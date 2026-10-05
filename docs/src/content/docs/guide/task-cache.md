@@ -41,6 +41,7 @@ export function executionCount() {
 ```
 
 ```ts title="run-cache.ts"
+import { reportValue } from "./reporter.ts";
 import { summarize } from "./summarize.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -48,7 +49,8 @@ for (let run = 1; run <= 2; run++) {
   const summary = summarize();
   const result = await defineWorkflow("release-notes", [summary]).start();
   result.unwrap();
-  console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
+  reportValue(result.value(summary), result.tasks[0]?.cacheHit ?? false);
+  // Example output (second run): { summary: '3 fixes', execution: 1 } true
 }
 ```
 
@@ -144,6 +146,7 @@ API reference: [TaskCacheOptions](../../reference/taskcacheoptions/).
 Log cache outcomes from the workflow observer to see hits, misses and storage errors. A cache failure does not prevent the task from running or completing.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import type { Workflow } from "@elie-laloum/outpost";
 
 declare const workflow: Workflow;
@@ -151,7 +154,8 @@ declare const workflow: Workflow;
 await workflow.start({
   observe: (event) => {
     if (event.type === "cache")
-      console.log(event.key, event.cache, event.error);
+      reportValue(event.key, event.cache, event.error);
+    // Example output: summary hit undefined
   },
 });
 ```

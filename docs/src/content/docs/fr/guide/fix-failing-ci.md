@@ -143,21 +143,25 @@ export function defineFix(sandbox: Sandbox) {
 ```
 
 ```ts title="fix-ci.ts"
+import { reportValue } from "./reporter.ts";
 import { openFixSandbox } from "./fix-sandbox.ts";
 import { defineFix } from "./fix-task.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
-
 await using sandbox = await openFixSandbox();
 export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-ci", [fix]).start({
   budget: { attempts: 4, usage: { input: 5_000_000, output: 200_000 } },
 });
-export const rounds = result.tasks.find((task) => task.key === "fix")?.rounds;
-console.log(`status: ${result.status}`);
-console.log(`branch: ${sandbox.workspace.branch}`);
-console.log(`rounds: ${rounds?.length ?? 0}`);
-console.log(`tokens: ${JSON.stringify(result.usage.tokens)}`);
-if (result.status === "done") console.log(result.value(fix).summary);
+reportValue(`status: ${result.status}`);
+// Example output: status: done
+reportValue(`branch: ${sandbox.workspace.branch}`);
+// Example output: branch: outpost/fix-ci
+reportValue(`rounds: ${result.tasks[0]?.rounds?.length ?? 0}`);
+// Example output: rounds: 2
+reportValue(`tokens: ${JSON.stringify(result.usage.tokens)}`);
+// Example output: tokens: {"input":1200,"cached":0,"output":320}
+if (result.status === "done") reportValue(result.value(fix).summary);
+// Example output: Fixed the parser and verified the tests.
 result.unwrap();
 ```
 

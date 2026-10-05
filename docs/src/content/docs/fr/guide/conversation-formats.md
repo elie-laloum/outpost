@@ -91,6 +91,7 @@ Une transcription enregistre le dossier où la CLI s’exécutait. La capture re
 `createSessionBundleConversations()` regroupe un dossier de session en une seule archive JSON. Un script Node.js exécuté dans la sandbox crée cette archive ; la restauration en extrait les fichiers dans la nouvelle sandbox.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSessionBundleConversations } from "@elie-laloum/outpost";
 
 export const storage = createSessionBundleConversations({
@@ -108,7 +109,8 @@ export const storage = createSessionBundleConversations({
   relocate: (_path, text, { cwd }) =>
     JSON.stringify({ ...JSON.parse(text), cwd }),
 });
-console.log(storage.format); // mycli
+reportValue(storage.format);
+// Example output: mycli
 ```
 
 <!-- check:run -->

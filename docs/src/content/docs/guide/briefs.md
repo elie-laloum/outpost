@@ -28,6 +28,7 @@ Run `npm test` and commit your change.
 ```
 
 ```ts title="feature.ts"
+import { reportValue } from "./reporter.ts";
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
@@ -42,7 +43,8 @@ const result = await dispatch({
     values: { FEATURE: "email validation" },
   },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: Added email validation to the signup form and committed it.
 ```
 
 A relative `file` resolves from the process working directory. Build the path from `import.meta.url` so the script runs from anywhere.

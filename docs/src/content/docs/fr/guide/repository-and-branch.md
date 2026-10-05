@@ -8,6 +8,7 @@ description: "Choisissez la copie du dépôt modifiée par l’agent et le momen
 Passez `repository` pour choisir le dépôt Git utilisé par la tâche. Vos scripts de workflow peuvent se trouver ailleurs ; calculez le chemin du dépôt à partir du dossier du script pour pouvoir le lancer depuis n’importe quel répertoire courant.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { resolve } from "node:path";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, sandboxProvider } from "./outpost.config.ts";
@@ -19,7 +20,8 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/update-deps" },
   brief: { text: "Update the outdated dependencies and commit the change." },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/update-deps 1
 ```
 
 Le script affiche `outpost/update-deps` et le nombre de commits. Un chemin relatif se résout depuis le répertoire courant : le résoudre depuis `import.meta.dirname` permet de lancer le script de n’importe où.
@@ -86,6 +88,7 @@ Un workspace sert une seule sandbox à la fois. Fermez la sandbox avant le works
 Un nouveau worktree ne contient que les fichiers commités. `copies` liste des fichiers ou dossiers, relatifs au dépôt, à copier depuis votre checkout, par exemple une configuration de test ignorée par Git.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -97,7 +100,8 @@ const result = await dispatch({
   copies: [".env.test"],
   brief: { text: "Run the end-to-end tests and fix what fails." },
 });
-console.log(result.retainedDirectory);
+reportValue(result.retainedDirectory);
+// Example output: /project/.outpost/workspaces/…
 ```
 
 Les entrées absentes sont ignorées. Les sandboxes cloud reçoivent les commits et les `copies` ; `includeUncommitted: true` envoie aussi les fichiers non commités du worktree ([Sandboxes cloud](../cloud-sandboxes/)). Sans cette option, une copie qu’aucun `.gitignore` commité n’exclut fait échouer la première synchronisation avec le code `workspace`.

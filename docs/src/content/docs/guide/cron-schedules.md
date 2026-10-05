@@ -131,10 +131,12 @@ A failed slot is not published again. Errors thrown by `onError` are ignored.
 `next(after)` returns the first slot strictly after a date, `previous(at)` the latest slot at or before it. Neither publishes anything.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createCronSchedule } from "@elie-laloum/outpost";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
-console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+reportValue(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+// Example output: 2026-03-30T00:30:00.000Z
 ```
 
 <!-- check:run -->

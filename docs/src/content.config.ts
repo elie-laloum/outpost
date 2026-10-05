@@ -5,12 +5,39 @@ import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 
 const link = z.object({ label: z.string(), href: z.string() });
 const links = z.object({ title: z.string(), links: z.array(link) });
+const capability = z.object({
+  title: z.string(),
+  text: z.string(),
+  href: z.string(),
+});
 const landing = z.object({
   category: z.string(),
   headline: z.array(z.string()).min(1).max(3),
   lead: z.string(),
   primary: link,
   secondary: link,
+  story: z.object({
+    label: z.string(),
+    title: z.string(),
+    steps: z
+      .array(
+        z.object({
+          title: z.string(),
+          text: z.string(),
+          role: z.string(),
+          icon: z.enum(["approve", "agent", "ci", "branch"]),
+          href: z.string(),
+        }),
+      )
+      .length(4),
+    result: z.object({
+      label: z.string(),
+      branch: z.string(),
+      text: z.string(),
+      href: z.string(),
+    }),
+    link,
+  }),
   overview: z
     .array(z.object({ title: z.string(), text: z.string(), href: z.string() }))
     .length(3),
@@ -25,11 +52,10 @@ const landing = z.object({
     failed: z.string(),
     prerequisites: z.string(),
   }),
-  next: z.object({
+  capabilities: z.object({
     title: z.string(),
     text: z.string(),
-    guide: link,
-    reference: link,
+    items: z.array(capability).min(3).max(12),
   }),
   footer: z.object({
     documentation: links,

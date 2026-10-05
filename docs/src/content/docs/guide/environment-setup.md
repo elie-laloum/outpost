@@ -8,6 +8,7 @@ description: "Install project dependencies before an agent starts and reuse down
 Use a `sandboxReady` hook to install project dependencies before the agent starts. The command runs in the prepared sandbox, so the agent can use the installed packages during its task.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,7 +22,8 @@ const result = await dispatch({
   },
   brief: { text: "Run the tests and fix the first failure." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: Fixed the failing tests and committed the change.
 ```
 
 `npm ci` runs inside the sandbox, in the repository root. The agent starts with `node_modules` installed. `createSandbox()` and `openWorkspace()` accept the same `hooks`; `speculate()` takes them under `sandbox`.

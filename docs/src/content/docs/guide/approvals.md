@@ -63,6 +63,7 @@ export function releaseDecision(
 ```
 
 ```ts title="release.ts"
+import { reportValue } from "./reporter.ts";
 import { workflow, deploy } from "./release-tasks.ts";
 import { checkpoint } from "./release-checkpoint.ts";
 import { releaseDecision } from "./release-decision.ts";
@@ -71,13 +72,15 @@ export const paused = await workflow.start({ checkpoint });
 export const request = paused.tasks.find(
   (task) => task.key === "approve",
 )?.pause;
-console.log(paused.status, request?.prompt);
+reportValue(paused.status, request?.prompt);
+// Example output: paused Deploy release 1.4 to production?
 if (!request) throw new Error("No approval is pending");
 export const result = await workflow.start({
   checkpoint,
   decisions: [releaseDecision(paused.executionId, request.id)],
 });
-console.log(result.status, result.value(deploy));
+reportValue(result.status, result.value(deploy));
+// Example output: done Deployed, approved by maintainer
 ```
 
 <!-- check:run -->

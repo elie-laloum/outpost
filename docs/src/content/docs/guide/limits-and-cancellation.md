@@ -8,6 +8,7 @@ description: "Bound agent execution time, control repeated passes and cancel fro
 Set deadlines alongside the brief when a task needs tighter limits than the defaults. You can bound the whole agent turn and the time it may remain silent.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,7 +21,8 @@ const result = await dispatch({
   deadlineMs: 20 * 60_000,
   idleMs: 5 * 60_000,
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: Fixed the failing tests and committed the change.
 ```
 
 If the agent runs longer than 20 minutes, or stays silent for 5, the promise rejects with an [`OutpostError`](../error-handling/) of code `timeout`. The sandbox is released; the branch keeps what the agent committed.
@@ -71,6 +73,7 @@ To change the agent’s direction without stopping it, [steer it](../steering/) 
 `passes` sends the brief again when a pass ends without a completion marker. Ask for the marker in the brief: Outpost does not add it.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -85,7 +88,8 @@ const result = await dispatch({
   passes: 3,
   until: "READY_FOR_REVIEW",
 });
-console.log(result.completed, result.completion);
+reportValue(result.completed, result.completion);
+// Example output: true READY_FOR_REVIEW
 ```
 
 Each pass starts a new conversation on the same branch, so it sees the previous commits. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.

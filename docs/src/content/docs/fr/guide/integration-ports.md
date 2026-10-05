@@ -64,12 +64,14 @@ Testez ce qu’un utilisateur observe quand les choses tournent mal : un code de
 Pour un fournisseur de sandbox, `diagnose()` lance une sonde limitée contre une vraie sandbox : Node.js, Git, flux de sortie séparés, code de sortie non nul, répertoire personnel et, avec `transfers`, transferts de fichiers binaires.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ sandboxProvider, repository });
 const report = await sandbox.diagnose({ transfers: true });
-console.log(report.hasFailures, report.checks);
+reportValue(report.hasFailures, report.checks);
+// Example output: false [ { id: "sandbox.node", status: "pass", … }, … ]
 ```
 
 :::caution

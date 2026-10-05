@@ -70,6 +70,7 @@ Chaque instruction en direct coûte une commande du fournisseur : un wrapper lan
 Passez le fournisseur à `dispatch()` ou à `createSandbox()`, comme pour toute sandbox.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 import { coder, repository } from "./outpost.config.ts";
@@ -85,7 +86,8 @@ const result = await dispatch({
     text: "Fix the failing test in src/date.test.ts and commit the fix.",
   },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/job-… 1
 ```
 
 Avant le premier tour, Outpost installe la CLI de l’agent, dans sa version épinglée, si l’image ne la contient pas ; c’est le cas sur toute sandbox distante. Définissez `bootstrap: false` quand l’image doit la fournir. Le hook `sandboxReady` installe ensuite les dépendances du projet ([Préparer l’environnement](../environment-setup/)).

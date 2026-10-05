@@ -61,12 +61,14 @@ try {
 Un producteur ouvre la même file et y ajoute un job sous un identifiant stable.
 
 ```ts title="submit.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
   await queue.enqueue({ id: "count-42", handler: "count", input: [1, 2, 3] });
-  console.log(await queue.get("count-42"));
+  reportValue(await queue.get("count-42"));
+  // Example output: { id: "count-42", status: "pending", … }
 } finally {
   queue.close();
 }
@@ -81,14 +83,10 @@ Le script affiche le job avec `status: "pending"` ; une fois qu’un worker l’
 `defineQueuedTask()` est une tâche de workflow qui met un job en file, l’interroge jusqu’à ce qu’il se termine et valide sa valeur avec `decode`.
 
 ```ts
-import {
-  createSqliteTaskQueue,
-  defineQueuedTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const count = defineQueuedTask({
+import { reportValue } from "./reporter.ts";
+import * as outpost from "@elie-laloum/outpost";
+const queue = await outpost.createSqliteTaskQueue(".outpost/jobs.sqlite");
+const count = outpost.defineQueuedTask({
   key: "count",
   queue,
   handler: "count",
@@ -98,8 +96,10 @@ const count = defineQueuedTask({
     return value;
   },
 });
-const result = await defineWorkflow("count-items", [count]).start();
-console.log(result.value(count));
+reportValue(
+  (await outpost.defineWorkflow("count-items", [count]).start()).value(count),
+);
+// Example output: 3
 queue.close();
 ```
 
@@ -147,6 +147,7 @@ L’empreinte lie un `runId` à une seule entrée. Un job avec le même `runId` 
 Un identifiant de job terminé ne s’exécute plus : le remettre en file renvoie le job enregistré. Pour poursuivre une exécution, mettez en file un nouvel identifiant de job avec le même `runId` et la même entrée.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -155,7 +156,8 @@ const job = await queue.enqueue({
   handler: "fix",
   input: { runId: "fix-42", input: { issue: 42 } },
 });
-console.log(job.status);
+reportValue(job.status);
+// Example output: pending
 queue.close();
 ```
 
@@ -210,6 +212,7 @@ Une API distante dotée de clés d’idempotence persistantes convient aussi. Un
 `serveTaskQueue()` place n’importe quelle file derrière un point d’accès HTTP. `createHttpTaskQueue()` est un client de file pour les producteurs et workers situés sur d’autres machines.
 
 ```ts title="queue-server.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
@@ -217,7 +220,8 @@ if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const server = await serveTaskQueue({ queue, token, port: 8788 });
-console.log(`Queue at ${server.url}`);
+reportValue(`Queue at ${server.url}`);
+// Example output: Queue at http://127.0.0.1:8787
 ```
 
 Sur une autre machine, `createHttpTaskQueue({ url, token })` renvoie une file à passer à `runQueueWorker()` ou à utiliser avec `enqueue()`. Le jeton compte de 32 à 512 caractères, sans espace. Le serveur écoute sur `127.0.0.1` sauf si vous définissez `host` ; `await server.close()` l’arrête, et vous fermez vous-même la file sous-jacente.

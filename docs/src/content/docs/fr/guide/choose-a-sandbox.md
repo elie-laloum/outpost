@@ -36,6 +36,7 @@ Commencez avec Docker ou Podman pour travailler dans un conteneur local. Pour un
 Importez le fournisseur depuis son sous-chemin et passez-le dans `sandboxProvider`. L’agent, le brief et la branche ne changent pas.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 import { coder, repository } from "./outpost.config.ts";
@@ -46,7 +47,8 @@ const result = await dispatch({
   sandboxProvider: createVercelSandboxProvider(),
   brief: { text: "Fix the broken links in the README and commit the change." },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/job-… 1
 ```
 
 Chaque fournisseur a son propre sous-chemin, `@elie-laloum/outpost/providers/<name>` : `docker`, `podman`, `vercel`, `daytona`, `firecracker` et `local`. Sans `sandboxProvider`, Outpost utilise Docker.

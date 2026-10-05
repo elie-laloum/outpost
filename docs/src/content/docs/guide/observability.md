@@ -10,13 +10,15 @@ Create an observation hub when you want workflow, agent and resource events in o
 <!-- tabs -->
 
 ```ts title="events.ts"
+import { reportValue } from "./reporter.ts";
 import { createObservationHub } from "@elie-laloum/outpost";
 
 export const observation = createObservationHub({
   sinks: [
     {
       observe({ seq, source, scope, event }) {
-        console.log(seq, source, scope.taskKey, event.kind);
+        reportValue(seq, source, scope.taskKey, event.kind);
+        // Example output: 1 agent review phase
       },
     },
   ],
@@ -119,6 +121,7 @@ A sink that returns nothing runs during emission, so keep it fast. A sink that r
 <!-- tabs -->
 
 ```ts title="slow-observer.ts"
+import { reportValue } from "./reporter.ts";
 import { createObservationHub } from "@elie-laloum/outpost";
 
 export const observation = createObservationHub({
@@ -127,7 +130,8 @@ export const observation = createObservationHub({
     {
       async observe({ seq, event }) {
         await new Promise((resolve) => setTimeout(resolve, 5));
-        console.log(seq, event.kind);
+        reportValue(seq, event.kind);
+        // Example output: 1 workflow
       },
     },
   ],
@@ -135,6 +139,7 @@ export const observation = createObservationHub({
 ```
 
 ```ts title="delivery.ts"
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 import { observation } from "./slow-observer.ts";
 
@@ -143,7 +148,8 @@ export const result = await defineWorkflow("greet", [greet]).start({
   observation,
 });
 await observation.close();
-console.log(result.status, observation.dropped, observation.errors.length);
+reportValue(result.status, observation.dropped, observation.errors.length);
+// Example output: done 0 0
 ```
 
 <!-- check:run -->

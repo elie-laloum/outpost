@@ -27,6 +27,7 @@ API reference: [ReporterOptions](../../reference/reporteroptions/).
 Pass your own function as `observe`. Narrow on `kind` before reading the other fields.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -36,9 +37,11 @@ await dispatch({
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
   observe(event) {
-    if (event.kind === "tool") console.log(`tool ${event.name}`);
+    if (event.kind === "tool") reportValue(`tool ${event.name}`);
+    // Example output: tool read_file
     if (event.kind === "summary")
-      console.log(`pass ${event.pass}: ${event.tokens.output} output tokens`);
+      reportValue(`pass ${event.pass}: ${event.tokens.output} output tokens`);
+    // Example output: pass 1: 320 output tokens
   },
 });
 ```
@@ -78,15 +81,18 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="report-workflow.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { review } from "./reported-review.ts";
 
 export const result = await defineWorkflow("review", [review]).start({
   observe(event) {
-    if (event.type === "task") console.log(event.key, event.status);
+    if (event.type === "task") reportValue(event.key, event.status);
+    // Example output: review done
   },
 });
-console.log(result.status, result.observerErrors);
+reportValue(result.status, result.observerErrors);
+// Example output: done []
 ```
 
 API reference: [WorkflowEvent](../../reference/workflowevent/).

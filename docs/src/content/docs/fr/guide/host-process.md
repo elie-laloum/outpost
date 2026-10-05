@@ -16,6 +16,7 @@ Rien n’est isolé. L’agent et chaque commande qu’il lance agissent sous vo
 Créez le fournisseur avec `createLocalSandboxProvider()` et passez-le à `dispatch()`, comme tout autre fournisseur de sandbox.
 
 ```ts title="host.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { coder, repository } from "./outpost.config.ts";
@@ -27,7 +28,8 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/host-fix" },
   brief: { text: "Fix the failing unit test and commit the fix." },
 });
-console.log(result.commits);
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ]
 ```
 
 L’agent lance votre CLI installée dans un worktree de `outpost/host-fix`. `variables` ajoute des [variables d’environnement](../environment-variables/) à l’environnement de votre processus.

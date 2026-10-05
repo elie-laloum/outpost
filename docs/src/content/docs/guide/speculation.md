@@ -48,6 +48,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
+import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
@@ -60,7 +61,8 @@ export const result = await speculate({
   candidates,
   validate,
 });
-console.log(result.status, result.winner?.branch);
+reportValue(result.status, result.winner?.branch);
+// Example output: winner outpost/speculation/…/codex
 ```
 
 ## Validate real behaviour
@@ -171,22 +173,22 @@ A crashed race stays owned by its coordinator, the process that ran `speculate()
     - sandbox
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { createLocalTransport, recoverSpeculation } from "@elie-laloum/outpost";
 import { repository } from "./outpost.config.ts";
-
 const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),
 });
-const runId = "parser-race";
-const key = `speculations/${createHash("sha256").update(runId).digest("hex")}.json`;
+const key = `speculations/${createHash("sha256").update("parser-race").digest("hex")}.json`;
 const saved = await transporter.read(key);
 if (saved) {
-  console.log(new TextDecoder().decode(saved.bytes));
+  reportValue(new TextDecoder().decode(saved.bytes));
+  // Example output: {"runId":"parser-race",…}
   await recoverSpeculation({
     transporter,
-    runId,
+    runId: "parser-race",
     revision: saved.revision,
     coordinatorStopped: true,
   });

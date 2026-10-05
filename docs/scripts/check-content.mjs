@@ -44,6 +44,11 @@ for (const name of files) {
     );
     assert.doesNotMatch(
       content,
+      /\bconsole\.log\s*\(/,
+      `Use reporters with example output in Guide snippets: ${name}`,
+    );
+    assert.doesNotMatch(
+      content,
       /<!--\s*flow\s*-->|class=["']flow["']/,
       `Use a canvas for diagrams: ${name}`,
     );

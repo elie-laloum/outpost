@@ -154,16 +154,11 @@ for (const [locale, title, reference] of [
 }
 
 for (const [locale, heading, start, copied] of [
-  [
-    "",
-    "Your agents write code.",
-    "Run your first task",
-    "Copy the install command",
-  ],
+  ["", "Your agents.", "Try it on your project", "Copy the install command"],
   [
     "fr/",
-    "Vos agents codent.",
-    "Lancer ma première tâche",
+    "Vos agents.",
+    "Essayer sur mon projet",
     "Copier la commande d’installation",
   ],
 ]) {
@@ -187,8 +182,17 @@ for (const [locale, heading, start, copied] of [
       `/outpost/${locale}`,
     );
     const hero = page.locator(".landing .hero");
-    await expect(hero.locator(".overview a")).toHaveCount(3);
-    await expect(hero.locator(".overview a > svg:first-child")).toHaveCount(3);
+    const story = page.locator(".landing .story");
+    await expect(story.locator("ol a")).toHaveCount(4);
+    await expect(story.locator(".step-icon svg")).toHaveCount(4);
+    await expect(story.locator(".story-link")).toHaveAttribute(
+      "href",
+      `/outpost/${locale}guide/development-workflow/`,
+    );
+    await expect(page.locator(".landing .overview a")).toHaveCount(3);
+    await expect(
+      page.locator(".landing .overview a > svg:first-child"),
+    ).toHaveCount(3);
     const install = hero.locator("outpost-install");
     await expect(install.getByRole("tab")).toHaveCount(4);
     await install.getByRole("button", { name: copied }).click();
@@ -230,26 +234,94 @@ for (const [locale, heading, start, copied] of [
         ),
     ).toBe(true);
     const canvas = page.locator(".home-content [data-canvas]");
-    await expect(canvas.locator(".canvas-node")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-node")).toHaveCount(9);
+    const stages = locale
+      ? [
+          "Ticket export CSV",
+          "Préparer le plan",
+          "Implémenter l’export",
+          "Exécuter les tests",
+          "Relire le diff",
+          "Réunir les verdicts",
+          "Valider la livraison",
+          "Préparer la branche",
+          "Arrêter le run",
+        ]
+      : [
+          "CSV export ticket",
+          "Plan the change",
+          "Implement the export",
+          "Run the tests",
+          "Review the diff",
+          "Collect the verdicts",
+          "Approve delivery",
+          "Prepare the branch",
+          "Stop the run",
+        ];
+    await expect(canvas.locator(".canvas-node-title")).toHaveText(stages);
+    const edges = await canvas.evaluate((element) =>
+      [...element.querySelectorAll(".canvas-node")].flatMap((node) =>
+        [...node.querySelectorAll(".canvas-out [data-to]")].map((edge) => ({
+          from: node.querySelector(".canvas-node-title").textContent.trim(),
+          to: element
+            .querySelector(`#${edge.dataset.to} .canvas-node-title`)
+            .textContent.trim(),
+        })),
+      ),
+    );
+    expect(edges).toHaveLength(11);
+    expect(edges).toEqual(
+      expect.arrayContaining([
+        { from: stages[2], to: stages[3] },
+        { from: stages[2], to: stages[4] },
+        { from: stages[3], to: stages[5] },
+        { from: stages[4], to: stages[5] },
+        { from: stages[5], to: stages[2] },
+        { from: stages[5], to: stages[6] },
+        { from: stages[5], to: stages[8] },
+        { from: stages[6], to: stages[7] },
+        { from: stages[6], to: stages[8] },
+      ]),
+    );
     await canvas.locator('[data-zoom="fit"]').click();
-    await expect(canvas.locator(".canvas-link")).toHaveCount(3);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(11);
     const scale = await canvas.locator(".canvas-scale").textContent();
     await canvas.locator('[data-zoom="in"]').click();
     await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
     const features = page.locator(".home-content a.feature-cell");
-    await expect(features).toHaveCount(6);
-    await expect(features.locator(".feature-icon svg")).toHaveCount(6);
-    await expect(features.nth(3)).toHaveAttribute(
+    await expect(features).toHaveCount(9);
+    await expect(features.locator(".feature-icon svg")).toHaveCount(9);
+    await expect(features.first()).toHaveAttribute(
       "href",
-      "guide/fix-failing-ci/",
+      "guide/verification-loops/",
+    );
+    const capabilities = page.locator(".capabilities");
+    await expect(capabilities.getByRole("heading", { level: 2 })).toHaveText(
+      locale
+        ? "Ce que vous pouvez construire avec Outpost"
+        : "What you can build with Outpost",
+    );
+    await expect(capabilities.locator("a.capability")).toHaveCount(9);
+    await expect(
+      capabilities.locator("a.capability > svg:first-child"),
+    ).toHaveCount(9);
+    await expect(capabilities.locator("h3")).toHaveCount(9);
+    await expect(capabilities.locator("a.capability").first()).toHaveAttribute(
+      "href",
+      `/outpost/${locale}guide/choose-an-agent/`,
     );
     expect(await page.evaluate(() => window.homeRenderErrors)).toEqual([]);
+    await story.locator(".story-link").click();
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}guide/development-workflow/$`),
+    );
+    await page.goBack();
     await hero.getByRole("link", { name: start, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
 
   for (const width of [320, 390, 800, 1440, 2560]) {
-    test(`home remains readable and its actions share the width (${locale || "en"}, ${width}px)`, async ({
+    test(`home remains readable and its features fit the grid (${locale || "en"}, ${width}px)`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -267,14 +339,31 @@ for (const [locale, heading, start, copied] of [
           const notice = document
             .querySelector(".home-content .starlight-aside")
             .getBoundingClientRect();
-          const actions = [...document.querySelectorAll(".next-actions a")].map(
-            (link) => link.getBoundingClientRect().width,
-          );
+          const capabilities = [
+            ...document.querySelectorAll(".capability-grid li"),
+          ].map((link) => {
+            const box = link.getBoundingClientRect();
+            return {
+              left: box.left,
+              right: box.right,
+              top: box.top,
+              bottom: box.bottom,
+              width: box.width,
+            };
+          });
           return {
+            hero: document.querySelector(".hero").getBoundingClientRect()
+              .height,
+            storyTop:
+              document.querySelector(".story").getBoundingClientRect().top +
+              window.scrollY,
             content: { left: content.left, right: content.right },
             notice: { left: notice.left, right: notice.right },
-            actions,
+            capabilities,
             overflow: document.documentElement.scrollWidth > window.innerWidth,
+            storyPadding: parseFloat(
+              getComputedStyle(document.querySelector(".story")).paddingLeft,
+            ),
             cards: [...document.querySelectorAll(".overview a")].map((card) => {
               const box = card.getBoundingClientRect();
               return {
@@ -287,6 +376,11 @@ for (const [locale, heading, start, copied] of [
           };
         });
         expect(dimensions.overflow).toBe(false);
+        expect(Math.abs(dimensions.hero - 900)).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(dimensions.storyTop - dimensions.hero),
+        ).toBeLessThanOrEqual(1);
+        expect(dimensions.storyPadding).toBeGreaterThanOrEqual(16);
         for (const card of dimensions.cards) {
           expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
           expect(card.right).toBeLessThanOrEqual(dimensions.content.right);
@@ -298,15 +392,38 @@ for (const [locale, heading, start, copied] of [
             );
           }
         }
+        if (width >= 800) {
+          for (const card of dimensions.cards) {
+            expect(
+              Math.abs(card.top - dimensions.cards[0].top),
+            ).toBeLessThanOrEqual(1);
+          }
+        }
         expect(
           Math.abs(dimensions.notice.left - dimensions.content.left),
         ).toBeLessThanOrEqual(1);
         expect(
           Math.abs(dimensions.notice.right - dimensions.content.right),
         ).toBeLessThanOrEqual(1);
-        expect(
-          Math.abs(dimensions.actions[0] - dimensions.actions[1]),
-        ).toBeLessThanOrEqual(1);
+        expect(dimensions.capabilities).toHaveLength(9);
+        const columns = width <= 560 ? 1 : width <= 896 ? 2 : 3;
+        for (const [index, card] of dimensions.capabilities.entries()) {
+          expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
+          expect(card.right).toBeLessThanOrEqual(dimensions.content.right);
+          expect(
+            Math.abs(card.width - dimensions.capabilities[0].width),
+          ).toBeLessThanOrEqual(1);
+          if (index < columns) {
+            expect(
+              Math.abs(card.top - dimensions.capabilities[0].top),
+            ).toBeLessThanOrEqual(1);
+          }
+          if (index >= columns) {
+            expect(card.top).toBeGreaterThanOrEqual(
+              dimensions.capabilities[index - columns].bottom,
+            );
+          }
+        }
         const row = page
           .locator(".home-content .bay-row[data-bay=split]")
           .first();
@@ -317,8 +434,10 @@ for (const [locale, heading, start, copied] of [
         if (width <= 1024)
           expect(code.y).toBeGreaterThanOrEqual(say.y + say.height - 1);
       }
-      await page.locator(".next-actions a").first().click();
-      await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
+      await page.locator("a.capability").first().click();
+      await expect(page).toHaveURL(
+        new RegExp(`/${locale}guide/choose-an-agent/$`),
+      );
     });
   }
 }
@@ -342,7 +461,7 @@ test("documentation section styles leave the landing untouched", async ({
 }) => {
   await page.goto("");
   const primary = page.locator(".landing .hero .button.primary");
-  await expect(primary).toHaveText(/Run your first task/);
+  await expect(primary).toHaveText(/Try it on your project/);
   const colors = await primary.evaluate((element) => {
     const style = getComputedStyle(element);
     return [style.color, style.backgroundColor];
@@ -1130,6 +1249,21 @@ for (const locale of ["", "fr/"]) {
       const panels = tabs.locator(".code-tab-panel");
       await expect(labels).toHaveCount(5);
       await expect(strip).toHaveAttribute("data-overflow", "");
+      const scrolling = await strip.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          horizontal: element.scrollWidth > element.clientWidth,
+          vertical: element.scrollHeight > element.clientHeight,
+          overflowY: style.overflowY,
+          scrollbarWidth: style.scrollbarWidth,
+        };
+      });
+      expect(scrolling).toEqual({
+        horizontal: true,
+        vertical: false,
+        overflowY: "hidden",
+        scrollbarWidth: "none",
+      });
       await strip.scrollIntoViewIfNeeded();
       const isLastTabInside = () =>
         strip.evaluate((element) => {

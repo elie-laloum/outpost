@@ -107,6 +107,7 @@ Pass `instructions: ["Answer with evidence.", projectGuidance]`. The resolver re
 A skill is guidance and tools the model loads only when it needs them. Its instructions stay out of the system prompt until then.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   createHarnessGitTools,
   defineHarnessSkill,
@@ -119,10 +120,11 @@ export const review = defineHarnessSkill({
     "Read the diff. Check changed behavior against callers and tests. Cite file paths.",
   tools: [createHarnessGitTools()],
 });
-console.log(
+reportValue(
   review.name,
   review.tools.map((tool) => tool.name),
 );
+// Example output: review [ 'git' ]
 ```
 
 <!-- check:run -->

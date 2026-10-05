@@ -64,12 +64,14 @@ Test what a user observes when things go wrong: a nonzero exit status, output th
 For a sandbox provider, `diagnose()` runs a bounded probe against a real sandbox: Node.js, Git, separate output streams, a nonzero exit status, the home directory and, with `transfers`, binary file transfers.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ sandboxProvider, repository });
 const report = await sandbox.diagnose({ transfers: true });
-console.log(report.hasFailures, report.checks);
+reportValue(report.hasFailures, report.checks);
+// Example output: false [ { id: "sandbox.node", status: "pass", … }, … ]
 ```
 
 :::caution

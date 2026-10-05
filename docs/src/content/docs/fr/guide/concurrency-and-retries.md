@@ -6,6 +6,7 @@ description: "Réglez l’exécution en parallèle, les nouvelles tentatives, le
 Dans cet exemple, `flaky` et `lint` démarrent en parallèle. La première tâche échoue une fois, attend 100 ms et réussit à la tentative suivante. Son entrée dans `result.tasks` indique alors `attempts: 2`.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const flaky = defineTask({
@@ -22,7 +23,8 @@ const result = await defineWorkflow("checks", [flaky, lint]).start({
   concurrency: 2,
 });
 result.unwrap();
-console.log(result.value(flaky)); // { attempt: 2 }
+reportValue(result.value(flaky));
+// Example output: { attempt: 2 }
 ```
 
 <!-- check:run -->
@@ -66,12 +68,14 @@ export const request = defineTask({
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { request } from "./request.ts";
 
 export const result = await defineWorkflow("requests", [request]).start();
 result.unwrap();
-console.log(result.tasks[0]?.attempts);
+reportValue(result.tasks[0]?.attempts);
+// Example output: 1
 ```
 
 <!-- check:run -->
@@ -89,6 +93,7 @@ Référence API : [TaskOptions](../../reference/taskoptions/) et [DispatchOption
 Définissez des délais distincts pour chaque tentative et pour l’ensemble du workflow. Dans cet exemple, la première tentative expire après 200 ms et le délai du workflow interrompt la suivante à 300 ms.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { setTimeout as sleep } from "node:timers/promises";
 import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
@@ -101,12 +106,13 @@ const slow = defineTask({
 const result = await defineWorkflow("deadline", [slow]).start({
   timeoutMs: 300,
 });
-console.log(
+reportValue(
   result.status,
   result.errors.map((error) =>
     error instanceof OutpostError ? error.code : error,
   ),
-); // failed [ 'timeout' ]
+);
+// Example output: failed [ 'timeout' ]
 ```
 
 <!-- check:run -->
@@ -130,6 +136,7 @@ Une tâche échoue quand sa dernière tentative échoue. La suite dépend de `st
 `condition` s’exécute une fois, avant la première tentative. Si elle renvoie `false`, la tâche finit `skipped`, tout comme les tâches qui en dépendent.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const changes = defineTask({ key: "changes", perform: () => ["README.md"] });
@@ -142,7 +149,8 @@ const tests = defineTask({
 });
 const result = await defineWorkflow("docs-only", [changes, tests]).start();
 result.unwrap();
-console.log(result.tasks.map((task) => `${task.key}: ${task.status}`));
+reportValue(result.tasks.map((task) => `${task.key}: ${task.status}`));
+// Example output: [ 'changes: done', 'tests: skipped' ]
 // [ 'changes: done', 'tests: skipped' ]
 ```
 

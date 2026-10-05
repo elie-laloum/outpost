@@ -239,12 +239,15 @@ export function mergeDecision(
 ```
 
 ```ts title="rename-result.ts"
+import { reportValue } from "./reporter.ts";
 import type { WorkflowResult } from "@elie-laloum/outpost";
 
 export function showRun(result: WorkflowResult) {
-  console.log(result.status);
+  reportValue(result.status);
+  // Example output: done
   for (const task of result.tasks)
-    console.log(task.key, task.status, task.error ?? "");
+    reportValue(task.key, task.status, task.error ?? "");
+  // Example output: api done
 }
 ```
 

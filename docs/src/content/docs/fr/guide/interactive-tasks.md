@@ -49,6 +49,7 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="start.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { clarify } from "./clarify.ts";
 import { store } from "./question-store.ts";
@@ -56,7 +57,8 @@ import { store } from "./question-store.ts";
 export const workflow = defineWorkflow("discovery", [clarify]);
 export const checkpoint = { store, runId: "discovery-42", version: "1" };
 export const result = await workflow.start({ checkpoint });
-console.log(result.status, result.inputRequests[0]?.question);
+reportValue(result.status, result.inputRequests[0]?.question);
+// Example output: waiting-input What should the new endpoint return?
 ```
 
 Le script affiche `waiting-input` et la première question de l’agent. Outpost ajoute lui-même le protocole de question à votre brief : le brief décrit seulement l’objectif et la forme du JSON final.

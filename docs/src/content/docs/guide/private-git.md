@@ -12,6 +12,7 @@ Private Git is an opt-in prototype: its behavior can still change.
 Set `repositoryMode: "isolated"` on a Docker or Podman provider to give the container its own Git checkout. This option is experimental; the rest of the task uses the same agent and dispatch settings.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
@@ -28,7 +29,8 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/private-fix" },
   brief: { text: "Fix the failing unit test and commit the fix." },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/private-fix 1
 ```
 
 Outpost copies the branch history into the container and the agent works on that copy. When the task ends, its commits land on `outpost/private-fix` on your host.

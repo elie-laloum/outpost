@@ -74,6 +74,8 @@ const { install } = Astro.props;
   .managers {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
     border-bottom: 1px solid var(--docs-line);
   }
   .managers button {
@@ -110,7 +112,12 @@ const { install } = Astro.props;
     font-size: 0.8125rem;
     line-height: 1.5;
     white-space: nowrap;
-    scrollbar-width: thin;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .managers::-webkit-scrollbar,
+  code::-webkit-scrollbar {
+    display: none;
   }
   code[hidden] {
     display: none;

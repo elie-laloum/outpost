@@ -31,6 +31,7 @@ Egress policies and private Git are opt-in prototypes. Check that your provider 
 Docker and Podman take both layers at once: the container reaches no network and never sees your worktree.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
@@ -38,7 +39,8 @@ const sandboxProvider = createDockerSandboxProvider({
   repositoryMode: "isolated",
   egress: { mode: "deny-all" },
 });
-console.log(sandboxProvider.name);
+reportValue(sandboxProvider.name);
+// Example output: docker
 ```
 
 Prepare the tools and dependencies in the [image](../agent-images/) first. A CLI agent cut off from the network cannot reach its model; the [built-in harness](../harness/) can, because its model requests leave from your host and only its tools run offline.

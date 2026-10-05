@@ -20,6 +20,7 @@ You can change the agent without changing the sandbox provider. You can also run
 A call prepares the workspace, opens a sandbox, runs the agent and collects its answer, commits and usage. It then closes the resources it opened. With a named branch, the commits remain on that branch for review.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -30,8 +31,10 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/fix-links" },
   brief: { text: "Fix the broken links in the README and commit the change." },
 });
-console.log(result.text);
-console.log(result.branch, result.commits);
+reportValue(result.text);
+// Example output: Fixed the broken README links and committed the change.
+reportValue(result.branch, result.commits);
+// Example output: outpost/fix-links [ { oid: '8f3a21c…', subject: 'Fix README links' } ]
 ```
 
 The configuration comes from [Installation](../setup/). Each call opens a fresh sandbox. Installed dependencies and temporary sandbox files do not carry over to the next call; retained Git work depends on the branch policy.
@@ -41,6 +44,7 @@ The configuration comes from [Installation](../setup/). Each call opens a fresh 
 Use `createSandbox()` when you want an agent turn and a test command to share files and installed dependencies. The environment stays open until you close it.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -54,7 +58,8 @@ await sandbox.dispatch({
   brief: { text: "Fix the failing tests and commit the change." },
 });
 const tests = await sandbox.command({ executable: "npm", arguments: ["test"] });
-console.log(tests.status);
+reportValue(tests.status);
+// Example output: 0
 ```
 
 Here, `await using` closes the sandbox when the scope ends, including after an error. A sandbox accepts one operation at a time. Use separate sandboxes for parallel work; [Reuse a sandbox](../sandbox-sessions/) covers commands, terminals and explicit integration.

@@ -1,7 +1,53 @@
 ---
 import StarlightHead from "@astrojs/starlight/components/Head.astro";
+import manifest from "../../../package.json";
+
+const route = Astro.locals.starlightRoute;
+const home = Boolean(route.entry.data.landing);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const locale = route.locale === "fr" ? "fr" : "en";
+const homeUrl = new URL(`${base}/${locale === "fr" ? "fr/" : ""}`, Astro.site)
+  .href;
+const imageUrl = new URL(`${base}/social/home-${locale}.png`, Astro.site).href;
+const description = route.entry.data.description;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${homeUrl}#website`,
+      name: "Outpost",
+      url: homeUrl,
+      description,
+      inLanguage: locale,
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": `${homeUrl}#software`,
+      name: "Outpost",
+      url: homeUrl,
+      description,
+      programmingLanguage: "TypeScript",
+      runtimePlatform: "Node.js 24+",
+      version: manifest.version,
+      license: "https://opensource.org/license/mit/",
+      codeRepository: "https://gitlab.elielaloum.com/elielaloum/outpost",
+      author: { "@type": "Person", name: "Elie Laloum" },
+    },
+  ],
+};
 ---
 <StarlightHead />
+{home && <>
+  <meta property="og:image" content={imageUrl} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={route.entry.data.landing!.headline.join(" ")} />
+  <meta name="twitter:image" content={imageUrl} />
+  <meta name="twitter:title" content={route.entry.data.title} />
+  <meta name="twitter:description" content={description} />
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData).replaceAll("<", "\\u003c")} />
+</>}
 <script>
   import { mountCanvases } from "./guide-canvas.ts";
   import { mountCodeTabs } from "./guide-code-tabs.ts";

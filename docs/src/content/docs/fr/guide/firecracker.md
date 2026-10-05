@@ -44,6 +44,7 @@ export const sandboxProvider = createFirecrackerSandboxProvider({
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, coder } from "./outpost.config.ts";
 import { sandboxProvider } from "./firecracker.ts";
@@ -55,7 +56,8 @@ export const result = await dispatch({
   branch: { mode: "named", name: "outpost/firecracker" },
   brief: { text: "Run the test suite and fix the first failure." },
 });
-console.log(result.commits);
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ]
 ```
 
 Chaque allocation démarre une copie privée de `rootfs`, puis interroge SSH jusqu’à ce que l’invité réponde avec le `$HOME` et les outils attendus. Les chemins de l’hôte doivent être absolus.

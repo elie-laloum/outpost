@@ -10,6 +10,15 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 9.0.7
+
+- Redesign the bilingual documentation home with a full-viewport hero, a four-step journey and a nine-capability grid linking to the Guide. Show a medium-sized CSV-export workflow with parallel tests and review, bounded correction rounds and human approval.
+- Add a site favicon, localized social previews, homepage search metadata and structured data, and a robots endpoint.
+- Replace direct console output in Guide, homepage and README snippets with reporters and sample-output comments. Typecheck the shared reporter and execute the offline examples in both languages.
+- Hide code-tab and snippet scrollbars while preserving horizontal scrolling, mouse dragging and keyboard navigation.
+
+Public library contracts and runtime behavior are unchanged.
+
 ## 9.0.6
 
 - Rewrite the English and French Guide with clearer titles and explanations. The recommended setup builds an agent image, then imports Outpost in user-written TypeScript files; generated `init` workflow projects remain optional. Link option and property definitions to their API contracts instead of repeating them in the Guide.

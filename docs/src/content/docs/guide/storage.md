@@ -125,6 +125,7 @@ A remote transport moves stored objects, not the runtime. These still need the h
 Every write names the revision it expects: `ifRevision: null` creates, the observed `revision` replaces or removes. If another writer changed the object first, the call throws `TransportConflict` and nothing is written.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -141,7 +142,8 @@ try {
     ifRevision: first.revision,
   });
 } catch (error) {
-  if (error instanceof TransportConflict) console.log("stale:", error.key);
+  if (error instanceof TransportConflict) reportValue("stale:", error.key);
+  // Example output: stale: notes/today
 }
 ```
 

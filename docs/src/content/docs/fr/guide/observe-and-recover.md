@@ -42,6 +42,7 @@ export const result = await dispatch({
 ```
 
 ```ts title="read-journal.ts"
+import { reportValue } from "./reporter.ts";
 import { result, transporter } from "./record-journal.ts";
 import { readJournal } from "@elie-laloum/outpost";
 
@@ -50,7 +51,8 @@ if (result.logReference) {
     transporter,
     reference: result.logReference,
   });
-  console.log(events.length);
+  reportValue(events.length);
+  // Example output: 12
 }
 ```
 

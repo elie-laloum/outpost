@@ -8,6 +8,7 @@ description: "Give a running agent a new instruction and track how it is deliver
 Create a steering controller and pass it to the dispatch. While the task runs, `send()` submits another instruction and resolves when Outpost can report how it was delivered.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,7 +22,8 @@ const running = dispatch({
   steering,
 });
 const delivery = await steering.send("Leave the legacy/ folder untouched.");
-console.log(delivery.mode); // "injected" or "resumed"
+reportValue(delivery.mode);
+// Example output: injected
 const result = await running;
 ```
 

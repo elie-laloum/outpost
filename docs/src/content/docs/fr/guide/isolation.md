@@ -31,6 +31,7 @@ Les politiques egress et Git privé sont des prototypes à activer explicitement
 Docker et Podman acceptent les deux couches à la fois : le conteneur n’atteint aucun réseau et ne voit jamais votre worktree.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
@@ -38,7 +39,8 @@ const sandboxProvider = createDockerSandboxProvider({
   repositoryMode: "isolated",
   egress: { mode: "deny-all" },
 });
-console.log(sandboxProvider.name);
+reportValue(sandboxProvider.name);
+// Example output: docker
 ```
 
 Préparez d’abord les outils et les dépendances dans l’[image](../agent-images/). Un agent CLI coupé du réseau ne peut pas joindre son modèle ; le [harness intégré](../harness/) le peut, car ses requêtes au modèle partent de votre hôte et seuls ses outils s’exécutent hors ligne.

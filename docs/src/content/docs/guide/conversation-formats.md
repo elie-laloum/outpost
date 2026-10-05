@@ -91,6 +91,7 @@ Transcripts record the directory the CLI ran in. Capture rewrites every `cwd` fi
 `createSessionBundleConversations()` packs a session directory into one JSON bundle. A Node.js script run in the sandbox does the packing; restoration unpacks the bundle in the new sandbox.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSessionBundleConversations } from "@elie-laloum/outpost";
 
 export const storage = createSessionBundleConversations({
@@ -108,7 +109,8 @@ export const storage = createSessionBundleConversations({
   relocate: (_path, text, { cwd }) =>
     JSON.stringify({ ...JSON.parse(text), cwd }),
 });
-console.log(storage.format); // mycli
+reportValue(storage.format);
+// Example output: mycli
 ```
 
 <!-- check:run -->

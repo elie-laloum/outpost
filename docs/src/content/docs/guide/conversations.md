@@ -8,6 +8,7 @@ description: "Resume an agent’s saved context or start a separate conversation
 Call `result.resume()` to send a follow-up request to the conversation created by a dispatch. The saved context includes the earlier messages, so the agent can continue from its previous work.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,7 +21,8 @@ const first = await dispatch({
 const next = await first.resume({
   brief: { text: "Which edge case deserves a regression test first?" },
 });
-console.log(next.text);
+reportValue(next.text);
+// Example output: Add a regression test for empty parser input.
 ```
 
 The follow-up runs in a fresh sandbox with the same repository, provider and branch settings. Outpost restores the saved conversation before starting the agent. You can override these settings in the `resume()` request.
@@ -34,6 +36,7 @@ The follow-up runs in a fresh sandbox with the same repository, provider and bra
 Use `result.fork()` to explore another approach from the same saved context. It starts a separate conversation and leaves the original unchanged. Give the fork its own branch when its commits need to stay separate.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -47,7 +50,8 @@ const alternative = await first.fork({
   branch: { mode: "named", name: "outpost/parser-state-machine" },
   brief: { text: "Rewrite the parser as a state machine and commit it." },
 });
-console.log(alternative.conversation, alternative.branch);
+reportValue(alternative.conversation, alternative.branch);
+// Example output: session-2 outpost/parser-state-machine
 ```
 
 From an ID, `continuation: { id, fork: true }` does the same.

@@ -134,7 +134,7 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 ### Hierarchy
 
-- **Display** (600, sized from its bay's width with container units, 1.05): the landing headline ("Your agents write code." / "You stay in control."), one clause per line, all in White/Slate Ink. The category label introduces coding agent orchestration in TypeScript.
+- **Display** (600, sized from its bay's width with container units, 1.05): the centered landing headline ("Your agents." / "One TypeScript workflow."), with the second line in muted ink. The category label introduces coding agent orchestration in TypeScript.
 - **Headline** (600, clamp(1.5rem, 2.2vw, 1.875rem), 1.15, -0.03em): section headings in the left bays; Guide page titles follow the same tight tracking at clamp(1.8rem, 3vw, 2.3rem).
 - **Title** (500, 1.0625rem, -0.01em): card names and canvas nodes.
 - **Body** (400, 1.0714rem, 1.75): explanations beside code, capped at a comfortable reading measure. Text uses `text-wrap: pretty`.
@@ -151,9 +151,9 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 90rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-The home uses a 12-track frame: a 7 | 5 hero, then the same 5 | 7 prose and code bays as the Guide. Code-free sections use the full width, with a readable prose measure and cards or a canvas below. Each snippet has its explanation beside it on desktop and above it on mobile. The footer uses 5 | 4 | 3 columns. Horizontal hairlines separate sections; no content floats outside the frame.
+The home opens with a full-width, centered headline over a dot grid, followed by installation controls. A separate tonal band carries a four-step horizontal journey from brief to commit, with actor labels and a branch result, then three equal benefit cells. The TypeScript example comes first, followed by the workflow canvas and practical recipes, using the same 5 | 7 prose and code bays as the Guide. Code-free sections use the full width, with a readable prose measure and cards or a canvas below. Each snippet has its explanation beside it on desktop and above it on mobile. The footer uses 5 | 4 | 3 columns. Horizontal hairlines separate sections; no content floats outside the frame.
 
-The gutter follows `--docs-pad`: `clamp(1.25rem, 2.6vw, 2.5rem)`. Below 64rem the hero and split bays stack; below 40rem the rail loses its side borders and the footer becomes two columns below a full-width brand.
+The gutter follows `--docs-pad`: `clamp(1.25rem, 2.6vw, 2.5rem)`. Below 64rem the story becomes two columns and split bays stack; below 28rem the story becomes one column. Below 40rem the rail loses its side borders and the footer becomes two columns below a full-width brand.
 
 The documentation carries the same frame. Every Guide, API and changelog page shares one shell: a fixed 4rem header, a 17rem sidebar with a hairline edge, and a content pane of at most 84rem. The header offers Guide and API; its version button opens the changelog in either language and stays visible on mobile. The changelog uses the Guide sidebar, has no pagination and is excluded from search. The roadmap lives only in the repository's `roadmap.md`. Guide topics can be expanded, with first steps and the current topic open by default. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
 
@@ -196,18 +196,18 @@ Blunt, rectangular and confident.
 
 The home introduces Outpost through its benefits: put agents to work on fixes, reviews and maintenance, choose their environment and decide how to validate and integrate their changes. English and French copy live in `index.md` and `fr/index.md`; frontmatter describes the hero and footer, while Markdown holds the working example and learning sequence. Calls to action invite the reader to run a first task. `Landing.astro` renders this content with the same bays and components as the Guide.
 
-The hero states what Outpost does, provides the installation and API links, and names the three choices for a task: agent, execution environment and Git branch. Each choice is a linked card with the Guide’s icon. Package-manager tabs offer a copyable install command, with keyboard navigation and a localized copy status.
+The hero occupies a dynamic viewport height (`100dvh`), includes space for the fixed header and centers its content vertically. It can grow when the content needs more room. It states what Outpost does and provides installation and workflow links. The horizontal journey beneath it shows defining a task, running an agent, executing checks and reviewing commits. Each step is a linked card with the Guide’s icon. Package-manager tabs offer a copyable install command, with keyboard navigation and a localized copy status.
 
 Four sections follow in reading order:
 
 1. A first task in two named `.ts` files, beside the explanation of how to run it and what it returns.
-2. A movable, zoomable canvas showing the request, workspace and sandbox, agent turn and result to review.
+2. A movable, zoomable canvas showing a CSV-export workflow: a ticket and plan, implementation, parallel tests and review, joined verdicts, bounded correction rounds, human approval and a branch to integrate. Three lanes separate the maintainer, agents and checks.
 3. Linked cards for agents, sandbox providers and the built-in harness.
-4. Workflow examples, followed by links to typed responses, approval gates and durable runs.
+4. Practical recipes for failing CI, reviews and recurring maintenance.
 
-Setup is linked to its Guide page. The note below the example spans the home’s content rail. Code has at most 20 lines per file and is typechecked with the Guide examples. The final installation and API actions divide the row equally, including on mobile. All explanations remain visible while reading; the canvas moves only when the reader interacts with it.
+Setup is linked to its Guide page. The note below the example spans the home’s content rail. Code has at most 20 lines per file and is typechecked with the Guide examples. A final grid presents nine capabilities, each with a decorative icon, an explanation and a link to its Guide. It uses three columns on desktop, two on tablets and one on mobile. All explanations remain visible while reading; the canvas moves only when the reader interacts with it.
 
-The hero splits 7 | 5 on the 12-track frame; the content below uses the Guide’s 5 | 7 bays. Below 64rem, the hero and code rows stack. The three overview cards form a row on tablets and stack below 40rem. The home rail is at most 90rem wide, keeping the same hairlines, hatch, typefaces and two-theme palette as the documentation.
+The hero is centered across the full frame; the content below uses the Guide’s 5 | 7 bays. Below 64rem, code rows stack and the four story cards form two columns. The three overview cards form a row on tablets and stack below 40rem. The home rail is at most 90rem wide, keeping the same hairlines, hatch, typefaces and two-theme palette as the documentation.
 
 ### Property Rows
 
@@ -215,7 +215,7 @@ Reference parameters and properties become ruled rows rather than a table. Each 
 
 ### Docs Code Blocks
 
-Markdown code blocks keep Celestia's highlighting and copy button, set square, inside a hairline border on the code surface. Inline code uses a tonal chip (Slate Panel at 70%) without a border.
+Markdown code blocks keep Celestia's highlighting and copy button, set square, inside a hairline border on the code surface. Code and filename tabs keep horizontal scrolling without visible scrollbars; tabs have no vertical overflow. Inline code uses a tonal chip (Slate Panel at 70%) without a border.
 
 Notice banners span the content section and stop at its borders, before the hatched gutters and table-of-contents column. On mobile the content section fills the viewport. Their text remains aligned with the article, and their colored backgrounds and borders stay visible in both themes. The content pane is an inline-size container, so banner widths follow the article width.
 

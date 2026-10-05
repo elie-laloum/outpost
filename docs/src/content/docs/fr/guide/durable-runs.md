@@ -8,6 +8,7 @@ description: "Utilisez des checkpoints pour reprendre un workflow et autorisez e
 Passez un `checkpoint` à la méthode `start()` du workflow si vous devez poursuivre dans un autre processus. Outpost enregistre les changements d’état des tâches et leurs résultats sous le `runId` du checkpoint.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   createLocalTransport,
   defineTask,
@@ -23,7 +24,8 @@ const result = await defineWorkflow("scan", [scan]).start({
   checkpoint: { store, runId: "scan-2026-09", version: "1" },
 });
 result.unwrap();
-console.log(result.value(scan));
+reportValue(result.value(scan));
+// Example output: { files: 12 }
 ```
 
 <!-- check:run -->
@@ -123,17 +125,20 @@ export function uploadCount() {
 ```
 
 ```ts title="resume-upload.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { upload } from "./upload.ts";
 import { store } from "./upload-store.ts";
 
 export const workflow = defineWorkflow("upload", [upload]);
 export const checkpoint = { store, runId: "upload-1", version: "1" };
-console.log((await workflow.start({ checkpoint })).status);
+reportValue((await workflow.start({ checkpoint })).status);
+// Example output: failed
 export const resumed = await workflow.start({
   checkpoint: { ...checkpoint, resume: "retry-incomplete" },
 });
-console.log(resumed.status);
+reportValue(resumed.status);
+// Example output: done
 ```
 
 <!-- check:run -->

@@ -20,6 +20,7 @@ Vous pouvez changer d’agent en conservant le même fournisseur de sandbox. Vou
 Un appel prépare le workspace, ouvre une sandbox, lance l’agent et récupère sa réponse, ses commits et sa consommation. Il ferme ensuite les ressources qu’il a ouvertes. Avec une branche nommée, les commits restent sur cette branche pour que vous puissiez les examiner.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -30,8 +31,10 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/fix-links" },
   brief: { text: "Fix the broken links in the README and commit the change." },
 });
-console.log(result.text);
-console.log(result.branch, result.commits);
+reportValue(result.text);
+// Example output: Fixed the broken README links and committed the change.
+reportValue(result.branch, result.commits);
+// Example output: outpost/fix-links [ { oid: '8f3a21c…', subject: 'Fix README links' } ]
 ```
 
 La configuration vient de la page [Installation](../setup/). Chaque appel ouvre une nouvelle sandbox. Les dépendances installées et les fichiers temporaires de cet environnement ne passent pas au prochain appel ; le travail Git conservé dépend de la stratégie de branche.
@@ -41,6 +44,7 @@ La configuration vient de la page [Installation](../setup/). Chaque appel ouvre 
 Utilisez `createSandbox()` si vous voulez qu’un échange avec l’agent et une commande de test partagent les fichiers et les dépendances installées. L’environnement reste ouvert jusqu’à sa fermeture.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -54,7 +58,8 @@ await sandbox.dispatch({
   brief: { text: "Fix the failing tests and commit the change." },
 });
 const tests = await sandbox.command({ executable: "npm", arguments: ["test"] });
-console.log(tests.status);
+reportValue(tests.status);
+// Example output: 0
 ```
 
 Ici, `await using` ferme la sandbox à la sortie du bloc, même en cas d’erreur. Une sandbox accepte une seule opération à la fois. Pour travailler en parallèle, utilisez des sandboxes séparées. La page [Réutiliser une sandbox](../sandbox-sessions/) détaille les commandes, les terminaux et l’intégration explicite.

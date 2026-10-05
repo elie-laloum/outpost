@@ -8,6 +8,7 @@ description: "Set a workflow budget and understand how usage is counted across r
 Pass a `budget` to the workflow’s `start()` method to limit attempts, reported tokens or both. These limits apply across the workflow’s tasks, rather than to each task separately.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const meter = defineTask({
@@ -20,7 +21,8 @@ const meter = defineTask({
 const result = await defineWorkflow("bounded", [meter]).start({
   budget: { attempts: 5, usage: { input: 50_000, output: 10_000 } },
 });
-console.log(result.usage);
+reportValue(result.usage);
+// Example output: { attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }
 ```
 
 <!-- check:run -->
@@ -113,13 +115,15 @@ export const fix = defineIsolatedTask({
 ```
 
 ```ts title="run-fix.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { fix } from "./fix-task.ts";
 
 export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
-console.log(result.status, result.usage);
+reportValue(result.status, result.usage);
+// Example output: done { attempts: 1, tokens: { input: 1200, cached: 0, output: 320 } }
 ```
 
 `timeoutMs` bounds each task attempt and `deadlineMs` each agent turn: see [Limits and cancellation](../limits-and-cancellation/). [Choose an agent](../choose-an-agent/) shows when each agent reports usage.

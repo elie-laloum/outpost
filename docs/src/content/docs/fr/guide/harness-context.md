@@ -107,6 +107,7 @@ Passez `instructions: ["Answer with evidence.", projectGuidance]`. Le résolveur
 Une compétence regroupe des consignes et des outils que le modèle ne charge que lorsqu’il en a besoin. Ses instructions restent hors du prompt système jusque-là.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   createHarnessGitTools,
   defineHarnessSkill,
@@ -119,10 +120,11 @@ export const review = defineHarnessSkill({
     "Read the diff. Check changed behavior against callers and tests. Cite file paths.",
   tools: [createHarnessGitTools()],
 });
-console.log(
+reportValue(
   review.name,
   review.tools.map((tool) => tool.name),
 );
+// Example output: review [ 'git' ]
 ```
 
 <!-- check:run -->

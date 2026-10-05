@@ -8,6 +8,7 @@ description: "Gardez un environnement ouvert pour les échanges avec l’agent, 
 Ouvrez une sandbox avec `createSandbox()` lorsque plusieurs opérations doivent partager les mêmes fichiers et dépendances. `await using` la ferme à la sortie du bloc, y compris si une opération lève une erreur.
 
 ```ts title="session.ts"
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,7 +22,8 @@ const tests = await sandbox.command({
   executable: "npm",
   arguments: ["test"],
 });
-console.log(tests.status === 0 ? "Tests pass" : tests.stderr);
+reportValue(tests.status === 0 ? "Tests pass" : tests.stderr);
+// Example output: Tests pass
 ```
 
 L’agent modifie le worktree, puis `npm test` s’exécute dans la même sandbox, sur ses modifications. La page [Fonctionnement](../how-it-works/) explique la différence avec un `dispatch()` ponctuel, et qui ferme quoi.
@@ -37,6 +39,7 @@ Un `agent` passé à `sandbox.dispatch()` remplace celui donné à `createSandbo
 `sandbox.command()` lance un exécutable avec un tableau d’arguments. Aucun shell ne les interprète : `*`, `|` et `$HOME` arrivent au programme tels quels. Appelez vous-même un shell quand il vous en faut un.
 
 ```ts title="command.ts"
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -46,7 +49,8 @@ const result = await sandbox.command({
   arguments: ["-c", "node --version | tail -n 1"],
   variables: { CI: "1" },
 });
-console.log(result.stdout.trim()); // v24.15.0
+reportValue(result.stdout.trim());
+// Example output: v24.15.0
 ```
 
 `sandbox.root` est le chemin du dépôt dans la sandbox et le répertoire de travail par défaut.
@@ -94,6 +98,7 @@ Une exception levée dans `observe` arrête la commande, qui rejette alors avec 
 `sandbox.attach()` lance la CLI de l’agent dans votre terminal, à l’intérieur de la sandbox. Vous travaillez avec elle à la main ; l’appel résout quand vous quittez, avec `status` et les `commits` créés pendant la session.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -105,7 +110,8 @@ await using sandbox = await createSandbox({
 const session = await sandbox.attach({
   brief: { text: "Walk me through the payment module." },
 });
-console.log(session.status, session.commits);
+reportValue(session.status, session.commits);
+// Example output: 0 []
 ```
 
 Lancez-le depuis un vrai terminal. `continuation` rouvre une conversation capturée. La fonction [`attach()`](../../reference/attach/) de premier niveau ouvre et ferme sa propre sandbox, et applique la politique de branche quand la session sort avec le statut 0.

@@ -42,13 +42,15 @@ export const summary = defineTask({
 ```
 
 ```ts title="fix.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { fix } from "./fix-task.ts";
 import { summary } from "./summary.ts";
 
 export const result = await defineWorkflow("fix-tests", [fix, summary]).start();
 result.unwrap();
-console.log(result.value(summary));
+reportValue(result.value(summary));
+// Example output: { branch: 'outpost/fix-tests', commits: 1 }
 ```
 
 ## Run the script

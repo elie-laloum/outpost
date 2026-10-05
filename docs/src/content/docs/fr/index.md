@@ -1,23 +1,60 @@
 ---
-title: Outpost
-description: "Automatisez les corrections, les revues de code et la maintenance avec vos agents. Outpost gère les sandboxes et les espaces de travail Git ; vous composez les étapes, les tests et les validations en TypeScript."
+title: "Outpost — Agents de code et workflows TypeScript"
+description: "Exécutez vos agents de code dans des sandboxes et composez des workflows TypeScript. Outpost gère les espaces Git, les tests, les validations et la reprise."
 tableOfContents: false
+head:
+  - tag: title
+    content: "Outpost — Agents de code et workflows TypeScript"
+  - tag: meta
+    attrs: { property: "og:type", content: "website" }
 landing:
-  category: "L’orchestration d’agents de code, en TypeScript"
-  headline: ["Vos agents codent.", "Vous gardez la main."]
-  lead: "Confiez vos corrections, vos revues de code et votre maintenance à des agents. Outpost gère leurs sandboxes et leurs espaces de travail Git. Vous reliez leur travail avec des tests et des validations en TypeScript."
-  primary: { label: "Lancer ma première tâche", href: "guide/setup/" }
-  secondary: { label: "Explorer l’API", href: "reference/" }
-  overview:
-    - title: "Vos agents habituels"
-      text: "Retrouvez Codex, Claude Code et les autres agents pris en charge. Choisissez celui qui convient à chaque tâche."
-      href: "guide/choose-an-agent/"
-    - title: "L’environnement qui convient"
-      text: "Exécutez les tâches dans Docker, Podman ou une sandbox cloud prise en charge."
-      href: "guide/choose-a-sandbox/"
-    - title: "Des changements à relire"
-      text: "Récupérez une branche Git, les commits et la réponse de l’agent. Choisissez ce que vous voulez intégrer."
+  category: "L’orchestration des agents, en TypeScript"
+  headline: ["Vos agents.", "Un workflow TypeScript."]
+  lead: "Un brief devient du code, des commits et un résultat à vérifier. Choisissez l’agent et sa sandbox. Reliez les tâches, les tests et les décisions dans le code de votre projet."
+  primary: { label: "Essayer sur mon projet", href: "guide/setup/" }
+  secondary:
+    { label: "Voir un workflow complet", href: "guide/development-workflow/" }
+  story:
+    label: "Exemple de workflow"
+    title: "Du brief au commit, un parcours explicite."
+    steps:
+      - title: "Définir le travail"
+        text: "Un dépôt, un brief et une branche pour la tâche."
+        role: "Vous"
+        icon: "branch"
+        href: "guide/repository-and-branch/"
+      - title: "Lancer votre agent"
+        text: "Codex, Claude Code ou un autre agent dans la sandbox choisie."
+        role: "Agent"
+        icon: "agent"
+        href: "guide/development-workflow/"
+      - title: "Exécuter vos tests"
+        text: "Vos critères décident de la suite : corriger, poursuivre ou arrêter."
+        role: "Workflow"
+        icon: "ci"
+        href: "guide/verification-loops/"
+      - title: "Relire les commits"
+        text: "Vous choisissez les changements à intégrer."
+        role: "Vous"
+        icon: "branch"
+        href: "guide/repository-and-branch/"
+    result:
+      label: "Une branche pour votre revue"
+      branch: "outpost/fix-tests"
+      text: "Le correctif et ses commits, prêts à être relus."
       href: "guide/repository-and-branch/"
+    link:
+      { label: "Construire ce workflow", href: "guide/development-workflow/" }
+  overview:
+    - title: "Moins de préparation à chaque tâche"
+      text: "Outpost prépare la sandbox et l’espace de travail Git. Concentrez-vous sur le changement."
+      href: "guide/how-it-works/"
+    - title: "Vos critères, vos validations"
+      text: "Placez vos tests et vos décisions entre la proposition de l’agent et l’étape suivante."
+      href: "guide/approvals/"
+    - title: "Un travail qui se poursuit"
+      text: "Enregistrez l’état du workflow pour le reprendre après une interruption."
+      href: "guide/durable-runs/"
   install:
     managers: "Gestionnaire de paquets"
     commands:
@@ -29,11 +66,37 @@ landing:
     copied: "Copié"
     failed: "La copie a échoué. Sélectionnez la commande pour la copier."
     prerequisites: "Node.js 24+ · Git · Docker pour l’exemple ci-dessous"
-  next:
-    title: "Confiez votre prochaine tâche à un agent."
-    text: "Installez Outpost, construisez votre image et lancez un premier correctif depuis un script TypeScript."
-    guide: { label: "Lancer ma première tâche", href: "guide/setup/" }
-    reference: { label: "Explorer l’API", href: "reference/" }
+  capabilities:
+    title: "Ce que vous pouvez construire avec Outpost"
+    text: "Choisissez vos agents, coordonnez leurs tâches et conservez les résultats pour la suite. Chaque fonctionnalité dispose de son guide."
+    items:
+      - title: "Agents et sandboxes"
+        text: "Choisissez l’agent de code indépendamment de son environnement : conteneurs, sandboxes cloud ou exécution locale explicite."
+        href: "guide/choose-an-agent/"
+      - title: "Espaces de travail Git"
+        text: "Donnez à chaque tâche son worktree, conservez les branches nommées et choisissez quand intégrer les commits."
+        href: "guide/repository-and-branch/"
+      - title: "Workflows typés"
+        text: "Reliez les résultats par des dépendances. Exécutez les tâches indépendantes en parallèle et transmettez des valeurs typées entre les étapes."
+        href: "guide/task-dependencies/"
+      - title: "Réponses validées"
+        text: "Définissez le schéma JSON attendu, validez la réponse et demandez une réparation si l’agent renvoie un résultat invalide."
+        href: "guide/typed-responses/"
+      - title: "Décisions humaines"
+        text: "Mettez en pause pour une validation ou laissez l’agent poser ses questions. Enregistrez les réponses avant de poursuivre."
+        href: "guide/approvals/"
+      - title: "Reprise des exécutions"
+        text: "Enregistrez les tâches terminées et la consommation cumulée dans un checkpoint. Reprenez un workflow après une récupération explicite."
+        href: "guide/durable-runs/"
+      - title: "Votre propre boucle d’agent"
+        text: "Composez un fournisseur de modèles, des outils en sandbox, des serveurs MCP et des sous-agents bornés avec le harness intégré."
+        href: "guide/harness/"
+      - title: "Automatisation planifiée"
+        text: "Publiez des jobs depuis des planifications et des webhooks vérifiés. Les workers exécutent les workflows mis en file."
+        href: "guide/cron-schedules/"
+      - title: "Consommation et traces"
+        text: "Suivez les événements, consultez les journaux et exportez la télémétrie. Comptabilisez les tokens remontés et fixez des budgets."
+        href: "guide/observability/"
   footer:
     documentation:
       title: "Documentation"
@@ -55,13 +118,13 @@ landing:
     license: "Licence MIT"
 ---
 
-## Un premier correctif, en deux fichiers TypeScript
+## Une tâche pour commencer. Un workflow pour la suite.
 
-Confiez les tests en échec à Codex et demandez-lui un correctif. Outpost prépare son espace de travail dans une sandbox Docker et conserve ses commits sur une branche séparée. Vous pouvez continuer à travailler dans votre checkout courant pendant que l’agent s’occupe de sa tâche.
+Confiez un correctif à Codex dans sa sandbox Docker et son espace de travail Git. Votre checkout courant reste disponible pendant que l’agent travaille. La branche nommée conserve les commits à relire ; cet appel ne les intègre pas.
 
-Enregistrez les deux fichiers dans votre dépôt. Lancez `node task.ts`, puis relisez la réponse et les commits sur la branche renvoyée. Choisissez un nouveau nom de branche pour chaque tâche indépendante.
+Enregistrez ces deux fichiers dans votre dépôt et lancez `node task.ts`. Le reporter affiche la progression et la consommation de tokens ; `result` conserve la réponse et les commits pour votre code. Choisissez un nouveau nom de branche pour chaque tâche. Demander à l’agent de lancer les tests est une consigne ; la [boucle de vérification](guide/verification-loops/) ajoute le contrôle qui décide si le travail est accepté.
 
-[Votre première tâche](guide/first-request/) explique le résultat. La [référence API](reference/dispatch/) décrit le contrat complet.
+[Votre première tâche](guide/first-request/) explique le résultat. [Votre premier workflow](guide/first-workflow/) montre ensuite comment relier cette tâche à la suivante.
 
 <!-- tabs -->
 
@@ -79,65 +142,88 @@ export const repository = process.cwd();
 ```
 
 ```ts title="task.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { createReporter, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
+  observe: createReporter(),
   branch: { mode: "named", name: "outpost/fix-tests" },
   brief: { text: "Fix the failing tests, run them and commit the fix." },
 });
 
-console.log(result.text);
-console.log(result.branch, result.commits);
+// Example output:
+// [outpost · pass 1] running · codex
+// Fixed the failing tests and committed the change.
+// [outpost · pass 1] finished · 12.00s · status 0 · input 1200 · cache read 0 · cache write 0 · output 320
 ```
 
 :::note[Avant de lancer l’exemple]
 Suivez [Installation](guide/setup/) pour construire `outpost:dev`, préparer la connexion de l’agent et déclarer `"type": "module"` dans votre `package.json`. Node.js 24 exécute directement ces fichiers `.ts`.
 :::
 
-## Chaque tâche a son espace de travail
+## Livrer un export CSV, du ticket à la branche
 
-Outpost s’occupe de préparer l’espace de travail Git, d’ouvrir la sandbox et de lancer l’agent. Lorsque `dispatch()` se termine, il ferme la sandbox qu’il a ouverte. Vous retrouvez la branche nommée et ses commits, prêts à être relus et intégrés quand vous le décidez.
+Un ticket demande un export CSV de la liste des commandes. Un agent prépare le plan : fichiers à modifier, format et cas limites. Un autre écrit le code et les tests. Les tests et la revue par un second agent tournent en parallèle, puis leurs résultats sont réunis. Si un contrôle échoue, ses retours repartent vers l’agent qui code, dans la limite de trois essais. Quand les deux contrôles acceptent le travail, le mainteneur valide la livraison.
 
 <!-- canvas -->
 
-- **Votre demande**: Choisissez l’agent, le dépôt et la sandbox en TypeScript.
-  - Tâche
-  - → **Espace de travail et sandbox**: préparer
-- **Espace de travail et sandbox**: Outpost prépare le checkout de travail et ouvre l’environnement d’exécution.
-  - Tâche
-  - → **Travail de l’agent**: exécuter
-- **Travail de l’agent**: L’agent lit les instructions, modifie les fichiers et lance des commandes.
-  - Tâche
-  - → **Résultat à relire**: récupérer
-- **Résultat à relire**: Lisez la réponse, les commits et la consommation. Choisissez ce que vous voulez intégrer.
-  - Tâche
+- [**Ticket export CSV**](guide/briefs/): Exporter les commandes filtrées, avec leurs dates et leurs montants.
+  - Mainteneur
+  - → **Préparer le plan**: brief
+- [**Préparer le plan**](guide/typed-responses/): Identifier les fichiers, le format CSV et les cas limites à couvrir.
+  - Agents
+  - → **Implémenter l’export**: plan validé
+- [**Implémenter l’export**](guide/sandbox-sessions/): Écrire le code et les tests dans un espace Git dédié.
+  - Agents
+  - → **Exécuter les tests**: en parallèle
+  - → **Relire le diff**: en parallèle
+- [**Exécuter les tests**](guide/task-dependencies/): Lancer npm test ; récupérer le code de sortie et les erreurs.
+  - Contrôles
+  - → **Réunir les verdicts**: résultat des tests
+- [**Relire le diff**](guide/typed-responses/): Un second agent vérifie le format CSV et renvoie un verdict structuré.
+  - Agents
+  - → **Réunir les verdicts**: résultat de la revue
+- [**Réunir les verdicts**](guide/verification-loops/): Attendre les deux contrôles ; accepter ou renvoyer leurs retours.
+  - Contrôles
+  - → **Implémenter l’export**: corrections · 3 essais maximum
+  - → **Valider la livraison**: tests et revue acceptés
+  - → **Arrêter le run**: essais épuisés
+- [**Valider la livraison**](guide/approvals/): Mettre en pause pour laisser le mainteneur examiner les changements.
+  - Mainteneur
+  - → **Préparer la branche**: approuvé
+  - → **Arrêter le run**: refusé
+- [**Préparer la branche**](guide/repository-and-branch/): Commiter le travail accepté sur outpost/csv-export pour l’intégration.
+  - Contrôles
+- [**Arrêter le run**](guide/recovery/): Conserver l’espace de travail et les retours pour examiner le problème.
+  - Contrôles
 
-Les instructions données à l’agent ne garantissent pas que les tests passent. Ajoutez une [étape de vérification](guide/verification-loops/) lorsque la réussite des tests doit décider de l’acceptation du travail. [Comment Outpost exécute une tâche](guide/how-it-works/) explique qui possède chaque ressource.
-
-## Intégrez les agents à votre façon de travailler
-
-Gardez une CLI prise en charge que vous connaissez, essayez un autre agent pour une tâche précise ou construisez votre propre boucle avec le harness Outpost. Choisissez séparément où il travaille. Le guide de chaque fournisseur vous aide à trouver l’environnement adapté et à le préparer.
+Les dépendances réunissent tests et revue avant le verdict. La boucle de correction réutilise l’espace de travail ; la validation humaine enregistre sa décision en attente dans un checkpoint. Chaque flèche représente une étape contrôlée par votre code TypeScript.
 
 <!-- features -->
 
-- [**Agents de code**](guide/choose-an-agent/): Configurez Codex, Claude Code, Kimi Code, Copilot CLI ou Antigravity.
-- [**Sandboxes**](guide/choose-a-sandbox/): Choisissez des conteneurs locaux ou un fournisseur cloud adapté à votre tâche.
-- [**Votre propre boucle d’agent**](guide/harness/): Composez un fournisseur de modèles, des outils en sandbox et des limites explicites.
+- [**Réinjecter les retours dans l’essai suivant**](guide/verification-loops/): Transmettre les erreurs des tests et les remarques de la revue, avec un nombre de tours borné.
+- [**Exécuter les contrôles indépendants ensemble**](guide/concurrency-and-retries/): Déclarer les dépendances et choisir combien de tâches peuvent tourner à la fois.
+- [**Valider la livraison avant de poursuivre**](guide/approvals/): Enregistrer la décision en attente et reprendre avec la réponse du mainteneur.
 
-## Automatisez le travail qui revient
+## Commencez par ce qui vous attend déjà
 
-Une CI à réparer, une pull request à relire, des dépendances à mettre à jour : transformez ces tâches récurrentes en workflows que vous pouvez relancer. Reliez les étapes, lancez les tâches indépendantes en parallèle et choisissez où placer les tests et les validations humaines. Le guide [Votre premier workflow](guide/first-workflow/) montre comment aller plus loin à partir d’une tâche d’agent.
-
-Commencez par un workflow pour l’un des besoins de votre équipe :
+Une CI qui bloque, une pull request à relire, une mise à jour toujours repoussée : partez d’un besoin concret. Ces recettes montrent quels agents lancer, quoi vérifier et quel résultat récupérer.
 
 <!-- features -->
 
-- [**Corriger une CI en échec**](guide/fix-failing-ci/): Renvoyez les échecs des tests à l’agent et vérifiez chaque nouvelle tentative.
-- [**Relire une pull request**](guide/review-on-label/): Déclenchez une revue avec un label et récupérez un verdict typé.
-- [**Lancer la maintenance chaque nuit**](guide/nightly-maintenance/): Planifiez les mises à jour sur des branches datées et récupérez un rapport.
+- [**Débloquer une CI en échec**](guide/fix-failing-ci/): Confiez l’erreur à un agent, lancez les vérifications et renvoyez-lui ce qui reste à corriger.
+- [**Avoir un second regard sur une pull request**](guide/review-on-label/): Déclenchez une revue depuis un label et récupérez un avis structuré que le workflow peut exploiter.
+- [**Donner un rythme à la maintenance**](guide/nightly-maintenance/): Planifiez les mises à jour sur des branches datées et récupérez un rapport.
 
-Ajoutez des [réponses typées](guide/typed-responses/) lorsqu’une tâche attend des données structurées, des [validations humaines](guide/approvals/) pour faire approuver une étape, ou des [exécutions durables](guide/durable-runs/) pour reprendre après une interruption.
+## Vos outils habituels. Votre façon de les assembler.
+
+Utilisez Codex pour une tâche, Claude Code pour une autre, ou votre propre boucle d’agent. Choisissez l’environnement d’exécution indépendamment. Votre workflow reste du TypeScript que vous pouvez lire, versionner et faire évoluer avec votre projet.
+
+<!-- features -->
+
+- [**Choisir l’agent pour la tâche**](guide/choose-an-agent/): Comparez Codex, Claude Code, Kimi Code, Copilot CLI et Antigravity.
+- [**Exécuter au bon endroit**](guide/choose-a-sandbox/): Choisissez Docker, Podman ou une sandbox cloud prise en charge.
+- [**Composer votre propre agent**](guide/harness/): Associez un fournisseur de modèles, des outils en sandbox et des limites explicites.

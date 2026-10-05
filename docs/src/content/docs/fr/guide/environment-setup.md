@@ -8,6 +8,7 @@ description: "Installez les dépendances du projet avant de lancer l’agent et 
 Utilisez le hook `sandboxReady` pour installer les dépendances du projet avant de lancer l’agent. La commande s’exécute dans la sandbox préparée : l’agent dispose donc des paquets installés pendant sa tâche.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,7 +22,8 @@ const result = await dispatch({
   },
   brief: { text: "Run the tests and fix the first failure." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: Fixed the failing tests and committed the change.
 ```
 
 `npm ci` s’exécute dans la sandbox, à la racine du dépôt. L’agent démarre avec `node_modules` déjà installé. `createSandbox()` et `openWorkspace()` acceptent les mêmes `hooks` ; `speculate()` les reçoit sous `sandbox`.

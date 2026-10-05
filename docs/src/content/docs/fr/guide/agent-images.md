@@ -67,9 +67,11 @@ Ne copiez pas `~/.codex`, `~/.claude`, `.env` ni des clés avec `COPY`, et ne pa
 Chaque version d’Outpost épingle une version par CLI, exposée par `agentVersions`. `init` inscrit ces versions dans la recette.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { agentVersions } from "@elie-laloum/outpost";
 
-console.log(agentVersions.codex);
+reportValue(agentVersions.codex);
+// Example output: 0.156.1
 ```
 
 <!-- check:run -->

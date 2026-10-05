@@ -36,6 +36,7 @@ Start with Docker or Podman if you want a local container. For hosted execution,
 Import the provider from its subpath and pass it as `sandboxProvider`. The agent, the brief and the branch stay the same.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 import { coder, repository } from "./outpost.config.ts";
@@ -46,7 +47,8 @@ const result = await dispatch({
   sandboxProvider: createVercelSandboxProvider(),
   brief: { text: "Fix the broken links in the README and commit the change." },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/job-… 1
 ```
 
 Each provider has its own subpath, `@elie-laloum/outpost/providers/<name>`: `docker`, `podman`, `vercel`, `daytona`, `firecracker` and `local`. Omit `sandboxProvider` and Outpost uses Docker.

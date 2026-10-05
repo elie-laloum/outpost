@@ -16,6 +16,7 @@ Nothing is isolated. The agent and every command it runs act as your user, with 
 Create the provider with `createLocalSandboxProvider()` and pass it to `dispatch()`, like any other sandbox provider.
 
 ```ts title="host.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { coder, repository } from "./outpost.config.ts";
@@ -27,7 +28,8 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/host-fix" },
   brief: { text: "Fix the failing unit test and commit the fix." },
 });
-console.log(result.commits);
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ]
 ```
 
 The agent runs your installed CLI in a worktree of `outpost/host-fix`. `variables` adds [environment variables](../environment-variables/) on top of your process environment.

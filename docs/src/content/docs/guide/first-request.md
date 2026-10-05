@@ -8,6 +8,7 @@ description: "Write a TypeScript script, run an agent and review its answer and 
 Create `review.ts` next to the configuration from [Installation](../setup/). This first script asks the agent to read the README and report its findings. `dispatch()` opens a fresh sandbox, and the named branch gives the task its own checkout.
 
 ```ts title="review.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,9 +21,12 @@ const result = await dispatch({
     text: "Review the README for incorrect setup instructions. Report findings without editing files.",
   },
 });
-console.log(result.text);
-console.log(result.usage);
-console.log(result.commits);
+reportValue(result.text);
+// Example output: The README setup command uses an outdated flag.
+reportValue(result.usage);
+// Example output: { input: 1200, cached: 0, output: 320 }
+reportValue(result.commits);
+// Example output: []
 ```
 
 ## Run the script
@@ -40,6 +44,7 @@ API reference: [DispatchResult](../../reference/dispatchresult/) and [Usage](../
 To ask the agent to edit the repository, create `fix.ts` with another branch name and instructions to commit the correction. Keep `review.ts` if you want to reuse the read-only request in [CI](../ci-automation/).
 
 ```ts title="fix.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -52,8 +57,10 @@ const result = await dispatch({
     text: "Fix the README setup command, verify that it works and commit the correction.",
   },
 });
-console.log(result.text);
-console.log(result.commits);
+reportValue(result.text);
+// Example output: Corrected the README setup command and committed it.
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix README setup command' } ]
 ```
 
 Run `node fix.ts`, then inspect the commits and diff with the commands below. A new named branch starts from your `HEAD` and remains after the task. Use a fresh name for each independent task; an existing named branch is reused.

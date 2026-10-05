@@ -29,6 +29,7 @@ export const agent = createFallbackAgent(
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./fallback.ts";
@@ -39,7 +40,8 @@ export const result = await dispatch({
   agent,
   brief: { text: "Fix the failing tests." },
 });
-console.log(result.fallback?.selected.name);
+reportValue(result.fallback?.selected.name);
+// Example output: claude
 ```
 
 A fallback agent goes wherever an agent does, including `createSandbox()`, agent tasks and [competing candidates](../speculation/). Each candidate keeps its own [authentication](../authentication/), so a subscription can fall back to an API key.

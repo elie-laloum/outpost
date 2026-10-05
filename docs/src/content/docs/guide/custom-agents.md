@@ -81,6 +81,7 @@ export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
 ```
 
 ```ts title="mycli.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { myCli } from "./mycli-agent.ts";
@@ -92,7 +93,8 @@ export const result = await dispatch({
   branch: { mode: "named", name: "outpost/mycli-review" },
   brief: { text: "Review the README for incorrect setup instructions." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: The README setup command uses an outdated flag.
 ```
 
 Outpost runs `mycli --json --model mycli-pro` in the sandbox with the brief on stdin, passes each stdout line to `events()` and returns the collected text in `result.text`. Install the CLI in your [agent image](../agent-images/) first.

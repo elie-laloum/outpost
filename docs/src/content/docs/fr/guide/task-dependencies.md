@@ -8,6 +8,7 @@ description: "Définissez les tâches, déclarez leurs dépendances et lisez leu
 Déclarez chaque étape avec une fonction de définition de tâche, puis passez les tâches à `defineWorkflow()`. Les dépendances déterminent l’ordre d’exécution et les résultats précédents qu’une tâche peut lire.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
@@ -18,7 +19,8 @@ const report = defineTask({
 });
 const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();
-console.log(result.value(report));
+reportValue(result.value(report));
+// Example output: { reviewed: 1 }
 ```
 
 <!-- check:run -->
@@ -47,6 +49,7 @@ Listez une tâche dans `after`, puis lisez sa sortie avec `context.value(task)`.
 `start()` se résout avec un `WorkflowResult` dès qu’aucune tâche ne peut plus s’exécuter, même si des tâches ont échoué. La promesse est rejetée si une option est invalide ou si un checkpoint ne peut pas être enregistré.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const lint = defineTask({
@@ -57,9 +60,11 @@ const lint = defineTask({
 });
 const test = defineTask({ key: "test", perform: () => "ok" });
 const result = await defineWorkflow("checks", [lint, test]).start();
-console.log(result.status);
+reportValue(result.status);
+// Example output: failed
 for (const task of result.tasks)
-  console.log(task.key, task.status, task.error ?? "");
+  reportValue(task.key, task.status, task.error ?? "");
+// Example output: lint failed 2 lint errors
 ```
 
 <!-- check:run -->
@@ -73,6 +78,7 @@ Référence API : [WorkflowResult](../../reference/workflowresult/) et [TaskReco
 Par défaut, `start()` exécute une tâche à la fois, dans l’ordre de la liste. Passez `concurrency` pour exécuter ensemble les tâches indépendantes.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const lint = defineTask({ key: "lint", perform: () => ({ warnings: 0 }) });
@@ -87,7 +93,8 @@ const result = await defineWorkflow("checks", [lint, test, report]).start({
   concurrency: 2,
 });
 result.unwrap();
-console.log(result.value(report));
+reportValue(result.value(report));
+// Example output: true
 ```
 
 <!-- check:run -->
@@ -99,6 +106,7 @@ console.log(result.value(report));
 `condition` s’exécute avant la première tentative de la tâche. Si elle renvoie `false`, la tâche se termine à l’état `skipped` sans s’exécuter.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const changes = defineTask({ key: "changes", perform: (): string[] => [] });
@@ -109,10 +117,11 @@ const review = defineTask({
   perform: (context) => `Reviewed ${context.value(changes).length} files`,
 });
 const result = await defineWorkflow("review", [changes, review]).start();
-console.log(
+reportValue(
   result.status,
   result.tasks.map((task) => task.status),
 );
+// Example output: done [ 'done', 'skipped' ]
 ```
 
 <!-- check:run -->
@@ -124,11 +133,13 @@ Le script affiche `done [ 'done', 'skipped' ]`. Une tâche ignorée ne fait pas 
 `diagram()` renvoie le graphe sous forme de flowchart Mermaid, à placer dans un README ou une pull request.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const lint = defineTask({ key: "lint", perform: () => 0 });
 const report = defineTask({ key: "report", after: [lint], perform: () => 0 });
-console.log(defineWorkflow("checks", [lint, report]).diagram());
+reportValue(defineWorkflow("checks", [lint, report]).diagram());
+// Example output: flowchart LR
 ```
 
 <!-- check:run -->

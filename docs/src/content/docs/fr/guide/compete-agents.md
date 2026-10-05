@@ -141,16 +141,19 @@ export async function askToMerge(branch: string) {
 ```
 
 ```ts title="compete.ts"
+import { reportValue } from "./reporter.ts";
 import { runCandidates } from "./run-candidates.ts";
 import { askToMerge } from "./merge-prompt.ts";
 import { mergeWinner } from "./merge-winner.ts";
 
 export const result = await runCandidates();
 for (const candidate of result.candidates)
-  console.log(candidate.key, candidate.status, candidate.branch);
+  reportValue(candidate.key, candidate.status, candidate.branch);
+// Example output: codex winner outpost/speculation/…/codex
 export const { winner, integration } = result;
 if (!winner) throw new Error(`No winner: ${result.status}`);
-console.log(`${winner.key} wins, integration: ${integration?.status}`);
+reportValue(`${winner.key} wins, integration: ${integration?.status}`);
+// Example output: codex wins, integration: undefined
 if (await askToMerge(winner.branch)) await mergeWinner(winner);
 ```
 
@@ -230,6 +233,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
+import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
@@ -243,7 +247,8 @@ export const result = await speculate({
   candidates,
   validate,
 });
-console.log(result.winner?.key);
+reportValue(result.winner?.key);
+// Example output: codex
 ```
 
 ### Laisser un agent de revue trancher

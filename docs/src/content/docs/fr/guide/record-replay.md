@@ -38,6 +38,7 @@ export const journal = await readJournal({
 ```
 
 ```ts title="replay.ts"
+import { reportValue } from "./reporter.ts";
 import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
 import { journal } from "./record.ts";
 import { repository, sandboxProvider } from "./outpost.config.ts";
@@ -51,7 +52,8 @@ export const replayed = await dispatch({
   brief,
   branch: { mode: "named", name: "replayed-fix" },
 });
-console.log(replayed.commits, replaying.remainingTurns);
+reportValue(replayed.commits, replaying.remainingTurns);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ] 0
 ```
 
 Les deux branches partent du même commit : les commits rejoués ont donc les mêmes identifiants que les commits enregistrés. Depuis un autre commit qui a le même arbre, les arbres et les messages sont identiques mais les identifiants diffèrent.
@@ -117,13 +119,13 @@ Quand le rejeu s’écarte de son journal, il lève [`ReplayDivergence`](../../r
 Référence API : [ReplayDivergenceKind](../../reference/replaydivergencekind/).
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   dispatch,
   createReplayAgent,
   ReplayDivergence,
 } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
-
 declare const journal: readonly unknown[];
 try {
   await dispatch({
@@ -134,7 +136,8 @@ try {
   });
 } catch (error) {
   if (!(error instanceof ReplayDivergence)) throw error;
-  console.log(error.kind, error.turn, error.expected, error.actual);
+  reportValue(error.kind, error.turn, error.expected, error.actual);
+  // Example output: prompt 0 Expected brief Actual brief
 }
 ```
 

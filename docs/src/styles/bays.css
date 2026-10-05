@@ -127,8 +127,11 @@
   background: transparent !important;
   font-size: 0.8125rem;
   line-height: 1.7;
-  scrollbar-width: thin;
-  scrollbar-color: var(--sl-color-gray-5) transparent;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.sl-markdown-content .bay pre.astro-code::-webkit-scrollbar {
+  display: none;
 }
 .sl-markdown-content .bay .code-tabs {
   border-radius: 0 !important;

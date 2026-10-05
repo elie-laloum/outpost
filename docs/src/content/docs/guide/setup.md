@@ -44,6 +44,10 @@ For API-key access, or another agent, follow [Authentication](../authentication/
 
 Save this file next to your scripts. It declares the agent, the image and the repository; your scripts import these values explicitly.
 
+Also save `reporter.ts` beside your scripts. The examples import it to display results through `createReporter()`. `reportValue()` sends a text event to the reporter; `format()` keeps Node.js object formatting. To follow events during a task, pass `createReporter()` directly to `observe` ([follow progress](../progress/)). “Example output” comments illustrate a possible output; answers, identifiers and measurements vary between runs.
+
+<!-- tabs -->
+
 ```ts title="outpost.config.ts"
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -55,6 +59,16 @@ export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
 });
 export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
+```
+
+```ts title="reporter.ts"
+import { format } from "node:util";
+import { createReporter } from "@elie-laloum/outpost";
+
+const reporter = createReporter();
+export function reportValue(...values: unknown[]) {
+  reporter({ kind: "text", text: `${format(...values)}\n` });
+}
 ```
 
 `repository` uses the current directory unless you set `OUTPOST_REPOSITORY` to the absolute path of another checkout. If you keep your scripts outside the repository, set this variable before running them.

@@ -125,6 +125,7 @@ Un transport distant permet de conserver les objets sur un autre service. Les é
 Pour créer un objet, utilisez `ifRevision: null`. Pour le remplacer ou le supprimer, indiquez la `revision` que vous avez lue. Si un autre processus a modifié l’objet entre-temps, l’opération lève `TransportConflict` sans écrire de données.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -141,7 +142,8 @@ try {
     ifRevision: first.revision,
   });
 } catch (error) {
-  if (error instanceof TransportConflict) console.log("stale:", error.key);
+  if (error instanceof TransportConflict) reportValue("stale:", error.key);
+  // Example output: stale: notes/today
 }
 ```
 

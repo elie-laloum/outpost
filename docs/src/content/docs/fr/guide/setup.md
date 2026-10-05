@@ -44,6 +44,10 @@ Pour utiliser une clé d’API ou un autre agent, consultez [Authentification](.
 
 Enregistrez ce fichier à côté de vos scripts. Il déclare l’agent, l’image et le dépôt ; vos scripts importeront ces valeurs explicitement.
 
+Enregistrez aussi `reporter.ts` à côté de vos scripts. Les exemples l’importent pour afficher leurs résultats avec `createReporter()`. `reportValue()` transmet un événement texte au reporter ; `format()` conserve la présentation des objets de Node.js. Pour suivre les événements pendant une tâche, passez directement `createReporter()` à `observe` ([suivre la progression](../progress/)). Les commentaires « Example output » illustrent une sortie ; les réponses, identifiants et mesures varient à chaque exécution.
+
+<!-- tabs -->
+
 ```ts title="outpost.config.ts"
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -55,6 +59,16 @@ export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
 });
 export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
+```
+
+```ts title="reporter.ts"
+import { format } from "node:util";
+import { createReporter } from "@elie-laloum/outpost";
+
+const reporter = createReporter();
+export function reportValue(...values: unknown[]) {
+  reporter({ kind: "text", text: `${format(...values)}\n` });
+}
 ```
 
 `repository` utilise le dossier courant, sauf si vous définissez `OUTPOST_REPOSITORY` avec le chemin absolu d’un autre dépôt. Si vos scripts se trouvent hors du dépôt, renseignez cette variable avant de les exécuter.

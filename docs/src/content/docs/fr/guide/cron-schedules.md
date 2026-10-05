@@ -131,10 +131,12 @@ Un créneau en échec n’est pas republié. Les erreurs levées par `onError` s
 `next(after)` renvoie le premier créneau strictement après une date, `previous(at)` le dernier créneau à cette date ou avant. Aucune des deux ne publie quoi que ce soit.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createCronSchedule } from "@elie-laloum/outpost";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
-console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+reportValue(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+// Example output: 2026-03-30T00:30:00.000Z
 ```
 
 <!-- check:run -->

@@ -44,6 +44,7 @@ export const sandboxProvider = createFirecrackerSandboxProvider({
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, coder } from "./outpost.config.ts";
 import { sandboxProvider } from "./firecracker.ts";
@@ -55,7 +56,8 @@ export const result = await dispatch({
   branch: { mode: "named", name: "outpost/firecracker" },
   brief: { text: "Run the test suite and fix the first failure." },
 });
-console.log(result.commits);
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ]
 ```
 
 Each allocation boots a private copy of `rootfs`, then polls SSH until the guest answers with the expected `$HOME` and tools. Host paths must be absolute.

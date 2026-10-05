@@ -8,6 +8,7 @@ description: "Définissez le budget d’un workflow et suivez la consommation au
 Passez un `budget` à la méthode `start()` du workflow pour limiter les tentatives, les tokens déclarés ou les deux. Ces limites portent sur l’ensemble des tâches du workflow, et non sur chaque tâche séparément.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const meter = defineTask({
@@ -20,7 +21,8 @@ const meter = defineTask({
 const result = await defineWorkflow("bounded", [meter]).start({
   budget: { attempts: 5, usage: { input: 50_000, output: 10_000 } },
 });
-console.log(result.usage);
+reportValue(result.usage);
+// Example output: { attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }
 ```
 
 <!-- check:run -->
@@ -113,13 +115,15 @@ export const fix = defineIsolatedTask({
 ```
 
 ```ts title="run-fix.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { fix } from "./fix-task.ts";
 
 export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
-console.log(result.status, result.usage);
+reportValue(result.status, result.usage);
+// Example output: done { attempts: 1, tokens: { input: 1200, cached: 0, output: 320 } }
 ```
 
 `timeoutMs` borne chaque tentative de tâche et `deadlineMs` chaque tour d’agent : voir [Limites et annulation](../limits-and-cancellation/). [Choisir un agent](../choose-an-agent/) indique quand chaque agent rapporte sa consommation.

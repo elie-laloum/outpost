@@ -44,6 +44,7 @@ export const checkpoint = {
 ```
 
 ```ts title="resume.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { review } from "./quota-review.ts";
 import { checkpoint } from "./quota-checkpoint.ts";
@@ -53,7 +54,8 @@ export const result = await defineWorkflow("nightly", [review]).start({
   onQuota: { action: "pause", maxWaitMs: 6 * 60 * 60_000 },
 });
 result.unwrap();
-console.log(result.value(review));
+reportValue(result.value(review));
+// Example output: reviewed
 ```
 
 <!-- check:run -->

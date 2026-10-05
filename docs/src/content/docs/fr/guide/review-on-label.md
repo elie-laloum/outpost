@@ -76,6 +76,7 @@ export const on: TriggerRoute["on"] = (event) => {
 ```
 
 ```ts title="server.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
 import { source } from "./webhook-source.ts";
 import { on } from "./review-trigger.ts";
@@ -87,7 +88,8 @@ export const server = await serveTriggers({
   routes: [{ path: "/github", source, on }],
   onError: (error, failure) => console.error(failure, error),
 });
-console.log(`Listening on ${server.url}/github`);
+reportValue(`Listening on ${server.url}/github`);
+// Example output: Listening on http://127.0.0.1:8787/github
 process.once("SIGINT", async () => {
   await server.close();
   queue.close();

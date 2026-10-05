@@ -28,6 +28,7 @@ export const store = createArtifactStore({
 ```
 
 ```ts title="publish.ts"
+import { reportValue } from "./reporter.ts";
 import { publishArtifact, readStoredArtifact } from "@elie-laloum/outpost";
 import { store, coverage } from "./coverage.ts";
 
@@ -37,7 +38,8 @@ export const reference = await publishArtifact(
   { lines: 87.5, files: ["src/parser.ts"] },
   { producer: { executionId: "nightly-42", taskKey: "coverage", attempt: 1 } },
 );
-console.log(await readStoredArtifact(store, coverage, reference));
+reportValue(await readStoredArtifact(store, coverage, reference));
+// Example output: { lines: 87.5, files: [ 'src/parser.ts' ] }
 ```
 
 <!-- check:run -->
@@ -116,13 +118,15 @@ export const summary = defineTask({
 ```
 
 ```ts title="audit-report.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { audit } from "./audit.ts";
 import { summary } from "./summary.ts";
 
 export const result = await defineWorkflow("audit", [audit, summary]).start();
 result.unwrap();
-console.log(result.value(summary));
+reportValue(result.value(summary));
+// Example output: 1 finding(s) in src/parser.ts
 ```
 
 <!-- check:run -->

@@ -29,6 +29,7 @@ export const agent = createFallbackAgent(
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./fallback.ts";
@@ -39,7 +40,8 @@ export const result = await dispatch({
   agent,
   brief: { text: "Fix the failing tests." },
 });
-console.log(result.fallback?.selected.name);
+reportValue(result.fallback?.selected.name);
+// Example output: claude
 ```
 
 Un agent de secours s’utilise partout où un agent est accepté, y compris `createSandbox()`, les tâches d’agent et les [candidats concurrents](../speculation/). Chaque candidat garde sa propre [authentification](../authentication/) : un abonnement peut ainsi se replier sur une clé d’API.

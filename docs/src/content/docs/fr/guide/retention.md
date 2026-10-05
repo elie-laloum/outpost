@@ -56,12 +56,12 @@ Référence API : [RecoveryRetentionEntry](../../reference/recoveryretentionentr
 `planRecoveryRetention()` construit le même plan que la prévisualisation. `pruneRecoveryRetention()` l’applique et renvoie ce qu’il a supprimé et conservé.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   planRecoveryRetention,
   pruneRecoveryRetention,
 } from "@elie-laloum/outpost";
 import { repository } from "./outpost.config.ts";
-
 const plan = await planRecoveryRetention({
   repository,
   policy: {
@@ -70,10 +70,11 @@ const plan = await planRecoveryRetention({
     minAgeMs: 7 * 24 * 60 * 60 * 1000,
   },
 });
-console.log(plan.quota, plan.projectedBytes);
-
+reportValue(plan.quota, plan.projectedBytes);
+// Example output: within 4096
 const result = await pruneRecoveryRetention(plan);
-console.log(result.removed, result.retained);
+reportValue(result.removed, result.retained);
+// Example output: [ '/project/.outpost/workspaces/old-run' ] []
 ```
 
 Pour des données conservées dans un [transport](../storage/) distant, passez `transporter` à `planRecoveryRetention()` et `{ transporter }` à `pruneRecoveryRetention()`. Seuls `closed-logs` et `task-cache` s’y appliquent.

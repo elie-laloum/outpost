@@ -8,6 +8,7 @@ description: "Écrivez un script TypeScript, lancez un agent et examinez sa rép
 Créez `review.ts` à côté de la configuration de la page [Installation](../setup/). Ce premier script demande à l’agent de lire le README et de présenter ses observations. `dispatch()` ouvre une nouvelle sandbox, et la branche nommée donne à la tâche sa propre copie du dépôt.
 
 ```ts title="review.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,9 +21,12 @@ const result = await dispatch({
     text: "Review the README for incorrect setup instructions. Report findings without editing files.",
   },
 });
-console.log(result.text);
-console.log(result.usage);
-console.log(result.commits);
+reportValue(result.text);
+// Example output: The README setup command uses an outdated flag.
+reportValue(result.usage);
+// Example output: { input: 1200, cached: 0, output: 320 }
+reportValue(result.commits);
+// Example output: []
 ```
 
 ## Exécuter le script
@@ -40,6 +44,7 @@ Référence API : [DispatchResult](../../reference/dispatchresult/) et [Usage](.
 Pour demander à l’agent de modifier le dépôt, créez `fix.ts` avec un autre nom de branche et des consignes demandant un commit. Gardez `review.ts` si vous souhaitez réutiliser la demande de lecture dans la [CI](../ci-automation/).
 
 ```ts title="fix.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -52,8 +57,10 @@ const result = await dispatch({
     text: "Fix the README setup command, verify that it works and commit the correction.",
   },
 });
-console.log(result.text);
-console.log(result.commits);
+reportValue(result.text);
+// Example output: Corrected the README setup command and committed it.
+reportValue(result.commits);
+// Example output: [ { oid: '8f3a21c…', subject: 'Fix README setup command' } ]
 ```
 
 Lancez `node fix.ts`, puis examinez les commits et les modifications avec les commandes ci-dessous. Une nouvelle branche nommée part de votre `HEAD` et reste disponible après la tâche. Utilisez un nom différent pour chaque tâche indépendante ; une branche qui existe déjà est réutilisée.

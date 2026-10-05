@@ -52,6 +52,12 @@ try {
       configuration,
     );
     roots.push(resolve(localeDirectory, "outpost.config.ts"));
+    const reporter = setup.match(
+      /```ts title="reporter\.ts"\n([\s\S]*?)```/,
+    )?.[1];
+    assert.ok(reporter, `Missing published reporter: ${locale}`);
+    await writeFile(resolve(localeDirectory, "reporter.ts"), reporter);
+    roots.push(resolve(localeDirectory, "reporter.ts"));
     const names = [
       "index.md",
       ...(await readdir(resolve(content, locale + "guide")))
@@ -82,6 +88,10 @@ try {
             await copyFile(
               resolve(localeDirectory, "outpost.config.ts"),
               resolve(project, "outpost.config.ts"),
+            );
+            await copyFile(
+              resolve(localeDirectory, "reporter.ts"),
+              resolve(project, "reporter.ts"),
             );
           }
           projectFiles.add(title);

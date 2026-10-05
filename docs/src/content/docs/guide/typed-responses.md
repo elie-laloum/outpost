@@ -8,15 +8,14 @@ description: "Ask for structured output and validate it before using it in your 
 Define a JSON response contract to receive data your application can validate. The agent writes the answer inside the requested tag, and Outpost parses and validates it before exposing `result.value`.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
 import { z } from "zod";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
 const verdict = defineJsonResponse({
   tag: "verdict",
   schema: z.object({ approved: z.boolean(), reasons: z.array(z.string()) }),
 });
-
 const result = await dispatch({
   repository,
   sandboxProvider,
@@ -26,7 +25,8 @@ const result = await dispatch({
     text: 'Review the last commit. End with <verdict>{"approved": true, "reasons": []}</verdict>.',
   },
 });
-if (!result.value.approved) console.log(result.value.reasons);
+if (!result.value.approved) reportValue(result.value.reasons);
+// Example output: [ 'Add a regression test.' ]
 ```
 
 API reference: [DispatchResult](../../reference/dispatchresult/) and [defineJsonResponse](../../reference/definejsonresponse/).
@@ -42,8 +42,8 @@ Outpost sends your brief unchanged: it adds no format instructions. Say which ta
 A function receives the parsed JSON as `unknown` and returns the typed value. Throw to reject it. `read()` applies the same rules as `dispatch()`, so you can test a response offline.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineJsonResponse } from "@elie-laloum/outpost";
-
 const verdict = defineJsonResponse({
   tag: "verdict",
   schema(input) {
@@ -57,11 +57,11 @@ const verdict = defineJsonResponse({
     return { approved: input.approved };
   },
 });
-
 const answer =
   'Draft: <verdict>{"approved":false}</verdict>\n' +
   'Final: <verdict>{"approved":true}</verdict>';
-console.log(await verdict.read(answer)); // { approved: true }
+reportValue(await verdict.read(answer));
+// Example output: { approved: true }
 ```
 
 <!-- check:run -->
@@ -73,10 +73,12 @@ The last complete `<verdict>…</verdict>` pair wins, so a draft earlier in the 
 `defineTextResponse()` returns the trimmed text inside the tag, without JSON parsing.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTextResponse } from "@elie-laloum/outpost";
 
 const summary = defineTextResponse({ tag: "summary" });
-console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>")); // "Fixed the README."
+reportValue(await summary.read("<summary>\n  Fixed the README.\n</summary>"));
+// Example output: Fixed the README.
 ```
 
 <!-- check:run -->

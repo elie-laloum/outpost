@@ -36,6 +36,7 @@ export const routes = [
 ```
 
 ```ts title="server.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
 import { routes } from "./github-route.ts";
 
@@ -46,7 +47,8 @@ export const server = await serveTriggers({
   routes,
   onError: (error, failure) => console.error(failure, error),
 });
-console.log(`Listening on ${server.url}`);
+reportValue(`Listening on ${server.url}`);
+// Example output: Listening on http://127.0.0.1:8787
 ```
 
 Ajouter le label `outpost:fix` à une issue ou à une pull request publie un job `fix` dans la file. Un worker l’exécute avec `defineWorkflowJob()` : voir [Files de jobs et workers](../job-queues/).

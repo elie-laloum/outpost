@@ -8,6 +8,7 @@ description: "Select the checkout an agent edits and decide when its commits are
 Pass `repository` to select the Git checkout the task will use. Your workflow scripts can live elsewhere; resolve the repository path from the script’s directory when you want it to work from any current directory.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { resolve } from "node:path";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, sandboxProvider } from "./outpost.config.ts";
@@ -19,7 +20,8 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/update-deps" },
   brief: { text: "Update the outdated dependencies and commit the change." },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/update-deps 1
 ```
 
 It prints `outpost/update-deps` and the number of commits. A relative path resolves from the working directory: resolving it from `import.meta.dirname` lets the script run from anywhere.
@@ -86,6 +88,7 @@ A workspace serves one sandbox at a time. Close the sandbox before the workspace
 A new worktree holds only committed files. `copies` lists repository-relative files or directories to copy from your checkout, such as an ignored test configuration.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -97,7 +100,8 @@ const result = await dispatch({
   copies: [".env.test"],
   brief: { text: "Run the end-to-end tests and fix what fails." },
 });
-console.log(result.retainedDirectory);
+reportValue(result.retainedDirectory);
+// Example output: /project/.outpost/workspaces/…
 ```
 
 Missing entries are skipped. Cloud sandboxes receive the commits and `copies`; `includeUncommitted: true` also sends the worktree’s uncommitted files ([Cloud sandboxes](../cloud-sandboxes/)). Without it, a copy that no committed `.gitignore` excludes makes the first synchronization fail with code `workspace`.

@@ -8,6 +8,7 @@ description: "Donnez une nouvelle consigne à un agent en cours d’exécution e
 Créez un contrôleur de réorientation et passez-le à la tâche. Pendant l’exécution, `send()` envoie une nouvelle consigne et se termine lorsqu’Outpost peut indiquer comment elle a été transmise.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,7 +22,8 @@ const running = dispatch({
   steering,
 });
 const delivery = await steering.send("Leave the legacy/ folder untouched.");
-console.log(delivery.mode); // "injected" ou "resumed"
+reportValue(delivery.mode);
+// Example output: "injected" ou "resumed"
 const result = await running;
 ```
 

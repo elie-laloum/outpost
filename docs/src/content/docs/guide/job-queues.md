@@ -61,12 +61,14 @@ try {
 A producer opens the same queue and enqueues a job under a stable ID.
 
 ```ts title="submit.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
   await queue.enqueue({ id: "count-42", handler: "count", input: [1, 2, 3] });
-  console.log(await queue.get("count-42"));
+  reportValue(await queue.get("count-42"));
+  // Example output: { id: "count-42", status: "pending", … }
 } finally {
   queue.close();
 }
@@ -81,14 +83,10 @@ It prints the job with `status: "pending"`; once a worker has run it, `result.va
 `defineQueuedTask()` is a workflow task that enqueues a job, polls until it settles and validates its value with `decode`.
 
 ```ts
-import {
-  createSqliteTaskQueue,
-  defineQueuedTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const count = defineQueuedTask({
+import { reportValue } from "./reporter.ts";
+import * as outpost from "@elie-laloum/outpost";
+const queue = await outpost.createSqliteTaskQueue(".outpost/jobs.sqlite");
+const count = outpost.defineQueuedTask({
   key: "count",
   queue,
   handler: "count",
@@ -98,8 +96,10 @@ const count = defineQueuedTask({
     return value;
   },
 });
-const result = await defineWorkflow("count-items", [count]).start();
-console.log(result.value(count));
+reportValue(
+  (await outpost.defineWorkflow("count-items", [count]).start()).value(count),
+);
+// Example output: 3
 queue.close();
 ```
 
@@ -147,6 +147,7 @@ The digest ties a `runId` to one input. A job with the same `runId` and a differ
 A completed job ID cannot run again: enqueuing it returns the stored job. To continue a run, enqueue a new job ID with the same `runId` and the same input.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -155,7 +156,8 @@ const job = await queue.enqueue({
   handler: "fix",
   input: { runId: "fix-42", input: { issue: 42 } },
 });
-console.log(job.status);
+reportValue(job.status);
+// Example output: pending
 queue.close();
 ```
 
@@ -210,6 +212,7 @@ A remote API with persistent idempotency keys works too. A receipt kept in memor
 `serveTaskQueue()` puts any queue behind an HTTP endpoint. `createHttpTaskQueue()` is a queue client for producers and workers on other machines.
 
 ```ts title="queue-server.ts"
+import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
@@ -217,7 +220,8 @@ if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const server = await serveTaskQueue({ queue, token, port: 8788 });
-console.log(`Queue at ${server.url}`);
+reportValue(`Queue at ${server.url}`);
+// Example output: Queue at http://127.0.0.1:8787
 ```
 
 On another machine, `createHttpTaskQueue({ url, token })` returns a queue for `runQueueWorker()` or `enqueue()`. The token is 32 to 512 characters without spaces. The server listens on `127.0.0.1` unless you set `host`; `await server.close()` stops it, and you close the underlying queue yourself.

@@ -68,6 +68,7 @@ export const coordinator = createAgent({
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { coordinator } from "./coordinator.ts";
@@ -78,7 +79,8 @@ export const result = await dispatch({
   agent: coordinator,
   brief: { text: "Have the validation code reviewed, then list the risks." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: The reviewer found unchecked input in src/validation.ts.
 ```
 
 Le coordinateur décide quand appeler `review`. Chaque appel démarre le relecteur avec un historique neuf ; `result.text` contient la réponse finale du coordinateur et `result.usage` inclut les tokens du relecteur.
@@ -132,11 +134,13 @@ Reprendre le parent ne relance pas l’enfant : le parent rejoue les résultats 
 Chaque délégation émet un événement `subagent` quand elle démarre, se termine ou échoue. Tous les autres événements de l’enfant, `usage` compris, portent l’identifiant de son exécution dans `subagentId`.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import type { DispatchOptions } from "@elie-laloum/outpost";
 
 const observe: DispatchOptions["observe"] = (event) => {
   if (event.kind === "subagent")
-    console.log(event.name, event.status, event.id, event.conversation);
+    reportValue(event.name, event.status, event.id, event.conversation);
+  // Example output: review started subagent-1 undefined
 };
 ```
 

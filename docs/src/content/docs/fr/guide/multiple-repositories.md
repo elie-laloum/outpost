@@ -31,6 +31,7 @@ export function upgrade(key: string, path: string) {
 ```
 
 ```ts title="upgrade-repositories.ts"
+import { reportValue } from "./reporter.ts";
 import { upgrade } from "./upgrade.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -40,7 +41,8 @@ export const result = await defineWorkflow("node-24", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
-console.log(result.value(api).commits.length, result.value(web).commits.length);
+reportValue(result.value(api).commits.length, result.value(web).commits.length);
+// Example output: 1 1
 ```
 
 Le script affiche le nombre de commits sur `outpost/node-24` dans chaque checkout. Chaque tâche ouvre son propre worktree et sa propre sandbox, puis les ferme en fin de tâche.

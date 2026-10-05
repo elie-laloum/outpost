@@ -15,6 +15,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Outpost",
+      favicon: "/favicon.svg",
       description: "Run an agent, own its environment, compose a workflow.",
       locales: {
         root: { label: "English", lang: "en" },

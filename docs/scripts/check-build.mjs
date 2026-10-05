@@ -23,6 +23,45 @@ let guideCards = 0;
 for (const file of files) {
   const $ = load(await readFile(resolve(root, file), "utf8"));
   const redirect = $("meta[http-equiv=refresh]").length > 0;
+  if (/^(fr\/)?index\.html$/.test(file)) {
+    const locale = file.startsWith("fr/") ? "fr" : "en";
+    const home = `${origin}${base}/${locale === "fr" ? "fr/" : ""}`;
+    const description = $('meta[name="description"]').attr("content");
+    assert.equal($("h1").length, 1, `Home needs one H1: ${file}`);
+    assert.match($("title").text(), /Outpost.*TypeScript/);
+    assert.equal($('link[rel="canonical"]').attr("href"), home);
+    assert.equal($('meta[property="og:type"]').attr("content"), "website");
+    assert.equal($('meta[property="og:url"]').attr("content"), home);
+    assert.equal(
+      $('meta[property="og:description"]').attr("content"),
+      description,
+    );
+    assert.equal(
+      $('meta[name="twitter:description"]').attr("content"),
+      description,
+    );
+    for (const lang of ["en", "fr", "x-default"])
+      assert.equal($(`link[rel="alternate"][hreflang="${lang}"]`).length, 1);
+    const image = `${origin}${base}/social/home-${locale}.png`;
+    assert.equal($('meta[property="og:image"]').attr("content"), image);
+    assert.equal($('meta[name="twitter:image"]').attr("content"), image);
+    const png = await readFile(resolve(root, `social/home-${locale}.png`));
+    assert.equal(png.readUInt32BE(16), 1200);
+    assert.equal(png.readUInt32BE(20), 630);
+    assert.equal(
+      $('link[rel="shortcut icon"]').attr("href"),
+      `${base}/favicon.svg`,
+    );
+    const data = JSON.parse($('script[type="application/ld+json"]').text());
+    assert.equal(data["@context"], "https://schema.org");
+    assert.deepEqual(
+      data["@graph"].map((entry) => entry["@type"]),
+      ["WebSite", "SoftwareSourceCode"],
+    );
+    assert.equal(data["@graph"][0].url, home);
+    assert.equal(data["@graph"][0].inLanguage, locale);
+    assert.equal(data["@graph"][1].programmingLanguage, "TypeScript");
+  }
   if (/^(fr\/)?(?:guide\/|index\.html$)/.test(file) && !redirect) {
     assert.ok(
       $(".sl-markdown-content").text().trim().length > 100,

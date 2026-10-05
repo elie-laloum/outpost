@@ -8,6 +8,7 @@ description: "Limitez la durée d’exécution de l’agent, réglez les passage
 Définissez les délais à côté du brief si la tâche demande des limites plus strictes que celles par défaut. Vous pouvez limiter la durée totale d’un échange et le temps pendant lequel l’agent peut rester silencieux.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,7 +21,8 @@ const result = await dispatch({
   deadlineMs: 20 * 60_000,
   idleMs: 5 * 60_000,
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: Fixed the failing tests and committed the change.
 ```
 
 Si l’agent tourne plus de 20 minutes, ou reste muet pendant 5, la promesse est rejetée avec une [`OutpostError`](../error-handling/) de code `timeout`. La sandbox est libérée ; la branche garde ce que l’agent a commité.
@@ -71,6 +73,7 @@ Pour changer la direction de l’agent sans l’arrêter, [réorientez-le](../st
 `passes` renvoie le brief quand une passe se termine sans marqueur de fin. Demandez le marqueur dans le brief : Outpost ne l’ajoute pas.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -85,7 +88,8 @@ const result = await dispatch({
   passes: 3,
   until: "READY_FOR_REVIEW",
 });
-console.log(result.completed, result.completion);
+reportValue(result.completed, result.completion);
+// Example output: true READY_FOR_REVIEW
 ```
 
 Chaque passe démarre une nouvelle conversation sur la même branche : elle voit donc les commits précédents. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.

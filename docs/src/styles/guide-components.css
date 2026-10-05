@@ -299,10 +299,13 @@
   max-width: 100%;
   margin: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 1px solid var(--docs-line);
   background: color-mix(in oklch, var(--sl-color-gray-6) 45%, transparent);
-  scrollbar-width: thin;
-  scrollbar-color: var(--sl-color-gray-3) transparent;
+  scrollbar-width: none;
+}
+.sl-markdown-content .bay .code-tab-list::-webkit-scrollbar {
+  display: none;
 }
 .sl-markdown-content .bay .code-tabs[data-tabs-ready] .code-tab-list {
   user-select: none;
@@ -318,7 +321,7 @@
 /* Cells share one divider: the frame draws the first left edge, each tab draws its right. */
 .sl-markdown-content .bay .code-tab {
   flex: none;
-  margin: 0 0 -1px;
+  margin: 0;
   padding: 0.65rem 1.1rem;
   border-right: 1px solid var(--docs-line);
   border-bottom: 1px solid var(--docs-line);

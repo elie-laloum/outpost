@@ -81,6 +81,7 @@ export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
 ```
 
 ```ts title="mycli.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { myCli } from "./mycli-agent.ts";
@@ -92,7 +93,8 @@ export const result = await dispatch({
   branch: { mode: "named", name: "outpost/mycli-review" },
   brief: { text: "Review the README for incorrect setup instructions." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: The README setup command uses an outdated flag.
 ```
 
 Outpost exécute `mycli --json --model mycli-pro` dans la sandbox avec le brief sur stdin, transmet chaque ligne de stdout à `events()` et renvoie le texte collecté dans `result.text`. Installez d’abord la CLI dans votre [image d’agent](../agent-images/).

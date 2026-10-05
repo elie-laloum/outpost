@@ -43,6 +43,7 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="review.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./reviewer.ts";
@@ -53,7 +54,8 @@ export const result = await dispatch({
   agent: reviewer,
   brief: { text: "Review the last commit and report risky changes." },
 });
-console.log(result.text);
+reportValue(result.text);
+// Example output: The last commit accepts unchecked input in src/parser.ts.
 ```
 
 This reviewer reads, searches and inspects history, but cannot change a file. Every call runs in the dispatch’s sandbox, against the repository root.

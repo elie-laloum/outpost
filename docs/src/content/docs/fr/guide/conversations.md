@@ -8,6 +8,7 @@ description: "Reprenez le contexte enregistré d’un agent ou créez une nouvel
 Appelez `result.resume()` pour envoyer une nouvelle demande dans la conversation créée par une tâche. Le contexte enregistré contient les messages précédents : l’agent peut ainsi poursuivre son travail.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -20,7 +21,8 @@ const first = await dispatch({
 const next = await first.resume({
   brief: { text: "Which edge case deserves a regression test first?" },
 });
-console.log(next.text);
+reportValue(next.text);
+// Example output: Add a regression test for empty parser input.
 ```
 
 `resume()` lance un nouveau dispatch dans une sandbox neuve, avec les réglages du premier : dépôt, fournisseur de sandbox, branche. Outpost y restaure d’abord la conversation enregistrée. Passez un réglage pour le remplacer.
@@ -34,6 +36,7 @@ console.log(next.text);
 `result.fork()` démarre une nouvelle conversation à partir d’une copie de la première. L’originale reste intacte : vous pouvez explorer deux pistes depuis le même contexte. Donnez au fork sa propre branche pour séparer ses commits.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -47,7 +50,8 @@ const alternative = await first.fork({
   branch: { mode: "named", name: "outpost/parser-state-machine" },
   brief: { text: "Rewrite the parser as a state machine and commit it." },
 });
-console.log(alternative.conversation, alternative.branch);
+reportValue(alternative.conversation, alternative.branch);
+// Example output: session-2 outpost/parser-state-machine
 ```
 
 À partir d’un identifiant, `continuation: { id, fork: true }` produit le même effet.

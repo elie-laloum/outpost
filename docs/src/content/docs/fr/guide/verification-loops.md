@@ -27,6 +27,7 @@ Définissez une tentative et une vérification avec `defineLoopTask()`. La véri
     - `LoopTaskExhausted`
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const fix = defineLoopTask({
@@ -44,7 +45,8 @@ const fix = defineLoopTask({
 
 const result = await defineWorkflow("verified", [fix]).start();
 result.unwrap();
-console.log(result.value(fix)); // { round: 2, feedback: 'Cover the missing edge case.' }
+reportValue(result.value(fix));
+// Example output: { round: 2, feedback: 'Cover the missing edge case.' }
 ```
 
 <!-- check:run -->
@@ -142,6 +144,7 @@ Lancez `run-loop.ts` : il garde la sandbox ouverte jusqu’à la fin du workflow
 <!-- tabs -->
 
 ```ts title="run-loop.ts"
+import { reportValue } from "./reporter.ts";
 import { openLoopSandbox } from "./loop-sandbox.ts";
 import { defineFix } from "./fix-loop.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
@@ -150,7 +153,8 @@ await using sandbox = await openLoopSandbox();
 export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-tests", [fix]).start();
 result.unwrap();
-console.log(result.value(fix).summary);
+reportValue(result.value(fix).summary);
+// Example output: Fixed the parser and verified the tests.
 ```
 
 `coding.perform(context)` rattache les tokens et l’annulation de l’agent à la boucle et à son [budget](../budgets/). `coder` sert à exécuter l’appel : seul `fix` entre dans le workflow. `attempt` renvoie du JSON, car un [checkpoint](../durable-runs/) sauvegarde chaque candidat, même refusé.

@@ -54,6 +54,7 @@ Use an ESM directory (`"type": "module"` in `package.json`); a CommonJS reposito
 import {
   createAgent,
   createCodexHarness,
+  createReporter,
   dispatch,
 } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -64,15 +65,17 @@ const result = await dispatch({
     harness: createCodexHarness({ authentication: "account" }),
   }),
   sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
+  observe: createReporter(),
   branch: { mode: "named", name: "outpost/fix-tests" },
   brief: {
     text: "Fix the failing tests, run them to verify and commit the change.",
   },
 });
 
-console.log(result.text);
-console.log(result.branch, result.commits);
-console.log(result.usage);
+// Example output:
+// [outpost · pass 1] running · codex
+// Fixed the failing tests and committed the change.
+// [outpost · pass 1] finished · 12.00s · status 0 · input 1200 · cache read 0 · cache write 0 · output 320
 ```
 
 `dispatch()` closes the sandbox it allocates; the named branch remains for review. Use a fresh branch name for each independent task. The agent’s answer is not an enforced test result: add explicit verification when checks must gate integration.

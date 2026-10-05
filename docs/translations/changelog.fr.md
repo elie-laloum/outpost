@@ -1,5 +1,14 @@
 # Historique des versions
 
+## 9.0.7
+
+- Refaire l’accueil bilingue de la documentation avec un hero occupant la hauteur de l’écran, un parcours en quatre étapes et une grille de neuf fonctionnalités liées au Guide. Montrer un workflow d’export CSV de taille moyenne avec tests et revue en parallèle, corrections bornées et validation humaine.
+- Ajouter un favicon, des aperçus sociaux localisés, les métadonnées de référencement et les données structurées de l’accueil, ainsi qu’un endpoint robots.
+- Remplacer les sorties console directes des snippets du Guide, de l’accueil et du README par des reporters et des commentaires montrant le résultat attendu. Vérifier les types du reporter partagé et exécuter les exemples hors ligne dans les deux langues.
+- Masquer les barres de défilement des onglets et snippets de code tout en conservant le défilement horizontal, le déplacement à la souris et la navigation au clavier.
+
+Les contrats publics de la bibliothèque et le comportement d’exécution restent inchangés.
+
 ## 9.0.6
 
 - Réécrit le Guide en français et en anglais avec des titres et des explications plus clairs. L'installation recommandée consiste à construire une image d'agent, puis à importer Outpost dans ses propres fichiers TypeScript ; les projets générés avec `init` restent une option. Les définitions des options et des propriétés sont accessibles par des liens vers leurs contrats dans l'API, sans être répétées dans le Guide.

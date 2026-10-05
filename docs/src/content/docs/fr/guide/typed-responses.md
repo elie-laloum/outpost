@@ -8,15 +8,14 @@ description: "Demandez une réponse structurée et validez-la avant de l’utili
 Définissez un contrat de réponse JSON pour recevoir des données que votre application peut valider. L’agent écrit sa réponse dans la balise demandée, puis Outpost l’analyse et la valide avant de fournir `result.value`.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
 import { z } from "zod";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
 const verdict = defineJsonResponse({
   tag: "verdict",
   schema: z.object({ approved: z.boolean(), reasons: z.array(z.string()) }),
 });
-
 const result = await dispatch({
   repository,
   sandboxProvider,
@@ -26,7 +25,8 @@ const result = await dispatch({
     text: 'Review the last commit. End with <verdict>{"approved": true, "reasons": []}</verdict>.',
   },
 });
-if (!result.value.approved) console.log(result.value.reasons);
+if (!result.value.approved) reportValue(result.value.reasons);
+// Example output: [ 'Add a regression test.' ]
 ```
 
 Référence API : [DispatchResult](../../reference/dispatchresult/) et [defineJsonResponse](../../reference/definejsonresponse/).
@@ -42,8 +42,8 @@ Outpost envoie votre brief tel quel : il n’ajoute aucune consigne de format. I
 La fonction reçoit le JSON analysé comme `unknown` et renvoie la valeur typée. Levez une exception pour le rejeter. `read()` applique les mêmes règles que `dispatch()` : vous pouvez tester une réponse hors ligne.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineJsonResponse } from "@elie-laloum/outpost";
-
 const verdict = defineJsonResponse({
   tag: "verdict",
   schema(input) {
@@ -57,11 +57,11 @@ const verdict = defineJsonResponse({
     return { approved: input.approved };
   },
 });
-
 const answer =
   'Draft: <verdict>{"approved":false}</verdict>\n' +
   'Final: <verdict>{"approved":true}</verdict>';
-console.log(await verdict.read(answer)); // { approved: true }
+reportValue(await verdict.read(answer));
+// Example output: { approved: true }
 ```
 
 <!-- check:run -->
@@ -73,10 +73,12 @@ La dernière paire `<verdict>…</verdict>` complète l’emporte : un brouillon
 `defineTextResponse()` renvoie le texte nettoyé contenu dans la balise, sans analyse JSON.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { defineTextResponse } from "@elie-laloum/outpost";
 
 const summary = defineTextResponse({ tag: "summary" });
-console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>")); // "Fixed the README."
+reportValue(await summary.read("<summary>\n  Fixed the README.\n</summary>"));
+// Example output: Fixed the README.
 ```
 
 <!-- check:run -->

@@ -52,13 +52,15 @@ export const fix = defineLoopTask({
 ```
 
 ```ts title="run.ts"
+import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { plan } from "./plan.ts";
 import { fix } from "./fix.ts";
 
 export const result = await defineWorkflow("fix-parser", [plan, fix]).start();
 result.unwrap();
-console.log(result.value(fix));
+reportValue(result.value(fix));
+// Example output: { files: [ 'src/parser.ts' ], round: 2 }
 ```
 
 <!-- check:run -->

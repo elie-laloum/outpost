@@ -252,6 +252,7 @@ export function openDiagnosticLease() {
 ```
 
 ```ts title="diagnose.ts"
+import { reportValue } from "./reporter.ts";
 import { openDiagnosticLease, vmSandboxProvider } from "./diagnostic-lease.ts";
 import { diagnoseSandbox } from "@elie-laloum/outpost";
 
@@ -261,7 +262,8 @@ try {
     transfers: true,
     sandboxProvider: vmSandboxProvider,
   });
-  console.log(report.hasFailures, report.checks);
+  reportValue(report.hasFailures, report.checks);
+  // Example output: false [ { id: "sandbox.node", status: "pass", … }, … ]
 } finally {
   await lease.release();
 }

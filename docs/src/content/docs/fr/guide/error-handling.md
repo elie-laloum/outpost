@@ -92,6 +92,7 @@ export const deploy = defineTask({
 ```
 
 ```ts title="run-deploy.ts"
+import { reportValue } from "./reporter.ts";
 import {
   defineWorkflow,
   WorkflowFailure,
@@ -105,7 +106,8 @@ try {
 } catch (error) {
   if (!(error instanceof WorkflowFailure)) throw error;
   const [first] = error.result.errors;
-  if (first instanceof OutpostError) console.log(first.code, first.details);
+  if (first instanceof OutpostError) reportValue(first.code, first.details);
+  // Example output: provider { status: 502 }
 }
 ```
 

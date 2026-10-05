@@ -70,6 +70,7 @@ Live input costs one provider command per instruction: a wrapper started with th
 Pass the provider to `dispatch()` or `createSandbox()` as with any sandbox.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 import { coder, repository } from "./outpost.config.ts";
@@ -85,7 +86,8 @@ const result = await dispatch({
     text: "Fix the failing test in src/date.test.ts and commit the fix.",
   },
 });
-console.log(result.branch, result.commits.length);
+reportValue(result.branch, result.commits.length);
+// Example output: outpost/job-… 1
 ```
 
 Before the first turn, Outpost installs the agent’s CLI at its pinned version if the image lacks it, on every remote sandbox. Set `bootstrap: false` when the image must provide it. The `sandboxReady` hook then installs the project’s dependencies ([Prepare the environment](../environment-setup/)).

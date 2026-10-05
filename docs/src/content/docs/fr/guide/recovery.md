@@ -21,6 +21,7 @@ Un worktree conservé est un worktree Git ordinaire sur sa branche : ouvrez-le, 
 [`recoveryDetails()`](../../reference/recoverydetails/) renvoie ce qu’Outpost a attaché à l’erreur : `branch`, `directory`, `commits`, `transcript` et `logReference` lorsqu’ils existent.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import { dispatch, OutpostError, recoveryDetails } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -32,7 +33,8 @@ try {
     branch: { mode: "named", name: "outpost/upgrade-deps" },
     brief: { text: "Upgrade the test dependencies and commit the change." },
   });
-  if (result.retainedDirectory) console.log("Kept:", result.retainedDirectory);
+  if (result.retainedDirectory) reportValue("Kept:", result.retainedDirectory);
+  // Example output: Kept: /project/.outpost/workspaces/…
 } catch (error) {
   console.error(recoveryDetails(error));
   if (error instanceof OutpostError) console.error(error.code, error.details);
@@ -128,6 +130,7 @@ export const transfer = process.env.TRANSFER!;
 ```
 
 ```ts title="verify-transfer.ts"
+import { reportValue } from "./reporter.ts";
 import { inspectRecovery, verifyRecoveryTransfer } from "@elie-laloum/outpost";
 import { repository, transfer } from "./recovery-target.ts";
 
@@ -137,7 +140,8 @@ export async function verifyTransfer() {
     git: true,
     locks: true,
   });
-  console.log(inventory.git?.workspaces);
+  reportValue(inventory.git?.workspaces);
+  // Example output: [ { branch: "outpost/fix-tests", … } ]
   const verification = await verifyRecoveryTransfer(transfer, {
     checksums: true,
     restorability: true,
@@ -149,6 +153,7 @@ export async function verifyTransfer() {
 ```
 
 ```ts title="restore.ts"
+import { reportValue } from "./reporter.ts";
 import { verifyTransfer } from "./verify-transfer.ts";
 import {
   planRecoveryRestore,
@@ -164,7 +169,8 @@ export const plan = await planRecoveryRestore({
   side: "incoming",
 });
 export const restored = await restoreRecoveryTransfer(plan);
-console.log(restored.directory, restored.commit);
+reportValue(restored.directory, restored.commit);
+// Example output: /project/.outpost/workspaces/… 8f3a21c…
 ```
 
 `inspectRecovery({ transporter })` liste les objets d’un [transport](../storage/) au lieu d’un dépôt local.
@@ -174,25 +180,24 @@ console.log(restored.directory, restored.commit);
 `archiveRecovery()` vérifie un transfert et le téléverse via un transport. `materializeRecoveryArchive()` le télécharge sur n’importe quelle machine et revérifie ses empreintes.
 
 ```ts
+import { reportValue } from "./reporter.ts";
 import {
   archiveRecovery,
   createLocalTransport,
   materializeRecoveryArchive,
 } from "@elie-laloum/outpost";
-
 const transporter = createLocalTransport({ directory: "/mnt/shared/outpost" });
-
 const reference = await archiveRecovery({
   transporter,
   directory: process.env.TRANSFER!,
 });
-
 const staging = await materializeRecoveryArchive({
   transporter,
   reference,
   destination: "/projects/transfer-copy",
 });
-console.log(staging);
+reportValue(staging);
+// Example output: /project/.outpost/recovery/run-1
 ```
 
 Conservez `reference` (une clé et une révision) pour retrouver l’archive. Passez `staging` comme `--directory` à `outpost recovery restore`, avec un clone du dépôt source.

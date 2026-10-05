@@ -52,6 +52,7 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="harness-review.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./review-agent.ts";
@@ -62,8 +63,10 @@ export const result = await dispatch({
   agent: reviewer,
   brief: { text: "List the exported functions that no test calls." },
 });
-console.log(result.text);
-console.log(result.usage);
+reportValue(result.text);
+// Example output: No test calls parseDate() or formatDate().
+reportValue(result.usage);
+// Example output: { input: 1200, cached: 0, output: 320 }
 ```
 
 Set `ANTHROPIC_API_KEY`, then run `node harness-review.ts`. `result.text` holds the model’s final answer. These tools only read files, so the agent cannot edit the repository.
@@ -160,6 +163,7 @@ export const agent = createAgent({
 ```
 
 ```ts title="observe-harness.ts"
+import { reportValue } from "./reporter.ts";
 import { dispatch, createObservationHub } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./observed-agent.ts";
@@ -171,7 +175,8 @@ await dispatch({
   brief: { text: "Explain how the build is configured." },
   observation: createObservationHub({ verbose: true }),
   observe(event) {
-    if (event.kind === "tool") console.log(event.name, event.input);
+    if (event.kind === "tool") reportValue(event.name, event.input);
+    // Example output: read_file { path: "README.md" }
     if (event.kind === "model-request") console.dir(event.request);
   },
 });
