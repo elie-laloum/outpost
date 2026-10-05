@@ -54,7 +54,7 @@ In order of emphasis:
 
 - Real, typechecked code snippets from the Guide and README.
 - The supported agents and sandbox providers listed above; OpenAI and Anthropic model providers for the built-in harness.
-- MIT license (`LICENSE`), security boundaries (`SECURITY.md`), changelog (`CHANGELOG.md`) and public roadmap (`docs/src/content/docs/project/roadmap.md`).
+- MIT license (`LICENSE`), security boundaries (`SECURITY.md`), changelog (`CHANGELOG.md`) and public roadmap (`roadmap.md`).
 - Engineering rigor that can be stated factually: CI on Windows, macOS and Linux, real Docker/Podman tests, package smoke tests, an 80% coverage floor, npm provenance.
 - Custom reference icons in `docs/src/assets/`. The Outpost logo, a warehouse glyph on a transparent background, is `docs/src/assets/outpost-logo.png`; `outpost-mark.png` is its trimmed display copy.
 

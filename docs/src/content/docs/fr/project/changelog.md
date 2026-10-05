@@ -1,8 +1,11 @@
 ---
 title: "Historique des versions"
-description: "Historique des versions — Outpost API"
+description: "Les nouveautés, corrections et changements de chaque version d’Outpost."
+pagefind: false
 sidebar:
-  order: 2
+  hidden: true
+prev: false
+next: false
 ---
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.

@@ -9,12 +9,10 @@ import type {
 const spaceLabels = {
   guide: ["Guide", "Guide"],
   reference: ["API", "API"],
-  project: ["Project", "Projet"],
 } as const;
 const spaceHomes = {
   guide: "guide/introduction/",
   reference: "reference/",
-  project: "project/changelog/",
 } as const;
 
 export function docsSpace(route: DocsRoute): DocsSpace {
@@ -22,7 +20,7 @@ export function docsSpace(route: DocsRoute): DocsSpace {
   const id = route.entry.id.replace(/^fr(\/|$)/, "");
   if (id.startsWith("guide/")) return "guide";
   if (id === "reference" || id.startsWith("reference/")) return "reference";
-  return "project";
+  return "changelog";
 }
 
 export function isFrench(route: DocsRoute): boolean {
@@ -36,7 +34,7 @@ export function docsHref(route: DocsRoute, path: string): string {
 
 export function spaceLinks(route: DocsRoute) {
   const french = isFrench(route) ? 1 : 0;
-  return (["guide", "reference", "project"] as const).map((space) => ({
+  return (["guide", "reference"] as const).map((space) => ({
     space,
     label: spaceLabels[space][french],
     href: docsHref(route, spaceHomes[space]),
@@ -71,6 +69,7 @@ export function currentLink(entries: SidebarEntry[]): SidebarLink | undefined {
 export function breadcrumbs(route: DocsRoute): Crumb[] {
   const space = docsSpace(route);
   if (space === "landing") return [];
+  if (space === "changelog") return [{ label: route.entry.data.title }];
   const home = spaceLinks(route).find((link) => link.space === space)!;
   const root = route.sidebar[0];
   if (space !== "guide" || !root || root.type !== "group")

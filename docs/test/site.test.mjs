@@ -1,6 +1,87 @@
 import { readFile, readdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
+for (const locale of ["", "fr/"]) {
+  for (const width of [320, 800, 1440]) {
+    test(`space buttons keep their size while fonts load and the active space changes (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      let releaseFonts;
+      let fonts = new Promise((resolve) => {
+        releaseFonts = resolve;
+      });
+      await page.route(/\.woff2?(?:\?|$)/, async (route) => {
+        await fonts;
+        await route.continue();
+      });
+      const buttons = page.locator(".docs-header .spaces a");
+      const measure = () =>
+        buttons.evaluateAll((links) =>
+          links.map((link) => {
+            const { x, width, height } = link.getBoundingClientRect();
+            return { x, width, height };
+          }),
+        );
+      const expectStable = (actual, expected) => {
+        expect(actual).toHaveLength(2);
+        expect(expected).toHaveLength(2);
+        for (let index = 0; index < actual.length; index++) {
+          for (const dimension of ["x", "width", "height"]) {
+            expect(
+              Math.abs(actual[index][dimension] - expected[index][dimension]),
+            ).toBeLessThan(0.25);
+          }
+        }
+      };
+      const loadFonts = async () => {
+        releaseFonts();
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise(requestAnimationFrame);
+        });
+      };
+      try {
+        await page.goto(`${locale}guide/introduction/`, {
+          waitUntil: "domcontentloaded",
+        });
+        let previous;
+        for (const destination of ["API", "Guide"]) {
+          await expect
+            .poll(() => page.evaluate(() => document.fonts.status))
+            .toBe("loading");
+          const before = await measure();
+          if (previous) expectStable(before, previous);
+          await loadFonts();
+          const after = await measure();
+          expectStable(after, before);
+          previous = after;
+          fonts = new Promise((resolve) => {
+            releaseFonts = resolve;
+          });
+          const path =
+            destination === "API" ? "reference/" : "guide/introduction/";
+          await Promise.all([
+            page.waitForURL(new RegExp(`/${locale}${path}$`), {
+              waitUntil: "domcontentloaded",
+            }),
+            page
+              .locator(".docs-header .spaces")
+              .getByRole("link", { name: destination, exact: true })
+              .click({ noWaitAfter: true }),
+          ]);
+        }
+        expectStable(await measure(), previous);
+        await loadFonts();
+        expectStable(await measure(), previous);
+      } finally {
+        releaseFonts();
+        await page.unrouteAll({ behavior: "ignoreErrors" });
+      }
+    });
+  }
+}
+
 for (const [locale, title, reference] of [
   ["", "Your first task", "API"],
   ["fr/", "Votre première tâche", "API"],
@@ -12,6 +93,33 @@ for (const [locale, title, reference] of [
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
     await expect(page.locator(".docs-navigation summary h2")).toHaveCount(12);
     await expect(page.locator(".docs-navigation details[open]")).toHaveCount(1);
+    const spacing = await page
+      .locator(".docs-navigation")
+      .evaluate((navigation) => {
+        const sections = [...navigation.querySelectorAll(":scope > section")];
+        const gaps = sections
+          .slice(1)
+          .map(
+            (section, index) =>
+              section.getBoundingClientRect().top -
+              sections[index].getBoundingClientRect().bottom,
+          );
+        const links = [...navigation.querySelectorAll("details[open] a")];
+        return {
+          groupGap: Math.max(...gaps),
+          linkGap: Math.max(
+            ...links
+              .slice(1)
+              .map(
+                (link, index) =>
+                  link.getBoundingClientRect().top -
+                  links[index].getBoundingClientRect().bottom,
+              ),
+          ),
+        };
+      });
+    expect(spacing.groupGap).toBeLessThanOrEqual(8);
+    expect(spacing.linkGap).toBeLessThanOrEqual(2);
     const agents = page.locator(".docs-navigation details").filter({
       has: page.getByRole("heading", { name: "Agents", exact: true }),
     });
@@ -45,124 +153,175 @@ for (const [locale, title, reference] of [
   });
 }
 
-for (const [locale, heading, start, copied, beat] of [
+for (const [locale, heading, start, copied] of [
   [
     "",
-    "Run coding agents",
-    "Get started",
+    "Your agents write code.",
+    "Run your first task",
     "Copy the install command",
-    "Resume",
   ],
   [
     "fr/",
-    "Exécutez des agents de code",
-    "Commencer",
+    "Vos agents codent.",
+    "Lancer ma première tâche",
     "Copier la commande d’installation",
-    "Reprise",
   ],
 ]) {
-  test(`landing demos and copy work (${locale || "en"})`, async ({
+  test(`home explains a task with working examples, a canvas and useful links (${locale || "en"})`, async ({
     page,
     context,
   }) => {
+    await page.addInitScript(() => {
+      window.homeRenderErrors = [];
+      window.addEventListener("error", (event) => {
+        window.homeRenderErrors.push(event.message);
+      });
+    });
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto(locale);
-    const brand = page.locator(".docs-header .brand");
-    await expect(brand).toHaveAttribute("href", `/outpost/${locale}`);
-    await expect(brand.locator(".mark")).toBeVisible();
-    await expect(page.locator(".docs-header nav a").first()).toHaveAttribute(
-      "href",
-      `/outpost/${locale}guide/introduction/`,
-    );
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       heading,
     );
-    const hero = page.locator(".landing .hero");
-    await expect(hero.locator(".hero-excerpt code").first()).toContainText(
-      "dispatch({",
-    );
-    // The ticker repeats its list for the loop; only the first one is announced.
-    await expect(
-      hero.locator(".hero-evidence ul:not([aria-hidden]) li"),
-    ).toHaveCount(4);
-    await expect(hero.locator(".hero-evidence ul")).toHaveCount(2);
-    const useCases = page.locator(".landing .use-cases a");
-    await expect(useCases).toHaveCount(3);
-    await expect(useCases.first()).toHaveAttribute(
+    await expect(page.locator(".docs-header .brand")).toHaveAttribute(
       "href",
-      `/outpost/${locale}guide/fix-failing-ci/`,
+      `/outpost/${locale}`,
     );
-    const demo = page.locator("outpost-demo");
-    await demo.scrollIntoViewIfNeeded();
-    await expect(demo).toHaveAttribute("data-state", "playing");
-    const toggle = demo.locator("[data-toggle]");
-    await toggle.click();
-    await expect(demo).toHaveAttribute("data-state", "stopped");
-    await expect(demo.locator("button[data-beat]")).toHaveCount(4);
-    await demo.getByRole("button", { name: beat, exact: true }).click();
-    await expect(
-      demo.getByRole("button", { name: beat, exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
-    await expect(demo).toHaveAttribute("data-beat", "3");
-    await expect(demo.locator(".demo-summary li")).toHaveCount(4);
-    // The pains run their own carousel, one bay below the drawing.
-    const problem = page.locator(".landing .problem");
-    await problem.scrollIntoViewIfNeeded();
-    const pager = problem.locator(".pain-pager button");
-    await expect(pager).toHaveCount(4);
-    await pager.nth(2).click();
-    await expect(problem).toHaveAttribute("data-beat", "2");
-    await expect(pager.nth(2)).toHaveAttribute("aria-pressed", "true");
-    await expect(problem.locator('[data-pain="2"]')).toBeVisible();
-    await expect(problem.locator('[data-pain="0"]')).toBeHidden();
-    // It holds while a reader is on the bay.
-    await expect(problem).toHaveAttribute("data-hold", "");
-    await page.getByRole("button", { name: copied }).click();
+    const hero = page.locator(".landing .hero");
+    await expect(hero.locator(".overview a")).toHaveCount(3);
+    await expect(hero.locator(".overview a > svg:first-child")).toHaveCount(3);
+    const install = hero.locator("outpost-install");
+    await expect(install.getByRole("tab")).toHaveCount(4);
+    await install.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npm install @elie-laloum/outpost",
     );
-    // The copy button follows the selected package manager.
-    const install = page.locator(".landing .install");
-    await expect(install.getByRole("tab")).toHaveCount(4);
     await install.getByRole("tab", { name: "pnpm" }).click();
-    await expect(install.getByRole("tab", { name: "pnpm" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    await page.getByRole("button", { name: copied }).click();
+    await install.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "pnpm add @elie-laloum/outpost",
     );
-    await expect(page.locator(".landing .boundary")).toHaveCount(3);
-    const verdict = page.locator("outpost-verdict");
-    await verdict.scrollIntoViewIfNeeded();
-    await expect(verdict.locator(".pane.code")).toContainText(
-      "defineJsonResponse({",
+    await install.getByRole("tab", { name: "pnpm" }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(install.getByRole("tab", { name: "bun" })).toHaveAttribute(
+      "aria-selected",
+      "true",
     );
-    await expect(verdict).toHaveAttribute("data-step", "3", { timeout: 5000 });
-    await expect(verdict.locator(".value code")).toContainText(
-      "approved: false",
+
+    const tabs = page.locator(".home-content .code-tabs");
+    await expect(tabs.locator(".code-tab")).toHaveText([
+      "outpost.config.ts",
+      "task.ts",
+    ]);
+    await expect(tabs.locator(".code-tab-panel").first()).toContainText(
+      'authentication: "account"',
     );
-    await hero.getByRole("link", { name: start }).click();
+    await tabs.locator(".code-tab").last().click();
+    await expect(tabs.locator(".code-tab-panel").last()).toBeVisible();
+    await expect(tabs.locator(".code-tab-panel").last()).toContainText(
+      "dispatch({",
+    );
+    expect(
+      await page
+        .locator(".home-content pre code")
+        .evaluateAll((blocks) =>
+          blocks.every(
+            (block) => block.textContent.trimEnd().split("\n").length <= 20,
+          ),
+        ),
+    ).toBe(true);
+    const canvas = page.locator(".home-content [data-canvas]");
+    await expect(canvas.locator(".canvas-node")).toHaveCount(4);
+    await canvas.locator('[data-zoom="fit"]').click();
+    await expect(canvas.locator(".canvas-link")).toHaveCount(3);
+    const scale = await canvas.locator(".canvas-scale").textContent();
+    await canvas.locator('[data-zoom="in"]').click();
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
+    const features = page.locator(".home-content a.feature-cell");
+    await expect(features).toHaveCount(6);
+    await expect(features.locator(".feature-icon svg")).toHaveCount(6);
+    await expect(features.nth(3)).toHaveAttribute(
+      "href",
+      "guide/fix-failing-ci/",
+    );
+    expect(await page.evaluate(() => window.homeRenderErrors)).toEqual([]);
+    await hero.getByRole("link", { name: start, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
-}
 
-test("landing comparison stays still with reduced motion", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("");
-  const demo = page.locator("outpost-demo");
-  await expect(demo.locator("[data-toggle]")).toBeHidden();
-  await expect(demo).not.toHaveAttribute("data-state", "playing");
-  await demo.getByRole("button", { name: "Order", exact: true }).click();
-  await expect(demo).toHaveAttribute("data-drift", "");
-  await expect(
-    demo.locator('[data-lane="model"] .step').nth(3),
-  ).toHaveAttribute("data-note", "early");
-  const verdict = page.locator("outpost-verdict");
-  await verdict.scrollIntoViewIfNeeded();
-  await expect(verdict).toHaveAttribute("data-step", "3");
-});
+  for (const width of [320, 390, 800, 1440, 2560]) {
+    test(`home remains readable and its actions share the width (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto(locale);
+      for (const theme of ["light", "dark"]) {
+        await page.evaluate(
+          (value) => (document.documentElement.dataset.theme = value),
+          theme,
+        );
+        const dimensions = await page.evaluate(() => {
+          const content = document
+            .querySelector(".rail")
+            .getBoundingClientRect();
+          const notice = document
+            .querySelector(".home-content .starlight-aside")
+            .getBoundingClientRect();
+          const actions = [...document.querySelectorAll(".next-actions a")].map(
+            (link) => link.getBoundingClientRect().width,
+          );
+          return {
+            content: { left: content.left, right: content.right },
+            notice: { left: notice.left, right: notice.right },
+            actions,
+            overflow: document.documentElement.scrollWidth > window.innerWidth,
+            cards: [...document.querySelectorAll(".overview a")].map((card) => {
+              const box = card.getBoundingClientRect();
+              return {
+                left: box.left,
+                right: box.right,
+                top: box.top,
+                bottom: box.bottom,
+              };
+            }),
+          };
+        });
+        expect(dimensions.overflow).toBe(false);
+        for (const card of dimensions.cards) {
+          expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
+          expect(card.right).toBeLessThanOrEqual(dimensions.content.right);
+        }
+        if (width <= 560) {
+          for (let index = 1; index < dimensions.cards.length; index++) {
+            expect(dimensions.cards[index].top).toBeGreaterThanOrEqual(
+              dimensions.cards[index - 1].bottom,
+            );
+          }
+        }
+        expect(
+          Math.abs(dimensions.notice.left - dimensions.content.left),
+        ).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(dimensions.notice.right - dimensions.content.right),
+        ).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(dimensions.actions[0] - dimensions.actions[1]),
+        ).toBeLessThanOrEqual(1);
+        const row = page
+          .locator(".home-content .bay-row[data-bay=split]")
+          .first();
+        const say = await row.locator(".bay-say").boundingBox();
+        const code = await row.locator(".code-tabs").boundingBox();
+        if (width > 1024)
+          expect(code.x).toBeGreaterThanOrEqual(say.x + say.width - 1);
+        if (width <= 1024)
+          expect(code.y).toBeGreaterThanOrEqual(say.y + say.height - 1);
+      }
+      await page.locator(".next-actions a").first().click();
+      await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
+    });
+  }
+}
 
 test("language switch retains the new guide page", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -183,14 +342,14 @@ test("documentation section styles leave the landing untouched", async ({
 }) => {
   await page.goto("");
   const primary = page.locator(".landing .hero .button.primary");
-  await expect(primary).toHaveText(/Get started/);
+  await expect(primary).toHaveText(/Run your first task/);
   const colors = await primary.evaluate((element) => {
     const style = getComputedStyle(element);
     return [style.color, style.backgroundColor];
   });
   expect(colors[0]).not.toBe(colors[1]);
   const code = await page
-    .locator(".landing .install code:not([hidden])")
+    .locator(".landing outpost-install code:not([hidden])")
     .evaluate((element) => getComputedStyle(element).paddingTop);
   expect(parseFloat(code)).toBeGreaterThan(8);
 });
@@ -227,6 +386,85 @@ test("navigation bar links the source and the released version", async ({
     Math.round(sidebar.x + sidebar.width),
   );
 });
+
+for (const locale of ["", "fr/"]) {
+  for (const width of [320, 800, 1440]) {
+    test(`version is the only changelog entry point and the roadmap is retired (${locale || "en"}, ${width}px)`, async ({
+      page,
+      request,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const route of [
+        "",
+        "guide/first-request/",
+        "reference/dispatch/",
+        "project/changelog/",
+      ]) {
+        await page.goto(`${locale}${route}`);
+        await expect(page.locator(".docs-header .spaces a")).toHaveText([
+          "Guide",
+          "API",
+        ]);
+        const links = page.locator(
+          'a[href$="/project/changelog/"]:not(.language)',
+        );
+        await expect(links).toHaveCount(1);
+        await expect(page.locator(".docs-header .version")).toBeVisible();
+        await expect(links).toHaveAttribute(
+          "href",
+          `/outpost/${locale}project/changelog/`,
+        );
+        await expect(page.locator('a[href*="/project/roadmap/"]')).toHaveCount(
+          0,
+        );
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth,
+          ),
+        ).toBe(true);
+      }
+      await page.goto(locale);
+      const version = page.locator(".docs-header .version");
+      const button = await version.boundingBox();
+      const cell = await page.locator(".docs-header .release").boundingBox();
+      expect(Math.abs(button.height - cell.height)).toBeLessThan(2);
+      expect(Math.abs(button.width - cell.width)).toBeLessThan(2);
+      for (const theme of ["light", "dark"]) {
+        await page.evaluate(
+          (value) => (document.documentElement.dataset.theme = value),
+          theme,
+        );
+        await page.mouse.move(0, 0);
+        const initial = await version.evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        );
+        await page.mouse.move(button.x + button.width / 2, button.y + 2);
+        expect(
+          await version.evaluate((element) => element.matches(":hover")),
+        ).toBe(true);
+        await expect
+          .poll(() =>
+            version.evaluate(
+              (element) => getComputedStyle(element).backgroundColor,
+            ),
+          )
+          .not.toBe(initial);
+      }
+      await page.locator(".docs-header .version").click();
+      await expect(page).toHaveURL(new RegExp(`/${locale}project/changelog/$`));
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+        locale ? "Historique des versions" : "Changelog",
+      );
+      await expect(page.locator(".crumbs")).not.toContainText(
+        locale ? "Projet" : "Project",
+      );
+      await expect(page.locator(".docs-footer .pager")).toHaveCount(0);
+      await expect(page.locator("[data-pagefind-body]")).toHaveCount(0);
+      const removed = await request.get(`${locale}project/roadmap/`);
+      expect(removed.status()).toBe(404);
+    });
+  }
+}
 
 test("short request snippet copies exactly with the keyboard", async ({
   page,
@@ -604,7 +842,7 @@ for (const locale of ["", "fr/"]) {
     let checked = 0;
     for (const file of await readdir(root, { recursive: true })) {
       if (
-        !file.endsWith("/index.html") ||
+        !(file === "index.html" || file.endsWith("/index.html")) ||
         file.startsWith("fr/") !== Boolean(locale)
       )
         continue;
@@ -613,7 +851,7 @@ for (const locale of ["", "fr/"]) {
       await page.goto(file.replace(/index\.html$/, ""));
       const results = await page.evaluate(() => {
         const frame = document
-          .querySelector(".docs-pane")
+          .querySelector(".docs-pane, .landing .home-content")
           .getBoundingClientRect();
         return [...document.querySelectorAll(".starlight-aside")].map(
           (aside) => {

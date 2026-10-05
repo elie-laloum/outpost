@@ -245,7 +245,7 @@ export function iconForTitle(title) {
 }
 
 export function icon(name) {
-  const markup = shapes[name] ?? shapes.compass;
+  const markup = iconMarkup(name);
   const children = [...markup.matchAll(/<(\w+)([^>]*?)\/>/g)].map(
     ([, tagName, attributes]) => ({
       type: "element",
@@ -277,4 +277,8 @@ export function icon(name) {
     },
     children,
   };
+}
+
+export function iconMarkup(name) {
+  return shapes[name] ?? shapes.compass;
 }

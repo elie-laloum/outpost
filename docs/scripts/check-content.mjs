@@ -36,7 +36,7 @@ for (const name of files) {
     `Unfinished or stale content: ${name}`,
   );
   assert.ok(content.length > 150, `Empty page: ${name}`);
-  if (/^(fr\/)?guide\//.test(name.replaceAll("\\", "/"))) {
+  if (/^(fr\/)?(?:guide\/|index\.md$)/.test(name.replaceAll("\\", "/"))) {
     assert.doesNotMatch(
       content,
       /\.mts\b/,

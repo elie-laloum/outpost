@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --force",
     "build": "astro build --force",
     "preview": "astro preview",
     "check": "node scripts/check-content.mjs && node --test scripts/reference-model.test.mjs scripts/rehype-bays.test.mjs",

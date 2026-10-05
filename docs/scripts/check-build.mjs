@@ -13,12 +13,17 @@ const inventory = new Set(
   ),
 );
 const files = [...inventory].filter((file) => file.endsWith(".html"));
+for (const locale of ["", "fr/"])
+  assert.ok(
+    !inventory.has(`${locale}project/roadmap/index.html`),
+    "Roadmap must remain in the repository only",
+  );
 const pages = new Map();
 let guideCards = 0;
 for (const file of files) {
   const $ = load(await readFile(resolve(root, file), "utf8"));
   const redirect = $("meta[http-equiv=refresh]").length > 0;
-  if (/^(fr\/)?guide\//.test(file) && !redirect) {
+  if (/^(fr\/)?(?:guide\/|index\.html$)/.test(file) && !redirect) {
     assert.ok(
       $(".sl-markdown-content").text().trim().length > 100,
       `Guide content failed to render: ${file}`,
@@ -27,7 +32,9 @@ for (const file of files) {
       resolve(
         root,
         "../src/content/docs",
-        file.replace(/\/index\.html$/, ".md"),
+        file
+          .replace(/^(fr\/)?index\.html$/, "$1index.md")
+          .replace(/\/index\.html$/, ".md"),
       ),
       "utf8",
     );
@@ -94,6 +101,41 @@ for (const file of files) {
         file.startsWith("fr/") ? "en" : "fr",
         `Missing language switch: ${file}`,
       );
+    if (!redirect) {
+      assert.deepEqual(
+        $(".docs-header .spaces a")
+          .toArray()
+          .map((link) => $(link).text().trim()),
+        ["Guide", "API"],
+        `Unexpected documentation space: ${file}`,
+      );
+      const changelogLinks = $("a[href]").filter(
+        (_, link) =>
+          /\/project\/changelog\/$/.test($(link).attr("href")) &&
+          !$(link).hasClass("language"),
+      );
+      assert.equal(
+        changelogLinks.length,
+        1,
+        `Changelog must have only its version entry point: ${file}`,
+      );
+      assert.ok(
+        changelogLinks.first().is(".docs-header .version"),
+        `Changelog link is outside the header version button: ${file}`,
+      );
+      if (/^(fr\/)?project\/changelog\/index\.html$/.test(file)) {
+        assert.equal(
+          $("[data-pagefind-body]").length,
+          0,
+          `Changelog must be excluded from search: ${file}`,
+        );
+        assert.equal(
+          $(".docs-footer .pager").length,
+          0,
+          `Changelog must have no pagination: ${file}`,
+        );
+      }
+    }
   }
   pages.set(file, {
     ids: new Set(

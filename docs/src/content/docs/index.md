@@ -1,14 +1,23 @@
 ---
 title: Outpost
-description: "Run coding agents from your TypeScript. Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox of your own, on a Git branch of your own."
+description: "Turn fixes, code reviews and maintenance into repeatable agent workflows. Outpost manages sandboxes and Git workspaces; you build the steps, checks and approvals in TypeScript."
+tableOfContents: false
 landing:
-  headline:
-    - "Run coding agents"
-    - "from your TypeScript."
-  tagline: "Run an agent, own its environment, compose a workflow."
-  lead: "Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox of your own, on a Git branch of your own. Your code decides the order, runs the checks and handles the recovery; the agent only does the part that needs judgment."
-  hero:
-    caption: "One task from end to end: a sandbox, a named branch, the agent’s answer and its commits."
+  category: "Coding agent orchestration, in TypeScript"
+  headline: ["Your agents write code.", "You stay in control."]
+  lead: "Turn fixes, code reviews and maintenance into repeatable workflows. Outpost handles agent sandboxes and Git workspaces; you connect the steps, checks and approvals in TypeScript."
+  primary: { label: "Run your first task", href: "guide/setup/" }
+  secondary: { label: "Explore the API", href: "reference/" }
+  overview:
+    - title: "The agents you already use"
+      text: "Work with Codex, Claude Code or another supported agent. Choose the right one for each task."
+      href: "guide/choose-an-agent/"
+    - title: "The environment that fits"
+      text: "Run tasks in Docker, Podman or a supported cloud sandbox."
+      href: "guide/choose-a-sandbox/"
+    - title: "Changes you can review"
+      text: "Get a Git branch, the agent’s commits and its answer. Decide what to integrate."
+      href: "guide/repository-and-branch/"
   install:
     managers: "Package manager"
     commands:
@@ -18,145 +27,117 @@ landing:
       - { label: "pnpm", command: "pnpm add @elie-laloum/outpost" }
     copy: "Copy the install command"
     copied: "Copied"
-    prerequisites: "You need Node.js 24+."
-  primary: { label: "Get started", href: "guide/setup/" }
-  secondary: { label: "Read the guide", href: "guide/introduction/" }
-  facts: "MIT"
-  evidence:
-    - "Docker, Podman or cloud sandboxes"
-    - "A named Git branch per task"
-    - "Typed answers your schema validates"
-    - "Runs that resume from a checkpoint"
-  reference: { label: "API reference", href: "reference/" }
-  useCases:
-    title: "What you can run"
-    text: "Each one is a guide page: the code, the contracts it uses and what comes back."
-    link: { label: "Your first task", href: "guide/first-request/" }
-    entries:
-      - title: "Fix a failing CI build"
-        text: "An agent fixes the tests on a branch while Outpost reruns them after each attempt and feeds the failures back."
-        href: "guide/fix-failing-ci/"
-      - title: "Review a pull request on demand"
-        text: "A label on a pull request queues an agent review, and your code posts the typed verdict it returns."
-        href: "guide/review-on-label/"
-      - title: "Nightly maintenance"
-        text: "Every weekday night, an agent updates dependencies on a dated branch and leaves a typed report for the morning."
-        href: "guide/nightly-maintenance/"
-  demo:
-    title: "One job, two orchestrators"
-    pause: "Pause the comparison"
-    replay: "Replay the comparison"
-    beatsLabel: "Compare"
-    beats: ["Steps", "Context", "Order", "Resume"]
-    steps: ["Branch", "Fix", "Verify", "Integrate"]
-    owners: { model: "model", code: "code", agent: "agent" }
-    notes: { early: "too early", reread: "reread", restored: "restored" }
-    totalLabel: "Total time"
-    interrupted: "Interrupted"
-    model:
-      title: "The model orchestrates"
-      context: "Context"
-      captions:
-        - "The model interprets every step, even the certain ones."
-        - "Every step adds to the conversation the model rereads."
-        - "The model decides the order as it goes, and can drift."
-        - "After an interruption, the model rereads everything."
-    code:
-      title: "Your code orchestrates"
-      context: "Context"
-      captions:
-        - "Your code branches, verifies and integrates. The agent only fixes."
-        - "The agent starts from its brief, nothing more."
-        - "The order is a task graph, fixed before the run."
-        - "Finished steps come back from the checkpoint."
-  problem:
-    title: "Models are asked to do everything"
-    text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines hand it the steps, the order and the recovery too — three things code does better than it does."
-    link: { label: "How it works", href: "guide/how-it-works/" }
-    answerLabel: "With Outpost"
-    summaryLabel: "What the model is handed, step by step"
-    rows:
-      - pain: "Everything is interpreted"
-        detail: "Even a branch name or a test command goes through the model, every time."
-        answer: "Code runs the certain steps. The agent only gets what needs judgment."
-      - pain: "The context keeps growing"
-        detail: "Each step adds to one conversation that the model rereads."
-        answer: "Each agent task starts from its own brief, in its own sandbox."
-      - pain: "The orchestrator drifts"
-        detail: "When a model decides the order, it can skip, repeat or reorder steps."
-        answer: "The task graph is TypeScript, validated before the run. Typed responses have to satisfy their schema."
-      - pain: "Resuming means re-interpreting"
-        detail: "After a crash or a spent quota, the model rebuilds its state from a transcript."
-        answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
-  typed:
-    title: "The agent answers in prose. Your code gets a typed value."
-    text: "Describe the answer you want with a Zod schema. Outpost finds the tagged block in whatever the agent replies, checks it against your schema and hands back `result.value`, typed from it. And when the answer does not fit, it is not yours to patch: Outpost sends the agent back to fix it, in the same conversation. If that fails too, the run throws rather than let bad data through."
-    link: { label: "Typed responses", href: "guide/typed-responses/" }
-    secondary:
-      { label: "Review a pull request", href: "guide/review-on-label/" }
-    declareLabel: "Your code asks for a typed answer"
-    answerLabel: "The agent replies"
-    answerText: "I reviewed the last commit. The fix is correct, but there is no regression test for it."
-    answerTag: '<verdict>{"approved": false, "reasons": ["no regression test"]}</verdict>'
-    valueLabel: "Your code receives result.value"
-    value: '{ approved: false, reasons: ["no regression test"] }'
-  runtimes:
-    title: "Any agent, any sandbox"
-    text: "Swap either in one line; the workflow stays the same. You declare how each agent authenticates, and an isolated sandbox never falls back to your host."
-    agentsLabel: "Agents"
-    sandboxesLabel: "Sandboxes"
-    experimental: "Experimental"
-    agents:
-      - { name: "Claude Code", href: "guide/claude-code/" }
-      - { name: "Codex", href: "guide/codex/" }
-      - { name: "Kimi Code", href: "guide/kimi-code/" }
-      - { name: "Copilot CLI", href: "guide/copilot-cli/" }
-      - { name: "Antigravity", href: "guide/antigravity/" }
-      - { name: "Outpost harness", href: "guide/harness/" }
-    sandboxes:
-      - { name: "Docker", href: "guide/containers/" }
-      - { name: "Podman", href: "guide/containers/#podman" }
-      - { name: "Vercel", href: "guide/cloud-sandboxes/#vercel-sandbox" }
-      - { name: "Daytona", href: "guide/cloud-sandboxes/#daytona-sandbox" }
-      - { name: "Host process", href: "guide/host-process/" }
-      - { name: "Firecracker", href: "guide/firecracker/" }
-    link: { label: "Choose an agent", href: "guide/choose-an-agent/" }
-  boundaries:
-    title: "Where Outpost is not the answer"
-    text: "Outpost takes care of everything around the agent. When that is not your problem to solve, something smaller is the better choice."
-    entries:
-      - lead: "One agent session is enough"
-        text: "If the whole job fits in one conversation, run the agent CLI directly. Outpost earns its place when the branch, the checks, the order and the resume are yours."
-      - lead: "A single CI step"
-        text: "A workflow file that runs an agent and stops will cost you less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint even when the worker restarts."
-      - lead: "You only want to read"
-        text: "A question about the code produces no branch, no commits and nothing for a check to gate. Run the agent in your own terminal and keep the answer."
-    link: { label: "Job queues and workers", href: "guide/job-queues/" }
-    action: { label: "Start with the setup guide", href: "guide/setup/" }
+    failed: "Copy failed. Select the command to copy it."
+    prerequisites: "Node.js 24+ · Git · Docker for the example below"
+  next:
+    title: "Give your next task to an agent."
+    text: "Install Outpost, build your image and run a first fix from a TypeScript script."
+    guide: { label: "Run your first task", href: "guide/setup/" }
+    reference: { label: "Explore the API", href: "reference/" }
   footer:
     documentation:
       title: "Documentation"
       links:
         - { label: "Guide", href: "guide/introduction/" }
         - { label: "API", href: "reference/" }
-        - { label: "Changelog", href: "project/changelog/" }
-        - { label: "Roadmap", href: "project/roadmap/" }
     source:
-      title: "Source"
+      title: "Project"
       links:
         - {
             label: "GitLab",
             href: "https://gitlab.elielaloum.com/elielaloum/outpost",
           }
-        - {
-            label: "GitHub mirror",
-            href: "https://github.com/elie-laloum/outpost",
-          }
+        - { label: "GitHub", href: "https://github.com/elie-laloum/outpost" }
         - {
             label: "npm",
             href: "https://www.npmjs.com/package/@elie-laloum/outpost",
           }
-    license: "Released under the MIT License."
+    license: "MIT license"
 ---
 
-Outpost runs coding agents in a sandbox of your own, from workflows you write in TypeScript. Code decides the order, runs the checks and handles the recovery; the agent gets the part that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
+## Your first fix, in two TypeScript files
+
+Give Codex the failing tests and ask it to make a fix. Outpost prepares its workspace in a Docker sandbox and keeps its commits on a separate branch. You can carry on working in your current checkout while the agent works on its task.
+
+Save both files in your repository. Run `node task.ts`, then review the answer and commits on the returned branch. Use a new branch name for each independent task.
+
+[Your first task](guide/first-request/) explains the result. The [API](reference/dispatch/) describes the full contract.
+
+<!-- tabs -->
+
+```ts title="outpost.config.ts"
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+export const coder = createAgent({
+  harness: createCodexHarness({ authentication: "account" }),
+});
+export const sandboxProvider = createDockerSandboxProvider({
+  image: "outpost:dev",
+});
+export const repository = process.cwd();
+```
+
+```ts title="task.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-tests" },
+  brief: { text: "Fix the failing tests, run them and commit the fix." },
+});
+
+console.log(result.text);
+console.log(result.branch, result.commits);
+```
+
+:::note[Before running the example]
+Follow [Installation](guide/setup/) to build `outpost:dev`, prepare the agent’s login and set `"type": "module"` in your `package.json`. Node.js 24 runs these `.ts` files directly.
+:::
+
+## Every task gets its own workspace
+
+Outpost takes care of preparing the Git workspace, opening the sandbox and running the agent. When `dispatch()` finishes, it closes the sandbox it opened. You keep the named branch and its commits, ready to review and integrate when you choose.
+
+<!-- canvas -->
+
+- **Your request**: Choose the agent, repository and sandbox in TypeScript.
+  - Task
+  - → **Workspace and sandbox**: prepare
+- **Workspace and sandbox**: Outpost creates the working checkout and opens the execution environment.
+  - Task
+  - → **Agent at work**: run
+- **Agent at work**: The agent reads the brief, edits files and runs commands.
+  - Task
+  - → **Result to review**: collect
+- **Result to review**: Read the answer, commits and usage. Decide what to integrate.
+  - Task
+
+The agent’s instructions do not enforce a successful test run. Add a [verification step](guide/verification-loops/) when passing checks must determine whether the work is accepted. [How Outpost runs a task](guide/how-it-works/) explains resource ownership.
+
+## Make agents part of how you work
+
+Keep using a supported CLI you know, try a different agent for a particular task, or build your own loop with the Outpost harness. Choose where it runs independently. Each provider’s guide helps you find the right environment and prepare it.
+
+<!-- features -->
+
+- [**Coding agents**](guide/choose-an-agent/): Configure Codex, Claude Code, Kimi Code, Copilot CLI or Antigravity.
+- [**Sandboxes**](guide/choose-a-sandbox/): Choose local containers or a supported cloud provider for your task.
+- [**Your own agent loop**](guide/harness/): Combine a model provider, sandbox tools and explicit limits.
+
+## Automate the work that keeps coming back
+
+A failing CI build, a pull request to review, dependencies to update: turn recurring work into a workflow you can run again. Connect tasks, run independent steps in parallel and decide where checks and human approval belong. The [first workflow](guide/first-workflow/) guide shows how to build on one agent task.
+
+Start with a workflow for the work on your team’s plate:
+
+<!-- features -->
+
+- [**Fix a failing CI build**](guide/fix-failing-ci/): Feed test failures back to an agent and check each new attempt.
+- [**Review a pull request**](guide/review-on-label/): Queue a review from a pull request label and receive a typed verdict.
+- [**Run nightly maintenance**](guide/nightly-maintenance/): Schedule dependency updates on dated branches and collect a report.
+
+Add [typed responses](guide/typed-responses/) when another task needs structured data, [approval gates](guide/approvals/) when a step needs a person’s decision, or [durable runs](guide/durable-runs/) when the workflow must resume after an interruption.

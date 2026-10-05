@@ -1,0 +1,154 @@
+---
+import type { InstallCommandProps as Props } from "./install-command.types.ts";
+const { install } = Astro.props;
+---
+
+<outpost-install data-copied={install.copied} data-failed={install.failed}>
+  <div class="managers" role="tablist" aria-label={install.managers}>
+    {install.commands.map(({ label }, index) => (
+      <button type="button" role="tab" id={`install-${label}`} aria-controls={`install-${label}-command`} aria-selected={index === 0 ? "true" : "false"} tabindex={index === 0 ? 0 : -1}>{label}</button>
+    ))}
+  </div>
+  <div class="command">
+    {install.commands.map(({ label, command }, index) => (
+      <code role="tabpanel" id={`install-${label}-command`} aria-labelledby={`install-${label}`} hidden={index > 0}>{command}</code>
+    ))}
+    <button type="button" class="copy" aria-label={install.copy} title={install.copy}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11"/><path d="M5 15H4V4h11v1"/></svg>
+    </button>
+  </div>
+  <span class="status" role="status" aria-live="polite"></span>
+</outpost-install>
+
+<script>
+  class OutpostInstall extends HTMLElement {
+    connectedCallback() {
+      if (this.hasAttribute("data-ready")) return;
+      this.dataset.ready = "";
+      const tabs = [...this.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+      const panels = [...this.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+      const select = (index: number, focus: boolean) => {
+        tabs.forEach((tab, position) => {
+          tab.setAttribute("aria-selected", String(position === index));
+          tab.tabIndex = position === index ? 0 : -1;
+          panels[position].hidden = position !== index;
+        });
+        if (focus) tabs[index].focus();
+      };
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => select(index, false));
+        tab.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          const step = event.key === "ArrowLeft" ? -1 : 1;
+          event.preventDefault();
+          select((index + step + tabs.length) % tabs.length, true);
+        });
+      });
+      const copy = this.querySelector<HTMLButtonElement>(".copy");
+      const status = this.querySelector<HTMLElement>(".status");
+      copy?.addEventListener("click", async () => {
+        const command = panels
+          .find((panel) => !panel.hidden)
+          ?.textContent?.trim();
+        if (!command || !status) return;
+        try {
+          await navigator.clipboard.writeText(command);
+          status.textContent = this.dataset.copied ?? "";
+        } catch {
+          status.textContent = this.dataset.failed ?? "";
+        }
+      });
+    }
+  }
+  if (!customElements.get("outpost-install"))
+    customElements.define("outpost-install", OutpostInstall);
+</script>
+
+<style>
+  outpost-install {
+    display: block;
+    margin-top: 1.5rem;
+    border: 1px solid var(--docs-line);
+    background: var(--docs-code-bg);
+  }
+  .managers {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--docs-line);
+  }
+  .managers button {
+    flex: 1;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.75rem;
+    border: 0;
+    border-right: 1px solid var(--docs-line);
+    background: none;
+    color: var(--sl-color-gray-3);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .managers button:last-child {
+    border-right: 0;
+  }
+  .managers button:hover,
+  .managers button[aria-selected="true"] {
+    color: var(--sl-color-white);
+    background: var(--sl-color-gray-6);
+  }
+  .command {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+  }
+  code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 0.85rem 1rem;
+    color: var(--sl-color-white);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    scrollbar-width: thin;
+  }
+  code[hidden] {
+    display: none;
+  }
+  .copy {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.75rem;
+    border: 0;
+    border-left: 1px solid var(--docs-line);
+    background: none;
+    color: var(--sl-color-gray-3);
+    cursor: pointer;
+  }
+  .copy:hover {
+    color: var(--sl-color-white);
+  }
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .status {
+    display: block;
+    min-height: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.8125rem;
+  }
+  .status:not(:empty) {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--docs-line);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: -2px;
+  }
+</style>

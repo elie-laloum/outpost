@@ -5,6 +5,7 @@ import MobileMenuToggle from "starlight-theme-celestia/components/MobileMenuTogg
 import Brand from "./Brand.astro";
 import LanguageSwitch from "./LanguageSwitch.astro";
 import SourceLinks from "./SourceLinks.astro";
+import VersionLink from "./VersionLink.astro";
 import { docsHref, docsSpace, isFrench, spaceLinks } from "./docs-route.ts";
 
 const route = Astro.locals.starlightRoute;
@@ -27,6 +28,7 @@ const space = docsSpace(route);
   </nav>
   <div class="cell docs-search"><Search /></div>
   <div class="cell source"><SourceLinks /></div>
+  <div class="cell release"><VersionLink /></div>
   <div class="cell settings"><LanguageSwitch /><ThemeSelect /></div>
   <div class="docs-menu"><MobileMenuToggle /></div>
 </div>
@@ -56,13 +58,15 @@ const space = docsSpace(route);
     background: var(--sl-color-gray-6);
   }
   .spaces {
-    flex: 0 0 16rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex: 0 0 11rem;
     align-items: stretch;
     font-size: 0.875rem;
+    font-weight: 500;
   }
   .spaces a {
     display: flex;
-    flex: 1 1 auto;
     align-items: center;
     justify-content: center;
     padding: 0 0.5rem;
@@ -77,7 +81,6 @@ const space = docsSpace(route);
   }
   .spaces a[aria-current] {
     color: var(--sl-color-white);
-    font-weight: 500;
     box-shadow: inset 0 -2px 0 var(--sl-color-white);
   }
   .docs-search {
@@ -140,6 +143,11 @@ const space = docsSpace(route);
     align-items: stretch;
     border-right: 0;
   }
+  .cell.release {
+    flex: 0 0 auto;
+    align-items: stretch;
+    border-right: 0;
+  }
   .settings :global(.language) {
     border-right: 1px solid var(--sl-color-hairline-light);
   }
@@ -176,11 +184,6 @@ const space = docsSpace(route);
   .docs-menu {
     display: none;
   }
-  @media (max-width: 79.99rem) {
-    .source :global(.version) {
-      display: none;
-    }
-  }
   @media (max-width: 63.99rem) {
     .source {
       display: none;
@@ -195,7 +198,7 @@ const space = docsSpace(route);
       padding: 0 0.75rem 0 1rem;
     }
     .spaces {
-      flex: 0 0 auto;
+      flex: 0 0 6rem;
       font-size: 0.8rem;
     }
     .spaces a {

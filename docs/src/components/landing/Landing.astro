@@ -1,345 +1,91 @@
 ---
-import Code from "starlight-theme-celestia/components/Code.astro";
+import { render } from "astro:content";
 import manifest from "../../../../package.json";
+import { iconForHref, iconMarkup } from "../../../scripts/guide-icons.mjs";
 import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
-import OrchestrationDemo from "./OrchestrationDemo.astro";
-import dispatchCall from "./snippets/dispatch.ts?raw";
-import verdictCall from "./snippets/verdict.ts?raw";
+import InstallCommand from "./InstallCommand.astro";
 
 const route = Astro.locals.starlightRoute;
 const landing = route.entry.data.landing!;
+const { Content } = await render(route.entry);
 const locale = route.locale === "fr" ? "fr/" : "";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) =>
   /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
-const marked = (text: string) =>
-  text.split(/`([^`]+)`/).map((part, index) => ({ part, code: index % 2 === 1 }));
-// A heading made of sentences breaks between them, never inside one.
-const sentences = (text: string) => text.split(/(?<=\.)\s+/);
-// Everything the caller writes, cut from the typechecked snippet beside it:
-// the schema, the dispatch that asks for it, and the typed value it returns.
-const verdictLines = verdictCall.split("\n");
-const declareStart = verdictLines.findIndex((line) =>
-  line.includes("defineJsonResponse({"),
-);
-if (declareStart < 0)
-  throw new Error("The verdict snippet no longer declares a JSON response.");
-const declareCode = verdictLines.slice(declareStart).join("\n").trimEnd();
-const runtimeGroups = [
-  { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
-  { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
-];
 ---
 
 <main class="landing" data-pagefind-body>
   <div class="rail">
-    <section class="bay hero" aria-labelledby="_top">
-      <div class="say hero-copy">
+    <section class="hero" aria-labelledby="_top">
+      <div class="hero-copy">
+        <p class="category">{landing.category}</p>
         <h1 id="_top">
-          {landing.headline.map((clause) => <span>{clause}</span>)}
+          {landing.headline.map((line) => <span>{line}</span>)}
         </h1>
         <p class="lead">{landing.lead}</p>
-        <p class="install-note">{landing.install.prerequisites}</p>
-        <outpost-install class="install" data-copied={landing.install.copied}>
-          <div
-            class="managers"
-            role="tablist"
-            aria-label={landing.install.managers}
-          >
-            {
-              landing.install.commands.map(({ label }, index) => (
-                <button
-                  type="button"
-                  role="tab"
-                  id={`install-${label}`}
-                  aria-controls={`install-${label}-command`}
-                  aria-selected={index === 0 ? "true" : "false"}
-                  tabindex={index === 0 ? 0 : -1}
-                >
-                  {label}
-                </button>
-              ))
-            }
-          </div>
-          <div class="command">
-            {
-              landing.install.commands.map(({ label, command }, index) => (
-                <code
-                  role="tabpanel"
-                  id={`install-${label}-command`}
-                  aria-labelledby={`install-${label}`}
-                  hidden={index > 0}
-                >
-                  <span aria-hidden="true">$ </span>
-                  {command}
-                </code>
-              ))
-            }
-            <button
-              type="button"
-              class="copy"
-              aria-label={landing.install.copy}
-              title={landing.install.copy}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="copy-icon">
-                <rect x="9" y="9" width="12" height="12" rx="1.5"></rect>
-                <path
-                  d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
-                ></path>
-              </svg>
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="done-icon"
-                ><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg
-              >
-            </button>
-          </div>
-          <span class="status" role="status" aria-live="polite"></span>
-        </outpost-install>
         <div class="actions">
           <a class="button primary" href={href(landing.primary.href)}>
-            {landing.primary.label}
-            <Arrow />
+            {landing.primary.label}<Arrow />
           </a>
-          <a class="button" href={href(landing.secondary.href)}
-            >{landing.secondary.label}</a
-          >
+          <a class="button" href={href(landing.secondary.href)}>
+            {landing.secondary.label}<Arrow />
+          </a>
         </div>
-        <p class="facts">
-          {`${landing.facts} · v${manifest.version} · `}
-          <a href={href(landing.reference.href)}>{landing.reference.label}</a>
-        </p>
+        <InstallCommand install={landing.install} />
+        <p class="prerequisites">{landing.install.prerequisites}</p>
       </div>
-      <div class="show hero-code">
-        <figure class="excerpt hero-excerpt">
-          <figcaption>{landing.hero.caption}</figcaption>
-          <div
-            class="excerpt-code"
-            role="region"
-            aria-label={landing.hero.caption}
-            tabindex="0"
-          >
-            <Code code={dispatchCall.trimEnd()} lang="ts" />
-          </div>
-        </figure>
-      </div>
-      <div class="hero-evidence">
-        <div class="ticker">
-          {
-            [false, true].map((repeat) => (
-              <ul aria-hidden={repeat ? "true" : undefined}>
-                {landing.evidence.map((fact) => (
-                  <li>{fact}</li>
-                ))}
-              </ul>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-
-    <section class="bay" aria-labelledby="use-cases-title">
-      <div class="say">
-        <h2 id="use-cases-title">{landing.useCases.title}</h2>
-        <p>{landing.useCases.text}</p>
-        <a class="more" href={href(landing.useCases.link.href)}
-          >{landing.useCases.link.label}<Arrow /></a
-        >
-      </div>
-      <div class="show flush use-cases">
+      <ul class="overview">
         {
-          landing.useCases.entries.map((useCase) => (
-            <a href={href(useCase.href)}>
-              <strong>{useCase.title}</strong>
-              <span>{useCase.text}</span>
+          landing.overview.map((entry) => (
+          <li>
+            <a href={href(entry.href)}>
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+                set:html={iconMarkup(iconForHref(entry.href))}
+              />
+              <span class="overview-copy">
+                <strong>{entry.title}</strong><span>{entry.text}</span>
+              </span>
               <Arrow />
             </a>
+          </li>
           ))
         }
-      </div>
+      </ul>
     </section>
 
-    <div class="bay figure-bay">
-      <div class="show figure-wide">
-        <OrchestrationDemo demo={landing.demo} />
-      </div>
+    <div class="home-content sl-markdown-content">
+      <Content />
     </div>
 
-    <section class="bay" aria-labelledby="runtimes-title">
-      <div class="say">
-        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
-        <p>{landing.runtimes.text}</p>
-        <a class="more" href={href(landing.runtimes.link.href)}
-          >{landing.runtimes.link.label}<Arrow /></a
-        >
+    <section class="next" aria-labelledby="next-title">
+      <div>
+        <h2 id="next-title">{landing.next.title}</h2>
+        <p>{landing.next.text}</p>
       </div>
-      <div class="show flush runtimes">
+      <div class="next-actions">
         {
-          runtimeGroups.map((group) => (
-            <div class="runtime-group">
-              <h3>{group.label}</h3>
-              <ul>
-                {group.items.map((item) => (
-                  <li>
-                    <a href={href(item.href)}>
-                      {item.name}
-                      {item.experimental && (
-                        <span
-                          class="flask"
-                          role="img"
-                          aria-label={landing.runtimes.experimental}
-                          title={landing.runtimes.experimental}
-                        />
-                      )}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          [landing.next.guide, landing.next.reference].map((link) => (
+            <a href={href(link.href)}>{link.label}<Arrow /></a>
           ))
         }
-      </div>
-    </section>
-
-    <section class="bay problem" data-beat="0" aria-labelledby="problem-title">
-      <div class="say">
-        <h2 id="problem-title">{landing.problem.title}</h2>
-        <p>{landing.problem.text}</p>
-        <a class="more" href={href(landing.problem.link.href)}
-          >{landing.problem.link.label}<Arrow /></a
-        >
-      </div>
-      <outpost-pains class="show pains">
-        <div class="pain-stage">
-          {
-            landing.problem.rows.map((row, index) => (
-              <div class="pain" data-pain={index}>
-                <p class="pain-name">{row.pain}</p>
-                <p class="pain-detail">{row.detail}</p>
-                <p class="pain-answer">
-                  <span class="answer-label">{landing.problem.answerLabel}</span>
-                  {row.answer}
-                </p>
-              </div>
-            ))
-          }
-        </div>
-        <div
-          class="pain-pager"
-          role="group"
-          aria-label={landing.problem.summaryLabel}
-        >
-          {
-            landing.problem.rows.map((row, index) => (
-              <button
-                type="button"
-                data-pain-beat={index}
-                aria-pressed={index === 0 ? "true" : "false"}
-              >
-                <span>{row.pain}</span>
-              </button>
-            ))
-          }
-        </div>
-        <ul class="pain-summary">
-          <li>{landing.problem.summaryLabel}</li>
-          {
-            landing.problem.rows.map((row) => (
-              <li>
-                {row.pain}. {row.detail} {landing.problem.answerLabel}:{" "}
-                {row.answer}
-              </li>
-            ))
-          }
-        </ul>
-      </outpost-pains>
-    </section>
-
-    <section class="bay" aria-labelledby="typed-title">
-      <div class="say">
-        <h2 id="typed-title">
-          {sentences(landing.typed.title).map((clause) => <span>{clause}</span>)}
-        </h2>
-        <p>
-          {
-            marked(landing.typed.text).map(({ part, code }) =>
-              code ? <code>{part}</code> : part,
-            )
-          }
-        </p>
-        <div class="links">
-          <a class="more" href={href(landing.typed.link.href)}
-            >{landing.typed.link.label}<Arrow /></a
-          >
-          <a class="more" href={href(landing.typed.secondary.href)}
-            >{landing.typed.secondary.label}<Arrow /></a
-          >
-        </div>
-      </div>
-      <div class="show">
-        <outpost-verdict class="verdict">
-          <figure>
-            <figcaption id="declare-label">
-              {landing.typed.declareLabel}
-            </figcaption>
-            <div
-              class="pane code"
-              role="region"
-              aria-labelledby="declare-label"
-              tabindex="0"
-            >
-              <Code code={declareCode} lang="ts" />
-            </div>
-            <p class="step" data-at="2" aria-hidden="true"></p>
-            <p class="label" data-at="2">{landing.typed.answerLabel}</p>
-            <div class="pane prose" data-at="2">
-              <p>{landing.typed.answerText}</p>
-              <p class="tag">{landing.typed.answerTag}</p>
-            </div>
-            <p class="step" data-at="3" aria-hidden="true"></p>
-            <p class="label" data-at="3">{landing.typed.valueLabel}</p>
-            <div class="pane value" data-at="3">
-              <code>{landing.typed.value}</code>
-            </div>
-          </figure>
-        </outpost-verdict>
-      </div>
-    </section>
-
-    <section class="bay" aria-labelledby="boundaries-title">
-      <div class="say">
-        <h2 id="boundaries-title">{landing.boundaries.title}</h2>
-        <p>{landing.boundaries.text}</p>
-        <div class="closing">
-          <a
-            class="button primary"
-            href={href(landing.boundaries.action.href)}
-          >
-            {landing.boundaries.action.label}
-            <Arrow />
-          </a>
-          <a class="more" href={href(landing.boundaries.link.href)}
-            >{landing.boundaries.link.label}<Arrow /></a
-          >
-        </div>
-      </div>
-      <div class="show flush boundaries">
-        <dl>
-          {
-            landing.boundaries.entries.map((boundary) => (
-              <div class="boundary">
-                <dt>{boundary.lead}</dt>
-                <dd>{boundary.text}</dd>
-              </div>
-            ))
-          }
-        </dl>
       </div>
     </section>
 
     <footer class="landing-footer">
       <div class="footer-brand">
-        <Brand href={href("")} class="wordmark" />
-        <p>{landing.tagline}</p>
+        <Brand href={`${base}/${locale}`} />
+        <p>{landing.footer.license} · v{manifest.version}</p>
       </div>
       {
         [landing.footer.documentation, landing.footer.source].map((column) => (
@@ -347,1027 +93,316 @@ const runtimeGroups = [
             <h2>{column.title}</h2>
             <ul>
               {column.links.map((link) => (
-                <li>
-                  <a href={href(link.href)}>{link.label}</a>
-                </li>
+                <li><a href={href(link.href)}>{link.label}</a></li>
               ))}
             </ul>
           </nav>
         ))
       }
-      <p class="footer-legal">{landing.footer.license} v{manifest.version}</p>
     </footer>
   </div>
 </main>
 
-<script>
-  class OutpostInstall extends HTMLElement {
-    connectedCallback() {
-      const tabs = [
-        ...this.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
-      ];
-      const panels = [
-        ...this.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
-      ];
-      const select = (index: number, focus: boolean) => {
-        tabs.forEach((tab, position) => {
-          tab.setAttribute("aria-selected", String(position === index));
-          tab.tabIndex = position === index ? 0 : -1;
-          panels[position].hidden = position !== index;
-        });
-        if (focus) tabs[index].focus();
-      };
-      tabs.forEach((tab, index) => {
-        tab.addEventListener("click", () => select(index, false));
-        tab.addEventListener("keydown", (event) => {
-          const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-          if (!step) return;
-          event.preventDefault();
-          select((index + step + tabs.length) % tabs.length, true);
-        });
-      });
-      const copy = this.querySelector<HTMLButtonElement>(".copy");
-      const status = this.querySelector<HTMLElement>(".status");
-      copy?.addEventListener("click", async () => {
-        const shown = panels.find((panel) => !panel.hidden);
-        await navigator.clipboard.writeText(
-          shown?.lastChild?.textContent?.trim() ?? "",
-        );
-        copy.dataset.done = "";
-        if (status) status.textContent = this.dataset.copied ?? "";
-        setTimeout(() => {
-          delete copy.dataset.done;
-          if (status) status.textContent = "";
-        }, 1600);
-      });
-    }
-  }
-  customElements.define("outpost-install", OutpostInstall);
-
-  // The reply arrives, then the value your code receives is read out of it.
-  class OutpostVerdict extends HTMLElement {
-    connectedCallback() {
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        this.dataset.step = "3";
-        return;
-      }
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.intersectionRatio >= 0.35)) return;
-          observer.disconnect();
-          this.dataset.step = "2";
-          setTimeout(() => (this.dataset.step = "3"), 900);
-        },
-        { threshold: 0.35 },
-      );
-      observer.observe(this);
-    }
-  }
-  customElements.define("outpost-verdict", OutpostVerdict);
-
-  // Long enough to read a pain and its answer, short enough to stay alive.
-  const PAIN_MS = 6000;
-
-  // The pains are the drawing's four beats in words, but the drawing sits a bay
-  // away now, so the stage keeps its own clock and its pager is its control.
-  class OutpostPains extends HTMLElement {
-    #bay: HTMLElement | null = null;
-    #ticks: HTMLButtonElement[] = [];
-    #timer = 0;
-    #beat = 0;
-
-    connectedCallback() {
-      this.#bay = this.closest(".problem");
-      this.#ticks = [
-        ...this.querySelectorAll<HTMLButtonElement>("[data-pain-beat]"),
-      ];
-      if (!this.#bay || !this.#ticks.length) return;
-      this.#ticks.forEach((tick, index) =>
-        tick.addEventListener("click", () => this.#show(index)),
-      );
-      for (const [event, held] of [
-        ["pointerenter", true],
-        ["pointerleave", false],
-        ["focusin", true],
-        ["focusout", false],
-      ] as const)
-        this.#bay.addEventListener(event, () =>
-          this.#bay?.toggleAttribute("data-hold", held),
-        );
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.intersectionRatio >= 0.35)) return;
-          observer.disconnect();
-          this.#show(0);
-        },
-        { threshold: 0.35 },
-      );
-      observer.observe(this);
-    }
-
-    #show(beat: number) {
-      clearTimeout(this.#timer);
-      this.#beat = beat;
-      const bay = this.#bay!;
-      bay.dataset.beat = String(beat);
-      bay.dataset.state = "playing";
-      bay.style.setProperty("--beat-ms", `${PAIN_MS}ms`);
-      bay.toggleAttribute("data-timed", false);
-      this.#ticks.forEach((tick, index) =>
-        tick.setAttribute("aria-pressed", String(index === beat)),
-      );
-      requestAnimationFrame(() => bay.toggleAttribute("data-timed", true));
-      this.#timer = window.setTimeout(() => this.#advance(), PAIN_MS);
-    }
-
-    // The pager wraps, and waits while the reader is still on this bay.
-    #advance() {
-      if (this.#bay?.hasAttribute("data-hold"))
-        return (this.#timer = window.setTimeout(() => this.#advance(), 400));
-      this.#show((this.#beat + 1) % this.#ticks.length);
-    }
-  }
-  customElements.define("outpost-pains", OutpostPains);
-
-
-  // A fade marks the edge where the excerpt still has code to scroll to.
-  for (const scroller of document.querySelectorAll<HTMLElement>(
-    ".excerpt-code",
-  )) {
-    const measure = () =>
-      scroller.toggleAttribute(
-        "data-clipped",
-        scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1,
-      );
-    scroller.addEventListener("scroll", measure, { passive: true });
-    new ResizeObserver(measure).observe(scroller);
-  }
-
-</script>
-
 <style>
   .landing {
-    --landing-line: var(--sl-color-hairline-light);
-    --landing-code-bg: color-mix(
-      in oklch,
-      var(--sl-color-gray-6) 45%,
-      var(--sl-color-black)
-    );
-    --landing-code-bg-active: color-mix(
-      in oklch,
-      var(--sl-color-gray-6) 80%,
-      var(--sl-color-black)
-    );
-    --landing-gutter: var(--sl-color-gray-3);
-    --landing-pad: clamp(1.25rem, 3.2vw, 3rem);
-    --landing-ease: cubic-bezier(0.16, 1, 0.3, 1);
     padding-top: 4rem;
-    background-color: var(--sl-color-black);
     background-image: repeating-linear-gradient(
       -45deg,
       transparent 0 7px,
       color-mix(in oklch, var(--sl-color-gray-5) 45%, transparent) 7px 8px
     );
-    color: var(--sl-color-gray-2);
   }
   .rail {
-    max-width: 82rem;
-    margin: 0 auto;
-    border-inline: 1px solid var(--landing-line);
+    container-type: inline-size;
+    max-width: 90rem;
+    margin-inline: auto;
     background: var(--sl-color-black);
+    border-inline: 1px solid var(--docs-line);
   }
-  .landing :where(h1, h2, h3, p, ul, ol, dl, dd, figure) {
+  .landing :where(h1, h2, p, ul) {
     margin: 0;
   }
-  .landing :where(ul, ol) {
-    padding: 0;
-    list-style: none;
-  }
-  .landing ::selection {
-    background: color-mix(in oklch, var(--sl-color-accent) 32%, transparent);
-    color: var(--sl-color-white);
-  }
-  .landing a {
-    text-underline-offset: 0.22em;
-  }
-  .landing :focus-visible {
-    outline: 2px solid var(--sl-color-accent);
-    outline-offset: 2px;
-  }
-
-  /* Every section splits at track 5 of 12; cells split the right bay at track 9. */
-  .bay {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    border-bottom: 1px solid var(--landing-line);
-  }
-  .say {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-width: 0;
-    padding: 3.5rem var(--landing-pad);
-    border-right: 1px solid var(--landing-line);
-  }
-  .show {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-    padding: 3rem var(--landing-pad);
-  }
-  .flush {
-    padding: 0;
-  }
-  .figure-bay {
-    display: block;
-  }
-  .figure-wide {
-    grid-column: 1 / -1;
-    padding-block: 2.75rem;
-    border-bottom: 1px solid var(--landing-line);
-  }
-  .say > p {
-    max-width: 34rem;
-    line-height: 1.65;
-    text-wrap: pretty;
-  }
-  .say h2 span {
-    display: block;
-  }
-  .say h2 {
-    color: var(--sl-color-white);
-    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-  }
-  .more {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    align-self: flex-start;
-    padding-top: 0.75rem;
-    color: var(--sl-color-white);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: underline;
-    text-decoration-color: var(--sl-color-gray-4);
-    transition: text-decoration-color 0.2s var(--landing-ease);
-  }
-  .more:hover {
-    text-decoration-color: var(--sl-color-white);
-  }
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 1.5rem;
-  }
-  .excerpt {
-    margin: 0.75rem 0 0;
-    border: 1px solid var(--landing-line);
-    background: var(--landing-code-bg);
-  }
-  .excerpt figcaption {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-2);
-    font-size: 0.8125rem;
-  }
-  .hero-excerpt {
-    margin: 0;
-  }
-  .hero-excerpt .excerpt-code :global(pre) {
-    font-size: 0.8125rem;
-  }
-  .excerpt-code[data-clipped] {
-    mask-image: linear-gradient(
-      to right,
-      #000 calc(100% - 2.5rem),
-      transparent
-    );
-  }
-  .excerpt-code:focus-visible {
-    outline: 2px solid var(--sl-color-accent);
-    outline-offset: -2px;
-  }
-  .excerpt-code {
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--sl-color-gray-5) transparent;
-  }
-  .excerpt-code :global([data-celestia-code-container]) {
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-  }
-  .excerpt-code :global(celestia-code-copy-button) {
-    display: none;
-  }
-  .excerpt-code :global(pre) {
-    margin: 0;
-    padding: 0.85rem 1rem;
-    overflow: visible !important;
-    background: transparent !important;
-    font-size: 0.75rem;
-    line-height: 1.7;
-  }
-
-  /* Hero */
   .hero {
-    min-height: min(calc(100svh - 4rem), 48rem);
-    /* The spare height belongs to the hero, not to the band of facts below it. */
-    grid-template-rows: 1fr auto;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    border-bottom: 1px solid var(--docs-line);
   }
   .hero-copy {
-    gap: 0;
-    container-type: inline-size;
+    min-width: 0;
+    padding: clamp(2rem, 4vw, 4rem) var(--docs-pad);
   }
-  .hero-code {
-    justify-content: flex-start;
-    padding-block: 3.5rem;
+  .category {
+    margin-bottom: 1.1rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
   }
   h1 {
+    max-width: 21ch;
     color: var(--sl-color-white);
-    font-size: clamp(2.2rem, 10.2cqi, 3.4rem);
+    font-size: clamp(2.35rem, 4.6vw, 4.3rem);
     font-weight: 600;
-    line-height: 1.05;
+    line-height: 1.06;
     letter-spacing: -0.04em;
+    text-wrap: balance;
   }
   h1 span {
     display: block;
-    text-wrap: balance;
   }
   .lead {
-    max-width: 34rem;
+    max-width: 53ch;
     margin-top: 1.5rem;
-    font-size: 1.0625rem;
+    color: var(--sl-color-gray-2);
+    font-size: 1.1rem;
     line-height: 1.65;
     text-wrap: pretty;
-  }
-  .install-note {
-    max-width: 34rem;
-    margin-top: 1.5rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-    line-height: 1.6;
-    text-wrap: pretty;
-  }
-  .install {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    max-width: 26rem;
-    margin-top: 0.75rem;
-    border: 1px solid var(--landing-line);
-    background: var(--landing-code-bg);
-  }
-  .install .managers {
-    display: flex;
-    overflow-x: auto;
-    border-bottom: 1px solid var(--landing-line);
-    scrollbar-width: none;
-  }
-  .install [role="tab"] {
-    padding: 0.5rem 0.9rem;
-    border: 0;
-    border-bottom: 1px solid transparent;
-    background: none;
-    color: var(--sl-color-gray-3);
-    font-family: var(--sl-font-mono);
-    font-size: 0.8125rem;
-    cursor: pointer;
-  }
-  .install [role="tab"]:hover {
-    color: var(--sl-color-white);
-  }
-  .install [role="tab"][aria-selected="true"] {
-    margin-bottom: -1px;
-    border-bottom-color: var(--sl-color-white);
-    color: var(--sl-color-white);
-  }
-  .install .command {
-    display: flex;
-    align-items: center;
-  }
-  .install code {
-    flex: 1;
-    min-width: 0;
-    padding: 0.8rem 1rem;
-    overflow-x: auto;
-    color: var(--sl-color-white);
-    background: none;
-    border: 0;
-    font-size: 0.875rem;
-    white-space: nowrap;
-    scrollbar-width: none;
-  }
-  .install code span {
-    color: var(--sl-color-gray-3);
-  }
-  .install .copy {
-    display: grid;
-    place-items: center;
-    align-self: stretch;
-    width: 2.9rem;
-    border: 0;
-    border-left: 1px solid var(--landing-line);
-    background: none;
-    color: var(--sl-color-gray-3);
-    cursor: pointer;
-  }
-  .install .copy:hover,
-  .install .copy[data-done] {
-    color: var(--sl-color-white);
-  }
-  .install svg {
-    width: 1rem;
-    height: 1rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .done-icon,
-  .install .copy[data-done] .copy-icon {
-    display: none;
-  }
-  .install .copy[data-done] .done-icon {
-    display: block;
-  }
-  .status {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1.5rem;
+    margin-top: 1.75rem;
   }
   .button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 2.75rem;
-    padding: 0 1.25rem;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 2.9rem;
+    padding: 0.6rem 1.15rem;
     border: 1px solid var(--sl-color-gray-5);
     color: var(--sl-color-white);
     font-size: 0.9375rem;
     font-weight: 500;
     text-decoration: none;
-    transition:
-      background-color 0.2s var(--landing-ease),
-      border-color 0.2s var(--landing-ease);
   }
   .button:hover {
-    border-color: var(--sl-color-gray-3);
     background: var(--sl-color-gray-6);
   }
   .button.primary {
-    border-color: var(--sl-color-white);
     background: var(--sl-color-white);
+    border-color: var(--sl-color-white);
     color: var(--sl-color-black);
   }
   .button.primary:hover {
-    background: var(--sl-color-gray-1);
+    background: var(--sl-color-gray-2);
   }
-  .facts {
-    margin-top: 1.5rem;
+  .prerequisites {
+    margin-top: 0.75rem;
     color: var(--sl-color-gray-3);
     font-size: 0.8125rem;
   }
-  .facts a {
-    color: var(--sl-color-gray-2);
-  }
-  .facts a:hover {
-    color: var(--sl-color-white);
-  }
-  /* The engineering facts run as a ticker, written once and repeated. */
-  .hero-evidence {
-    display: flex;
-    align-items: center;
-    grid-column: 1 / -1;
-    padding-block: 0.6rem;
-    overflow: hidden;
-    border-top: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-3);
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-  .ticker {
-    display: flex;
-    width: max-content;
-    animation: ticker 38s linear infinite;
-  }
-  .hero-evidence:hover .ticker {
-    animation-play-state: paused;
-  }
-  .ticker ul {
-    display: flex;
-    flex: none;
-  }
-  .ticker li {
-    padding-inline: 1.1rem;
-    white-space: nowrap;
-  }
-  .ticker li::after {
-    margin-left: 1.1rem;
-    color: var(--sl-color-gray-4);
-    content: "\00b7";
-  }
-  @keyframes ticker {
-    to {
-      transform: translateX(-50%);
-    }
-  }
-
-  /* Use cases are whole rows, so they add no vertical line to the frame. */
-  .use-cases {
-    justify-content: center;
-  }
-  .use-cases a {
+  .overview {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 0.35rem 1.25rem;
-    padding: 1.4rem var(--landing-pad);
-    color: var(--sl-color-gray-2);
-    font-size: 0.9375rem;
-    line-height: 1.55;
-    text-decoration: none;
-    transition: background-color 0.2s var(--landing-ease);
-  }
-  .use-cases a + a {
-    border-top: 1px solid var(--landing-line);
-  }
-  .use-cases a:hover {
-    background: var(--landing-code-bg);
-  }
-  .use-cases strong {
-    color: var(--sl-color-white);
-    font-size: 1.0625rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .use-cases span {
-    grid-column: 1;
-    max-width: 34rem;
-  }
-  .use-cases :global(.arrow) {
-    grid-row: 1;
-    grid-column: 2;
-    align-self: center;
-    color: var(--sl-color-gray-3);
-    transition:
-      color 0.2s var(--landing-ease),
-      transform 0.2s var(--landing-ease);
-  }
-  .use-cases a:hover :global(.arrow) {
-    color: var(--sl-color-white);
-  }
-
-  /* One pain at a time, on the beat the drawing above is explaining. */
-  .pains {
-    justify-content: start;
-  }
-  .pain-stage {
-    display: grid;
-    width: 100%;
-    max-width: 38rem;
-  }
-  .pain {
-    grid-area: 1 / 1;
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity 0.35s var(--landing-ease),
-      visibility 0s linear 0.35s;
-  }
-  .problem[data-beat="0"] [data-pain="0"],
-  .problem[data-beat="1"] [data-pain="1"],
-  .problem[data-beat="2"] [data-pain="2"],
-  .problem[data-beat="3"] [data-pain="3"] {
-    opacity: 1;
-    visibility: visible;
-    transition-delay: 0s;
-  }
-  .pain-name {
-    position: relative;
-    align-self: start;
-    justify-self: start;
-    color: var(--sl-color-white);
-    font-size: 1.375rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-  .pain-name::after {
-    position: absolute;
-    top: 56%;
-    right: -0.2rem;
-    left: -0.2rem;
-    height: 1px;
-    background: var(--sl-color-gray-3);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.55s var(--landing-ease) 0.25s;
-    content: "";
-  }
-  .problem[data-beat="0"] [data-pain="0"] .pain-name::after,
-  .problem[data-beat="1"] [data-pain="1"] .pain-name::after,
-  .problem[data-beat="2"] [data-pain="2"] .pain-name::after,
-  .problem[data-beat="3"] [data-pain="3"] .pain-name::after {
-    transform: scaleX(1);
-  }
-  .pain-detail {
-    margin-top: 0.6rem;
-    color: var(--sl-color-gray-2);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-  }
-  .pain-answer {
-    margin-top: 1.4rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--landing-line);
-    color: var(--sl-color-white);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-  }
-  .answer-label {
-    display: block;
-    margin-bottom: 0.3rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-  /* Four ticks: which pain is showing, and how long before the next. */
-  .pain-pager {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1.9rem;
-  }
-  .pain-pager button {
-    position: relative;
-    flex: 1 1 0;
-    max-width: 5rem;
-    /* 1.75rem keeps the target at the 24px WCAG 2.2 minimum. */
-    height: 1.75rem;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    list-style: none;
     padding: 0;
-    border: 0;
-    background: none;
-    cursor: pointer;
+    border-left: 1px solid var(--docs-line);
   }
-  .pain-pager button span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+  .overview li + li {
+    border-top: 1px solid var(--docs-line);
   }
-  .pain-pager button::before,
-  .pain-pager button::after {
-    position: absolute;
-    inset-inline: 0;
-    content: "";
-  }
-  .pain-pager button::before {
-    top: 50%;
-    height: 1px;
-    background: var(--sl-color-gray-4);
-  }
-  .pain-pager button:hover::before {
-    background: var(--sl-color-gray-3);
-  }
-  .pain-pager button::after {
-    top: calc(50% - 1px);
-    height: 2px;
-    background: var(--sl-color-white);
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-  .pain-pager button[aria-pressed="true"]::after {
-    transform: scaleX(1);
-  }
-  .problem[data-state="playing"] .pain-pager button[aria-pressed="true"]::after {
-    transform: scaleX(0);
-  }
-  .problem[data-state="playing"][data-timed]
-    .pain-pager
-    button[aria-pressed="true"]::after {
-    transform: scaleX(1);
-    transition: transform var(--beat-ms) linear;
-  }
-  .pain-pager button:focus-visible {
-    outline: 2px solid var(--sl-color-accent);
-    outline-offset: 2px;
-  }
-  .pain-summary {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  /* Runtimes */
-  .runtimes {
-    justify-content: center;
-  }
-  .runtime-group + .runtime-group {
-    border-top: 1px solid var(--landing-line);
-  }
-  .runtime-group h3 {
-    padding: 0.8rem var(--landing-pad);
-    border-bottom: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-    font-weight: 500;
-  }
-  .runtime-group ul {
+  .overview a {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 1.25rem var(--landing-pad) 1.4rem;
-  }
-  .runtime-group a {
-    display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    min-height: 2.25rem;
-    padding: 0 0.8rem;
-    border: 1px solid var(--landing-line);
+    gap: 1.25rem;
+    min-height: 9rem;
+    height: 100%;
+    padding: 1.75rem var(--docs-pad);
     color: var(--sl-color-white);
-    font-size: 0.9375rem;
-    font-weight: 500;
     text-decoration: none;
-    transition:
-      background-color 0.2s var(--landing-ease),
-      border-color 0.2s var(--landing-ease);
   }
-  .runtime-group a:hover {
-    border-color: var(--sl-color-gray-4);
-    background: var(--landing-code-bg);
+  .overview a:hover {
+    background: var(--docs-code-bg);
   }
-  .flask {
-    width: 0.9rem;
-    height: 0.9rem;
-    background-color: var(--sl-color-accent);
-    mask: url("../../assets/reference-experiment.svg") center / contain
-      no-repeat;
+  .overview svg {
+    flex-shrink: 0;
   }
-
-  /* The page closes on its own limits, with the action beside them. */
-  .closing {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.5rem;
-    padding-top: 1rem;
+  .overview-copy {
+    display: grid;
+    flex: 1;
+    gap: 0.5rem;
   }
-  .closing .more {
-    padding-top: 0;
-  }
-  .boundaries {
-    justify-content: center;
-  }
-  .boundary {
-    padding: 1.4rem var(--landing-pad);
-  }
-  .boundary + .boundary {
-    border-top: 1px solid var(--landing-line);
-  }
-  .boundary dt {
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
+  .overview strong {
+    font-size: 1.15rem;
     font-weight: 500;
+    letter-spacing: -0.015em;
   }
-  .boundary dd {
-    max-width: 34rem;
-    margin-top: 0.35rem;
-    color: var(--sl-color-white);
-    font-size: 0.9375rem;
-    line-height: 1.55;
-  }
-
-  /* Prose goes in, a typed value comes out; the figure reveals that order. */
-  .verdict figure {
-    border: 1px solid var(--landing-line);
-    background: var(--landing-code-bg);
-  }
-  .verdict figcaption,
-  .verdict .label {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid var(--landing-line);
+  .overview-copy > span {
+    max-width: 30ch;
     color: var(--sl-color-gray-2);
-    font-size: 0.8125rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    text-wrap: pretty;
   }
-  .verdict .label {
-    border-top: 1px solid var(--landing-line);
+  .home-content {
+    font-size: 1.0714rem;
+    line-height: 1.75;
   }
-  .verdict .pane:focus-visible {
-    outline: 2px solid var(--sl-color-accent);
-    outline-offset: -2px;
-  }
-  .verdict .pane {
-    padding: 0.85rem 1rem;
-    overflow-x: auto;
-    font-size: 0.75rem;
-    line-height: 1.7;
-    scrollbar-width: thin;
-    scrollbar-color: var(--sl-color-gray-5) transparent;
-  }
-  .verdict .pane :global(pre) {
+  .home-content :global(> .bay) {
     margin: 0;
-    padding: 0;
-    overflow: visible !important;
-    background: transparent !important;
-    font-size: 0.75rem;
-    line-height: 1.7;
+    border-bottom: 1px solid var(--docs-line);
   }
-  .verdict .pane :global([data-celestia-code-container]) {
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
+  .next > div:first-child {
+    padding: 2.5rem var(--docs-pad);
   }
-  .verdict .pane :global(celestia-code-copy-button) {
-    display: none;
+  .next h2 {
+    color: var(--sl-color-white);
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
   }
-  .verdict .prose p {
-    max-width: 40rem;
+  .next p {
+    margin-top: 0.85rem;
     color: var(--sl-color-gray-2);
-    font-size: 0.8125rem;
-    line-height: 1.6;
+    font-size: 1.0714rem;
+    line-height: 1.65;
   }
-  .verdict .tag {
-    margin-top: 0.5rem;
-    padding: 0.3rem 0.45rem;
-    color: var(--sl-color-gray-3);
-    font-family: var(--sl-font-system-mono);
-    font-size: 0.75rem;
-    white-space: nowrap;
-    transition:
-      background-color 0.4s var(--landing-ease),
-      color 0.4s var(--landing-ease);
+  .next-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-block: 1px solid var(--docs-line);
   }
-  .verdict[data-step="3"] .tag {
-    background: var(--landing-code-bg-active);
-    color: var(--sl-color-white);
-  }
-  .verdict .value code {
-    color: var(--sl-color-white);
-    font-size: 0.75rem;
-  }
-  /* A drawn chevron carries the eye from one pane to the next. */
-  .verdict .step {
+  .next-actions a {
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 1.9rem;
-    border-top: 1px solid var(--landing-line);
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.5rem var(--docs-pad);
+    color: var(--sl-color-white);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
   }
-  .verdict .step::after {
-    width: 0.4rem;
-    height: 0.4rem;
-    margin-bottom: 0.2rem;
-    border-right: 1px solid var(--sl-color-gray-4);
-    border-bottom: 1px solid var(--sl-color-gray-4);
-    transform: rotate(45deg);
-    content: "";
+  .next-actions a + a {
+    border-left: 1px solid var(--docs-line);
   }
-  .verdict [data-at] {
-    opacity: 0;
-    transition: opacity 0.4s var(--landing-ease);
+  .next-actions a:hover {
+    background: var(--docs-code-bg);
   }
-  .verdict[data-step="2"] [data-at="2"],
-  .verdict[data-step="3"] [data-at="2"],
-  .verdict[data-step="3"] [data-at="3"] {
-    opacity: 1;
-  }
-
-  /* Footer columns start on tracks 5 and 9. */
   .landing-footer {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
   }
   .landing-footer > * {
-    padding: 3rem var(--landing-pad) 2.5rem;
+    min-width: 0;
+    padding: 2rem var(--docs-pad);
   }
-  .footer-brand p:last-child {
-    max-width: 22rem;
-    margin-top: 0.5rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.875rem;
-  }
-  .landing-footer h2 {
-    margin-bottom: 0.9rem;
+  .footer-brand p {
+    margin-top: 1rem;
     color: var(--sl-color-gray-3);
     font-size: 0.8125rem;
+  }
+  .landing-footer h2 {
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
     font-weight: 500;
   }
+  .landing-footer ul {
+    padding: 0;
+    margin-top: 1rem;
+    list-style: none;
+  }
   .landing-footer li + li {
-    margin-top: 0.55rem;
+    margin-top: 0.65rem;
   }
   .landing-footer nav a {
     color: var(--sl-color-gray-2);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     text-decoration: none;
   }
   .landing-footer nav a:hover {
     color: var(--sl-color-white);
     text-decoration: underline;
+    text-underline-offset: 0.25em;
   }
-  .landing-footer .footer-legal {
-    grid-column: 1 / -1;
-    padding-block: 1.25rem;
-    border-top: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-  }
-
   @media (max-width: 64rem) {
-    .bay {
+    .hero {
       grid-template-columns: minmax(0, 1fr);
     }
-    .hero {
+    .overview {
+      display: grid;
+      grid-template-rows: none;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-left: 0;
+      border-top: 1px solid var(--docs-line);
+    }
+    .overview li + li {
+      border-top: 0;
+      border-left: 1px solid var(--docs-line);
+    }
+    .overview a {
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      height: 100%;
       min-height: 0;
+      padding: 1.5rem var(--docs-pad);
     }
-    .say {
-      padding-block: 3rem 2rem;
-      border-right: 0;
+    .overview-copy {
+      flex-basis: 100%;
+      order: 1;
     }
-    .hero-copy {
-      padding-block: 3.5rem 3rem;
-      border-bottom: 1px solid var(--landing-line);
+    .overview a :global(.arrow) {
+      margin-left: auto;
     }
-    .show {
-      padding-block: 0 3rem;
-    }
-    .figure-wide {
-      padding-block: 2.5rem;
-    }
-    .show.flush {
-      border-top: 1px solid var(--landing-line);
+    h1 {
+      max-width: 28ch;
+      font-size: clamp(2.35rem, 5.6vw, 4.3rem);
     }
   }
   @media (max-width: 40rem) {
     .rail {
       border-inline: 0;
     }
-    .verdict .tag {
-      white-space: normal;
+    .hero-copy {
+      padding-top: 2.25rem;
+      padding-bottom: 2rem;
     }
-    .pain dd {
-      padding-left: 1rem;
+    .lead {
+      font-size: 1rem;
+    }
+    .actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .overview {
+      display: block;
+    }
+    .overview li + li {
+      border-left: 0;
+      border-top: 1px solid var(--docs-line);
+    }
+    .overview a {
+      flex-wrap: nowrap;
+      align-items: center;
+      padding-block: 1.25rem;
+    }
+    .overview-copy {
+      flex-basis: auto;
+      order: 0;
+    }
+    .overview strong {
+      font-size: 1.0625rem;
+    }
+    .overview-copy > span {
+      font-size: 0.9375rem;
+    }
+    .actions .button {
+      flex: 1;
     }
     .landing-footer {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .footer-brand {
       grid-column: 1 / -1;
+      border-bottom: 1px solid var(--docs-line);
     }
-    .landing-footer .footer-brand {
-      padding-bottom: 0;
-    }
-    .figure-wide {
-      padding-inline: 0;
-    }
-    .hero-excerpt .excerpt-code :global(pre) {
-      font-size: 0.75rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .landing *,
-    .landing :global(*) {
-      transition: none !important;
-    }
-    /* A ticker that cannot move is a wrapped line of facts. */
-    .hero-evidence {
-      padding-inline: var(--landing-pad);
-    }
-    .ticker {
-      flex: 1;
-      flex-wrap: wrap;
-      min-width: 0;
-      width: auto;
-      animation: none;
-    }
-    .ticker ul[aria-hidden] {
-      display: none;
-    }
-    .ticker ul {
-      flex: 1;
-      flex-wrap: wrap;
-      min-width: 0;
-    }
-    .ticker li:first-child {
-      padding-left: 0;
+    .next-actions a {
+      padding: 1.25rem var(--docs-pad);
+      align-items: flex-start;
+      font-size: 0.9375rem;
     }
   }
 </style>

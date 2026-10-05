@@ -121,12 +121,18 @@ function mountCanvas(root: HTMLElement) {
     focus = element;
     paint(root, edges, element ? trace(element, edges) : null);
   };
-  new ResizeObserver(() => {
-    edges = drawLinks(world, links, labels);
-    paint(root, edges, focus ? trace(focus, edges) : null);
-    refresh();
-  }).observe(world);
-  new ResizeObserver(refresh).observe(viewport);
+  let resizeFrame: number | undefined;
+  const observer = new ResizeObserver(() => {
+    if (resizeFrame !== undefined) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = undefined;
+      edges = drawLinks(world, links, labels);
+      paint(root, edges, focus ? trace(focus, edges) : null);
+      refresh();
+    });
+  });
+  observer.observe(world);
+  observer.observe(viewport);
 
   root.querySelector(".canvas-controls")?.addEventListener("click", (event) => {
     const zoom = (event.target as Element | null)

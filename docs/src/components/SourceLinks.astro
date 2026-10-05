@@ -1,7 +1,6 @@
 ---
 import { Icon } from "@astrojs/starlight/components";
-import manifest from "../../../package.json";
-import { docsHref, isFrench } from "./docs-route.ts";
+import { isFrench } from "./docs-route.ts";
 
 interface Props {
   class?: string;
@@ -14,10 +13,6 @@ const sources = [
   [french ? "Miroir GitHub" : "GitHub mirror", "https://github.com/elie-laloum/outpost", "github"],
   ["npm", "https://www.npmjs.com/package/@elie-laloum/outpost", "npm"],
 ] as const;
-const version = `v${manifest.version}`;
-const versionLabel = french
-  ? `${version}, historique des versions`
-  : `${version}, changelog`;
 ---
 
 <div class:list={["source-links", Astro.props.class]}>
@@ -28,9 +23,6 @@ const versionLabel = french
       </a>
     ))
   }
-  <a class="version" href={docsHref(route, "project/changelog/")} aria-label={versionLabel}>
-    {version}
-  </a>
 </div>
 
 <style>
@@ -51,19 +43,6 @@ const versionLabel = french
   .source {
     height: 100%;
     aspect-ratio: 1;
-  }
-  .version {
-    padding: 0 0.9rem;
-    font-family: var(--sl-font-system-mono);
-    font-size: 0.8125rem;
-    font-variant-numeric: tabular-nums;
-    transition:
-      color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-      background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .version:hover {
-    background: var(--sl-color-gray-6);
-    color: var(--sl-color-white);
   }
   a:focus-visible {
     outline: 2px solid var(--sl-color-accent);

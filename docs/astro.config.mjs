@@ -11,7 +11,7 @@ export default defineConfig({
   site: "https://elie-laloum.github.io",
   base,
   trailingSlash: "always",
-  markdown: { processor: unified(), rehypePlugins: [rehypeBays] },
+  markdown: { processor: unified({ rehypePlugins: [rehypeBays] }) },
   integrations: [
     starlight({
       title: "Outpost",

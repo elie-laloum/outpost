@@ -1,8 +1,11 @@
 ---
 title: "Changelog"
-description: "Changelog — Outpost API"
+description: "Features, fixes and changes in each Outpost release."
+pagefind: false
 sidebar:
-  order: 2
+  hidden: true
+prev: false
+next: false
 ---
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.

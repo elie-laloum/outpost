@@ -29,6 +29,26 @@ const migration = JSON.parse(
   await readFile(new URL("../audit/migration.json", import.meta.url), "utf8"),
 );
 for (const page of migration.pages) {
+  if (page.repositoryDestination) {
+    assert.equal(
+      page.destination,
+      null,
+      `Repository page still has a docs destination: ${page.source}`,
+    );
+    assert.ok(
+      !routes.has(route(page.source)),
+      `Retired page still exists: ${page.source}`,
+    );
+    const content = await readFile(
+      new URL(`../../${page.repositoryDestination}`, import.meta.url),
+      "utf8",
+    );
+    assert.ok(
+      content.trim().length > 150,
+      `Empty repository destination: ${page.repositoryDestination}`,
+    );
+    continue;
+  }
   for (const name of [page.source, page.destination, page.details].filter(
     Boolean,
   )) {

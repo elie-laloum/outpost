@@ -312,7 +312,7 @@ for (const [language, locale] of [
     );
   expected.set(
     `${locale}project/changelog.md`,
-    front(language ? "Historique des versions" : "Changelog", 2) +
+    `---\ntitle: ${JSON.stringify(language ? "Historique des versions" : "Changelog")}\ndescription: ${JSON.stringify(language ? "Les nouveautés, corrections et changements de chaque version d’Outpost." : "Features, fixes and changes in each Outpost release.")}\npagefind: false\nsidebar:\n  hidden: true\nprev: false\nnext: false\n---\n\n` +
       (language
         ? "Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.\n\n"
         : "The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.\n\n") +

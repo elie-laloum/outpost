@@ -52,21 +52,29 @@ try {
       configuration,
     );
     roots.push(resolve(localeDirectory, "outpost.config.ts"));
-    for (const name of await readdir(resolve(content, locale + "guide"))) {
-      if (!name.endsWith(".md")) continue;
-      const markdown = await readFile(
-        resolve(content, locale + "guide", name),
-        "utf8",
-      );
+    const names = [
+      "index.md",
+      ...(await readdir(resolve(content, locale + "guide")))
+        .filter((name) => name.endsWith(".md"))
+        .map((name) => `guide/${name}`),
+    ];
+    for (const name of names) {
+      const markdown = await readFile(resolve(content, locale, name), "utf8");
       let index = 0;
-      const project = resolve(localeDirectory, name.replace(/\.md$/, ""));
+      const project = resolve(
+        localeDirectory,
+        name.replace(/\.md$/, "").replaceAll("/", "-"),
+      );
       const projectFiles = new Set();
       for (const match of markdown.matchAll(
         /^```ts([^\n]*)\n([\s\S]*?)^```/gm,
       )) {
         // Titled TypeScript files form one project per page, so they can import each other.
         const title = match[1].match(/title="([\w.-]+\.ts)"/)?.[1];
-        let file = resolve(localeDirectory, `${name}-${index++}.ts`);
+        let file = resolve(
+          localeDirectory,
+          `${name.replaceAll("/", "-")}-${index++}.ts`,
+        );
         if (title) {
           assert.ok(!projectFiles.has(title), `Duplicate ${title} in ${name}`);
           if (!projectFiles.size) {
@@ -90,24 +98,6 @@ try {
           runnable.push({ file, name: locale + name });
       }
     }
-  }
-  const landing = resolve(root, "docs/src/components/landing/snippets");
-  const landingDirectory = resolve(workspace, "landing");
-  await mkdir(landingDirectory);
-  await copyFile(
-    resolve(workspace, "en/outpost.config.ts"),
-    resolve(landingDirectory, "outpost.config.ts"),
-  );
-  // The landing may carry no snippet at all; its folder then does not exist.
-  const landingNames = await readdir(landing).catch((error) => {
-    if (error.code === "ENOENT") return [];
-    throw error;
-  });
-  for (const name of landingNames) {
-    if (!name.endsWith(".ts")) continue;
-    const file = resolve(landingDirectory, name);
-    await writeFile(file, await readFile(resolve(landing, name), "utf8"));
-    roots.push(file);
   }
   assert.ok(roots.length > 2, "No guide snippets found");
   const program = ts.createProgram(roots, {

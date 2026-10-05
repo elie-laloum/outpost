@@ -6,7 +6,7 @@ const route = (name) =>
   `/${name.replace(/\.md$/, "").replace(/\/index$/, "")}/`;
 const historical = Object.fromEntries(
   migration.pages
-    .filter((page) => page.source !== page.destination)
+    .filter((page) => page.destination && page.source !== page.destination)
     .map((page) => [route(page.source), route(page.destination)]),
 );
 const redirects = { ...historical, ...referenceRedirects, ...guide };

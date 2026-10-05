@@ -1,6 +1,5 @@
 ---
 import GuideSidebar from "./GuideSidebar.astro";
-import ProjectSidebar from "./ProjectSidebar.astro";
 import ReferenceSidebar from "./ReferenceSidebar.astro";
 import { docsSpace } from "./docs-route.ts";
 
@@ -8,7 +7,7 @@ const sidebars = {
   landing: GuideSidebar,
   guide: GuideSidebar,
   reference: ReferenceSidebar,
-  project: ProjectSidebar,
+  changelog: GuideSidebar,
 };
 const SpaceSidebar = sidebars[docsSpace(Astro.locals.starlightRoute)];
 ---

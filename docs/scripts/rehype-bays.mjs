@@ -49,6 +49,7 @@ function pageKind(path) {
     .replaceAll("\\", "/")
     .match(/src\/content\/docs\/(?:fr\/)?(.+)\.md$/)?.[1];
   if (!page) return undefined;
+  if (page === "index") return "guide";
   return pageKinds.find(([prefix]) => page.startsWith(prefix))?.[1];
 }
 
