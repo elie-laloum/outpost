@@ -1,19 +1,18 @@
 ---
-title: "Variables d’environnement"
-description: "Déclarer les variables que reçoivent la sandbox, l’agent ou une seule commande, et d’où viennent leurs valeurs."
+title: "Transmettre des variables d’environnement"
+description: "Déclarez les variables transmises à la sandbox, à l’agent et aux commandes."
 ---
 
 ## Choisir où déclarer une variable
 
-Outpost transmet uniquement les noms que vous déclarez. Choisissez l’endroit le plus restreint qui atteint le processus concerné.
+Déclarez chaque variable là où elle est utile : sur le fournisseur de sandbox, sur le harness d’un agent ou sur une commande. Outpost transmet les noms déclarés ; choisissez le périmètre qui couvre les processus ayant besoin de la valeur.
 
-| Où                                  | Atteint                                                      | Pour                                                 |
-| ----------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
-| `variables` du provider de sandbox  | Toutes les commandes de la sandbox, agent compris            | Réglages d’outils comme `CI` ou `NODE_ENV`           |
-| `variables` du harness (agents CLI) | Les processus de l’agent uniquement                          | Clés d’API, réglages de l’agent, secrets MCP         |
-| `variables` d’une commande          | Cette seule commande                                         | Une surcharge ponctuelle                             |
-| `.outpost/.env` dans le dépôt cible | Toutes les commandes de la sandbox, comme celles du provider | Des valeurs gardées hors du code, propres à un dépôt |
-| `.env` à côté d’un `run.ts` généré  | Le provider de sandbox du script généré                      | Projets générés, plus bas                            |
+| Où                                    | Atteint                                                         | Pour                                                 |
+| ------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------- |
+| `variables` du fournisseur de sandbox | Toutes les commandes de la sandbox, agent compris               | Réglages d’outils comme `CI` ou `NODE_ENV`           |
+| `variables` du harness (agents CLI)   | Les processus de l’agent uniquement                             | Clés d’API, réglages de l’agent, secrets MCP         |
+| `variables` d’une commande            | Cette seule commande                                            | Une surcharge ponctuelle                             |
+| `.outpost/.env` dans le dépôt cible   | Toutes les commandes de la sandbox, comme celles du fournisseur | Des valeurs gardées hors du code, propres à un dépôt |
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -34,16 +33,16 @@ export const coder = createAgent({
 
 Les valeurs sont des chaînes. Sélectionnez chaque nom dans `process.env` explicitement : recopier tout `process.env` enverrait chaque secret de l’hôte dans la sandbox. Les `variables` par commande sont présentées dans [Sessions de sandbox](../sandbox-sessions/).
 
-## Savoir quelle valeur l’emporte
+## Comprendre la priorité des valeurs
 
 Quand un nom apparaît à plusieurs endroits, la source la plus spécifique l’emporte :
 
-`.outpost/.env` → provider de sandbox → harness → commande
+`.outpost/.env` → fournisseur de sandbox → harness → commande
 
 Outpost définit aussi `GIT_AUTHOR_*` et `GIT_COMMITTER_*` d’après la configuration Git du dépôt ; toute source déclarée les remplace.
 
 :::caution
-Un même nom ne peut pas être déclaré à la fois sur le harness et sur le provider de sandbox. Le dispatch échoue avant le démarrage de l’agent avec `Agent and sandbox variables overlap: NAME` (code `configuration`).
+Un même nom ne peut pas être déclaré à la fois sur le harness et sur le fournisseur de sandbox. Le dispatch échoue avant le démarrage de l’agent avec `Agent and sandbox variables overlap: NAME` (code `configuration`).
 :::
 
 ## Garder des valeurs dans `.outpost/.env`
@@ -61,11 +60,15 @@ Une valeur non vide est utilisée telle quelle. Une déclaration vide comme `LIN
 Gardez ce fichier hors de Git. Une ligne `.env` dans `.gitignore` le couvre.
 :::
 
-## Projets générés
+## Charger un fichier dans votre script
 
-`outpost init` écrit `.env.example` avec la variable dont votre connexion a besoin. Copiez-le en `.env` à côté de `run.ts` et ajoutez vos propres noms.
+Node.js peut charger un fichier d’environnement avant d’exécuter votre script :
 
-Le script lit `.env` dans son propre dossier : vous pouvez donc le lancer depuis n’importe où. Il complète les valeurs vides depuis l’environnement parent et transmet chaque nom déclaré aux `variables` du provider de sandbox.
+```sh
+node --env-file=.env run.ts
+```
+
+Votre code choisit ensuite les valeurs à transmettre avec `variables`. Charger le fichier dans Node.js ne transmet pas automatiquement son contenu à la sandbox. Le chemin `.env` est relatif au dossier depuis lequel vous lancez la commande.
 
 ## Secrets des serveurs MCP et du harness intégré
 
@@ -73,9 +76,9 @@ Les [serveurs MCP](../mcp-servers/) nomment leurs secrets ; Outpost n’écrit j
 
 <!-- features -->
 
-- [Agents CLI](../choose-an-agent/): Déclarez le secret dans les `variables` du harness, sur le provider de sandbox ou dans `.outpost/.env`.
-- [Harness intégré](../harness/): `createHarness()` n’a pas de `variables`. Déclarez le secret sur le provider de sandbox ou dans `.outpost/.env`.
-- [Providers de modèle](../model-providers/): L’`apiKey` reste sur l’hôte, dans votre code. Ne la transmettez pas à la sandbox.
+- [Agents CLI](../choose-an-agent/): Déclarez le secret dans les `variables` du harness, sur le fournisseur de sandbox ou dans `.outpost/.env`.
+- [Harness intégré](../harness/): `createHarness()` n’a pas de `variables`. Déclarez le secret sur le fournisseur de sandbox ou dans `.outpost/.env`.
+- [Fournisseurs de modèle](../model-providers/): L’`apiKey` reste sur l’hôte, dans votre code. Ne la transmettez pas à la sandbox.
 
 Un secret manquant échoue avant le démarrage du serveur, avec `Missing NAME`.
 

@@ -1,11 +1,11 @@
 ---
-title: "Firecracker microVMs"
-description: "Run each task in a Firecracker microVM on a Linux/KVM host you prepare, reached over SSH and optionally confined by the jailer."
+title: "Use Firecracker"
+description: "Configure a microVM provider and the host resources it needs."
 ---
 
 ## Prerequisites
 
-Outpost boots and stops the VM; you prepare the host and the guest image once.
+Prepare the Linux host and guest image before using the provider. Outpost boots and stops each VM; your infrastructure supplies the resources listed below.
 
 <!-- features -->
 
@@ -20,12 +20,12 @@ Outpost boots and stops the VM; you prepare the host and the guest image once.
 
 Import the provider from its subpath and pass it to `dispatch()` like any other sandbox.
 
-```ts
-import { dispatch } from "@elie-laloum/outpost";
-import { createFirecrackerSandboxProvider } from "@elie-laloum/outpost/providers/firecracker";
-import { coder, repository } from "./outpost.config.mts";
+<!-- tabs -->
 
-const sandboxProvider = createFirecrackerSandboxProvider({
+```ts title="firecracker.ts"
+import { createFirecrackerSandboxProvider } from "@elie-laloum/outpost/providers/firecracker";
+
+export const sandboxProvider = createFirecrackerSandboxProvider({
   binary: "/usr/local/bin/firecracker",
   kernel: "/srv/firecracker/vmlinux",
   rootfs: "/srv/firecracker/rootfs.ext4",
@@ -41,8 +41,14 @@ const sandboxProvider = createFirecrackerSandboxProvider({
   },
   home: "/home/agent",
 });
+```
 
-const result = await dispatch({
+```ts title="run.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, coder } from "./outpost.config.ts";
+import { sandboxProvider } from "./firecracker.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
@@ -54,18 +60,7 @@ console.log(result.commits);
 
 Each allocation boots a private copy of `rootfs`, then polls SSH until the guest answers with the expected `$HOME` and tools. Host paths must be absolute.
 
-| Option                                       | Default                   | Sets                                                                  |
-| -------------------------------------------- | ------------------------- | --------------------------------------------------------------------- |
-| `binary`, `kernel`, `rootfs`                 | Required                  | The Firecracker executable and the guest boot files.                  |
-| `tap`, `guestMac`, `bootArgs`                | Required                  | The host network device, the guest MAC and the kernel command line.   |
-| `ssh.host`, `user`, `identity`, `knownHosts` | Required                  | How Outpost reaches the guest. Unknown host keys are refused.         |
-| `home`                                       | Required                  | The agent’s home in the guest; it must equal the SSH user’s `$HOME`.  |
-| `ssh.port`, `ssh.binary`                     | `22`, `ssh` on the `PATH` | The guest SSH port and the host SSH client.                           |
-| `root`                                       | `/workspace`              | The repository workspace in the guest.                                |
-| `cpus`, `memoryMb`                           | `2`, `2048`               | Guest vCPUs and memory in MiB.                                        |
-| `bootDeadlineMs`                             | `60000`                   | How long to wait for SSH and the guest tools before failing.          |
-| `variables`                                  | None                      | [Environment variables](../environment-variables/) for every command. |
-| `jailer`                                     | Direct launch             | [Run through the jailer](#run-through-the-jailer).                    |
+API reference: [FirecrackerOptions](../../reference/firecrackeroptions/).
 
 ## Repository access
 
@@ -77,15 +72,7 @@ The SSH user must own `root` or be able to create it. Outpost keeps its Git tran
 
 Set `jailer` to start Firecracker through its jailer: the VMM runs as a non-root identity, in a private chroot and a cgroup v2 child with CPU, memory and thread limits.
 
-| Setting       | What it bounds                                                                                                    |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `binary`      | The jailer executable, from the same release as Firecracker.                                                      |
-| `directory`   | The jail base. Each VM gets a private jail beneath it.                                                            |
-| `cgroup`      | A dedicated cgroup v2 parent under `/sys/fs/cgroup`, with `cpu`, `memory` and `pids` in `cgroup.subtree_control`. |
-| `uid`, `gid`  | The non-root identity the VMM runs as. It must be able to use the TAP device.                                     |
-| `cpuQuotaUs`  | VMM CPU time per 100,000 µs: `50000` is half a CPU. Minimum `1000`. Guest `cpus` stays a separate setting.        |
-| `memoryMaxMb` | The cgroup memory limit in MiB. It must exceed `memoryMb` and leave room for the VMM overhead. Swap is disabled.  |
-| `processes`   | The host thread limit of the VM, at least `16`.                                                                   |
+API reference: [FirecrackerOptions](../../reference/firecrackeroptions/).
 
 The Outpost process must run as root: it never calls `sudo`. Every path it hands to the jailer must be root-owned, free of symlinks and not writable by group or others, up to `/`. That covers both binaries, `kernel`, `rootfs`, the SSH identity and known-hosts files, the SSH client (`/usr/bin/ssh` by default in this mode), `directory` and `cgroup`.
 

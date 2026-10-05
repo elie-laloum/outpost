@@ -1,23 +1,24 @@
 ---
-title: "Fallback agents"
-description: "Hand a dispatch to another agent or model when the first one hits a usage limit or its service is down."
+title: "Use a fallback agent"
+description: "Hand work to another agent when a configured quota or availability error occurs."
 ---
 
 ## Compose a fallback agent
 
-List the candidates in the order to try them, and the failures that hand over in `on`. Here Claude Opus runs first, then Claude Sonnet, then the Codex agent from [Setup](../setup/).
+Create a fallback agent with an ordered list of candidates and the fault kinds in `on`. Outpost tries the next candidate only when the current one fails with a covered quota or availability fault.
 
-```ts
+<!-- tabs -->
+
+```ts title="fallback.ts"
 import {
-  createAgent,
   createClaudeHarness,
   createFallbackAgent,
-  dispatch,
+  createAgent,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder } from "./outpost.config.ts";
 
-const claude = createClaudeHarness({ authentication: "account" });
-const agent = createFallbackAgent(
+export const claude = createClaudeHarness({ authentication: "account" });
+export const agent = createFallbackAgent(
   [
     createAgent({ harness: claude, model: "opus" }),
     createAgent({ harness: claude, model: "sonnet" }),
@@ -25,8 +26,14 @@ const agent = createFallbackAgent(
   ],
   { on: ["quota", "unavailable"] },
 );
+```
 
-const result = await dispatch({
+```ts title="run.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { agent } from "./fallback.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent,
@@ -41,10 +48,7 @@ A fallback agent goes wherever an agent does, including `createSandbox()`, agent
 
 `on` is required and names one or both categories.
 
-| `on` value    | Hands over when the turn fails with                                                                    |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| `quota`       | A usage or rate limit: `OutpostError` code `quota`, as classified on [Quota pauses](../quota-pauses/). |
-| `unavailable` | A service outage: overload, HTTP 408, 5xx or 529, or a connection or transport failure.                |
+API reference: [FallbackAgentOptions](../../reference/fallbackagentoptions/).
 
 Any other failure, including cancellation and deadlines, is rethrown at once. One exception: a deadline reached after the agent reported a connection failure counts as an outage. An outage keeps its code (`process`, `provider` or `timeout`); detect it with `unavailableFault(error)`.
 
@@ -62,12 +66,9 @@ The next candidate is not told about the partial work. If that matters, say in t
 
 ## Read which candidate answered
 
-A dispatch through a fallback agent returns `result.fallback`:
+After a fallback, you can inspect which candidates were tried and which one answered.
 
-| Field      | What it holds                                                                             |
-| ---------- | ----------------------------------------------------------------------------------------- |
-| `selected` | `index`, `name` and `model` of the candidate that produced the result.                    |
-| `attempts` | Candidates that stopped before it, each with `failure`, `message` and optional `resetAt`. |
+API reference: [DispatchResult](../../reference/dispatchresult/) and [FallbackAttempt](../../reference/fallbackattempt/).
 
 Each handover emits a `fallback` [agent event](../progress/) with `from`, `to`, `failure` and `message`. `result.usage` and workflow [budgets](../budgets/) include the tokens of failed candidates. `resume()` and `fork()` on the result continue with the selected candidate.
 

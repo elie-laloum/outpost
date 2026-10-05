@@ -32,22 +32,26 @@ const roots = [];
 const runnable = [];
 let executed = 0;
 try {
+  await writeFile(
+    resolve(workspace, "package.json"),
+    JSON.stringify({ type: "module" }),
+  );
   for (const locale of ["", "fr/"]) {
     const setup = await readFile(
       resolve(content, `${locale}guide/setup.md`),
       "utf8",
     );
     const configuration = setup.match(
-      /```ts title="outpost\.config\.mts"\n([\s\S]*?)```/,
+      /```ts title="outpost\.config\.ts"\n([\s\S]*?)```/,
     )?.[1];
     assert.ok(configuration, `Missing published configuration: ${locale}`);
     const localeDirectory = resolve(workspace, locale || "en");
     await mkdir(localeDirectory, { recursive: true });
     await writeFile(
-      resolve(localeDirectory, "outpost.config.mts"),
+      resolve(localeDirectory, "outpost.config.ts"),
       configuration,
     );
-    roots.push(resolve(localeDirectory, "outpost.config.mts"));
+    roots.push(resolve(localeDirectory, "outpost.config.ts"));
     for (const name of await readdir(resolve(content, locale + "guide"))) {
       if (!name.endsWith(".md")) continue;
       const markdown = await readFile(
@@ -60,16 +64,16 @@ try {
       for (const match of markdown.matchAll(
         /^```ts([^\n]*)\n([\s\S]*?)^```/gm,
       )) {
-        // Blocks titled `*.ts` form one project per page, so they can import each other.
+        // Titled TypeScript files form one project per page, so they can import each other.
         const title = match[1].match(/title="([\w.-]+\.ts)"/)?.[1];
-        let file = resolve(localeDirectory, `${name}-${index++}.mts`);
+        let file = resolve(localeDirectory, `${name}-${index++}.ts`);
         if (title) {
           assert.ok(!projectFiles.has(title), `Duplicate ${title} in ${name}`);
           if (!projectFiles.size) {
             await mkdir(project);
             await copyFile(
-              resolve(localeDirectory, "outpost.config.mts"),
-              resolve(project, "outpost.config.mts"),
+              resolve(localeDirectory, "outpost.config.ts"),
+              resolve(project, "outpost.config.ts"),
             );
           }
           projectFiles.add(title);
@@ -91,8 +95,8 @@ try {
   const landingDirectory = resolve(workspace, "landing");
   await mkdir(landingDirectory);
   await copyFile(
-    resolve(workspace, "en/outpost.config.mts"),
-    resolve(landingDirectory, "outpost.config.mts"),
+    resolve(workspace, "en/outpost.config.ts"),
+    resolve(landingDirectory, "outpost.config.ts"),
   );
   // The landing may carry no snippet at all; its folder then does not exist.
   const landingNames = await readdir(landing).catch((error) => {
@@ -101,7 +105,7 @@ try {
   });
   for (const name of landingNames) {
     if (!name.endsWith(".ts")) continue;
-    const file = resolve(landingDirectory, name.replace(/\.ts$/, ".mts"));
+    const file = resolve(landingDirectory, name);
     await writeFile(file, await readFile(resolve(landing, name), "utf8"));
     roots.push(file);
   }

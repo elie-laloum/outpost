@@ -1,106 +1,74 @@
 ---
-title: "Setup"
-description: "Generate a ready-to-run workflow project (path A) or add Outpost to your application (path B), both with Docker and a Codex account."
+title: "Installation"
+description: "Install Outpost, build an agent image and create your TypeScript configuration."
 ---
 
-## Prerequisites
+## Before you start
 
-Other agents and sandboxes: [Choose an agent](../choose-an-agent/), [Choose a sandbox](../choose-a-sandbox/).
+You need Node.js 24 or later, Git, a repository with at least one commit and Docker running. This guide uses Codex; you can [choose another agent](../choose-an-agent/) later.
 
-<!-- features -->
+Run the following commands from the directory where you want to keep your scripts. This can be your repository or a separate directory.
 
-- **Node.js 24+**: Runs Outpost and your scripts.
-- **A Git repository**: With at least one commit.
-- **Docker or Podman**: Installed and running.
+## Install the package
 
-## Sign in to Codex
-
-```sh
-npm install -g @openai/codex
-codex -c cli_auth_credentials_store='"file"' login
-```
-
-Outpost copies `~/.codex/auth.json` (or `$CODEX_HOME/auth.json`) into the sandbox’s private home, so the agent uses your ChatGPT plan. API keys and other agents: [Authentication](../authentication/).
-
-## Path A: generate a workflow project
-
-Run `init` in your repository. `--yes` accepts the defaults: Codex, Docker, account sign-in, npm.
-
-```sh
-npx @elie-laloum/outpost init --image outpost:dev
-npx @elie-laloum/outpost init --yes --install --image outpost:dev
-```
-
-`init` writes these files, then builds the image. It stops without writing anything if one already exists.
-
-<!-- files -->
-
-- `run.ts`: The workflow script (`run.mts` if `package.json` declares `"type": "commonjs"`).
-- `brief.md`: The agent’s instructions, with an `{{OBJECTIVE}}` placeholder.
-- `.env.example`: Variables your sign-in needs, none for a Codex account.
-- `Dockerfile`: The [agent image](../agent-images/) recipe (`Containerfile` for Podman).
-- `.gitignore`: Ignores `.env`, `node_modules/` and runtime directories; extends an existing one.
-- `package.json`: Only when the directory has none.
-
-`--no-build` skips the first build, which downloads the agent CLIs. Without `--install`, run `npm install`. `--directory` and `--repository` keep the workflow outside the checkout ([CLI commands](../cli/)).
-
-## Path B: use Outpost in your application
+Your scripts import the library from this package. The second command sets `"type": "module"` in the directory’s `package.json`, so Node.js can run the `.ts` examples as ESM modules. If your repository uses CommonJS, keep these scripts in a separate directory with its own `package.json`.
 
 ```sh
 npm install @elie-laloum/outpost
+npm pkg set type=module
 ```
 
-Path A already built `outpost:dev`. Otherwise, generate its recipe in a separate directory:
+The `outpost` command helps you build images and check your environment.
+
+## Build the agent image
+
+Generate and build the image in a dedicated directory:
 
 ```sh
-npx outpost init --yes --directory outpost-image --image outpost:dev
+npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-Save this configuration next to your scripts. Outpost does not load it by itself: import its names where you need them.
+The first build downloads the agent CLIs and may take a few minutes. Wait for it to finish before running a task.
 
-```ts title="outpost.config.mts"
+Here, `init` prepares the image recipe and builds it. It also generates example workflow files in `.outpost-image`; the scripts in this guide are the ones you write yourself. You do not need to run the generated project.
+
+You can edit `.outpost-image/Dockerfile` to add project tools, then rebuild with `npx outpost image build --directory .outpost-image --image outpost:dev`. See [Build an agent image](../agent-images/) for Podman and image customization.
+
+## Prepare agent access
+
+Before using the account-based configuration below, prepare a Codex login saved to a file on your machine. Follow [Configure Codex](../codex/#sign-in-with-your-account) for the login command and credential location.
+
+For API-key access, or another agent, follow [Authentication](../authentication/). Account access and API access have separate billing.
+
+## Create your configuration file
+
+Save this file next to your scripts. It declares the agent, the image and the repository; your scripts import these values explicitly.
+
+```ts title="outpost.config.ts"
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
 });
-
 export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
 });
-
 export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
 ```
 
-<!-- features -->
+`repository` uses the current directory unless you set `OUTPOST_REPOSITORY` to the absolute path of another checkout. If you keep your scripts outside the repository, set this variable before running them.
 
-- `coder`: The Codex agent, signed in with your account.
-- `sandboxProvider`: Starts a container from `outpost:dev` for each task.
-- `repository`: The checkout to edit: `OUTPOST_REPOSITORY` (absolute path) or the current directory.
+All TypeScript files in the guides use the `.ts` extension, including in their imports. Node.js 24 runs them directly; you do not need to compile them before execution.
 
-## Check the setup
+The guides show longer examples as several files in tabs. Save each tab under its displayed filename, in the same directory as this configuration. The accompanying text names the script to run.
+
+## Check the image
+
+`doctor` checks the local tools and image. It does not send a model request or test your login. A failed check exits with status 1; [Troubleshoot your setup](../diagnostics/) explains the report.
 
 ```sh
 npx outpost doctor --image outpost:dev
 ```
 
-`doctor` checks the host, the container engine and the image, and exits with status 1 on failure. It does not test sign-in or model access; see [Diagnostics](../diagnostics/).
-
-## Run the generated project
-
-```sh
-node run.ts "Describe this repository"
-```
-
-Progress goes to stderr, then the script prints the work branch, the agent’s commits and its conversation. Ctrl+C cancels and prints recovery details.
-
-:::caution
-The generated `run.ts` uses `branch: { mode: "integrate" }`: it merges the agent’s commits into your checked-out branch. To review first, use a named branch ([Repository and branch](../repository-and-branch/)).
-:::
-
-## Next
-
-Run your own task from TypeScript in [Your first task](../first-request/).
-
-API: [createAgent](../../reference/createagent/) · [createCodexHarness](../../reference/createcodexharness/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/).
+You are ready to [run your first task](../first-request/).

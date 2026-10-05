@@ -1,15 +1,15 @@
 ---
-title: "Prepare the environment"
-description: "Install dependencies before the agent starts, and reuse package downloads across Docker and Podman sandboxes."
+title: "Prepare the agent’s environment"
+description: "Install project dependencies before an agent starts and reuse download caches."
 ---
 
 ## Install dependencies before agent work
 
-Pass `hooks` to `dispatch()`. Each hook is a list of commands that Outpost runs while it prepares the sandbox, before the agent's first turn.
+Use a `sandboxReady` hook to install project dependencies before the agent starts. The command runs in the prepared sandbox, so the agent can use the installed packages during its task.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -28,11 +28,7 @@ console.log(result.text);
 
 ## Choose where each hook runs
 
-| Hook             | Runs where                        | When                                              | Commands          |
-| ---------------- | --------------------------------- | ------------------------------------------------- | ----------------- |
-| `workspaceReady` | On the host, in the worktree      | After the worktree is created, before any sandbox | One after another |
-| `hostReady`      | On the host, in the worktree      | After the sandbox is acquired                     | One after another |
-| `sandboxReady`   | In the sandbox, in the repository | After the repository is in place                  | All at once       |
+API reference: [LifecycleHooks](../../reference/lifecyclehooks/).
 
 `hostReady` and `sandboxReady` run at the same time. Install dependencies in `sandboxReady`: they then match the sandbox's operating system and architecture.
 

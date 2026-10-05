@@ -1,11 +1,11 @@
 ---
-title: "MCP servers"
-description: "Give any agent the tools of Model Context Protocol servers, declared once and passed secrets by name only."
+title: "Connect MCP servers"
+description: "Give an agent MCP tools, resources and prompts with explicitly declared credentials."
 ---
 
 ## Declare servers
 
-`mcpServers` maps a server name to a stdio command or a Streamable HTTP endpoint. Every CLI preset and `createHarness()` accept the same declaration.
+Declare MCP servers in `mcpServers`, using a name for each server. A server can start from a command or expose a Streamable HTTP endpoint. CLI harnesses and the built-in harness accept the same declaration.
 
 ```ts
 import type { McpServers } from "@elie-laloum/outpost";
@@ -23,19 +23,7 @@ const mcpServers: McpServers = {
 };
 ```
 
-A server has either `command` (stdio) or `url` (HTTP). Names use 1 to 32 letters, digits, `_` or `-`.
-
-| Field                  | Server | Holds                                                                     |
-| ---------------------- | ------ | ------------------------------------------------------------------------- |
-| `command`, `arguments` | stdio  | The executable and its arguments, started in the sandbox.                 |
-| `environment`          | stdio  | Non-secret environment values.                                            |
-| `variables`            | stdio  | Names of secret variables forwarded to the server.                        |
-| `url`                  | HTTP   | An absolute `http` or `https` endpoint, without credentials.              |
-| `headers`              | HTTP   | Non-secret headers sent with every request.                               |
-| `bearerTokenVariable`  | HTTP   | Name of the variable sent as `Authorization: Bearer`.                     |
-| `oauth`                | HTTP   | A CLI login or client credentials: see [MCP server login](../mcp-oauth/). |
-| `tools`                | Both   | `include` and `exclude` lists of exact MCP tool names.                    |
-| `startupTimeoutMs`     | Both   | How long the server may take to start.                                    |
+API reference: [McpStdioServer](../../reference/mcpstdioserver/) and [McpHttpServer](../../reference/mcphttpserver/).
 
 ## Pass secrets by name
 
@@ -77,7 +65,7 @@ Kimi Code and Antigravity have no per-run option. Outpost merges the declared en
 
 ## Filter tools and set startup timeouts
 
-`tools.include` keeps only the listed tools; `tools.exclude` removes tools afterwards. `startupTimeoutMs` bounds server start-up.
+This example removes the deletion tool from the tools offered to the model and gives the server two minutes to start.
 
 ```ts
 import type { McpServers } from "@elie-laloum/outpost";
@@ -94,14 +82,7 @@ const mcpServers: McpServers = {
 
 An option a harness cannot apply fails when the agent is composed.
 
-| Harness          | `include`       | `exclude`                            | `startupTimeoutMs`                   |
-| ---------------- | --------------- | ------------------------------------ | ------------------------------------ |
-| Built-in harness | Yes             | Yes                                  | Yes, 60 s by default                 |
-| Claude Code      | Refused         | `--disallowedTools`                  | `MCP_TIMEOUT`, one value for the run |
-| Codex            | `enabled_tools` | `disabled_tools`                     | `startup_timeout_ms`                 |
-| Copilot CLI      | `tools`         | `--deny-tool`: listed, calls refused | Refused                              |
-| Kimi Code        | `enabledTools`  | `disabledTools`                      | `startupTimeoutMs`                   |
-| Antigravity      | Refused         | `disabledTools`                      | Refused                              |
+API reference: [McpToolFilter](../../reference/mcptoolfilter/).
 
 With Claude Code, every server that sets `startupTimeoutMs` must use the same value, and you cannot also set `MCP_TIMEOUT` in the harness `variables`.
 
@@ -109,43 +90,54 @@ With Claude Code, every server that sets `startupTimeoutMs` must use the same va
 
 Pass the same servers to `createHarness({ mcpServers })`. Each turn starts them inside the borrowed sandbox and stops them when the turn ends.
 
-```ts
+<!-- tabs -->
+
+```ts title="mcp-model.ts"
+import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createOpenAIModelProvider({
+  baseUrl: "https://api.openai.com/v1",
+  api: "responses",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+});
+```
+
+```ts title="linear-access.ts"
+import { defineHarnessPermissions } from "@elie-laloum/outpost";
+
+export const mcpServers = {
+  linear: {
+    command: "npx",
+    arguments: ["-y", "linear-mcp"],
+    variables: ["LINEAR_API_KEY"],
+  },
+};
+export const permissions = defineHarnessPermissions({
+  rules: [{ effect: "deny", tools: ["mcp__linear__delete_*"] }],
+});
+```
+
+```ts title="mcp-reviewer.ts"
 import {
   createAgent,
   createHarness,
   createHarnessFileTools,
-  createOpenAIModelProvider,
-  defineHarnessPermissions,
 } from "@elie-laloum/outpost";
+import { modelProvider } from "./mcp-model.ts";
+import { mcpServers, permissions } from "./linear-access.ts";
 
-const reviewer = createAgent({
+export const reviewer = createAgent({
   model: process.env.MODEL_NAME ?? "",
   harness: createHarness({
-    modelProvider: createOpenAIModelProvider({
-      baseUrl: "https://api.openai.com/v1",
-      api: "responses",
-      apiKey: process.env.OPENAI_API_KEY ?? "",
-    }),
+    modelProvider,
     tools: [createHarnessFileTools()],
-    mcpServers: {
-      linear: {
-        command: "npx",
-        arguments: ["-y", "linear-mcp"],
-        variables: ["LINEAR_API_KEY"],
-      },
-    },
-    permissions: defineHarnessPermissions({
-      rules: [{ effect: "deny", tools: ["mcp__linear__delete_*"] }],
-    }),
+    mcpServers,
+    permissions,
   }),
 });
 ```
 
-<!-- features -->
-
-- `mcp__<server>__<tool>`: The name the model sees and [permission rules](../harness-permissions/) match. Characters other than letters, digits, `_` and `-` become `_`; long names end with a hash.
-- **Inside the sandbox**: Stdio servers and the HTTP bridge run there, so tokens stay in the sandbox and [network rules](../network-restrictions/) apply.
-- **Results**: Text, structured content and resource text reach the model. Images and audio become a marker; server errors become tool errors.
+API reference: [HarnessMcpContext](../../reference/harnessmcpcontext/) and [HarnessPermissionRule](../../reference/harnesspermissionrule/).
 
 The harness has no `variables` of its own: declare secrets on the sandbox provider or in `.outpost/.env`. A [subagent](../subagents/) starts the servers of its own harness.
 
@@ -157,12 +149,7 @@ The sandbox needs `node` and must accept live input (`liveInput`). Every built-i
 
 In the built-in harness, servers that announce resources or prompts add read-only tools. Each takes a `server` name.
 
-| Tool                 | Does                                    |
-| -------------------- | --------------------------------------- |
-| `mcp_list_resources` | Lists resources and resource templates. |
-| `mcp_read_resource`  | Reads a resource by URI.                |
-| `mcp_list_prompts`   | Lists prompts.                          |
-| `mcp_get_prompt`     | Renders a prompt with its arguments.    |
+API reference: [createHarness](../../reference/createharness/) and [HarnessMcpContext](../../reference/harnessmcpcontext/).
 
 `defineMcpPrompt()` puts a server prompt into the harness instructions. It is rendered at the start of each turn.
 

@@ -1,11 +1,11 @@
 ---
-title: "Tasks and dependencies"
-description: "Declare tasks, connect their typed outputs into a graph, run it and read each task’s result."
+title: "Connect tasks and dependencies"
+description: "Define tasks, declare what they depend on and read their typed results."
 ---
 
 ## Define tasks and a workflow
 
-A task is one step with a unique `key` and a `perform` function. A workflow is the list of tasks, ordered by their `after` dependencies.
+Declare each step with a task constructor, then give the tasks to `defineWorkflow()`. Dependencies determine execution order and which earlier results a task may read.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -66,14 +66,7 @@ for (const task of result.tasks)
 
 It prints `failed`, then `lint failed 2 lint errors` and `test cancelled`: by default, the first failure cancels the tasks that have not finished.
 
-| Member        | What it holds                                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------------------- |
-| `status`      | `"done"`, `"failed"`, `"cancelled"`, `"paused"` (a gate or quota pause) or `"waiting-input"`.                   |
-| `unwrap()`    | Throws a [`WorkflowFailure`](../../reference/workflowfailure/) carrying the result unless `status` is `"done"`. |
-| `value(task)` | The task’s output. Throws if the task did not finish with `done` in this run.                                   |
-| `tasks`       | One record per task: `key`, `status`, `attempts`, `startedAt`, `finishedAt`, `error`.                           |
-| `errors`      | The errors that failed the run.                                                                                 |
-| `usage`       | Attempts made and tokens reported by agent tasks, summed over the run.                                          |
+API reference: [WorkflowResult](../../reference/workflowresult/) and [TaskRecord](../../reference/taskrecord/).
 
 ## Run tasks in parallel
 
@@ -126,7 +119,7 @@ console.log(
 
 It prints `done [ 'done', 'skipped' ]`. A skipped task does not fail the run, has no value, and skips every task that depends on it.
 
-## Draw the graph
+## Display the dependencies
 
 `diagram()` returns the graph as a Mermaid flowchart, for a README or a pull request.
 
@@ -151,38 +144,59 @@ flowchart LR
 
 `defineAgentTask()` and `defineCommandTask()` run in a sandbox you opened with [`createSandbox()`](../sandbox-sessions/). The tasks share its files; you close it.
 
-```ts
-import {
-  createSandbox,
-  defineAgentTask,
-  defineCommandTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
+
+```ts title="fix-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+
+export function defineFix(sandbox: Sandbox) {
+  return defineAgentTask({
+    key: "fix",
+    sandbox,
+    request: () => ({ brief: { text: "Fix the failing date tests." } }),
+  });
+}
+```
+
+```ts title="test-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineFix } from "./fix-dates.ts";
+import { defineCommandTask } from "@elie-laloum/outpost";
+
+export function defineTests(
+  sandbox: Sandbox,
+  fix: ReturnType<typeof defineFix>,
+) {
+  return defineCommandTask({
+    key: "test",
+    after: [fix],
+    sandbox,
+    command: { executable: "npm", arguments: ["test"] },
+  });
+}
+```
+
+```ts title="run-dates.ts"
+import { createSandbox, defineWorkflow } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { defineFix } from "./fix-dates.ts";
+import { defineTests } from "./test-dates.ts";
 
 await using sandbox = await createSandbox({
   repository,
   sandboxProvider,
   agent: coder,
 });
-const fix = defineAgentTask({
-  key: "fix",
-  sandbox,
-  request: () => ({ brief: { text: "Fix the failing date tests." } }),
-});
-const test = defineCommandTask({
-  key: "test",
-  after: [fix],
-  sandbox,
-  command: { executable: "npm", arguments: ["test"] },
-});
-const result = await defineWorkflow("fix-dates", [fix, test]).start();
+export const fix = defineFix(sandbox);
+export const test = defineTests(sandbox, fix);
+export const result = await defineWorkflow("fix-dates", [fix, test]).start();
 result.unwrap();
 ```
 
 `test` runs `npm test` on the agent’s edits. A nonzero exit status fails the task.
 
-## Which task type?
+## Choose the task type
 
 Each declaration returns a task that you list in `defineWorkflow()` and connect with `after`.
 

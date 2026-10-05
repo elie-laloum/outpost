@@ -1,11 +1,11 @@
 ---
-title: "Exécutions sans surveillance"
-description: "Lancer des workflows sans personne au clavier : depuis un job de CI, une file durable, un créneau cron ou un webhook vérifié, chaque exécution sous checkpoint pour qu’un redémarrage ne refasse pas le travail."
+title: "Automatiser les exécutions"
+description: "Choisissez la CI, les files, les planifications ou les webhooks pour lancer du travail sans session interactive."
 ---
 
-## Quatre portes d’entrée
+## Choisir le déclencheur
 
-Toutes les portes ci-dessous mènent au même endroit : un workflow lancé depuis votre code. Choisissez celle qui correspond à qui, ou à quoi, décide de l’exécuter.
+Choisissez ce qui déclenche le travail : un job de CI, une demande en file, un horaire ou un événement vérifié. Le workflow s’exécute toujours depuis votre code TypeScript ; le point d’entrée détermine quand le soumettre.
 
 <!-- features -->
 
@@ -13,14 +13,12 @@ Toutes les portes ci-dessous mènent au même endroit : un workflow lancé depui
   - clé d’API
   - code de sortie
 - [Files de jobs et workers](../job-queues/): Les producteurs déposent des jobs, des workers de longue durée les réclament et les exécutent.
-  - `runQueueWorker()`
   - SQLite
   - HTTP
 - [Redis et BullMQ](../redis-workers/): Une seule file partagée entre producteurs et workers répartis sur plusieurs machines.
   - Redis
   - BullMQ
 - [Planification cron](../cron-schedules/): Un job déterministe par créneau, dans votre fuseau, sans doublon.
-  - `createCronSchedule()`
   - créneaux
 - [Webhooks](../webhooks/): Un événement GitHub, GitLab ou Slack vérifié devient un job.
   - GitHub
@@ -28,13 +26,12 @@ Toutes les portes ci-dessous mènent au même endroit : un workflow lancé depui
   - Slack
 - [Exécutions durables](../durable-runs/): Chaque job tourne sous un checkpoint : un redémarrage reprend au lieu de repartir de zéro.
   - checkpoints
-  - `runId`
 
 ## Traiter le travail à mesure qu’il arrive
 
-Un processus worker enregistre les handlers qu’il connaît et traite un job à la fois jusqu’à ce que son signal l’arrête. Les producteurs n’envoient jamais de code, seulement un nom de handler et du JSON.
+Un processus worker enregistre les traitements qu’il connaît et traite un job à la fois jusqu’à ce que son signal l’arrête. Les producteurs n’envoient jamais de code, seulement un nom de traitement et du JSON.
 
-```ts title="worker.mts"
+```ts title="worker.ts"
 import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -56,7 +53,7 @@ try {
 
 Enveloppez le workflow dans `defineWorkflowJob()` pour obtenir une exécution sous checkpoint par job, identifiée par le `runId` du job. Planifications et webhooks déposent dans la même file : le worker reste le seul processus à faire tourner des agents.
 
-## Choisir sa porte d’entrée
+## Comparer les déclencheurs
 
 | Déclenché par                        | Utilisez                                 | Tourne en continu               |
 | ------------------------------------ | ---------------------------------------- | ------------------------------- |
@@ -71,7 +68,7 @@ Un trigger ne lance jamais de workflow dans la requête ou le timer qui l’a d�
 
 - Les entrées et les valeurs de job sont du JSON, jusqu’à 256 Kio chacune ; un seul job à la fois par `runId`.
 - Une file écarte les baux périmés, mais vos effets externes ne sont exactement-une-fois que si le service appelé déduplique votre clé d’idempotence.
-- Une source de webhook vérifie la signature avant d’analyser le contenu et échoue en se fermant ; un expéditeur vérifié n’est pas une approbation, et les [gates](../approvals/) gardent leur propre acteur.
+- Une source de webhook vérifie la signature avant d’analyser le contenu et échoue en se fermant ; un expéditeur vérifié n’est pas une approbation, et les [étapes d’approbation](../approvals/) gardent leur propre acteur.
 - Un créneau sauté par l’heure d’été ne se déclenche pas, un créneau répété ne se déclenche qu’une fois, et seul le dernier créneau dans `maxLateMs` est rattrapé.
 - Une exécution que personne ne regarde a quand même besoin d’une limite : associez-la aux [pauses sur quota](../quota-pauses/) et aux [budgets](../budgets/).
 

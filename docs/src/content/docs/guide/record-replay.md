@@ -1,22 +1,29 @@
 ---
-title: "Replay without a model"
-description: "Record a real dispatch, then replay its events, result and commits without calling a model: to reproduce a bug or to turn a run into a deterministic test."
+title: "Replay a recorded run"
+description: "Replay a journal and its recorded commits without sending a model request."
 ---
 
 ## Record a run and replay it
 
-```ts
-import {
-  dispatch,
-  createLocalTransport,
-  readJournal,
-  createReplayAgent,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+Record a dispatch in a [journal](../journals/), then use a replay agent to reproduce its events and recorded commits. The replay sends no model requests; its usage fields reproduce the original counters rather than new consumption.
 
-const transporter = createLocalTransport({ directory: ".outpost/storage" });
-const brief = { text: "Fix the failing parser test." };
-const recorded = await dispatch({
+<!-- tabs -->
+
+```ts title="record-settings.ts"
+import { createLocalTransport } from "@elie-laloum/outpost";
+
+export const transporter = createLocalTransport({
+  directory: ".outpost/storage",
+});
+export const brief = { text: "Fix the failing parser test." };
+```
+
+```ts title="record.ts"
+import { dispatch, readJournal } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { brief, transporter } from "./record-settings.ts";
+
+export const recorded = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
@@ -24,23 +31,28 @@ const recorded = await dispatch({
   branch: { mode: "named", name: "recorded-fix" },
   logging: { transporter, replayable: true },
 });
-
-const journal = await readJournal({
+export const journal = await readJournal({
   transporter,
   reference: recorded.logReference!,
 });
-const replaying = createReplayAgent({ journal });
-const replayed = await dispatch({
+```
+
+```ts title="replay.ts"
+import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
+import { journal } from "./record.ts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { brief } from "./record-settings.ts";
+
+export const replaying = createReplayAgent({ journal });
+export const replayed = await dispatch({
   repository,
   sandboxProvider,
   agent: replaying,
   brief,
   branch: { mode: "named", name: "replayed-fix" },
 });
-console.log(replayed.commits, replaying.remainingTurns); // same commits, 0
+console.log(replayed.commits, replaying.remainingTurns);
 ```
-
-The first dispatch calls the model and writes a [journal](../journals/). The second replays that journal: same events, text, usage and commits, no tokens.
 
 Both branches start from the same commit, so the replayed commits have the same ids as the recorded ones. From another commit with the same tree, trees and messages match but ids differ.
 
@@ -48,12 +60,7 @@ Both branches start from the same commit, so the replayed commits have the same 
 
 `logging: { replayable: true }` adds a `workspace-commits` event to the journal when a sandbox dispatch ends, including a failed or cancelled one.
 
-| Field                               | Holds                                                                  |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| `baseline`                          | The commit and tree the workspace started from.                        |
-| `commits[].author`, `.committer`    | Name, email and date of each identity.                                 |
-| `commits[].message`                 | The exact commit message.                                              |
-| `commits[].patch`, `commits[].tree` | A binary Git patch, checked against the commit's tree while recording. |
+API reference: [WorkspaceCommitsEvent](../../reference/workspacecommitsevent/).
 
 :::caution
 Patches put repository content in the journal. Store and share replayable journals like the code itself.
@@ -70,23 +77,30 @@ When the history cannot be recorded, the event keeps the baseline, gives the rea
 
 Pass the journal to `createReplayAgent()` and use the result as the `agent` of a `dispatch()` with the same brief. It replays turn by turn, in recorded order.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Check**: Before each turn.
-   - **Compare the prompt**: The rendered prompt must equal the recorded one.
-2. **Re-emit**: Instead of calling a model.
-   - **Replay the events**: Agent or harness events, then the recorded text and usage. A `verbose` journal also replays raw lines and deltas.
-     - `observe`
-3. **Rebuild**: On the last turn of the dispatch.
-   - **Check the baseline**: The workspace tree must match the recorded baseline.
-     - sandbox
-   - **Apply each patch**: `git apply --index`, then compare the resulting tree.
-     - sandbox
-   - **Recreate the commit**: With the recorded identities, dates and message.
-     - sandbox
-4. **Finish**: Like the recorded turn.
-   - **Rethrow the failure**: A turn that failed when recorded throws its error code and message.
-   - **Return the result**: Otherwise the dispatch returns the recorded text, usage and commits.
+- **Check**: Before each turn.
+  - Steps
+  - **Compare the prompt**: The rendered prompt must equal the recorded one.
+  - → **Re-emit**: then
+- **Re-emit**: Instead of calling a model.
+  - Steps
+  - **Replay the events**: Agent or harness events, then the recorded text and usage. A `verbose` journal also replays raw lines and deltas.
+    - `observe`
+  - → **Rebuild**: then
+- **Rebuild**: On the last turn of the dispatch.
+  - Steps
+  - **Check the baseline**: The workspace tree must match the recorded baseline.
+    - sandbox
+  - **Apply each patch**: `git apply --index`, then compare the resulting tree.
+    - sandbox
+  - **Recreate the commit**: With the recorded identities, dates and message.
+    - sandbox
+  - → **Finish**: then
+- **Finish**: Like the recorded turn.
+  - Steps
+  - **Rethrow the failure**: A turn that failed when recorded throws its error code and message.
+  - **Return the result**: Otherwise the dispatch returns the recorded text, usage and commits.
 
 Commits are rebuilt through the sandbox, so replays work with cloud sandboxes too. The sandbox needs `git`.
 
@@ -100,13 +114,7 @@ A [fallback agent](../fallback-agents/) handover replays in the same turn: the s
 
 When the replay differs from its journal, it throws [`ReplayDivergence`](../../reference/replaydivergence/), an `OutpostError` with code `replay`.
 
-| `kind`       | Cause                                                            |
-| ------------ | ---------------------------------------------------------------- |
-| `prompt`     | The rendered prompt differs from the recorded prompt.            |
-| `baseline`   | The workspace starts from a different tree.                      |
-| `tree`       | A patch does not apply, or produces a different tree.            |
-| `exhausted`  | The dispatch asks for more turns than the journal holds.         |
-| `unrecorded` | The journal has no workspace commits, or they are `unavailable`. |
+API reference: [ReplayDivergenceKind](../../reference/replaydivergencekind/).
 
 ```ts
 import {
@@ -114,7 +122,7 @@ import {
   createReplayAgent,
   ReplayDivergence,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 declare const journal: readonly unknown[];
 try {
@@ -144,30 +152,47 @@ Replay on a `named` branch with the recorded name, deleted beforehand so it star
 
 Save the journal once to `fixtures/parser-fix.json` with `JSON.stringify(journal)`, and tag the commit the recorded branch started from `parser-fix-base`. The test replays it on a fresh branch from that tag.
 
-```ts title="parser-fix.test.mts"
-import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { test } from "node:test";
-import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-test("the parser fix replays", async () => {
-  const journal = JSON.parse(
-    await readFile("fixtures/parser-fix.json", "utf8"),
-  );
+```ts title="replay-fixture.ts"
+import { readFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+
+export const journal = JSON.parse(
+  await readFile("fixtures/parser-fix.json", "utf8"),
+);
+export const branch = {
+  mode: "named",
+  name: `replay/${randomUUID()}`,
+  from: "parser-fix-base",
+} as const;
+```
+
+```ts title="replay-parser.ts"
+import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
+import { journal, branch } from "./replay-fixture.ts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+
+export async function replayParser() {
   const agent = createReplayAgent({ journal });
   const result = await dispatch({
     repository,
     sandboxProvider,
     agent,
     brief: { text: "Fix the failing parser test." },
-    branch: {
-      mode: "named",
-      name: `replay/${randomUUID()}`,
-      from: "parser-fix-base",
-    },
+    branch,
   });
+  return { agent, result };
+}
+```
+
+```ts title="parser-fix.test.ts"
+import { test } from "node:test";
+import { replayParser } from "./replay-parser.ts";
+import assert from "node:assert/strict";
+
+test("the parser fix replays", async () => {
+  const { agent, result } = await replayParser();
   assert.equal(agent.remainingTurns, 0);
   assert.equal(result.commits.length, 1);
 });

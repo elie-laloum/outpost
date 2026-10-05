@@ -1,16 +1,16 @@
 ---
-title: "Typed responses"
-description: "Ask the agent for a tagged answer and receive it as validated, typed data in result.value."
+title: "Validate agent responses"
+description: "Ask for structured output and validate it before using it in your application."
 ---
 
 ## Ask for a JSON answer
 
-Declare the answer with `defineJsonResponse()`: an XML-style tag and a schema. Pass it as `response`, and ask for the tag in the brief.
+Define a JSON response contract to receive data your application can validate. The agent writes the answer inside the requested tag, and Outpost parses and validates it before exposing `result.value`.
 
 ```ts
 import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
 import { z } from "zod";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const verdict = defineJsonResponse({
   tag: "verdict",
@@ -29,9 +29,7 @@ const result = await dispatch({
 if (!result.value.approved) console.log(result.value.reasons);
 ```
 
-`result.value` holds the parsed object, typed from the schema. `result.text` keeps the agent’s full answer, tags included.
-
-`schema` accepts any [Standard Schema](https://standardschema.dev/) validator, such as Zod or Valibot, or a parsing function. TypeScript types alone do not check what the model returns; the schema does.
+API reference: [DispatchResult](../../reference/dispatchresult/) and [defineJsonResponse](../../reference/definejsonresponse/).
 
 ## Write the brief for the tag
 
@@ -93,7 +91,7 @@ import {
   defineTextResponse,
   ResponseError,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   await dispatch({
@@ -109,7 +107,7 @@ try {
 }
 ```
 
-`raw` holds the tagged content when a tag was found. `recovery` names the conversation and branch, so you can [continue the conversation](../conversations/) or inspect the work. See [Errors](../error-handling/) for the other codes.
+API reference: [ResponseError](../../reference/responseerror/).
 
 ## Let the agent repair its answer
 

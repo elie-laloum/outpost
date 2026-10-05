@@ -1,22 +1,22 @@
 ---
-title: "Exécuter en CI"
-description: "Lancer un script Outpost dans un job de CI avec une clé API, faire échouer le job quand l’agent ou vos contrôles échouent, et pousser le résultat vous-même."
+title: "Exécuter depuis la CI"
+description: "Exécutez un script Outpost dans un job de CI et conservez les résultats utiles après son arrêt."
 ---
 
-## Ce qu’il faut sur le runner
+## Préparer le runner
 
 <!-- features -->
 
 - **Node.js 24+** : Exécute Outpost et vos scripts.
 - **L’historique Git** : Un clone complet, pour que l’agent lise l’historique et que les sandboxes cloud le téléversent.
 - **Une sandbox** : Docker ou Podman sur le runner, ou le SDK d’une [sandbox cloud](../cloud-sandboxes/) et ses identifiants d’allocation.
-- **L’image de l’agent** : Construite dans le job depuis votre `Dockerfile` commité, pour les sandboxes en conteneur.
-- **Un identifiant sans surveillance** : Une clé API ou un jeton de compte dédié, rangé dans un secret de CI.
-- **Votre projet de workflow** : `package.json`, le lockfile, `outpost.config.mts` et vos scripts, commités.
+- **L’image de l’agent** : Construite dans le job depuis `.outpost-image/Dockerfile`, préparé pendant l’[installation](../setup/) et commité avec vos scripts.
+- **Des identifiants pour le job** : Une clé d’API ou un jeton de compte dédié, enregistré dans les secrets de votre CI.
+- **Vos scripts et leur configuration** : `package.json`, le lockfile, `outpost.config.ts` et vos scripts, commités.
 
-## S’authentifier sans personne
+## Configurer les identifiants du job
 
-Un runner n’a aucune connexion de CLI à copier. Dans `outpost.config.mts`, passez `coder` sur une clé API lue dans l’environnement du job.
+Pour utiliser une clé d’API en CI, configurez `coder` dans `outpost.config.ts` afin de lire la clé dans l’environnement du job. Déclarez-la dans les secrets de votre CI pour que le runner puisse l’utiliser sans connexion interactive.
 
 ```ts
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -29,11 +29,11 @@ export const coder = createAgent({
 });
 ```
 
-Claude Code et Copilot CLI acceptent aussi un jeton d’abonnement via `{ account: { variable } }`, comme `CLAUDE_CODE_OAUTH_TOKEN`. Formes, facturation et destination de chaque identifiant : [Authentification](../authentication/).
+Claude Code et Copilot CLI acceptent aussi un jeton d’abonnement via `{ account: { variable } }`, comme `CLAUDE_CODE_OAUTH_TOKEN`. La page [Authentification](../authentication/) présente les identifiants acceptés, leur facturation et l’endroit où Outpost les installe.
 
 ## Ajouter le workflow
 
-Ce job GitHub Actions lance `review.mts`, tiré de [Votre première tâche](../first-request/), sur chaque pull request.
+Ce job GitHub Actions lance `review.ts`, tiré de [Votre première tâche](../first-request/), sur chaque pull request.
 
 ```yaml title=".github/workflows/outpost.yml"
 name: Outpost review
@@ -51,14 +51,14 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npx outpost image build --image outpost:dev
+      - run: npx outpost image build --directory .outpost-image --image outpost:dev
       - run: npx outpost doctor --image outpost:dev --json
-      - run: node review.mts
+      - run: node review.ts
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 ```
 
-Construisez l’image dans le job : le provider Docker refuse une image construite pour un autre identifiant utilisateur, et celui du runner diffère en général du vôtre. Ajoutez `--directory` quand le `Dockerfile` n’est pas à la racine.
+Construisez l’image dans le job pour que son identifiant utilisateur corresponde à celui du runner. Le fournisseur Docker refuse une image construite pour un autre identifiant. Si votre Dockerfile se trouve dans un autre dossier, adaptez `--directory`.
 
 `doctor` sort avec le statut 1 quand le moteur, l’image ou la CLI de l’agent manque ([Diagnostic](../diagnostics/)). Il vérifie Codex sur Docker, sauf si vous passez `--agent` ou `--sandbox-provider`, et ne teste pas la clé API.
 
@@ -75,9 +75,9 @@ Un job échoue quand le script sort avec un statut non nul. Afficher une erreur 
 | Un workflow lancé par `start()`     | Se résout avec un `status` autre que `"done"` | Appeler `result.unwrap()`          |
 | `outpost doctor`                    | Sort avec le statut 1                         | Rien                               |
 
-```ts title="fix.mts"
+```ts title="fix.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const signal = AbortSignal.timeout(30 * 60_000);
 await using sandbox = await createSandbox({
@@ -100,9 +100,9 @@ if (tests.status !== 0) throw new Error(`npm test failed:\n${tests.stderr}`);
 
 Gardez l’échéance de `signal` plus courte que le `timeout-minutes` du job. Outpost arrête alors l’agent et l’étape échoue, au lieu que GitHub annule le job et saute vos étapes `if: failure()` ([Limites et annulation](../limits-and-cancellation/)).
 
-## Nommer la branche par exécution
+## Créer une branche par exécution
 
-Une branche `named` qui existe déjà est réutilisée, avec les commits de l’exécution précédente. Mettez l’identifiant d’exécution dans le nom, comme dans `fix.mts`, pour que chaque job parte du commit extrait. C’est important sur les runners auto-hébergés, qui gardent les branches d’un job à l’autre.
+Une branche `named` qui existe déjà est réutilisée, avec les commits de l’exécution précédente. Mettez l’identifiant d’exécution dans le nom, comme dans `fix.ts`, pour que chaque job parte du commit extrait. C’est important sur les runners auto-hébergés, qui gardent les branches d’un job à l’autre.
 
 ## Livrer les changements
 
@@ -112,7 +112,7 @@ Outpost commite sur la branche et s’arrête là. Poussez depuis le job une foi
 permissions:
   contents: write
 steps:
-  # ...les étapes ci-dessus, qui lancent fix.mts
+  # ...les étapes ci-dessus, qui lancent fix.ts
   - run: git push origin "outpost/fix-${GITHUB_RUN_ID}"
 ```
 

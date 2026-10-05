@@ -1,15 +1,15 @@
 ---
-title: "Conversations"
-description: "Continue an agent’s conversation in a later task, branch it into a separate one, and keep it on another machine."
+title: "Continue a conversation"
+description: "Resume an agent’s saved context or start a separate conversation from it."
 ---
 
 ## Continue a conversation
 
-`result.resume()` sends a follow-up brief to the conversation a dispatch produced. The agent keeps its context: the files it read, what it decided and what it answered.
+Call `result.resume()` to send a follow-up request to the conversation created by a dispatch. The saved context includes the earlier messages, so the agent can continue from its previous work.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const first = await dispatch({
   repository,
@@ -23,7 +23,7 @@ const next = await first.resume({
 console.log(next.text);
 ```
 
-`resume()` runs a new dispatch in a fresh sandbox with the first one’s settings: repository, sandbox provider, branch. Outpost restores the saved conversation there first. Pass any setting to override it.
+The follow-up runs in a fresh sandbox with the same repository, provider and branch settings. Outpost restores the saved conversation before starting the agent. You can override these settings in the `resume()` request.
 
 ## Resume later from its ID
 
@@ -31,11 +31,11 @@ console.log(next.text);
 
 ## Branch a conversation
 
-`result.fork()` starts a new conversation from a copy of the first one. The original stays unchanged, so you can try two directions from the same context. Give the fork its own branch to keep its commits apart.
+Use `result.fork()` to explore another approach from the same saved context. It starts a separate conversation and leaves the original unchanged. Give the fork its own branch when its commits need to stay separate.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const first = await dispatch({
   repository,
@@ -58,7 +58,7 @@ In a [sandbox session](../sandbox-sessions/), `result.resume()` and `result.fork
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -129,11 +129,8 @@ export const coder = createAgent({
 <!-- features -->
 
 - **Matching format**: Wrap the store of the same agent, such as `createHarnessConversations()` for `createHarness()`. A mismatch fails when the harness is created.
-  - `conversations`
 - **Stable namespace**: Use one project name on every machine that shares these conversations.
-  - `namespace`
 - **Shared transport**: Use [S3 or R2](../object-storage/) between hosts; a local transport coordinates writers on one machine only.
-  - `createS3Transport()`
 
 `result.transcriptReference` identifies the archived copy. The Claude Code, Codex, Copilot and Kimi presets and `createHarness()` accept `conversations`.
 

@@ -1,11 +1,11 @@
 ---
-title: "Budgets"
-description: "Cap the attempts and the tokens a workflow may use, across its tasks, retries and checkpoint resumes."
+title: "Limit attempts and token usage"
+description: "Set a workflow budget and understand how usage is counted across retries and resumes."
 ---
 
 ## Set a workflow budget
 
-Pass `budget` to `start()`. Set an attempt limit, token limits, or both.
+Pass a `budget` to the workflow’s `start()` method to limit attempts, reported tokens or both. These limits apply across the workflow’s tasks, rather than to each task separately.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -25,24 +25,23 @@ console.log(result.usage);
 
 <!-- check:run -->
 
-It prints `{ attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }`. `budget.usage` accepts `input`, `cached`, `cacheCreated` and `output`; a limit you omit is unbounded.
+It prints `{ attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }`.
+
+API reference: [WorkflowBudget](../../reference/workflowbudget/).
 
 `speculate()` requires the same `budget`, shared by its candidates: see [Competing candidates](../speculation/).
 
-## Know what counts as an attempt
+## Understand attempt counts
 
 Each attempt is admitted against `budget.attempts` before it starts.
 
 <!-- features -->
 
 - [Task attempt](../concurrency-and-retries/): Each run of a task, including every retry.
-  - `retry`
 - [Loop round](../verification-loops/): Each round of a loop task.
-  - `defineLoopTask()`
 - [Speculative candidate](../speculation/): Each candidate that `speculate()` starts.
-  - `speculate()`
 
-An attempt is not a model request: one agent turn that calls its model forty times counts once. Skipped tasks and [cache hits](../task-cache/) use no attempt.
+One agent turn counts as one attempt, even if it makes many model requests. A skipped task or a result restored from the [cache](../task-cache/) uses no attempt.
 
 ## Report usage
 
@@ -68,9 +67,9 @@ const summary = defineTask({
 
 `reportUsage(usage)` adds to the totals. `reportUsageOnce(receipt, usage)` ignores a receipt the task already recorded, even after a checkpoint resume, so a result read twice is counted once. Both work only during the running attempt.
 
-## Know what a budget guarantees
+## Understand budget limits
 
-A budget is admission control on the usage reported so far.
+Outpost checks the reported usage before allowing more work to start. The budget applies to these recorded totals; it cannot predict the tokens an in-progress model request will consume.
 
 | Limit                                         | When it is checked                           | What happens                                                                            |
 | --------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -92,11 +91,13 @@ With token limits and no `attempts`, incomplete usage stops the run with `Workfl
 
 [Copilot CLI](../copilot-cli/) and [Kimi Code](../kimi-code/) read their final counters from the session after the CLI exits. For them especially, bound each run by attempts and time.
 
-```ts
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const fix = defineIsolatedTask({
+```ts title="fix-task.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+
+export const fix = defineIsolatedTask({
   key: "fix",
   timeoutMs: 30 * 60_000,
   retry: { attempts: 2 },
@@ -109,8 +110,13 @@ const fix = defineIsolatedTask({
     deadlineMs: 20 * 60_000,
   }),
 });
+```
 
-const result = await defineWorkflow("fix-tests", [fix]).start({
+```ts title="run-fix.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { fix } from "./fix-task.ts";
+
+export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
 console.log(result.status, result.usage);
@@ -129,11 +135,7 @@ To continue a run its budget stopped, start it again with a larger budget and au
 <!-- features -->
 
 - [Limits and cancellation](../limits-and-cancellation/): Bound one agent turn in time or silence.
-  - `deadlineMs`
-  - `idleMs`
 - [Concurrency, retries and timeouts](../concurrency-and-retries/): Bound each task attempt and a whole run in time.
-  - `timeoutMs`
 - [Built-in harness](../harness/): Bound model requests, tool calls and tokens within one turn.
-  - `limits`
 
 API: [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../../reference/workflowusage/) · [Usage](../../reference/usage/) · [TaskContext](../../reference/taskcontext/) · [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/) · [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/).

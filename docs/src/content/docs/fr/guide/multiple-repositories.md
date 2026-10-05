@@ -1,18 +1,20 @@
 ---
-title: "Plusieurs dépôts"
-description: "Donner à chaque dépôt sa tâche et sa sandbox, les exécuter côte à côte et transmettre le résultat d’un dépôt au suivant."
+title: "Travailler sur plusieurs dépôts"
+description: "Confiez chaque dépôt à sa propre tâche d’agent et reliez les tâches par leurs dépendances."
 ---
 
 ## Une tâche par dépôt
 
-Une sandbox possède un seul dépôt. Pour en modifier plusieurs, définissez un `defineIsolatedTask()` par checkout et lancez-les dans le même workflow.
+Confiez chaque dépôt à une tâche `defineIsolatedTask()` et reliez ces tâches dans un workflow. Une sandbox gère un seul dépôt : chaque tâche possède donc sa copie de travail et son historique Git.
 
-```ts
+<!-- tabs -->
+
+```ts title="upgrade.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { resolve } from "node:path";
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, sandboxProvider } from "./outpost.config.mts";
+import { sandboxProvider, coder } from "./outpost.config.ts";
 
-function upgrade(key: string, path: string) {
+export function upgrade(key: string, path: string) {
   return defineIsolatedTask({
     key,
     request: () => ({
@@ -26,10 +28,15 @@ function upgrade(key: string, path: string) {
     }),
   });
 }
-const api = upgrade("api", "../api");
-const web = upgrade("web", "../web");
+```
 
-const result = await defineWorkflow("node-24", [api, web]).start({
+```ts title="upgrade-repositories.ts"
+import { upgrade } from "./upgrade.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
+
+export const api = upgrade("api", "../api");
+export const web = upgrade("web", "../web");
+export const result = await defineWorkflow("node-24", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
@@ -38,19 +45,21 @@ console.log(result.value(api).commits.length, result.value(web).commits.length);
 
 Le script affiche le nombre de commits sur `outpost/node-24` dans chaque checkout. Chaque tâche ouvre son propre worktree et sa propre sandbox, puis les ferme en fin de tâche.
 
-`concurrency` vaut `1` par défaut : sans cette option, les dépôts passent l’un après l’autre. Les chemins sont résolus depuis `import.meta.dirname` : le script fonctionne depuis n’importe quel répertoire.
+Les chemins sont résolus depuis `import.meta.dirname`, ce qui permet de lancer ce script depuis n’importe quel dossier. Pour régler le nombre de tâches exécutées en parallèle, consultez [WorkflowOptions](../../reference/workflowoptions/).
 
 ## Transmettre le résultat d’un dépôt à un autre
 
 Ajoutez la première tâche à `after`, puis lisez son résultat avec `context.value()` dans `request`. Le client démarre dès que la tâche de l’API réussit.
 
-```ts
-import { resolve } from "node:path";
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const branch = { mode: "named", name: "outpost/rename-field" } as const;
-const api = defineIsolatedTask({
+```ts title="api-change.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { resolve } from "node:path";
+import { sandboxProvider, coder } from "./outpost.config.ts";
+
+export const branch = { mode: "named", name: "outpost/rename-field" } as const;
+export const api = defineIsolatedTask({
   key: "api",
   request: () => ({
     repository: resolve(import.meta.dirname, "../api"),
@@ -62,7 +71,15 @@ const api = defineIsolatedTask({
     },
   }),
 });
-const web = defineIsolatedTask({
+```
+
+```ts title="web-change.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { api, branch } from "./api-change.ts";
+import { resolve } from "node:path";
+import { sandboxProvider, coder } from "./outpost.config.ts";
+
+export const web = defineIsolatedTask({
   key: "web",
   after: [api],
   request: (context) => ({
@@ -75,8 +92,14 @@ const web = defineIsolatedTask({
     },
   }),
 });
+```
 
-const result = await defineWorkflow("rename-field", [api, web]).start();
+```ts title="rename.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { api } from "./api-change.ts";
+import { web } from "./web-change.ts";
+
+export const result = await defineWorkflow("rename-field", [api, web]).start();
 result.unwrap();
 ```
 
@@ -96,11 +119,11 @@ L’échec d’une tâche n’annule pas les autres. Par défaut, le premier éc
 
 Pour ne relancer que les tâches inachevées, ajoutez un checkpoint : [Exécutions durables](../durable-runs/). [Récupérer du travail](../recovery/) inspecte les worktrees conservés.
 
-## Publier derrière une approbation
+## Attendre un accord avant de publier
 
-Outpost ne pousse rien. Placez le push ou le merge dans une tâche située après une gate [`defineApprovalTask()`](../approvals/) dont le `after` liste chaque tâche de dépôt.
+Outpost ne pousse rien. Placez le push ou le merge dans une tâche située après une étape d’approbation [`defineApprovalTask()`](../approvals/) dont le `after` liste chaque tâche de dépôt.
 
-Une gate exige un checkpoint, et les checkpoints ne contiennent que du JSON. Enveloppez chaque tâche isolée dans un `defineTask()` qui garde `repository`, `branch` et `commits`. [Modifier plusieurs dépôts](../multi-repository-change/) en donne l’exemple complet, avec l’approbation.
+Une étape d’approbation exige un checkpoint, et les checkpoints ne contiennent que du JSON. Enveloppez chaque tâche isolée dans un `defineTask()` qui garde `repository`, `branch` et `commits`. [Modifier plusieurs dépôts](../multi-repository-change/) en donne l’exemple complet, avec l’approbation.
 
 ## Limites
 

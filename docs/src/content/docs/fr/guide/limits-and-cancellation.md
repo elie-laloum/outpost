@@ -1,15 +1,15 @@
 ---
-title: "Limites et annulation"
-description: "Borner la durée d’une tâche d’agent, relancer son brief jusqu’à ce que l’agent la déclare terminée et l’arrêter depuis votre code."
+title: "Fixer des délais et annuler une tâche"
+description: "Limitez la durée d’exécution de l’agent, réglez les passages successifs et annulez depuis votre code."
 ---
 
-## Borner une tâche
+## Limiter la durée d’une tâche
 
-Chaque dispatch s’exécute déjà sous des limites par défaut. Fixez les vôtres dans la requête, à côté du brief.
+Définissez les délais à côté du brief si la tâche demande des limites plus strictes que celles par défaut. Vous pouvez limiter la durée totale d’un échange et le temps pendant lequel l’agent peut rester silencieux.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -27,17 +27,9 @@ Si l’agent tourne plus de 20 minutes, ou reste muet pendant 5, la promesse est
 
 ## Choisir une limite
 
-| Option          | Borne                                                                 | Défaut                    | Quand elle est atteinte                   |
-| --------------- | --------------------------------------------------------------------- | ------------------------- | ----------------------------------------- |
-| `deadlineMs`    | Chaque tour d’agent : un processus CLI, ou un tour du harness intégré | 1 heure                   | Rejet avec le code `timeout`              |
-| `idleMs`        | Durée sans aucune sortie de l’agent                                   | 10 minutes                | Rejet avec le code `timeout`              |
-| `idleWarningMs` | Silence avant chaque événement `warning`                              | 60 secondes               | Émet un événement ; l’agent continue      |
-| `passes`        | Nombre d’envois du brief                                              | 1                         | Résout avec `completed: false`            |
-| `until`         | Marqueurs de fin qui arrêtent les passes                              | `<outpost>done</outpost>` | Arrêt à la première passe qui le contient |
-| `settleMs`      | Temps laissé à l’agent après son marqueur                             | 60 secondes               | Arrête le processus, garde le résultat    |
-| `signal`        | Annulation depuis votre code                                          | Aucun                     | Rejet avec la raison du signal            |
+Référence API : [DispatchOptions](../../reference/dispatchoptions/).
 
-Votre callback `observe` reçoit un événement `stopped` dont le champ `reason` indique ce qui a arrêté le processus : `deadline`, `idle-timeout`, `completion` ou `aborted`.
+Votre fonction de rappel `observe` reçoit un événement `stopped` dont le champ `reason` indique ce qui a arrêté le processus : `deadline`, `idle-timeout`, `completion` ou `aborted`.
 
 ## Annuler depuis votre code
 
@@ -45,7 +37,7 @@ Passez un `AbortSignal`. Ici, Ctrl+C arrête l’agent au lieu de le laisser tou
 
 ```ts
 import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const controller = new AbortController();
 process.once("SIGINT", () => controller.abort("cancelled by user"));
@@ -80,7 +72,7 @@ Pour changer la direction de l’agent sans l’arrêter, [réorientez-le](../st
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -98,7 +90,7 @@ console.log(result.completed, result.completion);
 
 Chaque passe démarre une nouvelle conversation sur la même branche : elle voit donc les commits précédents. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.
 
-`result.completed` vaut `true` quand un marqueur a été trouvé, et `result.completion` le nomme. Un dispatch qui épuise ses passes est tout de même résolu, avec `completed: false`.
+Référence API : [DispatchResult](../../reference/dispatchresult/).
 
 :::caution
 Un marqueur est une déclaration de l’agent, pas une preuve. Lancez vos tests avant de vous y fier ; les [boucles de vérification](../verification-loops/) relancent l’agent jusqu’à ce que votre contrôle passe.
@@ -106,13 +98,13 @@ Un marqueur est une déclaration de l’agent, pas une preuve. Lancez vos tests 
 
 Si l’agent écrit son marqueur mais continue de tourner, Outpost l’arrête `settleMs` après sa dernière sortie. Le résultat est conservé et `warn` reçoit un message.
 
-## Borner les étapes du workspace
+## Limiter la durée des opérations Git et fichiers
 
 `limits` fixe des délais aux étapes Git et fichiers qui entourent l’agent. Passez-le à `dispatch()`, `createWorkspace()` ou `createSandbox()`.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
   repository,
@@ -124,12 +116,7 @@ await dispatch({
 });
 ```
 
-| Champ       | Borne                                                               | Défaut                                   |
-| ----------- | ------------------------------------------------------------------- | ---------------------------------------- |
-| `copyMs`    | La copie de `copies` dans le worktree ; chaque transfert de sandbox | 60 secondes ; 120 secondes par transfert |
-| `gitMs`     | Chaque commande Git qui prépare le worktree                         | 30 secondes                              |
-| `collectMs` | La lecture des nouveaux commits après l’agent                       | 30 secondes                              |
-| `mergeMs`   | La fusion de la branche de travail dans sa base (`integrate`)       | 30 secondes                              |
+Référence API : [StageLimits](../../reference/stagelimits/).
 
 ## Autres limites
 

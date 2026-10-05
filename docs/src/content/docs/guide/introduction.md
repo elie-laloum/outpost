@@ -1,103 +1,41 @@
 ---
-title: "Introduction"
-description: "Outpost runs coding agents from your TypeScript code: any supported agent CLI or its own loop, in a sandbox you choose, on a Git branch you control. Their results become typed data that workflows can check, approve and resume."
+title: "Start here"
+description: "Run a coding agent from TypeScript, then add checks and workflows as you need them."
 ---
 
-## One task in code
+## What you can do with Outpost
 
-`dispatch()` starts a sandbox, runs the agent on a branch, collects its commits and releases the sandbox.
+Outpost is a TypeScript library for running coding agents on Git repositories. Your code chooses the agent, its execution environment and the branch where it works. The result includes its answer, commits and reported token usage.
 
-The three imports come from the configuration file you write in [Setup](../setup/).
+Start with a single task. When you need several steps, a workflow connects them and passes their results from one task to the next.
 
-```ts title="fix.mts"
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+## Run your first task
 
-const result = await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/fix-tests" },
-  brief: { text: "Fix the failing tests, run them and commit the fix." },
-});
-
-console.log(result.text); // the agent's final answer
-console.log(result.commits.map((commit) => commit.subject)); // commits on outpost/fix-tests
-console.log(result.usage); // input, cached and output token counts
-```
-
-## Features
-
-<!-- features -->
-
-- [Write a brief](../briefs/): Give your instructions as text, or as a Markdown template with variables and command output.
-  - `{ text }`
-  - `{ file, values }`
-- [Choose an agent](../choose-an-agent/): Five agent CLIs, signed in with your account or, for most, an API key.
-  - Claude Code
-  - Codex
-  - Copilot CLI
-  - Kimi Code
-  - Antigravity
-- [Built-in harness](../harness/): Drive a model with your tools, permissions and subagents.
-  - OpenAI
-  - Anthropic
-  - `createHarness()`
-- [Choose a sandbox](../choose-a-sandbox/): Local containers, cloud sandboxes, a microVM or the host.
-  - Docker
-  - Podman
-  - Vercel
-  - Daytona
-  - Firecracker
-- [MCP servers](../mcp-servers/): Give your agents Model Context Protocol servers, with secrets passed by name.
-  - stdio
-  - HTTP
-  - OAuth
-- [Isolation](../isolation/): Restrict outbound traffic and keep Git metadata private.
-  - egress rules
-  - private Git
-- [Typed workflows](../typed-workflows/): Tasks pass typed results, retry and loop until checks pass.
-  - `defineWorkflow()`
-  - `defineLoopTask()`
-- [Durable runs](../durable-runs/): Checkpoint progress, pause when a quota is hit, resume without redoing the work.
-  - checkpoints
-  - quota pauses
-  - cache
-- [Approvals](../approvals/): Stop the workflow at a gate until a person approves or rejects.
-  - `defineApprovalTask()`
-  - `definePauseTask()`
-  - signed gates
-- [Unattended runs](../unattended-runs/): Run from CI, queues, cron schedules and verified webhooks.
-  - SQLite
-  - Redis
-  - GitHub
-  - GitLab
-  - Slack
-- [Observe and recover](../observe-and-recover/): Journals, traces, offline replay and work preserved when a run stops.
-  - OpenTelemetry
-  - replay
-  - recovery
-- [Integration ports](../integration-ports/): Plug in your own agent CLI, sandbox or storage.
-  - `AgentAdapter`
-  - `SandboxProvider`
-  - `Transport`
-
-## Complete examples
-
-<!-- features -->
-
-- [Build a development workflow](../development-workflow/): From a ticket to a reviewed branch: questions, plan, red tests, then code.
-- [Fix a failing CI build](../fix-failing-ci/): Loop until the test command passes.
-- [Review a pull request on demand](../review-on-label/): A label on the pull request starts the review.
-- [Nightly maintenance](../nightly-maintenance/): A scheduled run that survives restarts and quota limits.
-- [Change several repositories](../multi-repository-change/): The same change, one sandbox per repository.
-- [Let agents compete](../compete-agents/): Run several approaches, keep the one that passes.
-
-## Where to start
+Follow these three pages in order. They use Docker and Codex to give you a working starting point.
 
 <!-- path -->
 
-1. [How it works](../how-it-works/): The agent, the sandbox and the workspace.
-2. [Setup](../setup/): Install Outpost and write its configuration file.
-3. [Your first task](../first-request/): Run an agent and read its result.
-4. [From a task to a workflow](../first-workflow/): Check, approve and resume.
+1. [Install Outpost](../setup/): Build the image and create your TypeScript configuration.
+2. [Your first task](../first-request/): Write a script, read the answer and review a change on its branch.
+3. [Create a workflow](../first-workflow/): Connect two tasks and read their results.
+
+## Understand the building blocks
+
+An **agent** does the work, a **sandbox** runs its commands, and a **workspace** is the checkout it edits. You choose these separately. [How Outpost runs a task](../how-it-works/) explains their lifetimes and what happens to the files.
+
+For the exact options and return types of a function, open the [API reference](../../reference/). The guide focuses on how to use those functions together.
+
+## Continue with your own use case
+
+Pick the topic that matches your next step. You can return to the other guides when you need them.
+
+<!-- features -->
+
+- [Write agent instructions](../briefs/): Use text or a reusable Markdown file.
+- [Check work and retry](../verification-loops/): Run tests and send failures back for another attempt.
+- [Choose an agent](../choose-an-agent/): Configure the agent independently of its sandbox.
+- [Reuse a sandbox](../sandbox-sessions/): Run commands and several agent turns on the same files.
+- [Wait for approval](../approvals/): Require approval before a later task runs.
+- [Run in CI](../ci-automation/): Execute your script in an automated job.
+
+For a complete example, try [fixing a failing build](../fix-failing-ci/) or [building a development workflow](../development-workflow/).

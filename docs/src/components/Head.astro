@@ -4,6 +4,7 @@ import StarlightHead from "@astrojs/starlight/components/Head.astro";
 <StarlightHead />
 <script>
   import { mountCanvases } from "./guide-canvas.ts";
+  import { mountCodeTabs } from "./guide-code-tabs.ts";
 
   const prepareCopyButtons = () => {
     for (const button of document.querySelectorAll<HTMLElement>("celestia-code-copy-button")) {
@@ -36,6 +37,8 @@ import StarlightHead from "@astrojs/starlight/components/Head.astro";
   else observePins();
   mountCanvases();
   document.addEventListener("astro:page-load", mountCanvases);
+  mountCodeTabs();
+  document.addEventListener("astro:page-load", mountCodeTabs);
   prepareReferenceStatus();
   document.addEventListener("astro:page-load", prepareReferenceStatus);
   prepareCopyButtons();

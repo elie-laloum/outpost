@@ -1,7 +1,9 @@
 ---
-title: "Concurrence, relances et délais"
-description: "Exécuter les tâches indépendantes en parallèle, relancer celles qui échouent, borner leur durée et choisir ce qu’un échec arrête."
+title: "Tâches parallèles et nouvelles tentatives"
+description: "Réglez l’exécution en parallèle, les nouvelles tentatives, les délais et le comportement après un échec."
 ---
+
+Dans cet exemple, `flaky` et `lint` démarrent en parallèle. La première tâche échoue une fois, attend 100 ms et réussit à la tentative suivante. Son entrée dans `result.tasks` indique alors `attempts: 2`.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -25,8 +27,6 @@ console.log(result.value(flaky)); // { attempt: 2 }
 
 <!-- check:run -->
 
-`flaky` et `lint` démarrent ensemble. `flaky` échoue une fois, attend 100 ms et réussit à sa deuxième tentative ; son enregistrement dans `result.tasks` indique `attempts: 2`.
-
 ## Exécuter des tâches en parallèle
 
 `start({ concurrency })` fixe le nombre de tâches exécutées en même temps. La valeur par défaut est `1` : les tâches s’enchaînent une par une. Une tâche attend toujours chaque tâche de sa liste `after`.
@@ -39,19 +39,14 @@ Des tâches qui partagent une sandbox ne doivent pas s’exécuter en même temp
 
 Une tâche s’exécute une seule fois, sauf si vous lui donnez une politique `retry`.
 
-| Option       | Défaut                                          | Effet                                                          |
-| ------------ | ----------------------------------------------- | -------------------------------------------------------------- |
-| `attempts`   | Obligatoire                                     | Nombre total de tentatives, la première comprise.              |
-| `delayMs`    | `0`                                             | Attente avant chaque relance.                                  |
-| `backoff`    | `"fixed"`                                       | `"exponential"` double l’attente après chaque échec.           |
-| `maxDelayMs` | 30 000 en mode exponentiel, sinon aucun plafond | Borne supérieure de l’attente calculée.                        |
-| `jitter`     | `"none"`                                        | `"full"` tire une attente au hasard entre zéro et le plafond.  |
-| `accepts`    | Toute erreur est relancée                       | `(error, attempt) => boolean` ; `false` fait échouer la tâche. |
+Référence API : [WorkflowOptions](../../reference/workflowoptions/).
 
-```ts
-import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const request = defineTask({
+```ts title="request.ts"
+import { defineTask, OutpostError } from "@elie-laloum/outpost";
+
+export const request = defineTask({
   key: "request",
   retry: {
     attempts: 4,
@@ -68,9 +63,15 @@ const request = defineTask({
     return "Replace with your cancellable request";
   },
 });
-const result = await defineWorkflow("requests", [request]).start();
+```
+
+```ts title="run.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { request } from "./request.ts";
+
+export const result = await defineWorkflow("requests", [request]).start();
 result.unwrap();
-console.log(result.tasks[0]?.attempts); // 1
+console.log(result.tasks[0]?.attempts);
 ```
 
 <!-- check:run -->
@@ -83,10 +84,9 @@ Les [fournisseurs de modèles](../model-providers/) recopient un en-tête `Retry
 
 ## Fixer des délais
 
-| Réglage                | Couvre                                                                                                           | À l’expiration                                                                                                                                   |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `timeoutMs` de tâche   | Une tentative.                                                                                                   | Le `signal` de la tentative est interrompu avec l’erreur `<key> timed out` ; la tâche est relancée s’il reste des tentatives.                    |
-| `start({ timeoutMs })` | Tout l’appel à `start()` : acquisition du checkpoint, conditions, chaque tentative et chaque attente de relance. | Les tâches en cours sont annulées, aucune ne démarre plus, `status` vaut `"failed"` et `errors` contient une `OutpostError` de code `"timeout"`. |
+Référence API : [TaskOptions](../../reference/taskoptions/) et [DispatchOptions](../../reference/dispatchoptions/).
+
+Définissez des délais distincts pour chaque tentative et pour l’ensemble du workflow. Dans cet exemple, la première tentative expire après 200 ms et le délai du workflow interrompt la suivante à 300 ms.
 
 ```ts
 import { setTimeout as sleep } from "node:timers/promises";

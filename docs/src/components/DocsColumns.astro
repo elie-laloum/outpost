@@ -26,6 +26,7 @@ const { toc } = Astro.locals.starlightRoute;
   }
   /* Edges are drawn outside the sheet so they merge with the sidebar and window edges. */
   .docs-pane {
+    container-type: inline-size;
     grid-column: 2;
     min-width: 0;
     background: var(--sl-color-black);

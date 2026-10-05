@@ -1,23 +1,19 @@
 ---
-title: "Quota pauses"
-description: "Pause a workflow when a subscription or API limit is reached, then resume it after the reset without spending retries or losing the conversation."
+title: "Pause when a quota is reached"
+description: "Save a workflow after a terminal quota error and resume when access is available."
 ---
 
 ## Pause instead of failing
 
-Set `onQuota` on `start()`. A task that hits a usage limit or an HTTP 429 then pauses instead of failing.
+Set `onQuota` on the workflow’s `start()` method when you want to preserve progress after a terminal quota error. With a checkpoint configured, the affected task pauses so it can resume later.
 
-```ts
-import {
-  createLocalTransport,
-  OutpostError,
-  defineTask,
-  defineWorkflow,
-  createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-let calls = 0;
-const review = defineTask({
+```ts title="quota-review.ts"
+import { defineTask, OutpostError } from "@elie-laloum/outpost";
+
+export let calls = 0;
+export const review = defineTask({
   key: "review",
   perform: () => {
     if (++calls === 1)
@@ -27,14 +23,33 @@ const review = defineTask({
     return "reviewed";
   },
 });
-const result = await defineWorkflow("nightly", [review]).start({
-  checkpoint: {
-    store: createWorkflowCheckpointStore({
-      transporter: createLocalTransport({ directory: ".outpost/storage" }),
-    }),
-    runId: "nightly-2026-09-28",
-    version: "1",
-  },
+export function reviewCount() {
+  return calls;
+}
+```
+
+```ts title="quota-checkpoint.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+} from "@elie-laloum/outpost";
+
+export const checkpoint = {
+  store: createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: ".outpost/storage" }),
+  }),
+  runId: "nightly-2026-09-28",
+  version: "1",
+};
+```
+
+```ts title="resume.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { review } from "./quota-review.ts";
+import { checkpoint } from "./quota-checkpoint.ts";
+
+export const result = await defineWorkflow("nightly", [review]).start({
+  checkpoint,
   onQuota: { action: "pause", maxWaitMs: 6 * 60 * 60_000 },
 });
 result.unwrap();
@@ -66,18 +81,23 @@ A [fallback agent](../fallback-agents/) switches agents instead of waiting: the 
 
 ## What happens after a quota error
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Pause**: The attempt that hit the limit ends.
-   - **Keep the retries**: The error does not consume `retry` attempts.
-   - **Save the pause**: The task becomes `paused` with a `quota` record, and the checkpoint is saved.
-2. **Wait**: Only when the reset time is known.
-   - **Wait in the process**: A reset within `maxWaitMs` emits a `quota` event with `status: "waiting"`, then runs the task again.
-   - **Pause durably**: Otherwise the task stays paused. Independent tasks continue, dependent tasks wait, and `start()` returns `paused`.
-3. **Resume**: A later `start()` with the same checkpoint.
-   - **Run again**: An unknown or past reset runs the task at once.
-   - **Wait first**: A reset within `maxWaitMs` is awaited, then the task runs.
-   - **Stay paused**: A later reset leaves the task paused without calling the agent.
+- **Pause**: The attempt that hit the limit ends.
+  - Steps
+  - **Keep the retries**: The error does not consume `retry` attempts.
+  - **Save the pause**: The task becomes `paused` with a `quota` record, and the checkpoint is saved.
+  - → **Wait**: then
+- **Wait**: Only when the reset time is known.
+  - Steps
+  - **Wait in the process**: A reset within `maxWaitMs` emits a `quota` event with `status: "waiting"`, then runs the task again.
+  - **Pause durably**: Otherwise the task stays paused. Independent tasks continue, dependent tasks wait, and `start()` returns `paused`.
+  - → **Resume**: then
+- **Resume**: A later `start()` with the same checkpoint.
+  - Steps
+  - **Run again**: An unknown or past reset runs the task at once.
+  - **Wait first**: A reset within `maxWaitMs` is awaited, then the task runs.
+  - **Stay paused**: A later reset leaves the task paused without calling the agent.
 
 The paused record in `result.tasks` holds `quota.resetAt`: schedule the next `start()` from it. `onQuota` authorizes the rerun, without `resume: "retry-incomplete"`. A [loop task](../verification-loops/) resumes the phase of the round that hit the limit.
 

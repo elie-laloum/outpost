@@ -4,15 +4,15 @@ export const chapters = [
     "Premiers pas",
     [
       "guide/introduction",
-      "guide/how-it-works",
       "guide/setup",
       "guide/first-request",
       "guide/first-workflow",
+      "guide/how-it-works",
     ],
   ],
   [
-    "Use cases",
-    "Cas d’usage",
+    "Examples",
+    "Exemples",
     [
       "guide/development-workflow",
       "guide/fix-failing-ci",
@@ -23,8 +23,8 @@ export const chapters = [
     ],
   ],
   [
-    "Agent tasks",
-    "Tâches d’agent",
+    "Run agent tasks",
+    "Exécuter des tâches",
     [
       "guide/briefs",
       "guide/repository-and-branch",
@@ -54,8 +54,8 @@ export const chapters = [
     ],
   ],
   [
-    "Outpost harness",
-    "Harness Outpost",
+    "Build an agent",
+    "Créer un agent",
     [
       "guide/harness",
       "guide/model-providers",
@@ -97,8 +97,8 @@ export const chapters = [
     ],
   ],
   [
-    "Durable runs and people",
-    "Exécutions durables et humains",
+    "Resume and approve",
+    "Reprendre et approuver",
     [
       "guide/durable-runs",
       "guide/quota-pauses",
@@ -119,8 +119,8 @@ export const chapters = [
     ],
   ],
   [
-    "Storage and observability",
-    "Stockage et observabilité",
+    "Store and observe",
+    "Stocker et suivre",
     [
       "guide/observe-and-recover",
       "guide/storage",
@@ -131,8 +131,8 @@ export const chapters = [
     ],
   ],
   [
-    "Operations",
-    "Exploitation",
+    "Troubleshooting and cleanup",
+    "Diagnostic et nettoyage",
     [
       "guide/diagnostics",
       "guide/error-handling",

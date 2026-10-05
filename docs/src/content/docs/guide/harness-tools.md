@@ -1,39 +1,53 @@
 ---
-title: "Tools"
-description: "Give the built-in harness ready-made file, search, edit, Git and shell tools, or write your own tools that run in the sandbox."
+title: "Give the model tools"
+description: "Choose sandbox tools or define your own tools for the built-in harness."
 ---
 
 ## Give the model ready-made tools
 
-Pass toolsets to `createHarness({ tools })`. The model can only call the tools you list, so give it the smallest set the task needs.
+Pass the tools or toolsets the model needs to `createHarness({ tools })`. The model can call only this declared set, so start with the tools required by the task.
 
-```ts
+<!-- tabs -->
+
+```ts title="read-model.ts"
+import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createAnthropicModelProvider({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+```
+
+```ts title="read-tools.ts"
 import {
-  createAgent,
-  createAnthropicModelProvider,
-  createHarness,
   createHarnessFileTools,
   createHarnessSearchTools,
   createHarnessGitTools,
-  dispatch,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
 
-const reviewer = createAgent({
+export const tools = [
+  createHarnessFileTools(),
+  createHarnessSearchTools(),
+  createHarnessGitTools(),
+];
+```
+
+```ts title="reviewer.ts"
+import { createAgent, createHarness } from "@elie-laloum/outpost";
+import { modelProvider } from "./read-model.ts";
+import { tools } from "./read-tools.ts";
+
+export const reviewer = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
-  harness: createHarness({
-    modelProvider: createAnthropicModelProvider({
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    }),
-    tools: [
-      createHarnessFileTools(),
-      createHarnessSearchTools(),
-      createHarnessGitTools(),
-    ],
-  }),
+  harness: createHarness({ modelProvider, tools }),
 });
+```
 
-const result = await dispatch({
+```ts title="review.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { reviewer } from "./reviewer.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: reviewer,
@@ -46,70 +60,83 @@ This reviewer reads, searches and inspects history, but cannot change a file. Ev
 
 ## Choose the toolsets
 
-| Toolset                      | Tools                     | Read-only | What the model can do                                                                                                  |
-| ---------------------------- | ------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `createHarnessFileTools()`   | `read_file`, `list_files` | Yes       | Read a UTF-8 file with numbered lines (`offset`, `limit`); list files tracked or not ignored by Git, filtered by glob. |
-| `createHarnessSearchTools()` | `search`                  | Yes       | Search files with an extended regular expression (`git grep`), by path, glob and case.                                 |
-| `createHarnessGitTools()`    | `git`                     | Yes       | Run `git status`, `diff`, `log` or `show` with extra arguments.                                                        |
-| `createHarnessEditTools()`   | `write_file`, `edit_file` | No        | Create or replace a file; replace an exact text that appears once, or everywhere with `replace_all`.                   |
-| `createHarnessShellTools()`  | `shell`                   | No        | Run a `sh -c` command without input and read its exit status and output.                                               |
+| Toolset                      | Tools                     | Read-only | What the model can do                                                                  |
+| ---------------------------- | ------------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `createHarnessFileTools()`   | `read_file`, `list_files` | Yes       | Read UTF-8 files and list files tracked or not ignored by Git.                         |
+| `createHarnessSearchTools()` | `search`                  | Yes       | Search files with an extended regular expression (`git grep`), by path, glob and case. |
+| `createHarnessGitTools()`    | `git`                     | Yes       | Run `git status`, `diff`, `log` or `show` with extra arguments.                        |
+| `createHarnessEditTools()`   | `write_file`, `edit_file` | No        | Create files and replace text within existing files.                                   |
+| `createHarnessShellTools()`  | `shell`                   | No        | Run a `sh -c` command without input and read its exit status and output.               |
 
-Paths are relative to the repository root and must stay inside it. `createHarnessShellTools({ deadlineMs })` bounds each command; the default is 120 seconds.
+Paths must stay inside the repository. To configure command limits, see [createHarnessShellTools](../../reference/createharnessshelltools/).
 
 ## Define a tool
 
-`defineHarnessTool()` declares a name, a description for the model, an input schema and an `execute(input, context)` function. The input is validated before `execute` runs.
+This tool lets the model run tests inside the sandbox. The model can request the whole suite or select tests by name.
 
-```ts
-import { defineHarnessTool } from "@elie-laloum/outpost";
+<!-- tabs -->
+
+```ts title="test-input.ts"
 import { z } from "zod";
+
+export const testInput = z.object({ match: z.string().optional() });
+export type TestInput = z.infer<typeof testInput>;
+```
+
+```ts title="execute-tests.ts"
+import type { TestInput } from "./test-input.ts";
+import type { HarnessToolContext } from "@elie-laloum/outpost";
+
+export async function executeTests(
+  { match }: TestInput,
+  { sandbox, signal }: HarnessToolContext,
+) {
+  const result = await sandbox.invoke({
+    executable: "npm",
+    arguments: [
+      "test",
+      ...(match ? ["--", `--test-name-pattern=${match}`] : []),
+    ],
+    signal,
+  });
+  return {
+    content: result.stdout + result.stderr,
+    isError: result.status !== 0,
+  };
+}
+```
+
+```ts title="run-tests.ts"
+import { defineHarnessTool } from "@elie-laloum/outpost";
+import { testInput } from "./test-input.ts";
+import { executeTests } from "./execute-tests.ts";
 
 export const runTests = defineHarnessTool({
   name: "run_tests",
   description:
     "Run the test suite, optionally only the tests whose name matches.",
-  input: z.object({ match: z.string().optional() }),
+  input: testInput,
   resources: ({ match }) => ({ command: `npm test ${match ?? ""}`.trim() }),
-  async execute({ match }, { sandbox, signal }) {
-    const result = await sandbox.invoke({
-      executable: "npm",
-      arguments: [
-        "test",
-        ...(match ? ["--", `--test-name-pattern=${match}`] : []),
-      ],
-      signal,
-    });
-    return {
-      content: result.stdout + result.stderr,
-      isError: result.status !== 0,
-    };
-  },
+  execute: executeTests,
 });
 ```
 
-<!-- features -->
+API reference: [HarnessToolOptions](../../reference/harnesstooloptions/), [HarnessToolContext](../../reference/harnesstoolcontext/) and [ToolOutput](../../reference/tooloutput/).
 
-- `input`: A JSON Schema object, or a Standard Schema that converts to JSON Schema, such as Zod.
-- `execute`: Returns a string, or `{ content, isError }` to report a failure to the model.
-- `context.sandbox`: Runs commands (`invoke`) and moves files (`upload`, `download`) in the borrowed sandbox.
-- `context.signal`: Aborts when the call deadline expires or the dispatch is cancelled.
-- `readOnly`: Marks a tool that changes nothing: the loop runs it alongside other read-only calls and keeps it during response repairs.
-- `resources(input)`: Returns the `paths` or `command` a call touches, for [permission rules](../harness-permissions/).
-
-Tool names use 1 to 64 letters, digits, `_` or `-`. A thrown error returns its message to the model unless `toolExecution.onError` is `"fail"` (see [Built-in harness](../harness/)).
+A tool name must contain 1 to 64 letters, digits, `_` or `-`. By default, an execution error is sent back to the model as a failed tool result. Set `toolExecution.onError: "fail"` to stop the turn instead; see [Built-in harness](../harness/).
 
 ## Group tools into a toolset
 
 `defineHarnessToolset()` bundles tools and other toolsets under one name, so you can share them between harnesses.
 
-```ts
+<!-- tabs -->
+
+```ts title="inspect-tools.ts"
 import {
-  createHarnessEditTools,
-  createHarnessFileTools,
-  createHarnessGitTools,
-  createHarnessSearchTools,
-  createHarnessShellTools,
   defineHarnessToolset,
+  createHarnessFileTools,
+  createHarnessSearchTools,
+  createHarnessGitTools,
 } from "@elie-laloum/outpost";
 
 export const inspect = defineHarnessToolset({
@@ -120,6 +147,15 @@ export const inspect = defineHarnessToolset({
     createHarnessGitTools(),
   ],
 });
+```
+
+```ts title="coding-tools.ts"
+import {
+  defineHarnessToolset,
+  createHarnessEditTools,
+  createHarnessShellTools,
+} from "@elie-laloum/outpost";
+import { inspect } from "./inspect-tools.ts";
 
 export const coding = defineHarnessToolset({
   name: "coding",

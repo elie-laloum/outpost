@@ -1,11 +1,11 @@
 ---
-title: "Fournisseurs de modèles"
-description: "Connecter le harness intégré à une API compatible OpenAI ou Anthropic. Les requêtes partent de votre processus, avec votre clé."
+title: "Connecter une API de modèle"
+description: "Configurez un fournisseur de modèle OpenAI ou Anthropic pour le harness intégré."
 ---
 
 ## Connecter un modèle
 
-Un fournisseur de modèles envoie les requêtes du [harness intégré](../harness/) à une API de modèle. Passez-le à `createHarness()`, puis utilisez l’agent comme n’importe quel autre.
+Connectez un fournisseur de modèle à `createHarness()` pour que la boucle intégrée puisse appeler l’API. Associez ensuite le harness et un modèle avec `createAgent()`, puis passez cet agent à votre tâche.
 
 ```ts
 import {
@@ -48,7 +48,7 @@ const openai = createOpenAIModelProvider({
 
 `createCodexHarness({ modelProvider })` est un réglage distinct : il dirige la CLI Codex, dans la sandbox, vers un service compatible Responses ([Codex](../codex/)).
 
-## Utiliser un endpoint local
+## Utiliser un service local
 
 Indiquez `apiKey: false` pour un serveur sans authentification. L’adresse est résolue depuis votre hôte, pas depuis la sandbox.
 
@@ -61,7 +61,7 @@ const local = createOpenAIModelProvider({
 });
 ```
 
-## Garder la clé sur l’hôte
+## Conserver la clé sur la machine hôte
 
 Vous passez la clé vous-même : Outpost ne lit ni variable d’environnement ni session de compte pour les fournisseurs de modèles. La clé reste dans votre processus et n’atteint jamais la sandbox. [Authentification](../authentication/) compare ce fonctionnement avec celui des agents CLI.
 
@@ -69,10 +69,7 @@ Vous passez la clé vous-même : Outpost ne lit ni variable d’environnement ni
 
 Le `model` de l’agent est un nom ou `{ name, reasoning, maxOutputTokens }`. `createAgent()` rejette les réglages que le fournisseur ne prend pas en charge.
 
-| Réglage           | Protocoles OpenAI                                                          | Anthropic                                                                                                            |
-| ----------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `maxOutputTokens` | Facultatif.                                                                | Obligatoire.                                                                                                         |
-| `reasoning`       | Envoyé comme effort de raisonnement ; le service décide des niveaux admis. | `"none"` désactive la réflexion ; de `"low"` à `"max"`, la réflexion adaptative suit cet effort. `"minimal"` échoue. |
+Référence API : [AgentModel](../../reference/agentmodel/).
 
 Le service vérifie tout de même le nom du modèle et les niveaux à chaque requête.
 
@@ -80,14 +77,11 @@ Le service vérifie tout de même le nom du modèle et les niveaux à chaque req
 
 Les deux fournisseurs diffusent en streaming. Le harness émet des événements `text-delta` pendant que le modèle écrit, et un événement `reasoning` quand une réponse contient un raisonnement lisible. Affichez-les depuis `observe` avec `if (event.kind === "text-delta") process.stdout.write(event.text)` ([Suivre la progression](../progress/)).
 
-## Borner chaque requête
+## Limiter la durée des requêtes
 
-| Option             | Défaut     | Ce qu’elle borne                                                                     |
-| ------------------ | ---------- | ------------------------------------------------------------------------------------ |
-| `timeoutMs`        | 120 000 ms | L’attente de la réponse. En streaming, le silence entre deux fragments.              |
-| `maxResponseBytes` | 8 Mio      | Le corps de la réponse après décompression. Au-delà, l’appel échoue avec `response`. |
+Référence API : [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) et [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
-Un dépassement échoue avec le code `timeout`. Le harness diffuse en streaming avec les deux fournisseurs : une longue réponse qui continue d’arriver n’expire donc jamais. Bornez le tour entier avec les [limites](../limits-and-cancellation/).
+Un dépassement échoue avec le code `timeout`. Le harness diffuse en streaming avec les deux fournisseurs : une longue réponse qui continue d’arriver n’expire donc jamais. Limitez le tour entier avec les [limites](../limits-and-cancellation/).
 
 ## Mettre en cache le préfixe du prompt
 
@@ -113,7 +107,7 @@ Implémentez [`ModelProvider`](../../reference/modelprovider/) : `request()` ren
 
 ## Limites
 
-- Le raisonnement n’est rejoué qu’au même fournisseur, au même endpoint et au même modèle. En changer le retire de l’historique.
+- Le raisonnement n’est rejoué qu’au même fournisseur, au même point d’accès et au même modèle. En changer le retire de l’historique.
 - `baseUrl` ne peut contenir ni identifiants, ni requête, ni fragment. Les redirections sont refusées.
 - Les réponses Anthropic contenant autre chose que du texte, des appels d’outils et de la réflexion échouent avec `response`.
 

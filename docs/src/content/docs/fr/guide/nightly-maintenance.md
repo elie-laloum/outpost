@@ -1,98 +1,82 @@
 ---
-title: "Maintenance nocturne"
-description: "Chaque nuit de semaine, un agent met à jour les dépendances sur une branche datée. L’exécution résiste aux redémarrages du worker et aux limites d’usage, et laisse une branche et un rapport typé pour le matin."
+title: "Planifier une maintenance nocturne"
+description: "Planifiez un workflow de maintenance et reprenez la même exécution après une pause liée au quota."
 ---
 
-## Ce que vous utilisez
+## Ce que montre l’exemple
 
 <!-- features -->
 
 - [Planification cron](../cron-schedules/): Publie un job par nuit, dans votre fuseau horaire.
-  - `runSchedules()`
-  - `createCronSchedule()`
 - [Files de jobs et workers](../job-queues/): Exécute chaque job dans un processus worker séparé.
-  - `runQueueWorker()`
-  - `defineWorkflowJob()`
 - [Exécutions durables](../durable-runs/): Enregistre chaque tâche terminée dans un checkpoint.
-  - `createWorkflowCheckpointStore()`
 - [Pauses sur quota](../quota-pauses/): Met en pause sur une limite d’usage au lieu d’échouer.
-  - `onQuota`
 - [Agents de secours](../fallback-agents/): Confie le travail à un second agent quand la limite est atteinte.
-  - `createFallbackAgent()`
 - [Réponses typées](../typed-responses/): Valide le rapport final de l’agent.
-  - `defineJsonResponse()`
 
-Deux processus partagent la file `.outpost/jobs.sqlite` : le planificateur publie les jobs, le worker les exécute. Enregistrez les deux fichiers à côté du `outpost.config.mts` d’[Installation](../setup/).
+Lancez un planificateur et un worker dans deux processus séparés qui partagent `.outpost/jobs.sqlite`. Le planificateur publie les jobs de maintenance et le worker les exécute. Enregistrez les deux scripts à côté de la configuration de la page [Installation](../setup/).
 
 ## Planifier les nuits
 
-```ts title="scheduler.mts"
-import {
-  createCronSchedule,
-  createSqliteTaskQueue,
-  runSchedules,
-} from "@elie-laloum/outpost";
+Les deux planifications donnent le même `runId` à une même nuit, par exemple `deps-2026-09-29`. Le job de 07:00 reprend cette exécution si une limite d’usage l’a mise en pause.
 
-const timeZone = "Europe/Paris";
-// en-CA formate la date locale en AAAA-MM-JJ.
-const runId = (slot: Date) =>
+<!-- tabs -->
+
+```ts title="nightly-time.ts"
+export const timeZone = "Europe/Paris";
+export const runId = (slot: Date) =>
   `deps-${slot.toLocaleDateString("en-CA", { timeZone })}`;
+```
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const stop = new AbortController();
+```ts title="nightly-schedules.ts"
+import { createCronSchedule } from "@elie-laloum/outpost";
+import { timeZone, runId } from "./nightly-time.ts";
+
+export const schedules = [
+  {
+    name: "nightly-deps",
+    cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
+    handler: "nightly-deps",
+    runId,
+  },
+  {
+    name: "nightly-deps-resume",
+    cron: createCronSchedule("0 7 * * 1-5", { timeZone }),
+    handler: "nightly-deps",
+    runId,
+  },
+];
+```
+
+```ts title="scheduler.ts"
+import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import { schedules } from "./nightly-schedules.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
-  await runSchedules({
-    queue,
-    signal: stop.signal,
-    schedules: [
-      {
-        name: "nightly-deps",
-        cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
-        handler: "nightly-deps",
-        runId,
-      },
-      {
-        name: "nightly-deps-resume",
-        cron: createCronSchedule("0 7 * * 1-5", { timeZone }),
-        handler: "nightly-deps",
-        runId,
-      },
-    ],
-  });
+  await runSchedules({ queue, signal: stop.signal, schedules });
 } finally {
   queue.close();
 }
 ```
 
-Les deux planifications donnent le même `runId` à une même nuit, par exemple `deps-2026-09-29`. Le job de 07:00 reprend cette exécution si une limite d’usage l’a mise en pause.
-
 ## Exécuter le workflow
 
-```ts title="worker.mts"
-import { mkdir, writeFile } from "node:fs/promises";
-import {
-  createAgent,
-  createClaudeHarness,
-  createFallbackAgent,
-  createLocalTransport,
-  createSqliteTaskQueue,
-  createWorkflowCheckpointStore,
-  defineIsolatedTask,
-  defineJsonResponse,
-  defineTask,
-  defineWorkflow,
-  defineWorkflowJob,
-  runQueueWorker,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+Définissez le rapport, l’agent et la tâche de mise à jour.
 
-function names(value: unknown): string[] {
+<!-- tabs -->
+
+```ts title="nightly-report.ts"
+import { defineJsonResponse } from "@elie-laloum/outpost";
+
+export function names(value: unknown): string[] {
   if (!Array.isArray(value) || !value.every((item) => typeof item === "string"))
     throw new Error("Expected a list of strings");
   return value;
 }
-const report = defineJsonResponse({
+export const report = defineJsonResponse({
   tag: "report",
   schema(input) {
     if (typeof input !== "object" || input === null)
@@ -102,9 +86,17 @@ const report = defineJsonResponse({
     return { updated: names(input.updated), skipped: names(input.skipped) };
   },
 });
+```
 
-// Facultatif : Claude Code prend le relais quand Codex atteint sa limite.
-const agent = createFallbackAgent(
+```ts title="nightly-agent.ts"
+import {
+  createFallbackAgent,
+  createAgent,
+  createClaudeHarness,
+} from "@elie-laloum/outpost";
+import { coder } from "./outpost.config.ts";
+
+export const agent = createFallbackAgent(
   [
     coder,
     createAgent({
@@ -113,9 +105,28 @@ const agent = createFallbackAgent(
   ],
   { on: ["quota"] },
 );
+```
 
-function nightly(runId: string) {
-  const agentTask = defineIsolatedTask({
+```ts title="nightly-brief.ts"
+export const brief = {
+  text: [
+    "Update outdated dependencies one at a time.",
+    "Run the tests after each update; commit it if they pass, revert it otherwise.",
+    "The branch may already hold updates from an earlier attempt: keep them.",
+    'End with <report>{"updated": ["name@version"], "skipped": ["name: reason"]}</report>.',
+  ].join("\n"),
+};
+```
+
+```ts title="update-agent.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { agent } from "./nightly-agent.ts";
+import { report } from "./nightly-report.ts";
+import { brief } from "./nightly-brief.ts";
+
+export function updateAgent(runId: string) {
+  return defineIsolatedTask({
     key: "update-agent",
     request: () => ({
       repository,
@@ -123,17 +134,19 @@ function nightly(runId: string) {
       agent,
       branch: { mode: "named", name: `outpost/${runId}` },
       response: report,
-      brief: {
-        text: [
-          "Update outdated dependencies one at a time.",
-          "Run the tests after each update; commit it if they pass, revert it otherwise.",
-          "The branch may already hold updates from an earlier attempt: keep them.",
-          'End with <report>{"updated": ["name@version"], "skipped": ["name: reason"]}</report>.',
-        ].join("\n"),
-      },
+      brief,
     }),
   });
-  const update = defineTask({
+}
+```
+
+```ts title="update-task.ts"
+import { updateAgent } from "./update-agent.ts";
+import { defineTask } from "@elie-laloum/outpost";
+
+export function updateTask(runId: string) {
+  const agentTask = updateAgent(runId);
+  return defineTask({
     key: "update",
     perform: async (context) => {
       const { branch, commits, value } = await agentTask.perform(context);
@@ -144,7 +157,23 @@ function nightly(runId: string) {
       };
     },
   });
-  const publish = defineTask({
+}
+```
+
+Publiez le rapport et traitez les jobs avec checkpoint dans `worker.ts`.
+
+<!-- tabs -->
+
+```ts title="publish-report.ts"
+import { updateTask } from "./update-task.ts";
+import { defineTask } from "@elie-laloum/outpost";
+import { mkdir, writeFile } from "node:fs/promises";
+
+export function publishTask(
+  runId: string,
+  update: ReturnType<typeof updateTask>,
+) {
+  return defineTask({
     key: "publish",
     after: [update],
     perform: async (context) => {
@@ -154,41 +183,68 @@ function nightly(runId: string) {
       return file;
     },
   });
+}
+```
+
+```ts title="nightly-workflow.ts"
+import { updateTask } from "./update-task.ts";
+import { publishTask } from "./publish-report.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
+
+export function nightly(runId: string) {
+  const update = updateTask(runId);
+  const publish = publishTask(runId, update);
   return defineWorkflow("nightly-deps", [update, publish]);
 }
+```
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const store = createWorkflowCheckpointStore({
+```ts title="nightly-job.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+  defineWorkflowJob,
+} from "@elie-laloum/outpost";
+import { nightly } from "./nightly-workflow.ts";
+
+export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
-const stop = new AbortController();
+export const job = defineWorkflowJob({
+  checkpoint: { store, version: "1", resume: "retry-incomplete" },
+  start: { onQuota: { action: "pause", maxWaitMs: 4 * 60 * 60_000 } },
+  workflow: (_input, { runId }) => nightly(runId),
+});
+```
+
+```ts title="worker.ts"
+import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import { job } from "./nightly-job.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
   await runQueueWorker({
     queue,
     worker: "nightly-1",
     signal: stop.signal,
-    handlers: {
-      "nightly-deps": defineWorkflowJob({
-        checkpoint: { store, version: "1", resume: "retry-incomplete" },
-        start: { onQuota: { action: "pause", maxWaitMs: 4 * 60 * 60_000 } },
-        workflow: (_input, { runId }) => nightly(runId),
-      }),
-    },
+    handlers: { "nightly-deps": job },
   });
 } finally {
   queue.close();
 }
 ```
 
-```sh
-node scheduler.mts
-node worker.mts
-```
+### Exécuter le script
 
 Lancez chaque commande dans son propre terminal ou service. Ctrl+C arrête l’un ou l’autre proprement.
 
-## Comment ça marche
+```sh
+node scheduler.ts
+node worker.ts
+```
+
+## Comprendre les étapes
 
 Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
@@ -228,7 +284,7 @@ Les tâches terminées viennent toujours du checkpoint. `resume: "retry-incomple
 
 Si vous arrêtez le worker pendant une exécution, son job revient dans la file après le bail de 30 secondes. Le worker redémarré le reprend et continue à partir de la tâche interrompue.
 
-## L’adapter
+## Adapter l’exemple
 
 ### Une autre tâche de maintenance
 

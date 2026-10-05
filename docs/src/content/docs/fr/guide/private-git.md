@@ -1,6 +1,6 @@
 ---
-title: "Git privé"
-description: "Donner à un agent Docker ou Podman sa propre copie du dépôt au lieu de votre checkout monté, et ne récupérer ses commits qu’après validation."
+title: "Garder les données Git dans le conteneur"
+description: "Essayez les dépôts isolés en conteneur et examinez comment les modifications reviennent sur l’hôte."
 ---
 
 ## L’activer
@@ -9,12 +9,12 @@ description: "Donner à un agent Docker ou Podman sa propre copie du dépôt au 
 Git privé est un prototype à activer explicitement : son comportement peut encore changer.
 :::
 
-Définissez `repositoryMode: "isolated"` sur le provider Docker ou Podman. Le reste de votre code ne change pas.
+Définissez `repositoryMode: "isolated"` sur un fournisseur Docker ou Podman pour donner au conteneur sa propre copie Git. Cette option est expérimentale ; la tâche conserve les mêmes réglages d’agent et d’exécution.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
-import { coder, repository } from "./outpost.config.mts";
+import { coder, repository } from "./outpost.config.ts";
 
 const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
@@ -42,12 +42,12 @@ Outpost copie l’historique de la branche dans le conteneur, et l’agent trava
 | Hooks, config et refs de l’hôte        | Partagés et modifiables : ce que l’agent écrit s’applique sur l’hôte | Ni copiés à l’aller ni au retour : seuls les commits et fichiers de la branche reviennent |
 | Politique de branche par défaut        | `current`                                                            | `integrate` ; `current` est refusé                                                        |
 | CLI de l’agent                         | Doit être dans l’image                                               | Installée dans la sandbox si elle manque ; `bootstrap: false` désactive l’installation    |
-| [Spéculation durable](../speculation/) | Prise en charge                                                      | Refusée : le provider ne sait pas récupérer un conteneur abandonné                        |
+| [Spéculation durable](../speculation/) | Prise en charge                                                      | Refusée : le fournisseur ne sait pas récupérer un conteneur abandonné                     |
 | Terminal interactif                    | Pris en charge                                                       | Pris en charge ; les changements reviennent quand vous quittez                            |
 
 `copies` et `includeUncommitted` ajoutent des entrées comme sur les [sandboxes cloud](../cloud-sandboxes/). Politiques de branche : [Dépôt et branche](../repository-and-branch/).
 
-## Récupérer les changements sans risque
+## Synchroniser les modifications avec l’hôte
 
 Les conteneurs isolés utilisent la même synchronisation que les sandboxes cloud. Avant d’appliquer quoi que ce soit, Outpost valide les commits et fichiers entrants et sauvegarde le worktree de l’hôte.
 

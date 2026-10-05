@@ -1,11 +1,11 @@
 ---
-title: "Write a brief"
-description: "Give the agent its instructions as text or as a Markdown template with variables and command output."
+title: "Write agent instructions"
+description: "Give an agent a task using text or a Markdown template."
 ---
 
 ## Choose text or a file
 
-The brief is the instruction the agent receives. Pass a string when your code builds the request, or a file when you keep a reusable task template.
+The `brief` contains the instructions you send to the agent. Use `text` for a request written in your script, or `file` for instructions you want to keep and reuse in Markdown.
 
 |                | Text brief `{ text }`          | File brief `{ file, values }`                          |
 | -------------- | ------------------------------ | ------------------------------------------------------ |
@@ -27,10 +27,10 @@ You work on {{WORK_BRANCH}}, created from {{BASE_BRANCH}}.
 Run `npm test` and commit your change.
 ```
 
-```ts title="feature.mts"
+```ts title="feature.ts"
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -53,7 +53,7 @@ A relative `file` resolves from the process working directory. Build the path fr
 | `{{WORK_BRANCH}}` | The branch the agent works on (see [Repository and branch](../repository-and-branch/)). |
 | `{{BASE_BRANCH}}` | The branch checked out in your repository when the task started.                        |
 
-A placeholder without a value fails the task with error code `prompt` before the agent runs. Values the file never uses reach your `warn` callback.
+If a placeholder has no value, the task fails with code `prompt` before the agent starts. If you provide a value that the file does not use, Outpost reports it through `warn`.
 
 ## Insert command output
 
@@ -80,7 +80,7 @@ The commands run in the sandbox, in the checkout the agent works on, with `sh -c
 ```ts
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
   repository,
@@ -102,7 +102,7 @@ Values cannot add commands: Outpost finds the `` !` `` fragments in the file bef
 
 ## Instruct the agent, enforce in code
 
-A brief asks; it does not guarantee. When a condition matters, check it in your workflow.
+Instructions tell the agent what you want it to do. If a condition determines whether the work is accepted, check that condition in your workflow code.
 
 | Condition            | Ask in the brief          | Enforce in code                                                                                                  |
 | -------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |

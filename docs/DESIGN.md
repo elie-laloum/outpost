@@ -187,9 +187,10 @@ The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding
 
 Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, the pain stage keeps one column, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
 
-The documentation carries the same frame. Every Guide, Reference and Project page shares one shell: a fixed 4rem header, a 17rem sidebar for the current space with a hairline edge, and a content pane of at most 84rem. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
+The documentation carries the same frame. Every Guide, Reference and Project page shares one shell: a fixed 4rem header, a 17rem sidebar for the current space with a hairline edge, and a content pane of at most 84rem. Guide topics can be expanded, with first steps and the current topic open by default. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
 
 - **Split** (5 | 7) when the section has code, a contract or entries. Prose goes left; code, signatures or log entries go right. The right column stays pinned while it fits the viewport and its prose is taller. The divider is drawn on the right column so it runs the full section height.
+- **Reading order** in Guide sections: pair each code example with the prose preceding it, then render its explanation before the next example. Multiple examples form successive rows inside the same section.
 - **Wide** when there is nothing to put on the right. Prose stays within 70ch; tables, cells and property rows take the full width.
 
 Changelog and roadmap sections pin their heading on the left and run their entries on the right. The docs gutter is `clamp(1.25rem, 2.6vw, 2.5rem)`; sections use 2.5rem of top and 2.75rem of bottom padding. Below 64rem, sections and the title stack to one column. Below 50rem (800px), the sidebar moves into the menu.
@@ -314,17 +315,27 @@ Reference parameters and properties become ruled rows rather than a table. Each 
 
 Markdown code blocks keep Celestia's highlighting and copy button, set square, inside a hairline border on the code surface. Inline code uses a tonal chip (Slate Panel at 70%) without a border.
 
+Notice banners span the content section and stop at its borders, before the hatched gutters and table-of-contents column. On mobile the content section fills the viewport. Their text remains aligned with the article, and their colored backgrounds and borders stay visible in both themes. The content pane is an inline-size container, so banner widths follow the article width.
+
 ### Guide Components
 
-Guide pages show before they tell. An HTML comment before a Markdown list (`<!-- features -->`, `<!-- path -->`, `<!-- flow -->`, `<!-- files -->`) becomes one of four drawn components, built by `docs/scripts/guide-components.mjs` and styled in `docs/src/styles/guide-components.css`. They run flush with the bay edges, like bay cells, and use hairlines only.
+Guide pages show before they tell. An HTML comment before a Markdown list (`<!-- features -->`, `<!-- path -->`, `<!-- canvas -->`, `<!-- files -->`) becomes one of four drawn components, built by `docs/scripts/guide-components.mjs` and styled in `docs/src/styles/guide-components.css`. They run flush with the bay edges, like bay cells, and use hairlines only.
 
-- **Feature cells:** a 3-column grid (2 below 64rem, 1 below 40rem). Each cell is a link with a drawn icon in ink, a Title-style name, one Pewter/Steel sentence and a row of tags pushed to the cell's foot. A registration cross (two 1px strokes, gray-4) marks each inner corner, like the corner ticks of a drawing sheet. Hover adds the code-surface fill.
+- **Feature cells:** a 3-column grid (2 below 64rem, 1 below 40rem). Every cell, linked or informational, has a drawn icon in ink, a Title-style name, one Pewter/Steel sentence and a row of tags pushed to the cell's foot. A registration cross (two 1px strokes, gray-4) marks each inner corner, like the corner ticks of a drawing sheet. Linked cells gain the code-surface fill on hover.
 - **Tags:** 1px hairline boxes at label size. API names keep the monospace; product and concept names stay in Inter.
 - **Path:** linked stages side by side, each divider carrying a drawn chevron (two hairline borders turned 45°) that points to the next stage. Below 64rem the stages stack and the chevron turns down.
-- **Flow:** one column per phase with a tonal head (phase name and one line) above ruled steps; host or sandbox tags under each step, chevrons between phases.
+- **Canvas:** pannable, zoomable diagrams with nodes, branches and labeled connections. Sequential phases share a lane and connect in reading order; nested steps keep their icons and execution tags.
 - **File tree:** ruled rows with a muted file or folder icon, the monospace name in ink and a one-line note; folders indent their entries behind a hairline.
 
-Icons are drawn per Guide page in `docs/scripts/guide-icons.mjs` on the 24px grid with the 1.6 stroke. The sequence of a path or flow is carried by its connectors, never by numerals.
+Every guide card has a decorative SVG icon, including diagram branches and numbered cards. Icons come from `docs/scripts/guide-icons.mjs` on the 24px grid with the 1.6 stroke. Linked cards use the destination page's icon; informational cards use their title's subject in either language, with a book as the fallback. The sequence of a path or canvas is carried by its connectors, never by numerals.
+
+At the bottom of a documentation page, navigation actions divide the full content width into equal columns at every screen size. One action fills the row; two each take half; additional actions share it equally. Missing previous or next links leave no empty cell. The edit link occupies a separate row.
+
+Every snippet or tab group sits beside a relevant explanation. A heading or API link alone leaves an empty prose column and is rejected by the rendered-page checks. Introductions belong before their examples in Markdown, so they sit beside the code on desktop and above it on mobile.
+
+Guide code blocks contain at most 20 lines, including imports. Longer examples become separate, named files in tab groups of at most five. Split by responsibility, keep imports explicit and explain which file to run. Do not compress statements to meet the limit.
+
+File tabs scroll horizontally within the code block, with a visible scrollbar, mouse-wheel scrolling, mouse dragging and native touch swipes. Keyboard selection reveals the active filename without scrolling the page. Dragging moves the strip without selecting a different file.
 
 ## Do's and Don'ts
 

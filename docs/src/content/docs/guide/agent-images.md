@@ -1,17 +1,16 @@
 ---
-title: "Agent images"
-description: "Build the Docker or Podman image your sandboxes start from: every built-in agent CLI at a pinned version, plus your project tools."
+title: "Build an agent image"
+description: "Build and customize the Docker or Podman image used by your agents."
 ---
 
 ## What the image contains
 
-`outpost init` writes a `Dockerfile` (`Containerfile` for Podman) that you own and can edit.
+The agent image contains the command-line tools your tasks will use. Generate a Dockerfile or Containerfile, add the tools your project needs and build it under a name such as `outpost:dev`.
 
 <!-- features -->
 
 - **Base**: `node:24-bookworm-slim` with Git, the OpenSSH client, curl, Python 3 and process tools.
 - **Agent CLIs**: Claude Code, Codex, Copilot CLI and Kimi Code from npm, [Antigravity](../antigravity/) from a verified archive.
-  - `agentVersions`
 - **Agent user**: The image’s `node` user, renumbered to your UID and GID.
 - **Private home**: `/home/agent`, owned by the agent user with mode 700, set as `HOME`.
 - **Environment**: Antigravity auto-updates off, Copilot’s cache under `/tmp/.cache`.
@@ -19,26 +18,26 @@ description: "Build the Docker or Podman image your sandboxes start from: every 
 
 ## Generate the recipe
 
+The command builds the image and writes its `Dockerfile` in `.outpost-image` (`Containerfile` with Podman). It also writes example workflow files there; you can leave these aside and write your own TypeScript scripts. Add `--no-build` to generate the files without building.
+
 ```sh
-npx @elie-laloum/outpost init --yes --image outpost:dev
+npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-`init` writes the recipe with the rest of the project, then builds the image. `--no-build` writes the recipe only. Without `--image`, the name is `outpost:<directory name>`; the generated `run.ts` passes the same name to the provider.
-
-To add Outpost to an existing application, generate the recipe in a separate directory ([Setup](../setup/)).
+These commands assume Outpost is installed, as in [Installation](../setup/). For Podman, add `--sandbox-provider podman` when generating and `--engine podman` when building.
 
 ## Add project tools and rebuild
 
 Add system packages and binaries as root, before the recipe’s final `USER` line.
 
-```dockerfile title="Dockerfile"
+```dockerfile title=".outpost-image/Dockerfile"
 RUN apt-get update && apt-get install -y --no-install-recommends make \
   && rm -rf /var/lib/apt/lists/*
 USER $AGENT_UID:$AGENT_GID
 ```
 
 ```sh
-npx outpost image build --image outpost:dev
+npx outpost image build --directory .outpost-image --image outpost:dev
 ```
 
 | Option           | Default                                  | Effect                                  |
@@ -79,13 +78,15 @@ The script prints the Codex version pinned by your installed Outpost. After upgr
 
 ## Check the image
 
+`doctor` starts a temporary container with the network disabled. It checks `node`, `git`, the writable home and the agent CLI, and warns when the CLI version differs from the pinned one. It uses the local image only and does not test sign-in ([Diagnostics](../diagnostics/)).
+
 ```sh
 npx outpost doctor --sandbox-provider docker --agent claude --image outpost:dev
 ```
 
-`doctor` starts a temporary container with the network disabled. It checks `node`, `git`, the writable home and the agent CLI, and warns when the CLI version differs from the pinned one. It uses the local image only and does not test sign-in ([Diagnostics](../diagnostics/)).
-
 ## Remove the image
+
+Remove `outpost:dev` when you no longer need this image. This removes the image from the local container engine, independently of the retained Git branches.
 
 ```sh
 npx outpost image remove --image outpost:dev

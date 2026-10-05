@@ -1,11 +1,11 @@
 ---
-title: "Tâches et dépendances"
-description: "Déclarer des tâches, relier leurs sorties typées dans un graphe, l’exécuter et lire le résultat de chaque tâche."
+title: "Relier les tâches et leurs dépendances"
+description: "Définissez les tâches, déclarez leurs dépendances et lisez leurs résultats typés."
 ---
 
 ## Définir des tâches et un workflow
 
-Une tâche est une étape identifiée par une `key` unique, avec une fonction `perform`. Un workflow est la liste des tâches, ordonnée par leurs dépendances `after`.
+Déclarez chaque étape avec une fonction de définition de tâche, puis passez les tâches à `defineWorkflow()`. Les dépendances déterminent l’ordre d’exécution et les résultats précédents qu’une tâche peut lire.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -66,14 +66,7 @@ for (const task of result.tasks)
 
 Le script affiche `failed`, puis `lint failed 2 lint errors` et `test cancelled` : par défaut, le premier échec annule les tâches qui n’ont pas terminé.
 
-| Membre        | Contenu                                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `status`      | `"done"`, `"failed"`, `"cancelled"`, `"paused"` (une gate ou une pause de quota) ou `"waiting-input"`.                |
-| `unwrap()`    | Lève une [`WorkflowFailure`](../../reference/workflowfailure/) qui porte le résultat, sauf si `status` vaut `"done"`. |
-| `value(task)` | La sortie de la tâche. Lève une exception si la tâche n’a pas terminé à l’état `done` pendant cette exécution.        |
-| `tasks`       | Un enregistrement par tâche : `key`, `status`, `attempts`, `startedAt`, `finishedAt`, `error`.                        |
-| `errors`      | Les erreurs qui ont fait échouer l’exécution.                                                                         |
-| `usage`       | Les tentatives effectuées et les tokens déclarés par les tâches d’agent, cumulés sur l’exécution.                     |
+Référence API : [WorkflowResult](../../reference/workflowresult/) et [TaskRecord](../../reference/taskrecord/).
 
 ## Exécuter des tâches en parallèle
 
@@ -126,7 +119,7 @@ console.log(
 
 Le script affiche `done [ 'done', 'skipped' ]`. Une tâche ignorée ne fait pas échouer l’exécution, n’a pas de valeur et fait ignorer toutes les tâches qui en dépendent.
 
-## Dessiner le graphe
+## Afficher les dépendances
 
 `diagram()` renvoie le graphe sous forme de flowchart Mermaid, à placer dans un README ou une pull request.
 
@@ -151,54 +144,75 @@ flowchart LR
 
 `defineAgentTask()` et `defineCommandTask()` s’exécutent dans une sandbox que vous avez ouverte avec [`createSandbox()`](../sandbox-sessions/). Les tâches partagent ses fichiers ; c’est vous qui la fermez.
 
-```ts
-import {
-  createSandbox,
-  defineAgentTask,
-  defineCommandTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
+
+```ts title="fix-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+
+export function defineFix(sandbox: Sandbox) {
+  return defineAgentTask({
+    key: "fix",
+    sandbox,
+    request: () => ({ brief: { text: "Fix the failing date tests." } }),
+  });
+}
+```
+
+```ts title="test-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineFix } from "./fix-dates.ts";
+import { defineCommandTask } from "@elie-laloum/outpost";
+
+export function defineTests(
+  sandbox: Sandbox,
+  fix: ReturnType<typeof defineFix>,
+) {
+  return defineCommandTask({
+    key: "test",
+    after: [fix],
+    sandbox,
+    command: { executable: "npm", arguments: ["test"] },
+  });
+}
+```
+
+```ts title="run-dates.ts"
+import { createSandbox, defineWorkflow } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { defineFix } from "./fix-dates.ts";
+import { defineTests } from "./test-dates.ts";
 
 await using sandbox = await createSandbox({
   repository,
   sandboxProvider,
   agent: coder,
 });
-const fix = defineAgentTask({
-  key: "fix",
-  sandbox,
-  request: () => ({ brief: { text: "Fix the failing date tests." } }),
-});
-const test = defineCommandTask({
-  key: "test",
-  after: [fix],
-  sandbox,
-  command: { executable: "npm", arguments: ["test"] },
-});
-const result = await defineWorkflow("fix-dates", [fix, test]).start();
+export const fix = defineFix(sandbox);
+export const test = defineTests(sandbox, fix);
+export const result = await defineWorkflow("fix-dates", [fix, test]).start();
 result.unwrap();
 ```
 
 `test` lance `npm test` sur les modifications de l’agent. Un code de sortie non nul fait échouer la tâche.
 
-## Quel type de tâche ?
+## Choisir le type de tâche
 
 Chaque déclaration renvoie une tâche que vous listez dans `defineWorkflow()` et reliez avec `after`.
 
-| Déclaration                                                                 | Usage                                                                       | Guide                                             |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------- |
-| [`defineTask`](../../reference/definetask/)                                 | Votre propre code, qui renvoie une valeur.                                  | Cette page                                        |
-| [`defineIsolatedTask`](../../reference/defineisolatedtask/)                 | Une tâche d’agent dans sa propre sandbox, ouverte et fermée par la tâche.   | [D’une tâche à un workflow](../first-workflow/)   |
-| [`defineAgentTask`](../../reference/defineagenttask/)                       | Un tour d’agent dans une sandbox que vous gardez ouverte.                   | [Partager une sandbox](#partager-une-sandbox)     |
-| [`defineCommandTask`](../../reference/definecommandtask/)                   | Une commande dans une sandbox que vous gardez ouverte.                      | [Partager une sandbox](#partager-une-sandbox)     |
-| [`defineLoopTask`](../../reference/definelooptask/)                         | Des essais vérifiés par tours, avec le contrôle échoué comme feedback.      | [Boucles de vérification](../verification-loops/) |
-| [`defineQueuedTask`](../../reference/definequeuedtask/)                     | Un travail confié à un worker via une file de jobs.                         | [Files de jobs et workers](../job-queues/)        |
-| [`defineApprovalTask`](../../reference/defineapprovaltask/)                 | Une pause jusqu’à l’approbation ou au rejet d’une personne listée.          | [Approbations](../approvals/)                     |
-| [`definePauseTask`](../../reference/definepausetask/)                       | Une pause jusqu’à la reprise ou au rejet par une personne listée.           | [Approbations](../approvals/)                     |
-| [`defineInteractiveAgentTask`](../../reference/defineinteractiveagenttask/) | Un dialogue d’agent qui attend des réponses humaines entre les tours.       | [Tâches interactives](../interactive-tasks/)      |
-| [`defineArtifactTask`](../../reference/defineartifacttask/)                 | Une valeur publiée comme artefact ; les dépendants reçoivent une référence. | [Artefacts](../artifacts/)                        |
-| [`defineWorkflowJob`](../../reference/defineworkflowjob/)                   | Pas une tâche : exécute un workflow entier comme job de file.               | [Files de jobs et workers](../job-queues/)        |
+| Déclaration                                                                 | Usage                                                                                   | Guide                                             |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`defineTask`](../../reference/definetask/)                                 | Votre propre code, qui renvoie une valeur.                                              | Cette page                                        |
+| [`defineIsolatedTask`](../../reference/defineisolatedtask/)                 | Une tâche d’agent dans sa propre sandbox, ouverte et fermée par la tâche.               | [D’une tâche à un workflow](../first-workflow/)   |
+| [`defineAgentTask`](../../reference/defineagenttask/)                       | Un tour d’agent dans une sandbox que vous gardez ouverte.                               | [Partager une sandbox](#partager-une-sandbox)     |
+| [`defineCommandTask`](../../reference/definecommandtask/)                   | Une commande dans une sandbox que vous gardez ouverte.                                  | [Partager une sandbox](#partager-une-sandbox)     |
+| [`defineLoopTask`](../../reference/definelooptask/)                         | Des essais vérifiés par tours, avec le contrôle échoué comme retour de la vérification. | [Boucles de vérification](../verification-loops/) |
+| [`defineQueuedTask`](../../reference/definequeuedtask/)                     | Un travail confié à un worker via une file de jobs.                                     | [Files de jobs et workers](../job-queues/)        |
+| [`defineApprovalTask`](../../reference/defineapprovaltask/)                 | Une pause jusqu’à l’approbation ou au rejet d’une personne listée.                      | [Approbations](../approvals/)                     |
+| [`definePauseTask`](../../reference/definepausetask/)                       | Une pause jusqu’à la reprise ou au rejet par une personne listée.                       | [Approbations](../approvals/)                     |
+| [`defineInteractiveAgentTask`](../../reference/defineinteractiveagenttask/) | Un dialogue d’agent qui attend des réponses humaines entre les tours.                   | [Tâches interactives](../interactive-tasks/)      |
+| [`defineArtifactTask`](../../reference/defineartifacttask/)                 | Une valeur publiée comme artefact ; les dépendants reçoivent une référence.             | [Artefacts](../artifacts/)                        |
+| [`defineWorkflowJob`](../../reference/defineworkflowjob/)                   | Pas une tâche : exécute un workflow entier comme job de file.                           | [Files de jobs et workers](../job-queues/)        |
 
 :::caution
 `defineIsolatedTask()` et `defineAgentTask()` renvoient un résultat de dispatch doté de méthodes, qu’un checkpoint ne peut pas stocker. Dans une exécution avec checkpoint, appelez-les depuis une `defineTask()` qui renvoie du JSON, comme dans [D’une tâche à un workflow](../first-workflow/). Voir [Exécutions durables](../durable-runs/).

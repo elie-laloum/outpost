@@ -1,15 +1,15 @@
 ---
-title: "Sandbox sessions"
-description: "Keep one sandbox open to run agent turns, test commands and an interactive terminal in the same environment."
+title: "Reuse a sandbox"
+description: "Keep an environment open for agent turns, commands and tests on the same files."
 ---
 
 ## Open a sandbox
 
-`createSandbox()` allocates a sandbox and keeps it open until you close it. Agent turns and commands then share its files and installed dependencies. `await using` closes it when the block ends.
+Open a sandbox with `createSandbox()` when several operations need the same files and installed dependencies. `await using` closes it at the end of the scope, including when an operation throws.
 
-```ts title="session.mts"
+```ts title="session.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -36,9 +36,9 @@ An `agent` passed to `sandbox.dispatch()` replaces the one given to `createSandb
 
 `sandbox.command()` runs one executable with an array of arguments. No shell parses them: `*`, `|` and `$HOME` reach the program as plain text. Call a shell yourself when you need one.
 
-```ts title="command.mts"
+```ts title="command.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
 const result = await sandbox.command({
@@ -51,19 +51,7 @@ console.log(result.stdout.trim()); // v24.15.0
 
 `sandbox.root` is the repository path inside the sandbox and the default working directory.
 
-| Option       | What it does                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| `executable` | Program to run, required.                                                                        |
-| `arguments`  | Arguments passed as-is, without shell expansion.                                                 |
-| `directory`  | Working directory inside the sandbox. Defaults to `sandbox.root`.                                |
-| `variables`  | Environment values for this command only ([Environment variables](../environment-variables/)).   |
-| `stdin`      | Text written to standard input, which then closes.                                               |
-| `input`      | A `Readable` stream written after `stdin`; standard input stays open until it ends.              |
-| `observe`    | Callback receiving each `stdout` or `stderr` chunk as it arrives.                                |
-| `retain`     | Number of trailing characters kept per stream in the result. Defaults to 65,536.                 |
-| `deadlineMs` | Maximum duration before Outpost stops the process. Defaults to 10 minutes.                       |
-| `signal`     | `AbortSignal` that cancels the command.                                                          |
-| `elevated`   | Runs as root on Docker, Podman, Vercel and Daytona. The host ignores it; Firecracker rejects it. |
+API reference: [Command](../../reference/command/).
 
 ## Check the outcome
 
@@ -107,7 +95,7 @@ An exception thrown inside `observe` stops the command, which then rejects with 
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -136,7 +124,7 @@ A sandbox you create never merges its branch on its own. With `branch: { mode: "
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,

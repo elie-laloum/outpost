@@ -1,15 +1,15 @@
 ---
-title: "Préparer l’environnement"
-description: "Installer les dépendances avant le démarrage de l’agent et réutiliser les téléchargements de paquets entre sandboxes Docker et Podman."
+title: "Préparer l’environnement de l’agent"
+description: "Installez les dépendances du projet avant de lancer l’agent et réutilisez les caches de téléchargement."
 ---
 
 ## Installer les dépendances avant le travail de l’agent
 
-Passez `hooks` à `dispatch()`. Chaque hook est une liste de commandes qu’Outpost exécute pendant la préparation de la sandbox, avant le premier tour de l’agent.
+Utilisez le hook `sandboxReady` pour installer les dépendances du projet avant de lancer l’agent. La commande s’exécute dans la sandbox préparée : l’agent dispose donc des paquets installés pendant sa tâche.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -28,11 +28,7 @@ console.log(result.text);
 
 ## Choisir où s’exécute chaque hook
 
-| Hook             | Exécution                      | Moment                                             | Commandes           |
-| ---------------- | ------------------------------ | -------------------------------------------------- | ------------------- |
-| `workspaceReady` | Sur l’hôte, dans le worktree   | Après la création du worktree, avant toute sandbox | L’une après l’autre |
-| `hostReady`      | Sur l’hôte, dans le worktree   | Après l’acquisition de la sandbox                  | L’une après l’autre |
-| `sandboxReady`   | Dans la sandbox, dans le dépôt | Une fois le dépôt en place                         | Toutes ensemble     |
+Référence API : [LifecycleHooks](../../reference/lifecyclehooks/).
 
 `hostReady` et `sandboxReady` s’exécutent en même temps. Installez les dépendances dans `sandboxReady` : elles correspondent alors au système et à l’architecture de la sandbox.
 
@@ -50,7 +46,7 @@ Un workspace ouvert par `openWorkspace()` exécute `workspaceReady` une fois, à
 
 ## Réutiliser les téléchargements entre conteneurs
 
-Les providers Docker et Podman acceptent `caches` : des volumes nommés qui survivent au conteneur. Dirigez votre gestionnaire de paquets vers le répertoire monté.
+Les fournisseurs Docker et Podman acceptent `caches` : des volumes nommés qui survivent au conteneur. Dirigez votre gestionnaire de paquets vers le répertoire monté.
 
 ```ts
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -62,7 +58,7 @@ export const sandboxProvider = createDockerSandboxProvider({
 });
 ```
 
-Chaque cache est monté sur `/outpost/cache/<name>` et appartient à l’utilisateur du conteneur. La sandbox suivante qui utilise la même clé y retrouve les téléchargements. Changez `key` quand le contenu en cache n’est plus compatible, par exemple après une mise à jour du runtime.
+Chaque cache est monté sur `/outpost/cache/<name>` et appartient à l’utilisateur du conteneur. La sandbox suivante qui utilise la même clé y retrouve les téléchargements. Changez `key` quand le contenu en cache n’est plus compatible, par exemple après une mise à jour du moteur d’exécution.
 
 | Gestionnaire de paquets | Variable            |
 | ----------------------- | ------------------- |
@@ -86,7 +82,7 @@ Podman accepte les mêmes commandes avec `podman`.
 
 ## Limites
 
-- Les autres providers n’ont pas de `caches` : `sandboxReady` retélécharge tout à chaque allocation.
+- Les autres fournisseurs n’ont pas de `caches` : `sandboxReady` retélécharge tout à chaque allocation.
 - Chaque commande de hook s’arrête après 10 minutes, sauf si vous fixez `deadlineMs`.
 - Une commande qui se termine avec un statut non nul rejette avec une `OutpostError` de code `process`, arrête les autres commandes de préparation et libère la sandbox. Voir [Erreurs](../error-handling/).
 - Les commandes s’exécutent sans shell. Appelez `sh -c` pour les pipes et `&&`.

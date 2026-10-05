@@ -1,6 +1,6 @@
 ---
-title: "Network restrictions"
-description: "Block or allowlist the outbound traffic of a sandbox with an egress policy on Docker, Podman, Vercel or Daytona."
+title: "Restrict network access"
+description: "Configure supported outbound rules and understand where they apply."
 ---
 
 ## Choose a policy
@@ -9,14 +9,9 @@ description: "Block or allowlist the outbound traffic of a sandbox with an egres
 Egress policies are experimental. Check that your provider and account enforce a policy before you rely on it.
 :::
 
-Set `egress` on the sandbox provider. Without it, the provider keeps its own network defaults.
+Set `egress` on the sandbox provider to restrict outbound traffic from the sandbox. If you omit it, the provider’s network defaults apply. Check the support table before selecting a policy.
 
-| Policy                                  | Effect                                                         |
-| --------------------------------------- | -------------------------------------------------------------- |
-| `{ mode: "deny-all" }`                  | Blocks all outbound traffic from the sandbox.                  |
-| `{ mode: "allowlist", domains }`        | Allows the listed DNS names only.                              |
-| `{ mode: "allowlist", allowCidrs }`     | Allows the listed IP ranges, independently of `domains`.       |
-| `{ mode: "allowlist", ..., denyCidrs }` | Denies these IP ranges even when a domain or CIDR allows them. |
+API reference: [EgressPolicy](../../reference/egresspolicy/).
 
 Support depends on the provider. Outpost rejects an unsupported policy with a `configuration` error when you create the provider.
 

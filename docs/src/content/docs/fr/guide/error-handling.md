@@ -1,11 +1,11 @@
 ---
-title: "Erreurs"
-description: "Savoir comment chaque appel Outpost signale un échec, lire une OutpostError et son code de faute, et choisir quoi relancer."
+title: "Gérer les erreurs"
+description: "Examinez les erreurs des agents et des workflows, puis décidez ce qui peut être relancé."
 ---
 
-## Savoir comment chaque appel échoue
+## Comprendre les retours d’erreur
 
-Outpost signale un échec de trois façons : une promesse rejetée, un statut dans le résultat, ou une exception que vous demandez.
+L’erreur reçue dépend de l’opération. Un appel d’agent rejette sa promesse en cas d’échec ; un workflow renvoie généralement un résultat contenant les tâches en échec. Le tableau ci-dessous indique comment traiter chaque appel.
 
 | Appel                                                                | En cas d’échec                                                                                                                                                    |
 | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -17,11 +17,13 @@ Outpost signale un échec de trois façons : une promesse rejetée, un statut da
 | `steering.send()`                                                    | Rejette avec le code `steering` quand l’instruction n’est pas remise.                                                                                             |
 | `dispatch()` ou `sandbox.command()` annulé par votre propre `signal` | Rejette avec la raison du signal, telle que passée à `abort()`, et non une `OutpostError`.                                                                        |
 
-## Lire une OutpostError
+## Examiner une OutpostError
+
+Interceptez une `OutpostError` pour lire son code, son message et les informations de récupération. Relancez les autres erreurs pour qu’elles restent visibles ; les informations de récupération aident à retrouver le travail conservé après un dispatch en échec.
 
 ```ts
 import { OutpostError, dispatch, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   await dispatch({
@@ -38,41 +40,17 @@ try {
 }
 ```
 
-| Champ                    | Contenu                                                                                                                                                                                                               |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `code`                   | Un [code de faute](#codes-de-faute) stable. Branchez votre logique dessus, pas sur `message`.                                                                                                                         |
-| `message`                | Une explication lisible, destinée aux humains.                                                                                                                                                                        |
-| `details`                | Le contexte structuré : `status` et `retryAfterMs` pour les échecs HTTP, `resetAt` pour les quotas, `unavailable` pour les pannes, `status`, `stdout`, `stderr` et `conversation` pour un processus d’agent en échec. |
-| `cause`                  | L’échec d’origine, quand Outpost l’a reclassé.                                                                                                                                                                        |
-| `recoveryDetails(error)` | Où le travail a été conservé, par exemple `branch`, `directory`, `commits`, `transcript` et `logReference`. Fonctionne aussi sur les erreurs qui ne sont pas des `OutpostError`.                                      |
+Référence API : [OutpostError](../../reference/outposterror/).
 
-Deux échecs indiquent aussi leur emplacement dans `details` :
+Utilisez les informations de récupération pour retrouver le travail conservé après un échec.
 
-| Échec                                                | Code        | Champ                                         |
-| ---------------------------------------------------- | ----------- | --------------------------------------------- |
-| Les changements distants n’ont pas pu être appliqués | `workspace` | `details.recovery` : le dossier du transfert. |
-| L’intégration automatique a échoué                   | `conflict`  | `details.directory` : le worktree conservé.   |
+Référence API : [recoveryDetails](../../reference/recoverydetails/).
 
 [Récupérer le travail](../recovery/) montre comment exploiter ces emplacements.
 
-## Codes de faute
+## Codes d’erreur
 
-| Code            | Signification                                        | Cause typique                                                                                                         | Que faire                                                                                                     |
-| --------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `configuration` | L’appel ou ses réglages sont invalides               | Réglage de modèle non pris en charge, fichier d’identifiants de compte absent, sandbox occupée ou fermée              | Corrigez le code ou la configuration. Relancer n’y change rien.                                               |
-| `process`       | Un processus a échoué                                | Agent sorti avec un code non nul ou sans événement final ; tâche de commande sortie avec un code non nul              | Lisez `details.stderr` ; vérifiez `unavailableFault(error)`.                                                  |
-| `timeout`       | Un délai a expiré                                    | `deadlineMs`, `idleMs`, le `deadlineMs` d’une commande, `start({ timeoutMs })`, une requête au modèle                 | Augmentez la limite ou découpez la tâche. Voir [Limites et annulation](../limits-and-cancellation/).          |
-| `aborted`       | Outpost a arrêté l’opération                         | La sandbox s’est fermée pendant une commande ou un tour                                                               | Relancez dans une sandbox ouverte.                                                                            |
-| `workspace`     | Une opération sur le worktree ou un fichier a échoué | Chemin ou lien symbolique dangereux, réservation de stockage refusée, échec de la synchronisation Git distante        | Inspectez le worktree conservé et les fichiers de récupération.                                               |
-| `conflict`      | Quelqu’un d’autre a modifié l’état                   | Worktree déjà utilisé, branche extraite ailleurs, modifications sur l’hôte pendant la synchronisation, fusion échouée | Résolvez sur l’hôte, puis relancez.                                                                           |
-| `prompt`        | Le brief n’a pas pu être rendu                       | Variable de prompt manquante, commande de prompt en échec                                                             | Corrigez le [brief](../briefs/).                                                                              |
-| `response`      | Une réponse n’a pas pu être analysée                 | `ResponseError` : balise absente, JSON invalide, rejet du schéma ; réponse invalide d’un modèle ou d’un serveur MCP   | Autorisez des réparations. Voir [Réponses typées](../typed-responses/).                                       |
-| `session`       | Une conversation est indisponible                    | Conversation introuvable dans le stockage natif, transcription absente ou non prise en charge                         | Vérifiez la [conversation](../conversations/) que vous reprenez ou dupliquez.                                 |
-| `provider`      | La sandbox ou le service de modèle a échoué          | Sandbox déjà libérée par le provider, transfert de fichiers en échec, erreur HTTP d’un provider de modèle hors quota  | Vérifiez le provider ; `unavailableFault(error)` signale les pannes.                                          |
-| `limit`         | Une limite du harness intégré est atteinte           | `maxSteps`, `maxToolCalls`, `maxOutputTokens`, budget de tokens, profondeur de délégation                             | Relevez la limite du [harness](../harness/) ou resserrez le brief.                                            |
-| `quota`         | Une limite d’usage ou de débit est atteinte          | Limite d’usage définitive signalée par une CLI d’agent, HTTP 429 ou erreur de quota d’un provider de modèle           | Attendez `resetAt`, [mettez le workflow en pause](../quota-pauses/) ou [passez la main](../fallback-agents/). |
-| `replay`        | Un rejeu diffère de son journal                      | `ReplayDivergence`                                                                                                    | Enregistrez de nouveau. Voir [Rejouer sans modèle](../record-replay/).                                        |
-| `steering`      | Une instruction n’a pas été remise                   | Le dispatch s’est terminé avant, ou le contrôleur est fermé                                                           | Envoyez-la au dispatch suivant. Voir [Piloter un agent en cours](../steering/).                               |
+Référence API : [FaultCode](../../reference/faultcode/).
 
 ## Reconnaître les quotas et les pannes
 
@@ -98,15 +76,12 @@ Un délai de connexion dépassé garde le code `timeout`. Quand une CLI d’agen
 
 Une tâche en échec ne fait pas rejeter `start()`. Lisez `status` et `errors`, ou appelez `unwrap()` pour lever une exception.
 
-```ts
-import {
-  OutpostError,
-  WorkflowFailure,
-  defineTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const deploy = defineTask({
+```ts title="deploy.ts"
+import { defineTask, OutpostError } from "@elie-laloum/outpost";
+
+export const deploy = defineTask({
   key: "deploy",
   perform: () => {
     throw new OutpostError("provider", "Deployment returned HTTP 502", {
@@ -114,7 +89,17 @@ const deploy = defineTask({
     });
   },
 });
-const result = await defineWorkflow("release", [deploy]).start();
+```
+
+```ts title="run-deploy.ts"
+import {
+  defineWorkflow,
+  WorkflowFailure,
+  OutpostError,
+} from "@elie-laloum/outpost";
+import { deploy } from "./deploy.ts";
+
+export const result = await defineWorkflow("release", [deploy]).start();
 try {
   result.unwrap();
 } catch (error) {
@@ -122,22 +107,13 @@ try {
   const [first] = error.result.errors;
   if (first instanceof OutpostError) console.log(first.code, first.details);
 }
-// provider { status: 502 }
 ```
 
 <!-- check:run -->
 
 `WorkflowFailure.cause` est la première entrée de `errors` : `quotaFault()` et `unavailableFault()` s’appliquent donc directement à elle. `unwrap()` lève aussi une exception pour les exécutions `"paused"`, `"waiting-input"` et `"cancelled"`.
 
-| Erreur                     | Où elle apparaît                                                                     | À lire                                                |
-| -------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| `WorkflowFailure`          | Levée par `unwrap()`                                                                 | `result` : statut, tâches, erreurs, usage.            |
-| `WorkflowBudgetExceeded`   | `result.errors` quand un [budget](../budgets/) est épuisé                            | `dimension`, `limit`, `observed`.                     |
-| `WorkflowUsageUnavailable` | `result.errors` quand un budget de tokens ne peut pas être appliqué                  | Définissez `budget.attempts` et des délais.           |
-| `LoopTaskExhausted`        | `result.errors` après l’échec du dernier tour d’une [boucle](../verification-loops/) | `key`, `maxRounds`, `feedback`.                       |
-| `ResponseError`            | Un dispatch ou une tâche d’agent avec un contrat de réponse                          | `tag`, `raw` ; code `response`.                       |
-| `ReplayDivergence`         | Un agent de rejeu                                                                    | `kind`, `turn`, `expected`, `actual` ; code `replay`. |
-| `TransportConflict`        | Une écriture conditionnelle dans le [stockage](../storage/)                          | `key`. Relisez l’objet avant de réessayer.            |
+Référence API : [WorkflowFailure](../../reference/workflowfailure/), [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/), [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/), [LoopTaskExhausted](../../reference/looptaskexhausted/), [ResponseError](../../reference/responseerror/), [ReplayDivergence](../../reference/replaydivergence/) et [TransportConflict](../../reference/transportconflict/).
 
 ## Relancer à bon escient
 
@@ -168,7 +144,7 @@ Pour le récit complet d’un dispatch en échec, ouvrez son [journal](../journa
 
 ## Limites
 
-- Certains échecs sont de simples `Error` : définitions de tâche ou de workflow invalides, et [checkpoint](../durable-runs/) déjà détenu par un autre runner.
+- Certains échecs sont de simples `Error` : définitions de tâche ou de workflow invalides, et [checkpoint](../durable-runs/) déjà détenu par un autre processus.
 - Un `timeout` ne prouve pas que les effets externes ont été annulés. Vérifiez la branche conservée avant de relancer.
 
 API : [OutpostError](../../reference/outposterror/) · [FaultCode](../../reference/faultcode/) · [recoveryDetails](../../reference/recoverydetails/) · [quotaFault](../../reference/quotafault/) · [unavailableFault](../../reference/unavailablefault/) · [WorkflowFailure](../../reference/workflowfailure/) · [WorkflowResult](../../reference/workflowresult/) · [ResponseError](../../reference/responseerror/) · [TransportConflict](../../reference/transportconflict/)

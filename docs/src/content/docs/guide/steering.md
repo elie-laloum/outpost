@@ -1,15 +1,15 @@
 ---
-title: "Steering a running agent"
-description: "Send an extra instruction to an agent while it works, without cancelling the task or losing its sandbox."
+title: "Send instructions during a task"
+description: "Give a running agent a new instruction and track how it is delivered."
 ---
 
 ## Send an instruction
 
-`createSteering()` returns a controller. Pass it to a dispatch as `steering`, then call `send()` while the agent works.
+Create a steering controller and pass it to the dispatch. While the task runs, `send()` submits another instruction and resolves when Outpost can report how it was delivered.
 
 ```ts
 import { createSteering, dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const steering = createSteering();
 const running = dispatch({
@@ -68,11 +68,7 @@ const request: DispatchOptions = {
 };
 ```
 
-| `subagent` | Receiver                                                                    |
-| ---------- | --------------------------------------------------------------------------- |
-| omitted    | The first active loop to reach its next step: the working subagent, if any. |
-| a run id   | That subagent run only, at any depth.                                       |
-| `null`     | The main loop only, once the current delegation returns.                    |
+API reference: [SteeringSendOptions](../../reference/steeringsendoptions/).
 
 An instruction still waiting when its run ends is rejected with code `steering` and the run id in `details.subagent`.
 

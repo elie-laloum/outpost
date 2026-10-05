@@ -1,11 +1,11 @@
 ---
-title: "Diagnostics"
-description: "Check the host, the container engine, the image and the agent CLI before paying for a model call, then probe an open sandbox from code."
+title: "Troubleshoot your setup"
+description: "Check your tools and sandbox before investigating agent or model failures."
 ---
 
 ## Check prerequisites
 
-`outpost doctor` runs short probes for the sandbox provider and agent you intend to use. Add `--image` to also start the image in a temporary container.
+Run `outpost doctor` to check the tools needed by your sandbox provider and agent. Add `--image` to test the image in a temporary container before sending your first request.
 
 ```sh
 npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
@@ -77,7 +77,7 @@ jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"'
 }
 ```
 
-`hasFailures` is `true` when any check has the status `fail`, which is also when the exit status is `1`. `scope` is `host` without `--image`. `version` and `referenceVersion` appear on version checks only.
+API reference: [SandboxDiagnosticReport](../../reference/sandboxdiagnosticreport/) and [DiagnosticCheck](../../reference/diagnosticcheck/).
 
 ## Diagnose an open sandbox
 
@@ -85,7 +85,7 @@ jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"'
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
 const report = await sandbox.diagnose({ agent: "codex", transfers: true });
@@ -93,11 +93,7 @@ for (const check of report.checks)
   console.log(check.status, check.id, check.message);
 ```
 
-<!-- features -->
-
-- `sandbox.*`: Node.js, Git, a writable home, and a command whose separate output streams and nonzero exit status must come back intact.
-- `agent`: Adds the agent CLI version and help checks from doctor.
-- `transfers`: Uploads a binary file, verifies it with a process in the sandbox, then downloads it.
+API reference: [SandboxDiagnosticOptions](../../reference/sandboxdiagnosticoptions/).
 
 Each probe stops after `deadlineMs` (5,000 ms by default, 60,000 at most). `report.capabilities` compares what the provider advertises with what was observed. The diagnosis is a sandbox operation: it fails while a dispatch or command is running on the same sandbox.
 
@@ -118,19 +114,15 @@ console.log(report.referenceVersion, report.hasFailures);
 
 It prints the Claude Code version Outpost pins, then `false` when every sample decodes as expected.
 
-## Make a first paid run
+## Test model access
 
 Doctor stops before sign-in and model access. After it passes, run a small task that edits nothing, such as the review script in [Your first task](../first-request/), and read its actual result.
 
-## Read a connection timeout
+## Understand a connection timeout
 
 A CLI agent can keep retrying an unreachable endpoint until its deadline. The error keeps the code `timeout`. When the agent's last reported failure was a connection problem, Outpost adds a hint.
 
-<!-- features -->
-
-- `error.message`: Ends with "The agent reported a connection failure. Check the model endpoint and network access."
-- `error.details.agentDiagnostic`: Equals `"connection"`.
-- `unavailableFault(error)`: Returns `{ message: "connection failure" }`, so a [fallback agent](../fallback-agents/) covering `unavailable` moves to its next candidate.
+API reference: [OutpostError](../../reference/outposterror/).
 
 The hint summarizes the agent's report without copying its URL or credentials. It does not prove that the endpoint is down. Other error codes are listed in [Errors](../error-handling/).
 

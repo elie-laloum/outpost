@@ -1,6 +1,6 @@
 ---
-title: "Private Git"
-description: "Give a Docker or Podman agent its own copy of the repository instead of your mounted checkout, and bring its commits back only after validation."
+title: "Keep Git metadata inside the container"
+description: "Try isolated container repositories and inspect how changes return to the host."
 ---
 
 ## Turn it on
@@ -9,12 +9,12 @@ description: "Give a Docker or Podman agent its own copy of the repository inste
 Private Git is an opt-in prototype: its behavior can still change.
 :::
 
-Set `repositoryMode: "isolated"` on the Docker or Podman provider. The rest of your code stays the same.
+Set `repositoryMode: "isolated"` on a Docker or Podman provider to give the container its own Git checkout. This option is experimental; the rest of the task uses the same agent and dispatch settings.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
-import { coder, repository } from "./outpost.config.mts";
+import { coder, repository } from "./outpost.config.ts";
 
 const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
@@ -47,7 +47,7 @@ Outpost copies the branch history into the container and the agent works on that
 
 `copies` and `includeUncommitted` select extra inputs as on [cloud sandboxes](../cloud-sandboxes/). Branch policies: [Repository and branch](../repository-and-branch/).
 
-## Bring changes back safely
+## Synchronize changes to the host
 
 Isolated containers use the same synchronization as cloud sandboxes. Before applying anything, Outpost validates the incoming commits and files and backs up the host worktree.
 

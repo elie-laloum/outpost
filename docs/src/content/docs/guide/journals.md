@@ -1,28 +1,34 @@
 ---
-title: "Journals"
-description: "Keep a durable record of each dispatch and read its events back after the run."
+title: "Read execution journals"
+description: "Record agent events and read the journal of a completed or failed dispatch."
 ---
 
 ## Record a journal
 
-Every dispatch writes a journal by default. Pass a transport in `logging` to choose where it goes, then read it back with `readJournal()`.
+Each dispatch records its events in a journal by default. Set `logging.transporter` to choose its storage location, then use `readJournal()` to inspect the recorded events after the run.
 
-```ts
-import {
-  createLocalTransport,
-  dispatch,
-  readJournal,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const transporter = createLocalTransport({ directory: ".outpost/storage" });
-const result = await dispatch({
+```ts title="record-journal.ts"
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+
+export const transporter = createLocalTransport({
+  directory: ".outpost/storage",
+});
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Describe the repository without changing it." },
   logging: { transporter },
 });
+```
+
+```ts title="read-journal.ts"
+import { result, transporter } from "./record-journal.ts";
+import { readJournal } from "@elie-laloum/outpost";
+
 if (result.logReference) {
   const events = await readJournal({
     transporter,
@@ -36,14 +42,7 @@ if (result.logReference) {
 
 ## Choose what to record
 
-| `logging`              | What Outpost records                               | `logReference` |
-| ---------------------- | -------------------------------------------------- | -------------- |
-| omitted                | A journal in `<repository>/.outpost/storage`       | Yes            |
-| `{ transporter }`      | A journal in that transport                        | Yes            |
-| `{ verbose: true }`    | Also raw and streamed events                       | Yes            |
-| `{ replayable: true }` | Also each commit as a patch, for replay            | Yes            |
-| `"stdout"`             | No journal; progress lines printed to the terminal | No             |
-| `false`                | Nothing                                            | No             |
+API reference: [Logging](../../reference/logging/).
 
 Object options combine: `{ transporter, verbose: true, replayable: true }`. A [sandbox session](../sandbox-sessions/) takes `logging` once for all its dispatches, and each `sandbox.dispatch()` can override it.
 
@@ -51,7 +50,9 @@ Object options combine: `{ transporter, verbose: true, replayable: true }`. A [s
 
 `readJournal()` returns the events in the order they happened. Each entry is a plain object: the event fields with its `kind`, plus `at`, `seq`, `source`, `scope` and the dispatch `label` when you set one.
 
-`maxEntries` (100,000 by default) and `maxBytes` (64 MiB by default) bound a read. A journal beyond either limit fails to read instead of being cut short.
+API reference: [ReadJournalOptions](../../reference/readjournaloptions/).
+
+Reading fails if the journal exceeds the configured limits; it does not return a truncated transcript.
 
 ```ts
 import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
@@ -67,13 +68,9 @@ const events = await readJournal({
 });
 ```
 
-## Know what a journal contains
+## Understand recorded events
 
-| Recorded                | Events                                                                                                                                                                                            |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Always                  | `dispatch-start`, the `phase` and `operation` events from preparation to cleanup, the [agent events](../progress/) (`prompt`, `text`, `tool`, `tool-result`, `usage`…), then `dispatch-finished`. |
-| With `verbose: true`    | `raw` protocol lines, `text-delta`, `stderr`, `reasoning`, `tool-output`, `command-output`, `model-request` and `model-response`.                                                                 |
-| With `replayable: true` | A `workspace-commits` event at the end of each sandbox dispatch.                                                                                                                                  |
+API reference: [ObservationEvent](../../reference/observationevent/) and [AgentObservation](../../reference/agentobservation/).
 
 `dispatch-finished` carries the `status` (`done`, `failed` or `cancelled`), `completed`, the token `usage`, the branch and commits, and the `error` code and message on failure. `operation` events carry their `durationMs`.
 
@@ -81,7 +78,7 @@ The [built-in harness](../harness/) emits `model-request` and `model-response` o
 
 ```ts
 import { createObservationHub, dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const observation = createObservationHub({ verbose: true });
 await dispatch({
@@ -105,7 +102,7 @@ A failed or cancelled dispatch still closes its journal with `dispatch-finished`
 
 ```ts
 import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   await dispatch({

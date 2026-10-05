@@ -1,30 +1,34 @@
 ---
 title: "Add a CLI agent"
-description: "Run a coding-agent CLI that Outpost does not support yet: build its command, decode its output, then declare what else it can do."
+description: "Build an adapter that starts your agent CLI and reads its output as Outpost events."
 ---
 
 ## Write a minimal adapter
 
-An `AgentAdapter` translates between Outpost and one CLI: `request()` builds the command, `events()` decodes each output line. A `CliHarness` creates the adapter for a model, and `createAgent()` turns it into an agent like the built-in ones.
+Implement an `AgentAdapter` to describe how your CLI starts and how its output becomes events: `request()` builds the command and `events()` reads its output lines. A `CliHarness` binds that adapter to the selected model, and `createAgent()` makes it usable in a dispatch.
 
-```ts title="mycli.mts"
-import {
-  createAgent,
-  dispatch,
-  type AgentEvent,
-  type CliHarness,
-} from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const parse = (line: string) => {
+```ts title="protocol-values.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
+
+export const parse = (line: string) => {
   try {
     return JSON.parse(line);
   } catch {
     return undefined;
   }
 };
+export function usage(input: number, output: number): AgentEvent {
+  return { kind: "usage", tokens: { input, cached: 0, output } };
+}
+```
 
-function events(line: string): AgentEvent[] {
+```ts title="events.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
+import { parse, usage } from "./protocol-values.ts";
+
+export function events(line: string): AgentEvent[] {
   const event = parse(line);
   switch (event?.type) {
     case "session":
@@ -34,39 +38,54 @@ function events(line: string): AgentEvent[] {
     case "tool":
       return [{ kind: "tool", name: event.name, input: event.input }];
     case "usage":
-      return [
-        {
-          kind: "usage",
-          tokens: { input: event.input, cached: 0, output: event.output },
-        },
-      ];
+      return [usage(event.input, event.output)];
     case "error":
       return [{ kind: "failure", message: event.message }];
     default:
       return [];
   }
 }
+```
 
-const myCliHarness: CliHarness = {
+```ts title="model-request.ts"
+import type { AgentModel, AgentAdapter } from "@elie-laloum/outpost";
+
+export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
+  return ({ text }) => ({
+    executable: "mycli",
+    arguments: ["--json", ...(model ? ["--model", model.name] : [])],
+    stdin: text ?? "",
+  });
+}
+```
+
+```ts title="mycli-agent.ts"
+import type { CliHarness } from "@elie-laloum/outpost";
+import { requestForModel } from "./model-request.ts";
+import { events } from "./events.ts";
+import { createAgent } from "@elie-laloum/outpost";
+
+export const myCliHarness: CliHarness = {
   kind: "cli",
   bind(model) {
     if (model?.reasoning || model?.maxOutputTokens)
       throw new Error("mycli accepts only a model name");
     return {
       name: "mycli",
-      request: ({ text }) => ({
-        executable: "mycli",
-        arguments: ["--json", ...(model ? ["--model", model.name] : [])],
-        stdin: text ?? "",
-      }),
+      request: requestForModel(model),
       events,
     };
   },
 };
-
 export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
+```
 
-const result = await dispatch({
+```ts title="mycli.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { myCli } from "./mycli-agent.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: myCli,
@@ -82,27 +101,13 @@ Outpost runs `mycli --json --model mycli-pro` in the sandbox with the brief on s
 
 `request()` receives an `AgentInput` and returns a `Command`: `executable`, `arguments`, `stdin`, `variables`. Outpost adds the deadline and the cancellation signal.
 
-| Input field         | Set when                                                   | Your command should                                     |
-| ------------------- | ---------------------------------------------------------- | ------------------------------------------------------- |
-| `text`              | Every turn                                                 | Pass the prompt, on stdin or as an argument.            |
-| `continuation.id`   | The dispatch continues a conversation                      | Resume that native conversation.                        |
-| `continuation.fork` | The dispatch forks a conversation and you have no `fork()` | Start a new conversation from it.                       |
-| `liveInput`         | Steering uses your `liveInput` protocol                    | Put the prompt on stdin in the live protocol format.    |
-| `interactive`       | [`attach()`](../sandbox-sessions/) opens a terminal        | Return `interactive: true`, pass `text` as an argument. |
+API reference: [AgentInput](../../reference/agentinput/).
 
 ## Decode the output
 
 `events()` receives each stdout line and returns zero, one or several events. Stderr never reaches it: Outpost reports stderr lines as `stderr` events.
 
-| Event                            | Effect on the turn                                                          |
-| -------------------------------- | --------------------------------------------------------------------------- |
-| `conversation` (`id`)            | Records the native conversation ID for capture, continuation and steering.  |
-| `text` (`text`)                  | Appended to the answer.                                                     |
-| `result` (`text`)                | The final answer; replaces the appended `text`.                             |
-| `usage` (`tokens`, `cumulative`) | Adds tokens to `result.usage`. Set `cumulative: true` for running totals.   |
-| `failure` (`message`)            | Fails the turn with this message.                                           |
-| `quota` (`message`, `resetAt`)   | Classifies the failed turn as a [quota](../quota-pauses/) error.            |
-| `finished`                       | Ends the turn. With `requiresFinishedEvent: true`, a turn without it fails. |
+API reference: [AgentEvent](../../reference/agentevent/).
 
 Other kinds, such as `tool`, `tool-result`, `reasoning`, `file-change` and `warning`, reach only [observers](../progress/). A nonzero exit status fails the turn. Without `text` or `result` events, `result.text` holds the end of stdout.
 
@@ -114,29 +119,13 @@ An exception thrown by `events()` fails the turn. Return `[]` for lines you do n
 
 Each optional member enables one feature. Declare only what the CLI really does.
 
-| Member                                 | Enables                                                                                                    | Page                                                                     |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Model check in `bind()`                | Throw there to reject model settings the CLI cannot apply when `createAgent()` runs, not mid-run.          | [AgentModel](../../reference/agentmodel/)                                |
-| `resumable: true`                      | Continuation, typed-response repairs and resumed steering. `false` rejects continuation and forks upfront. | [Conversations](../conversations/)                                       |
-| `forkable`, `fork(id, invoke)`         | Forks. `fork()` creates the child with sandbox commands and returns its ID. `false` rejects forks.         | [Conversations](../conversations/)                                       |
-| `storage`, `capture`                   | Capture after each turn and resume in a new sandbox. `capture: false` turns capture off.                   | [Native conversation formats](../conversation-formats/)                  |
-| `credentials(variables)`               | Variables, host files, generated files and login commands for the private agent home.                      | [Authentication](../authentication/)                                     |
-| `configuration(variables)`             | CLI settings files merged into the agent home, such as MCP servers.                                        | [MCP servers](../mcp-servers/)                                           |
-| `quota(text)`, `unavailable(text)`     | Classify a failed turn as a quota error or an outage from its failure or stderr text.                      | [Quota pauses](../quota-pauses/), [Fallback agents](../fallback-agents/) |
-| `usage`, `usageCommand`, `usageResult` | Token accounting.                                                                                          | [Report token usage](#report-token-usage)                                |
-| `liveInput`                            | Instructions injected into the running turn.                                                               | [Steer a running turn](#steer-a-running-turn)                            |
-| `variables`                            | Environment variables for every command of the agent.                                                      | [Environment variables](../environment-variables/)                       |
+API reference: [AgentAdapter](../../reference/agentadapter/).
 
 ## Report token usage
 
 `usage` tells Outpost where the counters come from. Incomplete usage is a lower bound that [budgets](../budgets/) treat separately.
 
-| `usage`         | What Outpost does                                                                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `"events"`      | Adds the `usage` events. Marks usage incomplete when none arrives or the command does not complete.                       |
-| `"session"`     | After the CLI exits, runs `usageCommand(conversation)` in the sandbox and parses the session totals with `usageResult()`. |
-| `"unavailable"` | Marks usage incomplete before the command starts.                                                                         |
-| omitted         | Adds the `usage` events without judging completeness.                                                                     |
+API reference: [Usage](../../reference/usage/).
 
 ```ts
 import type { AgentAdapter } from "@elie-laloum/outpost";
@@ -210,15 +199,22 @@ Injection also needs a `SandboxLease` with `liveInput: true`, which every built-
 
 Record real output lines of the CLI once, then replay them through `events()`. [`diagnoseAgentProtocol()`](../diagnostics/) checks the built-in agents the same way.
 
-```ts
-import assert from "node:assert/strict";
-import type { AgentEvent, CliHarness } from "@elie-laloum/outpost";
+<!-- tabs -->
+
+```ts title="protocol.types.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
 
 export interface ProtocolFixture {
   readonly name: string;
   readonly lines: readonly string[];
   readonly expected: readonly AgentEvent[];
 }
+```
+
+```ts title="check-protocol.ts"
+import type { CliHarness } from "@elie-laloum/outpost";
+import type { ProtocolFixture } from "./protocol.types.ts";
+import assert from "node:assert/strict";
 
 export function checkProtocol(
   harness: CliHarness,

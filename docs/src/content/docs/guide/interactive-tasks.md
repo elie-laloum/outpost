@@ -1,11 +1,11 @@
 ---
-title: "Interactive tasks"
-description: "Let an agent ask a person questions between its turns, wait durably for each answer, then continue the same conversation."
+title: "Let an agent ask questions"
+description: "Pause an agent task for a human answer and continue the saved conversation."
 ---
 
 ## Interactive task or approval gate?
 
-An interactive task lets the agent decide what to ask. An [approval gate](../approvals/) asks a question you wrote in advance.
+Use an interactive task when the agent needs to ask a person for information before continuing. Use an approval task when your workflow needs permission to proceed. These two pauses have different inputs and resume rules.
 
 |                   | Interactive task                                 | Approval gate                               |
 | ----------------- | ------------------------------------------------ | ------------------------------------------- |
@@ -20,16 +20,13 @@ An interactive task lets the agent decide what to ask. An [approval gate](../app
 
 The task needs a checkpoint: it stores the questions and answers between processes.
 
-```ts
-import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
-  defineInteractiveAgentTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const clarify = defineInteractiveAgentTask({
+```ts title="clarify.ts"
+import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
+import { repository, coder, sandboxProvider } from "./outpost.config.ts";
+
+export const clarify = defineInteractiveAgentTask({
   key: "clarify",
   repository,
   agent: coder,
@@ -38,65 +35,67 @@ const clarify = defineInteractiveAgentTask({
     'Define the application with its owner, then complete with {"summary": string, "features": string[]}.',
   actors: ["owner"],
 });
-const workflow = defineWorkflow("discovery", [clarify]);
-const store = createWorkflowCheckpointStore({
+```
+
+```ts title="question-store.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+} from "@elie-laloum/outpost";
+
+export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
-const checkpoint = { store, runId: "discovery-42", version: "1" };
+```
 
-const result = await workflow.start({ checkpoint });
+```ts title="start.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { clarify } from "./clarify.ts";
+import { store } from "./question-store.ts";
+
+export const workflow = defineWorkflow("discovery", [clarify]);
+export const checkpoint = { store, runId: "discovery-42", version: "1" };
+export const result = await workflow.start({ checkpoint });
 console.log(result.status, result.inputRequests[0]?.question);
 ```
 
 It prints `waiting-input` and the agent’s first question. Outpost adds the question protocol to your brief, so the brief only describes the goal and the shape of the final JSON.
 
-| Option             | Use                                                                             |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `repository`       | The checkout that holds the task’s worktree.                                    |
-| `agent`            | An agent with portable conversation capture and resume.                         |
-| `sandboxProvider`  | Where each turn runs. Omitting it uses Docker.                                  |
-| `brief`            | The goal of the dialogue and the expected output.                               |
-| `actors`           | The identifiers allowed to answer.                                              |
-| `maxTurns`         | Agent turns allowed, final answer included. Default: 12.                        |
-| `timeoutMs`        | Deadline of each executing turn. Time spent waiting for an answer is not timed. |
-| `bootstrap`        | Whether the sandbox may install a missing CLI agent.                            |
-| `conversationHome` | Host home where the agent’s native conversations are found.                     |
-| `after`            | Tasks that must succeed before the first turn.                                  |
+API reference: [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/).
 
 Codex, Claude Code, Copilot CLI, Kimi Code and the [built-in harness](../harness/) are accepted. Antigravity, and a harness created with `conversations: false`, are rejected when the task is defined: see [Conversations](../conversations/).
 
 ## How the dialogue runs
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Turn**: The agent works in a fresh sandbox.
-   - **Run**: It continues its conversation with the brief or the latest answer.
-     - sandbox
-   - **Close**: Outpost saves the conversation and closes the sandbox.
-     - host
-2. **Question**: The run stops with `waiting-input`.
-   - **Save**: The checkpoint stores the question; dependent tasks wait.
-     - `inputRequests`
-3. **Answer**: Your application submits it.
-   - **Validate**: Outpost checks and saves the answer, then starts the next turn.
-     - `start({ answers })`
-4. **Output**: The agent completes with JSON instead of asking.
-   - **Keep**: The checkpoint stores the output.
-     - `result.value()`
+- **Turn**: The agent works in a fresh sandbox.
+  - Steps
+  - **Run**: It continues its conversation with the brief or the latest answer.
+    - sandbox
+  - **Close**: Outpost saves the conversation and closes the sandbox.
+    - host
+  - → **Question**: then
+- **Question**: The run stops with `waiting-input`.
+  - Steps
+  - **Save**: The checkpoint stores the question; dependent tasks wait.
+    - `inputRequests`
+  - → **Answer**: then
+- **Answer**: Your application submits it.
+  - Steps
+  - **Validate**: Outpost checks and saves the answer, then starts the next turn.
+    - `start({ answers })`
+  - → **Output**: then
+- **Output**: The agent completes with JSON instead of asking.
+  - Steps
+  - **Keep**: The checkpoint stores the output.
+    - `result.value()`
 
 ## Show the questions
 
 `result.inputRequests` lists every pending question. Independent interactive tasks can wait at the same time.
 
-| Field           | Content                                                                 |
-| --------------- | ----------------------------------------------------------------------- |
-| `question`      | The text to display.                                                    |
-| `choices`       | Suggested answers, when the agent gave some.                            |
-| `allowFreeText` | `false` when the answer must be one of `choices`; omitted means `true`. |
-| `id`            | The request to answer, as `requestId`.                                  |
-| `executionId`   | The workflow execution, copied into the answer.                         |
-| `key`           | The task that asked.                                                    |
-| `requestedAt`   | When the agent asked, as an ISO date.                                   |
+API reference: [WorkflowInputRequest](../../reference/workflowinputrequest/).
 
 :::caution
 Notify people from `result.inputRequests` once `start()` returns. The `input-request` [workflow event](../progress/) fires before the checkpoint write and carries only the task key.
@@ -106,14 +105,35 @@ Notify people from `result.inputRequests` once `start()` returns. The `input-req
 
 Restart the same workflow with the same checkpoint and an `answers` entry per request.
 
-```ts
+<!-- tabs -->
+
+```ts title="answer-value.ts"
+import type { WorkflowInputRequest } from "@elie-laloum/outpost";
+
+export function answerValue(
+  request: WorkflowInputRequest,
+  actor: string,
+  value: string,
+) {
+  return {
+    executionId: request.executionId,
+    key: request.key,
+    requestId: request.id,
+    actor,
+    value,
+  };
+}
+```
+
+```ts title="answer.ts"
 import type {
   Workflow,
   WorkflowCheckpointOptions,
   WorkflowInputRequest,
 } from "@elie-laloum/outpost";
+import { answerValue } from "./answer-value.ts";
 
-async function answer(
+export async function answer(
   workflow: Workflow,
   checkpoint: WorkflowCheckpointOptions,
   request: WorkflowInputRequest,
@@ -122,15 +142,7 @@ async function answer(
 ) {
   return workflow.start({
     checkpoint,
-    answers: [
-      {
-        executionId: request.executionId,
-        key: request.key,
-        requestId: request.id,
-        actor,
-        value,
-      },
-    ],
+    answers: [answerValue(request, actor, value)],
   });
 }
 ```
@@ -145,15 +157,9 @@ Submitting is not idempotent. After a lost HTTP response, call `start({ checkpoi
 
 ## Read the result
 
-Once the task succeeds, `result.value(clarify)` holds plain data:
+Read the completed dialogue with `result.value(clarify)`.
 
-<!-- features -->
-
-- `output`: The JSON the agent completed with.
-- `conversation`: The captured conversation id.
-- `branch`: The work branch, `outpost/interactive-…`.
-- `directory`: The retained worktree.
-- `turns`: The agent turns used.
+API reference: [InteractiveAgentResult](../../reference/interactiveagentresult/).
 
 `result.usage` adds up the attempts and tokens of every turn, repairs included. `unwrap()` throws while the run waits. In a workflow that also has gates, `waiting-input` wins over `paused`, and a failure or cancellation wins over both.
 

@@ -14,9 +14,72 @@ const inventory = new Set(
 );
 const files = [...inventory].filter((file) => file.endsWith(".html"));
 const pages = new Map();
+let guideCards = 0;
 for (const file of files) {
   const $ = load(await readFile(resolve(root, file), "utf8"));
   const redirect = $("meta[http-equiv=refresh]").length > 0;
+  if (/^(fr\/)?guide\//.test(file) && !redirect) {
+    assert.ok(
+      $(".sl-markdown-content").text().trim().length > 100,
+      `Guide content failed to render: ${file}`,
+    );
+    const source = await readFile(
+      resolve(
+        root,
+        "../src/content/docs",
+        file.replace(/\/index\.html$/, ".md"),
+      ),
+      "utf8",
+    );
+    assert.equal(
+      $(".sl-markdown-content pre").length,
+      [...source.matchAll(/^```[^\n]*\n[\s\S]*?^```/gm)].length,
+      `Guide code blocks were lost during rendering: ${file}`,
+    );
+    assert.equal($(".flow").length, 0, `Retired flow diagram: ${file}`);
+    $(".sl-markdown-content pre code").each((_, code) => {
+      const lines = $(code).text().trimEnd().split("\n").length;
+      assert.ok(lines <= 20, `Guide code exceeds 20 lines: ${file} (${lines})`);
+    });
+    $(".sl-markdown-content .bay-row[data-bay=split]").each((_, row) => {
+      if (!$(row).children(".bay-show").find("pre").length) return;
+      const explanations = $(row)
+        .children(".bay-say")
+        .find("p, li")
+        .toArray()
+        .map((element) => $(element).text().trim())
+        .filter(
+          (text) =>
+            text && !/^(?:API(?: reference)?|Référence API)\s*:/i.test(text),
+        );
+      assert.ok(
+        explanations.length,
+        `Guide snippets need an explanation beside them: ${file}: ${$(row).children(".bay-show").find("code").first().text().slice(0, 80)}`,
+      );
+    });
+    const cards = $(
+      ".feature-cell, .path-cell, .canvas-node-head, .canvas-branch, .compare-head, .card",
+    );
+    cards.each((_, card) => {
+      const icons = $(card).children("span").find("svg.guide-icon");
+      assert.equal(
+        icons.length,
+        1,
+        `Expected one card icon: ${file}: ${$(card).text()}`,
+      );
+      assert.equal(
+        icons.attr("aria-hidden"),
+        "true",
+        `Decorative icon must be hidden from assistive technology: ${file}`,
+      );
+      assert.equal(
+        icons.attr("focusable"),
+        "false",
+        `Decorative icon must not receive focus: ${file}`,
+      );
+    });
+    guideCards += cards.length;
+  }
   if (file !== "404.html") {
     assert.equal($("main").length, 1, `Missing main landmark: ${file}`);
     assert.equal($("h1").length, 1, `Expected one title: ${file}`);
@@ -80,5 +143,5 @@ assert.ok(
   "Both language homepages are required",
 );
 console.log(
-  `${files.length} rendered pages: links, assets, anchors, languages and search verified.`,
+  `${files.length} rendered pages: links, assets, anchors, languages, search and ${guideCards} guide card icons verified.`,
 );

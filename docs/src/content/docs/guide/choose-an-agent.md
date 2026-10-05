@@ -1,11 +1,11 @@
 ---
 title: "Choose an agent"
-description: "Compare the five agent CLIs and the built-in harness, then compose an agent with the model you want."
+description: "Configure a coding agent and compare the settings and conversation features it supports."
 ---
 
 ## The agents
 
-An agent pairs a harness with a model. A harness is what drives the model: one of five coding-agent CLIs installed in the sandbox, or Outpost’s own loop.
+An agent combines a harness with an optional model selection. The harness runs the agent’s loop: it can use an installed CLI, such as Codex or Claude Code, or Outpost’s built-in loop. Pick the agent first, then configure its access and model.
 
 <!-- features -->
 
@@ -29,11 +29,10 @@ An agent pairs a harness with a model. A harness is what drives the model: one o
 - [Built-in harness](../harness/): Outpost’s own loop, running your tools over an OpenAI or Anthropic API.
   - API key
   - model required
-  - `createHarness()`
 
 ## Compose an agent
 
-`createAgent()` takes a harness and an optional model. Each CLI has a preset: `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` and `createAntigravityHarness()`.
+Pass a harness to `createAgent()`, then add `model` if you want to override the agent’s default. Outpost provides a harness constructor for each supported CLI: `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` and `createAntigravityHarness()`.
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -48,43 +47,51 @@ Pass the agent to `dispatch()` as `agent`. `authentication` chooses between your
 
 ## Select a model
 
-`model` is a name (`"opus"`) or an object `{ name, reasoning, maxOutputTokens }`. Omit it to use the CLI’s default model. The built-in harness has no default and requires one.
+API reference: [ModelSpec](../../reference/modelspec/) and [AgentModel](../../reference/agentmodel/).
 
-The harness checks the settings when you call `createAgent()`: a `reasoning` level or `maxOutputTokens` it cannot apply throws there, before any run. Whether your account can use the model is decided by the service, at run time. The table below lists which settings each agent accepts.
+`createAgent()` rejects model settings the harness cannot apply, including unsupported `reasoning` levels or `maxOutputTokens`. This check happens before execution. The model service checks your account’s access when the request runs; the API reference below describes the supported settings.
+
+API reference: [ModelSpec](../../reference/modelspec/) and [AgentModel](../../reference/agentmodel/).
 
 ## Compare capabilities
 
-| Capability                                      | [Claude Code](../claude-code/) | [Codex](../codex/)                               | [Copilot CLI](../copilot-cli/) | [Kimi Code](../kimi-code/) | [Antigravity](../antigravity/) | [Built-in harness](../harness/)                      |
-| ----------------------------------------------- | ------------------------------ | ------------------------------------------------ | ------------------------------ | -------------------------- | ------------------------------ | ---------------------------------------------------- |
-| [Account login](../authentication/)             | Yes                            | Yes                                              | Yes                            | Yes                        | Yes                            | No                                                   |
-| [Account token variable](../authentication/)    | Yes                            | No                                               | Yes                            | No                         | No                             | No                                                   |
-| [API key](../authentication/)                   | Yes                            | Yes                                              | No                             | Yes, with a model          | Yes                            | Yes                                                  |
-| Model `reasoning`                               | `low` to `max`                 | `low` to `max`                                   | No                             | No                         | No                             | Anthropic: `none`, `low` to `max`; OpenAI: any level |
-| Model `maxOutputTokens`                         | Yes                            | No                                               | No                             | No                         | No                             | Anthropic: required; OpenAI: optional                |
-| [Conversation capture](../conversations/)       | Yes                            | Yes                                              | Yes                            | Yes                        | No                             | Yes                                                  |
-| [Warm resume](../conversations/) (same sandbox) | Yes                            | Yes                                              | Yes                            | Yes                        | Yes                            | Yes                                                  |
-| [Cold resume](../conversations/) (new sandbox)  | Yes                            | Yes                                              | Yes                            | Yes                        | No                             | Yes                                                  |
-| [Fork](../conversations/)                       | Yes                            | Yes                                              | No                             | Yes                        | No                             | Yes                                                  |
-| [Response repair](../typed-responses/)          | Yes                            | Yes                                              | Yes                            | Yes                        | Yes                            | Yes                                                  |
-| [Steering](../steering/)                        | `injected`                     | `injected`                                       | `resumed`                      | `resumed`                  | `resumed`                      | `injected`                                           |
-| [MCP servers](../mcp-servers/)                  | Yes                            | Yes                                              | Yes                            | Yes                        | Yes                            | Yes                                                  |
-| [MCP OAuth](../mcp-oauth/)                      | Host login                     | Host login                                       | No                             | Host login                 | No                             | Client credentials                                   |
-| [Usage reporting](../budgets/)                  | End of turn                    | End of turn; each model response with `steering` | Each message, total after exit | After exit                 | End of turn                    | Each model response                                  |
-| [Quota reset time](../quota-pauses/)            | When reported                  | No                                               | No                             | No                         | No                             | From `Retry-After`                                   |
+### Sign in
 
-<!-- features -->
+Choose the credential you already have. [Authentication](../authentication/) explains how to pass it to the sandbox and how account access differs from API billing.
 
-- **Capture**: `saveConversations: false` on Claude Code or Codex leaves only warm resume; `conversations: false` on the built-in harness removes resume, fork and repair.
-  - `saveConversations`
-  - `conversations`
-- **Repair**: `dispatch()` refuses `repairs` above 0 for an agent that cannot continue its conversation.
-  - `repairs`
-- **Usage**: `usage.complete === false` marks the counters as a lower bound; Kimi counters arrive only after the CLI exits.
-  - `usage.complete`
+| Agent                           | Account login | Account token in a variable | API key                     |
+| ------------------------------- | ------------- | --------------------------- | --------------------------- |
+| [Claude Code](../claude-code/)  | Yes           | Yes                         | Yes                         |
+| [Codex](../codex/)              | Yes           | No                          | Yes                         |
+| [Copilot CLI](../copilot-cli/)  | Yes           | Yes                         | No                          |
+| [Kimi Code](../kimi-code/)      | Yes           | No                          | Yes, with an explicit model |
+| [Antigravity](../antigravity/)  | Yes           | No                          | Yes                         |
+| [Built-in harness](../harness/) | No            | No                          | Yes                         |
+
+### Continue work
+
+Every agent can continue a conversation while its sandbox remains open. To resume in a new sandbox, Outpost also needs to capture and restore that conversation. A fork starts a separate conversation from the same context.
+
+| Agent            | Resume in a new sandbox | Fork | Steering mode |
+| ---------------- | ----------------------- | ---- | ------------- |
+| Claude Code      | Yes                     | Yes  | `injected`    |
+| Codex            | Yes                     | Yes  | `injected`    |
+| Copilot CLI      | Yes                     | No   | `resumed`     |
+| Kimi Code        | Yes                     | Yes  | `resumed`     |
+| Antigravity      | No                      | No   | `resumed`     |
+| Built-in harness | Yes                     | Yes  | `injected`    |
+
+With `injected`, new instructions reach the running turn. With `resumed`, Outpost stops the turn and resumes its conversation. See [steering](../steering/) to send instructions and [conversations](../conversations/) to resume or fork.
+
+All these agents support [response repairs](../typed-responses/) when conversation continuation is enabled. Setting `saveConversations: false` on Claude Code or Codex keeps only continuation in the same sandbox. Setting `conversations: false` on the built-in harness disables continuation, forks and repairs.
+
+For progress events and token counters, see [progress reporting](../progress/) and [budgets](../budgets/). Quota reset times depend on the agent or model provider; [quota pauses](../quota-pauses/) explains when a workflow can wait automatically.
 
 ## Give agents MCP tools
 
-Every harness accepts `mcpServers`: stdio commands or HTTP endpoints, with secrets passed by variable name. See [MCP servers](../mcp-servers/) and [MCP server login](../mcp-oauth/).
+Every harness accepts `mcpServers`: stdio commands or HTTP endpoints, with secrets passed by variable name. [MCP servers](../mcp-servers/) shows how to declare them.
+
+For OAuth, Claude Code, Codex and Kimi can use a login saved on the host; the built-in harness uses client credentials. Copilot CLI and Antigravity do not support this OAuth configuration. See [MCP server login](../mcp-oauth/).
 
 ## Fall back to another agent
 

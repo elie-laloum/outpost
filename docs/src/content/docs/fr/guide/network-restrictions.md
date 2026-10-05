@@ -1,26 +1,21 @@
 ---
-title: "Restrictions réseau"
-description: "Bloquer ou filtrer par liste d’autorisation le trafic sortant d’une sandbox avec une politique egress sur Docker, Podman, Vercel ou Daytona."
+title: "Limiter les accès réseau"
+description: "Configurez les règles de sortie réseau prises en charge et comprenez leur périmètre."
 ---
 
 ## Choisir une politique
 
 :::caution[Expérimental]
-Les politiques egress sont expérimentales. Vérifiez que votre provider et votre compte appliquent la politique avant de vous y fier.
+Les politiques egress sont expérimentales. Vérifiez que votre fournisseur et votre compte appliquent la politique avant de vous y fier.
 :::
 
-Définissez `egress` sur le provider de sandbox. Sans cette option, le provider garde ses propres réglages réseau par défaut.
+Définissez `egress` sur le fournisseur de sandbox pour limiter les connexions sortantes. Sans cette option, les règles réseau par défaut du fournisseur s’appliquent. Consultez le tableau de prise en charge avant de choisir une politique.
 
-| Politique                               | Effet                                                               |
-| --------------------------------------- | ------------------------------------------------------------------- |
-| `{ mode: "deny-all" }`                  | Bloque tout le trafic sortant de la sandbox.                        |
-| `{ mode: "allowlist", domains }`        | Autorise uniquement les noms DNS listés.                            |
-| `{ mode: "allowlist", allowCidrs }`     | Autorise les plages IP listées, indépendamment de `domains`.        |
-| `{ mode: "allowlist", ..., denyCidrs }` | Refuse ces plages IP même quand un domaine ou un CIDR les autorise. |
+Référence API : [EgressPolicy](../../reference/egresspolicy/).
 
-La prise en charge dépend du provider. Outpost refuse une politique non prise en charge par une erreur `configuration` dès la création du provider.
+La prise en charge dépend du fournisseur. Outpost refuse une politique non prise en charge par une erreur `configuration` dès la création du fournisseur.
 
-| Provider           | `deny-all`                | `domains`   | `allowCidrs`                       | `denyCidrs` |
+| Fournisseur        | `deny-all`                | `domains`   | `allowCidrs`                       | `denyCidrs` |
 | ------------------ | ------------------------- | ----------- | ---------------------------------- | ----------- |
 | Docker, Podman     | Oui (réseau `none`)       | Non         | Non                                | Non         |
 | Vercel             | Oui                       | Oui         | IPv4 et IPv6                       | Oui         |
@@ -49,7 +44,7 @@ Les entrées de `domains` suivent ces règles :
 - `*.example.com` correspond aux sous-domaines ; ajoutez `example.com` pour le domaine racine.
 - Les listes vides, adresses IP, `*` seul, noms sans point et jokers partiels comme `api*.example.com` sont refusés.
 
-Outpost n’ajoute aucune destination à votre place. Incluez les hôtes de téléchargement, les cibles de redirection, les endpoints d’authentification et les URL de modèles personnalisées. Si le bootstrap exige un accès large, préinstallez plutôt les outils dans une [image d’agent](../agent-images/).
+Outpost n’ajoute aucune destination à votre place. Incluez les hôtes de téléchargement, les cibles de redirection, les points d’accès d’authentification et les URL de modèles personnalisées. Si le bootstrap exige un accès large, préinstallez plutôt les outils dans une [image d’agent](../agent-images/).
 
 ## Particularités de Vercel
 
@@ -60,7 +55,7 @@ Vercel applique la politique avec son [pare-feu natif](https://vercel.com/docs/s
 - `denyCidrs` l’emporte sur toutes les règles d’autorisation.
 - Une politique uniquement CIDR laisse la sandbox résoudre d’autres noms DNS.
 
-Pour des règles de requête par domaine et des transformations, utilisez plutôt l’option native de Vercel `create.networkPolicy`. Elle sort de la politique portable, et Outpost refuse un provider qui définit les deux.
+Pour des règles de requête par domaine et des transformations, utilisez plutôt l’option native de Vercel `create.networkPolicy`. Elle sort de la politique portable, et Outpost refuse un fournisseur qui définit les deux.
 
 ## Particularités de Daytona
 
@@ -106,7 +101,7 @@ La politique egress de la sandbox ne couvre pas le trafic qu’Outpost gère sur
 
 ## Limites
 
-- Une politique est fixée à la création du provider. Outpost ne la modifie pas pendant une exécution.
+- Une politique est fixée à la création du fournisseur. Outpost ne la modifie pas pendant une exécution.
 - Docker et Podman n’appliquent que `deny-all`, incompatible avec tout `networks` autre que `none`. Pour une liste d’autorisation, utilisez Vercel ou un pare-feu que vous gérez.
 - L’exécution locale et [Firecracker](../firecracker/) refusent `egress` ; le réseau de Firecracker se configure sur votre hôte.
 - Un service cloud peut encore refuser une politique quand Outpost acquiert la sandbox.

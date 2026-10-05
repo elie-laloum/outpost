@@ -1,11 +1,11 @@
 ---
-title: "Security"
-description: "What an agent can reach in each sandbox, where credentials and data go, which code runs on your host and what Outpost does not authenticate."
+title: "Understand security boundaries"
+description: "Review the files, credentials and network access available to agents and host code."
 ---
 
 ## What the agent can reach
 
-An agent runs project commands with the access its sandbox gives it. The sandbox provider sets that access.
+An agent can run project commands with the access provided by its sandbox. Review the environment, mounted files and credentials before starting a task; the sandbox provider determines these boundaries.
 
 | Sandbox                                | The agent reaches                                                                                    | Boundary                                                                       |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
@@ -41,14 +41,9 @@ The sandbox confines the agent’s commands, not your own code. These parts run 
 <!-- features -->
 
 - [Harness tools](../harness-tools/): `execute` runs in the Outpost process and reaches the sandbox only through `context.sandbox`.
-  - `defineHarnessTool()`
 - [Harness hooks](../harness-permissions/): Run in the Outpost process at each step of the built-in loop.
-  - `defineHarnessHook()`
 - [Workflow callbacks](../task-dependencies/): Tasks, loop checks and gate verifiers are your code, run by the workflow engine.
-  - `defineTask()`
-  - `defineLoopTask()`
 - [Preparation hooks](../environment-setup/): `workspaceReady` and `hostReady` commands run on the host, in the worktree.
-  - `hooks`
 - [Returned code](../repository-and-branch/): The agent’s commits land in your repository: review them before you build or test on the host.
 - [Git metadata](../containers/): A mounted agent can write hooks and configuration in `.git` that your own Git commands then run.
 

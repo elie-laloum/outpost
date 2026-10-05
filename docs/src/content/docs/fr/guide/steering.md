@@ -1,15 +1,15 @@
 ---
-title: "Réorienter un agent en cours"
-description: "Envoyer une consigne supplémentaire à un agent pendant qu’il travaille, sans annuler la tâche ni perdre sa sandbox."
+title: "Envoyer des consignes pendant une tâche"
+description: "Donnez une nouvelle consigne à un agent en cours d’exécution et suivez sa transmission."
 ---
 
 ## Envoyer une consigne
 
-`createSteering()` renvoie un contrôleur. Passez-le à un dispatch dans `steering`, puis appelez `send()` pendant que l’agent travaille.
+Créez un contrôleur de réorientation et passez-le à la tâche. Pendant l’exécution, `send()` envoie une nouvelle consigne et se termine lorsqu’Outpost peut indiquer comment elle a été transmise.
 
 ```ts
 import { createSteering, dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const steering = createSteering();
 const running = dispatch({
@@ -36,7 +36,7 @@ const result = await running;
 | [Codex](../codex/)                                                                         | `injected` | Un dispatch avec `steering` lance `codex app-server`. `turn/steer` ajoute le texte au tour actif, ou démarre le suivant.            |
 | [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost arrête le processus dès que sa conversation est connue, puis la reprend avec le texte dans la même sandbox.                 |
 
-Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les providers de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne coûte une commande du provider et arrive avec un léger délai.
+Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les fournisseurs de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne coûte une commande du fournisseur et arrive avec un léger délai.
 
 ## Selon le moment de l’envoi
 
@@ -49,7 +49,7 @@ Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà mo
 
 Une consigne que le dispatch ne peut pas remettre, par exemple parce que l’agent n’a jamais signalé de conversation, est rejetée à la fin du dispatch. Le rejet est une [`OutpostError`](../error-handling/) de code `steering`, avec le texte dans `details.text`.
 
-## Viser un sous-agent intégré
+## Envoyer une consigne à un sous-agent
 
 Chaque exécution d’un [sous-agent intégré](../subagents/) a un identifiant, fourni par son événement `subagent`. Passez-le dans `subagent` pour ne viser que cette exécution.
 
@@ -68,11 +68,7 @@ const request: DispatchOptions = {
 };
 ```
 
-| `subagent`     | Destinataire                                                                                         |
-| -------------- | ---------------------------------------------------------------------------------------------------- |
-| absent         | La première boucle active qui atteint son étape suivante : le sous-agent au travail, s’il y en a un. |
-| un identifiant | Cette exécution de sous-agent seulement, à toute profondeur.                                         |
-| `null`         | La boucle principale seulement, une fois la délégation en cours terminée.                            |
+Référence API : [SteeringSendOptions](../../reference/steeringsendoptions/).
 
 Une consigne encore en attente quand son exécution se termine est rejetée avec le code `steering` et l’identifiant dans `details.subagent`.
 
@@ -84,7 +80,7 @@ Un contrôleur sert un dispatch à la fois, sur toutes ses passes ; l’attacher
 
 Dans un workflow, renvoyez `steering` depuis la `request` d’un [`defineAgentTask()` ou d’un `defineIsolatedTask()`](../task-dependencies/). Avec un [agent de secours](../fallback-agents/), la réorientation suit le candidat en cours d’exécution.
 
-## Événements et usage
+## Événements et consommation
 
 Chaque remise émet un [événement d’agent](../progress/) `steer` avec `text`, `mode`, `pass`, et `subagentId` quand un sous-agent l’a reçue. Le reporter de terminal l’affiche, et la conversation l’enregistre comme message utilisateur.
 

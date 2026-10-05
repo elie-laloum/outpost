@@ -1,15 +1,15 @@
 ---
-title: "Limits and cancellation"
-description: "Bound how long an agent task runs, repeat its brief until the agent declares it done, and stop it from your code."
+title: "Set deadlines and cancel work"
+description: "Bound agent execution time, control repeated passes and cancel from your code."
 ---
 
-## Bound one task
+## Set task deadlines
 
-Every dispatch already runs under default limits. Set your own on the request, next to the brief.
+Set deadlines alongside the brief when a task needs tighter limits than the defaults. You can bound the whole agent turn and the time it may remain silent.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -27,15 +27,7 @@ If the agent runs longer than 20 minutes, or stays silent for 5, the promise rej
 
 ## Choose a limit
 
-| Option          | Bounds                                                                | Default                   | When reached                          |
-| --------------- | --------------------------------------------------------------------- | ------------------------- | ------------------------------------- |
-| `deadlineMs`    | Each agent turn: one CLI process, or one turn of the built-in harness | 1 hour                    | Rejects with code `timeout`           |
-| `idleMs`        | Time without any output from the agent                                | 10 minutes                | Rejects with code `timeout`           |
-| `idleWarningMs` | Silence before each `warning` event                                   | 60 seconds                | Emits an event; the agent keeps going |
-| `passes`        | How many times the brief is sent                                      | 1                         | Resolves with `completed: false`      |
-| `until`         | Completion markers that end the passes                                | `<outpost>done</outpost>` | Stops at the first matching pass      |
-| `settleMs`      | Time the agent may keep running after its marker                      | 60 seconds                | Stops the process, keeps the result   |
-| `signal`        | Cancellation from your code                                           | None                      | Rejects with the signal’s reason      |
+API reference: [DispatchOptions](../../reference/dispatchoptions/).
 
 Your `observe` callback receives a `stopped` event whose `reason` says which one ended the process: `deadline`, `idle-timeout`, `completion` or `aborted`.
 
@@ -45,7 +37,7 @@ Pass an `AbortSignal`. Here, Ctrl+C stops the agent instead of leaving it runnin
 
 ```ts
 import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const controller = new AbortController();
 process.once("SIGINT", () => controller.abort("cancelled by user"));
@@ -80,7 +72,7 @@ To change the agent’s direction without stopping it, [steer it](../steering/) 
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -98,7 +90,7 @@ console.log(result.completed, result.completion);
 
 Each pass starts a new conversation on the same branch, so it sees the previous commits. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.
 
-`result.completed` is `true` when a marker matched, and `result.completion` names it. A dispatch that exhausts its passes still resolves, with `completed: false`.
+API reference: [DispatchResult](../../reference/dispatchresult/).
 
 :::caution
 A marker is the agent’s declaration, not proof. Run your tests before relying on it; [Verification loops](../verification-loops/) repeat the agent until your check passes.
@@ -106,13 +98,13 @@ A marker is the agent’s declaration, not proof. Run your tests before relying 
 
 If the agent writes its marker but keeps running, Outpost stops it `settleMs` after its last output. The result is kept and `warn` receives a message.
 
-## Bound workspace stages
+## Set Git and file operation deadlines
 
 `limits` sets deadlines on the Git and file steps around the agent. Pass it to `dispatch()`, `createWorkspace()` or `createSandbox()`.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
   repository,
@@ -124,12 +116,7 @@ await dispatch({
 });
 ```
 
-| Field       | Bounds                                                    | Default                              |
-| ----------- | --------------------------------------------------------- | ------------------------------------ |
-| `copyMs`    | Copying `copies` into the worktree; each sandbox transfer | 60 seconds; 120 seconds per transfer |
-| `gitMs`     | Each Git command that prepares the worktree               | 30 seconds                           |
-| `collectMs` | Reading the new commits after the agent                   | 30 seconds                           |
-| `mergeMs`   | Merging the work branch into its base (`integrate`)       | 30 seconds                           |
+API reference: [StageLimits](../../reference/stagelimits/).
 
 ## Other limits
 

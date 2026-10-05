@@ -1,19 +1,15 @@
 ---
-title: "GitHub Copilot CLI"
-description: "Exécuter la CLI copilot avec votre abonnement Copilot, via une connexion enregistrée ou un jeton GitHub à permissions fines."
+title: "Configurer Copilot CLI"
+description: "Exécutez GitHub Copilot CLI avec votre compte Copilot ou un jeton GitHub."
 ---
 
 ## Installer
 
-Les [images d’agent](../agent-images/) générées installent la CLI `copilot` (`@github/copilot`) dans la version épinglée par [`agentVersions.copilot`](../../reference/agentversions/). Pour générer un projet Copilot qui lit un jeton depuis `.env` :
-
-```sh
-npx outpost init --yes --agent copilot --authentication account-token --image outpost:dev
-```
+L’[image d’agent](../agent-images/) contient `copilot`, issu du paquet `@github/copilot`, à la version fixée par [`agentVersions.copilot`](../../reference/agentversions/). Configurez l’accès au compte dans votre harness TypeScript, comme ci-dessous.
 
 Votre compte GitHub doit avoir accès à Copilot ; voir le [démarrage rapide de la CLI GitHub](https://docs.github.com/en/copilot/get-started/cli-quickstart).
 
-## Accès par compte
+## Se connecter avec son compte
 
 Copilot s’exécute toujours sur votre abonnement Copilot. Fournissez un jeton GitHub à permissions fines disposant de la permission **Copilot Requests** :
 
@@ -36,34 +32,27 @@ Par défaut, Copilot enregistre sa connexion dans le trousseau système, qu’Ou
 
 Autres formes d’identifiants et emplacement des secrets : [Authentification](../authentication/).
 
-## Accès API
+## Utiliser une clé d’API
 
 Copilot n’a pas de mode par clé API : `authentication: "usage"` est refusé à la composition de l’agent. Les requêtes sont décomptées de votre abonnement Copilot.
 
-## Ce qu’il prend en charge
+## Fonctions disponibles
 
 <!-- features -->
 
-- [Conversations](../conversations/) : Capturées sous forme de bundle de session, puis reprises à chaud ou à froid avec `--resume`.
-  - `conversations`
-  - `createCopilotConversations()`
+- [Conversations](../conversations/) : Capturées sous forme de archive de session, puis reprises à chaud ou à froid avec `--resume`.
 - [Réponses typées](../typed-responses/) : Une réponse invalide est réparée en reprenant la même conversation.
-  - `response`
 - [Réorientation](../steering/) : Outpost arrête le processus et reprend la session avec votre texte.
-  - `resumed`
 - [Serveurs MCP](../mcp-servers/) : Transmis à chaque exécution avec `--additional-mcp-config`.
-  - `mcpServers`
 - [Consommation](../budgets/) : Tokens lus après l’exécution dans `session-state/<id>/events.jsonl`.
-  - `usage.complete`
 - [Pauses sur quota](../quota-pauses/) : Les messages de limite de débit et de crédits de Copilot échouent avec le code `quota`.
-  - `onQuota`
 
-`conversations` accepte un store au format `"copilot"`, par exemple `createTransportConversations(createCopilotConversations(), …)`. [Choisir un agent](../choose-an-agent/) compare ces capacités d’un agent à l’autre.
+Référence API : [CopilotSettings](../../reference/copilotsettings/) et [createTransportConversations](../../reference/createtransportconversations/).
 
 ## Limites
 
 - **Pas de fork automatisé** : Le fork d’une conversation Copilot est refusé ; reprenez-la plutôt.
-- **Réglages du modèle** : `model` n’accepte qu’un nom. `reasoning` et `maxOutputTokens` sont refusés.
+- Pour les réglages de modèle pris en charge, consultez [CopilotSettings](../../reference/copilotsettings/).
 - **Jetons classiques** : Les jetons d’accès personnels `ghp_` sont refusés.
 - **Consommation incomplète** : Un fichier de session absent ou illisible met `usage.complete` à `false`, avec un avertissement.
 - **Décompte tardif** : Les totaux de tokens peuvent arriver après leur consommation par le modèle. Associez un [budget](../budgets/) à un timeout.

@@ -1,11 +1,11 @@
 ---
-title: "Durable runs"
-description: "Save a workflow's progress in a checkpoint, resume it after a failure, a pause or a crash, and recover a run whose process died."
+title: "Save and resume a workflow"
+description: "Use checkpoints to resume a workflow and explicitly retry interrupted tasks."
 ---
 
 ## Save progress
 
-Pass a `checkpoint` to `start()`. Outpost saves the run under `runId` after every task transition.
+Pass a `checkpoint` to the workflow’s `start()` method when you need to continue in a later process. Outpost saves task transitions and results under the checkpoint’s `runId`.
 
 ```ts
 import {
@@ -36,17 +36,17 @@ It prints `{ files: 12 }` and saves the checkpoint under `.outpost/storage`. Run
 - **Outputs**: The value of each `done` task, restored instead of running it again.
 - **Usage**: Cumulative attempts and tokens, so a [budget](../budgets/) spans every resume.
 
-A resumed run keeps its `executionId`, so `context.idempotencyKey` stays the same for each task. Sandboxes, their files and task code are not saved: resume by calling `start()` on the same workflow definition.
+A resumed run keeps its `executionId` and each task’s `context.idempotencyKey`. To resume, call `start()` on the same workflow definition. The checkpoint stores state and outputs; it does not save sandbox instances, their files or task code.
 
 ## Return JSON outputs
 
-A checkpointed task must return lossless JSON or `undefined`. Otherwise the attempt fails. Convert dates to strings and keep only the fields you need.
+A checkpointed task must return `undefined` or a value that survives JSON serialization without losing information. Otherwise the attempt fails. Convert dates to strings and return only the fields you need.
 
-A dispatch result carries methods such as `resume()`. Project it in a `defineTask`, as in [From a task to a workflow](../first-workflow/):
+A dispatch result carries methods such as `resume()`. Project it in a `defineTask`, as shown below:
 
 ```ts
 import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const agent = defineIsolatedTask({
   key: "fix-agent",
@@ -92,19 +92,24 @@ To reuse results across different runs, use the [result cache](../task-cache/) i
 
 A run that ended with a failed, cancelled or interrupted task resumes only with `resume: "retry-incomplete"`. This authorizes running those tasks again, with their side effects.
 
-```ts
+<!-- tabs -->
+
+```ts title="upload-store.ts"
 import {
-  createLocalTransport,
   createWorkflowCheckpointStore,
-  defineTask,
-  defineWorkflow,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
 
-const store = createWorkflowCheckpointStore({
+export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
-let calls = 0;
-const upload = defineTask({
+```
+
+```ts title="upload.ts"
+import { defineTask } from "@elie-laloum/outpost";
+
+export let calls = 0;
+export const upload = defineTask({
   key: "upload",
   perform: () => {
     calls += 1;
@@ -112,11 +117,20 @@ const upload = defineTask({
     return { uploaded: true };
   },
 });
-const workflow = defineWorkflow("upload", [upload]);
-const checkpoint = { store, runId: "upload-1", version: "1" };
+export function uploadCount() {
+  return calls;
+}
+```
 
+```ts title="resume-upload.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { upload } from "./upload.ts";
+import { store } from "./upload-store.ts";
+
+export const workflow = defineWorkflow("upload", [upload]);
+export const checkpoint = { store, runId: "upload-1", version: "1" };
 console.log((await workflow.start({ checkpoint })).status);
-const resumed = await workflow.start({
+export const resumed = await workflow.start({
   checkpoint: { ...checkpoint, resume: "retry-incomplete" },
 });
 console.log(resumed.status);
@@ -137,20 +151,25 @@ Rerun tasks start a new series of `retry` attempts. `done` tasks never run again
 
 ## Recover a run after a crash
 
-A run owns its checkpoint while `start()` runs, and releases it when `start()` returns. If the process dies, the ownership stays: every later `start()` for that `runId` rejects until you clear it.
+While `start()` is running, the process owns the checkpoint. A normal return releases that ownership. If the process dies, the ownership record remains and prevents another run from starting under the same `runId` until you recover it explicitly.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Stop**: Make sure the old runner no longer writes.
-   - **Stop the process**: Confirm it exited. A PID does not prove that a remote runner stopped.
-2. **Unlock**: Clear the owner, keep the progress.
-   - **Read the revision**: Read the run's checkpoint object from the transport.
-     - `Transport`
-   - **Clear the owner**: It rejects if the object changed since you read it.
-     - `recoverWorkflowCheckpoint()`
-3. **Resume**: Start the same workflow with the same checkpoint.
-   - **Authorize the replay**: The interrupted task reruns with `resume: "retry-incomplete"`.
-     - `start()`
+- **Stop**: Make sure the old runner no longer writes.
+  - Steps
+  - **Stop the process**: Confirm it exited. A PID does not prove that a remote runner stopped.
+  - → **Unlock**: then
+- **Unlock**: Clear the owner, keep the progress.
+  - Steps
+  - **Read the revision**: Read the run's checkpoint object from the transport.
+    - `Transport`
+  - **Clear the owner**: It rejects if the object changed since you read it.
+    - `recoverWorkflowCheckpoint()`
+  - → **Resume**: then
+- **Resume**: Start the same workflow with the same checkpoint.
+  - Steps
+  - **Authorize the replay**: The interrupted task reruns with `resume: "retry-incomplete"`.
+    - `start()`
 
 ```ts
 import { createHash } from "node:crypto";

@@ -1,11 +1,11 @@
 ---
-title: "Unattended runs"
-description: "Start workflows with nobody at the keyboard: from a CI job, a durable queue, a cron slot or a verified webhook, each run checkpointed so a restart does not redo the work."
+title: "Automate your runs"
+description: "Choose CI, queues, schedules or webhooks to start work without an interactive session."
 ---
 
-## Four ways in
+## Choose what starts the work
 
-Every entry point below ends in the same place: a workflow started from your code. Pick the one that matches who or what decides to run it.
+Choose how work should start: a CI job, a queued request, a schedule or a verified event. The workflow still runs from your TypeScript code; the entry point decides when to submit it.
 
 <!-- features -->
 
@@ -13,14 +13,12 @@ Every entry point below ends in the same place: a workflow started from your cod
   - API key
   - exit status
 - [Job queues and workers](../job-queues/): Producers submit jobs, long-running workers claim and run them.
-  - `runQueueWorker()`
   - SQLite
   - HTTP
 - [Redis and BullMQ](../redis-workers/): One queue shared by producers and workers on several machines.
   - Redis
   - BullMQ
 - [Cron schedules](../cron-schedules/): A deterministic job per slot, in your time zone, without duplicates.
-  - `createCronSchedule()`
   - slots
 - [Webhooks](../webhooks/): A verified GitHub, GitLab or Slack event becomes a job.
   - GitHub
@@ -28,13 +26,12 @@ Every entry point below ends in the same place: a workflow started from your cod
   - Slack
 - [Durable runs](../durable-runs/): Each job runs under a checkpoint, so a restart resumes instead of restarting.
   - checkpoints
-  - `runId`
 
 ## Run work as it arrives
 
 A worker process registers the handlers it knows and runs one job at a time until its signal aborts. Producers never send code, only a handler name and JSON input.
 
-```ts title="worker.mts"
+```ts title="worker.ts"
 import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -56,7 +53,7 @@ try {
 
 Wrap the workflow itself in `defineWorkflowJob()` to get a checkpointed run per job, keyed by the job's `runId`. Schedules and webhooks publish into the same queue, so the worker is the only process that runs agents.
 
-## Choose an entry point
+## Compare entry points
 
 | Starts a run                          | Use                                  | Keeps running                  |
 | ------------------------------------- | ------------------------------------ | ------------------------------ |

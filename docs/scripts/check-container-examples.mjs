@@ -28,6 +28,10 @@ await symlink(
 for (const locale of ["", "fr/"]) {
   const workspace = await mkdtemp(resolve(directory, "command-"));
   try {
+    await writeFile(
+      resolve(workspace, "package.json"),
+      JSON.stringify({ type: "module" }),
+    );
     const content = resolve(root, `docs/src/content/docs/${locale}guide`);
     const setup = await readFile(resolve(content, "setup.md"), "utf8");
     const page = await readFile(
@@ -35,7 +39,7 @@ for (const locale of ["", "fr/"]) {
       "utf8",
     );
     let config = setup.match(
-      /```ts title="outpost\.config\.mts"\n([\s\S]*?)```/,
+      /```ts title="outpost\.config\.ts"\n([\s\S]*?)```/,
     )[1];
     config = config.replace(
       '"outpost:dev"',
@@ -46,10 +50,10 @@ for (const locale of ["", "fr/"]) {
         'import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";',
         'import { createPodmanSandboxProvider as createDockerSandboxProvider } from "@elie-laloum/outpost/providers/podman";',
       );
-    await writeFile(resolve(workspace, "outpost.config.mts"), config);
+    await writeFile(resolve(workspace, "outpost.config.ts"), config);
     await writeFile(
-      resolve(workspace, "command.mts"),
-      page.match(/```ts title="command\.mts"\n([\s\S]*?)```/)[1],
+      resolve(workspace, "command.ts"),
+      page.match(/```ts title="command\.ts"\n([\s\S]*?)```/)[1],
     );
     execFileSync("git", ["init", "--quiet"], { cwd: workspace });
     execFileSync(
@@ -67,7 +71,7 @@ for (const locale of ["", "fr/"]) {
       ],
       { cwd: workspace },
     );
-    const output = execFileSync(process.execPath, ["command.mts"], {
+    const output = execFileSync(process.execPath, ["command.ts"], {
       cwd: workspace,
       encoding: "utf8",
       timeout: 120_000,

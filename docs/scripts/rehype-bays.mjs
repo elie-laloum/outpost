@@ -53,8 +53,7 @@ function pageKind(path) {
 }
 
 const layouts = {
-  guide: (sections) =>
-    sections.map((section) => bay(section, placements.guide)),
+  guide: (sections) => sections.map(guideBay),
   project: (sections) =>
     sections.map((section) =>
       section.heading
@@ -102,6 +101,47 @@ const layouts = {
     return bays;
   },
 };
+
+// Keep each example beside its introduction, with the explanation that follows still after it.
+function guideBay(section) {
+  if (!section.nodes.some((node) => isCode(node) || isAside(node)))
+    return bay(section, placements.guide);
+  const rows = [];
+  let nodes = section.heading ? [section.heading] : [];
+  let hasCode = false;
+  const flush = () => {
+    if (nodes.some(isContent)) {
+      const row = bay({ nodes }, placements.guide);
+      row.tagName = "div";
+      row.properties.className = ["bay-row"];
+      rows.push(row);
+    }
+    nodes = [];
+    hasCode = false;
+  };
+  for (const node of section.nodes) {
+    if (isAside(node)) {
+      flush();
+      rows.push(element("div", { className: ["bay-aside"] }, [node]));
+      continue;
+    }
+    if (hasCode && isContent(node) && !isCode(node)) {
+      flush();
+    }
+    nodes.push(node);
+    hasCode ||= isCode(node);
+  }
+  flush();
+  return element(
+    "section",
+    {
+      className: ["bay"],
+      dataBay: "split",
+      dataRole: "guide",
+    },
+    rows,
+  );
+}
 
 function splitSections(nodes) {
   const sections = [{ heading: undefined, nodes: [] }];
@@ -221,6 +261,10 @@ function isCode(node) {
 
 function isTable(node) {
   return node.type === "element" && node.tagName === "table";
+}
+
+function isAside(node) {
+  return node.type === "element" && classes(node).includes("starlight-aside");
 }
 
 function isList(node) {

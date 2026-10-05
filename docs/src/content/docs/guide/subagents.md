@@ -1,31 +1,34 @@
 ---
-title: "Subagents"
-description: "Let a built-in agent delegate part of its turn to a child agent with its own instructions, tools and limits, in the same sandbox."
+title: "Delegate to subagents"
+description: "Give the built-in harness bounded child agents that share its sandbox."
 ---
 
 ## Expose a child agent as a tool
 
-`defineHarnessSubagent()` turns a [built-in harness](../harness/) agent into a tool that another built-in agent can call. Give it a `name`, a `description` that tells the parent when to delegate, and the child `agent`.
+Declare a subagent with `defineHarnessSubagent()` and expose it as a tool of the parent harness. It borrows the parent’s sandbox but keeps its own conversation history, permissions and limits.
 
-```ts
-import {
-  createAgent,
-  createHarness,
-  createHarnessFileTools,
-  createOpenAIModelProvider,
-  defineHarnessSubagent,
-  dispatch,
-} from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const modelProvider = createOpenAIModelProvider({
+```ts title="model.ts"
+import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
   api: "responses",
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
-const model = process.env.MODEL_NAME ?? "";
+export const model = process.env.MODEL_NAME ?? "";
+```
 
-const reviewer = createAgent({
+```ts title="reviewer.ts"
+import {
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost";
+import { model, modelProvider } from "./model.ts";
+
+export const reviewer = createAgent({
   model,
   harness: createHarness({
     modelProvider,
@@ -34,23 +37,42 @@ const reviewer = createAgent({
     limits: { maxSteps: 6, usage: { output: 2_000 } },
   }),
 });
+```
 
-const coordinator = createAgent({
+```ts title="delegation.ts"
+import { defineHarnessSubagent } from "@elie-laloum/outpost";
+import { reviewer } from "./reviewer.ts";
+
+export const tools = [
+  defineHarnessSubagent({
+    name: "review",
+    description: "Ask a reviewer to inspect repository files.",
+    agent: reviewer,
+  }),
+];
+```
+
+```ts title="coordinator.ts"
+import { createAgent, createHarness } from "@elie-laloum/outpost";
+import { model, modelProvider } from "./model.ts";
+import { tools } from "./delegation.ts";
+
+export const coordinator = createAgent({
   model,
   harness: createHarness({
     modelProvider,
-    tools: [
-      defineHarnessSubagent({
-        name: "review",
-        description: "Ask a reviewer to inspect repository files.",
-        agent: reviewer,
-      }),
-    ],
+    tools,
     limits: { maxSteps: 8, maxDelegationDepth: 1, usage: { output: 5_000 } },
   }),
 });
+```
 
-const result = await dispatch({
+```ts title="run.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { coordinator } from "./coordinator.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coordinator,
@@ -63,38 +85,37 @@ The coordinator decides when to call `review`. Each call starts the reviewer wit
 
 ## What the parent sends and receives
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Delegate**: The parent model calls the subagent tool.
-   - **Send a prompt**: The only input is `{ "prompt": "…" }`.
-   - **Start the child**: Its history holds its own instructions and that prompt, nothing from the parent.
-     - host
-2. **Work**: The child runs its own loop.
-   - **Use its tools**: Commands and edits run in the parent’s sandbox and worktree.
-     - sandbox
-   - **Count its tokens**: Usage adds up in the child, the parent and every ancestor.
-3. **Return**: The parent reads a tool result.
-   - **Save the transcript**: The child conversation is captured, even after a failure.
-     - host
-   - **Answer the parent**: JSON text with `text`, the child’s final answer, and `conversation` when the child keeps one.
+- **Delegate**: The parent model calls the subagent tool.
+  - Steps
+  - **Send a prompt**: The only input is `{ "prompt": "…" }`.
+  - **Start the child**: Its history holds its own instructions and that prompt, nothing from the parent.
+    - host
+  - → **Work**: then
+- **Work**: The child runs its own loop.
+  - Steps
+  - **Use its tools**: Commands and edits run in the parent’s sandbox and worktree.
+    - sandbox
+  - **Count its tokens**: Usage adds up in the child, the parent and every ancestor.
+  - → **Return**: then
+- **Return**: The parent reads a tool result.
+  - Steps
+  - **Save the transcript**: The child conversation is captured, even after a failure.
+    - host
+  - **Answer the parent**: JSON text with `text`, the child’s final answer, and `conversation` when the child keeps one.
 
 Children share the parent’s sandbox: they allocate no provider and open no workspace, so the parent sees their edits at once. Delegations run one at a time, even when the parent’s other tools run in parallel.
 
-## Bound delegation
+## Limit delegated work
 
 Each loop keeps its own step and tool-call counts, while token budgets add up across descendants.
 
-| Limit                                                                      | Counts                                      | When it is reached                                 |
-| -------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------- |
-| `maxSteps`, `maxToolCalls`                                                 | Each loop separately.                       | The child stops; the parent receives a tool error. |
-| `usage` on the child                                                       | The child and its own children.             | The child stops; the parent receives a tool error. |
-| `usage` on an ancestor                                                     | That ancestor and all its descendants.      | That ancestor fails with code `limit`.             |
-| `maxDelegationDepth`                                                       | Nesting levels below this harness.          | The delegating call returns a `limit` tool error.  |
-| parent [`toolExecution.deadlineMs`](../../reference/harnesstoolexecution/) | One whole delegation; 5 minutes by default. | The child is cancelled; the parent gets a timeout. |
+API reference: [HarnessLimits](../../reference/harnesslimits/).
 
 A tool error goes back to the parent model, unless the parent sets `toolExecution: { onError: "fail" }`. Cancelling the dispatch also stops the child’s model requests and commands.
 
-`maxDelegationDepth` defaults to 3, and 0 disables delegation. A child’s own value can only tighten what its ancestors allow: with `maxDelegationDepth: 1` above, the reviewer cannot delegate further.
+API reference: [HarnessLimits](../../reference/harnesslimits/) and [HarnessSubagentOptions](../../reference/harnesssubagentoptions/).
 
 ## Permissions and hooks
 
@@ -119,13 +140,7 @@ const observe: DispatchOptions["observe"] = (event) => {
 };
 ```
 
-| Field          | Holds                                         |
-| -------------- | --------------------------------------------- |
-| `id`           | This child run, unique per delegation.        |
-| `callId`       | The parent’s tool call that started it.       |
-| `name`         | The subagent tool name.                       |
-| `status`       | `started`, `finished` or `failed`.            |
-| `conversation` | The child conversation ID, when it keeps one. |
+API reference: [AgentEvent](../../reference/agentevent/).
 
 To send an instruction to a running child, pass its `id` as `subagent` to `steering.send()`. See [Steering a running agent](../steering/).
 

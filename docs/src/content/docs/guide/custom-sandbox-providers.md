@@ -1,21 +1,18 @@
 ---
 title: "Add a sandbox provider"
-description: "Run agents on an execution environment Outpost does not support yet: allocate it, run commands, transfer files and release it. Outpost keeps handling Git, agents and conversations."
+description: "Connect an execution environment that runs commands, transfers files and releases resources."
 ---
 
 ## Write a minimal provider
 
-A `SandboxProvider` allocates one environment per sandbox and returns a `SandboxLease` that runs commands and transfers files in it. This skeleton wraps a virtual machine platform; `vms` stands for its SDK.
+Implement a `SandboxProvider` to open an execution environment. It returns a `SandboxLease` through which Outpost runs commands and transfers files. The example below outlines a virtual machine integration; `vms` represents that platform’s SDK.
 
-```ts title="vm-provider.mts"
-import { randomUUID } from "node:crypto";
-import {
-  createRemoteSandboxProvider,
-  type TransferOptions,
-} from "@elie-laloum/outpost";
+Adapt these SDK contracts and command helpers to your VM platform.
 
-// Your platform's SDK.
-interface Vm {
+<!-- tabs -->
+
+```ts title="vm.types.ts"
+export interface Vm {
   run(
     argv: readonly string[],
     options: {
@@ -30,73 +27,131 @@ interface Vm {
   put(local: string, remote: string, signal: AbortSignal): Promise<void>;
   get(remote: string, local: string, signal: AbortSignal): Promise<void>;
 }
-declare const vms: {
+```
+
+```ts title="vm-sdk.types.ts"
+import type { Vm } from "./vm.types.ts";
+
+export declare const vms: {
   create(name: string, signal?: AbortSignal): Promise<Vm>;
   remove(name: string, signal?: AbortSignal): Promise<void>;
 };
+```
 
-const bounded = ({ signal, deadlineMs }: TransferOptions) =>
+```ts title="deadline.ts"
+import type { TransferOptions } from "@elie-laloum/outpost";
+
+export const bounded = ({ signal, deadlineMs }: TransferOptions) =>
   AbortSignal.any([
     ...(signal ? [signal] : []),
     ...(deadlineMs ? [AbortSignal.timeout(deadlineMs)] : []),
   ]);
+```
+
+```ts title="command-options.ts"
+import type { SandboxContext, Command } from "@elie-laloum/outpost";
+import { bounded } from "./deadline.ts";
+
+export function commandOptions(context: SandboxContext, command: Command) {
+  return {
+    cwd: command.directory ?? "/workspace",
+    env: { ...context.variables, ...command.variables },
+    stdin: command.stdin,
+    signal: bounded(command),
+    onOutput: command.observe,
+  };
+}
+```
+
+```ts title="invoke-vm.ts"
+import type { Vm } from "./vm.types.ts";
+import type { SandboxContext, SandboxLease } from "@elie-laloum/outpost";
+import { commandOptions } from "./command-options.ts";
+
+export function invokeVm(
+  vm: Vm,
+  context: SandboxContext,
+): SandboxLease["invoke"] {
+  return async (command) => {
+    const result = await vm.run(
+      [command.executable, ...(command.arguments ?? [])],
+      commandOptions(context, command),
+    );
+    return {
+      status: result.exitCode,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    };
+  };
+}
+```
+
+Add transfers and idempotent release, then compose the provider in `vm-provider.ts`.
+
+<!-- tabs -->
+
+```ts title="transfer-vm.ts"
+import type { Vm } from "./vm.types.ts";
+import type { SandboxLease } from "@elie-laloum/outpost";
+import { bounded } from "./deadline.ts";
+
+export function transferVm(vm: Vm): Pick<SandboxLease, "upload" | "download"> {
+  return {
+    upload: (source, destination, options = {}) =>
+      vm.put(source, destination, bounded(options)),
+    download: (source, destination, options = {}) =>
+      vm.get(source, destination, bounded(options)),
+  };
+}
+```
+
+```ts title="vm-lease.ts"
+import type { Vm } from "./vm.types.ts";
+import type { SandboxLease } from "@elie-laloum/outpost";
+import { transferVm } from "./transfer-vm.ts";
+
+export function createVmLease(
+  vm: Vm,
+  invoke: SandboxLease["invoke"],
+  remove: () => Promise<void>,
+): SandboxLease {
+  let released: Promise<void> | undefined;
+  return {
+    root: "/workspace",
+    home: "/home/agent",
+    invoke,
+    ...transferVm(vm),
+    release: () => (released ??= remove()),
+  };
+}
+```
+
+```ts title="vm-provider.ts"
+import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
+import { randomUUID } from "node:crypto";
+import { vms } from "./vm-sdk.types.ts";
+import { createVmLease } from "./vm-lease.ts";
+import { invokeVm } from "./invoke-vm.ts";
 
 export const vmSandboxProvider = createRemoteSandboxProvider({
   name: "vm",
   async acquire(context) {
     const name = `outpost-${randomUUID()}`;
     const vm = await vms.create(name, context.signal);
-    let released: Promise<void> | undefined;
-    return {
-      root: "/workspace",
-      home: "/home/agent",
-      async invoke(command) {
-        const result = await vm.run(
-          [command.executable, ...(command.arguments ?? [])],
-          {
-            cwd: command.directory ?? "/workspace",
-            env: { ...context.variables, ...command.variables },
-            stdin: command.stdin,
-            signal: bounded(command),
-            onOutput: command.observe,
-          },
-        );
-        return {
-          status: result.exitCode,
-          stdout: result.stdout,
-          stderr: result.stderr,
-        };
-      },
-      upload: (source, destination, options = {}) =>
-        vm.put(source, destination, bounded(options)),
-      download: (source, destination, options = {}) =>
-        vm.get(source, destination, bounded(options)),
-      release: () => (released ??= vms.remove(name)),
-    };
+    return createVmLease(vm, invokeVm(vm, context), () => vms.remove(name));
   },
 });
 ```
 
 Pass `vmSandboxProvider` as `sandboxProvider` to `dispatch()` or `createSandbox()`. Outpost calls `acquire()` once per sandbox, runs the agent and your commands through `invoke()`, then calls `release()`.
 
-## Fill the contract
+## Implement the operations
 
-| Member                  | What Outpost expects                                                                                                              |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                  | An identifier for diagnostics and resource activity.                                                                              |
-| `placement`             | How the sandbox sees the checkout: `"mounted"`, `"remote"` or `"host"`. Set by the helpers below.                                 |
-| `variables`             | Declarations Outpost resolves into `context.variables` ([Environment variables](../environment-variables/)).                      |
-| `acquire(context)`      | Allocate the environment, honour `context.signal`, apply `context.variables` to every command and return the lease.               |
-| `lease.root`            | The checkout's path inside the sandbox. Commands run there by default.                                                            |
-| `lease.home`            | The agent's private home, where Outpost installs credentials and CLI settings.                                                    |
-| `lease.invoke(command)` | Run `executable` with `arguments`, `stdin`, `directory` and `variables`; stream output to `observe`; return the real exit status. |
-| `lease.upload()`        | Copy a host file or directory into the sandbox.                                                                                   |
-| `lease.download()`      | Copy a sandbox file or directory to the host.                                                                                     |
-| `lease.release()`       | Destroy the environment.                                                                                                          |
+API reference: [SandboxLease](../../reference/sandboxlease/), [SandboxContext](../../reference/sandboxcontext/) and [FileTransfers](../../reference/filetransfers/).
 
 `invoke()` also receives `retain` (bytes of output tail to keep), `interactive` and `terminal` streams for [`attach()`](../sandbox-sessions/), and `input` when the lease declares `liveInput`.
 
-## Choose mounted or remote
+## Choose repository access
 
 Both helpers take `name`, optional `variables` and `acquire`, check the name and freeze the result. They differ in the `placement` they set, which decides who moves the repository.
 
@@ -129,36 +184,36 @@ A container provider must transfer through a process inside the container, for e
 
 Outpost uses a capability only when the provider or lease declares it; it never infers one from the provider's name.
 
-| Member                                                  | Enables                                                                                                                                    | Details                                                                                        |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `lease.fileTransfers` (`manifest()`, `downloadBatch()`) | Remote synchronization downloads only changed files, in batches, and verifies their SHA-256.                                               | [FileTransfers](../../reference/filetransfers/)                                                |
-| `lease.fileTransfers.uploadBatch()`                     | Files sent to a remote sandbox go in one batch instead of one `upload()` each.                                                             | [Cloud sandboxes](../cloud-sandboxes/)                                                         |
-| `lease.liveInput: true`                                 | `invoke()` pipes `command.input` to the running process: steering reaches agents with a `liveInput` protocol, and harness MCP servers run. | [Steering](../steering/), [Add a CLI agent](../custom-agents/), [MCP servers](../mcp-servers/) |
-| `provider.recover()`                                    | Durable races with `speculate()` can clean up after a crash.                                                                               | [Competing candidates](../speculation/)                                                        |
+API reference: [SandboxLease](../../reference/sandboxlease/).
 
 Without `liveInput`, steering a resumable CLI agent stops its process once the conversation is known and resumes it in the same sandbox.
 
-## Survive a durable-race crash
+## Prepare recovery after a crash
 
 A durable race registers each sandbox before it exists, so a restarted coordinator can remove it. In `acquire()`, await `context.registerRecovery(resourceId)` exactly once, before allocating. `recover(resourceId, { signal, deadlineMs })` then removes that resource.
 
-```ts
-import { randomUUID } from "node:crypto";
-import {
-  createRemoteSandboxProvider,
-  type SandboxLease,
-  type SandboxProvider,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-// Start the VM and build its lease, as above.
-declare function startVm(
+```ts title="vm-lifecycle.types.ts"
+import type { SandboxLease } from "@elie-laloum/outpost";
+
+export declare function startVm(
   name: string,
   signal?: AbortSignal,
 ): Promise<SandboxLease>;
-// Resolve when the VM is already gone.
-declare function removeVm(name: string, signal?: AbortSignal): Promise<void>;
+export declare function removeVm(
+  name: string,
+  signal?: AbortSignal,
+): Promise<void>;
+```
 
-const provider = createRemoteSandboxProvider({
+```ts title="durable-vm.ts"
+import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
+import { randomUUID } from "node:crypto";
+import { startVm, removeVm } from "./vm-lifecycle.types.ts";
+import type { SandboxProvider } from "@elie-laloum/outpost";
+
+export const provider = createRemoteSandboxProvider({
   name: "vm",
   async acquire(context) {
     const name = `outpost-${randomUUID()}`;
@@ -166,7 +221,6 @@ const provider = createRemoteSandboxProvider({
     return startVm(name, context.signal);
   },
 });
-
 export const durableVmProvider: SandboxProvider = {
   ...provider,
   recover: (resourceId, options) => removeVm(resourceId, options?.signal),
@@ -179,19 +233,29 @@ export const durableVmProvider: SandboxProvider = {
 
 `diagnoseSandbox()` probes a lease: Node.js, Git, separate output streams, a nonzero exit status, the home directory and, with `transfers`, a binary upload verified by a process in the sandbox.
 
-```ts
+<!-- tabs -->
+
+```ts title="diagnostic-lease.ts"
+import type { SandboxProvider } from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.ts";
 import { join } from "node:path";
-import { diagnoseSandbox, type SandboxProvider } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.mts";
 
-declare const vmSandboxProvider: SandboxProvider;
+export declare const vmSandboxProvider: SandboxProvider;
+export function openDiagnosticLease() {
+  return vmSandboxProvider.acquire({
+    repository,
+    directory: repository,
+    gitDirectories: [join(repository, ".git")],
+    variables: {},
+  });
+}
+```
 
-const lease = await vmSandboxProvider.acquire({
-  repository,
-  directory: repository,
-  gitDirectories: [join(repository, ".git")],
-  variables: {},
-});
+```ts title="diagnose.ts"
+import { openDiagnosticLease, vmSandboxProvider } from "./diagnostic-lease.ts";
+import { diagnoseSandbox } from "@elie-laloum/outpost";
+
+export const lease = await openDiagnosticLease();
 try {
   const report = await diagnoseSandbox(lease, {
     transfers: true,

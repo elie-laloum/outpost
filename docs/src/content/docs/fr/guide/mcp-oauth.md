@@ -1,11 +1,11 @@
 ---
-title: "Connexion aux serveurs MCP"
-description: "Connecter les agents à des serveurs MCP HTTP protégés par OAuth, avec une connexion CLI faite sur l’hôte ou des identifiants client demandés dans la sandbox."
+title: "Connecter les comptes MCP"
+description: "Réutilisez une connexion déclarée à un serveur MCP ou configurez des identifiants client pour le harness intégré."
 ---
 
-## Choisir une forme
+## Choisir un mode de connexion
 
-Définissez `oauth` sur un serveur HTTP de [`mcpServers`](../mcp-servers/). Il remplace `bearerTokenVariable` et tout en-tête `Authorization`.
+Définissez `oauth` sur un [serveur MCP](../mcp-servers/) HTTP déclaré pour utiliser une connexion enregistrée ou des identifiants client. Cette option remplace `bearerTokenVariable` et tout en-tête `Authorization` ; choisissez la forme prise en charge par votre harness.
 
 | Forme                | Harness                       | Source du jeton                                         |
 | -------------------- | ----------------------------- | ------------------------------------------------------- |
@@ -40,9 +40,9 @@ const coder = createAgent({
 });
 ```
 
-Avant le démarrage de l’agent, Outpost copie uniquement les entrées des serveurs concernés dans le home privé de la sandbox. Vos autres connexions, dont le compte de la CLI lui-même, ne sont pas copiées par cette option. Une connexion absente échoue en indiquant la commande à lancer sur l’hôte.
+Avant le démarrage de l’agent, Outpost copie uniquement les entrées des serveurs concernés dans le répertoire personnel privé de la sandbox. Vos autres connexions, dont le compte de la CLI lui-même, ne sont pas copiées par cette option. Une connexion absente échoue en indiquant la commande à lancer sur l’hôte.
 
-Avec [`createLocalSandboxProvider()`](../host-process/), rien n’est copié : la CLI lit directement votre home.
+Avec [`createLocalSandboxProvider()`](../host-process/), rien n’est copié : la CLI lit directement votre répertoire personnel.
 
 :::caution
 La CLI rafraîchit le jeton dans la sandbox. Si le serveur d’autorisation fait tourner les refresh tokens, ce rafraîchissement peut invalider votre connexion sur l’hôte : reconnectez-vous sur l’hôte si une exécution ultérieure échoue.
@@ -68,23 +68,28 @@ const mcpServers: McpServers = {
 // createHarness({ modelProvider, mcpServers })
 ```
 
-Déclarez les deux variables sur le provider de sandbox ou dans `.outpost/.env` ([Variables d’environnement](../environment-variables/)). Sans `scopes`, le pont demande le scope indiqué par le challenge 401 du serveur, s’il y en a un.
+Déclarez les deux variables sur le fournisseur de sandbox ou dans `.outpost/.env` ([Variables d’environnement](../environment-variables/)). Sans `scopes`, le pont demande le scope indiqué par le challenge 401 du serveur, s’il y en a un.
 
 Le pont HTTP de la sandbox obtient le jeton lui-même : le secret y reste et les [règles sortantes](../network-restrictions/) s’appliquent aux demandes de jeton.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Découvrir**: À partir de l’URL du serveur MCP.
-   - **Lire les métadonnées**: Métadonnées de la ressource protégée, puis celles du serveur d’autorisation et son endpoint de jeton.
-     - sandbox
-2. **Demander**: Un grant `client_credentials`.
-   - **Authentifier le client**: Avec `client_secret_basic`, ou `client_secret_post` si le serveur n’annonce que celui-ci.
-     - sandbox
-   - **Lier le jeton**: L’URL du serveur est envoyée comme `resource`.
-     - sandbox
-3. **Réutiliser**: Jusqu’à l’expiration du jeton.
-   - **Réessayer après un 401**: Refaire la découverte, demander un nouveau jeton et réessayer la requête une fois.
-     - sandbox
+- **Découvrir**: À partir de l’URL du serveur MCP.
+  - Étapes
+  - **Lire les métadonnées**: Métadonnées de la ressource protégée, puis celles du serveur d’autorisation et son point d’accès de jeton.
+    - sandbox
+  - → **Demander**: puis
+- **Demander**: Un grant `client_credentials`.
+  - Étapes
+  - **Authentifier le client**: Avec `client_secret_basic`, ou `client_secret_post` si le serveur n’annonce que celui-ci.
+    - sandbox
+  - **Lier le jeton**: L’URL du serveur est envoyée comme `resource`.
+    - sandbox
+  - → **Réutiliser**: puis
+- **Réutiliser**: Jusqu’à l’expiration du jeton.
+  - Étapes
+  - **Réessayer après un 401**: Refaire la découverte, demander un nouveau jeton et réessayer la requête une fois.
+    - sandbox
 
 ## Limites
 

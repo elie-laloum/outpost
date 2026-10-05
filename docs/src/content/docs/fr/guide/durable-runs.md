@@ -1,11 +1,11 @@
 ---
-title: "Exécutions durables"
-description: "Enregistrer la progression d’un workflow dans un checkpoint, la reprendre après un échec, une pause ou un plantage, et récupérer une exécution dont le processus s’est arrêté."
+title: "Enregistrer et reprendre un workflow"
+description: "Utilisez des checkpoints pour reprendre un workflow et autorisez explicitement les nouvelles tentatives après une interruption."
 ---
 
 ## Enregistrer la progression
 
-Passez un `checkpoint` à `start()`. Outpost enregistre l’exécution sous `runId` à chaque changement d’état d’une tâche.
+Passez un `checkpoint` à la méthode `start()` du workflow si vous devez poursuivre dans un autre processus. Outpost enregistre les changements d’état des tâches et leurs résultats sous le `runId` du checkpoint.
 
 ```ts
 import {
@@ -32,7 +32,7 @@ Le script affiche `{ files: 12 }` et enregistre le checkpoint sous `.outpost/sto
 
 <!-- features -->
 
-- **Enregistrements des tâches**: Statut, tentatives, erreurs, demandes et décisions des gates de chaque tâche.
+- **Enregistrements des tâches**: Statut, tentatives, erreurs, demandes et décisions des étapes d’approbation de chaque tâche.
 - **Sorties**: La valeur de chaque tâche `done`, restaurée au lieu d’exécuter la tâche à nouveau.
 - **Consommation**: Tentatives et tokens cumulés, pour qu’un [budget](../budgets/) couvre toutes les reprises.
 
@@ -40,13 +40,13 @@ Une exécution reprise garde son `executionId` : `context.idempotencyKey` reste 
 
 ## Renvoyer des sorties JSON
 
-Une tâche avec checkpoint doit renvoyer du JSON sans perte ou `undefined`. Sinon, la tentative échoue. Convertissez les dates en chaînes et ne gardez que les champs utiles.
+Une tâche avec checkpoint doit renvoyer `undefined` ou une valeur qui peut être enregistrée et relue en JSON sans perdre d’information. Sinon, la tentative échoue. Convertissez les dates en chaînes et ne gardez que les champs utiles.
 
-Un résultat de dispatch porte des méthodes comme `resume()`. Projetez-le dans une `defineTask`, comme dans [D’une tâche à un workflow](../first-workflow/) :
+Un résultat de dispatch porte des méthodes comme `resume()`. Projetez-le dans une `defineTask`, comme dans l’exemple ci-dessous :
 
 ```ts
 import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const agent = defineIsolatedTask({
   key: "fix-agent",
@@ -80,7 +80,7 @@ Un checkpoint ne reprend que le workflow qui l’a écrit. `start()` refuse un c
 | Réglages d’exécution  | `timeoutMs`, réglages de `retry`, présence de `condition` ou `retry.accepts` |
 | Gates                 | Type, `prompt`, `actors` et `authentication` de chaque approbation ou pause  |
 | Tâches en boucle      | `maxRounds`                                                                  |
-| Tâches interactives   | `actors`, agent, modèle, brief, dépôt, `maxTurns` et provider de sandbox     |
+| Tâches interactives   | `actors`, agent, modèle, brief, dépôt, `maxTurns` et fournisseur de sandbox  |
 
 Le reste du code des tâches, les briefs et les entrées du workflow n’en font pas partie : changez `version` quand vous les modifiez. Une exécution enregistrée ne peut pas changer d’identité, pas même de `version` : relancez-la sous un nouveau `runId`.
 
@@ -92,19 +92,24 @@ Pour réutiliser des résultats entre exécutions différentes, utilisez plutôt
 
 Une exécution terminée sur une tâche en échec, annulée ou interrompue ne reprend qu’avec `resume: "retry-incomplete"`. Cette option autorise à exécuter ces tâches à nouveau, avec leurs effets de bord.
 
-```ts
+<!-- tabs -->
+
+```ts title="upload-store.ts"
 import {
-  createLocalTransport,
   createWorkflowCheckpointStore,
-  defineTask,
-  defineWorkflow,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
 
-const store = createWorkflowCheckpointStore({
+export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
-let calls = 0;
-const upload = defineTask({
+```
+
+```ts title="upload.ts"
+import { defineTask } from "@elie-laloum/outpost";
+
+export let calls = 0;
+export const upload = defineTask({
   key: "upload",
   perform: () => {
     calls += 1;
@@ -112,11 +117,20 @@ const upload = defineTask({
     return { uploaded: true };
   },
 });
-const workflow = defineWorkflow("upload", [upload]);
-const checkpoint = { store, runId: "upload-1", version: "1" };
+export function uploadCount() {
+  return calls;
+}
+```
 
+```ts title="resume-upload.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { upload } from "./upload.ts";
+import { store } from "./upload-store.ts";
+
+export const workflow = defineWorkflow("upload", [upload]);
+export const checkpoint = { store, runId: "upload-1", version: "1" };
 console.log((await workflow.start({ checkpoint })).status);
-const resumed = await workflow.start({
+export const resumed = await workflow.start({
   checkpoint: { ...checkpoint, resume: "retry-incomplete" },
 });
 console.log(resumed.status);
@@ -126,12 +140,12 @@ console.log(resumed.status);
 
 Le script affiche `failed`, puis `done`. Sans `resume`, le second `start()` est refusé.
 
-| État enregistré                                   | Sans `resume`                                  | Avec `resume: "retry-incomplete"`                  |
-| ------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| Toutes les tâches `done` ou `skipped`             | Renvoie le résultat enregistré, n’exécute rien | Identique                                          |
-| En pause sur une gate ou en attente d’une réponse | Continue avec vos décisions ou réponses        | Identique                                          |
-| En pause sur un [quota](../quota-pauses/)         | Relance la tâche après la réinitialisation     | Identique                                          |
-| Une tâche `failed`, `cancelled` ou interrompue    | `start()` est refusé                           | La relance, ainsi que les tâches qu’elle a sautées |
+| État enregistré                                                  | Sans `resume`                                  | Avec `resume: "retry-incomplete"`                  |
+| ---------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| Toutes les tâches `done` ou `skipped`                            | Renvoie le résultat enregistré, n’exécute rien | Identique                                          |
+| En pause sur une étape d’approbation ou en attente d’une réponse | Continue avec vos décisions ou réponses        | Identique                                          |
+| En pause sur un [quota](../quota-pauses/)                        | Relance la tâche après la réinitialisation     | Identique                                          |
+| Une tâche `failed`, `cancelled` ou interrompue                   | `start()` est refusé                           | La relance, ainsi que les tâches qu’elle a sautées |
 
 Une tâche relancée repart pour une nouvelle série de tentatives `retry`. Une tâche `done` ne s’exécute jamais à nouveau. Une exécution arrêtée par son [budget](../budgets/) reprend de la même façon ; passez un `budget` plus large, car la consommation continue de s’additionner.
 
@@ -139,18 +153,23 @@ Une tâche relancée repart pour une nouvelle série de tentatives `retry`. Une 
 
 Une exécution possède son checkpoint pendant `start()` et le libère quand `start()` se termine. Si le processus meurt, la propriété reste : tout `start()` suivant pour ce `runId` est refusé jusqu’à ce que vous la libériez.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Arrêter**: Assurez-vous que l’ancien runner n’écrit plus.
-   - **Arrêter le processus**: Confirmez qu’il s’est terminé. Un PID ne prouve pas qu’un runner distant s’est arrêté.
-2. **Déverrouiller**: Libérez la propriété, gardez la progression.
-   - **Lire la révision**: Lisez l’objet du checkpoint de l’exécution depuis le transport.
-     - `Transport`
-   - **Libérer la propriété**: L’appel est refusé si l’objet a changé depuis votre lecture.
-     - `recoverWorkflowCheckpoint()`
-3. **Reprendre**: Relancez le même workflow avec le même checkpoint.
-   - **Autoriser le rejeu**: La tâche interrompue est relancée avec `resume: "retry-incomplete"`.
-     - `start()`
+- **Arrêter**: Assurez-vous que l’ancien processus n’écrit plus.
+  - Étapes
+  - **Arrêter le processus**: Confirmez qu’il s’est terminé. Un PID ne prouve pas qu’un processus distant s’est arrêté.
+  - → **Déverrouiller**: puis
+- **Déverrouiller**: Libérez la propriété, gardez la progression.
+  - Étapes
+  - **Lire la révision**: Lisez l’objet du checkpoint de l’exécution depuis le transport.
+    - `Transport`
+  - **Libérer la propriété**: L’appel est refusé si l’objet a changé depuis votre lecture.
+    - `recoverWorkflowCheckpoint()`
+  - → **Reprendre**: puis
+- **Reprendre**: Relancez le même workflow avec le même checkpoint.
+  - Étapes
+  - **Autoriser le rejeu**: La tâche interrompue est relancée avec `resume: "retry-incomplete"`.
+    - `start()`
 
 ```ts
 import { createHash } from "node:crypto";
@@ -173,7 +192,7 @@ if (saved)
 
 La clé du checkpoint est `checkpoints/` suivi du SHA-256 du `runId`. La progression reste intacte ; relancez l’exécution avec `resume: "retry-incomplete"`.
 
-## Reprendre une exécution depuis un job de file
+## Reprendre un workflow lancé depuis une file
 
 [`defineWorkflowJob()`](../job-queues/) exécute chaque job sous son `runId`. Une file renvoie le job existant pour un identifiant qu’elle connaît déjà : un job terminé ne s’exécute donc jamais à nouveau.
 
@@ -194,16 +213,16 @@ try {
 }
 ```
 
-Une autre `input` change la version du checkpoint et le job échoue. Pour rejouer des tâches en échec ou interrompues, le handler doit recevoir `checkpoint: { store, version, resume: "retry-incomplete" }`.
+Une autre `input` change la version du checkpoint et le job échoue. Pour rejouer des tâches en échec ou interrompues, le traitement doit recevoir `checkpoint: { store, version, resume: "retry-incomplete" }`.
 
 ## Stocker les checkpoints à distance
 
-Le store accepte n’importe quel `Transport`. Utilisez un transport S3 ou R2 pour que des workers sur plusieurs machines partagent les exécutions : voir [Où vivent les données](../storage/).
+Le stockage accepte n’importe quel `Transport`. Utilisez un transport S3 ou R2 pour que des workers sur plusieurs machines partagent les exécutions : voir [Où vivent les données](../storage/).
 
 ## Limites
 
 - Un seul `start()` à la fois par `runId`. Un second est refusé tant que le premier s’exécute.
-- La propriété n’expire jamais d’elle-même. Libérez-la avec `recoverWorkflowCheckpoint()` après avoir arrêté l’ancien runner.
+- La propriété n’expire jamais d’elle-même. Libérez-la avec `recoverWorkflowCheckpoint()` après avoir arrêté l’ancien processus.
 - Le rejeu répète les effets de bord qu’une tâche interrompue a déjà produits. Dédupliquez-les avec `context.idempotencyKey` : voir [Files de jobs et workers](../job-queues/).
 
 API : [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [WorkflowCheckpointOptions](../../reference/workflowcheckpointoptions/) · [recoverWorkflowCheckpoint](../../reference/recoverworkflowcheckpoint/) · [WorkflowCheckpoint](../../reference/workflowcheckpoint/) · [defineWorkflowJob](../../reference/defineworkflowjob/).

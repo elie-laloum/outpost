@@ -1,11 +1,11 @@
 ---
-title: "Harness intégré"
-description: "Laisser Outpost mener lui-même la boucle de l’agent : il appelle une API de modèle, contrôle chaque appel d’outil et exécute vos outils dans la sandbox."
+title: "Créer votre propre boucle d’agent"
+description: "Utilisez le harness intégré d’Outpost avec un fournisseur de modèle, des outils et des limites explicites."
 ---
 
-## Quand le choisir
+## Choisir la boucle intégrée
 
-Un agent CLI apporte sa propre boucle et ses outils. Le harness intégré est la boucle d’Outpost : vous choisissez l’API de modèle, les outils et les règles que chaque appel doit respecter.
+Choisissez le harness intégré si vous voulez contrôler vous-même l’API du modèle, les outils et les règles d’exécution de l’agent. La boucle s’exécute dans votre processus Node.js, tandis que ses outils agissent dans la sandbox de la tâche.
 
 |                             | Agent CLI                                   | Harness intégré                                                   |
 | --------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
@@ -22,29 +22,41 @@ Un agent CLI apporte sa propre boucle et ses outils. Le harness intégré est la
 
 `createHarness()` configure la boucle ; `createAgent()` l’associe à un modèle. L’agent passe ensuite à `dispatch()` comme n’importe quel autre.
 
-```ts title="harness-review.mts"
+<!-- tabs -->
+
+```ts title="review-model.ts"
+import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createAnthropicModelProvider({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+```
+
+```ts title="review-agent.ts"
 import {
   createAgent,
-  createAnthropicModelProvider,
   createHarness,
   createHarnessFileTools,
   createHarnessSearchTools,
-  dispatch,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { modelProvider } from "./review-model.ts";
 
-const reviewer = createAgent({
+export const reviewer = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
   harness: createHarness({
-    modelProvider: createAnthropicModelProvider({
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    }),
+    modelProvider: modelProvider,
     instructions: "Inspect the repository and answer with evidence.",
     tools: [createHarnessFileTools(), createHarnessSearchTools()],
   }),
 });
+```
 
-const result = await dispatch({
+```ts title="harness-review.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { reviewer } from "./review-agent.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: reviewer,
@@ -54,33 +66,38 @@ console.log(result.text);
 console.log(result.usage);
 ```
 
-Définissez `ANTHROPIC_API_KEY`, puis lancez `node harness-review.mts`. `result.text` contient la réponse finale du modèle. Ces outils ne font que lire des fichiers : l’agent ne peut pas modifier le dépôt.
+Définissez `ANTHROPIC_API_KEY`, puis lancez `node harness-review.ts`. `result.text` contient la réponse finale du modèle. Ces outils ne font que lire des fichiers : l’agent ne peut pas modifier le dépôt.
 
-## La boucle en bref
+## Étapes de la boucle
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Ouvrir le tour**: Une fois par brief, passe ou réparation.
-   - **Construire le prompt système**: Résoudre `instructions` et le catalogue de skills.
-     - hôte
-   - **Démarrer les serveurs MCP**: Les `mcpServers` déclarés démarrent et ajoutent leurs outils.
-     - sandbox
-2. **Exécuter une étape**: Répétée jusqu’à ce que le modèle réponde sans appel d’outil.
-   - **Interroger le modèle**: Envoyer l’historique, le prompt système et la liste des outils.
-     - hôte
-   - **Contrôler les appels**: Valider chaque entrée contre son schéma, puis appliquer les permissions et les hooks `before-tool`.
-     - hôte
-   - **Exécuter les outils**: Les appels consécutifs en lecture seule tournent en parallèle, les autres un par un.
-     - sandbox
-   - **Renvoyer les résultats**: Résultats et erreurs d’outils rejoignent l’historique pour l’étape suivante.
-     - hôte
-3. **Terminer**: Le modèle répond.
-   - **Rendre la réponse**: Le texte final devient `result.text`, sauf si un hook `stop` ou un message de steering relance le modèle.
-     - hôte
+- **Ouvrir le tour**: Une fois par brief, passe ou réparation.
+  - Étapes
+  - **Construire le prompt système**: Résoudre `instructions` et le catalogue de compétences.
+    - hôte
+  - **Démarrer les serveurs MCP**: Les `mcpServers` déclarés démarrent et ajoutent leurs outils.
+    - sandbox
+  - → **Exécuter une étape**: puis
+- **Exécuter une étape**: Répétée jusqu’à ce que le modèle réponde sans appel d’outil.
+  - Étapes
+  - **Interroger le modèle**: Envoyer l’historique, le prompt système et la liste des outils.
+    - hôte
+  - **Contrôler les appels**: Valider chaque entrée contre son schéma, puis appliquer les permissions et les hooks `before-tool`.
+    - hôte
+  - **Exécuter les outils**: Les appels consécutifs en lecture seule tournent en parallèle, les autres un par un.
+    - sandbox
+  - **Renvoyer les résultats**: Résultats et erreurs d’outils rejoignent l’historique pour l’étape suivante.
+    - hôte
+  - → **Terminer**: puis
+- **Terminer**: Le modèle répond.
+  - Étapes
+  - **Rendre la réponse**: Le texte final devient `result.text`, sauf si un hook `stop` ou une nouvelle instruction envoyée pendant l’exécution relance le modèle.
+    - hôte
 
 Outpost vérifie les limites avant chaque étape et après chaque réponse du modèle. La première atteinte termine le tour par une [`OutpostError`](../error-handling/).
 
-## Borner un tour
+## Limiter un échange avec le modèle
 
 `limits` borne la boucle ; `toolExecution` règle l’exécution des appels d’outils.
 
@@ -101,15 +118,7 @@ const harness = createHarness({
 });
 ```
 
-| Option                      | Borne                                                          | Défaut              | Une fois atteinte                                 |
-| --------------------------- | -------------------------------------------------------------- | ------------------- | ------------------------------------------------- |
-| `limits.maxSteps`           | Requêtes au modèle dans un tour                                | 100                 | Échoue avec le code `limit`                       |
-| `limits.maxToolCalls`       | Appels d’outils dans un tour                                   | Aucune              | Échoue avec le code `limit`                       |
-| `limits.usage`              | Tokens d’un tour (`input`, `cached`, `cacheCreated`, `output`) | Aucune              | Échoue avec le code `limit`                       |
-| `limits.maxDelegationDepth` | Niveaux imbriqués de [sous-agents](../subagents/)              | 3                   | L’appel de délégation échoue comme un outil       |
-| `toolExecution.concurrency` | Appels en lecture seule simultanés                             | 4                   | Les appels suivants attendent                     |
-| `toolExecution.deadlineMs`  | Un appel d’outil                                               | 5 minutes           | L’appel échoue avec le code `timeout`             |
-| `toolExecution.onError`     | Effet d’un appel d’outil en échec                              | `"return-to-model"` | `"fail"` termine le tour avec l’erreur de l’outil |
+Référence API : [HarnessLimits](../../reference/harnesslimits/) et [HarnessToolExecution](../../reference/harnesstoolexecution/).
 
 Avec `onError` par défaut, un appel en échec ou expiré revient au modèle comme résultat d’erreur, et la boucle continue. `usage` compte les sous-agents et les résumés de contexte, et exige un fournisseur de modèle qui remonte une consommation complète.
 
@@ -119,28 +128,41 @@ Avec `onError` par défaut, un appel en échec ou expiré revient au modèle com
 
 ## Observer la boucle
 
-`observe` reçoit les événements de la boucle : `step`, `tool`, `tool-result`, `tool-output`, `tool-denied`, `hook`, `subagent` et `model-*`. [Suivre la progression](../progress/) détaille chaque type.
+Référence API : [AgentObservation](../../reference/agentobservation/).
 
-```ts
+Suivez les appels d’outils et les requêtes au modèle pendant l’exécution du harness. Cet exemple active l’observation détaillée pour que la fonction de rappel puisse examiner la requête complète au modèle.
+
+<!-- tabs -->
+
+```ts title="observed-model.ts"
+import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+
+export const observedModel = createAnthropicModelProvider({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+```
+
+```ts title="observed-agent.ts"
 import {
   createAgent,
-  createAnthropicModelProvider,
   createHarness,
   createHarnessFileTools,
-  createObservationHub,
-  dispatch,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { observedModel } from "./observed-model.ts";
 
-const agent = createAgent({
+export const agent = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
   harness: createHarness({
-    modelProvider: createAnthropicModelProvider({
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    }),
+    modelProvider: observedModel,
     tools: [createHarnessFileTools()],
   }),
 });
+```
+
+```ts title="observe-harness.ts"
+import { dispatch, createObservationHub } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { agent } from "./observed-agent.ts";
 
 await dispatch({
   repository,
@@ -162,21 +184,11 @@ await dispatch({
 <!-- features -->
 
 - [Fournisseurs de modèles](../model-providers/): Brancher une API compatible OpenAI ou Anthropic.
-  - `createOpenAIModelProvider()`
-  - `createAnthropicModelProvider()`
 - [Outils](../harness-tools/): Donner au modèle fichiers, recherche, édition, Git, un shell ou vos propres outils.
-  - `defineHarnessTool()`
-  - `createHarnessShellTools()`
 - [Permissions et hooks](../harness-permissions/): Autoriser, refuser ou réécrire les appels d’outils avant leur exécution.
-  - `defineHarnessPermissions()`
-  - `defineHarnessHook()`
 - [Sous-agents](../subagents/): Déléguer une partie d’un tour à un agent enfant dans la même sandbox.
-  - `defineHarnessSubagent()`
-- [Contexte et skills](../harness-context/): Contenir l’historique et charger des instructions à la demande.
-  - `defineHarnessContextStrategy()`
-  - `defineHarnessSkill()`
+- [Contexte et compétences](../harness-context/): Contenir l’historique et charger des instructions à la demande.
 - [Serveurs MCP](../mcp-servers/): Ajouter les outils de serveurs Model Context Protocol.
-  - `mcpServers`
 
 ## Limites
 

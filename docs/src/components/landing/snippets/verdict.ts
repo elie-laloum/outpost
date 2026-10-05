@@ -1,6 +1,6 @@
 import { defineJsonResponse, dispatch } from "@elie-laloum/outpost";
 import { z } from "zod";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const verdict = defineJsonResponse({
   tag: "verdict",

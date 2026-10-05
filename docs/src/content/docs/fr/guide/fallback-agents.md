@@ -1,23 +1,24 @@
 ---
-title: "Agents de secours"
-description: "Confier un dispatch à un autre agent ou modèle quand le premier atteint une limite d’usage ou que son service est indisponible."
+title: "Utiliser un agent de secours"
+description: "Confiez le travail à un autre agent lorsqu’une erreur de quota ou de disponibilité prévue survient."
 ---
 
 ## Composer un agent de secours
 
-Listez les candidats dans l’ordre où les essayer, et les échecs qui passent la main dans `on`. Ici, Claude Opus s’exécute d’abord, puis Claude Sonnet, puis l’agent Codex de l’[Installation](../setup/).
+Créez un agent de secours avec une liste ordonnée de candidats et les types d’erreur attendus dans `on`. Outpost passe au candidat suivant uniquement si l’agent courant rencontre une erreur de quota ou de disponibilité couverte par cette liste.
 
-```ts
+<!-- tabs -->
+
+```ts title="fallback.ts"
 import {
-  createAgent,
   createClaudeHarness,
   createFallbackAgent,
-  dispatch,
+  createAgent,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder } from "./outpost.config.ts";
 
-const claude = createClaudeHarness({ authentication: "account" });
-const agent = createFallbackAgent(
+export const claude = createClaudeHarness({ authentication: "account" });
+export const agent = createFallbackAgent(
   [
     createAgent({ harness: claude, model: "opus" }),
     createAgent({ harness: claude, model: "sonnet" }),
@@ -25,8 +26,14 @@ const agent = createFallbackAgent(
   ],
   { on: ["quota", "unavailable"] },
 );
+```
 
-const result = await dispatch({
+```ts title="run.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { agent } from "./fallback.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent,
@@ -41,10 +48,7 @@ Un agent de secours s’utilise partout où un agent est accepté, y compris `cr
 
 `on` est obligatoire et nomme une catégorie ou les deux.
 
-| Valeur de `on` | Passe la main quand le tour échoue sur                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `quota`        | Une limite d’usage ou de débit : `OutpostError` de code `quota`, classée comme dans [Pauses sur quota](../quota-pauses/). |
-| `unavailable`  | Une panne du service : surcharge, HTTP 408, 5xx ou 529, ou échec de connexion ou de transport.                            |
+Référence API : [FallbackAgentOptions](../../reference/fallbackagentoptions/).
 
 Tout autre échec, y compris une annulation ou un délai dépassé, est relancé immédiatement. Exception : un délai dépassé après que l’agent a signalé un échec de connexion compte comme une panne. Une panne garde son code (`process`, `provider` ou `timeout`) ; détectez-la avec `unavailableFault(error)`.
 
@@ -62,12 +66,9 @@ Le candidat suivant n’est pas informé du travail partiel. Si cela compte, pr�
 
 ## Savoir quel candidat a répondu
 
-Un dispatch par un agent de secours renvoie `result.fallback` :
+Après un passage de relais, vous pouvez examiner les candidats essayés et celui qui a répondu.
 
-| Champ      | Contenu                                                                                      |
-| ---------- | -------------------------------------------------------------------------------------------- |
-| `selected` | `index`, `name` et `model` du candidat qui a produit le résultat.                            |
-| `attempts` | Candidats arrêtés avant lui, chacun avec `failure`, `message` et, le cas échéant, `resetAt`. |
+Référence API : [DispatchResult](../../reference/dispatchresult/) et [FallbackAttempt](../../reference/fallbackattempt/).
 
 Chaque passage de relais émet un [événement d’agent](../progress/) `fallback` avec `from`, `to`, `failure` et `message`. `result.usage` et les [budgets](../budgets/) de workflow incluent les tokens des candidats en échec. `resume()` et `fork()` sur le résultat continuent avec le candidat retenu.
 

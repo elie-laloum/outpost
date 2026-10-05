@@ -1,11 +1,11 @@
 ---
-title: "Environment variables"
-description: "Declare which variables reach the sandbox, the agent or a single command, and where their values come from."
+title: "Pass environment variables"
+description: "Declare which variables reach the sandbox, agent and commands."
 ---
 
 ## Choose where to declare a variable
 
-Outpost forwards only the names you declare. Pick the narrowest place that reaches the process that needs the value.
+Declare each variable where it is needed: on the sandbox provider, on a CLI harness or on one command. Outpost forwards declared names; choose the scope that reaches only the processes needing the value.
 
 | Where                                    | Reaches                                           | Use it for                                 |
 | ---------------------------------------- | ------------------------------------------------- | ------------------------------------------ |
@@ -13,7 +13,6 @@ Outpost forwards only the names you declare. Pick the narrowest place that reach
 | Harness `variables` (CLI agents)         | The agent’s processes only                        | API keys, agent settings, MCP secrets      |
 | Command `variables`                      | That one command                                  | A per-call override                        |
 | `.outpost/.env` in the target repository | Every command in the sandbox, like the provider’s | Values you keep out of code for a checkout |
-| `.env` next to a generated `run.ts`      | The generated script’s sandbox provider           | Generated projects, below                  |
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -34,7 +33,7 @@ export const coder = createAgent({
 
 Values are strings. Select each name from `process.env` explicitly: spreading `process.env` would send every host secret into the sandbox. Per-command `variables` are shown in [Sandbox sessions](../sandbox-sessions/).
 
-## Know which value wins
+## Understand value precedence
 
 When a name appears in several places, the more specific source wins:
 
@@ -61,11 +60,15 @@ A nonempty value is used as written. An empty declaration such as `LINEAR_API_KE
 Keep this file out of Git. A `.env` line in `.gitignore` covers it.
 :::
 
-## Generated projects
+## Load a file from your script
 
-`outpost init` writes `.env.example` with the variable your sign-in needs. Copy it to `.env` next to `run.ts` and add your own names.
+Node.js can load an environment file before running your script:
 
-The script reads `.env` from its own directory, so you can run it from anywhere. It fills empty values from the parent environment and passes every declared name to the sandbox provider’s `variables`.
+```sh
+node --env-file=.env run.ts
+```
+
+Your code then selects the values to forward with `variables`. Loading the file into Node.js does not automatically send its contents to the sandbox. The `.env` path is relative to the directory where you run the command.
 
 ## Secrets for MCP servers and the built-in harness
 

@@ -1,33 +1,40 @@
 ---
-title: "Files de jobs et workers"
-description: "Confier du travail à des processus workers de longue durée via une file persistante, exécuter un workflow avec checkpoint par job et dédupliquer les effets externes."
+title: "Exécuter des jobs avec des workers"
+description: "Soumettez des jobs à une file et exécutez-les dans des workers avec réservation, reprise et résultats enregistrés."
 ---
 
 ## Parcours d’un job
 
-Un job nomme un handler enregistré et porte une entrée JSON. Les workers n’exécutent que les handlers que vous avez enregistrés, jamais du code envoyé avec le job.
+Les producteurs publient un nom de traitement et une entrée JSON dans une file. Les workers réservent les jobs, exécutent le traitement enregistré et conservent le résultat. Choisissez une file partagée par les producteurs et les workers concernés.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Soumission**: Un producteur ajoute le job.
-   - **Mise en file**: Le job est enregistré en `pending` sous son identifiant.
-     - `enqueue()`
-2. **Prise en charge**: Un worker le récupère.
-   - **Bail**: Le worker réclame un job pour l’un de ses handlers et renouvelle un bail pendant son exécution.
-     - `runQueueWorker()`
-3. **Exécution**: Le handler fait le travail.
-   - **Traitement**: Il reçoit l’entrée, un signal d’annulation et une `idempotencyKey`.
-     - `QueueHandler`
-4. **Conservation**: Le résultat reste dans la file.
-   - **Fin**: Le job passe à `done`, ou à `failed` avec une erreur.
-   - **Lecture**: Les producteurs le relisent par son identifiant.
-     - `get()`
+- **Soumission**: Un producteur ajoute le job.
+  - Étapes
+  - **Mise en file**: Le job est enregistré en `pending` sous son identifiant.
+    - `enqueue()`
+  - → **Prise en charge**: puis
+- **Prise en charge**: Un worker le récupère.
+  - Étapes
+  - **Bail**: Le worker réclame un job pour l’un de ses traitements et renouvelle un bail pendant son exécution.
+    - `runQueueWorker()`
+  - → **Exécution**: puis
+- **Exécution**: Le traitement fait le travail.
+  - Étapes
+  - **Traitement**: Il reçoit l’entrée, un signal d’annulation et une `idempotencyKey`.
+    - `QueueHandler`
+  - → **Conservation**: puis
+- **Conservation**: Le résultat reste dans la file.
+  - Étapes
+  - **Fin**: Le job passe à `done`, ou à `failed` avec une erreur.
+  - **Lecture**: Les producteurs le relisent par son identifiant.
+    - `get()`
 
 ## Démarrer un worker
 
 Lancez le worker dans son propre processus. Il interroge la file et exécute un job à la fois jusqu’à l’annulation de son signal.
 
-```ts title="worker.mts"
+```ts title="worker.ts"
 import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -47,13 +54,13 @@ try {
 }
 ```
 
-`createSqliteTaskQueue()` crée le fichier et son répertoire parent. Un handler renvoie `{ value }`, avec `usage` et `error` en option ; une erreur levée ou un champ `error` fait passer le job en `failed`. Pour travailler en parallèle, lancez plusieurs workers, chacun avec son propre nom `worker`.
+`createSqliteTaskQueue()` crée le fichier et son répertoire parent. Un traitement renvoie `{ value }`, avec `usage` et `error` en option ; une erreur levée ou un champ `error` fait passer le job en `failed`. Pour travailler en parallèle, lancez plusieurs workers, chacun avec son propre nom `worker`.
 
 ## Soumettre du travail
 
 Un producteur ouvre la même file et y ajoute un job sous un identifiant stable.
 
-```ts title="submit.mts"
+```ts title="submit.ts"
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -98,11 +105,11 @@ queue.close();
 
 L’identifiant du job dérive de l’`executionId` de l’exécution et de la clé de la tâche : une [exécution durable](../durable-runs/) reprise attend donc le même job. Annuler le workflow annule le job. Pour un job arrêté par une limite d’usage, voir [Pauses sur quota](../quota-pauses/).
 
-## Exécuter un workflow avec checkpoint par job
+## Associer un checkpoint à chaque job
 
-`defineWorkflowJob()` transforme un handler en une [exécution durable](../durable-runs/) par job. L’entrée du job est `{ runId, input }`, ce que publient la [Planification cron](../cron-schedules/) et les [Webhooks](../webhooks/).
+`defineWorkflowJob()` transforme un traitement en une [exécution durable](../durable-runs/) par job. L’entrée du job est `{ runId, input }`, ce que publient la [Planification cron](../cron-schedules/) et les [Webhooks](../webhooks/).
 
-```ts title="fix-job.mts"
+```ts title="fix-job.ts"
 import {
   createLocalTransport,
   createWorkflowCheckpointStore,
@@ -125,17 +132,9 @@ export const fix = defineWorkflowJob({
 
 Enregistrez-le dans le worker avec `handlers: { fix }`. Pour chaque job, `workflow` construit le graphe à partir de `input` et le démarre sous le `runId` du job ; la même entrée doit construire le même graphe. Passez les autres options de démarrage, comme `concurrency`, `budget`, `onQuota` ou `timeoutMs`, dans `start`.
 
-Le `result.value` du job résume l’exécution :
+Le résultat enregistré permet au producteur de consulter le workflow terminé.
 
-| Champ           | Contenu                                                                       |
-| --------------- | ----------------------------------------------------------------------------- |
-| `runId`         | L’exécution du checkpoint.                                                    |
-| `version`       | `checkpoint.version` suivie d’une empreinte de l’entrée : `1#input:<digest>`. |
-| `executionId`   | L’exécution du workflow, nécessaire pour soumettre décisions et réponses.     |
-| `status`        | `done`, `paused`, `waiting-input`, `failed` ou `cancelled`.                   |
-| `tasks`         | La `key` et le `status` de chaque tâche.                                      |
-| `pauses`        | Les gates en attente : `key`, `id`, `kind`, `prompt`, `actors`.               |
-| `inputRequests` | Les questions en attente des [tâches interactives](../interactive-tasks/).    |
+Référence API : [QueueHandlerContext](../../reference/queuehandlercontext/).
 
 `result.usage` contient l’usage cumulé des tokens de l’exécution. Une exécution `failed` ou `cancelled` fait échouer le job ; une exécution en pause ou en attente le termine normalement.
 
@@ -162,29 +161,29 @@ queue.close();
 
 <!-- check:run -->
 
-Le script affiche `pending` jusqu’à ce qu’un worker exécute le job. Les tâches `done` proviennent du checkpoint. Les tâches échouées ou interrompues ne sont relancées que si le handler définit `checkpoint: { store, version: "1", resume: "retry-incomplete" }` : voir [Exécutions durables](../durable-runs/).
+Le script affiche `pending` jusqu’à ce qu’un worker exécute le job. Les tâches `done` proviennent du checkpoint. Les tâches échouées ou interrompues ne sont relancées que si le traitement définit `checkpoint: { store, version: "1", resume: "retry-incomplete" }` : voir [Exécutions durables](../durable-runs/).
 
 ### Approuver ou répondre à une exécution en pause
 
 `start` exclut `decisions` et `answers` : soumettez-les depuis votre application. Construisez le même workflow et appelez `workflow.start()` avec `checkpoint: { store, runId, version }` issus de la valeur du job, plus `decisions` ([approbations](../approvals/)) ou `answers` ([tâches interactives](../interactive-tasks/)).
 
-## Baux et reprises
+## Réservation des jobs et nouvelles tentatives
 
 Chaque prise en charge incrémente le `fence` du job : un worker qui a perdu son bail ne peut pas écraser le résultat de son successeur.
 
 | Événement                         | Ce qui se passe                                                                                            |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Le handler s’exécute              | Le bail dure `leaseMs` (30 s par défaut, de 30 ms à 5 min) et se renouvelle tous les tiers de cette durée. |
-| Le worker plante                  | Le bail expire ; un autre worker prend le job avec un nouveau fence.                                       |
-| Renouvellement échoué, job annulé | Le `signal` du handler est annulé et ce worker n’enregistre aucun résultat.                                |
-| Le handler échoue                 | Le job passe à `failed`. La file ne le relance pas : mettez en file un nouvel identifiant.                 |
+| Le traitement s’exécute           | Le bail dure `leaseMs` (30 s par défaut, de 30 ms à 5 min) et se renouvelle tous les tiers de cette durée. |
+| Le worker plante                  | Le bail expire ; un autre worker prend le job avec un nouveau jeton de propriété.                          |
+| Renouvellement échoué, job annulé | Le `signal` du traitement est annulé et ce worker n’enregistre aucun résultat.                             |
+| Le traitement échoue              | Le job passe à `failed`. La file ne le relance pas : mettez en file un nouvel identifiant.                 |
 | `deadline` dépassée               | Le job passe à `cancelled`. `deadline` est un horodatage en millisecondes epoch.                           |
 
-Transmettez `signal` à chaque opération lancée par le handler, pour que l’annulation et la perte du bail l’arrêtent.
+Transmettez `signal` à chaque opération lancée par le traitement, pour que l’annulation et la perte du bail l’arrêtent.
 
 ## Dédupliquer les effets avec les clés d’idempotence
 
-Un job peut s’exécuter deux fois : le successeur d’un worker planté relance le handler. Les handlers qui produisent des effets externes les dédupliquent avec `idempotencyKey`.
+Un job peut s’exécuter deux fois : le successeur d’un worker planté relance le traitement. Les traitements qui produisent des effets externes les dédupliquent avec `idempotencyKey`.
 
 ```ts
 import type { QueueHandler, WorkflowJson } from "@elie-laloum/outpost";
@@ -202,19 +201,15 @@ function deliveryHandler(
 }
 ```
 
-<!-- features -->
+Référence API : [QueueHandlerContext](../../reference/queuehandlercontext/) et [TaskContext](../../reference/taskcontext/).
 
-- `QueueHandlerContext.idempotencyKey`: L’identifiant du job, ou la clé d’origine quand une pause sur quota a republié le job.
-- `TaskContext.idempotencyKey`: Dérivée de l’exécution et de la clé de tâche, stable entre retries et rejeux du checkpoint.
-- **Reçu**: Enregistrez-le avec l’effet, dans la même transaction, sous une contrainte d’unicité.
-
-Une API distante dotée de clés d’idempotence persistantes convient aussi. Un reçu gardé en mémoire, ou écrit séparément de l’effet, est perdu lors d’un plantage. Dérivez une clé par effet quand un handler en produit plusieurs, et conservez les reçus aussi longtemps qu’un job peut être rejoué.
+Une API distante dotée de clés d’idempotence persistantes convient aussi. Un reçu gardé en mémoire, ou écrit séparément de l’effet, est perdu lors d’un plantage. Dérivez une clé par effet quand un traitement en produit plusieurs, et conservez les reçus aussi longtemps qu’un job peut être rejoué.
 
 ## Exposer une file via HTTP
 
-`serveTaskQueue()` place n’importe quelle file derrière un endpoint HTTP. `createHttpTaskQueue()` est un client de file pour les producteurs et workers situés sur d’autres machines.
+`serveTaskQueue()` place n’importe quelle file derrière un point d’accès HTTP. `createHttpTaskQueue()` est un client de file pour les producteurs et workers situés sur d’autres machines.
 
-```ts title="queue-server.mts"
+```ts title="queue-server.ts"
 import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
@@ -229,29 +224,34 @@ Sur une autre machine, `createHttpTaskQueue({ url, token })` renvoie une file à
 
 Pour faire tourner les jetons, donnez à `token` une fonction, lue à chaque requête. Celle du serveur renvoie les jetons acceptés ; une liste vide ou une erreur refuse toutes les requêtes.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Ajout**: Le serveur accepte les deux jetons.
-   - **Serveur**: Sa fonction renvoie l’ancien et le nouveau jeton.
-2. **Bascule**: Les clients passent au nouveau jeton.
-   - **Clients**: Leur fonction renvoie le nouveau jeton, y compris pour les heartbeats et les finalisations.
-3. **Retrait**: Le serveur abandonne l’ancien jeton.
-   - **Serveur**: Sa fonction ne renvoie plus que le nouveau jeton.
+- **Ajout**: Le serveur accepte les deux jetons.
+  - Étapes
+  - **Serveur**: Sa fonction renvoie l’ancien et le nouveau jeton.
+  - → **Bascule**: puis
+- **Bascule**: Les clients passent au nouveau jeton.
+  - Étapes
+  - **Clients**: Leur fonction renvoie le nouveau jeton, y compris pour les heartbeats et les finalisations.
+  - → **Retrait**: puis
+- **Retrait**: Le serveur abandonne l’ancien jeton.
+  - Étapes
+  - **Serveur**: Sa fonction ne renvoie plus que le nouveau jeton.
 
 ## Exploiter les workers
 
 <!-- features -->
 
-- **Déployer les handlers d’abord**: Démarrez les workers qui connaissent un handler avant que les producteurs mettent des jobs en file pour lui.
+- **Déployer les traitements d’abord**: Démarrez les workers qui connaissent un traitement avant que les producteurs mettent des jobs en file pour lui.
 - **Monter en charge**: Lancez d’autres workers sur la même file, avec un nom `worker` par processus.
 - **Arrêter proprement**: Arrêtez les producteurs, annulez le signal du worker, attendez `runQueueWorker()`, puis fermez la file.
 - **Récupérer après un plantage**: Vérifiez que l’ancien processus est arrêté, puis démarrez un remplaçant ; il prend le job à l’expiration du bail.
-- **Récupérer un job de workflow**: Libérez le checkpoint de l’exécution plantée comme dans [Exécutions durables](../durable-runs/), puis mettez en file un nouvel identifiant de job pour un handler `retry-incomplete`.
+- **Récupérer un job de workflow**: Libérez le checkpoint de l’exécution plantée comme dans [Exécutions durables](../durable-runs/), puis mettez en file un nouvel identifiant de job pour un traitement `retry-incomplete`.
 - **Surveiller**: Suivez l’âge des jobs, les jobs échoués, les erreurs de renouvellement de bail et l’espace de stockage.
 
-Un handler annulé pendant un arrêt laisse son job `active` ; un autre worker le prend à l’expiration du bail. Un job de workflow repris échoue tant que l’exécution plantée possède encore son checkpoint.
+Un traitement annulé pendant un arrêt laisse son job `active` ; un autre worker le prend à l’expiration du bail. Un job de workflow repris échoue tant que l’exécution plantée possède encore son checkpoint.
 
-## Choisir un backend
+## Choisir le stockage de la file
 
 | Backend      | Création                                                              | Usage                                               | Fermeture             |
 | ------------ | --------------------------------------------------------------------- | --------------------------------------------------- | --------------------- |
@@ -259,13 +259,13 @@ Un handler annulé pendant un arrêt laisse son job `active` ; un autre worker l
 | HTTP         | `createHttpTaskQueue({ url, token })`                                 | Les clients d’une file servie par `serveTaskQueue`. | Rien à fermer         |
 | Redis/BullMQ | `createBullMQTaskQueue()` depuis `@elie-laloum/outpost/queues/bullmq` | Des workers répartis sur plusieurs machines.        | `await queue.close()` |
 
-Le backend BullMQ a sa propre configuration : voir [Redis et BullMQ](../redis-workers/).
+Le système de stockage BullMQ a sa propre configuration : voir [Redis et BullMQ](../redis-workers/).
 
 ## Limites
 
-- Les entrées et les valeurs sont du JSON, jusqu’à 256 Kio chacune. Les identifiants et noms de handlers font au plus 512 caractères, un `runId` au plus 256.
-- Un worker enregistre au plus 100 handlers.
-- Un job échoué garde son résultat. Un `defineQueuedTask()` relancé ou repris retrouve le même job échoué : relancez plutôt dans le handler.
+- Les entrées et les valeurs sont du JSON, jusqu’à 256 Kio chacune. Les identifiants et noms de traitements font au plus 512 caractères, un `runId` au plus 256.
+- Un worker enregistre au plus 100 traitements.
+- Un job échoué garde son résultat. Un `defineQueuedTask()` relancé ou repris retrouve le même job échoué : relancez plutôt dans le traitement.
 - Un seul job à la fois par `runId` : un second job pour une exécution encore en cours échoue.
 - La file bloque les écritures périmées mais ne garantit pas qu’un effet externe n’ait lieu qu’une fois.
 - Un jeton HTTP autorise toutes les opérations de la file. Servez-la derrière TLS sur un réseau privé, et gardez les jetons hors des URL et des logs.

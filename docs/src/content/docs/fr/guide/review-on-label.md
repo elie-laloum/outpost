@@ -1,88 +1,90 @@
 ---
-title: "Relire une pull request à la demande"
-description: "Lancer une revue par un agent quand un label est ajouté à une pull request, puis publier son verdict typé depuis votre propre code."
+title: "Examiner une pull request à la demande"
+description: "Utilisez un webhook vérifié pour mettre en file une revue par un agent lorsqu’un label est ajouté."
 ---
 
-Un mainteneur ajoute le label `outpost:review` à une pull request GitHub. Un serveur de webhooks met la demande en file ; un worker fait relire le commit de tête par un agent, dans sa propre sandbox, et renvoie `{ approved, findings }` au code qui le publie.
+Enregistrez le script à côté de la configuration de la page [Installation](../setup/) et lancez-le avec Node.js. Il reçoit les événements de label vérifiés et publie des jobs de revue ; le worker exécute l’agent séparément.
 
-## Ce que vous utilisez
+## Ce que montre l’exemple
 
 <!-- features -->
 
 - [Webhooks](../webhooks/): Vérifier la livraison et transformer l’événement de label en job.
-  - `serveTriggers()`
-  - `createGithubWebhook()`
-  - `labelAdded()`
 - [Files de jobs et workers](../job-queues/): Transmettre le job du serveur à un processus worker.
-  - `createSqliteTaskQueue()`
-  - `runQueueWorker()`
-  - `defineWorkflowJob()`
 - [Exécutions durables](../durable-runs/): Enregistrer la sortie de chaque tâche sous le `runId` du job.
-  - `createWorkflowCheckpointStore()`
 - [Tâches et dépendances](../task-dependencies/): Récupérer, relire, puis publier.
-  - `defineTask()`
-  - `defineIsolatedTask()`
 - [Réponses typées](../typed-responses/): Valider le verdict de l’agent.
-  - `defineJsonResponse()`
 - [Dépôt et branche](../repository-and-branch/): Faire partir la branche de revue du commit de tête de la pull request.
-  - `named`
-  - `from`
 
-## Le code
+## Écrire le script
 
-Lancez les deux fichiers depuis le même répertoire, à côté du `outpost.config.mts` d’[Installation](../setup/). Son `repository` est un clone local du dépôt GitHub relu.
+Enregistrez les fichiers présentés dans les onglets dans le même répertoire, à côté du `outpost.config.ts` de la page [Installation](../setup/). Lancez le serveur HTTP avec `server.ts` et le worker avec `worker.ts`. Le `repository` de la configuration est un clone local du dépôt GitHub relu.
 
-```ts title="server.mts"
-import {
-  createGithubWebhook,
-  createSqliteTaskQueue,
-  labelAdded,
-  serveTriggers,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
+
+```ts title="webhook-source.ts"
+import { createGithubWebhook } from "@elie-laloum/outpost";
+
+export const secret = process.env.GITHUB_WEBHOOK_SECRET;
+if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
+export const reviewers = new Set(["github:octocat"]);
+export const source = createGithubWebhook({ secret });
+```
+
+```ts title="payload-field.ts"
 import type { WorkflowJson } from "@elie-laloum/outpost";
 
-const secret = process.env.GITHUB_WEBHOOK_SECRET;
-if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
-const reviewers = new Set(["github:octocat"]);
-
-// Lit une valeur imbriquée du payload du webhook.
-function field(value: WorkflowJson | undefined, ...path: string[]) {
+export function field(value: WorkflowJson | undefined, ...path: string[]) {
   for (const key of path) {
     if (typeof value !== "object" || value === null) return undefined;
     value = Object.entries(value).find(([name]) => name === key)?.[1];
   }
   return value;
 }
+```
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const server = await serveTriggers({
+```ts title="pull-commits.ts"
+import type { WorkflowJson } from "@elie-laloum/outpost";
+import { field } from "./payload-field.ts";
+
+export function commits(payload: WorkflowJson) {
+  const base = field(payload, "pull_request", "base", "sha");
+  const head = field(payload, "pull_request", "head", "sha");
+  if (typeof base !== "string" || typeof head !== "string") return undefined;
+  return { base, head };
+}
+```
+
+```ts title="review-trigger.ts"
+import type { TriggerRoute } from "@elie-laloum/outpost";
+import { labelAdded } from "@elie-laloum/outpost";
+import { reviewers } from "./webhook-source.ts";
+import { commits } from "./pull-commits.ts";
+
+export const on: TriggerRoute["on"] = (event) => {
+  const pull = labelAdded(event, "outpost:review");
+  if (pull?.target !== "pull-request") return undefined;
+  if (!event.actor || !reviewers.has(event.actor)) return undefined;
+  const change = commits(event.payload);
+  if (!change) return undefined;
+  return {
+    handler: "review",
+    runId: `review:${pull.repository}#${pull.number}@${change.head}`,
+    input: { repository: pull.repository, number: pull.number, ...change },
+  };
+};
+```
+
+```ts title="server.ts"
+import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
+import { source } from "./webhook-source.ts";
+import { on } from "./review-trigger.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const server = await serveTriggers({
   queue,
   port: 8787,
-  routes: [
-    {
-      path: "/github",
-      source: createGithubWebhook({ secret }),
-      on(event) {
-        const pull = labelAdded(event, "outpost:review");
-        if (pull?.target !== "pull-request") return undefined;
-        if (!event.actor || !reviewers.has(event.actor)) return undefined;
-        const base = field(event.payload, "pull_request", "base", "sha");
-        const head = field(event.payload, "pull_request", "head", "sha");
-        if (typeof base !== "string" || typeof head !== "string")
-          return undefined;
-        return {
-          handler: "review",
-          runId: `review:${pull.repository}#${pull.number}@${head}`,
-          input: {
-            repository: pull.repository,
-            number: pull.number,
-            base,
-            head,
-          },
-        };
-      },
-    },
-  ],
+  routes: [{ path: "/github", source, on }],
   onError: (error, failure) => console.error(failure, error),
 });
 console.log(`Listening on ${server.url}/github`);
@@ -92,30 +94,25 @@ process.once("SIGINT", async () => {
 });
 ```
 
-```ts title="worker.mts"
-import {
-  createLocalTransport,
-  createSqliteTaskQueue,
-  createWorkflowCheckpointStore,
-  defineIsolatedTask,
-  defineJsonResponse,
-  defineTask,
-  defineWorkflow,
-  defineWorkflowJob,
-  runQueueWorker,
-} from "@elie-laloum/outpost";
-import type { WorkflowJson } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+Validez les données du job et le verdict, puis fournissez les opérations GitHub de votre application.
 
-type PullRequest = {
+<!-- tabs -->
+
+```ts title="review.types.ts"
+export type PullRequest = {
   repository: string;
   number: number;
   base: string;
   head: string;
 };
-type Verdict = { approved: boolean; findings: string[] };
+export type Verdict = { approved: boolean; findings: string[] };
+```
 
-const verdict = defineJsonResponse({
+```ts title="verdict.ts"
+import { defineJsonResponse } from "@elie-laloum/outpost";
+import type { Verdict } from "./review.types.ts";
+
+export const verdict = defineJsonResponse({
   tag: "verdict",
   repairs: 1,
   schema(value): Verdict {
@@ -130,8 +127,13 @@ const verdict = defineJsonResponse({
     return { approved: value.approved, findings: value.findings };
   },
 });
+```
 
-function readPullRequest(input: WorkflowJson): PullRequest {
+```ts title="read-pull.ts"
+import type { WorkflowJson } from "@elie-laloum/outpost";
+import type { PullRequest } from "./review.types.ts";
+
+export function readPullRequest(input: WorkflowJson): PullRequest {
   if (typeof input !== "object" || input === null || Array.isArray(input))
     throw new Error("Expected a pull request");
   const { repository, number, base, head } = input as {
@@ -146,74 +148,16 @@ function readPullRequest(input: WorkflowJson): PullRequest {
     throw new Error("Expected { repository, number, base, head }");
   return { repository, number, base, head };
 }
+```
 
-function reviewWorkflow(pull: PullRequest) {
-  const fetch = defineTask({ key: "fetch", perform: () => fetchCommits(pull) });
-  const agent = defineIsolatedTask({
-    key: "review-agent",
-    request: () => ({
-      repository,
-      sandboxProvider,
-      agent: coder,
-      branch: {
-        mode: "named",
-        name: `outpost/review-${pull.number}-${pull.head.slice(0, 12)}`,
-        from: pull.head,
-      },
-      response: verdict,
-      brief: {
-        text: [
-          `Review pull request #${pull.number}: git diff ${pull.base}...HEAD.`,
-          "Do not edit files. Report each problem as path:line: message.",
-          'End with <verdict>{"approved": true, "findings": []}</verdict>.',
-        ].join("\n"),
-      },
-    }),
-  });
-  const review = defineTask({
-    key: "review",
-    after: [fetch],
-    perform: async (context) => (await agent.perform(context)).value,
-  });
-  const post = defineTask({
-    key: "post",
-    after: [review],
-    perform: (context) =>
-      postVerdict(pull, context.value(review), context.idempotencyKey),
-  });
-  return defineWorkflow("review-pull-request", [fetch, review, post]);
-}
+```ts title="github-effects.ts"
+import type { PullRequest, Verdict } from "./review.types.ts";
+import { repository } from "./outpost.config.ts";
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const store = createWorkflowCheckpointStore({
-  transporter: createLocalTransport({ directory: ".outpost/storage" }),
-});
-const stop = new AbortController();
-process.once("SIGINT", () => stop.abort());
-try {
-  await runQueueWorker({
-    queue,
-    worker: "reviewer-1",
-    signal: stop.signal,
-    handlers: {
-      review: defineWorkflowJob({
-        checkpoint: { store, version: "1" },
-        workflow: (input) => reviewWorkflow(readPullRequest(input)),
-      }),
-    },
-  });
-} finally {
-  queue.close();
-}
-
-// Votre code : rendre pull.base et pull.head disponibles dans le clone local,
-// par exemple avec `git fetch origin pull/<number>/head`.
-async function fetchCommits(pull: PullRequest): Promise<void> {
+export async function fetchCommits(pull: PullRequest): Promise<void> {
   throw new Error(`Fetch ${pull.base} and ${pull.head} into ${repository}`);
 }
-
-// Votre code : publier le verdict sur GitHub, dédupliqué par idempotencyKey.
-async function postVerdict(
+export async function postVerdict(
   pull: PullRequest,
   result: Verdict,
   idempotencyKey: string,
@@ -222,14 +166,162 @@ async function postVerdict(
 }
 ```
 
+```ts title="pull-brief.ts"
+import type { PullRequest } from "./review.types.ts";
+
+export function pullBrief(pull: PullRequest) {
+  return {
+    text: [
+      `Review pull request #${pull.number}: git diff ${pull.base}...HEAD.`,
+      "Do not edit files. Report each problem as path:line: message.",
+      'End with <verdict>{"approved": true, "findings": []}</verdict>.',
+    ].join("\n"),
+  };
+}
+```
+
+Lancez la revue sur le commit demandé et publiez le verdict avec des tâches dépendantes.
+
+<!-- tabs -->
+
+```ts title="pull-request.ts"
+import type { PullRequest } from "./review.types.ts";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { verdict } from "./verdict.ts";
+import { pullBrief } from "./pull-brief.ts";
+
+export function reviewRequest(pull: PullRequest) {
+  return {
+    repository,
+    sandboxProvider,
+    agent: coder,
+    branch: {
+      mode: "named",
+      name: `outpost/review-${pull.number}-${pull.head.slice(0, 12)}`,
+      from: pull.head,
+    } as const,
+    response: verdict,
+    brief: pullBrief(pull),
+  };
+}
+```
+
+```ts title="pull-agent.ts"
+import type { PullRequest } from "./review.types.ts";
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { reviewRequest } from "./pull-request.ts";
+
+export function reviewAgent(pull: PullRequest) {
+  return defineIsolatedTask({
+    key: "review-agent",
+    request: () => reviewRequest(pull),
+  });
+}
+```
+
+```ts title="pull-review.ts"
+import type { PullRequest } from "./review.types.ts";
+import type { Task } from "@elie-laloum/outpost";
+import { reviewAgent } from "./pull-agent.ts";
+import { defineTask } from "@elie-laloum/outpost";
+
+export function reviewTask(pull: PullRequest, fetch: Task<void>) {
+  const agent = reviewAgent(pull);
+  return defineTask({
+    key: "review",
+    after: [fetch],
+    perform: async (context) => (await agent.perform(context)).value,
+  });
+}
+```
+
+```ts title="post-review.ts"
+import type { PullRequest } from "./review.types.ts";
+import { reviewTask } from "./pull-review.ts";
+import { defineTask } from "@elie-laloum/outpost";
+import { postVerdict } from "./github-effects.ts";
+
+export function postTask(
+  pull: PullRequest,
+  review: ReturnType<typeof reviewTask>,
+) {
+  return defineTask({
+    key: "post",
+    after: [review],
+    perform: (context) =>
+      postVerdict(pull, context.value(review), context.idempotencyKey),
+  });
+}
+```
+
+```ts title="review-workflow.ts"
+import type { PullRequest } from "./review.types.ts";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { fetchCommits } from "./github-effects.ts";
+import { reviewTask } from "./pull-review.ts";
+import { postTask } from "./post-review.ts";
+
+export function reviewWorkflow(pull: PullRequest) {
+  const fetch = defineTask({ key: "fetch", perform: () => fetchCommits(pull) });
+  const review = reviewTask(pull, fetch);
+  const post = postTask(pull, review);
+  return defineWorkflow("review-pull-request", [fetch, review, post]);
+}
+```
+
+Enregistrez l’état du workflow et lancez le worker.
+
+<!-- tabs -->
+
+```ts title="review-job.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+  defineWorkflowJob,
+} from "@elie-laloum/outpost";
+import { reviewWorkflow } from "./review-workflow.ts";
+import { readPullRequest } from "./read-pull.ts";
+
+export const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
+});
+export const job = defineWorkflowJob({
+  checkpoint: { store, version: "1" },
+  workflow: (input) => reviewWorkflow(readPullRequest(input)),
+});
+```
+
+```ts title="worker.ts"
+import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import { job } from "./review-job.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const stop = new AbortController();
+process.once("SIGINT", () => stop.abort());
+try {
+  await runQueueWorker({
+    queue,
+    worker: "reviewer-1",
+    signal: stop.signal,
+    handlers: { review: job },
+  });
+} finally {
+  queue.close();
+}
+```
+
+### Exécuter le script
+
+Lancez le serveur HTTP et le worker dans deux terminaux distincts. Fournissez au serveur le secret du webhook configuré dans GitHub ; le worker traite les jobs de revue que le serveur publie.
+
 ```sh
-GITHUB_WEBHOOK_SECRET=… node server.mts
-node worker.mts
+GITHUB_WEBHOOK_SECRET=… node server.ts
+node worker.ts
 ```
 
 Pointez le webhook du dépôt vers le chemin `/github` du serveur, derrière un proxy HTTPS, avec le même secret et l’événement « Pull requests ».
 
-## Comment ça marche
+## Comprendre les étapes
 
 Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
@@ -265,7 +357,7 @@ Le `runId` nomme le commit de tête. Rajouter le label sur le même commit resta
 
 `review` ne renvoie que `.value` : les checkpoints contiennent du JSON, pas les méthodes d’un résultat de dispatch ([D’une tâche à un workflow](../first-workflow/)).
 
-## L’adapter
+## Adapter l’exemple
 
 ### Merge requests GitLab
 
@@ -277,11 +369,11 @@ Ajoutez une route `/slack` avec `createSlackSource({ signingSecret })` et `comma
 
 ### Une file Redis
 
-Remplacez `createSqliteTaskQueue()` dans les deux fichiers par [`createBullMQTaskQueue()`](../redis-workers/) pour exécuter le serveur et les workers sur des machines distinctes. Plusieurs machines de workers demandent aussi un stockage de checkpoints partagé ([S3 et R2](../object-storage/)).
+Remplacez `createSqliteTaskQueue()` dans la configuration de la file par [`createBullMQTaskQueue()`](../redis-workers/) pour exécuter le serveur et les workers sur des machines distinctes. Plusieurs machines de workers demandent aussi un stockage de checkpoints partagé ([S3 et R2](../object-storage/)).
 
 ### Approuver avant de publier
 
-Insérez une [gate d’approbation](../approvals/) entre `review` et `post`. Le job se termine alors en `paused`, avec la gate en attente dans sa valeur ; soumettez la décision à la même exécution comme dans [Files de jobs et workers](../job-queues/).
+Insérez une [étape d’approbation](../approvals/) entre `review` et `post`. Le job se termine alors en `paused`, avec l’étape d’approbation en attente dans sa valeur ; soumettez la décision à la même exécution comme dans [Files de jobs et workers](../job-queues/).
 
 ```ts
 import { defineApprovalTask, defineTask } from "@elie-laloum/outpost";

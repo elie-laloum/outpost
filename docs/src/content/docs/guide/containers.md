@@ -1,6 +1,6 @@
 ---
-title: "Docker and Podman"
-description: "Run each agent task in a local Docker or Podman container that sees only your checkout and its Git metadata."
+title: "Use Docker or Podman"
+description: "Configure local containers, repository mounts and the user that runs agent commands."
 ---
 
 ## Prerequisites
@@ -8,10 +8,10 @@ description: "Run each agent task in a local Docker or Podman container that see
 <!-- features -->
 
 - **Docker or Podman**: Installed and running. On macOS, start a Podman machine with `podman machine start`.
-- [An agent image](../agent-images/): Built by `outpost init` with the agent CLIs your tasks use.
+- [An agent image](../agent-images/): Contains the agent CLIs your tasks will use.
 - **A Git repository**: The checkout the container mounts.
 
-Check the engine and the image before the first task:
+Before running a task, check that the container engine responds and the agent image is available:
 
 ```sh
 npx outpost doctor --sandbox-provider docker --image outpost:dev
@@ -43,23 +43,7 @@ export const sandboxProvider = createPodmanSandboxProvider({
 
 Each allocation starts a fresh container from the image. Closing the sandbox removes it.
 
-| Option           | Effect                                                                                          |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| `image`          | Image to start. Default: `outpost:<repository folder name>`.                                    |
-| `cpus`           | CPU limit, a positive number.                                                                   |
-| `memoryMb`       | Memory limit in megabytes, at least 64.                                                         |
-| `variables`      | Variables set in every command ([Environment variables](../environment-variables/)).            |
-| `volumes`        | Extra host paths to mount, optionally read-only.                                                |
-| `caches`         | Named volumes that keep package downloads ([dependency caches](../environment-setup/)).         |
-| `user`           | UID and GID of the container user. Default: yours on the host, 1000:1000 on Windows.            |
-| `groups`         | Supplementary group names or IDs.                                                               |
-| `devices`        | Host devices exposed to the container.                                                          |
-| `networks`       | Engine networks to join. Not a domain allowlist.                                                |
-| `egress`         | `{ mode: "deny-all" }` runs without network ([Network restrictions](../network-restrictions/)). |
-| `repositoryMode` | `"mounted"` (default) or `"isolated"` ([Private Git](../private-git/)).                         |
-| `retain`         | Bytes of output kept per stream. Default: 65,536.                                               |
-| `userns`         | Podman user namespace: `"keep-id"` or `false`. See [Podman](#podman).                           |
-| `label`          | SELinux relabeling of mounts on Linux: `"z"` (default), `"Z"` or `false`.                       |
+API reference: [ContainerOptions](../../reference/containeroptions/), [Volume](../../reference/volume/) and [DependencyCache](../../reference/dependencycache/).
 
 ## Repository access
 
@@ -88,7 +72,9 @@ Every mount, device and network you add widens what the agent can reach. To keep
 
 Rootless Podman maps your host user into the container with `--userns keep-id`, so files the agent writes stay owned by you. Set `userns: false` to leave the mapping to your Podman configuration. When Podman runs as root, set `userns: "keep-id"` to request it.
 
-On Linux, both engines relabel mounts with `z` (shared SELinux label) by default. Use `label: "Z"` for a private label, or `label: false` to mount without relabeling. Match these settings to the host instead of loosening repository permissions.
+Choose SELinux labels that match your host instead of loosening repository permissions.
+
+API reference: [ContainerOptions](../../reference/containeroptions/).
 
 `outpost init --sandbox-provider podman` writes a `Containerfile` instead of a `Dockerfile`.
 

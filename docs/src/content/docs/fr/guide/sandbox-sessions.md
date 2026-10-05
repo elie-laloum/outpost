@@ -1,15 +1,15 @@
 ---
-title: "Sessions de sandbox"
-description: "Garder une sandbox ouverte pour enchaîner tours d’agent, commandes de test et terminal interactif dans le même environnement."
+title: "Réutiliser une sandbox"
+description: "Gardez un environnement ouvert pour les échanges avec l’agent, les commandes et les tests sur les mêmes fichiers."
 ---
 
 ## Ouvrir une sandbox
 
-`createSandbox()` alloue une sandbox et la garde ouverte jusqu’à ce que vous la fermiez. Les tours d’agent et les commandes partagent alors ses fichiers et ses dépendances installées. `await using` la ferme à la fin du bloc.
+Ouvrez une sandbox avec `createSandbox()` lorsque plusieurs opérations doivent partager les mêmes fichiers et dépendances. `await using` la ferme à la sortie du bloc, y compris si une opération lève une erreur.
 
-```ts title="session.mts"
+```ts title="session.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -36,9 +36,9 @@ Un `agent` passé à `sandbox.dispatch()` remplace celui donné à `createSandbo
 
 `sandbox.command()` lance un exécutable avec un tableau d’arguments. Aucun shell ne les interprète : `*`, `|` et `$HOME` arrivent au programme tels quels. Appelez vous-même un shell quand il vous en faut un.
 
-```ts title="command.mts"
+```ts title="command.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
 const result = await sandbox.command({
@@ -51,19 +51,7 @@ console.log(result.stdout.trim()); // v24.15.0
 
 `sandbox.root` est le chemin du dépôt dans la sandbox et le répertoire de travail par défaut.
 
-| Option       | Effet                                                                                                      |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| `executable` | Programme à lancer, obligatoire.                                                                           |
-| `arguments`  | Arguments transmis tels quels, sans expansion shell.                                                       |
-| `directory`  | Répertoire de travail dans la sandbox. Par défaut, `sandbox.root`.                                         |
-| `variables`  | Valeurs d’environnement propres à cette commande ([Variables d’environnement](../environment-variables/)). |
-| `stdin`      | Texte écrit sur l’entrée standard, qui se ferme ensuite.                                                   |
-| `input`      | Flux `Readable` écrit après `stdin` ; l’entrée standard reste ouverte jusqu’à sa fin.                      |
-| `observe`    | Callback qui reçoit chaque fragment de `stdout` ou `stderr` dès son arrivée.                               |
-| `retain`     | Nombre de derniers caractères conservés par flux dans le résultat. Par défaut, 65 536.                     |
-| `deadlineMs` | Durée maximale avant qu’Outpost arrête le processus. Par défaut, 10 minutes.                               |
-| `signal`     | `AbortSignal` qui annule la commande.                                                                      |
-| `elevated`   | Exécute en root sur Docker, Podman, Vercel et Daytona. L’hôte l’ignore ; Firecracker le rejette.           |
+Référence API : [Command](../../reference/command/).
 
 ## Vérifier le résultat
 
@@ -107,7 +95,7 @@ Une exception levée dans `observe` arrête la commande, qui rejette alors avec 
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -122,7 +110,7 @@ console.log(session.status, session.commits);
 
 Lancez-le depuis un vrai terminal. `continuation` rouvre une conversation capturée. La fonction [`attach()`](../../reference/attach/) de premier niveau ouvre et ferme sa propre sandbox, et applique la politique de branche quand la session sort avec le statut 0.
 
-| Provider             | `attach()`     |
+| Fournisseur          | `attach()`     |
 | -------------------- | -------------- |
 | Docker, Podman, hôte | Pris en charge |
 | Daytona              | Pris en charge |
@@ -136,7 +124,7 @@ Une sandbox que vous créez ne fusionne jamais sa branche d’elle-même. Avec `
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
   repository,
@@ -156,6 +144,6 @@ Avec les autres modes de branche, `integrate()` ne fait rien. Un conflit de fusi
 ## Limites
 
 - Une sandbox exécute une opération à la fois : un second appel lancé pendant qu’une opération tourne est rejeté, pas mis en file. Utilisez des sandboxes distinctes pour le travail parallèle.
-- La sortie est capturée sous forme de texte. Déplacez les fichiers binaires avec les méthodes de transfert du provider ([Sandboxes cloud](../cloud-sandboxes/)).
+- La sortie est capturée sous forme de texte. Déplacez les fichiers binaires avec les méthodes de transfert du fournisseur ([Sandboxes cloud](../cloud-sandboxes/)).
 
 API : [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).

@@ -1,19 +1,15 @@
 ---
-title: "GitHub Copilot CLI"
-description: "Run the copilot CLI on your Copilot plan, with a stored login or a fine-grained GitHub token."
+title: "Configure Copilot CLI"
+description: "Run GitHub Copilot CLI using your Copilot account or a GitHub token."
 ---
 
 ## Install
 
-Generated [agent images](../agent-images/) install the `copilot` CLI (`@github/copilot`) at the version pinned in [`agentVersions.copilot`](../../reference/agentversions/). To generate a Copilot project that reads a token from `.env`:
-
-```sh
-npx outpost init --yes --agent copilot --authentication account-token --image outpost:dev
-```
+The [agent image](../agent-images/) includes `copilot` from the `@github/copilot` package, at the version pinned by [`agentVersions.copilot`](../../reference/agentversions/). Configure account access in your TypeScript harness, as shown below.
 
 Your GitHub account needs Copilot access; see [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart).
 
-## Account access
+## Sign in with your account
 
 Copilot always runs on your Copilot plan. Pass a fine-grained GitHub token with the **Copilot Requests** permission:
 
@@ -36,34 +32,27 @@ Copilot stores its login in the system keychain by default, which Outpost never 
 
 Other credential forms and where credentials go: [Authentication](../authentication/).
 
-## API access
+## Use an API key
 
 Copilot has no API-key mode: `authentication: "usage"` is rejected when the agent is composed. Requests count against your Copilot plan.
 
-## What it supports
+## Available features
 
 <!-- features -->
 
 - [Conversations](../conversations/): Captured as a session bundle, then resumed warm or cold with `--resume`.
-  - `conversations`
-  - `createCopilotConversations()`
 - [Typed responses](../typed-responses/): An invalid answer is repaired by resuming the same conversation.
-  - `response`
 - [Steering](../steering/): Outpost stops the process and resumes the session with your text.
-  - `resumed`
 - [MCP servers](../mcp-servers/): Passed on each run with `--additional-mcp-config`.
-  - `mcpServers`
 - [Usage reporting](../budgets/): Token counts read after the run from `session-state/<id>/events.jsonl`.
-  - `usage.complete`
 - [Quota pauses](../quota-pauses/): Copilot rate-limit and credit messages fail with code `quota`.
-  - `onQuota`
 
-`conversations` accepts a `"copilot"` store, such as `createTransportConversations(createCopilotConversations(), …)`. [Choose an agent](../choose-an-agent/) compares these capabilities across agents.
+API reference: [CopilotSettings](../../reference/copilotsettings/) and [createTransportConversations](../../reference/createtransportconversations/).
 
 ## Limits
 
 - **No automated fork**: Forking a Copilot conversation is rejected; resume it instead.
-- **Model settings**: `model` accepts a name only. `reasoning` and `maxOutputTokens` are rejected.
+- For supported model settings, see [CopilotSettings](../../reference/copilotsettings/).
 - **Classic tokens**: `ghp_` personal access tokens are rejected.
 - **Incomplete usage**: A missing or unreadable session file sets `usage.complete` to `false`, with a warning.
 - **Late counts**: Token totals can arrive after the model has spent them. Pair a [budget](../budgets/) with a timeout.

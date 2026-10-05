@@ -1,52 +1,54 @@
 ---
-title: "Planification cron"
-description: "Publier un job de workflow à chaque créneau cron, dans votre fuseau horaire, sans doublon entre redémarrages et réplicas."
+title: "Planifier des exécutions régulières"
+description: "Publiez des jobs de workflow selon une expression cron et un fuseau horaire explicite."
 ---
 
 ## Publier un job selon une planification
 
-`createCronSchedule()` lit une expression cron dans un fuseau horaire IANA. `runSchedules()` publie un job de file par créneau jusqu’à l’interruption de son signal.
+Créez une planification avec `createCronSchedule()`, une expression cron et un fuseau horaire. `runSchedules()` publie un job dans la file à chaque horaire prévu, jusqu’à l’annulation de son signal. Un worker exécute le job séparément.
 
-```ts title="scheduler.mts"
-import {
-  createCronSchedule,
-  createSqliteTaskQueue,
-  runSchedules,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const timeZone = "Europe/Paris";
-// en-CA formate la date locale en AAAA-MM-JJ.
-const day = (slot: Date) => slot.toLocaleDateString("en-CA", { timeZone });
+```ts title="audit-schedule.ts"
+import { createCronSchedule } from "@elie-laloum/outpost";
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const stop = new AbortController();
+export const timeZone = "Europe/Paris";
+export const day = (slot: Date) =>
+  slot.toLocaleDateString("en-CA", { timeZone });
+export const schedules = [
+  {
+    name: "nightly-audit",
+    cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
+    handler: "audit",
+    runId: (slot: Date) => `audit-${day(slot)}`,
+    input: (slot: Date) => ({ day: day(slot) }),
+  },
+];
+```
+
+```ts title="scheduler.ts"
+import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import { schedules } from "./audit-schedule.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
-  await runSchedules({
-    queue,
-    signal: stop.signal,
-    schedules: [
-      {
-        name: "nightly-audit",
-        cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
-        handler: "audit",
-        runId: (slot) => `audit-${day(slot)}`,
-        input: (slot) => ({ day: day(slot) }),
-      },
-    ],
-  });
+  await runSchedules({ queue, signal: stop.signal, schedules });
 } finally {
   queue.close();
 }
 ```
 
+### Exécuter le script
+
+À 02:00 heure de Paris, du lundi au vendredi, le planificateur publie un job pour le traitement `audit` avec un `runId` comme `audit-2026-09-30`. Ctrl+C interrompt le signal et `runSchedules()` se résout.
+
 ```sh
-node scheduler.mts
+node scheduler.ts
 ```
 
-À 02:00 heure de Paris, du lundi au vendredi, le planificateur publie un job pour le handler `audit` avec un `runId` comme `audit-2026-09-30`. Ctrl+C interrompt le signal et `runSchedules()` se résout.
-
-Sans `timeZone`, l’expression est évaluée en UTC. `runId` vaut par défaut `<name>:<heure ISO du créneau>` et `input` vaut `null`.
+Référence API : [CronOptions](../../reference/cronoptions/).
 
 ## Exécuter les jobs publiés
 
@@ -74,7 +76,7 @@ Cette union ne s’applique que si aucun des deux champs de jour ne commence par
 
 Utilisez `slot.toLocaleDateString("en-CA", { timeZone })` avec le fuseau horaire de la planification, comme dans le premier extrait, pour obtenir la date locale au format `AAAA-MM-JJ`.
 
-## Heure d’été
+## Changements d’heure
 
 Les créneaux sont des heures murales dans le fuseau horaire de la planification.
 

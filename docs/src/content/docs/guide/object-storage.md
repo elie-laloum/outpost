@@ -1,11 +1,11 @@
 ---
-title: "S3 and R2"
-description: "Keep checkpoints, artifacts, journals and conversations in an S3 bucket or Cloudflare R2, so any machine can resume or read them."
+title: "Store data in S3 or R2"
+description: "Connect an object store to share artifacts, checkpoints and journals between machines."
 ---
 
 ## Create the transport
 
-Install the AWS SDK, an optional dependency used only by this transport.
+Install the AWS SDK alongside Outpost to use an S3-compatible object store. This dependency is optional and is loaded through the S3 transport entry point.
 
 ```sh
 npm install @aws-sdk/client-s3
@@ -26,12 +26,7 @@ const checkpoints = createWorkflowCheckpointStore({ transporter });
 
 `transporter` replaces `createLocalTransport()` wherever a [transport](../storage/) is accepted. Every object lands under `outpost/` in the bucket.
 
-| Option       | Default         | Meaning                                                                                           |
-| ------------ | --------------- | ------------------------------------------------------------------------------------------------- |
-| `client`     | Required        | Your `S3Client`, with region, credentials and endpoint.                                           |
-| `bucket`     | Required        | An existing private bucket.                                                                       |
-| `prefix`     | Bucket root     | Key prefix for Outpost objects. Keep unrelated objects outside it.                                |
-| `deleteMode` | `"conditional"` | `"conditional"` deletes with a conditional DELETE; `"tombstone"` is for [R2](#use-cloudflare-r2). |
+API reference: [S3TransportOptions](../../reference/s3transportoptions/).
 
 ## Prepare the bucket
 
@@ -47,23 +42,29 @@ Create the bucket first: Outpost does not create it. The endpoint must support t
 
 One transport serves every store. Pass it where you want each kind of object kept.
 
-```ts
+<!-- tabs -->
+
+```ts title="remote-stores.ts"
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 import { S3Client } from "@aws-sdk/client-s3";
 import {
-  createArtifactStore,
   createWorkflowCheckpointStore,
-  dispatch,
+  createArtifactStore,
 } from "@elie-laloum/outpost";
-import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const transporter = createS3Transport({
+export const transporter = createS3Transport({
   client: new S3Client({ region: "eu-west-1" }),
   bucket: "my-private-outpost",
   prefix: "outpost/",
 });
 export const checkpoints = createWorkflowCheckpointStore({ transporter });
 export const artifacts = createArtifactStore({ transporter });
+```
+
+```ts title="save.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { transporter } from "./remote-stores.ts";
 
 await dispatch({
   repository,
@@ -79,17 +80,11 @@ await dispatch({
 <!-- features -->
 
 - [Checkpoints](../durable-runs/): Resume a workflow run from another machine.
-  - `createWorkflowCheckpointStore()`
 - [Artifacts](../artifacts/): Share task outputs by reference.
-  - `createArtifactStore()`
 - [Journals](../journals/): Keep the dispatch journal.
-  - `logging.transporter`
 - [Conversations](../conversations/): Archive captures to resume them anywhere.
-  - `createTransportConversations()`
 - [Recovery archives](../recovery/): Back up remote changes before applying them.
-  - `recoveryTransport`
 - [Sandbox activity](../retention/): Record which sandboxes are in use.
-  - `activityTransport`
 
 ## Keep credentials on the host
 

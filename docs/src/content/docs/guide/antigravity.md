@@ -1,11 +1,11 @@
 ---
-title: "Antigravity"
-description: "Run Google’s Antigravity CLI (agy) in a sandbox, signed in with your Google account or a Gemini API key."
+title: "Configure Antigravity"
+description: "Run Google’s agy CLI and understand its conversation limits."
 ---
 
 ## Install
 
-Generated [agent images](../agent-images/) include the `agy` executable. [Cloud sandboxes](../cloud-sandboxes/) install it on first use when it is missing, unless you set `bootstrap: false`.
+Use the [agent image](../agent-images/) to make `agy` available in a local container. In a [cloud sandbox](../cloud-sandboxes/), Outpost installs it when it is missing, unless you set `bootstrap: false`.
 
 <!-- features -->
 
@@ -24,7 +24,7 @@ npx outpost doctor --agent antigravity --sandbox-provider local
 
 `doctor` warns when the versions differ. It does not verify the binary’s checksum or test sign-in.
 
-## Account access
+## Sign in with your account
 
 Run `agy` on the host and sign in with your Google account.
 
@@ -38,7 +38,7 @@ export const coder = createAgent({
 
 Outpost copies `~/.gemini/antigravity-cli/antigravity-oauth-token` into the sandbox’s private home. For a token stored elsewhere, pass `{ account: { file: "/path/to/token" } }`. See [Authentication](../authentication/).
 
-## API access
+## Use an API key
 
 Declare `GEMINI_API_KEY`. Gemini API usage is billed separately from Google AI plans.
 
@@ -55,7 +55,7 @@ export const coder = createAgent({
 
 Outpost also writes `~/.gemini/antigravity-cli/settings.json` in the sandbox home to select the Gemini provider. `{ usage: { variable: "NAME" } }` reads the key from another declared variable.
 
-## What it supports
+## Available features
 
 <!-- features -->
 

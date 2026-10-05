@@ -1,11 +1,11 @@
 ---
-title: "Budgets"
-description: "Plafonner les tentatives et les tokens d’un workflow, sur l’ensemble de ses tâches, relances et reprises de checkpoint."
+title: "Limiter les tentatives et les tokens"
+description: "Définissez le budget d’un workflow et suivez la consommation au fil des tentatives et des reprises."
 ---
 
 ## Définir un budget de workflow
 
-Passez `budget` à `start()`. Fixez une limite de tentatives, des limites de tokens, ou les deux.
+Passez un `budget` à la méthode `start()` du workflow pour limiter les tentatives, les tokens déclarés ou les deux. Ces limites portent sur l’ensemble des tâches du workflow, et non sur chaque tâche séparément.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -25,28 +25,27 @@ console.log(result.usage);
 
 <!-- check:run -->
 
-Le script affiche `{ attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }`. `budget.usage` accepte `input`, `cached`, `cacheCreated` et `output` ; une limite omise n’est pas bornée.
+Le script affiche `{ attempts: 1, tokens: { input: 10, cached: 0, output: 5 } }`.
+
+Référence API : [WorkflowBudget](../../reference/workflowbudget/).
 
 `speculate()` exige le même `budget`, partagé par ses candidats : voir [Candidats concurrents](../speculation/).
 
-## Savoir ce qui compte comme tentative
+## Comprendre le décompte des tentatives
 
 Chaque tentative est admise sur `budget.attempts` avant de démarrer.
 
 <!-- features -->
 
 - [Tentative de tâche](../concurrency-and-retries/): Chaque exécution d’une tâche, relances comprises.
-  - `retry`
 - [Tour de boucle](../verification-loops/): Chaque tour d’une tâche en boucle.
-  - `defineLoopTask()`
 - [Candidat spéculatif](../speculation/): Chaque candidat lancé par `speculate()`.
-  - `speculate()`
 
-Une tentative n’est pas une requête au modèle : un tour d’agent qui appelle son modèle quarante fois compte une fois. Les tâches ignorées et les [résultats en cache](../task-cache/) ne consomment aucune tentative.
+Un échange avec l’agent compte comme une tentative, même s’il comporte de nombreuses requêtes au modèle. Une tâche ignorée ou un résultat restauré depuis le [cache](../task-cache/) ne consomme aucune tentative.
 
-## Rapporter la consommation
+## Déclarer la consommation
 
-Les helpers de tâche d’agent rapportent automatiquement les tokens de leur agent : `defineAgentTask()`, `defineIsolatedTask()`, `defineInteractiveAgentTask()` et `defineQueuedTask()`. Une tâche personnalisée qui appelle un modèle rapporte ce qu’elle a consommé.
+Les fonctions utilitaires de tâche d’agent rapportent automatiquement les tokens de leur agent : `defineAgentTask()`, `defineIsolatedTask()`, `defineInteractiveAgentTask()` et `defineQueuedTask()`. Une tâche personnalisée qui appelle un modèle rapporte ce qu’elle a consommé.
 
 ```ts
 import { defineTask } from "@elie-laloum/outpost";
@@ -68,9 +67,9 @@ const summary = defineTask({
 
 `reportUsage(usage)` s’ajoute aux totaux. `reportUsageOnce(receipt, usage)` ignore un reçu déjà enregistré par la tâche, même après une reprise de checkpoint : un résultat lu deux fois compte une seule fois. Les deux ne fonctionnent que pendant la tentative en cours.
 
-## Savoir ce que garantit un budget
+## Comprendre les limites du budget
 
-Un budget contrôle l’admission d’après la consommation rapportée jusque-là.
+Outpost vérifie la consommation déclarée avant d’autoriser la suite du travail. Le budget s’applique à ces totaux enregistrés ; il ne prédit pas les tokens qu’une requête en cours va consommer.
 
 | Limite                                              | Quand elle est vérifiée                              | Ce qui se passe                                                                                      |
 | --------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -90,13 +89,15 @@ Un tour d’agent en cours peut consommer des tokens avant de les rapporter : le
 
 Avec des limites de tokens sans `attempts`, une consommation incomplète arrête l’exécution avec `WorkflowUsageUnavailable`. Avec `attempts`, l’exécution continue sous la limite de tentatives et Outpost émet un avertissement.
 
-[GitHub Copilot CLI](../copilot-cli/) et [Kimi Code](../kimi-code/) lisent leurs compteurs définitifs dans la session, après la fin de la CLI. Pour eux surtout, bornez chaque exécution en tentatives et en temps.
+[GitHub Copilot CLI](../copilot-cli/) et [Kimi Code](../kimi-code/) lisent leurs compteurs définitifs dans la session, après la fin de la CLI. Pour eux surtout, limitez chaque exécution en tentatives et en temps.
 
-```ts
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const fix = defineIsolatedTask({
+```ts title="fix-task.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+
+export const fix = defineIsolatedTask({
   key: "fix",
   timeoutMs: 30 * 60_000,
   retry: { attempts: 2 },
@@ -109,8 +110,13 @@ const fix = defineIsolatedTask({
     deadlineMs: 20 * 60_000,
   }),
 });
+```
 
-const result = await defineWorkflow("fix-tests", [fix]).start({
+```ts title="run-fix.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { fix } from "./fix-task.ts";
+
+export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
 console.log(result.status, result.usage);
@@ -128,12 +134,8 @@ Pour poursuivre une exécution arrêtée par son budget, relancez-la avec un bud
 
 <!-- features -->
 
-- [Limites et annulation](../limits-and-cancellation/): Bornez un tour d’agent en durée ou en silence.
-  - `deadlineMs`
-  - `idleMs`
-- [Concurrence, relances et délais](../concurrency-and-retries/): Bornez en durée chaque tentative de tâche et une exécution entière.
-  - `timeoutMs`
-- [Harness intégré](../harness/): Bornez les requêtes au modèle, les appels d’outils et les tokens d’un tour.
-  - `limits`
+- [Limites et annulation](../limits-and-cancellation/): Limitez un tour d’agent en durée ou en silence.
+- [Concurrence, relances et délais](../concurrency-and-retries/): Limitez en durée chaque tentative de tâche et une exécution entière.
+- [Harness intégré](../harness/): Limitez les requêtes au modèle, les appels d’outils et les tokens d’un tour.
 
 API : [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../../reference/workflowusage/) · [Usage](../../reference/usage/) · [TaskContext](../../reference/taskcontext/) · [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/) · [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/).

@@ -1,31 +1,34 @@
 ---
-title: "Sous-agents"
-description: "Permettre à un agent intégré de déléguer une partie de son tour à un agent enfant, avec ses propres instructions, outils et limites, dans la même sandbox."
+title: "Déléguer à des sous-agents"
+description: "Donnez au harness intégré des sous-agents aux limites explicites qui partagent sa sandbox."
 ---
 
-## Exposer un agent enfant comme outil
+## Déclarer un sous-agent comme outil
 
-`defineHarnessSubagent()` transforme un agent du [harness intégré](../harness/) en outil qu’un autre agent intégré peut appeler. Donnez-lui un `name`, une `description` qui indique au parent quand déléguer, et l’`agent` enfant.
+Déclarez un sous-agent avec `defineHarnessSubagent()` et exposez-le comme outil du harness parent. Il utilise la sandbox du parent, mais conserve son propre historique de conversation, ses permissions et ses limites.
 
-```ts
-import {
-  createAgent,
-  createHarness,
-  createHarnessFileTools,
-  createOpenAIModelProvider,
-  defineHarnessSubagent,
-  dispatch,
-} from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const modelProvider = createOpenAIModelProvider({
+```ts title="model.ts"
+import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
   api: "responses",
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
-const model = process.env.MODEL_NAME ?? "";
+export const model = process.env.MODEL_NAME ?? "";
+```
 
-const reviewer = createAgent({
+```ts title="reviewer.ts"
+import {
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost";
+import { model, modelProvider } from "./model.ts";
+
+export const reviewer = createAgent({
   model,
   harness: createHarness({
     modelProvider,
@@ -34,23 +37,42 @@ const reviewer = createAgent({
     limits: { maxSteps: 6, usage: { output: 2_000 } },
   }),
 });
+```
 
-const coordinator = createAgent({
+```ts title="delegation.ts"
+import { defineHarnessSubagent } from "@elie-laloum/outpost";
+import { reviewer } from "./reviewer.ts";
+
+export const tools = [
+  defineHarnessSubagent({
+    name: "review",
+    description: "Ask a reviewer to inspect repository files.",
+    agent: reviewer,
+  }),
+];
+```
+
+```ts title="coordinator.ts"
+import { createAgent, createHarness } from "@elie-laloum/outpost";
+import { model, modelProvider } from "./model.ts";
+import { tools } from "./delegation.ts";
+
+export const coordinator = createAgent({
   model,
   harness: createHarness({
     modelProvider,
-    tools: [
-      defineHarnessSubagent({
-        name: "review",
-        description: "Ask a reviewer to inspect repository files.",
-        agent: reviewer,
-      }),
-    ],
+    tools,
     limits: { maxSteps: 8, maxDelegationDepth: 1, usage: { output: 5_000 } },
   }),
 });
+```
 
-const result = await dispatch({
+```ts title="run.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { coordinator } from "./coordinator.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coordinator,
@@ -61,40 +83,39 @@ console.log(result.text);
 
 Le coordinateur décide quand appeler `review`. Chaque appel démarre le relecteur avec un historique neuf ; `result.text` contient la réponse finale du coordinateur et `result.usage` inclut les tokens du relecteur.
 
-## Ce que le parent envoie et reçoit
+## Entrées et résultats du sous-agent
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Déléguer**: Le modèle parent appelle l’outil sous-agent.
-   - **Envoyer un prompt**: La seule entrée est `{ "prompt": "…" }`.
-   - **Démarrer l’enfant**: Son historique contient ses propres instructions et ce prompt, rien du parent.
-     - hôte
-2. **Travailler**: L’enfant exécute sa propre boucle.
-   - **Utiliser ses outils**: Commandes et modifications s’exécutent dans la sandbox et le worktree du parent.
-     - sandbox
-   - **Compter ses tokens**: L’usage s’additionne chez l’enfant, le parent et chaque ancêtre.
-3. **Rendre**: Le parent lit un résultat d’outil.
-   - **Enregistrer le transcript**: La conversation enfant est capturée, même après un échec.
-     - hôte
-   - **Répondre au parent**: Un texte JSON avec `text`, la réponse finale de l’enfant, et `conversation` quand l’enfant en conserve une.
+- **Déléguer**: Le modèle parent appelle l’outil sous-agent.
+  - Étapes
+  - **Envoyer un prompt**: La seule entrée est `{ "prompt": "…" }`.
+  - **Démarrer l’enfant**: Son historique contient ses propres instructions et ce prompt, rien du parent.
+    - hôte
+  - → **Travailler**: puis
+- **Travailler**: L’enfant exécute sa propre boucle.
+  - Étapes
+  - **Utiliser ses outils**: Commandes et modifications s’exécutent dans la sandbox et le worktree du parent.
+    - sandbox
+  - **Compter ses tokens**: L’usage s’additionne chez l’enfant, le parent et chaque ancêtre.
+  - → **Rendre**: puis
+- **Rendre**: Le parent lit un résultat d’outil.
+  - Étapes
+  - **Enregistrer le transcript**: La conversation enfant est capturée, même après un échec.
+    - hôte
+  - **Répondre au parent**: Un texte JSON avec `text`, la réponse finale de l’enfant, et `conversation` quand l’enfant en conserve une.
 
-Les enfants partagent la sandbox du parent : ils n’allouent aucun provider et n’ouvrent aucun workspace, si bien que le parent voit leurs modifications immédiatement. Les délégations s’exécutent une à une, même quand les autres outils du parent s’exécutent en parallèle.
+Les enfants partagent la sandbox du parent : ils n’allouent aucun fournisseur et n’ouvrent aucun workspace, si bien que le parent voit leurs modifications immédiatement. Les délégations s’exécutent une à une, même quand les autres outils du parent s’exécutent en parallèle.
 
-## Borner la délégation
+## Limiter le travail délégué
 
 Chaque boucle garde ses propres compteurs d’étapes et d’appels d’outils, tandis que les budgets de tokens s’additionnent sur les descendants.
 
-| Limite                                                                        | Compte                                         | Quand elle est atteinte                                         |
-| ----------------------------------------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- |
-| `maxSteps`, `maxToolCalls`                                                    | Chaque boucle séparément.                      | L’enfant s’arrête ; le parent reçoit une erreur d’outil.        |
-| `usage` de l’enfant                                                           | L’enfant et ses propres enfants.               | L’enfant s’arrête ; le parent reçoit une erreur d’outil.        |
-| `usage` d’un ancêtre                                                          | Cet ancêtre et tous ses descendants.           | Cet ancêtre échoue avec le code `limit`.                        |
-| `maxDelegationDepth`                                                          | Les niveaux d’imbrication sous ce harness.     | L’appel de délégation renvoie une erreur d’outil `limit`.       |
-| [`toolExecution.deadlineMs`](../../reference/harnesstoolexecution/) du parent | Une délégation entière ; 5 minutes par défaut. | L’enfant est annulé ; le parent reçoit un dépassement de délai. |
+Référence API : [HarnessLimits](../../reference/harnesslimits/).
 
 Une erreur d’outil revient au modèle parent, sauf si le parent définit `toolExecution: { onError: "fail" }`. Annuler le dispatch arrête aussi les requêtes modèle et les commandes de l’enfant.
 
-`maxDelegationDepth` vaut 3 par défaut, et 0 désactive la délégation. La valeur propre d’un enfant ne peut que restreindre ce que ses ancêtres autorisent : avec `maxDelegationDepth: 1` ci-dessus, le relecteur ne peut pas déléguer à son tour.
+Référence API : [HarnessLimits](../../reference/harnesslimits/) et [HarnessSubagentOptions](../../reference/harnesssubagentoptions/).
 
 ## Permissions et hooks
 
@@ -119,13 +140,7 @@ const observe: DispatchOptions["observe"] = (event) => {
 };
 ```
 
-| Champ          | Contenu                                                      |
-| -------------- | ------------------------------------------------------------ |
-| `id`           | Cette exécution enfant, unique pour chaque délégation.       |
-| `callId`       | L’appel d’outil du parent qui l’a lancée.                    |
-| `name`         | Le nom de l’outil sous-agent.                                |
-| `status`       | `started`, `finished` ou `failed`.                           |
-| `conversation` | L’identifiant de la conversation enfant, s’il en existe une. |
+Référence API : [AgentEvent](../../reference/agentevent/).
 
 Pour envoyer une instruction à un enfant en cours d’exécution, passez son `id` comme `subagent` à `steering.send()`. Voir [Réorienter un agent en cours](../steering/).
 

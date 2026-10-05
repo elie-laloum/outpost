@@ -1,34 +1,28 @@
 ---
 title: "Choose a sandbox"
-description: "Compare the built-in sandbox providers and pick where agent commands run: a local container, a cloud sandbox, a microVM or the host."
+description: "Choose where your agent runs commands: a container, a cloud sandbox, a microVM or your machine."
 ---
 
-## Built-in providers
+## Available environments
 
-A sandbox provider decides where the agent's commands run. You choose it independently of the agent.
+Start with Docker or Podman if you want a local container. For hosted execution, use Vercel or Daytona. The sandbox provider determines where commands run; you can select it independently of the agent.
 
 <!-- features -->
 
 - [Docker](../containers/): The default: a local container started from an image you build.
-  - `createDockerSandboxProvider()`
   - mounted
 - [Podman](../containers/): The same container provider on the Podman engine, rootless included.
-  - `createPodmanSandboxProvider()`
   - mounted
 - [Vercel](../cloud-sandboxes/): A hosted sandbox that needs no local engine.
-  - `createVercelSandboxProvider()`
   - remote
 - [Daytona](../cloud-sandboxes/): A hosted sandbox that also supports interactive terminals.
-  - `createDaytonaSandboxProvider()`
   - remote
 - [Firecracker](../firecracker/): A microVM on a Linux host with KVM that you prepare.
-  - `createFirecrackerSandboxProvider()`
   - remote
 - [Host execution](../host-process/): Commands run directly on your machine, without isolation.
-  - `createLocalSandboxProvider()`
   - host
 
-## Decide
+## Choose for your task
 
 <!-- path -->
 
@@ -44,7 +38,7 @@ Import the provider from its subpath and pass it as `sandboxProvider`. The agent
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
-import { coder, repository } from "./outpost.config.mts";
+import { coder, repository } from "./outpost.config.ts";
 
 const result = await dispatch({
   agent: coder,
@@ -59,7 +53,7 @@ Each provider has its own subpath, `@elie-laloum/outpost/providers/<name>`: `doc
 
 Vercel and Daytona load their SDK when they allocate a sandbox. Install it next to Outpost: `npm install @vercel/sandbox` or `npm install @daytona/sdk`. The other providers need no extra package.
 
-## Compare providers
+## Compare environments
 
 |                                                  | Docker, Podman   | Vercel                         | Daytona                 | Firecracker                        | Host                |
 | ------------------------------------------------ | ---------------- | ------------------------------ | ----------------------- | ---------------------------------- | ------------------- |

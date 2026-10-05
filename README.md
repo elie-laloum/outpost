@@ -34,29 +34,21 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes a
 
 ## Quickstart
 
-You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [setup guide](https://elie-laloum.github.io/outpost/guide/setup/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
+You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [Codex guide](https://elie-laloum.github.io/outpost/guide/codex/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
 
-Create a workflow directory and point it at your checkout:
-
-```sh
-mkdir my-workflow
-cd my-workflow
-npx @elie-laloum/outpost init --yes --repository /absolute/path/to/repository --image outpost:dev --install
-```
-
-This installs the workflow dependencies, generates `run.ts`, `brief.md` and configuration files, and builds the Docker image. The first build downloads the agent CLIs. Use `--no-build` if the image already exists. Existing package manifests are preserved; explicit CommonJS projects get `run.mts`.
-
-Run your first task:
+Install the package, then build the agent image in a dedicated directory:
 
 ```sh
-node run.ts "Describe this repository and suggest one small improvement. Do not edit files."
+npm install @elie-laloum/outpost
+npm pkg set type=module
+npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-The generated script prints the branch, collected commits and conversation reference. It uses **local branch integration**: when you later ask the agent to change and commit code, those commits are integrated into the target checkout. Use a named branch, as below, to keep changes separate for review. See [branch strategies](https://elie-laloum.github.io/outpost/guide/repository-and-branch/).
+The first build downloads the agent CLIs. The image directory also receives example workflow files; write your own script as shown below. See [agent images](https://elie-laloum.github.io/outpost/guide/agent-images/) to add project tools or use Podman.
 
-## Use the library
+## Write a TypeScript script
 
-The workflow is ordinary TypeScript. After the setup above, save this as `task.mts` next to the generated script, replace the repository path, and run `node task.mts`:
+Use an ESM directory (`"type": "module"` in `package.json`); a CommonJS repository can keep the scripts in a separate directory with its own manifest. Save this as `task.ts`, replace the repository path, and run it with `node task.ts`. It keeps the agent’s changes on a named branch for review:
 
 ```ts
 import {

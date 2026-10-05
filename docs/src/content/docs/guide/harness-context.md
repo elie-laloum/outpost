@@ -1,27 +1,35 @@
 ---
-title: "Context and skills"
-description: "Keep a long built-in harness turn within the model’s context window, write its system instructions and load specialized guidance only when the model asks for it."
+title: "Manage context and skills"
+description: "Keep model history within bounds and load task-specific instructions when needed."
 ---
 
-## Keep the history within bounds
+## Limit history size
 
-A long turn accumulates tool output until a request no longer fits the model’s context window. Set `context` on `createHarness()`: before each model request, the strategy may rewrite the history the model receives.
+Choose a context strategy to reduce the history sent to the model as a conversation grows. Outpost can summarize older messages or keep only a bounded part of the history; the stored transcript remains available.
 
-```ts
+<!-- tabs -->
+
+```ts title="context-model.ts"
+import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createAnthropicModelProvider({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+```
+
+```ts title="context-agent.ts"
 import {
   createAgent,
-  createAnthropicModelProvider,
   createHarness,
   createHarnessFileTools,
   summarizeHistory,
 } from "@elie-laloum/outpost";
+import { modelProvider } from "./context-model.ts";
 
-const coder = createAgent({
+export const coder = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
   harness: createHarness({
-    modelProvider: createAnthropicModelProvider({
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    }),
+    modelProvider: modelProvider,
     tools: [createHarnessFileTools()],
     context: summarizeHistory({
       triggerCharacters: 200_000,
@@ -35,19 +43,15 @@ Once the serialized history exceeds 200,000 characters, the model summarizes the
 
 ## Choose a strategy
 
-| Strategy                         | What the model keeps                                                                                                 | Options and defaults                                    | Cost                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------ |
-| `truncateToolResults()`          | Every message. Older tool results are cut to `maxCharacters` and marked as truncated; the recent ones stay complete. | `keepRecent`: 4 result messages, `maxCharacters`: 2,000 | None. The cut output is lost to the model. |
-| `summarizeHistory()`             | The first prompt, a summary of the older messages and the recent messages.                                           | `triggerCharacters`: 400,000, `keepRecentMessages`: 6   | One extra model request per summary.       |
-| `defineHarnessContextStrategy()` | What your `compact` function returns.                                                                                | `name`, `compact`                                       | Whatever your function spends.             |
+API reference: [summarizeHistory](../../reference/summarizehistory/), [truncateToolResults](../../reference/truncatetoolresults/) and [HarnessContextStrategyOptions](../../reference/harnesscontextstrategyoptions/).
 
 A summary uses the agent’s model and provider. Its tokens count in the turn’s usage and in the harness `limits.usage` budget.
 
 ## Write a custom strategy
 
-`defineHarnessContextStrategy()` takes a `name` and a `compact` function. `compact` receives the `messages`, the `step`, the `model`, the `signal` and a `summarize(messages)` helper; it returns a new message list, or `undefined` to leave the history unchanged.
+Compose strategies when a conversation needs both shorter tool results and a summary. This example applies the two in that order.
 
-`context` accepts one strategy. This one combines both built-in strategies:
+API reference: [HarnessContextStrategyOptions](../../reference/harnesscontextstrategyoptions/) and [HarnessContextInput](../../reference/harnesscontextinput/).
 
 ```ts
 import {
@@ -77,7 +81,9 @@ Compaction changes what the model receives, not what is stored. The transcript k
 
 ## Write the system instructions
 
-`instructions` accepts text, a `defineHarnessInstructions()` resolver, or a list of both. Outpost resolves them at the start of each turn and joins them with blank lines; empty results are skipped.
+API reference: [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) and [HarnessSkillOptions](../../reference/harnessskilloptions/).
+
+Load the project’s `AGENTS.md` from the borrowed sandbox to build the system instructions. The example uses its content when the file can be read, and returns an empty string otherwise.
 
 ```ts
 import { defineHarnessInstructions } from "@elie-laloum/outpost";
@@ -123,16 +129,21 @@ console.log(
 
 The script prints `review [ 'git' ]`: the skill name and the tools it unlocks. Pass it with `createHarness({ skills: [review] })`.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Advertise**: The system instructions list each skill’s name and description.
-2. **Load**: The model calls `load_skill` with a skill name.
-   - **Return the instructions**: Outpost resolves them and sends them back as the tool result.
-   - **Unlock the tools**: The skill’s tools become callable for the rest of the conversation.
-3. **Use**: The model follows the instructions and calls the skill’s tools.
-   - **Before loading**: A skill tool call returns an error asking the model to load the skill.
+- **Advertise**: The system instructions list each skill’s name and description.
+  - Steps
+  - → **Load**: then
+- **Load**: The model calls `load_skill` with a skill name.
+  - Steps
+  - **Return the instructions**: Outpost resolves them and sends them back as the tool result.
+  - **Unlock the tools**: The skill’s tools become callable for the rest of the conversation.
+  - → **Use**: then
+- **Use**: The model follows the instructions and calls the skill’s tools.
+  - Steps
+  - **Before loading**: A skill tool call returns an error asking the model to load the skill.
 
-`instructions` can be a resolver, as for the harness; it runs when the model loads the skill. Skill names use 1 to 64 letters, digits, `_` or `-` and must be unique; skill tools share the harness tool namespace ([Tools](../harness-tools/)).
+API reference: [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) and [HarnessSkillOptions](../../reference/harnessskilloptions/).
 
 :::caution
 A skill guides the model; it enforces nothing. To block a tool, use [permissions](../harness-permissions/); to require a decision before continuing, use [approvals](../approvals/).

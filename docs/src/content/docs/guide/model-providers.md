@@ -1,11 +1,11 @@
 ---
-title: "Model providers"
-description: "Connect the built-in harness to an OpenAI-compatible or Anthropic API. Requests leave from your process, with your key."
+title: "Connect a model API"
+description: "Configure an OpenAI or Anthropic model provider for the built-in harness."
 ---
 
 ## Connect a model
 
-A model provider sends the [built-in harness](../harness/)’s requests to a model API. Pass it to `createHarness()`, then use the agent like any other.
+Connect a model provider to `createHarness()` so the built-in loop can call the model API. Then compose the harness and a model with `createAgent()` and pass that agent to a dispatch.
 
 ```ts
 import {
@@ -63,16 +63,13 @@ const local = createOpenAIModelProvider({
 
 ## Keep the key on the host
 
-You pass the key yourself: Outpost reads no environment variable and no account login for model providers. The key stays in your process and never reaches the sandbox. [Authentication](../authentication/) compares this with CLI agents.
+Pass the model API key explicitly to the provider. These providers do not load account logins or read environment variables automatically. The key stays in your Node.js process; [Authentication](../authentication/) explains how this differs from CLI agents.
 
 ## Set the model and its reasoning
 
 The agent’s `model` is a name or `{ name, reasoning, maxOutputTokens }`. `createAgent()` rejects settings the provider does not support.
 
-| Setting           | OpenAI protocols                                                           | Anthropic                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `maxOutputTokens` | Optional.                                                                  | Required.                                                                                                  |
-| `reasoning`       | Sent as the reasoning effort; the service decides which levels it accepts. | `"none"` disables thinking; `"low"` to `"max"` enable adaptive thinking at that effort. `"minimal"` fails. |
+API reference: [AgentModel](../../reference/agentmodel/).
 
 The service still checks the model name and levels on each request.
 
@@ -82,10 +79,7 @@ Both providers stream. The harness emits `text-delta` events while the model wri
 
 ## Bound each request
 
-| Option             | Default    | What it bounds                                                                  |
-| ------------------ | ---------- | ------------------------------------------------------------------------------- |
-| `timeoutMs`        | 120,000 ms | The wait for the response. While streaming, the silence between two chunks.     |
-| `maxResponseBytes` | 8 MiB      | The response body after decompression. A larger response fails with `response`. |
+API reference: [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) and [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
 A timeout fails with code `timeout`. The harness streams with both providers, so a long answer that keeps arriving never times out: bound the whole turn with [limits](../limits-and-cancellation/).
 

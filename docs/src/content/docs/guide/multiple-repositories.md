@@ -1,18 +1,20 @@
 ---
-title: "Multiple repositories"
-description: "Give each repository its own task and sandbox, run them side by side, and pass one repository’s result to the next."
+title: "Work across repositories"
+description: "Give each repository its own agent task and connect them with workflow dependencies."
 ---
 
 ## Run one task per repository
 
-A sandbox owns one repository. To change several, define one `defineIsolatedTask()` per checkout and start them in the same workflow.
+Give each repository its own `defineIsolatedTask()` and connect those tasks in a workflow. Each sandbox owns one repository, so every task works with its own checkout and Git history.
 
-```ts
+<!-- tabs -->
+
+```ts title="upgrade.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { resolve } from "node:path";
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, sandboxProvider } from "./outpost.config.mts";
+import { sandboxProvider, coder } from "./outpost.config.ts";
 
-function upgrade(key: string, path: string) {
+export function upgrade(key: string, path: string) {
   return defineIsolatedTask({
     key,
     request: () => ({
@@ -26,10 +28,15 @@ function upgrade(key: string, path: string) {
     }),
   });
 }
-const api = upgrade("api", "../api");
-const web = upgrade("web", "../web");
+```
 
-const result = await defineWorkflow("node-24", [api, web]).start({
+```ts title="upgrade-repositories.ts"
+import { upgrade } from "./upgrade.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
+
+export const api = upgrade("api", "../api");
+export const web = upgrade("web", "../web");
+export const result = await defineWorkflow("node-24", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
@@ -38,19 +45,21 @@ console.log(result.value(api).commits.length, result.value(web).commits.length);
 
 It prints the number of commits on `outpost/node-24` in each checkout. Each task opens its own worktree and sandbox, and closes them when it ends.
 
-`concurrency` defaults to `1`: without it, the repositories run one after the other. Paths resolve from `import.meta.dirname`, so the script runs from any directory.
+Paths resolve from `import.meta.dirname`, so you can run this script from any directory. To configure parallel execution, see [WorkflowOptions](../../reference/workflowoptions/).
 
 ## Pass one repository’s result to another
 
 Add the first task to `after`, then read its result with `context.value()` in `request`. The client starts once the API task succeeds.
 
-```ts
-import { resolve } from "node:path";
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const branch = { mode: "named", name: "outpost/rename-field" } as const;
-const api = defineIsolatedTask({
+```ts title="api-change.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { resolve } from "node:path";
+import { sandboxProvider, coder } from "./outpost.config.ts";
+
+export const branch = { mode: "named", name: "outpost/rename-field" } as const;
+export const api = defineIsolatedTask({
   key: "api",
   request: () => ({
     repository: resolve(import.meta.dirname, "../api"),
@@ -62,7 +71,15 @@ const api = defineIsolatedTask({
     },
   }),
 });
-const web = defineIsolatedTask({
+```
+
+```ts title="web-change.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { api, branch } from "./api-change.ts";
+import { resolve } from "node:path";
+import { sandboxProvider, coder } from "./outpost.config.ts";
+
+export const web = defineIsolatedTask({
   key: "web",
   after: [api],
   request: (context) => ({
@@ -75,14 +92,20 @@ const web = defineIsolatedTask({
     },
   }),
 });
+```
 
-const result = await defineWorkflow("rename-field", [api, web]).start();
+```ts title="rename.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { api } from "./api-change.ts";
+import { web } from "./web-change.ts";
+
+export const result = await defineWorkflow("rename-field", [api, web]).start();
 result.unwrap();
 ```
 
 The dependency orders the tasks. Each repository keeps its own branch and history.
 
-## When one repository fails
+## Handle a repository failure
 
 A task failure does not undo the others. By default, the first failure stops the run; `stopOnError: false` lets independent repositories finish.
 
@@ -96,7 +119,7 @@ A task failure does not undo the others. By default, the first failure stops the
 
 To rerun only the unfinished tasks, add a checkpoint: [Durable runs](../durable-runs/). [Recover work](../recovery/) inspects retained worktrees.
 
-## Publish behind an approval
+## Approve before publishing
 
 Outpost pushes nothing. Put the push or merge in a task placed after a [`defineApprovalTask()`](../approvals/) gate that lists every repository task in `after`.
 

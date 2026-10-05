@@ -1,11 +1,11 @@
 ---
 title: "Recover work"
-description: "Find the work Outpost kept after a failure, restore it into a new directory and bring it back into your repository."
+description: "Inspect retained worktrees and transfers before restoring or cleaning them up."
 ---
 
 ## What Outpost keeps
 
-A failure never deletes the agent’s work. Outpost keeps it in the target repository’s `.outpost` directory or in your transport.
+When a run stops before its changes can be integrated, inspect the work Outpost retained. Use the recovery inventory to locate worktrees, downloaded transfers and backups before restoring or removing anything.
 
 | What              | Where                                                | Kept when                                                                                                                   |
 | ----------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@ A retained worktree is an ordinary Git worktree on its branch: open it, commit w
 
 ```ts
 import { dispatch, OutpostError, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   const result = await dispatch({
@@ -42,10 +42,7 @@ try {
 
 Two failures also name their location in `error.details`. [Errors](../error-handling/) lists every code.
 
-| Failure                             | Code        | Location                                    |
-| ----------------------------------- | ----------- | ------------------------------------------- |
-| Remote changes could not be applied | `workspace` | `details.recovery`: the transfer directory. |
-| Automatic integration failed        | `conflict`  | `details.directory`: the kept worktree.     |
+API reference: [recoveryDetails](../../reference/recoverydetails/).
 
 When the run itself also failed, the synchronization error arrives inside an `AggregateError`.
 
@@ -53,23 +50,28 @@ When the run itself also failed, the synchronization error arrives inside an `Ag
 
 A transfer holds two sides: `previous`, your checkout before the sandbox’s changes, and `incoming`, the sandbox’s changes. Restore one side into a new directory, never over your checkout.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Look**: Nothing is changed.
-   - **Inspect**: List workspaces, locks and recorded sandbox activity.
-     - `recovery inspect`
-   - **Verify**: Check the transfer’s files, checksums and Git history.
-     - `recovery verify`
-2. **Restore**: Rebuild one side in a new directory.
-   - **Plan**: Preview the commit and files to restore.
-     - `recovery restore`
-   - **Apply**: Create a detached checkout from the plan.
-     - `--apply`
-3. **Integrate**: You decide what comes back.
-   - **Compare**: Review the restored checkout against your repository.
-     - git
-   - **Bring back**: Commit, cherry-pick or merge the parts you keep.
-     - git
+- **Look**: Nothing is changed.
+  - Steps
+  - **Inspect**: List workspaces, locks and recorded sandbox activity.
+    - `recovery inspect`
+  - **Verify**: Check the transfer’s files, checksums and Git history.
+    - `recovery verify`
+  - → **Restore**: then
+- **Restore**: Rebuild one side in a new directory.
+  - Steps
+  - **Plan**: Preview the commit and files to restore.
+    - `recovery restore`
+  - **Apply**: Create a detached checkout from the plan.
+    - `--apply`
+  - → **Integrate**: then
+- **Integrate**: You decide what comes back.
+  - Steps
+  - **Compare**: Review the restored checkout against your repository.
+    - git
+  - **Bring back**: Commit, cherry-pick or merge the parts you keep.
+    - git
 
 ### Inspect
 
@@ -77,13 +79,7 @@ A transfer holds two sides: `previous`, your checkout before the sandbox’s cha
 npx outpost recovery inspect --repository /projects/app --git --locks --resources
 ```
 
-| Flag                   | Adds to the inventory                                                                                     |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| `--git`                | Branch, clean or dirty, detached `HEAD` and Git’s `locked` flag per worktree.                             |
-| `--locks`              | Lock files, the PID recorded in each and its ownership status; a live PID alone does not prove ownership. |
-| `--resources`          | Recorded sandbox activity and its ownership.                                                              |
-| `--max-entries NUMBER` | A bound on scanned entries; the default is 100,000.                                                       |
-| `--json`               | The full report as JSON.                                                                                  |
+API reference: [RecoveryInspectionOptions](../../reference/recoveryinspectionoptions/).
 
 The command exits with status 1 when the inventory is incomplete.
 
@@ -104,10 +100,7 @@ npx outpost recovery restore --directory "$TRANSFER" --repository /projects/app 
 
 This prints the plan. Run it again with `--apply` to create the checkout: a clone of your repository detached at the restored commit, with the side’s patches and files applied and no `origin` remote.
 
-| `--side`   | Restores                                                  | Staged index |
-| ---------- | --------------------------------------------------------- | ------------ |
-| `incoming` | The sandbox’s commits, uncommitted changes and new files. | Not restored |
-| `previous` | Your checkout as it was before the transfer.              | Restored     |
+API reference: [RecoveryRestoreOptions](../../reference/recoveryrestoreoptions/).
 
 The destination must not exist and must be outside the repository, its Git metadata and the transfer. The transfer stays in place.
 
@@ -127,34 +120,50 @@ The work is now the `outpost/recovered` branch of your repository. Review it and
 
 Each command has a function. `planRecoveryRestore()` returns the plan; `restoreRecoveryTransfer()` checks that nothing changed since and applies it.
 
-```ts
+<!-- tabs -->
+
+```ts title="recovery-target.ts"
+export const repository = "/projects/app";
+export const transfer = process.env.TRANSFER!;
+```
+
+```ts title="verify-transfer.ts"
+import { inspectRecovery, verifyRecoveryTransfer } from "@elie-laloum/outpost";
+import { repository, transfer } from "./recovery-target.ts";
+
+export async function verifyTransfer() {
+  const inventory = await inspectRecovery({
+    repository,
+    git: true,
+    locks: true,
+  });
+  console.log(inventory.git?.workspaces);
+  const verification = await verifyRecoveryTransfer(transfer, {
+    checksums: true,
+    restorability: true,
+    repository,
+  });
+  if (!verification.complete)
+    throw new Error("The transfer failed verification");
+}
+```
+
+```ts title="restore.ts"
+import { verifyTransfer } from "./verify-transfer.ts";
 import {
-  inspectRecovery,
   planRecoveryRestore,
   restoreRecoveryTransfer,
-  verifyRecoveryTransfer,
 } from "@elie-laloum/outpost";
+import { transfer, repository } from "./recovery-target.ts";
 
-const repository = "/projects/app";
-const transfer = process.env.TRANSFER!;
-
-const inventory = await inspectRecovery({ repository, git: true, locks: true });
-console.log(inventory.git?.workspaces);
-
-const verification = await verifyRecoveryTransfer(transfer, {
-  checksums: true,
-  restorability: true,
-  repository,
-});
-if (!verification.complete) throw new Error("The transfer failed verification");
-
-const plan = await planRecoveryRestore({
+await verifyTransfer();
+export const plan = await planRecoveryRestore({
   directory: transfer,
   repository,
   destination: "/projects/app-recovered",
   side: "incoming",
 });
-const restored = await restoreRecoveryTransfer(plan);
+export const restored = await restoreRecoveryTransfer(plan);
 console.log(restored.directory, restored.commit);
 ```
 

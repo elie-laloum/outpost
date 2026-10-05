@@ -1,6 +1,6 @@
 ---
-title: "Redis and BullMQ"
-description: "Share one job queue between producers and workers on several machines, backed by BullMQ and a standalone Redis server."
+title: "Use Redis and BullMQ"
+description: "Configure a shared Redis queue for producers and workers on separate processes or machines."
 ---
 
 ## Prerequisites
@@ -11,11 +11,15 @@ description: "Share one job queue between producers and workers on several machi
 - **A standalone Redis server**: Self-hosted or managed, reachable by every producer and worker.
 - **The `noeviction` policy**: Required by the queue, which checks it at open.
 
+Install BullMQ alongside Outpost to connect producers and workers to the Redis queue.
+
 ```sh
 npm install bullmq
 ```
 
-The queue keeps its jobs in Redis. Enable Redis persistence (AOF or RDB snapshots) if jobs must survive a Redis restart.
+Use a dedicated Redis queue for all producers and workers that share these jobs. Configure its eviction policy before connecting BullMQ, so Redis does not discard queue keys under memory pressure.
+
+Enable Redis persistence (AOF or RDB snapshots) if jobs must survive a Redis restart.
 
 ## Set the eviction policy
 
@@ -43,7 +47,7 @@ Other policies can evict the expiring keys that hold worker leases. With `noevic
 
 Import the adapter from its own subpath. The queue implements the same contract as the SQLite queue, so a worker runs on it unchanged ([Job queues and workers](../job-queues/)).
 
-```ts title="worker.mts"
+```ts title="worker.ts"
 import { runQueueWorker } from "@elie-laloum/outpost";
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
@@ -67,7 +71,7 @@ try {
 
 A producer opens the same queue and enqueues a job for the `review` handler:
 
-```ts title="submit.mts"
+```ts title="submit.ts"
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 const queue = await createBullMQTaskQueue({
@@ -85,15 +89,7 @@ try {
 }
 ```
 
-| Option              | Effect                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------- |
-| `name`              | Queue name shared by producers and workers. Different names never share jobs.               |
-| `connection`        | BullMQ connection settings: `host`, `port`, `db`, `username`, `password`, `tls`…            |
-| `prefix`            | Redis key prefix. Default: `outpost`.                                                       |
-| `stalledIntervalMs` | Interval between checks for expired leases. Default: 1,000. Reclaiming can take two checks. |
-| `onError`           | Receives connection errors and background failures that no call reports.                    |
-
-`connection` sets 10-second connect and command timeouts and three reconnection attempts; your values override them.
+API reference: [BullMQTaskQueueOptions](../../reference/bullmqtaskqueueoptions/).
 
 ## Connect producers and workers
 
@@ -127,7 +123,7 @@ Pass connection settings, not a Redis client. Use `prefix` rather than `connecti
 - **Lease checks**: A timer that returns jobs with expired leases to the queue.
 - **Closing**: `close()` rejects new calls, waits for calls in progress, then closes every connection.
 
-Jobs, leases and results stay in Redis after `close()`, for the next process. Stop the worker before closing: abort its signal and await `runQueueWorker()`, as in `worker.mts`.
+Jobs, leases and results stay in Redis after `close()`, for the next process. Stop the worker before closing: abort its signal and await `runQueueWorker()`, as in `worker.ts`.
 
 ## Interrupted completion
 
@@ -143,19 +139,24 @@ The queue records each result in its own Redis state first, then marks the BullM
 
 Connection settings are read once, when the queue opens. Rotate them by replacing processes:
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Prepare**: Before any restart.
-   - **Add a second ACL user**: With the same permissions as the current one.
-     - Redis
-2. **Deploy**: Old and new processes share the queue.
-   - **Start new processes**: Workers and producers with the new credential, the same `name` and `prefix`.
-     - `createBullMQTaskQueue()`
-3. **Retire**: Once the new processes run.
-   - **Stop old workers**: Abort their signal, await `runQueueWorker()`, then `close()`.
-     - `runQueueWorker()`
-   - **Revoke**: Delete the old ACL user and disconnect its remaining clients.
-     - Redis
+- **Prepare**: Before any restart.
+  - Steps
+  - **Add a second ACL user**: With the same permissions as the current one.
+    - Redis
+  - → **Deploy**: then
+- **Deploy**: Old and new processes share the queue.
+  - Steps
+  - **Start new processes**: Workers and producers with the new credential, the same `name` and `prefix`.
+    - `createBullMQTaskQueue()`
+  - → **Retire**: then
+- **Retire**: Once the new processes run.
+  - Steps
+  - **Stop old workers**: Abort their signal, await `runQueueWorker()`, then `close()`.
+    - `runQueueWorker()`
+  - **Revoke**: Delete the old ACL user and disconnect its remaining clients.
+    - Redis
 
 A credential revoked while a worker still runs makes it lose its lease. Another worker then runs the job again with the same `idempotencyKey`: your effect service must deduplicate ([Job queues and workers](../job-queues/)).
 

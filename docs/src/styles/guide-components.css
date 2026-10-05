@@ -1,21 +1,16 @@
-/* Guide components drawn on the sheet: feature cells, reading path, phase flow and file tree. */
-.sl-markdown-content
-  .bay
-  :is(.features, .path, .flow, .files, .flow-steps, .files-children) {
+/* Guide components drawn on the sheet: feature cells, reading path, canvas and file tree. */
+.sl-markdown-content .bay :is(.features, .path, .files, .files-children) {
   padding: 0;
   list-style: none;
 }
-.sl-markdown-content
-  .bay
-  :is(.features, .path, .flow, .files, .flow-steps, .files-children)
-  > li {
+.sl-markdown-content .bay :is(.features, .path, .files, .files-children) > li {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .sl-markdown-content
   .bay
-  :is(.features, .path, .flow, .files, .flow-steps, .files-children)
+  :is(.features, .path, .files, .files-children)
   > li::marker {
   content: none;
 }
@@ -184,88 +179,6 @@
   text-wrap: pretty;
 }
 
-/* Phase flow: one column per phase, steps ruled below its head. */
-.sl-markdown-content .bay ol.flow {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  grid-template-rows: auto 1fr;
-  margin: 1.75rem calc(-1 * var(--docs-pad)) 0;
-  border-top: 1px solid var(--docs-line);
-}
-.sl-markdown-content .bay ol.flow:last-child {
-  margin-bottom: -2.75rem;
-}
-/* Subgrid rows align every head, so the rule under them runs straight across. */
-.sl-markdown-content .bay .flow-phase {
-  position: relative;
-  display: grid;
-  grid-row: span 2;
-  grid-template-rows: subgrid;
-  border-right: 1px solid var(--docs-line);
-}
-.sl-markdown-content .bay .flow-phase:last-child {
-  border-right: 0;
-}
-.sl-markdown-content .bay .flow-phase:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 1.35rem;
-  right: -0.4rem;
-  z-index: 1;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-top: 1px solid var(--sl-color-gray-3);
-  border-right: 1px solid var(--sl-color-gray-3);
-  background: var(--docs-code-bg);
-  transform: rotate(45deg);
-  pointer-events: none;
-}
-.sl-markdown-content .bay .flow-phase-head {
-  display: grid;
-  gap: 0.2rem;
-  padding: 1rem var(--docs-pad);
-  border-bottom: 1px solid var(--docs-line);
-  background: var(--docs-code-bg);
-}
-.sl-markdown-content .bay .flow-phase-title {
-  color: var(--sl-color-white);
-  font-size: 1rem;
-  font-weight: 500;
-}
-.sl-markdown-content .bay .flow-phase-text {
-  color: var(--sl-color-gray-3);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-.sl-markdown-content .bay .flow-steps {
-  margin: 0;
-}
-.sl-markdown-content .bay li.flow-step {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.95rem var(--docs-pad) 1rem;
-}
-.sl-markdown-content .bay .flow-step + .flow-step {
-  border-top: 1px solid var(--docs-line);
-}
-.sl-markdown-content .bay .flow-step-title {
-  color: var(--sl-color-white);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.35;
-}
-.sl-markdown-content .bay .flow-step-text {
-  color: var(--sl-color-gray-3);
-  font-size: 0.875rem;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-.sl-markdown-content .bay .flow-step .tags {
-  padding-top: 0.35rem;
-}
-
 /* File tree: ruled rows, folders indent their entries behind a hairline. */
 .sl-markdown-content .bay ul.files {
   max-width: 70ch;
@@ -321,28 +234,18 @@
   .sl-markdown-content .bay .feature:not(:nth-child(2n))::after {
     content: "";
   }
-  .sl-markdown-content .bay :is(ol.path, ol.flow) {
+  .sl-markdown-content .bay ol.path {
     grid-auto-flow: row;
     grid-template-rows: none;
   }
-  .sl-markdown-content .bay .flow-phase {
-    grid-row: auto;
-    grid-template-rows: none;
-  }
-  /* Stacked, the connector leaves the head band and sits on the sheet. */
-  .sl-markdown-content .bay .flow-phase:not(:last-child)::after {
-    background: var(--sl-color-black);
-  }
-  .sl-markdown-content .bay :is(.path-stage, .flow-phase) {
+  .sl-markdown-content .bay .path-stage {
     border-right: 0;
     border-bottom: 1px solid var(--docs-line);
   }
-  .sl-markdown-content .bay :is(.path-stage, .flow-phase):last-child {
+  .sl-markdown-content .bay .path-stage:last-child {
     border-bottom: 0;
   }
-  .sl-markdown-content
-    .bay
-    :is(.path-stage, .flow-phase):not(:last-child)::after {
+  .sl-markdown-content .bay .path-stage:not(:last-child)::after {
     top: auto;
     right: auto;
     bottom: -0.4rem;
@@ -369,7 +272,7 @@
 }
 
 /* A component followed by prose closes its frame and leaves room before the text. */
-.sl-markdown-content .bay :is(ol.path, ol.flow):not(:last-child) {
+.sl-markdown-content .bay ol.path:not(:last-child) {
   margin-bottom: 1.75rem;
   border-bottom: 1px solid var(--docs-line);
 }
@@ -392,11 +295,25 @@
 }
 .sl-markdown-content .bay .code-tab-list {
   display: flex;
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
   overflow-x: auto;
   border-bottom: 1px solid var(--docs-line);
   background: color-mix(in oklch, var(--sl-color-gray-6) 45%, transparent);
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-color-gray-3) transparent;
+}
+.sl-markdown-content .bay .code-tabs[data-tabs-ready] .code-tab-list {
+  user-select: none;
+}
+.sl-markdown-content .bay .code-tab-list[data-overflow],
+.sl-markdown-content .bay .code-tab-list[data-overflow] .code-tab {
+  cursor: grab;
+}
+.sl-markdown-content .bay .code-tab-list[data-dragging],
+.sl-markdown-content .bay .code-tab-list[data-dragging] .code-tab {
+  cursor: grabbing;
 }
 /* Cells share one divider: the frame draws the first left edge, each tab draws its right. */
 .sl-markdown-content .bay .code-tab {
@@ -409,6 +326,7 @@
   font-family: var(--__sl-font-mono, ui-monospace, monospace);
   font-size: 0.8125rem;
   line-height: 1.4;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     background-color 0.2s var(--docs-ease),
@@ -571,6 +489,7 @@
 }
 .sl-markdown-content .bay .compare-head {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   margin: 0;
   align-content: start;
   gap: 0.3rem;
@@ -588,6 +507,7 @@
   font-weight: 500;
 }
 .sl-markdown-content .bay .compare-text {
+  grid-column: 1 / -1;
   color: var(--sl-color-gray-3);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -723,8 +643,13 @@
 .sl-markdown-content .bay .card::marker {
   content: none;
 }
-.sl-markdown-content .bay .card-index {
+.sl-markdown-content .bay .card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.35rem;
+}
+.sl-markdown-content .bay .card-index {
   color: var(--sl-color-gray-3);
   font-family: var(--__sl-font-mono, ui-monospace, monospace);
   font-size: 0.75rem;
@@ -1057,10 +982,16 @@
 }
 .sl-markdown-content .bay li.canvas-branch {
   display: grid;
-  gap: 0.1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.1rem 0.55rem;
   padding: 0.6rem 0.9rem 0.7rem;
   border: 1px solid var(--sl-color-gray-5);
   background: var(--docs-code-bg);
+}
+.sl-markdown-content .bay .canvas-branch .tags {
+  grid-column: 1 / -1;
+  padding-top: 0.35rem;
 }
 .sl-markdown-content .bay .canvas-branch-title {
   color: var(--sl-color-white);
@@ -1069,9 +1000,14 @@
   line-height: 1.35;
 }
 .sl-markdown-content .bay .canvas-branch-text {
+  grid-column: 1 / -1;
   color: var(--sl-color-gray-3);
   font-size: 0.8125rem;
   line-height: 1.5;
+}
+.sl-markdown-content .bay .canvas-branch-icon .guide-icon {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 @media (max-width: 40rem) {
   .sl-markdown-content .bay .canvas-hint {

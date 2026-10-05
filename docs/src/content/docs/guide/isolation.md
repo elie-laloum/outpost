@@ -1,23 +1,17 @@
 ---
-title: "Isolation"
-description: "Decide what an agent can reach from its sandbox: outbound traffic, your Git metadata, the variables you declare, and the boundaries Outpost does not claim to enforce."
+title: "Choose isolation settings"
+description: "Combine execution, Git and network controls according to the access your task needs."
 ---
 
 ## Layers you set yourself
 
-An agent works in a sandbox, not on your machine. Each layer below is chosen on the provider, independently of the agent and the brief.
+Choose the execution environment first, then configure its Git, network and credential access. These controls belong to the sandbox provider and apply independently of the agent’s instructions. The local provider runs directly on your machine without isolation.
 
 <!-- features -->
 
 - [Network restrictions](../network-restrictions/): Block all outbound traffic, or allow only the hosts the agent really needs.
-  - `deny-all`
-  - `allowlist`
 - [Private Git](../private-git/): Give the container its own checkout instead of your mounted worktree.
-  - `repositoryMode`
-  - `isolated`
 - [Environment variables](../environment-variables/): Declare which values reach the sandbox, the agent or a single command.
-  - `environment`
-  - `.outpost/.env`
 - [Cloud sandboxes](../cloud-sandboxes/): Move the work off your machine, onto a hosted sandbox.
   - Vercel
   - Daytona
@@ -28,7 +22,7 @@ An agent works in a sandbox, not on your machine. Each layer below is chosen on 
   - credentials
   - mounts
 
-## Close a container down
+## Restrict a container’s access
 
 :::caution[Experimental]
 Egress policies and private Git are opt-in prototypes. Check that your provider enforces a policy before you rely on it.

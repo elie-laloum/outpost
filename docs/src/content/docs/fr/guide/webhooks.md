@@ -1,42 +1,49 @@
 ---
-title: "Webhooks"
-description: "Recevoir des événements GitHub, GitLab, Slack et Standard Webhooks vérifiés, et transformer ceux qui vous intéressent en jobs de file."
+title: "Lancer du travail depuis des webhooks"
+description: "Vérifiez les événements reçus et publiez les jobs du workflow correspondant dans une file."
 ---
 
 ## Recevoir un webhook et publier un job
 
-`serveTriggers()` démarre un serveur HTTP avec une route par émetteur. Chaque route vérifie la requête avec une **source**, puis son `on(event)` renvoie un job à publier, ou `undefined` pour ignorer l’événement.
+Utilisez une source de webhook pour vérifier la requête reçue, puis associez l’événement accepté à un job de la file. `serveTriggers()` traite la requête HTTP ; les workers exécutent le workflow après la publication.
 
-```ts title="server.mts"
-import {
-  createGithubWebhook,
-  createSqliteTaskQueue,
-  labelAdded,
-  serveTriggers,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const secret = process.env.GITHUB_WEBHOOK_SECRET;
+```ts title="label-job.ts"
+import type { TriggerRoute } from "@elie-laloum/outpost";
+import { labelAdded } from "@elie-laloum/outpost";
+
+export const on: TriggerRoute["on"] = (event) => {
+  const issue = labelAdded(event, "outpost:fix");
+  if (!issue) return undefined;
+  return {
+    handler: "fix",
+    runId: `${issue.repository}#${issue.number}`,
+    input: { repository: issue.repository, issue: issue.number },
+  };
+};
+```
+
+```ts title="github-route.ts"
+import { createGithubWebhook } from "@elie-laloum/outpost";
+import { on } from "./label-job.ts";
+
+export const secret = process.env.GITHUB_WEBHOOK_SECRET;
 if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
+export const routes = [
+  { path: "/github", source: createGithubWebhook({ secret }), on },
+];
+```
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const server = await serveTriggers({
+```ts title="server.ts"
+import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
+import { routes } from "./github-route.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const server = await serveTriggers({
   queue,
   port: 8787,
-  routes: [
-    {
-      path: "/github",
-      source: createGithubWebhook({ secret }),
-      on(event) {
-        const issue = labelAdded(event, "outpost:fix");
-        if (!issue) return undefined;
-        return {
-          handler: "fix",
-          runId: `${issue.repository}#${issue.number}`,
-          input: { repository: issue.repository, issue: issue.number },
-        };
-      },
-    },
-  ],
+  routes,
   onError: (error, failure) => console.error(failure, error),
 });
 console.log(`Listening on ${server.url}`);
@@ -44,19 +51,22 @@ console.log(`Listening on ${server.url}`);
 
 Ajouter le label `outpost:fix` à une issue ou à une pull request publie un job `fix` dans la file. Un worker l’exécute avec `defineWorkflowJob()` : voir [Files de jobs et workers](../job-queues/).
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Serveur**: Répond à l’émetteur en quelques secondes.
-   - **Vérifier**: La source contrôle la signature, sinon la réponse est `401`.
-     - `createGithubWebhook()`
-   - **Router**: `on(event)` renvoie un job, ou `undefined` pour ignorer l’événement.
-     - `labelAdded()`
-     - `commandIssued()`
-   - **Publier**: Le job entre dans la file sous l’identifiant `trigger:<path>:<delivery>`.
-     - `serveTriggers()`
-2. **Worker**: Exécute le job dans son propre processus.
-   - **Exécuter**: Un workflow avec checkpoint, sous le `runId` du job.
-     - `defineWorkflowJob()`
+- **Serveur**: Répond à l’émetteur en quelques secondes.
+  - Étapes
+  - **Vérifier**: La source contrôle la signature, sinon la réponse est `401`.
+    - `createGithubWebhook()`
+  - **Router**: `on(event)` renvoie un job, ou `undefined` pour ignorer l’événement.
+    - `labelAdded()`
+    - `commandIssued()`
+  - **Publier**: Le job entre dans la file sous l’identifiant `trigger:<path>:<delivery>`.
+    - `serveTriggers()`
+  - → **Worker**: puis
+- **Worker**: Exécute le job dans son propre processus.
+  - Étapes
+  - **Exécuter**: Un workflow avec checkpoint, sous le `runId` du job.
+    - `defineWorkflowJob()`
 
 Un job nomme un `handler` enregistré par le worker, un `runId` de 256 caractères au plus et un `input` JSON facultatif. Gardez `on()` rapide : GitHub attend une réponse pendant 10 secondes, Slack pendant 3 secondes.
 
@@ -74,26 +84,13 @@ Préférez un jeton de signature GitLab : un jeton simple circule tel quel dans 
 
 ## Lire l’événement
 
-Deux helpers reconnaissent les événements courants et renvoient `undefined` pour tout le reste.
+Deux fonctions utilitaires reconnaissent les événements courants et renvoient `undefined` pour tout le reste.
 
-| Helper                             | Reconnaît                                                                                                         | Renvoie                                                    |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `labelAdded(event, "outpost:fix")` | Le label, tout juste ajouté à une issue ou une pull request GitHub, ou à une issue ou une merge request GitLab.   | `repository`, `number`, `target`, `label`                  |
-| `commandIssued(event, "/outpost")` | Une ligne qui commence par la commande dans un nouveau commentaire GitHub ou GitLab, ou une commande slash Slack. | `text` après la commande, `repository`, `number`, `target` |
+Référence API : [labelAdded](../../reference/labeladded/), [commandIssued](../../reference/commandissued/) et [TriggerEvent](../../reference/triggerevent/).
 
-`target` vaut `"issue"` ou `"pull-request"` ; pour une merge request GitLab, `number` est son IID. Une commande Slack ne porte que `text`.
+Consultez le contrat de l’événement pour traiter un autre type de livraison.
 
-Pour les autres événements, lisez les champs de `TriggerEvent` :
-
-| Champ        | Contient                                                                                                                           |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `source`     | `github`, `gitlab`, `slack`, ou l’option `source` de Standard Webhooks (`standard` par défaut).                                    |
-| `delivery`   | L’identifiant de livraison de l’émetteur.                                                                                          |
-| `kind`       | L’événement GitHub, l’`object_kind` GitLab, `command` ou le type d’interaction Slack, ou le `type` de la charge Standard Webhooks. |
-| `action`     | La sous-action, comme `labeled`, ou le nom de la commande Slack.                                                                   |
-| `actor`      | L’identité de l’émetteur, comme dans le tableau des sources.                                                                       |
-| `payload`    | Le corps analysé, en JSON, à vérifier avant usage.                                                                                 |
-| `receivedAt` | L’heure ISO de la vérification.                                                                                                    |
+Référence API : [TriggerEvent](../../reference/triggerevent/).
 
 ## Autoriser les émetteurs
 
@@ -117,7 +114,7 @@ function fromCommand(event: TriggerEvent): TriggerJob | undefined {
 }
 ```
 
-Passez `fromCommand` comme `on` d’une route. `event.actor` n’est pas un acteur de gate Outpost : les [approbations](../approvals/) authentifient leurs décideurs séparément.
+Passez `fromCommand` comme `on` d’une route. `event.actor` n’est pas un acteur d’étape d’approbation Outpost : les [approbations](../approvals/) authentifient leurs décideurs séparément.
 
 ## Lire la réponse HTTP
 
@@ -135,13 +132,13 @@ Passez `fromCommand` comme `on` d’une route. `event.actor` n’est pas un acte
 
 Les routes Slack répondent `200` avec un corps vide au lieu de `202` et `204`. `onError` reçoit le `path`, l’étape `stage` (`verify`, `route` ou `enqueue`) et la `delivery` de l’échec, jamais un secret.
 
-## Dédupliquer les relivraisons
+## Éviter les jobs en double
 
 L’identifiant du job contient l’identifiant de livraison. Une nouvelle tentative de l’émetteur ou une relivraison manuelle le réutilise : la file garde un seul job tant qu’elle le conserve.
 
-Une nouvelle livraison publie un nouveau job, même pour le même événement, comme un label ajouté à nouveau. C’est le `runId` qui décide si le travail est refait. Les handlers qui publient un résultat ont toujours besoin de leurs propres [clés d’idempotence](../job-queues/).
+Une nouvelle livraison publie un nouveau job, même pour le même événement, comme un label ajouté à nouveau. C’est le `runId` qui décide si le travail est refait. Les traitements qui publient un résultat ont toujours besoin de leurs propres [clés d’idempotence](../job-queues/).
 
-## Dériver l’exécution de la charge
+## Identifier l’exécution à partir de l’événement
 
 Construisez le `runId` à partir de ce qui identifie le travail dans la charge : `owner/name#12`, ou un commit de tête. Les jobs de même `runId` et de même `input` partagent un [checkpoint](../durable-runs/) : `defineWorkflowJob()` restaure les tâches déjà terminées au lieu de les relancer.
 
@@ -149,7 +146,7 @@ Un `input` différent sous le même `runId` échoue sur un checkpoint incompatib
 
 Les signatures GitHub ne portent pas d’horodatage : une requête interceptée peut être rejouée sous un nouvel identifiant de livraison. Un `runId` dérivé de la charge fait converger ce rejeu vers la même exécution. La recette [Relire une pull request à la demande](../review-on-label/) associe chaque exécution au commit de tête.
 
-## Faire tourner un secret
+## Renouveler un secret
 
 Chaque option de secret accepte aussi une fonction qui renvoie les secrets acceptés à cet instant. La source l’appelle à chaque requête.
 

@@ -1,36 +1,28 @@
 ---
-title: "Integration ports"
-description: "Six contracts plug another agent CLI, sandbox, model API, store or queue into Outpost. You implement one; Outpost keeps running everything around it."
+title: "Extend Outpost"
+description: "Find the contract to implement when adding an agent, sandbox, model service, store or queue."
 ---
 
-## Pick the port
+## Choose a contract to implement
 
-Each port owns one responsibility. Implement the one that matches what you want to plug in.
+Choose the contract that matches the integration you want to add. Each contract has one responsibility, so you can implement an agent adapter, sandbox provider or storage transport without replacing the rest of Outpost.
 
 <!-- features -->
 
 - [Add a CLI agent](../custom-agents/): Build the command that starts the CLI and decode its output lines.
-  - `CliHarness`
-  - `AgentAdapter`
 - [Native conversation formats](../conversation-formats/): Find, capture and restore the transcripts a CLI writes.
-  - `ConversationStore`
 - [Add a sandbox provider](../custom-sandbox-providers/): Allocate an environment, run commands, transfer files, release it.
-  - `SandboxProvider`
-  - `SandboxLease`
 - [Model providers](../model-providers/): Send the built-in harness’s requests to a model API.
-  - `ModelProvider`
 - [Where data lives](../storage/): Read, list and conditionally write versioned bytes for every durable store.
-  - `Transport`
 - [Job queues](../job-queues/): Persist jobs, fence worker leases and keep their results.
-  - `TaskQueue`
 
-## Swap one port, keep the rest
+## Replace one integration
 
-Ports do not know each other. An adapter only builds a command and reads lines; any sandbox runs it. A provider runs commands without knowing which agent sent them.
+An agent adapter describes the command and decodes its output. A sandbox provider executes that command. Keeping these responsibilities separate lets the same adapter work with different providers.
 
 ```ts
 import { createAgent, dispatch, type AgentAdapter } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 const mycli: AgentAdapter = {
   name: "mycli",
@@ -54,7 +46,7 @@ Moving this agent to your own sandbox changes only `sandboxProvider`. Storing ch
 
 ## What Outpost keeps doing
 
-Your implementation stays small because the runtime around it does not change.
+Outpost continues to manage the lifecycle around your integration. Your adapter or provider implements its own contract while the application handles the following operations.
 
 <!-- features -->
 
@@ -73,7 +65,7 @@ For a sandbox provider, `diagnose()` runs a bounded probe against a real sandbox
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ sandboxProvider, repository });
 const report = await sandbox.diagnose({ transfers: true });
@@ -84,7 +76,7 @@ console.log(report.hasFailures, report.checks);
 Mock tests prove the protocol, not the environment. Mounts, tmpfs, terminals and network isolation need a test against the real engine.
 :::
 
-## Ship optional SDKs separately
+## Keep optional dependencies separate
 
 Load a vendor SDK only from your integration’s own entry point, and declare it as an optional peer dependency. Outpost does the same: `@elie-laloum/outpost/providers/vercel`, `/transports/s3` and `/queues/bullmq` load their SDKs, the core import does not.
 

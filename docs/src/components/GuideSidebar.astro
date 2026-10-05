@@ -1,6 +1,7 @@
 ---
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
 import NavFooter from "./NavFooter.astro";
+import { currentLink } from "./docs-route.ts";
 
 const guide = Astro.locals.starlightRoute.sidebar[0];
 ---
@@ -9,11 +10,15 @@ const guide = Astro.locals.starlightRoute.sidebar[0];
   {
     guide?.type === "group" &&
       guide.entries.map(
-        (group) =>
+        (group, index) =>
           group.type === "group" && (
             <section>
-              <h2>{group.label}</h2>
-              <SidebarSublist sublist={group.entries} />
+              <details open={index === 0 || Boolean(currentLink(group.entries))}>
+                <summary>
+                  <h2>{group.label}</h2>
+                </summary>
+                <SidebarSublist sublist={group.entries} />
+              </details>
             </section>
           ),
       )

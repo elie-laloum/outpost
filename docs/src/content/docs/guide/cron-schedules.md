@@ -1,52 +1,54 @@
 ---
-title: "Cron schedules"
-description: "Publish a workflow job at each cron slot, in your time zone, without duplicates across restarts and replicas."
+title: "Schedule recurring runs"
+description: "Publish workflow jobs on a cron schedule with an explicit time zone."
 ---
 
 ## Publish a job on a schedule
 
-`createCronSchedule()` reads a cron expression in an IANA time zone. `runSchedules()` publishes one queue job per slot until its signal aborts.
+Create a schedule with `createCronSchedule()` and give it a cron expression and time zone. `runSchedules()` publishes a queue job at each matching time until you abort its signal; a worker runs the job separately.
 
-```ts title="scheduler.mts"
-import {
-  createCronSchedule,
-  createSqliteTaskQueue,
-  runSchedules,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const timeZone = "Europe/Paris";
-// en-CA formats the local date as YYYY-MM-DD.
-const day = (slot: Date) => slot.toLocaleDateString("en-CA", { timeZone });
+```ts title="audit-schedule.ts"
+import { createCronSchedule } from "@elie-laloum/outpost";
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const stop = new AbortController();
+export const timeZone = "Europe/Paris";
+export const day = (slot: Date) =>
+  slot.toLocaleDateString("en-CA", { timeZone });
+export const schedules = [
+  {
+    name: "nightly-audit",
+    cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
+    handler: "audit",
+    runId: (slot: Date) => `audit-${day(slot)}`,
+    input: (slot: Date) => ({ day: day(slot) }),
+  },
+];
+```
+
+```ts title="scheduler.ts"
+import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import { schedules } from "./audit-schedule.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
-  await runSchedules({
-    queue,
-    signal: stop.signal,
-    schedules: [
-      {
-        name: "nightly-audit",
-        cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
-        handler: "audit",
-        runId: (slot) => `audit-${day(slot)}`,
-        input: (slot) => ({ day: day(slot) }),
-      },
-    ],
-  });
+  await runSchedules({ queue, signal: stop.signal, schedules });
 } finally {
   queue.close();
 }
 ```
 
-```sh
-node scheduler.mts
-```
+### Run the script
 
 At 02:00 Paris time, Monday to Friday, the scheduler publishes a job for the `audit` handler with a `runId` such as `audit-2026-09-30`. Ctrl+C aborts the signal and `runSchedules()` resolves.
 
-Without `timeZone`, the expression is evaluated in UTC. `runId` defaults to `<name>:<slot ISO time>` and `input` to `null`.
+```sh
+node scheduler.ts
+```
+
+API reference: [CronOptions](../../reference/cronoptions/).
 
 ## Run the published jobs
 

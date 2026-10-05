@@ -1,39 +1,43 @@
 ---
-title: "Artifacts"
-description: "Publish a large or binary result once, as a typed and versioned object, and pass a small verified reference between tasks and processes."
+title: "Share files and reports"
+description: "Store task outputs as artifacts and pass references between tasks or processes."
 ---
 
 ## Publish and read an artifact
 
-An artifact is a payload stored under its digest, with a contract that encodes and validates it. `publishArtifact()` stores the payload and returns a reference; `readStoredArtifact()` reads it back.
+Use an artifact when a task produces a file or report that you want to store separately from its result. `publishArtifact()` encodes and stores the content, then returns a reference that `readStoredArtifact()` can use to read it back.
 
-```ts
-import { z } from "zod";
+<!-- tabs -->
+
+```ts title="coverage.ts"
 import {
+  defineJsonArtifact,
   createArtifactStore,
   createLocalTransport,
-  defineJsonArtifact,
-  publishArtifact,
-  readStoredArtifact,
 } from "@elie-laloum/outpost";
+import { z } from "zod";
 
-const coverage = defineJsonArtifact({
+export const coverage = defineJsonArtifact({
   name: "coverage-report",
   version: "1",
   schema: z.object({ lines: z.number(), files: z.array(z.string()) }),
 });
-const store = createArtifactStore({
+export const store = createArtifactStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
+```
 
-const reference = await publishArtifact(
+```ts title="publish.ts"
+import { publishArtifact, readStoredArtifact } from "@elie-laloum/outpost";
+import { store, coverage } from "./coverage.ts";
+
+export const reference = await publishArtifact(
   store,
   coverage,
   { lines: 87.5, files: ["src/parser.ts"] },
   { producer: { executionId: "nightly-42", taskKey: "coverage", attempt: 1 } },
 );
 console.log(await readStoredArtifact(store, coverage, reference));
-// { lines: 87.5, files: [ 'src/parser.ts' ] }
 ```
 
 <!-- check:run -->
@@ -64,34 +68,44 @@ Change `version` when the format changes. A contract with another name, version 
 
 `defineArtifactTask()` takes the usual task options plus `store`, `contract` and `produce(context)`. Its output is the reference; `readArtifact()` reads it from a task listed in `after`.
 
-```ts
-import { z } from "zod";
+<!-- tabs -->
+
+```ts title="findings.ts"
 import {
+  defineJsonArtifact,
   createArtifactStore,
   createLocalTransport,
-  defineArtifactTask,
-  defineJsonArtifact,
-  defineTask,
-  defineWorkflow,
-  readArtifact,
 } from "@elie-laloum/outpost";
+import { z } from "zod";
 
-const findings = defineJsonArtifact({
+export const findings = defineJsonArtifact({
   name: "audit-findings",
   version: "1",
   schema: z.array(z.object({ file: z.string(), issue: z.string() })),
 });
-const store = createArtifactStore({
+export const store = createArtifactStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
+```
 
-const audit = defineArtifactTask({
+```ts title="audit.ts"
+import { defineArtifactTask } from "@elie-laloum/outpost";
+import { store, findings } from "./findings.ts";
+
+export const audit = defineArtifactTask({
   key: "audit",
   store,
   contract: findings,
   produce: () => [{ file: "src/parser.ts", issue: "Unchecked input length" }],
 });
-const summary = defineTask({
+```
+
+```ts title="summary.ts"
+import { defineTask, readArtifact } from "@elie-laloum/outpost";
+import { audit } from "./audit.ts";
+import { findings, store } from "./findings.ts";
+
+export const summary = defineTask({
   key: "summary",
   after: [audit],
   perform: async (context) => {
@@ -99,11 +113,16 @@ const summary = defineTask({
     return `${items.length} finding(s) in ${items[0]?.file}`;
   },
 });
+```
 
-const result = await defineWorkflow("audit", [audit, summary]).start();
+```ts title="audit-report.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { audit } from "./audit.ts";
+import { summary } from "./summary.ts";
+
+export const result = await defineWorkflow("audit", [audit, summary]).start();
 result.unwrap();
 console.log(result.value(summary));
-// 1 finding(s) in src/parser.ts
 ```
 
 <!-- check:run -->
@@ -164,7 +183,7 @@ const report = await readStoredArtifact(store, coverage, saved);
 
 ## Limits
 
-- `maxBytes` (16 MiB by default) caps each artifact, on publish and on read; the whole payload is held in memory.
+- An artifact’s contents are held in memory during publication and reading. To choose a size limit, see [ArtifactStoreOptions](../../reference/artifactstoreoptions/).
 - A published artifact is immutable. Outpost never deletes one: expire old objects with your storage’s own rules.
 
 API: [defineJsonArtifact](../../reference/definejsonartifact/) · [defineBinaryArtifact](../../reference/definebinaryartifact/) · [createArtifactStore](../../reference/createartifactstore/) · [publishArtifact](../../reference/publishartifact/) · [readStoredArtifact](../../reference/readstoredartifact/) · [defineArtifactTask](../../reference/defineartifacttask/) · [readArtifact](../../reference/readartifact/) · [ArtifactReference](../../reference/artifactreference/)

@@ -1,15 +1,15 @@
 ---
 title: "Votre première tâche"
-description: "Exécuter un agent sur votre dépôt, lire sa réponse, puis le laisser commiter une modification sur une branche séparée."
+description: "Écrivez un script TypeScript, lancez un agent et examinez sa réponse et ses commits."
 ---
 
-## Écrire un script de revue
+## Créer le script
 
-Partez du `outpost.config.mts` écrit dans [Installation](../setup/). `dispatch()` exécute une tâche d’agent dans une sandbox neuve. Le brief est son instruction ; la branche nommée tient ses modifications à l’écart de votre checkout.
+Créez `review.ts` à côté de la configuration de la page [Installation](../setup/). Ce premier script demande à l’agent de lire le README et de présenter ses observations. `dispatch()` ouvre une nouvelle sandbox, et la branche nommée donne à la tâche sa propre copie du dépôt.
 
-```ts title="review.mts"
+```ts title="review.ts"
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -25,27 +25,23 @@ console.log(result.usage);
 console.log(result.commits);
 ```
 
-## L’exécuter et lire le résultat
+## Exécuter le script
+
+Le script affiche les observations de l’agent une fois la tâche terminée. Cette demande porte sur une lecture sans modification : aucun nouveau commit n’est donc attendu.
 
 ```sh
-node review.mts
+node review.ts
 ```
 
-Le script affiche trois champs quand l’agent a terminé.
-
-| Champ     | Contenu                                                                                        |
-| --------- | ---------------------------------------------------------------------------------------------- |
-| `text`    | La réponse de l’agent : ce qu’il a relevé dans le README.                                      |
-| `usage`   | Les tokens déclarés, payés selon l’[authentification](../authentication/) du harness.          |
-| `commits` | Les nouveaux commits (`oid`, `subject`). Vide ici : le brief ne demandait aucune modification. |
+Référence API : [DispatchResult](../../reference/dispatchresult/) et [Usage](../../reference/usage/).
 
 ## Demander une modification
 
-Copiez `review.mts` dans `fix.mts`, avec une nouvelle branche et un brief qui demande un commit. Gardez l’original pour [Exécuter en CI](../ci-automation/).
+Pour demander à l’agent de modifier le dépôt, créez `fix.ts` avec un autre nom de branche et des consignes demandant un commit. Gardez `review.ts` si vous souhaitez réutiliser la demande de lecture dans la [CI](../ci-automation/).
 
-```ts title="fix.mts"
+```ts title="fix.ts"
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -60,7 +56,7 @@ console.log(result.text);
 console.log(result.commits);
 ```
 
-Lancez `node fix.mts`, puis relisez la branche. Elle part de votre `HEAD` et reste en place après l’exécution ; changez de nom à chaque tâche.
+Lancez `node fix.ts`, puis examinez les commits et les modifications avec les commandes ci-dessous. Une nouvelle branche nommée part de votre `HEAD` et reste disponible après la tâche. Utilisez un nom différent pour chaque tâche indépendante ; une branche qui existe déjà est réutilisée.
 
 ```sh
 git log --oneline HEAD..outpost/readme-fix
@@ -68,10 +64,10 @@ git diff HEAD...outpost/readme-fix
 ```
 
 :::note
-`result.text` est ce que l’agent affirme. Vérifiez la branche ou lancez vos tests avant de vous y fier.
+La réponse décrit ce que l’agent dit avoir fait. Examinez les modifications et lancez les vérifications nécessaires avant d’accepter le travail.
 :::
 
-## Ce qui s’est passé
+## Comprendre l’exécution
 
 Outpost a ouvert un worktree sous `.outpost/workspaces/`, exécuté l’agent dans une sandbox, puis fermé la sandbox en gardant la branche. La page [Fonctionnement](../how-it-works/) détaille ce cycle de vie.
 

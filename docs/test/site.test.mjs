@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
 for (const [locale, title, reference] of [
@@ -10,8 +10,13 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(12);
-    await expect(page.locator(".docs-navigation details")).toHaveCount(0);
+    await expect(page.locator(".docs-navigation summary h2")).toHaveCount(12);
+    await expect(page.locator(".docs-navigation details[open]")).toHaveCount(1);
+    const agents = page.locator(".docs-navigation details").filter({
+      has: page.getByRole("heading", { name: "Agents", exact: true }),
+    });
+    await agents.locator("summary").click();
+    await expect(agents.getByRole("link", { name: /Codex/ })).toBeVisible();
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");
     await spaces.getByRole("link", { name: reference, exact: true }).click();
@@ -234,7 +239,7 @@ test("short request snippet copies exactly with the keyboard", async ({
     "utf8",
   );
   const expected = markdown
-    .match(/```ts title="review\.mts"\n([\s\S]*?)```/)[1]
+    .match(/```ts title="review\.ts"\n([\s\S]*?)```/)[1]
     .trimEnd();
   const code = page.locator("pre").filter({ hasText: "outpost/readme-review" });
   const copy = code.locator("..").getByRole("button", { name: "Copy code" });
@@ -259,7 +264,7 @@ for (const locale of ["", "fr/"]) {
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     const setup = page
       .locator(".docs-navigation a")
-      .filter({ hasText: locale ? /^Installation$/ : /^Setup$/ });
+      .filter({ hasText: /^Installation$/ });
     await expect(setup).toBeVisible();
     await setup.click();
     await expect(page).toHaveURL(/\/guide\/setup\/$/);
@@ -529,6 +534,163 @@ for (const locale of ["", "fr/"]) {
 }
 
 for (const locale of ["", "fr/"]) {
+  test(`notices span the content with visible theme colors (${locale || "en"})`, async ({
+    page,
+  }) => {
+    for (const width of [390, 800, 1440, 1920, 2560]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const route of [
+        "guide/first-request/",
+        "guide/harness-permissions/",
+        "guide/host-process/",
+        "reference/speculate/",
+        "reference/overview/speculation/",
+      ]) {
+        await page.goto(`${locale}${route}`);
+        const article = page.locator(".sl-markdown-content");
+        const frame = page.locator(".docs-pane");
+        const asides = article.locator(".starlight-aside");
+        await expect(asides.first()).toBeVisible();
+        for (const theme of ["light", "dark"]) {
+          await page.evaluate((value) => {
+            document.documentElement.dataset.theme = value;
+          }, theme);
+          const content = await frame.boundingBox();
+          const pane = await article.boundingBox();
+          expect(Math.abs(content.width - pane.width)).toBeLessThan(2);
+          if (width >= 1920) {
+            const rail = await page.locator(".docs-rail").boundingBox();
+            expect(content.x + content.width).toBeLessThanOrEqual(rail.x + 2);
+          }
+          for (const aside of await asides.all()) {
+            const notice = await aside.boundingBox();
+            expect(Math.abs(notice.x - content.x)).toBeLessThan(2);
+            expect(Math.abs(notice.width - content.width)).toBeLessThan(2);
+            const colors = await aside.evaluate((element) => {
+              const style = getComputedStyle(element);
+              return {
+                background: style.backgroundColor,
+                border: style.borderInlineStartColor,
+                borderWidth: style.borderInlineStartWidth,
+                page: getComputedStyle(document.body).backgroundColor,
+              };
+            });
+            expect(colors.background).not.toBe(colors.page);
+            expect(colors.border).not.toBe(colors.background);
+            expect(colors.borderWidth).toBe("4px");
+          }
+          expect(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth <= window.innerWidth,
+            ),
+          ).toBe(true);
+        }
+      }
+    }
+    await page.goto(`${locale}guide/first-request/`);
+    const article = page.locator(".sl-markdown-content");
+    await expect(article.locator("table")).toHaveCount(0);
+    await article.getByRole("link", { name: "Usage", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}reference/usage/$`));
+    await expect(page.locator(".prop")).not.toHaveCount(0);
+  });
+
+  test(`every documentation notice spans the content section (${locale || "en"})`, async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1920, height: 900 });
+    const root = new URL("../dist/", import.meta.url);
+    let checked = 0;
+    for (const file of await readdir(root, { recursive: true })) {
+      if (
+        !file.endsWith("/index.html") ||
+        file.startsWith("fr/") !== Boolean(locale)
+      )
+        continue;
+      const html = await readFile(new URL(file, root), "utf8");
+      if (!html.includes('class="starlight-aside ')) continue;
+      await page.goto(file.replace(/index\.html$/, ""));
+      const results = await page.evaluate(() => {
+        const frame = document
+          .querySelector(".docs-pane")
+          .getBoundingClientRect();
+        return [...document.querySelectorAll(".starlight-aside")].map(
+          (aside) => {
+            const rect = aside.getBoundingClientRect();
+            return {
+              start: Math.abs(rect.x - frame.x),
+              width: Math.abs(rect.width - frame.width),
+            };
+          },
+        );
+      });
+      expect(results.length, file).toBeGreaterThan(0);
+      for (const notice of results) {
+        expect(notice.start, file).toBeLessThan(2);
+        expect(notice.width, file).toBeLessThan(2);
+        checked++;
+      }
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+        file,
+      ).toBe(true);
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  test(`guide snippets have explanations beside them and above them on mobile (${locale || "en"})`, async ({
+    page,
+  }) => {
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const slug of [
+        "speculation",
+        "setup",
+        "cloud-sandboxes",
+        "harness-permissions",
+        "harness-context",
+        "concurrency-and-retries",
+        "cli",
+      ]) {
+        await page.goto(`${locale}guide/${slug}/`);
+        const rows = page.locator(
+          '.sl-markdown-content .bay-row[data-bay="split"]',
+        );
+        expect(await rows.count(), slug).toBeGreaterThan(0);
+        for (const row of await rows.all()) {
+          const positions = await row.evaluate((element) => {
+            const explanation = [
+              ...element.querySelectorAll(".bay-say p, .bay-say li"),
+            ].find((paragraph) => {
+              const text = paragraph.textContent.trim();
+              return (
+                text && !/^(?:API(?: reference)?|Référence API)\s*:/i.test(text)
+              );
+            });
+            const code = element.querySelector(".bay-show");
+            return {
+              prose: explanation?.getBoundingClientRect().toJSON(),
+              code: code?.getBoundingClientRect().toJSON(),
+            };
+          });
+          expect(positions.prose, slug).toBeDefined();
+          expect(positions.code, slug).toBeDefined();
+          if (width === 1440)
+            expect(positions.prose.right, slug).toBeLessThanOrEqual(
+              positions.code.x,
+            );
+          if (width === 390)
+            expect(positions.prose.bottom, slug).toBeLessThanOrEqual(
+              positions.code.y,
+            );
+        }
+      }
+    }
+  });
+
   test(`pages lay code and contracts beside their prose (${locale || "en"})`, async ({
     page,
   }) => {
@@ -536,8 +698,8 @@ for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}guide/first-request/`);
     const split = page.locator('.bay[data-bay="split"]').first();
     await expect(split.locator(".bay-show pre").first()).toBeVisible();
-    const say = await split.locator(".bay-say").boundingBox();
-    const show = await split.locator(".bay-show").boundingBox();
+    const say = await split.locator(".bay-say").first().boundingBox();
+    const show = await split.locator(".bay-show").first().boundingBox();
     expect(show.x).toBeGreaterThanOrEqual(say.x + say.width - 1);
     await page.goto(`${locale}reference/dispatch/`);
     await expect(page.locator(".title-show")).toContainText(
@@ -562,40 +724,278 @@ for (const locale of ["", "fr/"]) {
 }
 
 for (const locale of ["", "fr/"]) {
+  for (const width of [1440, 390]) {
+    test(`guide card icons are visible (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const slug of [
+        "introduction",
+        "containers",
+        "verification-loops",
+        "fix-failing-ci",
+      ]) {
+        await page.goto(`${locale}guide/${slug}/`);
+        const cards = page.locator(
+          ".feature-cell, .path-cell, .canvas-node-head, .canvas-branch",
+        );
+        expect(await cards.count()).toBeGreaterThan(0);
+        for (const card of await cards.all()) {
+          const icon = card.locator("svg.guide-icon");
+          await expect(icon).toHaveCount(1);
+          await expect(icon).toBeVisible();
+          await expect(icon).toHaveAttribute("aria-hidden", "true");
+        }
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth,
+          ),
+        ).toBe(true);
+      }
+    });
+
+    test(`footer actions share the full width (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const count of [1, 2, 3, 4]) {
+        await page.goto(
+          `${locale}guide/${count === 1 ? "introduction" : "containers"}/`,
+        );
+        const pager = page.locator(".docs-footer .pager");
+        await expect(pager.locator("a")).toHaveCount(count === 1 ? 1 : 2);
+        if (count > 2) {
+          await pager.evaluate((nav, count) => {
+            while (nav.children.length < count)
+              nav.append(nav.lastElementChild.cloneNode(true));
+          }, count);
+        }
+        const dimensions = await pager.evaluate((nav) => ({
+          width: nav.getBoundingClientRect().width,
+          actions: [...nav.children].map(
+            (action) => action.getBoundingClientRect().width,
+          ),
+        }));
+        expect(dimensions.actions).toHaveLength(count);
+        for (const action of dimensions.actions) {
+          expect(Math.abs(action - dimensions.width / count)).toBeLessThan(1);
+        }
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth,
+          ),
+        ).toBe(true);
+      }
+    });
+  }
+
   test(`guide components render as linked cells (${locale || "en"})`, async ({
     page,
   }) => {
     await page.goto(`${locale}guide/introduction/`);
     const features = page.locator("ul.features").first();
-    await expect(features.locator("a.feature-cell")).toHaveCount(12);
+    await expect(features.locator("a.feature-cell")).toHaveCount(6);
     await expect(features.locator(".feature-icon svg").first()).toBeVisible();
-    await expect(page.locator("ol.path a.path-cell")).toHaveCount(4);
+    await expect(page.locator("ol.path a.path-cell")).toHaveCount(3);
     await features.locator("a.feature-cell").first().click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/briefs/$`));
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/how-it-works/`);
+    await expect(page.locator(".sl-markdown-content table")).toHaveCount(2);
+    await expect(page.locator(".sl-markdown-content pre")).toHaveCount(2);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  });
+}
+
+for (const locale of ["", "fr/"]) {
+  test(`code tabs support native touch scrolling without scripts (${locale || "en"})`, async ({
+    browser,
+    baseURL,
+  }) => {
+    const context = await browser.newContext({
+      baseURL,
+      viewport: { width: 390, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+      javaScriptEnabled: false,
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(`${locale}guide/compete-agents/`);
+      const tabs = page.locator(".code-tabs").first();
+      const strip = tabs.locator(".code-tab-list");
+      await strip.scrollIntoViewIfNeeded();
+      const bounds = await strip.boundingBox();
+      const session = await context.newCDPSession(page);
+      const y = bounds.y + 15;
+      for (let swipe = 0; swipe < 3; swipe++) {
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x: bounds.x + bounds.width - 20, y }],
+        });
+        for (let step = 1; step <= 10; step++) {
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [
+              {
+                x:
+                  bounds.x +
+                  bounds.width -
+                  20 -
+                  ((bounds.width - 40) * step) / 10,
+                y,
+              },
+            ],
+          });
+        }
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchEnd",
+          touchPoints: [],
+        });
+      }
+      await expect
+        .poll(() =>
+          strip.evaluate(
+            (el) => el.scrollWidth - el.clientWidth - el.scrollLeft,
+          ),
+        )
+        .toBeLessThanOrEqual(1);
+      await expect(tabs.locator(".code-tab-panel").first()).toBeVisible();
+      const last = await tabs.locator(".code-tab").last().boundingBox();
+      expect(last.x).toBeGreaterThanOrEqual(bounds.x);
+      expect(last.x + last.width).toBeLessThanOrEqual(
+        bounds.x + bounds.width + 1,
+      );
+      await page.touchscreen.tap(
+        last.x + last.width / 2,
+        last.y + last.height / 2,
+      );
+      await expect(tabs.locator(".code-tab-panel").last()).toBeVisible();
+    } finally {
+      await context.close();
+    }
+  });
+
+  for (const width of [390, 1440]) {
+    test(`all code files remain reachable by scrolling, dragging and keyboard (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${locale}guide/compete-agents/`);
+      const tabs = page.locator(".code-tabs").first();
+      const strip = tabs.locator(".code-tab-list");
+      const labels = tabs.locator(".code-tab");
+      const panels = tabs.locator(".code-tab-panel");
+      await expect(labels).toHaveCount(5);
+      await expect(strip).toHaveAttribute("data-overflow", "");
+      await strip.scrollIntoViewIfNeeded();
+      const isLastTabInside = () =>
+        strip.evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const last = element.lastElementChild.getBoundingClientRect();
+          return last.left >= bounds.left - 1 && last.right <= bounds.right + 1;
+        });
+      expect(await isLastTabInside()).toBe(false);
+      await strip.hover();
+      await page.mouse.wheel(150, 0);
+      await expect
+        .poll(() => strip.evaluate((el) => el.scrollLeft))
+        .toBeGreaterThan(0);
+      await page.mouse.wheel(0, 3000);
+      await expect.poll(isLastTabInside).toBe(true);
+      await expect(panels.first()).toBeVisible();
+      await labels.last().click();
+      await expect(panels.last()).toBeVisible();
+
+      await page.mouse.wheel(0, -3000);
+      await expect.poll(() => strip.evaluate((el) => el.scrollLeft)).toBe(0);
+      await labels.first().click();
+      const bounds = await strip.boundingBox();
+      const y = bounds.y + 15;
+      await page.mouse.move(bounds.x + bounds.width - 20, y);
+      await page.mouse.down();
+      await page.mouse.move(bounds.x + 20, y, { steps: 12 });
+      await page.mouse.up();
+      await expect
+        .poll(() => strip.evaluate((el) => el.scrollLeft))
+        .toBeGreaterThan(50);
+      await expect(panels.first()).toBeVisible();
+      await expect(strip).not.toHaveAttribute("data-dragging");
+      await page.mouse.wheel(0, 3000);
+      await expect.poll(isLastTabInside).toBe(true);
+      await labels.last().click();
+      await expect(panels.last()).toBeVisible();
+
+      await page.mouse.wheel(0, -3000);
+      await expect.poll(() => strip.evaluate((el) => el.scrollLeft)).toBe(0);
+      await labels.first().click();
+      const scrollY = await page.evaluate(() => window.scrollY);
+      await page.keyboard.press("ArrowLeft");
+      await expect(panels.last()).toBeVisible();
+      await expect.poll(isLastTabInside).toBe(true);
+      expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+    });
+  }
+
+  test(`sequential diagrams retain steps, tags and navigation in a canvas (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${locale}guide/verification-loops/`);
+    const canvas = page.locator("[data-canvas]").first();
+    await expect(page.locator(".flow")).toHaveCount(0);
+    await expect(canvas.locator(".canvas-node")).toHaveCount(3);
+    await expect(canvas.locator(".canvas-branch")).toHaveCount(7);
+    await expect(canvas.locator(".canvas-out > li")).toHaveCount(2);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(5);
+    await expect(canvas.locator(".canvas-branch .tags")).toContainText(
+      "LoopTaskExhausted",
+    );
+    await canvas.locator('[data-zoom="fit"]').click();
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText("100 %");
+    await page.goto(`${locale}guide/first-workflow/`);
+    const tabs = page.locator(".code-tabs").first();
+    await expect(tabs.locator(".code-tab")).toHaveCount(3);
+    await tabs.locator(".code-tab").last().click();
+    await expect(tabs.locator(".code-tab-panel").last()).toBeVisible();
+    await expect(tabs.locator(".code-tab-panel").last()).toContainText(
+      '"./fix-task.ts"',
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  });
+
+  test(`advanced guides keep diagrams, file lists and code tabs usable (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${locale}guide/fix-failing-ci/`);
     const canvas = page.locator("[data-canvas]");
-    await expect(canvas.locator(".canvas-node")).toHaveCount(11);
-    await expect(canvas.locator(".canvas-branch")).toHaveCount(12);
-    // 22 labelled links; the workflow's and the sandbox's fan out to five tasks and three agents.
-    await expect(canvas.locator(".canvas-label")).toHaveCount(22);
-    await expect(canvas.locator(".canvas-link")).toHaveCount(28);
-    // Hovering a gate lights only its exchange with the person.
-    await canvas.locator(".canvas-branch").filter({ hasText: "Gate" }).hover();
-    await expect(canvas).toHaveAttribute("data-focus", "");
-    await expect(canvas.locator(".canvas-link.is-lit")).toHaveCount(2);
-    await page.mouse.move(0, 0);
-    await expect(canvas).not.toHaveAttribute("data-focus", "");
+    await expect(canvas.locator(".canvas-node")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-branch")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-label")).toHaveCount(5);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(6);
     const world = canvas.locator(".canvas-world");
     const before = await world.getAttribute("style");
     await canvas.locator('[data-zoom="in"]').click();
     await expect(world).not.toHaveAttribute("style", before ?? "");
     await canvas.locator('[data-zoom="fit"]').click();
     await expect(canvas.locator(".canvas-scale")).not.toHaveText("100 %");
+    await page.goto(`${locale}guide/storage/`);
     await expect(page.locator("ul.files .file")).not.toHaveCount(0);
-    await expect(page.locator("ul.compare .compare-side")).toHaveCount(2);
-    await expect(page.locator("ul.features div.feature-cell")).toHaveCount(3);
-    await expect(page.locator("ol.cards .card")).toHaveCount(4);
+    await page.goto(`${locale}guide/development-workflow/`);
     const strip = page.locator(".code-tabs").first();
     await expect(strip.locator(".code-tab-panel:visible")).toHaveCount(1);
     await strip.locator(".code-tab").nth(1).click();
@@ -606,5 +1006,27 @@ for (const locale of ["", "fr/"]) {
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
+  });
+
+  test(`the guide opens the current topic and keeps installation focused on scripts (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}guide/storage/`);
+    const group = page.locator(".docs-navigation details").filter({
+      has: page.locator('a[aria-current="page"]'),
+    });
+    await expect(group).toHaveAttribute("open", "");
+    await expect(page.locator(".docs-navigation details[open]")).toHaveCount(2);
+    await page.goto(`${locale}guide/setup/`);
+    const article = page.locator(".sl-markdown-content");
+    await expect(article).toContainText("npm install @elie-laloum/outpost");
+    await expect(article).toContainText("npm pkg set type=module");
+    await expect(article).toContainText(
+      "--directory .outpost-image --image outpost:dev",
+    );
+    await expect(
+      article.locator("pre").filter({ hasText: "export const coder" }),
+    ).toHaveCount(1);
+    await expect(article).not.toContainText("node run.ts");
   });
 }

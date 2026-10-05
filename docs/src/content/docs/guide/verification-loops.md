@@ -1,25 +1,30 @@
 ---
-title: "Verification loops"
-description: "Let an agent try again with the check's feedback until the check accepts its work or the rounds run out, all in one workflow task."
+title: "Check work and retry"
+description: "Use test output or a review to accept an agent’s work or request another attempt."
 ---
 
 ## Repeat until a check accepts
 
-`defineLoopTask()` alternates two callbacks inside one workflow task: `attempt` produces a candidate, `check` accepts it or says what is wrong.
+Define an attempt and a check with `defineLoopTask()`. The check accepts the result or returns feedback for the next attempt. Set `maxRounds` so a result that never passes ends with a bounded failure.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Attempt**: Your `attempt(context, feedback)` returns a candidate.
-   - **First round**: The callback receives `undefined` as feedback.
-   - **Later rounds**: The callback receives the text of the last rejection.
-2. **Check**: Your `check(context, candidate)` returns a verdict.
-   - **Accept**: Return `{ done: true }`.
-   - **Reject**: Return `{ done: false, feedback }` with a text.
-3. **Next**: The verdict decides.
-   - **Next round**: A rejection feeds the next attempt.
-   - **Done**: The accepted candidate becomes the task's value.
-   - **Exhausted**: A rejection in the last round fails the task.
-     - `LoopTaskExhausted`
+- **Attempt**: Your `attempt(context, feedback)` returns a candidate.
+  - Steps
+  - **First round**: The callback receives `undefined` as feedback.
+  - **Later rounds**: The callback receives the text of the last rejection.
+  - → **Check**: then
+- **Check**: Your `check(context, candidate)` returns a verdict.
+  - Steps
+  - **Accept**: Return `{ done: true }`.
+  - **Reject**: Return `{ done: false, feedback }` with a text.
+  - → **Next**: then
+- **Next**: The verdict decides.
+  - Steps
+  - **Next round**: A rejection feeds the next attempt.
+  - **Done**: The accepted candidate becomes the task's value.
+  - **Exhausted**: A rejection in the last round fails the task.
+    - `LoopTaskExhausted`
 
 ```ts
 import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -50,37 +55,60 @@ Round 1 is rejected; round 2 receives the feedback and is accepted. `after`, `co
 
 The agent works in `attempt`, the tests run in `check`, both in one warm [sandbox](../sandbox-sessions/).
 
-```ts
-import {
-  createSandbox,
-  defineAgentTask,
-  defineLoopTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+Keep the sandbox, attempt and check separate so each step is easy to follow.
 
-await using sandbox = await createSandbox({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/fix-tests" },
-});
+<!-- tabs -->
 
-const fix = defineLoopTask({
-  key: "fix-tests",
-  maxRounds: 4,
-  async attempt(context, feedback) {
-    const coding = defineAgentTask({
-      key: "coder",
-      sandbox,
-      request: () => ({
-        brief: { text: `Fix the failing tests and commit.\n${feedback ?? ""}` },
-      }),
-    });
-    const result = await coding.perform(context);
+```ts title="loop-sandbox.ts"
+import { createSandbox } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+
+export function openLoopSandbox() {
+  return createSandbox({
+    repository,
+    sandboxProvider,
+    agent: coder,
+    branch: { mode: "named", name: "outpost/fix-tests" },
+  });
+}
+```
+
+```ts title="coding-task.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+
+export function codingTask(sandbox: Sandbox, feedback?: string) {
+  return defineAgentTask({
+    key: "coder",
+    sandbox,
+    request: () => ({
+      brief: { text: `Fix the failing tests and commit.\n${feedback ?? ""}` },
+    }),
+  });
+}
+```
+
+```ts title="loop-attempt.ts"
+import type { Sandbox, LoopTaskContext } from "@elie-laloum/outpost";
+import { codingTask } from "./coding-task.ts";
+
+export function createAttempt(sandbox: Sandbox) {
+  return async (context: LoopTaskContext, feedback: string | undefined) => {
+    const result = await codingTask(sandbox, feedback).perform(context);
     return { summary: result.text, commits: result.commits.length };
-  },
-  async check(context) {
+  };
+}
+```
+
+```ts title="loop-check.ts"
+import type {
+  Sandbox,
+  LoopTaskContext,
+  LoopCheckResult,
+} from "@elie-laloum/outpost";
+
+export function createCheck(sandbox: Sandbox) {
+  return async (context: LoopTaskContext): Promise<LoopCheckResult> => {
     const tests = await sandbox.command({
       executable: "npm",
       arguments: ["test"],
@@ -89,10 +117,38 @@ const fix = defineLoopTask({
     return tests.status === 0
       ? { done: true }
       : { done: false, feedback: `${tests.stdout}\n${tests.stderr}` };
-  },
-});
+  };
+}
+```
 
-const result = await defineWorkflow("fix-tests", [fix]).start();
+```ts title="fix-loop.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineLoopTask } from "@elie-laloum/outpost";
+import { createAttempt } from "./loop-attempt.ts";
+import { createCheck } from "./loop-check.ts";
+
+export function defineFix(sandbox: Sandbox) {
+  return defineLoopTask({
+    key: "fix-tests",
+    maxRounds: 4,
+    attempt: createAttempt(sandbox),
+    check: createCheck(sandbox),
+  });
+}
+```
+
+Run `run-loop.ts`; it keeps the sandbox open until the workflow finishes.
+
+<!-- tabs -->
+
+```ts title="run-loop.ts"
+import { openLoopSandbox } from "./loop-sandbox.ts";
+import { defineFix } from "./fix-loop.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
+
+await using sandbox = await openLoopSandbox();
+export const fix = defineFix(sandbox);
+export const result = await defineWorkflow("fix-tests", [fix]).start();
 result.unwrap();
 console.log(result.value(fix).summary);
 ```
@@ -109,45 +165,51 @@ A direct `sandbox.dispatch()` escapes the loop's budget and cancellation. Pass i
 
 `check` can dispatch a reviewer and turn its [typed response](../typed-responses/) into a verdict. Both agents count against the same budget.
 
-```ts
+<!-- tabs -->
+
+```ts title="review-settings.ts"
 import {
   createAgent,
   createClaudeHarness,
-  defineAgentTask,
   defineJsonResponse,
-} from "@elie-laloum/outpost";
-import type {
-  LoopCheckResult,
-  LoopTaskContext,
-  Sandbox,
 } from "@elie-laloum/outpost";
 import { z } from "zod";
 
-declare const sandbox: Sandbox;
-
-const reviewer = createAgent({
+export const reviewer = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),
 });
-const review = defineJsonResponse({
+export const review = defineJsonResponse({
   tag: "review",
   schema: z.object({ approved: z.boolean(), feedback: z.string() }),
 });
+export const brief = {
+  text: 'Review the last commit. End with <review>{"approved": false, "feedback": "What to change"}</review>.',
+};
+```
 
-async function reviewChanges(
-  context: LoopTaskContext,
-): Promise<LoopCheckResult> {
-  const reviewing = defineAgentTask({
+```ts title="reviewing-task.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+import { reviewer, review, brief } from "./review-settings.ts";
+
+export declare const sandbox: Sandbox;
+export function reviewingTask() {
+  return defineAgentTask({
     key: "reviewer",
     sandbox,
-    request: () => ({
-      agent: reviewer,
-      response: review,
-      brief: {
-        text: 'Review the last commit. End with <review>{"approved": false, "feedback": "What to change"}</review>.',
-      },
-    }),
+    request: () => ({ agent: reviewer, response: review, brief }),
   });
-  const { value } = await reviewing.perform(context);
+}
+```
+
+```ts title="review-changes.ts"
+import type { LoopTaskContext, LoopCheckResult } from "@elie-laloum/outpost";
+import { reviewingTask } from "./reviewing-task.ts";
+
+export async function reviewChanges(
+  context: LoopTaskContext,
+): Promise<LoopCheckResult> {
+  const { value } = await reviewingTask().perform(context);
   return value.approved
     ? { done: true }
     : { done: false, feedback: value.feedback };

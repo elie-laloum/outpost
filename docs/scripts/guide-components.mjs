@@ -1,10 +1,9 @@
 // Guide components: an HTML comment such as `<!-- features -->` turns the next Markdown list into a drawn component.
-import { icon, iconForHref } from "./guide-icons.mjs";
+import { icon, iconForHref, iconForTitle } from "./guide-icons.mjs";
 
 const builders = {
   features,
   path,
-  flow,
   canvas,
   files,
   compare,
@@ -36,7 +35,6 @@ let locale = "en";
 export const componentClasses = [
   "features",
   "path",
-  "flow",
   "canvas",
   "files",
   "compare",
@@ -103,13 +101,10 @@ function features(list) {
     { className: ["features"], role: "list" },
     items(list).map((item) => {
       const { title, href, text, nested } = parseItem(item);
-      const body = [element("span", { className: ["feature-title"] }, title)];
-      if (href)
-        body.unshift(
-          element("span", { className: ["feature-icon"] }, [
-            icon(iconForHref(href)),
-          ]),
-        );
+      const body = [
+        cardIcon("feature-icon", title, href),
+        element("span", { className: ["feature-title"] }, title),
+      ];
       if (text.length)
         body.push(element("span", { className: ["feature-text"] }, text));
       if (nested) body.push(tags(nested));
@@ -129,9 +124,7 @@ function path(list) {
     items(list).map((item) => {
       const { title, href, text } = parseItem(item);
       const body = [
-        element("span", { className: ["path-icon"] }, [
-          icon(iconForHref(href)),
-        ]),
+        cardIcon("path-icon", title, href),
         element("span", { className: ["path-title"] }, title),
       ];
       if (text.length)
@@ -140,40 +133,6 @@ function path(list) {
         href
           ? element("a", { className: ["path-cell"], href }, body)
           : element("div", { className: ["path-cell"] }, body),
-      ]);
-    }),
-  );
-}
-
-// Phases in sequence, each listing its steps; nested lists under a step become tags.
-function flow(list) {
-  return element(
-    "ol",
-    { className: ["flow"], role: "list" },
-    items(list).map((phase) => {
-      const { title, text, nested } = parseItem(phase);
-      const head = [
-        element("span", { className: ["flow-phase-title"] }, title),
-      ];
-      if (text.length)
-        head.push(element("span", { className: ["flow-phase-text"] }, text));
-      const steps = nested
-        ? items(nested).map((step) => {
-            const parsed = parseItem(step);
-            const content = [
-              element("span", { className: ["flow-step-title"] }, parsed.title),
-            ];
-            if (parsed.text.length)
-              content.push(
-                element("span", { className: ["flow-step-text"] }, parsed.text),
-              );
-            if (parsed.nested) content.push(tags(parsed.nested));
-            return element("li", { className: ["flow-step"] }, content);
-          })
-        : [];
-      return element("li", { className: ["flow-phase"] }, [
-        element("div", { className: ["flow-phase-head"] }, head),
-        element("ol", { className: ["flow-steps"], role: "list" }, steps),
       ]);
     }),
   );
@@ -270,9 +229,7 @@ function canvas(list) {
       : element("span", { className: ["canvas-node-title"] }, node.title);
     const content = [
       element("span", { className: ["canvas-node-head"] }, [
-        element("span", { className: ["canvas-node-icon"] }, [
-          icon(node.href ? iconForHref(node.href) : "folder"),
-        ]),
+        cardIcon("canvas-node-icon", node.title, node.href),
         title,
       ]),
     ];
@@ -287,6 +244,7 @@ function canvas(list) {
           { className: ["canvas-branches"], role: "list" },
           node.branches.map((branch) =>
             element("li", { className: ["canvas-branch"], id: branch.id }, [
+              cardIcon("canvas-branch-icon", branch.title),
               element(
                 "span",
                 { className: ["canvas-branch-title"] },
@@ -299,6 +257,16 @@ function canvas(list) {
                       { className: ["canvas-branch-text"] },
                       branch.text,
                     ),
+                  ]
+                : []),
+              ...(subItems(branch).some((item) => !isLink(item))
+                ? [
+                    tags({
+                      ...branch.nested,
+                      children: subItems(branch).filter(
+                        (item) => !isLink(item),
+                      ),
+                    }),
                   ]
                 : []),
               ...outgoing(branch.links.map(resolve)),
@@ -498,8 +466,11 @@ function compare(list) {
       role: "list",
       style: `--compare-rows: ${heights[0] + 1}`,
     },
-    sides.map(({ title, text, nested }) => {
-      const head = [element("span", { className: ["compare-title"] }, title)];
+    sides.map(({ title, href, text, nested }) => {
+      const head = [
+        cardIcon("compare-icon", title, href),
+        element("span", { className: ["compare-title"] }, title),
+      ];
       if (text.length)
         head.push(element("span", { className: ["compare-text"] }, text));
       const rows = nested ? items(nested).map(parseItem) : [];
@@ -538,10 +509,13 @@ function cards(list) {
     "ol",
     { className: ["cards"], role: "list" },
     items(list).map((item, index) => {
-      const { title, text, nested } = parseItem(item);
+      const { title, href, text, nested } = parseItem(item);
       const body = [
-        element("span", { className: ["card-index"], ariaHidden: "true" }, [
-          { type: "text", value: String(index + 1).padStart(2, "0") },
+        element("span", { className: ["card-head"] }, [
+          cardIcon("card-icon", title, href),
+          element("span", { className: ["card-index"], ariaHidden: "true" }, [
+            { type: "text", value: String(index + 1).padStart(2, "0") },
+          ]),
         ]),
         element("span", { className: ["card-title"] }, title),
       ];
@@ -551,6 +525,12 @@ function cards(list) {
       return element("li", { className: ["card"] }, body);
     }),
   );
+}
+
+function cardIcon(className, title, href) {
+  return element("span", { className: [className] }, [
+    icon(href ? iconForHref(href) : iconForTitle(title.map(textOf).join(" "))),
+  ]);
 }
 
 // A file tree: names ending with `/` are folders and may nest their entries.

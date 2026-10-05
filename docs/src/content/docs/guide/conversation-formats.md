@@ -1,11 +1,11 @@
 ---
-title: "Native conversation formats"
-description: "Give an external CLI native conversation capture and cold resume, in any sandbox and through a transport."
+title: "Support a conversation format"
+description: "Capture and restore the native sessions of a CLI agent you add to Outpost."
 ---
 
-## Choose a building block
+## Choose the storage format
 
-An adapter that returns a native store as `storage` gets the same [conversation](../conversations/) support as the built-in agents: capture after each turn, cold resume in a new sandbox and transport archiving. Pick the building block that matches how the CLI saves its sessions.
+A custom CLI adapter can expose its native session storage through `storage`. Outpost then uses it to capture conversations after turns, restore them in another sandbox and archive them through a transport. Choose the helper that matches how your CLI saves sessions.
 
 | The CLI keeps                         | Building block                              | Built-in stores using it | Host copy                                   |
 | ------------------------------------- | ------------------------------------------- | ------------------------ | ------------------------------------------- |
@@ -16,18 +16,14 @@ An adapter that returns a native store as `storage` gets the same [conversation]
 
 The layout tells Outpost where the transcript lives on the host and in the sandbox. This adapter for a fictional `mycli` resumes with `--resume <id>` and reports its session ID in a `session` event.
 
-```ts
-import { basename, join, posix } from "node:path";
-import {
-  createAgent,
-  createTranscriptConversations,
-  type AgentAdapter,
-  type TranscriptConversationLayout,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const sessions = (home: string) => join(home, ".mycli", "sessions");
+```ts title="conversation-layout.ts"
+import { join, basename, posix } from "node:path";
+import type { TranscriptConversationLayout } from "@elie-laloum/outpost";
 
-const layout: TranscriptConversationLayout = {
+export const sessions = (home: string) => join(home, ".mycli", "sessions");
+export const layout: TranscriptConversationLayout = {
   format: "mycli",
   sidecars: false,
   searchRoot: sessions,
@@ -39,8 +35,25 @@ const layout: TranscriptConversationLayout = {
   remotePath: (id, sandbox) =>
     posix.join(sandbox.home, ".mycli", "sessions", `${id}.jsonl`),
 };
+```
 
-const adapter: AgentAdapter = {
+```ts title="conversation-events.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
+
+export function events(line: string): AgentEvent[] {
+  const event = JSON.parse(line);
+  if (event.session) return [{ kind: "conversation", id: event.session }];
+  return [{ kind: "text", text: String(event.text ?? "") }];
+}
+```
+
+```ts title="adapter.ts"
+import type { AgentAdapter } from "@elie-laloum/outpost";
+import { createTranscriptConversations } from "@elie-laloum/outpost";
+import { layout } from "./conversation-layout.ts";
+import { events } from "./conversation-events.ts";
+
+export const adapter: AgentAdapter = {
   name: "mycli",
   resumable: true,
   storage: createTranscriptConversations(layout),
@@ -52,12 +65,13 @@ const adapter: AgentAdapter = {
     ],
     stdin: text ?? "",
   }),
-  events: (line) => {
-    const event = JSON.parse(line);
-    if (event.session) return [{ kind: "conversation", id: event.session }];
-    return [{ kind: "text", text: String(event.text ?? "") }];
-  },
+  events,
 };
+```
+
+```ts title="agent.ts"
+import { createAgent } from "@elie-laloum/outpost";
+import { adapter } from "./adapter.ts";
 
 export const agent = createAgent({
   harness: { kind: "cli", bind: () => adapter },
@@ -66,16 +80,7 @@ export const agent = createAgent({
 
 Host functions receive your home directory, or `conversationHome` when you set it. `remoteSearchRoot` receives the agent home in the sandbox, and `remotePath` the `SandboxLease`.
 
-| Option                        | Where   | What it returns                                                 |
-| ----------------------------- | ------- | --------------------------------------------------------------- |
-| `format`                      | Both    | The stable name of the format.                                  |
-| `searchRoot`, `matches`       | Host    | The directory searched for a transcript, and the file test.     |
-| `preferredPath` (optional)    | Host    | A path checked before the search.                               |
-| `directory`                   | Host    | The directory holding a repository’s captured transcripts.      |
-| `capturePath`                 | Host    | Where capture writes the transcript.                            |
-| `remoteSearchRoot`, `pattern` | Sandbox | The directory and `find -name` pattern used at capture.         |
-| `remotePath`                  | Sandbox | Where restoration writes the transcript.                        |
-| `sidecars`                    | Both    | Whether child transcripts under `<id>/subagents/` travel along. |
+API reference: [TranscriptConversationLayout](../../reference/transcriptconversationlayout/).
 
 ## Follow the workspace path
 
@@ -108,25 +113,7 @@ console.log(storage.format); // mycli
 
 <!-- check:run -->
 
-<!-- features -->
-
-- **Location**: The CLI home is `$MYCLI_HOME` when set, otherwise `.mycli` under the agent home.
-  - `root`
-  - `sessions`
-- **Selection**: Paths relative to the session directory; a directory must match for its files to be read.
-  - `include`
-  - `exclude`
-- **Completeness**: A session missing a required file, or rejected by `validate`, is refused.
-  - `required`
-  - `validate`
-- **Relocation**: Listed files pass through `relocate` as text at restore; others are copied byte for byte.
-  - `relocated`
-  - `relocate`
-- **Buckets**: Sessions stored as `<sessions>/<bucket>/<id>`, with the bucket computed from the workspace.
-  - `buckets`
-  - `bucket`
-- **Format**: The name used for the host copy under `.outpost/conversations/`.
-  - `format`
+API reference: [SessionBundleProfile](../../reference/sessionbundleprofile/).
 
 Restoration writes every file to a staging directory first. An existing session with the same ID moves to `.outpost-recovery/` in the CLI home before the new one takes its place.
 

@@ -1,11 +1,11 @@
 ---
 title: "Choisir un agent"
-description: "Comparez les cinq CLI d’agent et le harness intégré, puis composez un agent avec le modèle voulu."
+description: "Configurez un agent de code et comparez les réglages et les fonctions de conversation disponibles."
 ---
 
 ## Les agents
 
-Un agent associe un harness à un modèle. Le harness est ce qui pilote le modèle : l’une des cinq CLI d’agent de code installées dans la sandbox, ou la boucle propre à Outpost.
+Un agent associe un harness à un choix de modèle facultatif. Le harness pilote les échanges : il peut s’appuyer sur un outil installé, comme Codex ou Claude Code, ou sur la boucle intégrée d’Outpost. Choisissez d’abord l’agent, puis configurez son accès et son modèle.
 
 <!-- features -->
 
@@ -29,11 +29,10 @@ Un agent associe un harness à un modèle. Le harness est ce qui pilote le modè
 - [Harness intégré](../harness/): La boucle propre à Outpost, qui exécute vos outils sur une API OpenAI ou Anthropic.
   - clé d’API
   - modèle requis
-  - `createHarness()`
 
 ## Composer un agent
 
-`createAgent()` prend un harness et un modèle facultatif. Chaque CLI a son preset : `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` et `createAntigravityHarness()`.
+`createAgent()` prend un harness et un modèle facultatif. Chaque CLI a sa configuration prédéfinie : `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` et `createAntigravityHarness()`.
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -48,43 +47,51 @@ Passez l’agent à `dispatch()` dans `agent`. `authentication` choisit entre vo
 
 ## Sélectionner un modèle
 
-`model` est un nom (`"opus"`) ou un objet `{ name, reasoning, maxOutputTokens }`. Omettez-le pour utiliser le modèle par défaut de la CLI. Le harness intégré n’a pas de défaut et en exige un.
+Référence API : [ModelSpec](../../reference/modelspec/) et [AgentModel](../../reference/agentmodel/).
 
-Le harness vérifie les réglages à l’appel de `createAgent()` : un niveau `reasoning` ou un `maxOutputTokens` qu’il ne sait pas appliquer lève une erreur dès ce moment, avant toute exécution. Le service décide à l’exécution si votre compte peut utiliser le modèle. Le tableau ci-dessous indique les réglages acceptés par chaque agent.
+`createAgent()` refuse les réglages que le harness ne peut pas appliquer, notamment les niveaux `reasoning` ou les valeurs `maxOutputTokens` non pris en charge. Cette vérification a lieu avant l’exécution. Le service du modèle vérifie l’accès de votre compte lors de la requête ; la référence API ci-dessous décrit les réglages pris en charge.
+
+Référence API : [ModelSpec](../../reference/modelspec/) et [AgentModel](../../reference/agentmodel/).
 
 ## Comparer les capacités
 
-| Capacité                                               | [Claude Code](../claude-code/) | [Codex](../codex/)                                     | [Copilot CLI](../copilot-cli/)        | [Kimi Code](../kimi-code/) | [Antigravity](../antigravity/) | [Harness intégré](../harness/)                           |
-| ------------------------------------------------------ | ------------------------------ | ------------------------------------------------------ | ------------------------------------- | -------------------------- | ------------------------------ | -------------------------------------------------------- |
-| [Connexion au compte](../authentication/)              | Oui                            | Oui                                                    | Oui                                   | Oui                        | Oui                            | Non                                                      |
-| [Variable de jeton de compte](../authentication/)      | Oui                            | Non                                                    | Oui                                   | Non                        | Non                            | Non                                                      |
-| [Clé d’API](../authentication/)                        | Oui                            | Oui                                                    | Non                                   | Oui, avec un modèle        | Oui                            | Oui                                                      |
-| `reasoning` du modèle                                  | `low` à `max`                  | `low` à `max`                                          | Non                                   | Non                        | Non                            | Anthropic : `none`, `low` à `max` ; OpenAI : tout niveau |
-| `maxOutputTokens` du modèle                            | Oui                            | Non                                                    | Non                                   | Non                        | Non                            | Anthropic : obligatoire ; OpenAI : facultatif            |
-| [Capture de la conversation](../conversations/)        | Oui                            | Oui                                                    | Oui                                   | Oui                        | Non                            | Oui                                                      |
-| [Reprise à chaud](../conversations/) (même sandbox)    | Oui                            | Oui                                                    | Oui                                   | Oui                        | Oui                            | Oui                                                      |
-| [Reprise à froid](../conversations/) (autre sandbox)   | Oui                            | Oui                                                    | Oui                                   | Oui                        | Non                            | Oui                                                      |
-| [Fork](../conversations/)                              | Oui                            | Oui                                                    | Non                                   | Oui                        | Non                            | Oui                                                      |
-| [Réparation de réponse](../typed-responses/)           | Oui                            | Oui                                                    | Oui                                   | Oui                        | Oui                            | Oui                                                      |
-| [Réorientation](../steering/)                          | `injected`                     | `injected`                                             | `resumed`                             | `resumed`                  | `resumed`                      | `injected`                                               |
-| [Serveurs MCP](../mcp-servers/)                        | Oui                            | Oui                                                    | Oui                                   | Oui                        | Oui                            | Oui                                                      |
-| [OAuth MCP](../mcp-oauth/)                             | Connexion de l’hôte            | Connexion de l’hôte                                    | Non                                   | Connexion de l’hôte        | Non                            | Identifiants client                                      |
-| [Suivi de la consommation](../budgets/)                | Fin de tour                    | Fin de tour ; chaque réponse du modèle avec `steering` | Chaque message, total après la sortie | Après la sortie            | Fin de tour                    | Chaque réponse du modèle                                 |
-| [Heure de réinitialisation du quota](../quota-pauses/) | Si elle est fournie            | Non                                                    | Non                                   | Non                        | Non                            | Depuis `Retry-After`                                     |
+### Se connecter
 
-<!-- features -->
+Choisissez les identifiants dont vous disposez. La page [Authentification](../authentication/) explique comment les transmettre à la sandbox et distingue la facturation par compte de celle par API.
 
-- **Capture**: `saveConversations: false` sur Claude Code ou Codex ne laisse que la reprise à chaud ; `conversations: false` sur le harness intégré supprime reprise, fork et réparation.
-  - `saveConversations`
-  - `conversations`
-- **Réparation**: `dispatch()` refuse `repairs` supérieur à 0 pour un agent qui ne peut pas continuer sa conversation.
-  - `repairs`
-- **Consommation**: `usage.complete === false` signale des compteurs minimaux ; ceux de Kimi n’arrivent qu’après la sortie de la CLI.
-  - `usage.complete`
+| Agent                          | Connexion au compte | Jeton de compte dans une variable | Clé d’API                     |
+| ------------------------------ | ------------------- | --------------------------------- | ----------------------------- |
+| [Claude Code](../claude-code/) | Oui                 | Oui                               | Oui                           |
+| [Codex](../codex/)             | Oui                 | Non                               | Oui                           |
+| [Copilot CLI](../copilot-cli/) | Oui                 | Oui                               | Non                           |
+| [Kimi Code](../kimi-code/)     | Oui                 | Non                               | Oui, avec un modèle explicite |
+| [Antigravity](../antigravity/) | Oui                 | Non                               | Oui                           |
+| [Harness intégré](../harness/) | Non                 | Non                               | Oui                           |
+
+### Poursuivre le travail
+
+Tous les agents peuvent poursuivre une conversation tant que leur sandbox reste ouverte. Pour reprendre dans une nouvelle sandbox, Outpost doit aussi pouvoir enregistrer et restaurer la conversation. Un fork crée une conversation distincte à partir du même contexte.
+
+| Agent           | Reprise dans une nouvelle sandbox | Fork | Mode de réorientation |
+| --------------- | --------------------------------- | ---- | --------------------- |
+| Claude Code     | Oui                               | Oui  | `injected`            |
+| Codex           | Oui                               | Oui  | `injected`            |
+| Copilot CLI     | Oui                               | Non  | `resumed`             |
+| Kimi Code       | Oui                               | Oui  | `resumed`             |
+| Antigravity     | Non                               | Non  | `resumed`             |
+| Harness intégré | Oui                               | Oui  | `injected`            |
+
+Avec `injected`, les nouvelles consignes arrivent pendant l’échange en cours. Avec `resumed`, Outpost arrête l’échange puis reprend sa conversation. La page [Réorienter un agent](../steering/) montre comment envoyer ces consignes ; [Poursuivre une conversation](../conversations/) explique la reprise et le fork.
+
+Tous ces agents acceptent les [réparations de réponse](../typed-responses/) lorsque la poursuite de conversation est activée. Avec `saveConversations: false`, Claude Code et Codex ne peuvent reprendre que dans leur sandbox ouverte. Avec `conversations: false`, le harness intégré désactive la reprise, le fork et les réparations.
+
+Pour suivre les événements et les tokens, consultez [Suivre la progression](../progress/) et [Limiter les tentatives et les tokens](../budgets/). La possibilité de connaître l’heure de réinitialisation d’un quota dépend de l’agent ou du fournisseur de modèle ; [Attendre après une erreur de quota](../quota-pauses/) précise quand le workflow peut attendre automatiquement.
 
 ## Donner des outils MCP aux agents
 
-Chaque harness accepte `mcpServers` : des commandes stdio ou des points d’accès HTTP, avec des secrets transmis par nom de variable. Voir [Serveurs MCP](../mcp-servers/) et [Connexion aux serveurs MCP](../mcp-oauth/).
+Chaque harness accepte `mcpServers` : des commandes stdio ou des points d’accès HTTP, avec des secrets transmis par nom de variable. La page [Serveurs MCP](../mcp-servers/) montre comment les déclarer.
+
+Pour OAuth, Claude Code, Codex et Kimi peuvent utiliser une connexion enregistrée sur l’hôte ; le harness intégré utilise des identifiants client. Copilot CLI et Antigravity ne prennent pas en charge cette configuration OAuth. Voir [Connexion aux serveurs MCP](../mcp-oauth/).
 
 ## Se replier sur un autre agent
 

@@ -1,11 +1,11 @@
 ---
 title: "Authentication"
-description: "Run each CLI agent on your subscription login or on an API key, and know which credential reaches the sandbox."
+description: "Choose account access or an API key and configure the credentials your agent receives."
 ---
 
 ## Account or API key
 
-Each CLI harness takes an `authentication` mode. Outpost never picks one for you.
+Choose how each CLI agent authenticates by setting its harness’s `authentication` option. Use `"account"` for account credentials or `"usage"` for API-key access; Outpost does not choose a mode automatically.
 
 |                | `"account"`                                        | `"usage"`                                    |
 | -------------- | -------------------------------------------------- | -------------------------------------------- |
@@ -38,19 +38,13 @@ export const apiCoder = createAgent({
 
 Without `authentication`, Outpost prepares nothing: the CLI uses whatever access the sandbox already has. Where declared variables come from: [Environment variables](../environment-variables/).
 
-## Pick a form for your agent
+## Configure agent credentials
 
-The short forms read the default location. The object forms point elsewhere: `file` to another login file, `variable` to a variable of another name, `key` to a value your code already holds.
+In this example, the agent uses an API key your team supplies through an environment variable.
 
-| Agent                          | `"account"` reads                                   | `{ account: { file } }` | `{ account: { key \| variable } }` | `"usage"` sets      |
-| ------------------------------ | --------------------------------------------------- | ----------------------- | ---------------------------------- | ------------------- |
-| [Claude Code](../claude-code/) | `~/.claude/.credentials.json`                       | A file                  | `CLAUDE_CODE_OAUTH_TOKEN`          | `ANTHROPIC_API_KEY` |
-| [Codex](../codex/)             | `~/.codex/auth.json`                                | A file                  | No                                 | `OPENAI_API_KEY`    |
-| [Copilot CLI](../copilot-cli/) | `~/.copilot/config.json`                            | A file                  | `COPILOT_GITHUB_TOKEN`             | No                  |
-| [Kimi Code](../kimi-code/)     | `~/.kimi-code/`                                     | A profile directory     | No                                 | `KIMI_API_KEY`      |
-| [Antigravity](../antigravity/) | `~/.gemini/antigravity-cli/antigravity-oauth-token` | A file                  | No                                 | `GEMINI_API_KEY`    |
+API reference: [AgentAuthentication](../../reference/agentauthentication/), [AccountCredential](../../reference/accountcredential/) and [UsageCredential](../../reference/usagecredential/).
 
-Every agent with `"usage"` also accepts `{ usage: { key | variable } }`. On the host, `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME` and `KIMI_CODE_HOME` move the default file. Each agent page gives its login command.
+Each agent page gives its login command. Use its API contract to choose the credential source.
 
 ```ts
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -64,7 +58,7 @@ export const teamCoder = createAgent({
 });
 ```
 
-## What reaches the sandbox
+## Credentials sent to the sandbox
 
 Outpost reads only the file you select, never a system keychain. What it does next depends on where the agent runs.
 
@@ -78,7 +72,7 @@ Outpost reads only the file you select, never a system keychain. What it does ne
 A CLI that refreshes its token inside the sandbox can invalidate the host login it was copied from. For unattended runs, sign in to a dedicated profile and select it with `{ account: { file } }`.
 :::
 
-## Keep credentials apart
+## Separate agent and infrastructure credentials
 
 Three kinds of credentials serve three different clients. A Vercel or S3 key never authenticates the agent.
 

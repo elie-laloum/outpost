@@ -1,11 +1,11 @@
 ---
-title: "Where data lives"
-description: "What Outpost saves between runs, which store writes it, and how to keep it on disk or move it to shared storage."
+title: "Choose where data is stored"
+description: "Configure transports for durable data and locate the files that stay in the repository."
 ---
 
 ## What Outpost saves
 
-Every durable object goes through a **transport**: a small key-value interface for bytes with conditional writes. Stores give the objects their meaning; the transport decides where the bytes land.
+A transport stores versioned bytes under keys. The stores built on it interpret those bytes as checkpoints, artifacts or other durable data. Choose the transport to decide where the data lives, and the store to decide what it represents.
 
 | Object                                      | Written through                                        | Without a transport you pass |
 | ------------------------------------------- | ------------------------------------------------------ | ---------------------------- |
@@ -37,7 +37,7 @@ const artifacts = createArtifactStore({ transporter });
 const cache = createTaskCacheStore({ transporter });
 ```
 
-Nothing is written until a store saves an object. Each key then becomes one file, written atomically with owner-only permissions.
+Creating a transport or store does not write any data. When a store saves an object, the local transport writes a file atomically and restricts access to its owner.
 
 <!-- files -->
 
@@ -66,7 +66,7 @@ import {
   createWorkflowCheckpointStore,
   dispatch,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const transporter = createLocalTransport({ directory: "/srv/outpost" });
 const checkpoints = createWorkflowCheckpointStore({ transporter });
@@ -118,11 +118,9 @@ A remote transport moves stored objects, not the runtime. These still need the h
 - [Native conversations](../conversations/): The agent reads its own store; an archived copy is restored to disk before it resumes.
   - Claude Code
   - Codex
-  - `.outpost/conversations`
 - [Recovery transfers](../recovery/): Backups of a failed synchronization are written locally before any archive.
-  - `.outpost/recovery`
 
-## Handle a stale write
+## Handle a write conflict
 
 Every write names the revision it expects: `ifRevision: null` creates, the observed `revision` replaces or removes. If another writer changed the object first, the call throws `TransportConflict` and nothing is written.
 

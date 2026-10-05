@@ -1,11 +1,11 @@
 ---
-title: "Antigravity"
-description: "Exécuter la CLI Antigravity de Google (agy) dans une sandbox, connectée avec votre compte Google ou une clé API Gemini."
+title: "Configurer Antigravity"
+description: "Exécutez l’outil agy de Google et découvrez ses limites de reprise de conversation."
 ---
 
 ## Installer
 
-Les [images d’agent](../agent-images/) générées contiennent l’exécutable `agy`. Les [sandboxes cloud](../cloud-sandboxes/) l’installent à la première utilisation s’il manque, sauf avec `bootstrap: false`.
+L’[image d’agent](../agent-images/) fournit `agy` dans les conteneurs locaux. Dans une [sandbox cloud](../cloud-sandboxes/), Outpost l’installe s’il est absent, sauf si vous définissez `bootstrap: false`.
 
 <!-- features -->
 
@@ -24,7 +24,7 @@ npx outpost doctor --agent antigravity --sandbox-provider local
 
 `doctor` avertit quand les versions diffèrent. Il ne vérifie ni l’empreinte du binaire ni la connexion.
 
-## Accès par compte
+## Se connecter avec son compte
 
 Lancez `agy` sur l’hôte et connectez-vous avec votre compte Google.
 
@@ -36,9 +36,9 @@ export const coder = createAgent({
 });
 ```
 
-Outpost copie `~/.gemini/antigravity-cli/antigravity-oauth-token` dans le home privé de la sandbox. Pour un jeton rangé ailleurs, passez `{ account: { file: "/path/to/token" } }`. Voir [Authentification](../authentication/).
+Outpost copie `~/.gemini/antigravity-cli/antigravity-oauth-token` dans le répertoire personnel privé de la sandbox. Pour un jeton rangé ailleurs, passez `{ account: { file: "/path/to/token" } }`. Voir [Authentification](../authentication/).
 
-## Accès API
+## Utiliser une clé d’API
 
 Déclarez `GEMINI_API_KEY`. L’usage de l’API Gemini est facturé séparément des forfaits Google AI.
 
@@ -53,16 +53,16 @@ export const coder = createAgent({
 });
 ```
 
-Outpost écrit aussi `~/.gemini/antigravity-cli/settings.json` dans le home de la sandbox pour sélectionner le fournisseur Gemini. `{ usage: { variable: "NAME" } }` lit la clé dans une autre variable déclarée.
+Outpost écrit aussi `~/.gemini/antigravity-cli/settings.json` dans le répertoire personnel de la sandbox pour sélectionner le fournisseur Gemini. `{ usage: { variable: "NAME" } }` lit la clé dans une autre variable déclarée.
 
-## Ce qu’il prend en charge
+## Fonctions disponibles
 
 <!-- features -->
 
 - [Conversations](../conversations/) : Reprise dans la même [session de sandbox](../sandbox-sessions/) avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud.
 - [Réparations de réponse](../typed-responses/) : Une réponse typée invalide est réparée dans cette même conversation.
 - [Réorientation](../steering/) : Livrée en mode `resumed` : Outpost arrête `agy`, puis reprend la conversation avec votre texte.
-- [Serveurs MCP](../mcp-servers/) : Fusionnés dans `~/.gemini/config/mcp_config.json` du home de l’agent.
+- [Serveurs MCP](../mcp-servers/) : Fusionnés dans `~/.gemini/config/mcp_config.json` du répertoire personnel de l’agent.
 - **Consommation** : Jetons d’entrée, en cache et de sortie par tour ; les jetons de réflexion comptent en sortie.
 - **Modèle et mode** : Le `model` de l’agent devient `--model` ; `mode` passe `--mode accept-edits` ou `plan`.
 
@@ -70,7 +70,7 @@ Sans `mode`, les exécutions non interactives passent `--dangerously-skip-permis
 
 ## Limites
 
-- Les conversations ne sont pas capturées : elles disparaissent avec la sandbox. La reprise à froid et `fork()` sont refusés, et `createAntigravityHarness()` refuse un store `conversations`.
+- Les conversations ne sont pas capturées : elles disparaissent avec la sandbox. La reprise à froid et `fork()` sont refusés, et `createAntigravityHarness()` refuse un stockage `conversations`.
 - Un modèle avec `reasoning` ou `maxOutputTokens` est refusé à la composition de l’agent.
 - Les options MCP `tools.include`, `startupTimeoutMs` et `oauth: "login"` sont refusées.
 - Le bootstrap réutilise un `agy` déjà présent dans le PATH sans vérifier sa version ni son empreinte.

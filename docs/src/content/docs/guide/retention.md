@@ -1,11 +1,11 @@
 ---
-title: "Retention and cleanup"
-description: "Preview and apply a retention policy that removes clean worktrees, closed journals and old cache entries, and reserve storage between cooperating writers."
+title: "Clean up stored data"
+description: "Preview a retention policy and remove eligible runtime data while preserving recoverable work."
 ---
 
 ## Preview a policy
 
-A retention policy is a JSON file that says what may be removed and after how long. This one targets closed journals older than seven days:
+Start by previewing a retention policy. The report shows which runtime entries could be removed and which remain protected. Apply it only after reviewing the result.
 
 ```json title="retention.json"
 {
@@ -33,47 +33,23 @@ Observed 912004 logical bytes; projected 863791; projected quota within. Branche
 
 ## Apply it
 
+Each candidate is checked again right before removal. One that changed since the plan stays, with reason `PLAN_CHANGED`. The output adds a `REMOVED` line per deleted entry.
+
 ```sh
 npx outpost recovery prune --policy retention.json --repository /projects/app --apply
 ```
-
-Each candidate is checked again right before removal. One that changed since the plan stays, with reason `PLAN_CHANGED`. The output adds a `REMOVED` line per deleted entry.
 
 The command exits with status 1 when the inventory is incomplete, when what remains exceeds `maxBytes` or `maxWorkspaces`, or when a candidate could not be removed.
 
 ## Write the policy
 
-| Field           | Required | Meaning                                                                                  |
-| --------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `version`       | Yes      | Always `1`.                                                                              |
-| `scopes`        | Yes      | One or more scopes from the table below. Nothing outside them is removed.                |
-| `minAgeMs`      | Yes      | Minimum age, in milliseconds, since the entry's last modification. `0` accepts any age.  |
-| `maxBytes`      | No       | Size limit checked on what remains after pruning. Above it, the plan reports `exceeded`. |
-| `maxWorkspaces` | No       | Limit on the worktrees that remain after pruning. Above it, the plan reports `exceeded`. |
+API reference: [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/).
 
 `maxBytes` and `maxWorkspaces` never make more entries eligible: they tell you whether the policy frees enough space.
 
-| Scope              | Removes                                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `clean-workspaces` | Worktrees under `.outpost/workspaces` that are on a branch, without changes, untracked or ignored files, lock or recorded activity. The branch stays. |
-| `closed-logs`      | [Journals](../journals/) whose writer closed them, with every segment older than `minAgeMs`.                                                          |
-| `task-cache`       | [Result cache](../task-cache/) entries. The next run with that key executes the task again.                                                           |
-
 ## Read why an entry stays
 
-| Reason                                                  | What it means                                                                                             |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `SCOPE_NOT_SELECTED`, `TASK_CACHE_NOT_SELECTED`         | The policy does not include this scope.                                                                   |
-| `RETENTION_AGE`                                         | The worktree changed less than `minAgeMs` ago.                                                            |
-| `RETENTION_AGE_OR_INCOMPLETE_INVENTORY`                 | The journal or cache entry is younger than `minAgeMs`, or the inventory is incomplete.                    |
-| `DIRTY_WORKSPACE`, `IGNORED_FILES`                      | The worktree holds uncommitted, untracked or ignored files.                                               |
-| `DETACHED_WORKSPACE`                                    | The worktree has no branch: its commits could be lost.                                                    |
-| `OPERATION_LOCK_PRESENT`, `GIT_LOCKED_WORKSPACE`        | A task or Git owns the worktree.                                                                          |
-| `RESOURCE_ACTIVITY_RECORDED`                            | A sandbox recorded activity on it.                                                                        |
-| `LOG_ACTIVITY_OR_CONTENT_UNKNOWN`                       | The journal is still open or unreadable.                                                                  |
-| `INCOMPLETE_INVENTORY`                                  | The inventory could not read everything, so nothing is removed.                                           |
-| Other `*_UNKNOWN` reasons                               | Outpost could not establish the entry's state or owner.                                                   |
-| `RECOVERY_DATA_PROTECTED`, `OWNERSHIP_RECORD_PROTECTED` | Checkpoints, artifacts, conversations, recovery transfers, reservations and locks. No scope removes them. |
+API reference: [RecoveryRetentionEntry](../../reference/recoveryretentionentry/).
 
 ## Prune from code
 
@@ -84,7 +60,7 @@ import {
   planRecoveryRetention,
   pruneRecoveryRetention,
 } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.mts";
+import { repository } from "./outpost.config.ts";
 
 const plan = await planRecoveryRetention({
   repository,
@@ -118,7 +94,7 @@ A reservation claims bytes in `.outpost` before a job writes them. It is refused
 
 ```ts
 import { reserveRecoveryStorage } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.mts";
+import { repository } from "./outpost.config.ts";
 
 await using reservation = await reserveRecoveryStorage({
   repository,
@@ -128,11 +104,7 @@ await using reservation = await reserveRecoveryStorage({
 // Write up to 2 GiB; the reservation is released at the end of the scope.
 ```
 
-<!-- features -->
-
-- `storageQuota`: On `dispatch()` or `openWorkspace()`, holds the same reservation for the life of the workspace.
-- `reserveRecoveryStorage()`: Holds a reservation until `release()` or the end of an `await using` scope.
-- `assertRecoveryQuota()`: Checks current usage plus `reserveBytes` against `maxBytes` without reserving anything.
+API reference: [RecoveryQuotaOptions](../../reference/recoveryquotaoptions/) and [RecoveryStorageReservationOptions](../../reference/recoverystoragereservationoptions/).
 
 A refused reservation rejects with code `configuration`; a failed `assertRecoveryQuota()` rejects with code `workspace` ([Errors](../error-handling/)).
 

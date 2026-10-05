@@ -1,42 +1,49 @@
 ---
-title: "Webhooks"
-description: "Receive verified GitHub, GitLab, Slack and Standard Webhooks events and turn the ones you want into queue jobs."
+title: "Start work from webhooks"
+description: "Verify incoming events and publish queue jobs for the matching workflow."
 ---
 
 ## Receive a webhook and publish a job
 
-`serveTriggers()` starts an HTTP server with one route per sender. Each route verifies the request with a **source**, then its `on(event)` returns a job to publish, or `undefined` to ignore the event.
+Use a webhook source to verify the incoming request, then route the accepted event to a queue job. `serveTriggers()` handles the HTTP request; workers execute the workflow after publication.
 
-```ts title="server.mts"
-import {
-  createGithubWebhook,
-  createSqliteTaskQueue,
-  labelAdded,
-  serveTriggers,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const secret = process.env.GITHUB_WEBHOOK_SECRET;
+```ts title="label-job.ts"
+import type { TriggerRoute } from "@elie-laloum/outpost";
+import { labelAdded } from "@elie-laloum/outpost";
+
+export const on: TriggerRoute["on"] = (event) => {
+  const issue = labelAdded(event, "outpost:fix");
+  if (!issue) return undefined;
+  return {
+    handler: "fix",
+    runId: `${issue.repository}#${issue.number}`,
+    input: { repository: issue.repository, issue: issue.number },
+  };
+};
+```
+
+```ts title="github-route.ts"
+import { createGithubWebhook } from "@elie-laloum/outpost";
+import { on } from "./label-job.ts";
+
+export const secret = process.env.GITHUB_WEBHOOK_SECRET;
 if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
+export const routes = [
+  { path: "/github", source: createGithubWebhook({ secret }), on },
+];
+```
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const server = await serveTriggers({
+```ts title="server.ts"
+import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
+import { routes } from "./github-route.ts";
+
+export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+export const server = await serveTriggers({
   queue,
   port: 8787,
-  routes: [
-    {
-      path: "/github",
-      source: createGithubWebhook({ secret }),
-      on(event) {
-        const issue = labelAdded(event, "outpost:fix");
-        if (!issue) return undefined;
-        return {
-          handler: "fix",
-          runId: `${issue.repository}#${issue.number}`,
-          input: { repository: issue.repository, issue: issue.number },
-        };
-      },
-    },
-  ],
+  routes,
   onError: (error, failure) => console.error(failure, error),
 });
 console.log(`Listening on ${server.url}`);
@@ -44,19 +51,22 @@ console.log(`Listening on ${server.url}`);
 
 Adding the `outpost:fix` label to an issue or a pull request publishes a `fix` job to the queue. A worker runs it with `defineWorkflowJob()`: see [Job queues and workers](../job-queues/).
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Server**: Answers the sender within seconds.
-   - **Verify**: The source checks the signature, otherwise the answer is `401`.
-     - `createGithubWebhook()`
-   - **Route**: `on(event)` returns a job, or `undefined` to ignore the event.
-     - `labelAdded()`
-     - `commandIssued()`
-   - **Publish**: The job enters the queue as `trigger:<path>:<delivery>`.
-     - `serveTriggers()`
-2. **Worker**: Runs the job in its own process.
-   - **Run**: A checkpointed workflow under the job’s `runId`.
-     - `defineWorkflowJob()`
+- **Server**: Answers the sender within seconds.
+  - Steps
+  - **Verify**: The source checks the signature, otherwise the answer is `401`.
+    - `createGithubWebhook()`
+  - **Route**: `on(event)` returns a job, or `undefined` to ignore the event.
+    - `labelAdded()`
+    - `commandIssued()`
+  - **Publish**: The job enters the queue as `trigger:<path>:<delivery>`.
+    - `serveTriggers()`
+  - → **Worker**: then
+- **Worker**: Runs the job in its own process.
+  - Steps
+  - **Run**: A checkpointed workflow under the job’s `runId`.
+    - `defineWorkflowJob()`
 
 A job names a registered worker `handler`, a `runId` of at most 256 characters and an optional JSON `input`. Keep `on()` fast: GitHub waits 10 seconds for an answer, Slack 3 seconds.
 
@@ -76,24 +86,11 @@ Prefer a GitLab signing token: a plain token travels as is in a header and does 
 
 Two helpers recognize the common events and return `undefined` for everything else.
 
-| Helper                             | Recognizes                                                                                    | Returns                                                    |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `labelAdded(event, "outpost:fix")` | The label, just added to a GitHub issue or pull request, or a GitLab issue or merge request.  | `repository`, `number`, `target`, `label`                  |
-| `commandIssued(event, "/outpost")` | A line starting with the command in a new GitHub or GitLab comment, or a Slack slash command. | `text` after the command, `repository`, `number`, `target` |
+API reference: [labelAdded](../../reference/labeladded/), [commandIssued](../../reference/commandissued/) and [TriggerEvent](../../reference/triggerevent/).
 
-`target` is `"issue"` or `"pull-request"`; for a GitLab merge request, `number` is its IID. A Slack command carries only `text`.
+Use the event contract when handling another kind of delivery.
 
-For other events, read the `TriggerEvent` fields:
-
-| Field        | Holds                                                                                                                         |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `source`     | `github`, `gitlab`, `slack`, or the Standard Webhooks `source` option (`standard` by default).                                |
-| `delivery`   | The sender’s delivery identifier.                                                                                             |
-| `kind`       | The GitHub event, the GitLab `object_kind`, `command` or the Slack interaction type, or the Standard Webhooks payload `type`. |
-| `action`     | The sub-action, such as `labeled`, or the Slack command name.                                                                 |
-| `actor`      | The sender’s identity, as in the sources table.                                                                               |
-| `payload`    | The parsed body, as JSON; check its shape before use.                                                                         |
-| `receivedAt` | The ISO time of verification.                                                                                                 |
+API reference: [TriggerEvent](../../reference/triggerevent/).
 
 ## Authorize senders
 

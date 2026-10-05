@@ -1,19 +1,19 @@
 ---
 title: "Authentification"
-description: "Faire tourner chaque agent CLI sur votre connexion d’abonnement ou sur une clé API, et savoir quel identifiant atteint la sandbox."
+description: "Choisissez l’accès par compte ou par clé d’API et configurez les identifiants transmis à votre agent."
 ---
 
 ## Compte ou clé API
 
-Chaque harness CLI prend un mode `authentication`. Outpost ne le choisit jamais à votre place.
+Choisissez le mode de connexion de chaque agent avec l’option `authentication` de son harness. Utilisez `"account"` pour les identifiants d’un compte ou `"usage"` pour une clé d’API ; Outpost ne choisit pas ce mode automatiquement.
 
-|                 | `"account"`                                                      | `"usage"`                                                       |
-| --------------- | ---------------------------------------------------------------- | --------------------------------------------------------------- |
-| Utilise         | Votre connexion CLI ou un jeton d’abonnement                     | Une clé API                                                     |
-| Facturation     | Votre abonnement ChatGPT, Claude, Copilot, Google ou Kimi        | Au jeton, sur le compte API de l’éditeur                        |
-| Sur l’hôte      | Le fichier de connexion du CLI, par exemple `~/.codex/auth.json` | Une variable que vous déclarez                                  |
-| Dans la sandbox | Une copie de la connexion dans le home privé de la sandbox       | La clé, dans la variable standard du CLI                        |
-| Adapté à        | Vos propres exécutions, dans les conditions de votre abonnement  | La CI, les services et l’automatisation partagée par une équipe |
+|                 | `"account"`                                                                | `"usage"`                                                       |
+| --------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Utilise         | Votre connexion CLI ou un jeton d’abonnement                               | Une clé API                                                     |
+| Facturation     | Votre abonnement ChatGPT, Claude, Copilot, Google ou Kimi                  | Au jeton, sur le compte API de l’éditeur                        |
+| Sur l’hôte      | Le fichier de connexion du CLI, par exemple `~/.codex/auth.json`           | Une variable que vous déclarez                                  |
+| Dans la sandbox | Une copie de la connexion dans le répertoire personnel privé de la sandbox | La clé, dans la variable standard du CLI                        |
+| Adapté à        | Vos propres exécutions, dans les conditions de votre abonnement            | La CI, les services et l’automatisation partagée par une équipe |
 
 ```ts
 import {
@@ -36,21 +36,15 @@ export const apiCoder = createAgent({
 });
 ```
 
-Sans `authentication`, Outpost ne prépare rien : le CLI utilise l’accès dont la sandbox dispose déjà. Provenance des variables déclarées : [Variables d’environnement](../environment-variables/).
+Sans `authentication`, Outpost ne prépare rien : la CLI utilise l’accès dont la sandbox dispose déjà. Provenance des variables déclarées : [Variables d’environnement](../environment-variables/).
 
-## Choisir une forme pour votre agent
+## Configurer les identifiants de l’agent
 
-Les formes courtes lisent l’emplacement par défaut. Les formes objet pointent ailleurs : `file` vers un autre fichier de connexion, `variable` vers une variable d’un autre nom, `key` vers une valeur que votre code détient déjà.
+Dans cet exemple, l’agent utilise une clé d’API que votre équipe lui transmet par variable d’environnement.
 
-| Agent                          | `"account"` lit                                     | `{ account: { file } }` | `{ account: { key \| variable } }` | `"usage"` définit   |
-| ------------------------------ | --------------------------------------------------- | ----------------------- | ---------------------------------- | ------------------- |
-| [Claude Code](../claude-code/) | `~/.claude/.credentials.json`                       | Un fichier              | `CLAUDE_CODE_OAUTH_TOKEN`          | `ANTHROPIC_API_KEY` |
-| [Codex](../codex/)             | `~/.codex/auth.json`                                | Un fichier              | Non                                | `OPENAI_API_KEY`    |
-| [Copilot CLI](../copilot-cli/) | `~/.copilot/config.json`                            | Un fichier              | `COPILOT_GITHUB_TOKEN`             | Non                 |
-| [Kimi Code](../kimi-code/)     | `~/.kimi-code/`                                     | Un dossier de profil    | Non                                | `KIMI_API_KEY`      |
-| [Antigravity](../antigravity/) | `~/.gemini/antigravity-cli/antigravity-oauth-token` | Un fichier              | Non                                | `GEMINI_API_KEY`    |
+Référence API : [AgentAuthentication](../../reference/agentauthentication/), [AccountCredential](../../reference/accountcredential/) et [UsageCredential](../../reference/usagecredential/).
 
-Tout agent qui accepte `"usage"` accepte aussi `{ usage: { key | variable } }`. Sur l’hôte, `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME` et `KIMI_CODE_HOME` déplacent le fichier par défaut. Chaque page d’agent donne sa commande de connexion.
+La page de chaque agent indique sa commande de connexion. Consultez son contrat API pour choisir la source des identifiants.
 
 ```ts
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -64,15 +58,15 @@ export const teamCoder = createAgent({
 });
 ```
 
-## Ce qui atteint la sandbox
+## Identifiants transmis à la sandbox
 
 Outpost lit uniquement le fichier sélectionné, jamais un trousseau système. La suite dépend de l’endroit où l’agent s’exécute.
 
-|                            | Sandbox isolée                                                                                  | [Exécution sur l’hôte](../host-process/)   |
-| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| Fichier de connexion       | Copié dans un home privé, supprimé avec la sandbox ; le jeton de Copilot passe par une variable | Non lu : le CLI utilise votre session hôte |
-| Variables d’identification | Transmises aux commandes de l’agent                                                             | Transmises aux commandes de l’agent        |
-| Commandes de connexion     | Exécutées dans la sandbox, par exemple `codex login --with-api-key`                             | Non exécutées                              |
+|                            | Sandbox isolée                                                                                                  | [Exécution sur l’hôte](../host-process/)   |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Fichier de connexion       | Copié dans un répertoire personnel privé, supprimé avec la sandbox ; le jeton de Copilot passe par une variable | Non lu : la CLI utilise votre session hôte |
+| Variables d’identification | Transmises aux commandes de l’agent                                                                             | Transmises aux commandes de l’agent        |
+| Commandes de connexion     | Exécutées dans la sandbox, par exemple `codex login --with-api-key`                                             | Non exécutées                              |
 
 :::caution
 Un CLI qui rafraîchit son jeton dans la sandbox peut invalider la connexion de l’hôte dont il provient. Pour les exécutions sans surveillance, connectez-vous à un profil dédié et sélectionnez-le avec `{ account: { file } }`.
@@ -84,13 +78,13 @@ Trois types d’identifiants servent trois clients distincts. Une clé Vercel ou
 
 <!-- features -->
 
-- [Provider de sandbox](../cloud-sandboxes/) : Les identifiants d’allocation restent au client du provider, sur l’hôte.
-- [Agent](../choose-an-agent/) : `authentication` et les `variables` du harness connectent le CLI.
+- [Fournisseur de sandbox](../cloud-sandboxes/) : Les identifiants d’allocation restent au client du fournisseur, sur l’hôte.
+- [Agent](../choose-an-agent/) : `authentication` et les `variables` du harness connectent la CLI.
 - [Stockage](../object-storage/) : Les clés de bucket restent au client du transport, sur l’hôte.
 
 ## Limites
 
-- Claude rejette les variables contradictoires au dispatch : les formes compte échouent si `ANTHROPIC_API_KEY` a une valeur dans `.outpost/.env` ou dans les `variables` du harness ou du provider, les formes `usage` si `CLAUDE_CODE_OAUTH_TOKEN` en a une.
+- Claude rejette les variables contradictoires au dispatch : les formes compte échouent si `ANTHROPIC_API_KEY` a une valeur dans `.outpost/.env` ou dans les `variables` du harness ou du fournisseur, les formes `usage` si `CLAUDE_CODE_OAUTH_TOKEN` en a une.
 - Les formes compte de Kimi rejettent des valeurs de `KIMI_CODE_OAUTH_HOST`, `KIMI_OAUTH_HOST` ou `KIMI_CODE_BASE_URL` qui contredisent la région choisie. Le mode `usage` de Kimi exige un nom de modèle dans `createAgent()`.
 - Copilot n’a pas de mode `usage` et refuse les jetons classiques `ghp_`. Une connexion conservée dans le trousseau système est illisible : transmettez le jeton avec `{ account: { variable } }`.
 - Codex avec un `modelProvider` personnalisé n’accepte que les formes `usage`.

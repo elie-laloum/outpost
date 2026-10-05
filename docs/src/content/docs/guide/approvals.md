@@ -1,57 +1,81 @@
 ---
-title: "Approvals"
-description: "Stop a workflow at a gate until a person approves or rejects, then resume it from its checkpoint, even in another process."
+title: "Wait for approval"
+description: "Pause a workflow until an authorized person accepts or rejects the next step."
 ---
 
 ## Add a gate
 
-A gate is a task that waits for a person’s decision. Tasks after it run once an allowed actor approves.
+Add an approval task before a step that needs a person’s agreement, such as a merge or deployment. The workflow pauses at that task; dependent tasks wait until an allowed actor approves.
 
-```ts
+<!-- tabs -->
+
+```ts title="release-tasks.ts"
 import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
   defineApprovalTask,
   defineTask,
   defineWorkflow,
 } from "@elie-laloum/outpost";
 
-const approve = defineApprovalTask({
+export const approve = defineApprovalTask({
   key: "approve",
   prompt: "Deploy release 1.4 to production?",
   actors: ["maintainer"],
 });
-const deploy = defineTask({
+export const deploy = defineTask({
   key: "deploy",
   after: [approve],
   perform: (context) => `Deployed, approved by ${context.value(approve).actor}`,
 });
-const workflow = defineWorkflow("release", [approve, deploy]);
-const checkpoint = {
+export const workflow = defineWorkflow("release", [approve, deploy]);
+```
+
+```ts title="release-checkpoint.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+} from "@elie-laloum/outpost";
+
+export const checkpoint = {
   store: createWorkflowCheckpointStore({
     transporter: createLocalTransport({ directory: ".outpost/storage" }),
   }),
   runId: "release-1.4",
   version: "1",
 };
+```
 
-const paused = await workflow.start({ checkpoint });
-const request = paused.tasks.find((task) => task.key === "approve")?.pause;
+```ts title="release-decision.ts"
+import type { WorkflowDecision } from "@elie-laloum/outpost";
+
+export function releaseDecision(
+  executionId: string,
+  requestId: string,
+): WorkflowDecision {
+  return {
+    executionId,
+    key: "approve",
+    requestId,
+    actor: "maintainer",
+    reason: "Release notes and staging checks reviewed",
+    action: "approve",
+  };
+}
+```
+
+```ts title="release.ts"
+import { workflow, deploy } from "./release-tasks.ts";
+import { checkpoint } from "./release-checkpoint.ts";
+import { releaseDecision } from "./release-decision.ts";
+
+export const paused = await workflow.start({ checkpoint });
+export const request = paused.tasks.find(
+  (task) => task.key === "approve",
+)?.pause;
 console.log(paused.status, request?.prompt);
-
-// Later, once your application has authenticated the maintainer:
-const result = await workflow.start({
+if (!request) throw new Error("No approval is pending");
+export const result = await workflow.start({
   checkpoint,
-  decisions: [
-    {
-      executionId: paused.executionId,
-      key: "approve",
-      requestId: request!.id,
-      actor: "maintainer",
-      reason: "Release notes and staging checks reviewed",
-      action: "approve",
-    },
-  ],
+  decisions: [releaseDecision(paused.executionId, request.id)],
 });
 console.log(result.status, result.value(deploy));
 ```
@@ -64,26 +88,24 @@ A gate needs a checkpoint, the saved state of the run under `.outpost/storage`. 
 
 ## Submit a decision
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Pause**: The run stops at the gate.
-   - **Save the request**: The gate’s record holds it in `pause`: `id`, `prompt`, `actors`.
-   - **Return**: Status `paused`, once independent tasks have finished.
-2. **Decide**: In your application.
-   - **Show the request**: To a person listed in `actors`.
-   - **Submit**: `start()` with the same checkpoint and `decisions`.
-3. **Continue**: According to `action`.
-   - **Approve**: Dependent tasks run and read the decision as the gate’s value.
-   - **Reject**: Dependent tasks are skipped and the run ends `failed`.
+- **Pause**: The run stops at the gate.
+  - Steps
+  - **Save the request**: The gate’s record holds it in `pause`: `id`, `prompt`, `actors`.
+  - **Return**: Status `paused`, once independent tasks have finished.
+  - → **Decide**: then
+- **Decide**: In your application.
+  - Steps
+  - **Show the request**: To a person listed in `actors`.
+  - **Submit**: `start()` with the same checkpoint and `decisions`.
+  - → **Continue**: then
+- **Continue**: According to `action`.
+  - Steps
+  - **Approve**: Dependent tasks run and read the decision as the gate’s value.
+  - **Reject**: Dependent tasks are skipped and the run ends `failed`.
 
-| Decision field | Value                                                 |
-| -------------- | ----------------------------------------------------- |
-| `executionId`  | `executionId` of the paused result                    |
-| `key`          | The gate’s `key`                                      |
-| `requestId`    | `pause.id` of the gate’s record                       |
-| `actor`        | One of the gate’s `actors`                            |
-| `reason`       | A nonempty explanation, kept in the checkpoint        |
-| `action`       | `"approve"` (or `"resume"` for a pause) or `"reject"` |
+API reference: [WorkflowDecision](../../reference/workflowdecision/).
 
 `start()` throws, applying no decision, when one does not match the pending request.
 
@@ -101,20 +123,13 @@ Asking an agent in its brief to wait for approval is not a gate: only a gate tas
 
 With `authentication: "signed"` on the gate, a decision needs an Ed25519 signature from a key bound to its actor. Only your signing service holds private keys; keep them out of worker sandboxes.
 
-```ts
-import {
-  createEd25519DecisionVerifier,
-  signWorkflowDecision,
-} from "@elie-laloum/outpost";
-import type {
-  Workflow,
-  WorkflowApproverKey,
-  WorkflowCheckpointOptions,
-  WorkflowDecision,
-} from "@elie-laloum/outpost";
-import type { KeyObject } from "node:crypto";
+<!-- tabs -->
 
-// Signing service, after authenticating the approver.
+```ts title="sign.ts"
+import type { WorkflowDecision } from "@elie-laloum/outpost";
+import type { KeyObject } from "node:crypto";
+import { signWorkflowDecision } from "@elie-laloum/outpost";
+
 export function sign(decision: WorkflowDecision, privateKey: KeyObject) {
   return signWorkflowDecision({
     decision,
@@ -123,14 +138,34 @@ export function sign(decision: WorkflowDecision, privateKey: KeyObject) {
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
   });
 }
+```
 
-// Workflow side: public keys only.
-export function submit(
-  workflow: Workflow,
-  checkpoint: WorkflowCheckpointOptions,
-  signed: WorkflowDecision,
-  keys: () => Promise<readonly WorkflowApproverKey[]>,
-) {
+```ts title="submission.types.ts"
+import type {
+  Workflow,
+  WorkflowCheckpointOptions,
+  WorkflowDecision,
+  WorkflowApproverKey,
+} from "@elie-laloum/outpost";
+
+export interface SignedSubmission {
+  workflow: Workflow;
+  checkpoint: WorkflowCheckpointOptions;
+  signed: WorkflowDecision;
+  keys: () => Promise<readonly WorkflowApproverKey[]>;
+}
+```
+
+```ts title="submit.ts"
+import type { SignedSubmission } from "./submission.types.ts";
+import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
+
+export function submit({
+  workflow,
+  checkpoint,
+  signed,
+  keys,
+}: SignedSubmission) {
   return workflow.start({
     checkpoint,
     decisions: [signed],
@@ -145,14 +180,19 @@ Expiry is checked against the worker clock, so keep the signing service and work
 
 ## Rotate approver keys
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Add**: Publish the new public key.
-   - **Bind it**: A new `keyId` for the same actor, next to the old key.
-2. **Switch**: Sign with the new private key.
-   - **Overlap**: Both keys verify decisions still in flight.
-3. **Remove**: Drop the old public key.
-   - **Revoke**: Its new proofs fail; recorded approvals stay valid.
+- **Add**: Publish the new public key.
+  - Steps
+  - **Bind it**: A new `keyId` for the same actor, next to the old key.
+  - → **Switch**: then
+- **Switch**: Sign with the new private key.
+  - Steps
+  - **Overlap**: Both keys verify decisions still in flight.
+  - → **Remove**: then
+- **Remove**: Drop the old public key.
+  - Steps
+  - **Revoke**: Its new proofs fail; recorded approvals stay valid.
 
 `keys` runs for every signed decision, so changes apply without a restart.
 

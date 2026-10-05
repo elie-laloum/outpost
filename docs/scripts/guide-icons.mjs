@@ -178,6 +178,72 @@ export function iconForHref(href) {
   return pageIcons[slug] ?? "compass";
 }
 
+const cardIcons = [
+  [/\b(usage|budget|limit|limite|count|compt)/, "gauge"],
+  [/\b(git|branch|branche|commit|worktree)/, "branch"],
+  [/\b(auth|credential|identifiant|token|jeton|ssh|acl)|\bcles?\b/, "key"],
+  [
+    /\b(permission|privilege|trust|trusted|confiance|safe|secur|isolat|check|valid|verif|control|baseline|reference)/,
+    "shield",
+  ],
+  [/\b(network|reseau|tap|route)/, "globe"],
+  [/\b(docker|podman|container|conteneur)/, "containers"],
+  [/\b(cloud|remote|distant)/, "cloud"],
+  [/\b(image|base|kernel|noyau|rootfs)/, "layers"],
+  [/\b(model|modele|anthropic|openai)/, "bot"],
+  [/\b(agent|child|enfant|parent|deleg)/, "agent"],
+  [/\b(tool|outil|hook)/, "wrench"],
+  [/\b(host|hote|machine|linux|kvm|server|serveur)/, "server"],
+  [
+    /\b(home|foyer|directory|repertoire|workspace|espace|repository|depot|mount|mont)/,
+    "folder",
+  ],
+  [/\b(environment|environnement|config)/, "sliders"],
+  [/\b(fail|failure|error|erreur|echec|reject|rejet|exhaust|epuis)/, "alert"],
+  [
+    /\b(cancel|annul|stop|arret|close|closing|ferm|retire|retirer|revoke|revoqu)/,
+    "pause",
+  ],
+  [/\b(pause|wait|attend|attente)/, "clock"],
+  [/\b(deadline|delai|echeance|lease|bail)/, "timer"],
+  [/\b(recover|recovery|restor|reparer|recuper)/, "lifebuoy"],
+  [/\b(replay|rejou|re-emit|reem)/, "replay"],
+  [/\b(retry|retries|resume|repr|again|round|tour|reuse|reutilis)/, "repeat"],
+  [/\b(download|telecharg|bring|rapatr)/, "download"],
+  [/\b(upload|send|envoy|submit|soumet|publish|publi|enqueue|enfil)/, "steer"],
+  [/\b(save|sauv|store|stor|stock|cache|redis|transport)/, "database"],
+  [/\b(question|answer|repond|reponse|result|output|sortie)/, "message"],
+  [
+    /\b(prompt|brief|instruction|script|file|fichier|format|byte|octet)/,
+    "file",
+  ],
+  [
+    /\b(process|processus|exit|sortir|invoke|command|commande)|\bcli\b/,
+    "terminal",
+  ],
+  [/\b(observ|monitor|surveill)/, "pulse"],
+  [/\b(inspect|read|lire|look|compar|discover|decouvr)/, "search"],
+  [
+    /\b(approve|accept|appro|decid|complete|termin|finish|fin|done|keep|gard)/,
+    "approve",
+  ],
+  [/\b(lock|unlock|owner|proprietaire|verrou|bind|lier)/, "lock"],
+  [/\b(release|liber|remove|supprim|clear|effac)/, "trash"],
+  [/\b(run|start|execut|demarr|lancer|attempt|tentative|use|utilis)/, "play"],
+  [/\b(version|pinned|epingle|sha)/, "package"],
+  [/\b(connect|connexion|mcp|port)/, "plug"],
+  [/\b(add|ajout)/, "plus"],
+  [/\b(scale|worker|travailleur|client)/, "users"],
+];
+
+export function iconForTitle(title) {
+  const label = title
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+  return cardIcons.find(([pattern]) => pattern.test(label))?.[1] ?? "book";
+}
+
 export function icon(name) {
   const markup = shapes[name] ?? shapes.compass;
   const children = [...markup.matchAll(/<(\w+)([^>]*?)\/>/g)].map(

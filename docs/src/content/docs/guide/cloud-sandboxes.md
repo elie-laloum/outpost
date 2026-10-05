@@ -1,11 +1,11 @@
 ---
-title: "Cloud sandboxes"
-description: "Run agents in Vercel or Daytona sandboxes: Outpost uploads the repository, runs the agent remotely and brings its commits back to your machine."
+title: "Run in the cloud"
+description: "Configure Vercel or Daytona and synchronize the agent’s work with your repository."
 ---
 
 ## Prerequisites
 
-Install the SDK of your provider next to Outpost. No local container engine is needed.
+Install the SDK for the cloud provider you want to use alongside Outpost. The sandbox runs remotely, so your machine does not need Docker or Podman.
 
 ```sh
 npm install @vercel/sandbox   # Vercel
@@ -23,6 +23,8 @@ The sandbox image needs `sh` and `git` to synchronize the repository, and `node`
 
 ## Vercel Sandbox
 
+Vercel stops a sandbox after `create.timeout` milliseconds: set it longer than your task.
+
 ```ts
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
@@ -31,21 +33,13 @@ export const sandboxProvider = createVercelSandboxProvider({
 });
 ```
 
-Vercel stops a sandbox after `create.timeout` milliseconds: set it longer than your task.
-
-<!-- features -->
-
-- `create`: Passes creation settings to the Vercel SDK: runtime, image or snapshot `source`, `resources`, `timeout`.
-  - `runtime`
-  - `timeout`
-- `root`: Sets where the repository lives in the sandbox. Defaults to `/vercel/sandbox/outpost`.
-  - `root`
-- `variables`: Declares the [variables](../environment-variables/) every command in the sandbox receives.
-  - `variables`
+API reference: [VercelOptions](../../reference/verceloptions/).
 
 API: [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/) · [VercelOptions](../../reference/verceloptions/).
 
 ## Daytona Sandbox
+
+Create a Daytona provider with a Node.js 24 image. Use this `sandboxProvider` in your configuration or pass it directly to the task, as shown below.
 
 ```ts
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
@@ -56,18 +50,7 @@ export const sandboxProvider = createDaytonaSandboxProvider({
 });
 ```
 
-<!-- features -->
-
-- `connection`: Configures the Daytona client: API key, API URL, target region.
-  - `apiKey`
-  - `target`
-- `create`: Chooses an `image` or a `snapshot`, with resources and auto-stop settings.
-  - `image`
-  - `snapshot`
-- `root`: Sets where the repository lives in the sandbox. Defaults to `outpost` in the sandbox user’s home.
-  - `root`
-- `variables`: Declares the [variables](../environment-variables/) every command in the sandbox receives.
-  - `variables`
+API reference: [DaytonaOptions](../../reference/daytonaoptions/).
 
 API: [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/) · [DaytonaOptions](../../reference/daytonaoptions/).
 
@@ -89,7 +72,7 @@ Pass the provider to `dispatch()` or `createSandbox()` as with any sandbox.
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
-import { coder, repository } from "./outpost.config.mts";
+import { coder, repository } from "./outpost.config.ts";
 
 const result = await dispatch({
   agent: coder,
@@ -113,27 +96,32 @@ Before the first turn, Outpost installs the agent’s CLI at its pinned version 
 
 The sandbox works on its own copy of the repository. Outpost keeps it in step with the managed worktree on your machine. [Firecracker](../firecracker/) and [private Git](../private-git/) containers synchronize the same way.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Upload**: When the sandbox starts.
-   - **Send the history**: A Git bundle of the repository, checked out on the work branch.
-     - host
-     - sandbox
-   - **Send selected files**: `copies`, and uncommitted work when `includeUncommitted` is set.
-     - host
-     - sandbox
-2. **Run**: The agent works and commits in the sandbox.
-   - **Run the operation**: `dispatch()`, `command()` or `attach()`.
-     - sandbox
-3. **Bring back**: After every operation.
-   - **Download**: New commits, uncommitted edits and new untracked files.
-     - sandbox
-   - **Validate**: Check the commits and that the worktree did not change meanwhile.
-     - host
-   - **Back up**: Save the worktree’s state under `.outpost/recovery`.
-     - host
-   - **Apply**: Fast-forward the work branch and apply the edits.
-     - host
+- **Upload**: When the sandbox starts.
+  - Steps
+  - **Send the history**: A Git bundle of the repository, checked out on the work branch.
+    - host
+    - sandbox
+  - **Send selected files**: `copies`, and uncommitted work when `includeUncommitted` is set.
+    - host
+    - sandbox
+  - → **Run**: then
+- **Run**: The agent works and commits in the sandbox.
+  - Steps
+  - **Run the operation**: `dispatch()`, `command()` or `attach()`.
+    - sandbox
+  - → **Bring back**: then
+- **Bring back**: After every operation.
+  - Steps
+  - **Download**: New commits, uncommitted edits and new untracked files.
+    - sandbox
+  - **Validate**: Check the commits and that the worktree did not change meanwhile.
+    - host
+  - **Back up**: Save the worktree’s state under `.outpost/recovery`.
+    - host
+  - **Apply**: Fast-forward the work branch and apply the edits.
+    - host
 
 ## Choose the branch
 
@@ -141,16 +129,9 @@ Without `branch`, a cloud sandbox uses `integrate`: a new `outpost/job-…` bran
 
 ## Send files Git does not have
 
-The sandbox receives committed files only. Two options add more.
+Commit the files the sandbox needs before running a task. For ignored test configuration or other local inputs, consult the workspace and synchronization options below.
 
-<!-- features -->
-
-- `copies`: Copies paths from your checkout into the worktree, then uploads them. Use it for ignored inputs such as `.env.test`.
-  - your checkout
-- `includeUncommitted`: Sends the managed worktree’s uncommitted changes and untracked, non-ignored files.
-  - managed worktree
-- **Commit first**: Commits on the work branch travel with the history.
-  - Git
+API reference: [WorkspaceOptions](../../reference/workspaceoptions/) and [SandboxOptions](../../reference/sandboxoptions/).
 
 :::caution
 `includeUncommitted` reads the managed worktree under `.outpost/workspaces`, not your checkout. Edits you have not committed in your checkout reach the sandbox only through `copies`.

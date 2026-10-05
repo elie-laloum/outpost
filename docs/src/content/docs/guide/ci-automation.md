@@ -1,6 +1,6 @@
 ---
 title: "Run in CI"
-description: "Run an Outpost script in a CI job with an API key, fail the job when the agent or your checks fail, and push the result yourself."
+description: "Run an Outpost script in a CI job and keep the results you need after the runner stops."
 ---
 
 ## What the runner needs
@@ -10,13 +10,13 @@ description: "Run an Outpost script in a CI job with an API key, fail the job wh
 - **Node.js 24+**: Runs Outpost and your scripts.
 - **Git history**: A full clone, so the agent can read the history and cloud sandboxes can upload it.
 - **A sandbox**: Docker or Podman on the runner, or the SDK of a [cloud sandbox](../cloud-sandboxes/) and its allocation credentials.
-- **The agent image**: Built in the job from your committed `Dockerfile`, for container sandboxes.
+- **The agent image**: Built in the job from `.outpost-image/Dockerfile`, prepared during [installation](../setup/) and committed with your scripts.
 - **An unattended credential**: An API key or a dedicated account token, stored as a CI secret.
-- **Your workflow project**: `package.json`, the lockfile, `outpost.config.mts` and your scripts, committed.
+- **Your scripts and configuration**: `package.json`, the lockfile, `outpost.config.ts` and your scripts, committed.
 
 ## Authenticate without a person
 
-A runner has no CLI login to copy. In `outpost.config.mts`, switch `coder` to an API key read from the job’s environment.
+For API-key access in CI, configure `coder` in `outpost.config.ts` to read a key from the job’s environment. Declare that key in your CI secret settings, so the runner can use it without an interactive login.
 
 ```ts
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -29,11 +29,11 @@ export const coder = createAgent({
 });
 ```
 
-Claude Code and Copilot CLI also take a subscription token through `{ account: { variable } }`, such as `CLAUDE_CODE_OAUTH_TOKEN`. Forms, billing and where each credential goes: [Authentication](../authentication/).
+Claude Code and Copilot CLI also take a subscription token through `{ account: { variable } }`, such as `CLAUDE_CODE_OAUTH_TOKEN`. See [Authentication](../authentication/) for the supported credentials, their billing and where Outpost installs them.
 
 ## Add the workflow
 
-This GitHub Actions job runs `review.mts` from [Your first task](../first-request/) on every pull request.
+This GitHub Actions job runs `review.ts` from [Your first task](../first-request/) on every pull request.
 
 ```yaml title=".github/workflows/outpost.yml"
 name: Outpost review
@@ -51,14 +51,14 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npx outpost image build --image outpost:dev
+      - run: npx outpost image build --directory .outpost-image --image outpost:dev
       - run: npx outpost doctor --image outpost:dev --json
-      - run: node review.mts
+      - run: node review.ts
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 ```
 
-Build the image in the job: the Docker provider refuses an image built for another user ID, and the runner’s ID usually differs from yours. Add `--directory` when the `Dockerfile` is not at the root.
+Build the image in the job so its user ID matches the runner. The Docker provider refuses an image built for another user ID. If your image recipe is in another directory, adjust `--directory`.
 
 `doctor` exits with status 1 when the engine, the image or the agent CLI is missing ([Diagnostics](../diagnostics/)). It checks Codex on Docker unless you pass `--agent` or `--sandbox-provider`, and it does not test the API key.
 
@@ -75,9 +75,9 @@ A job fails when the script exits with a non-zero status. Printing an error is n
 | A workflow started with `start()` | Resolves with a `status` other than `"done"` | Call `result.unwrap()`       |
 | `outpost doctor`                  | Exits with status 1                          | Nothing                      |
 
-```ts title="fix.mts"
+```ts title="fix.ts"
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const signal = AbortSignal.timeout(30 * 60_000);
 await using sandbox = await createSandbox({
@@ -102,7 +102,7 @@ Keep the `signal` deadline shorter than the job’s `timeout-minutes`. Outpost t
 
 ## Name the branch per run
 
-A `named` branch that already exists is reused, with the commits of the earlier run. Put the run ID in the name, as in `fix.mts`, so each job starts from the checked-out commit. This matters on self-hosted runners, which keep branches between jobs.
+A `named` branch that already exists is reused, with the commits of the earlier run. Put the run ID in the name, as in `fix.ts`, so each job starts from the checked-out commit. This matters on self-hosted runners, which keep branches between jobs.
 
 ## Deliver the changes
 
@@ -112,7 +112,7 @@ Outpost commits on the branch and stops there. Push from the job once your check
 permissions:
   contents: write
 steps:
-  # ...the steps above, running fix.mts
+  # ...the steps above, running fix.ts
   - run: git push origin "outpost/fix-${GITHUB_RUN_ID}"
 ```
 

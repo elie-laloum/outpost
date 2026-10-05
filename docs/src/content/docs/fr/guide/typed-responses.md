@@ -1,16 +1,16 @@
 ---
-title: "Réponses typées"
-description: "Demander à l’agent une réponse balisée et la recevoir sous forme de données validées et typées dans result.value."
+title: "Valider les réponses de l’agent"
+description: "Demandez une réponse structurée et validez-la avant de l’utiliser dans votre application."
 ---
 
 ## Demander une réponse JSON
 
-Déclarez la réponse avec `defineJsonResponse()` : une balise de style XML et un schéma. Passez-la dans `response` et demandez la balise dans le brief.
+Définissez un contrat de réponse JSON pour recevoir des données que votre application peut valider. L’agent écrit sa réponse dans la balise demandée, puis Outpost l’analyse et la valide avant de fournir `result.value`.
 
 ```ts
 import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
 import { z } from "zod";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const verdict = defineJsonResponse({
   tag: "verdict",
@@ -29,17 +29,15 @@ const result = await dispatch({
 if (!result.value.approved) console.log(result.value.reasons);
 ```
 
-`result.value` contient l’objet analysé, typé d’après le schéma. `result.text` conserve la réponse complète de l’agent, balises comprises.
+Référence API : [DispatchResult](../../reference/dispatchresult/) et [defineJsonResponse](../../reference/definejsonresponse/).
 
-`schema` accepte tout validateur [Standard Schema](https://standardschema.dev/), comme Zod ou Valibot, ou une fonction d’analyse. Les types TypeScript seuls ne vérifient pas ce que renvoie le modèle ; le schéma, si.
-
-## Rédiger le brief pour la balise
+## Indiquer le format dans les consignes
 
 Outpost envoie votre brief tel quel : il n’ajoute aucune consigne de format. Indiquez la balise attendue et montrez un exemple de son contenu, comme ci-dessus.
 
 `dispatch()` vérifie que le brief contient la balise ouvrante (`<verdict>`) avant de démarrer une sandbox. Sans elle, l’appel échoue avec une erreur `configuration`.
 
-## Valider avec une fonction d’analyse
+## Utiliser votre propre validation
 
 La fonction reçoit le JSON analysé comme `unknown` et renvoie la valeur typée. Levez une exception pour le rejeter. `read()` applique les mêmes règles que `dispatch()` : vous pouvez tester une réponse hors ligne.
 
@@ -93,7 +91,7 @@ import {
   defineTextResponse,
   ResponseError,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   await dispatch({
@@ -109,7 +107,7 @@ try {
 }
 ```
 
-`raw` contient le contenu balisé lorsqu’une balise a été trouvée. `recovery` indique la conversation et la branche : vous pouvez [reprendre la conversation](../conversations/) ou inspecter le travail. Les autres codes sont décrits dans [Erreurs](../error-handling/).
+Référence API : [ResponseError](../../reference/responseerror/).
 
 ## Laisser l’agent réparer sa réponse
 

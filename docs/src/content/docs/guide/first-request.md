@@ -1,15 +1,15 @@
 ---
 title: "Your first task"
-description: "Run an agent on your repository, read its answer, then let it commit a change on a separate branch."
+description: "Write a TypeScript script, run an agent and review its answer and commits."
 ---
 
-## Write a review script
+## Create the script
 
-Start from the `outpost.config.mts` written in [Setup](../setup/). `dispatch()` runs one agent task in a fresh sandbox. The brief is its instruction; the named branch keeps its edits off your checkout.
+Create `review.ts` next to the configuration from [Installation](../setup/). This first script asks the agent to read the README and report its findings. `dispatch()` opens a fresh sandbox, and the named branch gives the task its own checkout.
 
-```ts title="review.mts"
+```ts title="review.ts"
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -25,27 +25,23 @@ console.log(result.usage);
 console.log(result.commits);
 ```
 
-## Run it and read the result
+## Run the script
+
+The script prints the agent’s findings when the task finishes. This request asks for a review without edits, so there should be no new commits.
 
 ```sh
-node review.mts
+node review.ts
 ```
 
-The script prints three fields when the agent finishes.
-
-| Field     | What it holds                                                                   |
-| --------- | ------------------------------------------------------------------------------- |
-| `text`    | The agent’s answer: its README findings.                                        |
-| `usage`   | Reported tokens, paid through the harness [authentication](../authentication/). |
-| `commits` | New commits (`oid`, `subject`). Empty here: the brief asked for no edits.       |
+API reference: [DispatchResult](../../reference/dispatchresult/) and [Usage](../../reference/usage/).
 
 ## Ask for a change
 
-Copy `review.mts` to `fix.mts` with a new branch and a brief that asks for a commit. Keep the original for [Run in CI](../ci-automation/).
+To ask the agent to edit the repository, create `fix.ts` with another branch name and instructions to commit the correction. Keep `review.ts` if you want to reuse the read-only request in [CI](../ci-automation/).
 
-```ts title="fix.mts"
+```ts title="fix.ts"
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -60,7 +56,7 @@ console.log(result.text);
 console.log(result.commits);
 ```
 
-Run `node fix.mts`, then review the branch. It starts from your `HEAD` and stays after the run; use a new name for each task.
+Run `node fix.ts`, then inspect the commits and diff with the commands below. A new named branch starts from your `HEAD` and remains after the task. Use a fresh name for each independent task; an existing named branch is reused.
 
 ```sh
 git log --oneline HEAD..outpost/readme-fix
@@ -68,10 +64,10 @@ git diff HEAD...outpost/readme-fix
 ```
 
 :::note
-`result.text` is the agent’s claim. Check the branch or run your tests before relying on it.
+The answer describes what the agent says it did. Review the diff and run the relevant checks before accepting the change.
 :::
 
-## What just happened
+## Understand the run
 
 Outpost opened a worktree under `.outpost/workspaces/`, ran the agent in a sandbox, then closed the sandbox and kept the branch. [How it works](../how-it-works/) details the lifecycle.
 

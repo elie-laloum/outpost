@@ -1,23 +1,19 @@
 ---
-title: "Pauses sur quota"
-description: "Mettre un workflow en pause quand un abonnement ou une API atteint sa limite, puis le reprendre après la réinitialisation sans consommer de retry ni perdre la conversation."
+title: "Faire une pause quand un quota est atteint"
+description: "Enregistrez un workflow après une erreur de quota définitive et reprenez quand l’accès est disponible."
 ---
 
 ## Mettre en pause au lieu d’échouer
 
-Passez `onQuota` à `start()`. Une tâche qui atteint une limite d’usage ou reçoit un HTTP 429 se met alors en pause au lieu d’échouer.
+Définissez `onQuota` dans la méthode `start()` du workflow pour conserver la progression après une erreur de quota définitive. Avec un checkpoint configuré, la tâche concernée se met en pause afin de reprendre plus tard.
 
-```ts
-import {
-  createLocalTransport,
-  OutpostError,
-  defineTask,
-  defineWorkflow,
-  createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-let calls = 0;
-const review = defineTask({
+```ts title="quota-review.ts"
+import { defineTask, OutpostError } from "@elie-laloum/outpost";
+
+export let calls = 0;
+export const review = defineTask({
   key: "review",
   perform: () => {
     if (++calls === 1)
@@ -27,14 +23,33 @@ const review = defineTask({
     return "reviewed";
   },
 });
-const result = await defineWorkflow("nightly", [review]).start({
-  checkpoint: {
-    store: createWorkflowCheckpointStore({
-      transporter: createLocalTransport({ directory: ".outpost/storage" }),
-    }),
-    runId: "nightly-2026-09-28",
-    version: "1",
-  },
+export function reviewCount() {
+  return calls;
+}
+```
+
+```ts title="quota-checkpoint.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+} from "@elie-laloum/outpost";
+
+export const checkpoint = {
+  store: createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: ".outpost/storage" }),
+  }),
+  runId: "nightly-2026-09-28",
+  version: "1",
+};
+```
+
+```ts title="resume.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { review } from "./quota-review.ts";
+import { checkpoint } from "./quota-checkpoint.ts";
+
+export const result = await defineWorkflow("nightly", [review]).start({
+  checkpoint,
   onQuota: { action: "pause", maxWaitMs: 6 * 60 * 60_000 },
 });
 result.unwrap();
@@ -47,7 +62,7 @@ Le script affiche `reviewed` : la limite simulée se réinitialise après une se
 
 `onQuota` exige un [checkpoint](../durable-runs/) pour conserver la pause. Avec la valeur par défaut de `maxWaitMs`, `0`, rien n’attend dans le processus : chaque pause est durable.
 
-## Ce qui compte comme quota
+## Reconnaître une erreur de quota
 
 Les agents et les fournisseurs de modèles rejettent avec une `OutpostError` de code `quota` :
 
@@ -66,18 +81,23 @@ Un [agent de secours](../fallback-agents/) change d’agent au lieu d’attendre
 
 ## Ce qui se passe après une erreur de quota
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Pause**: La tentative qui a atteint la limite s’arrête.
-   - **Garder les retries**: L’erreur ne consomme pas les tentatives de `retry`.
-   - **Enregistrer la pause**: La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé.
-2. **Attente**: Seulement si l’heure de réinitialisation est connue.
-   - **Attendre dans le processus**: Une réinitialisation comprise dans `maxWaitMs` émet un événement `quota` de `status: "waiting"`, puis relance la tâche.
-   - **Pause durable**: Sinon, la tâche reste en pause. Les tâches indépendantes continuent, les tâches dépendantes attendent et `start()` renvoie `paused`.
-3. **Reprise**: Un `start()` ultérieur avec le même checkpoint.
-   - **Relancer**: Une réinitialisation inconnue ou passée relance la tâche aussitôt.
-   - **Attendre d’abord**: Une réinitialisation comprise dans `maxWaitMs` est attendue, puis la tâche s’exécute.
-   - **Rester en pause**: Une réinitialisation plus lointaine laisse la tâche en pause sans appeler l’agent.
+- **Pause**: La tentative qui a atteint la limite s’arrête.
+  - Étapes
+  - **Garder les retries**: L’erreur ne consomme pas les tentatives de `retry`.
+  - **Enregistrer la pause**: La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé.
+  - → **Attente**: puis
+- **Attente**: Seulement si l’heure de réinitialisation est connue.
+  - Étapes
+  - **Attendre dans le processus**: Une réinitialisation comprise dans `maxWaitMs` émet un événement `quota` de `status: "waiting"`, puis relance la tâche.
+  - **Pause durable**: Sinon, la tâche reste en pause. Les tâches indépendantes continuent, les tâches dépendantes attendent et `start()` renvoie `paused`.
+  - → **Reprise**: puis
+- **Reprise**: Un `start()` ultérieur avec le même checkpoint.
+  - Étapes
+  - **Relancer**: Une réinitialisation inconnue ou passée relance la tâche aussitôt.
+  - **Attendre d’abord**: Une réinitialisation comprise dans `maxWaitMs` est attendue, puis la tâche s’exécute.
+  - **Rester en pause**: Une réinitialisation plus lointaine laisse la tâche en pause sans appeler l’agent.
 
 L’enregistrement en pause dans `result.tasks` contient `quota.resetAt` : planifiez le `start()` suivant à partir de cette heure. `onQuota` autorise la relance, sans `resume: "retry-incomplete"`. Une [tâche en boucle](../verification-loops/) reprend la phase du tour qui a atteint la limite.
 
@@ -97,9 +117,9 @@ Un tour poursuivi envoie une courte consigne de reprise au lieu du brief. Passez
 
 Claude Code, Codex, Copilot CLI et Kimi Code peuvent poursuivre. Un [agent de secours](../fallback-agents/) repart de son premier candidat avec le brief d’origine.
 
-## Transmettre la conversation à un handler en file
+## Transmettre la conversation à un traitement en file
 
-Un worker enregistre l’erreur de quota d’un handler dans `QueueResult.quota`, et `defineQueuedTask()` rejette avec le code `quota`. Transmettez la conversation par l’entrée de la tâche :
+Un worker enregistre l’erreur de quota d’un traitement dans `QueueResult.quota`, et `defineQueuedTask()` rejette avec le code `quota`. Transmettez la conversation par l’entrée de la tâche :
 
 ```ts
 import { defineQueuedTask } from "@elie-laloum/outpost";
@@ -116,9 +136,9 @@ function implement(queue: TaskQueue) {
 }
 ```
 
-Le handler lance ensuite son dispatch avec `continuation: { id: input.continueFrom }`. [Files de jobs](../job-queues/) présente les workers et les clés d’idempotence.
+Le traitement lance ensuite son dispatch avec `continuation: { id: input.continueFrom }`. [Files de jobs](../job-queues/) présente les workers et les clés d’idempotence.
 
-## Mettre en pause sur un quota de spéculation
+## Suspendre une course après une erreur de quota
 
 Quand des limites arrêtent des candidats et qu’aucun ne gagne, `speculate()` renvoie le statut `quota` avec la réinitialisation connue la plus proche. Levez-la depuis une tâche pour mettre le workflow en pause :
 
@@ -150,6 +170,6 @@ Une [course durable](../speculation/) relance ensuite seulement ces candidats, a
 - Les heures de réinitialisation écrites dans le texte de l’agent ne sont pas analysées ; elles restent dans le message.
 - Les autres agents, la capture désactivée, une requête avec sa propre `continuation` ou plusieurs `passes` repartent du brief.
 - Les changements non commités d’une tentative intégrée interrompue restent dans son [worktree conservé](../recovery/).
-- Les workers ne transmettent que les conversations capturées par le dispatch du handler.
+- Les workers ne transmettent que les conversations capturées par le dispatch du traitement.
 
 API : [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [QuotaResumePolicy](../../reference/quotaresumepolicy/) · [quotaFault](../../reference/quotafault/) · [TaskContext](../../reference/taskcontext/) · [QueueResult](../../reference/queueresult/) · [WorkflowOptions](../../reference/workflowoptions/)

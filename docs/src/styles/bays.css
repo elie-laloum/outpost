@@ -28,7 +28,17 @@
 .sl-markdown-content
   .bay[data-bay="wide"]
   > .bay-say
-  > :not(table, .cells, .props, .features, .path, .flow, .canvas, .cards) {
+  > :not(
+    table,
+    .cells,
+    .props,
+    .features,
+    .path,
+    .flow,
+    .canvas,
+    .cards,
+    .starlight-aside
+  ) {
   max-width: 70ch;
 }
 .bay-wide {
@@ -151,10 +161,33 @@
 
 /* Asides */
 .sl-markdown-content .bay .starlight-aside {
-  border: 1px solid var(--docs-line);
-  border-left-width: 1px;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100cqw;
+  max-width: none;
+  margin-inline-start: calc(-1 * var(--docs-aside-start, 0px));
+  border: 1px solid var(--sl-color-asides-border);
+  border-inline-start-width: 4px;
   border-radius: 0;
-  background: var(--docs-code-bg);
+  background: color-mix(
+    in srgb,
+    var(--sl-color-asides-border) 22%,
+    var(--sl-color-bg)
+  );
+  padding: 1.25rem var(--docs-pad);
+}
+.sl-markdown-content .bay .starlight-aside :is(p, li, a) {
+  color: var(--sl-color-asides-text-accent);
+}
+.bay-say > .starlight-aside {
+  --docs-aside-start: var(--docs-pad);
+}
+.bay-aside {
+  min-width: 0;
+}
+.bay-aside > .starlight-aside {
+  margin: 0;
 }
 
 /* Cells: links laid on the frame, flush with the bay edges. */
@@ -319,5 +352,50 @@
   .sl-markdown-content .bay table {
     display: block;
     overflow-x: auto;
+  }
+}
+
+/* Guide examples keep their reading order within the shared frame. */
+.docs-main .sl-markdown-content > .bay[data-role="guide"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.bay-row {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin: 0;
+  min-width: 0;
+}
+.bay-row[data-bay="wide"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.bay-row[data-bay="split"] > .bay-show {
+  border-left: 1px solid var(--docs-line);
+}
+.bay-row + .bay-row > .bay-say,
+.bay-row + .bay-row > .bay-show {
+  padding-top: 1rem;
+}
+.bay-row[data-bay="wide"]
+  > .bay-say
+  > :not(
+    table,
+    .features,
+    .path,
+    .flow,
+    .canvas,
+    .cards,
+    .files,
+    .compare,
+    .starlight-aside
+  ) {
+  max-width: 70ch;
+}
+@media (max-width: 64rem) {
+  .bay-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bay-row[data-bay="split"] > .bay-show {
+    border-left: 0;
+    padding-top: 0;
   }
 }

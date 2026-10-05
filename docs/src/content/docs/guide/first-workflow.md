@@ -1,30 +1,21 @@
 ---
-title: "From a task to a workflow"
-description: "Turn one agent task into a workflow that fixes code on a branch, summarises the result, waits for an approval and resumes from a checkpoint."
+title: "Your first workflow"
+description: "Run an agent task, pass its result to a second task and read the workflow’s output."
 ---
 
-<!-- flow -->
+## Connect two tasks
 
-1. **First run**: Stops at the approval.
-   - `fix`: The agent fixes the tests on a branch.
-     - `defineIsolatedTask()`
-   - `summary`: Keeps typed data from the result.
-     - `defineTask()`
-   - `approve`: Pauses the run for a decision.
-     - `defineApprovalTask()`
-2. **Second run**: Resumes with the decision.
-   - `report`: Runs once approved.
-     - `defineTask()`
+A workflow describes tasks and the dependencies between them. In this example, an agent fixes the tests on a separate branch. A second task reads its result and returns a short summary.
 
-A workflow is a graph of tasks. Each step replaces `fix.mts`, next to the `outpost.config.mts` from [Setup](../setup/).
+Use the configuration from [Installation](../setup/) and save these three files next to it. Each tab shows one file: the agent task, the summary task and the script that runs them.
 
-## Run the agent as a workflow task
+<!-- tabs -->
 
-```ts title="fix.mts"
-import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+```ts title="fix-task.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
-const fix = defineIsolatedTask({
+export const fix = defineIsolatedTask({
   key: "fix",
   request: () => ({
     repository,
@@ -34,40 +25,13 @@ const fix = defineIsolatedTask({
     brief: { text: "Fix the failing tests, run them and commit the fix." },
   }),
 });
-
-const result = await defineWorkflow("fix-tests", [fix]).start();
-result.unwrap();
-const { branch, commits } = result.value(fix);
-console.log(branch, commits);
 ```
 
-```sh
-node fix.mts
-```
+```ts title="summary.ts"
+import { defineTask } from "@elie-laloum/outpost";
+import { fix } from "./fix-task.ts";
 
-It prints `outpost/fix-tests` and the agent’s commits. `defineIsolatedTask()` runs a `dispatch()` as a task, in its own sandbox. `unwrap()` throws unless the run’s `status` is `"done"`.
-
-## Pass the result to another task
-
-```ts title="fix.mts" ins={3,18-25,27,29}
-import {
-  defineIsolatedTask,
-  defineTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
-
-const fix = defineIsolatedTask({
-  key: "fix",
-  request: () => ({
-    repository,
-    sandboxProvider,
-    agent: coder,
-    branch: { mode: "named", name: "outpost/fix-tests" },
-    brief: { text: "Fix the failing tests, run them and commit the fix." },
-  }),
-});
-const summary = defineTask({
+export const summary = defineTask({
   key: "summary",
   after: [fix],
   perform: (context) => ({
@@ -75,129 +39,40 @@ const summary = defineTask({
     commits: context.value(fix).commits.length,
   }),
 });
+```
 
-const result = await defineWorkflow("fix-tests", [fix, summary]).start();
+```ts title="fix.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { fix } from "./fix-task.ts";
+import { summary } from "./summary.ts";
+
+export const result = await defineWorkflow("fix-tests", [fix, summary]).start();
 result.unwrap();
 console.log(result.value(summary));
 ```
 
-It prints `{ branch: 'outpost/fix-tests', commits: 1 }`. `after: [fix]` starts `summary` once `fix` succeeds, and `context.value(fix)` reads its typed output. [Tasks and dependencies](../task-dependencies/) covers failures and concurrency.
+## Run the script
 
-## Wait for an approval
-
-```ts title="fix.mts" ins={2-4,11-12,21-27,36-47,49-72}
-import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
-  defineApprovalTask,
-  defineIsolatedTask,
-  defineTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
-
-const agent = defineIsolatedTask({
-  key: "fix-agent",
-  request: () => ({
-    repository,
-    sandboxProvider,
-    agent: coder,
-    branch: { mode: "named", name: "outpost/fix-tests" },
-    brief: { text: "Fix the failing tests, run them and commit the fix." },
-  }),
-});
-const fix = defineTask({
-  key: "fix",
-  perform: async (context) => {
-    const { branch, commits } = await agent.perform(context);
-    return { branch, commits };
-  },
-});
-const summary = defineTask({
-  key: "summary",
-  after: [fix],
-  perform: (context) => ({
-    branch: context.value(fix).branch,
-    commits: context.value(fix).commits.length,
-  }),
-});
-const approve = defineApprovalTask({
-  key: "approve",
-  after: [summary],
-  prompt: "Merge outpost/fix-tests?",
-  actors: ["maintainer"],
-});
-const report = defineTask({
-  key: "report",
-  after: [summary, approve],
-  perform: (context) =>
-    `${context.value(approve).actor} approved ${context.value(summary).branch}`,
-});
-
-const workflow = defineWorkflow("fix-tests", [fix, summary, approve, report]);
-const store = createWorkflowCheckpointStore({
-  transporter: createLocalTransport({ directory: ".outpost/storage" }),
-});
-const checkpoint = { store, runId: "fix-tests-1", version: "1" };
-
-let result = await workflow.start({ checkpoint });
-const pending = result.tasks.find((task) => task.key === "approve")?.pause;
-if (pending && process.argv[2] === "approve")
-  result = await workflow.start({
-    checkpoint,
-    decisions: [
-      {
-        executionId: result.executionId,
-        key: "approve",
-        requestId: pending.id,
-        actor: "maintainer",
-        reason: "Reviewed the branch and the test run",
-        action: "approve",
-      },
-    ],
-  });
-console.log(result.status);
-if (result.status === "done") console.log(result.value(report));
-```
+The agent works on `outpost/fix-tests`. After it succeeds, the `summary` task returns the branch name and the number of commits. The exact commit count depends on the work the agent produced.
 
 ```sh
-node fix.mts
+node fix.ts
 ```
 
-It prints `paused`. The `approve` gate stops the run until an actor listed in `actors` decides; its task record holds the request in `pause`.
+Review the branch before merging it. A successful workflow means its tasks completed; this example does not independently check whether the tests pass.
 
-A gate needs a **checkpoint**, the saved statuses, outputs and usage of a run, here under `.outpost/storage`. Change `version` when you change the tasks.
+## Read the dependencies and results
 
-Checkpoints hold JSON, not the methods of a dispatch result. `fix` therefore calls `agent.perform(context)` and keeps only `branch` and `commits`.
+`defineIsolatedTask()` runs the agent in its own sandbox. `defineTask()` runs your function. Neither starts work until you call the workflow’s `start()` method.
 
-## Resume with the decision
+`after: [fix]` tells `summary` to wait for `fix`. It also lets `summary` read the first task’s output with `context.value(fix)`; TypeScript keeps the value’s type.
 
-```sh
-node fix.mts approve
-```
+`result.unwrap()` throws if the workflow did not finish successfully. After it returns, `result.value(summary)` gives you the summary. See [Connect tasks and dependencies](../task-dependencies/) for failures, skipped tasks and parallel execution.
 
-It prints `done` and `maintainer approved outpost/fix-tests`. `fix` and `summary` come from the checkpoint: only `report` runs.
+## Add a check when you need one
 
-| Decision field | Value                       |
-| -------------- | --------------------------- |
-| `executionId`  | `result.executionId`        |
-| `key`          | `"approve"`, the gate’s key |
-| `requestId`    | `pause.id`                  |
-| `actor`        | One of the gate’s `actors`  |
-| `reason`       | A nonempty explanation      |
-| `action`       | `"approve"` or `"reject"`   |
+To make test results decide whether work is accepted, add a [verification loop](../verification-loops/). To require a person’s decision, add an [approval task](../approvals/).
 
-:::caution
-Authenticate the person before you submit their `actor`: see [Approvals](../approvals/). A task interrupted mid-run replays only once you authorize it: see [Durable runs](../durable-runs/).
-:::
+When the workflow needs to resume in a later process, [save its progress](../durable-runs/) with a checkpoint. You can add these features to the same task graph.
 
-## Next steps
-
-<!-- features -->
-
-- [Tasks and dependencies](../task-dependencies/): Shape the graph and run tasks in parallel.
-- [Verification loops](../verification-loops/): Retry with the test output as feedback.
-- [Approvals](../approvals/): Authenticate approvers and sign decisions.
-- [Durable runs](../durable-runs/): Authorize replays and recover crashed runs.
-- [Quota pauses](../quota-pauses/): Pause when the agent hits a usage limit.
-- [Job queues and workers](../job-queues/): Run workflows unattended.
+API: [defineIsolatedTask](../../reference/defineisolatedtask/) · [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/).

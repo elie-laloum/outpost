@@ -1,44 +1,43 @@
 ---
-title: "Images d’agent"
-description: "Construire l’image Docker ou Podman dont partent vos sandboxes : chaque CLI d’agent intégré à une version épinglée, plus les outils de votre projet."
+title: "Construire une image d’agent"
+description: "Construisez et personnalisez l’image Docker ou Podman utilisée par vos agents."
 ---
 
 ## Contenu de l’image
 
-`outpost init` écrit un `Dockerfile` (`Containerfile` pour Podman) qui vous appartient et que vous pouvez modifier.
+L’image contient les outils en ligne de commande utilisés par vos agents. Générez un Dockerfile ou un Containerfile, ajoutez les outils nécessaires à votre projet et construisez l’image sous un nom comme `outpost:dev`.
 
 <!-- features -->
 
 - **Base** : `node:24-bookworm-slim` avec Git, le client OpenSSH, curl, Python 3 et les outils de processus.
 - **CLI d’agent** : Claude Code, Codex, Copilot CLI et Kimi Code depuis npm, [Antigravity](../antigravity/) depuis une archive vérifiée.
-  - `agentVersions`
 - **Utilisateur de l’agent** : L’utilisateur `node` de l’image, renuméroté avec votre UID et votre GID.
-- **Home privé** : `/home/agent`, appartenant à l’utilisateur de l’agent en mode 700, défini comme `HOME`.
+- **Répertoire personnel privé** : `/home/agent`, appartenant à l’utilisateur de l’agent en mode 700, défini comme `HOME`.
 - **Environnement** : Mises à jour automatiques d’Antigravity désactivées, cache de Copilot sous `/tmp/.cache`.
 - **Répertoire de travail** : `/workspace`, où démarrent les commandes.
 
 ## Générer la recette
 
+La commande construit l’image et écrit son `Dockerfile` dans `.outpost-image` (`Containerfile` avec Podman). Ce dossier reçoit aussi des fichiers d’exemple que vous pouvez laisser de côté : vos tâches seront écrites dans vos propres scripts TypeScript. Ajoutez `--no-build` pour générer les fichiers sans lancer la construction.
+
 ```sh
-npx @elie-laloum/outpost init --yes --image outpost:dev
+npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-`init` écrit la recette avec le reste du projet, puis construit l’image. `--no-build` écrit seulement la recette. Sans `--image`, le nom est `outpost:<nom du répertoire>` ; le `run.ts` généré passe ce même nom au provider.
-
-Pour ajouter Outpost à une application existante, générez la recette dans un répertoire séparé ([Installation](../setup/)).
+Les commandes de cette page supposent que le paquet Outpost est déjà installé, comme indiqué dans [Installation](../setup/). Pour Podman, ajoutez `--sandbox-provider podman` à la génération et `--engine podman` à la construction.
 
 ## Ajouter des outils de projet et reconstruire
 
 Ajoutez paquets système et binaires en root, avant la ligne `USER` finale de la recette.
 
-```dockerfile title="Dockerfile"
+```dockerfile title=".outpost-image/Dockerfile"
 RUN apt-get update && apt-get install -y --no-install-recommends make \
   && rm -rf /var/lib/apt/lists/*
 USER $AGENT_UID:$AGENT_GID
 ```
 
 ```sh
-npx outpost image build --image outpost:dev
+npx outpost image build --directory .outpost-image --image outpost:dev
 ```
 
 | Option           | Défaut                                    | Effet                                              |
@@ -50,14 +49,14 @@ npx outpost image build --image outpost:dev
 | `--uid`, `--gid` | Les identifiants de votre utilisateur     | Identifiants attribués à l’utilisateur de l’agent. |
 
 :::caution
-Installez les outils hors de `/home/agent`. Chaque conteneur y monte un home privé vierge, qui masque tout ce que l’image y avait placé.
+Installez les outils hors de `/home/agent`. Chaque conteneur y monte un répertoire personnel privé vierge, qui masque tout ce que l’image y avait placé.
 :::
 
-Par défaut, les conteneurs tournent avec votre UID, et le provider refuse une image construite pour un autre UID. Construisez sur la machine qui exécute les workflows, ou passez `--uid` et `--gid` pour l’utilisateur cible ([`user`](../containers/) sur le provider lève ce contrôle).
+Par défaut, les conteneurs tournent avec votre UID, et le fournisseur refuse une image construite pour un autre UID. Construisez sur la machine qui exécute les workflows, ou passez `--uid` et `--gid` pour l’utilisateur cible ([`user`](../containers/) sur le fournisseur lève ce contrôle).
 
 ## Garder les identifiants hors de l’image
 
-L’image contient des outils, jamais de connexions. À chaque exécution, Outpost copie la connexion hôte du harness ou transmet sa clé API dans le home privé ([Authentification](../authentication/)).
+L’image contient des outils, jamais de connexions. À chaque exécution, Outpost copie la connexion hôte du harness ou transmet sa clé API dans le répertoire personnel privé ([Authentification](../authentication/)).
 
 :::caution
 Ne copiez pas `~/.codex`, `~/.claude`, `.env` ni des clés avec `COPY`, et ne passez aucun secret par `ARG` ou `ENV`. Les couches d’image les conservent pour quiconque peut récupérer l’image.
@@ -79,13 +78,15 @@ Le script affiche la version de Codex épinglée par l’Outpost installé. Apr�
 
 ## Vérifier l’image
 
+`doctor` démarre un conteneur temporaire sans réseau. Il vérifie `node`, `git`, l’accès en écriture au répertoire personnel et la CLI de l’agent, et avertit si la version du CLI diffère de la version épinglée. Il n’utilise que l’image locale et ne teste pas la connexion ([Diagnostic](../diagnostics/)).
+
 ```sh
 npx outpost doctor --sandbox-provider docker --agent claude --image outpost:dev
 ```
 
-`doctor` démarre un conteneur temporaire sans réseau. Il vérifie `node`, `git`, l’accès en écriture au home et le CLI de l’agent, et avertit si la version du CLI diffère de la version épinglée. Il n’utilise que l’image locale et ne teste pas la connexion ([Diagnostic](../diagnostics/)).
-
 ## Supprimer l’image
+
+Supprimez `outpost:dev` lorsque vous n’avez plus besoin de cette image. La commande la retire du moteur de conteneurs local, indépendamment des branches Git conservées.
 
 ```sh
 npx outpost image remove --image outpost:dev
@@ -95,7 +96,7 @@ Ajoutez `--engine podman` pour Podman. Les volumes de cache de dépendances sont
 
 ## Images des sandboxes distantes
 
-Les [sandboxes cloud](../cloud-sandboxes/), [Firecracker](../firecracker/) et les conteneurs en [Git privé](../private-git/) installent un CLI manquant à la première utilisation. Si l’exécutable de l’agent n’est pas dans le `PATH`, Outpost installe sa version épinglée dans le home de la sandbox. Passez `bootstrap: false` dans les options de la sandbox pour exiger que l’image le fournisse.
+Les [sandboxes cloud](../cloud-sandboxes/), [Firecracker](../firecracker/) et les conteneurs en [Git privé](../private-git/) installent un CLI manquant à la première utilisation. Si l’exécutable de l’agent n’est pas dans le `PATH`, Outpost installe sa version épinglée dans le répertoire personnel de la sandbox. Passez `bootstrap: false` dans les options de la sandbox pour exiger que l’image le fournisse.
 
 Docker et Podman avec un checkout monté n’installent jamais de CLI : l’image doit le contenir.
 

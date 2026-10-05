@@ -1,56 +1,51 @@
 ---
-title: "Construire un workflow de développement"
-description: "D’un ticket à une branche relue : un agent interroge son responsable et planifie, le responsable approuve le plan, puis des agents écrivent d’abord des tests qui échouent, puis du code jusqu’à ce que les tests passent et qu’un relecteur l’accepte. Votre code vérifie chaque étape et fait chaque commit."
+title: "Créer un workflow de développement"
+description: "Passez d’un ticket aux questions, au plan validé, puis aux tests et au code vérifié."
 ---
 
-Un ticket demande « ajouter un export CSV à la liste des commandes ». Un agent demande à son responsable ce que le ticket laisse ouvert et rend un plan ; le responsable l’approuve. Des agents écrivent ensuite les tests, qui doivent échouer, puis le code, qui doit les faire passer et convaincre un agent relecteur. Le travail arrive sur `outpost/shop-142` : un commit pour les tests, un pour le code.
+Cet exemple part d’un ticket demandant un export CSV et suit un workflow de développement complet. Un agent pose les questions nécessaires au responsable du ticket, puis propose un plan. Après validation, les agents écrivent des tests en échec, réalisent la modification et la font relire. Le travail accepté est enregistré sur `outpost/shop-142`, avec un commit pour les tests et un autre pour le code.
 
 Le workflow suit une règle de [redline](https://github.com/elie-laloum/redline), un système qui mène un ticket jusqu’à une merge request, construit sur Outpost : **le code décide, les agents jugent**. Les agents répondent et modifient des fichiers ; votre code valide leurs réponses, lance les tests, refuse les modifications hors des fichiers de chaque rôle et fait les commits.
 
-## Ce que vous utilisez
+## Ce que montre l’exemple
 
 <!-- features -->
 
 - [Tâches interactives](../interactive-tasks/): L’agent interroge le responsable, un point à la fois, puis rend le plan.
-  - `defineInteractiveAgentTask()`
 - [Approbations](../approvals/): Le responsable approuve le plan avant toute modification de fichier.
-  - `defineApprovalTask()`
 - [Boucles de vérification](../verification-loops/): Écrire, vérifier, renvoyer le refus, dans un nombre de tours limité.
-  - `defineLoopTask()`
-  - `defineAgentTask()`
 - [Réponses typées](../typed-responses/): Le relecteur rend un verdict validé.
-  - `defineJsonResponse()`
 - [Sessions de sandbox](../sandbox-sessions/): Une sandbox chaude garde les dépendances entre les agents et les lancements de tests.
-  - `createSandbox()`
-  - `sandbox.command()`
 - [Exécutions durables](../durable-runs/): Un checkpoint garde les réponses, le plan et les boucles terminées d’un processus à l’autre.
-  - `createWorkflowCheckpointStore()`
 
-## Le code
+## Écrire le script
 
-Trois fichiers se placent à côté du `outpost.config.mts` d’[Installation](../setup/) : le cadrage avec le responsable, la livraison dans la sandbox, et les fonctions qu’appelle votre application.
+Enregistrez les fichiers présentés dans les onglets à côté du `outpost.config.ts` de la page [Installation](../setup/). Ils sont regroupés par rôle : clarifier le ticket, préparer la sandbox, écrire les tests, réaliser la modification et fournir les fonctions qu’appelle votre application. Chaque fichier a une responsabilité ; les imports les relient.
+
+### Clarifier le ticket et approuver le plan
+
+Commencez par le ticket, le format du plan attendu et l’étape d’approbation.
 
 <!-- tabs -->
 
-```ts title="framing.ts"
-import {
-  defineApprovalTask,
-  defineInteractiveAgentTask,
-  defineTask,
-} from "@elie-laloum/outpost";
+```ts title="ticket.ts"
 import { z } from "zod";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
 export const ticket = {
   key: "SHOP-142",
   text: "Add a CSV export to the orders list.",
 };
-
-const planSchema = z.object({
+export const planSchema = z.object({
   summary: z.string().min(1),
   tests: z.array(z.string()).min(1),
   code: z.array(z.string()).min(1),
 });
+```
+
+```ts title="frame.ts"
+import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
+import { repository, coder, sandboxProvider } from "./outpost.config.ts";
+import { ticket } from "./ticket.ts";
 
 export const frame = defineInteractiveAgentTask({
   key: "frame",
@@ -66,13 +61,24 @@ export const frame = defineInteractiveAgentTask({
   actors: ["owner"],
   maxTurns: 10,
 });
+```
 
-// Les règles du plan : le code vérifie le JSON de l’agent avant toute lecture.
+```ts title="plan.ts"
+import { defineTask } from "@elie-laloum/outpost";
+import { frame } from "./frame.ts";
+import { planSchema } from "./ticket.ts";
+
 export const plan = defineTask({
   key: "plan",
   after: [frame],
   perform: (context) => planSchema.parse(context.value(frame).output),
 });
+```
+
+```ts title="approval.ts"
+import { defineApprovalTask } from "@elie-laloum/outpost";
+import { plan } from "./plan.ts";
+import { ticket } from "./ticket.ts";
 
 export const review = defineApprovalTask({
   key: "review",
@@ -82,24 +88,38 @@ export const review = defineApprovalTask({
 });
 ```
 
-```ts title="delivery.ts"
-import {
-  createSandbox,
-  defineAgentTask,
-  defineJsonResponse,
-  defineLoopTask,
-} from "@elie-laloum/outpost";
-import type { LoopTaskContext, Sandbox } from "@elie-laloum/outpost";
-import { z } from "zod";
-import { plan, review, ticket } from "./framing.ts";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+```ts title="loop.types.ts"
+import type { LoopTaskContext, LoopCheckResult } from "@elie-laloum/outpost";
+
+export type LoopCheck = (context: LoopTaskContext) => Promise<LoopCheckResult>;
+export type LoopAttempt = (
+  context: LoopTaskContext,
+  feedback: string | undefined,
+) => Promise<{ summary: string }>;
+```
+
+### Préparer et réutiliser la sandbox
+
+Ces fonctions ouvrent une sandbox au début de la réalisation et la réutilisent pour les commandes et les agents.
+
+<!-- tabs -->
+
+```ts title="branch.ts"
+import { ticket } from "./ticket.ts";
 
 export const branch = `outpost/${ticket.key.toLowerCase()}`;
-const isTest = (file: string) => /(^|\/)test\/|\.test\.[cm]?[jt]s$/.test(file);
-let opened: Sandbox | undefined;
+export const isTest = (file: string) =>
+  /(^|\/)test\/|\.test\.[cm]?[jt]s$/.test(file);
+```
 
-// N’ouvre la sandbox qu’à la première tâche de livraison : les questions n’attendent pas npm ci.
-async function workbench() {
+```ts title="workbench.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { branch } from "./branch.ts";
+
+export let opened: Sandbox | undefined;
+export async function workbench() {
   opened ??= await createSandbox({
     repository,
     sandboxProvider,
@@ -109,13 +129,17 @@ async function workbench() {
   });
   return opened;
 }
-
 export async function closeWorkbench() {
   await opened?.close();
   opened = undefined;
 }
+```
 
-async function run(
+```ts title="commands.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { workbench } from "./workbench.ts";
+
+export async function run(
   context: LoopTaskContext,
   executable: string,
   ...args: string[]
@@ -127,22 +151,36 @@ async function run(
     signal: context.signal,
   });
 }
+```
 
-async function changedFiles(context: LoopTaskContext) {
+```ts title="git.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { run } from "./commands.ts";
+
+export async function changedFiles(context: LoopTaskContext) {
   const status = await run(context, "git", "status", "--porcelain", "-uall");
   return status.stdout
     .split("\n")
     .filter(Boolean)
     .map((line) => line.slice(3));
 }
-
-async function commit(context: LoopTaskContext, message: string) {
+export async function commit(context: LoopTaskContext, message: string) {
   await run(context, "git", "add", "--all");
   const result = await run(context, "git", "commit", "--message", message);
   if (result.status !== 0) throw new Error(result.stderr);
 }
+```
 
-async function ask(context: LoopTaskContext, key: string, lines: string[]) {
+```ts title="ask.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+import { workbench } from "./workbench.ts";
+
+export async function ask(
+  context: LoopTaskContext,
+  key: string,
+  lines: string[],
+) {
   const role = defineAgentTask({
     key,
     sandbox: await workbench(),
@@ -150,94 +188,225 @@ async function ask(context: LoopTaskContext, key: string, lines: string[]) {
   });
   return (await role.perform(context)).text;
 }
+```
 
-const verdict = defineJsonResponse({
+### Écrire et vérifier les tests
+
+La boucle de tests refuse les modifications hors des fichiers de test et exige un échec avant de créer le commit.
+
+<!-- tabs -->
+
+```ts title="verdict.ts"
+import { defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+
+export const verdict = defineJsonResponse({
   tag: "review",
   schema: z.object({ approved: z.boolean(), feedback: z.string() }),
 });
+```
+
+```ts title="write-zones.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { changedFiles } from "./git.ts";
+import { isTest } from "./branch.ts";
+
+export async function checkTestFiles(context: LoopTaskContext) {
+  const files = await changedFiles(context);
+  const outside = files.filter((file) => !isTest(file));
+  if (!files.length) return "No test changed.";
+  if (outside.length) return `Revert:\n${outside.join("\n")}`;
+}
+export async function checkCodeFiles(context: LoopTaskContext) {
+  const edited = (await changedFiles(context)).filter(isTest);
+  if (edited.length) return `Revert:\n${edited.join("\n")}`;
+}
+```
+
+```ts title="test-attempt.ts"
+import type { LoopAttempt } from "./loop.types.ts";
+import { ask } from "./ask.ts";
+import { ticket } from "./ticket.ts";
+import { plan } from "./plan.ts";
+
+export const testAttempt: LoopAttempt = async (context, feedback) => {
+  const summary = await ask(context, "test-writer", [
+    `Ticket ${ticket.key}: ${ticket.text}`,
+    "Write tests for these behaviors. Edit test files only and do not commit.",
+    ...context.value(plan).tests.map((item) => `- ${item}`),
+    feedback ? `Your last attempt was rejected:\n${feedback}` : "",
+  ]);
+  return { summary };
+};
+```
+
+```ts title="test-check.ts"
+import type { LoopCheck } from "./loop.types.ts";
+import { checkTestFiles } from "./write-zones.ts";
+import { run } from "./commands.ts";
+import { commit } from "./git.ts";
+import { ticket } from "./ticket.ts";
+
+export const testCheck: LoopCheck = async (context) => {
+  const rejection = await checkTestFiles(context);
+  if (rejection) return { done: false, feedback: rejection };
+  const result = await run(context, "npm", "test");
+  if (result.status === 0)
+    return { done: false, feedback: "The tests already pass." };
+  await commit(context, `test(${ticket.key}): ${ticket.text}`);
+  return { done: true };
+};
+```
+
+```ts title="tests.ts"
+import { defineLoopTask } from "@elie-laloum/outpost";
+import { review } from "./approval.ts";
+import { testAttempt } from "./test-attempt.ts";
+import { testCheck } from "./test-check.ts";
 
 export const tests = defineLoopTask({
   key: "tests",
   after: [review],
   maxRounds: 4,
-  async attempt(context, feedback) {
-    const summary = await ask(context, "test-writer", [
-      `Ticket ${ticket.key}: ${ticket.text}`,
-      "Write tests for these behaviors. Edit test files only and do not commit.",
-      ...context.value(plan).tests.map((item) => `- ${item}`),
-      feedback ? `Your last attempt was rejected:\n${feedback}` : "",
-    ]);
-    return { summary };
-  },
-  async check(context) {
-    const files = await changedFiles(context);
-    const outside = files.filter((file) => !isTest(file));
-    if (!files.length) return { done: false, feedback: "No test changed." };
-    if (outside.length)
-      return { done: false, feedback: `Revert:\n${outside.join("\n")}` };
-    const result = await run(context, "npm", "test");
-    if (result.status === 0)
-      return { done: false, feedback: "The tests already pass." };
-    await commit(context, `test(${ticket.key}): ${ticket.text}`);
-    return { done: true };
-  },
+  attempt: testAttempt,
+  check: testCheck,
 });
+```
+
+### Réaliser et relire la modification
+
+La boucle d’implémentation vérifie les fichiers modifiés, exécute les tests et demande une revue avant de créer le commit.
+
+<!-- tabs -->
+
+```ts title="code-attempt.ts"
+import type { LoopAttempt } from "./loop.types.ts";
+import { ask } from "./ask.ts";
+import { ticket } from "./ticket.ts";
+import { plan } from "./plan.ts";
+
+export const codeAttempt: LoopAttempt = async (context, feedback) => {
+  const summary = await ask(context, "developer", [
+    `Ticket ${ticket.key}: ${ticket.text}`,
+    "Make the failing tests pass. Do not edit tests and do not commit.",
+    ...context.value(plan).code.map((item) => `- ${item}`),
+    feedback ? `Your last attempt was rejected:\n${feedback}` : "",
+  ]);
+  return { summary };
+};
+```
+
+```ts title="green-check.ts"
+import type { LoopCheck } from "./loop.types.ts";
+import { run } from "./commands.ts";
+
+export const greenCheck: LoopCheck = async (context) => {
+  const result = await run(context, "npm", "test");
+  const feedback = `${result.stdout}\n${result.stderr}`;
+  return result.status === 0 ? { done: true } : { done: false, feedback };
+};
+```
+
+```ts title="review-brief.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { ticket } from "./ticket.ts";
+import { plan } from "./plan.ts";
+
+export function reviewBrief(context: LoopTaskContext) {
+  return {
+    text: [
+      `Review the uncommitted changes for ${ticket.key} against this plan:`,
+      ...context.value(plan).code.map((item) => `- ${item}`),
+      'End with <review>{"approved": false, "feedback": "What to change"}</review>.',
+    ].join("\n"),
+  };
+}
+```
+
+```ts title="review-changes.ts"
+import type { LoopTaskContext } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+import { workbench } from "./workbench.ts";
+import { verdict } from "./verdict.ts";
+import { reviewBrief } from "./review-brief.ts";
+
+export async function reviewChanges(context: LoopTaskContext) {
+  const reviewing = defineAgentTask({
+    key: "reviewer",
+    sandbox: await workbench(),
+    request: () => ({ response: verdict, brief: reviewBrief(context) }),
+  });
+  return (await reviewing.perform(context)).value;
+}
+```
+
+```ts title="code-check.ts"
+import type { LoopCheck } from "./loop.types.ts";
+import { checkCodeFiles } from "./write-zones.ts";
+import { greenCheck } from "./green-check.ts";
+import { reviewChanges } from "./review-changes.ts";
+import { commit } from "./git.ts";
+import { ticket } from "./ticket.ts";
+
+export const codeCheck: LoopCheck = async (context) => {
+  const edited = await checkCodeFiles(context);
+  if (edited) return { done: false, feedback: edited };
+  const green = await greenCheck(context);
+  if (!green.done) return green;
+  const value = await reviewChanges(context);
+  if (!value.approved) return { done: false, feedback: value.feedback };
+  await commit(context, `feat(${ticket.key}): ${ticket.text}`);
+  return { done: true };
+};
+```
+
+### Assembler le workflow et son checkpoint
+
+Assemblez les tâches et le checkpoint, puis fermez la sandbox à la fin de chaque appel.
+
+<!-- tabs -->
+
+```ts title="code.ts"
+import { defineLoopTask } from "@elie-laloum/outpost";
+import { tests } from "./tests.ts";
+import { codeAttempt } from "./code-attempt.ts";
+import { codeCheck } from "./code-check.ts";
 
 export const code = defineLoopTask({
   key: "code",
   after: [tests],
   maxRounds: 6,
-  async attempt(context, feedback) {
-    const summary = await ask(context, "developer", [
-      `Ticket ${ticket.key}: ${ticket.text}`,
-      "Make the failing tests pass. Do not edit tests and do not commit.",
-      ...context.value(plan).code.map((item) => `- ${item}`),
-      feedback ? `Your last attempt was rejected:\n${feedback}` : "",
-    ]);
-    return { summary };
-  },
-  async check(context) {
-    const edited = (await changedFiles(context)).filter(isTest);
-    if (edited.length)
-      return { done: false, feedback: `Revert:\n${edited.join("\n")}` };
-    const result = await run(context, "npm", "test");
-    if (result.status !== 0)
-      return { done: false, feedback: `${result.stdout}\n${result.stderr}` };
-    const reviewing = defineAgentTask({
-      key: "reviewer",
-      sandbox: await workbench(),
-      request: () => ({
-        response: verdict,
-        brief: {
-          text: [
-            `Review the uncommitted changes for ${ticket.key} against this plan:`,
-            ...context.value(plan).code.map((item) => `- ${item}`),
-            'End with <review>{"approved": false, "feedback": "What to change"}</review>.',
-          ].join("\n"),
-        },
-      }),
-    });
-    const { value } = await reviewing.perform(context);
-    if (!value.approved) return { done: false, feedback: value.feedback };
-    await commit(context, `feat(${ticket.key}): ${ticket.text}`);
-    return { done: true };
-  },
+  attempt: codeAttempt,
+  check: codeCheck,
 });
 ```
 
-```ts title="run.ts"
-import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
-import type { WorkflowResult } from "@elie-laloum/outpost";
-import { branch, closeWorkbench, code, tests } from "./delivery.ts";
-import { frame, plan, review, ticket } from "./framing.ts";
-import { repository } from "./outpost.config.mts";
+```ts title="workflow.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { frame } from "./frame.ts";
+import { plan } from "./plan.ts";
+import { review } from "./approval.ts";
+import { tests } from "./tests.ts";
+import { code } from "./code.ts";
 
-const workflow = defineWorkflow("develop", [frame, plan, review, tests, code]);
-const checkpoint = {
+export const workflow = defineWorkflow("develop", [
+  frame,
+  plan,
+  review,
+  tests,
+  code,
+]);
+```
+
+```ts title="checkpoint.ts"
+import {
+  createWorkflowCheckpointStore,
+  createLocalTransport,
+} from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.ts";
+import { ticket } from "./ticket.ts";
+
+export const checkpoint = {
   store: createWorkflowCheckpointStore({
     transporter: createLocalTransport({
       directory: `${repository}/.outpost/storage`,
@@ -246,27 +415,52 @@ const checkpoint = {
   runId: ticket.key,
   version: "1",
 };
+```
 
-async function start(options: Parameters<typeof workflow.start>[0] = {}) {
-  try {
-    return view(await workflow.start({ ...options, checkpoint }));
-  } finally {
-    await closeWorkbench();
-  }
-}
+```ts title="view.ts"
+import type { WorkflowResult } from "@elie-laloum/outpost";
+import { plan } from "./plan.ts";
+import { branch } from "./branch.ts";
+import { code } from "./code.ts";
 
-function view(result: WorkflowResult) {
+export function view(result: WorkflowResult) {
   if (result.status === "waiting-input")
     return { questions: result.inputRequests };
   if (result.status === "paused") return { plan: result.value(plan) };
   result.unwrap();
   return { branch, summary: result.value(code).summary };
 }
+```
 
-// Démarre l’exécution, ou indique ce qu’elle attend.
+```ts title="start.ts"
+import { workflow } from "./workflow.ts";
+import { view } from "./view.ts";
+import { checkpoint } from "./checkpoint.ts";
+import { closeWorkbench } from "./workbench.ts";
+
+export async function start(
+  options: Parameters<typeof workflow.start>[0] = {},
+) {
+  try {
+    return view(await workflow.start({ ...options, checkpoint }));
+  } finally {
+    await closeWorkbench();
+  }
+}
 export const progress = () => start();
+```
 
-// `actor` vient de votre session authentifiée, jamais du formulaire.
+### Envoyer les réponses et les décisions
+
+Votre application importe les fonctions de `run.ts` pour transmettre les réponses et les décisions.
+
+<!-- tabs -->
+
+```ts title="answer.ts"
+import { workflow } from "./workflow.ts";
+import { checkpoint } from "./checkpoint.ts";
+import { start } from "./start.ts";
+
 export async function answer(actor: string, requestId: string, value: string) {
   const { inputRequests } = await workflow.start({ checkpoint });
   const request = inputRequests.find((pending) => pending.id === requestId);
@@ -274,6 +468,12 @@ export async function answer(actor: string, requestId: string, value: string) {
   const { executionId, key } = request;
   return start({ answers: [{ executionId, key, requestId, actor, value }] });
 }
+```
+
+```ts title="decide.ts"
+import { workflow } from "./workflow.ts";
+import { checkpoint } from "./checkpoint.ts";
+import { start } from "./start.ts";
 
 export async function decide(
   actor: string,
@@ -290,9 +490,19 @@ export async function decide(
 }
 ```
 
+```ts title="run.ts"
+import { progress } from "./start.ts";
+import { answer } from "./answer.ts";
+import { decide } from "./decide.ts";
+
+export { progress } from "./start.ts";
+export { answer } from "./answer.ts";
+export { decide } from "./decide.ts";
+```
+
 Votre application affiche `questions` dans un formulaire et `plan` sur une page de relecture. Chaque appel reconstruit le même workflow et le même checkpoint : il peut s’exécuter dans n’importe quel processus de la machine qui héberge le dépôt.
 
-## Comment ça marche
+## Comprendre les étapes
 
 Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
@@ -345,7 +555,7 @@ Les agents ne commitent jamais. Chaque boucle ne commite qu’une fois toutes se
 La zone d’écriture et les tests sont vérifiés par votre code, mais « ne commite pas » et « ne modifie que des fichiers de test » sont des instructions. Un agent peut tout de même lancer `git commit` lui-même : relisez la branche avant de la fusionner.
 :::
 
-## L’adapter
+## Adapter l’exemple
 
 | Variante                    | Changement                                                                                                                                                                                   |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

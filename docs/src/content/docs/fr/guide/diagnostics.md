@@ -1,11 +1,11 @@
 ---
-title: "Diagnostic"
-description: "Vérifier l’hôte, le moteur de conteneurs, l’image et la CLI de l’agent avant de payer un appel de modèle, puis sonder une sandbox ouverte depuis le code."
+title: "Diagnostiquer un problème"
+description: "Vérifiez vos outils et votre sandbox avant de rechercher un problème d’agent ou de modèle."
 ---
 
 ## Vérifier les prérequis
 
-`outpost doctor` lance de courtes sondes pour le provider de sandbox et l’agent que vous comptez utiliser. Ajoutez `--image` pour démarrer aussi l’image dans un conteneur temporaire.
+Lancez `outpost doctor` pour vérifier les outils nécessaires au fournisseur de sandbox et à l’agent. Ajoutez `--image` pour tester l’image dans un conteneur temporaire avant d’envoyer votre première demande.
 
 ```sh
 npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
@@ -77,15 +77,15 @@ jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"'
 }
 ```
 
-`hasFailures` vaut `true` dès qu’un contrôle a le statut `fail`, c’est-à-dire quand le code de sortie est `1`. `scope` vaut `host` sans `--image`. `version` et `referenceVersion` n’apparaissent que sur les contrôles de version.
+Référence API : [SandboxDiagnosticReport](../../reference/sandboxdiagnosticreport/) et [DiagnosticCheck](../../reference/diagnosticcheck/).
 
 ## Diagnostiquer une sandbox ouverte
 
-`sandbox.diagnose()` sonde la sandbox que votre code détient déjà, avec son vrai provider et ses montages. Elle laisse la sandbox ouverte.
+`sandbox.diagnose()` sonde la sandbox que votre code détient déjà, avec son vrai fournisseur et ses montages. Elle laisse la sandbox ouverte.
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
 const report = await sandbox.diagnose({ agent: "codex", transfers: true });
@@ -93,15 +93,11 @@ for (const check of report.checks)
   console.log(check.status, check.id, check.message);
 ```
 
-<!-- features -->
+Référence API : [SandboxDiagnosticOptions](../../reference/sandboxdiagnosticoptions/).
 
-- `sandbox.*` : Node.js, Git, un répertoire personnel accessible en écriture, et une commande dont les flux de sortie séparés et le code de sortie non nul doivent revenir intacts.
-- `agent` : Ajoute les contrôles de version et d’aide de la CLI de l’agent repris de doctor.
-- `transfers` : Envoie un fichier binaire, le vérifie avec un processus dans la sandbox, puis le télécharge.
+Chaque sonde s’arrête après `deadlineMs` (5 000 ms par défaut, 60 000 au maximum). `report.capabilities` compare ce que le fournisseur annonce avec ce qui a été observé. Le diagnostic est une opération de la sandbox : il échoue si un dispatch ou une commande s’exécute déjà dans la même sandbox.
 
-Chaque sonde s’arrête après `deadlineMs` (5 000 ms par défaut, 60 000 au maximum). `report.capabilities` compare ce que le provider annonce avec ce qui a été observé. Le diagnostic est une opération de la sandbox : il échoue si un dispatch ou une commande s’exécute déjà dans la même sandbox.
-
-Pour un [provider de sandbox personnalisé](../custom-sandbox-providers/), `diagnoseSandbox(lease)` lance les mêmes sondes sur un `SandboxLease`.
+Pour un [fournisseur de sandbox personnalisé](../custom-sandbox-providers/), `diagnoseSandbox(lease)` lance les mêmes sondes sur un `SandboxLease`.
 
 ## Vérifier un adaptateur d’agent hors ligne
 
@@ -118,21 +114,17 @@ console.log(report.referenceVersion, report.hasFailures);
 
 Il affiche la version de Claude Code qu’Outpost épingle, puis `false` si chaque échantillon est décodé comme prévu.
 
-## Faire un premier appel payant
+## Tester l’accès au modèle
 
 Doctor s’arrête avant la connexion et l’accès au modèle. Une fois qu’il passe, lancez une petite tâche qui ne modifie rien, comme le script de revue de [Votre première tâche](../first-request/), et lisez son résultat réel.
 
-## Lire un timeout de connexion
+## Comprendre un délai de connexion dépassé
 
-Un agent CLI peut retenter un endpoint injoignable jusqu’à sa limite de temps. L’erreur garde le code `timeout`. Si le dernier échec signalé par l’agent était un problème de connexion, Outpost ajoute une indication.
+Un agent CLI peut retenter un point d’accès injoignable jusqu’à sa limite de temps. L’erreur garde le code `timeout`. Si le dernier échec signalé par l’agent était un problème de connexion, Outpost ajoute une indication.
 
-<!-- features -->
+Référence API : [OutpostError](../../reference/outposterror/).
 
-- `error.message` : Se termine par « The agent reported a connection failure. Check the model endpoint and network access. »
-- `error.details.agentDiagnostic` : Vaut `"connection"`.
-- `unavailableFault(error)` : Renvoie `{ message: "connection failure" }`, donc un [agent de secours](../fallback-agents/) qui couvre `unavailable` passe au candidat suivant.
-
-L’indication résume le signalement de l’agent sans recopier son URL ni ses identifiants. Elle ne prouve pas que l’endpoint est arrêté. Les autres codes d’erreur sont listés dans [Erreurs](../error-handling/).
+L’indication résume le signalement de l’agent sans recopier son URL ni ses identifiants. Elle ne prouve pas que le point d’accès est arrêté. Les autres codes d’erreur sont listés dans [Erreurs](../error-handling/).
 
 ## Limites
 

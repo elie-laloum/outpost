@@ -1,30 +1,34 @@
 ---
-title: "Ajouter un agent CLI"
-description: "Exécuter une CLI d’agent de code qu’Outpost ne prend pas encore en charge : construire sa commande, décoder sa sortie, puis déclarer ce qu’elle sait faire d’autre."
+title: "Ajouter un agent en ligne de commande"
+description: "Créez un adaptateur qui lance votre agent et traduit sa sortie en événements Outpost."
 ---
 
-## Écrire un adapter minimal
+## Écrire un adaptateur minimal
 
-Un `AgentAdapter` fait le lien entre Outpost et une CLI : `request()` construit la commande, `events()` décode chaque ligne de sortie. Un `CliHarness` crée l’adapter pour un modèle, et `createAgent()` en fait un agent comme les agents intégrés.
+Implémentez un `AgentAdapter` pour décrire le lancement de votre outil et traduire sa sortie en événements : `request()` construit la commande et `events()` lit les lignes produites. Un `CliHarness` associe l’adaptateur au modèle choisi, puis `createAgent()` rend l’agent utilisable dans une tâche.
 
-```ts title="mycli.mts"
-import {
-  createAgent,
-  dispatch,
-  type AgentEvent,
-  type CliHarness,
-} from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const parse = (line: string) => {
+```ts title="protocol-values.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
+
+export const parse = (line: string) => {
   try {
     return JSON.parse(line);
   } catch {
     return undefined;
   }
 };
+export function usage(input: number, output: number): AgentEvent {
+  return { kind: "usage", tokens: { input, cached: 0, output } };
+}
+```
 
-function events(line: string): AgentEvent[] {
+```ts title="events.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
+import { parse, usage } from "./protocol-values.ts";
+
+export function events(line: string): AgentEvent[] {
   const event = parse(line);
   switch (event?.type) {
     case "session":
@@ -34,39 +38,54 @@ function events(line: string): AgentEvent[] {
     case "tool":
       return [{ kind: "tool", name: event.name, input: event.input }];
     case "usage":
-      return [
-        {
-          kind: "usage",
-          tokens: { input: event.input, cached: 0, output: event.output },
-        },
-      ];
+      return [usage(event.input, event.output)];
     case "error":
       return [{ kind: "failure", message: event.message }];
     default:
       return [];
   }
 }
+```
 
-const myCliHarness: CliHarness = {
+```ts title="model-request.ts"
+import type { AgentModel, AgentAdapter } from "@elie-laloum/outpost";
+
+export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
+  return ({ text }) => ({
+    executable: "mycli",
+    arguments: ["--json", ...(model ? ["--model", model.name] : [])],
+    stdin: text ?? "",
+  });
+}
+```
+
+```ts title="mycli-agent.ts"
+import type { CliHarness } from "@elie-laloum/outpost";
+import { requestForModel } from "./model-request.ts";
+import { events } from "./events.ts";
+import { createAgent } from "@elie-laloum/outpost";
+
+export const myCliHarness: CliHarness = {
   kind: "cli",
   bind(model) {
     if (model?.reasoning || model?.maxOutputTokens)
       throw new Error("mycli accepts only a model name");
     return {
       name: "mycli",
-      request: ({ text }) => ({
-        executable: "mycli",
-        arguments: ["--json", ...(model ? ["--model", model.name] : [])],
-        stdin: text ?? "",
-      }),
+      request: requestForModel(model),
       events,
     };
   },
 };
-
 export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
+```
 
-const result = await dispatch({
+```ts title="mycli.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { myCli } from "./mycli-agent.ts";
+
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: myCli,
@@ -82,27 +101,13 @@ Outpost exécute `mycli --json --model mycli-pro` dans la sandbox avec le brief 
 
 `request()` reçoit un `AgentInput` et renvoie une `Command` : `executable`, `arguments`, `stdin`, `variables`. Outpost ajoute l’échéance et le signal d’annulation.
 
-| Champ d’entrée      | Présent quand                                                   | Votre commande doit                                        |
-| ------------------- | --------------------------------------------------------------- | ---------------------------------------------------------- |
-| `text`              | À chaque tour                                                   | Transmettre le prompt, sur stdin ou en argument.           |
-| `continuation.id`   | Le dispatch poursuit une conversation                           | Reprendre cette conversation native.                       |
-| `continuation.fork` | Le dispatch dérive une conversation et vous n’avez pas `fork()` | Démarrer une nouvelle conversation à partir d’elle.        |
-| `liveInput`         | La réorientation passe par votre protocole `liveInput`          | Écrire le prompt sur stdin au format du protocole.         |
-| `interactive`       | [`attach()`](../sandbox-sessions/) ouvre un terminal            | Renvoyer `interactive: true` et passer `text` en argument. |
+Référence API : [AgentInput](../../reference/agentinput/).
 
 ## Décoder la sortie
 
 `events()` reçoit chaque ligne de stdout et renvoie zéro, un ou plusieurs événements. Stderr ne lui parvient jamais : Outpost signale ses lignes par des événements `stderr`.
 
-| Événement                        | Effet sur le tour                                                                       |
-| -------------------------------- | --------------------------------------------------------------------------------------- |
-| `conversation` (`id`)            | Enregistre l’ID de conversation native pour la capture, la reprise et la réorientation. |
-| `text` (`text`)                  | S’ajoute à la réponse.                                                                  |
-| `result` (`text`)                | La réponse finale ; remplace les `text` accumulés.                                      |
-| `usage` (`tokens`, `cumulative`) | Ajoute les tokens à `result.usage`. `cumulative: true` pour des totaux courants.        |
-| `failure` (`message`)            | Fait échouer le tour avec ce message.                                                   |
-| `quota` (`message`, `resetAt`)   | Classe le tour échoué comme erreur de [quota](../quota-pauses/).                        |
-| `finished`                       | Termine le tour. Avec `requiresFinishedEvent: true`, un tour sans lui échoue.           |
+Référence API : [AgentEvent](../../reference/agentevent/).
 
 Les autres types, comme `tool`, `tool-result`, `reasoning`, `file-change` et `warning`, ne parviennent qu’aux [observateurs](../progress/). Un code de sortie non nul fait échouer le tour. Sans événement `text` ni `result`, `result.text` contient la fin de stdout.
 
@@ -114,29 +119,13 @@ Une exception levée par `events()` fait échouer le tour. Renvoyez `[]` pour le
 
 Chaque membre optionnel active une fonctionnalité. Ne déclarez que ce que la CLI fait réellement.
 
-| Membre                                 | Active                                                                                                          | Page                                                                           |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Contrôle du modèle dans `bind()`       | Levez une erreur pour refuser les réglages de modèle que la CLI ne sait pas appliquer, dès `createAgent()`.     | [AgentModel](../../reference/agentmodel/)                                      |
-| `resumable: true`                      | Reprise, réparations des réponses typées et réorientation par reprise. `false` refuse reprise et fork d’emblée. | [Conversations](../conversations/)                                             |
-| `forkable`, `fork(id, invoke)`         | Forks. `fork()` crée l’enfant par des commandes dans la sandbox et renvoie son ID. `false` refuse les forks.    | [Conversations](../conversations/)                                             |
-| `storage`, `capture`                   | Capture après chaque tour et reprise dans une nouvelle sandbox. `capture: false` désactive la capture.          | [Formats de conversation natifs](../conversation-formats/)                     |
-| `credentials(variables)`               | Variables, fichiers de l’hôte, fichiers générés et commandes de connexion pour le home privé de l’agent.        | [Authentification](../authentication/)                                         |
-| `configuration(variables)`             | Fichiers de réglages de la CLI fusionnés dans le home de l’agent, comme les serveurs MCP.                       | [Serveurs MCP](../mcp-servers/)                                                |
-| `quota(text)`, `unavailable(text)`     | Classent un tour échoué comme erreur de quota ou panne, d’après son texte d’échec ou stderr.                    | [Pauses sur quota](../quota-pauses/), [Agents de secours](../fallback-agents/) |
-| `usage`, `usageCommand`, `usageResult` | Décompte des tokens.                                                                                            | [Mesurer la consommation de tokens](#mesurer-la-consommation-de-tokens)        |
-| `liveInput`                            | Instructions injectées dans le tour en cours.                                                                   | [Réorienter un tour en cours](#réorienter-un-tour-en-cours)                    |
-| `variables`                            | Variables d’environnement pour chaque commande de l’agent.                                                      | [Variables d’environnement](../environment-variables/)                         |
+Référence API : [AgentAdapter](../../reference/agentadapter/).
 
 ## Mesurer la consommation de tokens
 
 `usage` indique à Outpost d’où viennent les compteurs. Une consommation incomplète est une borne inférieure que les [budgets](../budgets/) traitent à part.
 
-| `usage`         | Ce que fait Outpost                                                                                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `"events"`      | Additionne les événements `usage`. Marque la consommation incomplète si aucun n’arrive ou si la commande n’aboutit pas.            |
-| `"session"`     | Après la sortie de la CLI, exécute `usageCommand(conversation)` dans la sandbox et lit les totaux de session avec `usageResult()`. |
-| `"unavailable"` | Marque la consommation incomplète avant le lancement de la commande.                                                               |
-| absent          | Additionne les événements `usage` sans juger de leur complétude.                                                                   |
+Référence API : [Usage](../../reference/usage/).
 
 ```ts
 import type { AgentAdapter } from "@elie-laloum/outpost";
@@ -161,7 +150,7 @@ export const sessionUsage: Pick<
 };
 ```
 
-Ajoutez `...sessionUsage` à l’adapter. La commande dispose de cinq secondes et n’est pas lancée si un événement `usage` cumulatif a déjà fourni les totaux. Sur une conversation poursuivie, Outpost mesure d’abord une référence et garde la différence ; un fork n’a pas de référence, sa consommation est donc incomplète.
+Ajoutez `...sessionUsage` à l’adaptateur. La commande dispose de cinq secondes et n’est pas lancée si un événement `usage` cumulatif a déjà fourni les totaux. Sur une conversation poursuivie, Outpost mesure d’abord une référence et garde la différence ; un fork n’a pas de référence, sa consommation est donc incomplète.
 
 Avec `storage`, `transcriptUsage(text)` peut plutôt lire les totaux dans la transcription capturée.
 
@@ -193,7 +182,7 @@ export const liveInput: AgentLiveInput = {
 
 Le prompt compte comme premier message à confirmer. Outpost garde stdin ouvert et le ferme après un événement `finished`, une fois tous les messages consommés.
 
-L’injection exige aussi un `SandboxLease` avec `liveInput: true`, ce que renvoient tous les providers intégrés. Sur un [provider personnalisé](../custom-sandbox-providers/) qui n’en a pas, un adapter reprenable se replie sur `resumed`.
+L’injection exige aussi un `SandboxLease` avec `liveInput: true`, ce que renvoient tous les fournisseurs intégrés. Sur un [fournisseur personnalisé](../custom-sandbox-providers/) qui n’en a pas, un adaptateur reprenable se replie sur `resumed`.
 
 ## Ce qu’Outpost gère pour vous
 
@@ -201,24 +190,31 @@ L’injection exige aussi un `SandboxLease` avec `liveInput: true`, ce que renvo
 
 - **Processus** : Les échéances, les délais d’inactivité et l’annulation arrêtent tout le groupe de processus.
 - **Sandbox et workspace** : L’allocation, le worktree, les commits et le nettoyage fonctionnent comme pour les agents intégrés.
-- **Home de l’agent** : Les plans de `credentials()` et `configuration()` sont installés dans le home privé de la sandbox.
+- **Répertoire personnel de l’agent** : Les plans de `credentials()` et `configuration()` sont installés dans le répertoire personnel privé de la sandbox.
 - **Réponses** : Les réponses typées, les réparations et les marqueurs de fin s’appliquent à votre texte décodé.
 - **Consommation** : Les compteurs s’additionnent entre tours, nouvelles tentatives et workflows, et alimentent les budgets.
 - **Observation** : Les événements décodés, les lignes brutes et stderr parviennent à `observe`, aux reporters et aux journaux.
 
-## Tester l’adapter
+## Tester l’adaptateur
 
 Enregistrez une fois de vraies lignes de sortie de la CLI, puis rejouez-les dans `events()`. [`diagnoseAgentProtocol()`](../diagnostics/) vérifie les agents intégrés de la même façon.
 
-```ts
-import assert from "node:assert/strict";
-import type { AgentEvent, CliHarness } from "@elie-laloum/outpost";
+<!-- tabs -->
+
+```ts title="protocol.types.ts"
+import type { AgentEvent } from "@elie-laloum/outpost";
 
 export interface ProtocolFixture {
   readonly name: string;
   readonly lines: readonly string[];
   readonly expected: readonly AgentEvent[];
 }
+```
+
+```ts title="check-protocol.ts"
+import type { CliHarness } from "@elie-laloum/outpost";
+import type { ProtocolFixture } from "./protocol.types.ts";
+import assert from "node:assert/strict";
 
 export function checkProtocol(
   harness: CliHarness,
@@ -238,7 +234,7 @@ Ajoutez des fixtures pour les échecs, et vérifiez que `quota()` ne reconnaît 
 
 ## Limites
 
-- Le bootstrap distant n’installe que les CLI intégrées. Installez la vôtre dans l’image de chaque provider utilisé.
+- Le bootstrap distant n’installe que les CLI intégrées. Installez la vôtre dans l’image de chaque fournisseur utilisé.
 - `outpost init`, `outpost doctor` et `diagnoseAgentProtocol()` ne connaissent que les agents intégrés.
 - Une ligne de stdout contient au plus 16 Mio ; une ligne plus longue fait échouer le tour.
 

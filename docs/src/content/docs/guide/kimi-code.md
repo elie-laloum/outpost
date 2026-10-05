@@ -1,6 +1,6 @@
 ---
-title: "Kimi Code"
-description: "Run Moonshot’s Kimi Code CLI in a sandbox, signed in with your Kimi account or an API key."
+title: "Configure Kimi Code"
+description: "Run Kimi Code with account access or an API key and choose the account region."
 ---
 
 ## Install
@@ -11,9 +11,9 @@ description: "Run Moonshot’s Kimi Code CLI in a sandbox, signed in with your K
 - [Cloud sandboxes](../cloud-sandboxes/): Outpost installs `@moonshot-ai/kimi-code` with npm when `kimi` is missing.
 - [Host execution](../host-process/): Install it yourself with `npm install -g @moonshot-ai/kimi-code`.
 
-Images and cloud installs use the version in [`agentVersions.kimi`](../../reference/agentversions/). Outpost turns off the CLI’s auto-update. `outpost init --agent kimi` generates a Kimi project ([CLI commands](../cli/)).
+The [agent image](../agent-images/) and cloud bootstrap install the version in [`agentVersions.kimi`](../../reference/agentversions/). Outpost disables automatic CLI updates to keep this version stable during runs.
 
-## Account access
+## Sign in with your account
 
 Sign in on the host with `kimi login --region global` (`mainland-cn` for a kimi.com account), then select `account`. The run uses your Kimi Code plan.
 
@@ -31,7 +31,7 @@ A `model` on `createAgent()` becomes `--model`; without one, the CLI picks its d
 
 ### Choose the region
 
-`region` selects the account service. It defaults to `"global"`.
+API reference: [KimiSettings](../../reference/kimisettings/).
 
 | `region`             | Account  | Credential file                                   | Endpoints                       |
 | -------------------- | -------- | ------------------------------------------------- | ------------------------------- |
@@ -55,7 +55,7 @@ export const coder = createAgent({
 });
 ```
 
-## API access
+## Use an API key
 
 Pass `KIMI_API_KEY` and a model: without a model, composition fails. API calls use Kimi’s API billing, not your plan.
 
@@ -73,24 +73,18 @@ export const coder = createAgent({
 
 Outpost passes the key and model to the CLI as `KIMI_MODEL_API_KEY` and `KIMI_MODEL_NAME`. For another endpoint, add `KIMI_MODEL_BASE_URL` to `variables` ([Kimi variables](https://www.kimi.com/code/docs/en/kimi-code-cli/configuration/env-vars.html)). Other key forms: [Authentication](../authentication/).
 
-## What it supports
+## Available features
 
 [Choose an agent](../choose-an-agent/) compares agents.
 
 <!-- features -->
 
 - [Conversations](../conversations/): Capture, cold and warm resume, and fork with `kimi fork`. The parent session stays unchanged.
-  - `createKimiConversations()`
 - [Typed responses](../typed-responses/): An invalid answer is repaired by resuming the session.
-  - `repairs`
 - [Steering](../steering/): Outpost stops the CLI once its session is known, then resumes it with your text.
-  - `resumed`
 - [MCP servers](../mcp-servers/): Merged into `~/.kimi-code/mcp.json` in the agent home. `oauth: "login"` servers reuse your host login.
-  - `mcpServers`
 - [Quota pauses](../quota-pauses/): Quota and balance errors stop the turn with code `quota`.
-  - `onQuota`
 - [Budgets](../budgets/): Token usage is read from the session after the CLI exits.
-  - `result.usage`
 
 ### Token usage
 

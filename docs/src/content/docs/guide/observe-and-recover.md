@@ -1,53 +1,50 @@
 ---
-title: "Observe and recover"
-description: "See what a run is doing, keep a durable record of it, export traces, replay it without a model, and find the work Outpost kept when it failed."
+title: "Follow a run and inspect failures"
+description: "Choose live progress, stored journals or recovery tools for the information you need."
 ---
 
 ## While it runs, and after
 
-Observation is read-only: a sink that throws never changes a task's outcome. Recovery is the other half, for the runs that stop badly.
+Use live events to follow the work, journals to inspect it afterwards and recovery tools when it stops before completion. An observer only reports what happens; an error in its callback does not change the task’s outcome.
 
 <!-- features -->
 
 - [Follow progress](../progress/): Receive the events of one dispatch as they happen.
-  - `observe`
-  - `createReporter()`
 - [Observation hub and OpenTelemetry](../observability/): One stream for a whole run, exported as traces and metrics.
-  - `createObservationHub()`
   - OpenTelemetry
 - [Journals](../journals/): A durable record of each dispatch, read back after the run.
-  - `readJournal()`
-  - `logReference`
 - [Replay without a model](../record-replay/): Reproduce a recorded run, event by event, with no model call.
-  - `createReplayAgent()`
   - replay
 - [Recover work](../recovery/): Find, inspect and restore what a failed run left behind.
-  - `inspectRecovery()`
   - worktrees
 - [Diagnostics](../diagnostics/): Check the host, engine, image and agent CLI before paying for a model call.
-  - `doctor`
-  - `diagnoseSandbox()`
 
 ## Read a run back
 
 Every dispatch writes a journal. `result.logReference` points at the finished one; `readJournal()` returns its events.
 
-```ts
-import {
-  createLocalTransport,
-  dispatch,
-  readJournal,
-} from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const transporter = createLocalTransport({ directory: ".outpost/storage" });
-const result = await dispatch({
+```ts title="record-journal.ts"
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+
+export const transporter = createLocalTransport({
+  directory: ".outpost/storage",
+});
+export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Describe the repository without changing it." },
   logging: { transporter },
 });
+```
+
+```ts title="read-journal.ts"
+import { result, transporter } from "./record-journal.ts";
+import { readJournal } from "@elie-laloum/outpost";
+
 if (result.logReference) {
   const events = await readJournal({
     transporter,

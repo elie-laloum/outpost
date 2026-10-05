@@ -1,63 +1,74 @@
 ---
-title: "Permissions and hooks"
-description: "Allow or deny the built-in harness’s tool calls with ordered rules, and run your own code at each step of its loop."
+title: "Control tool permissions"
+description: "Allow or deny tool calls and use hooks to inspect the built-in agent loop."
 ---
 
-Permissions are declarative rules on tool calls. Hooks are functions that run at fixed points of the [built-in harness](../harness/) loop. Both are `createHarness()` options; to run commands while the sandbox is prepared, see [Prepare the environment](../environment-setup/).
+Use permissions to decide which tool calls are allowed, and hooks to run your code at specific points in the [built-in loop](../harness/). Both are options of `createHarness()`. For commands that prepare a sandbox before a turn, use [environment hooks](../environment-setup/) instead.
 
 ## Allow only what the task needs
 
-```ts
-import {
-  createAnthropicModelProvider,
-  createHarness,
-  createHarnessEditTools,
-  createHarnessFileTools,
-  createHarnessShellTools,
-  defineHarnessPermissions,
-} from "@elie-laloum/outpost";
+The model can read any file except `.env` files, edit under `src/` and `test/`, and run `npm test`. Any other call returns `Denied: <reason>` to the model as a failed tool result, and the loop continues. Pass `harness` to `createAgent({ harness, model })`.
 
-const harness = createHarness({
-  modelProvider: createAnthropicModelProvider({
-    apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-  }),
+<!-- tabs -->
+
+```ts title="permission-rules.ts"
+export const rules = [
+  {
+    effect: "deny",
+    paths: ["**/.env*"],
+    reason: "Environment files are private.",
+  },
+  { effect: "allow", tools: ["read_file", "list_files"] },
+  {
+    effect: "allow",
+    tools: ["write_file", "edit_file"],
+    paths: ["src/**", "test/**"],
+  },
+  { effect: "allow", tools: ["shell"], commands: ["npm test"] },
+] as const;
+```
+
+```ts title="permissions.ts"
+import { defineHarnessPermissions } from "@elie-laloum/outpost";
+import { rules } from "./permission-rules.ts";
+
+export const permissions = defineHarnessPermissions({ default: "deny", rules });
+```
+
+```ts title="permission-model.ts"
+import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+
+export const modelProvider = createAnthropicModelProvider({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+```
+
+```ts title="harness.ts"
+import {
+  createHarness,
+  createHarnessFileTools,
+  createHarnessEditTools,
+  createHarnessShellTools,
+} from "@elie-laloum/outpost";
+import { modelProvider } from "./permission-model.ts";
+import { permissions } from "./permissions.ts";
+
+export const harness = createHarness({
+  modelProvider,
   tools: [
     createHarnessFileTools(),
     createHarnessEditTools(),
     createHarnessShellTools(),
   ],
-  permissions: defineHarnessPermissions({
-    default: "deny",
-    rules: [
-      {
-        effect: "deny",
-        paths: ["**/.env*"],
-        reason: "Environment files are private.",
-      },
-      { effect: "allow", tools: ["read_file", "list_files"] },
-      {
-        effect: "allow",
-        tools: ["write_file", "edit_file"],
-        paths: ["src/**", "test/**"],
-      },
-      { effect: "allow", tools: ["shell"], commands: ["npm test"] },
-    ],
-  }),
+  permissions,
 });
 ```
-
-The model can read any file except `.env` files, edit under `src/` and `test/`, and run `npm test`. Any other call returns `Denied: <reason>` to the model as a failed tool result, and the loop continues. Pass `harness` to `createAgent({ harness, model })`.
 
 ## Write rules
 
 Each rule has an `effect` (`"allow"` or `"deny"`) and one or more conditions. A rule matches when all its conditions match.
 
-| Field      | Matches                               | Patterns                                                                |
-| ---------- | ------------------------------------- | ----------------------------------------------------------------------- |
-| `tools`    | The tool name                         | `*` matches any text: `read_*`, `mcp__github__*`.                       |
-| `paths`    | Repository-relative paths of the call | `*` stays within a segment, `**/` spans directories, `?` one character. |
-| `commands` | The command line of the call          | `*` matches any text, spaces included.                                  |
-| `reason`   | —                                     | The text the model receives when this rule denies.                      |
+API reference: [HarnessPermissionRule](../../reference/harnesspermissionrule/).
 
 The first matching rule decides. Without a match, `default` applies; it is `"allow"` when omitted. An allow rule with `paths` needs every path of the call to match; a deny rule needs only one.
 
@@ -65,60 +76,70 @@ The first matching rule decides. Without a match, `default` applies; it is `"all
 
 ## Intercept calls with hooks
 
-```ts
+Use hooks to add instructions at the start, refuse `write_file` calls after step 20 and ask for a test report before the agent finishes. Pass the exported list to `createHarness({ hooks })`.
+
+<!-- tabs -->
+
+```ts title="editing-hooks.ts"
 import { defineHarnessHook } from "@elie-laloum/outpost";
 
-const hooks = [
-  defineHarnessHook({
-    on: "session-start",
-    run: () => ({ instructions: "Run npm test before you answer." }),
-  }),
-  defineHarnessHook({
-    on: "before-tool",
-    run({ call, step }) {
-      if (call.name === "write_file" && step > 20)
-        return { deny: "Stop editing and summarize your changes." };
-    },
-  }),
-  defineHarnessHook({
-    on: "stop",
-    run({ text }) {
-      if (!text.includes("npm test"))
-        return { continue: "Run npm test and report its result." };
-    },
-  }),
-];
+export const startHook = defineHarnessHook({
+  on: "session-start",
+  run: () => ({ instructions: "Run npm test before you answer." }),
+});
+export const editHook = defineHarnessHook({
+  on: "before-tool",
+  run({ call, step }) {
+    if (call.name === "write_file" && step > 20)
+      return { deny: "Stop editing and summarize your changes." };
+  },
+});
+```
+
+```ts title="completion-hook.ts"
+import { defineHarnessHook } from "@elie-laloum/outpost";
+
+export const completionHook = defineHarnessHook({
+  on: "stop",
+  run({ text }) {
+    if (!text.includes("npm test"))
+      return { continue: "Run npm test and report its result." };
+  },
+});
+```
+
+```ts title="hooks.ts"
+import { startHook, editHook } from "./editing-hooks.ts";
+import { completionHook } from "./completion-hook.ts";
+
+export const hooks = [startHook, editHook, completionHook];
 ```
 
 Pass the list to `createHarness({ hooks })`. A hook that returns nothing leaves the loop unchanged.
 
-| Phase           | Receives                                   | Can return                                                          |
-| --------------- | ------------------------------------------ | ------------------------------------------------------------------- |
-| `session-start` | `prompt`                                   | `{ instructions }`, appended to the system instructions.            |
-| `before-model`  | `messages` about to be sent                | Nothing: observe, or throw to stop the turn.                        |
-| `after-model`   | The model `result`                         | Nothing: observe, or throw to stop the turn.                        |
-| `before-tool`   | `call` (`name`, `input`)                   | `{ deny }` to refuse the call, or `{ input }` to replace its input. |
-| `after-tool`    | `call` and `result` (`content`, `isError`) | `{ result }` to replace what the model receives.                    |
-| `stop`          | The final `text`                           | `{ continue }` to send a new instruction instead of finishing.      |
+API reference: [HarnessHookPhase](../../reference/harnesshookphase/), [HarnessHookEvents](../../reference/harnesshookevents/), [HarnessHookDecisions](../../reference/harnesshookdecisions/) and [HarnessHookContext](../../reference/harnesshookcontext/).
 
-Every phase also receives `sandbox`, `signal`, `model` and `step`.
+## Order of checks and hooks
 
-## Know what runs first
+<!-- canvas -->
 
-<!-- flow -->
-
-1. **Check**: Before the tool runs.
-   - **Validate**: The input must match the tool’s schema.
-   - **Evaluate permissions**: A denial ends the call; hooks do not run.
-     - `permissions`
-   - **Run before-tool hooks**: In declaration order. A `deny` ends the chain; an `input` goes to the next hook.
-     - `before-tool`
-   - **Re-check a rewrite**: Outpost validates the new input and evaluates permissions again.
-     - `permissions`
-2. **Run**: The tool executes against the sandbox.
-3. **Return**: The model receives the result.
-   - **Run after-tool hooks**: Also for denied and failed calls. Each can replace the result.
-     - `after-tool`
+- **Check**: Before the tool runs.
+  - Steps
+  - **Validate**: The input must match the tool’s schema.
+  - **Evaluate permissions**: A denial ends the call; hooks do not run.
+    - `permissions`
+  - **Run before-tool hooks**: In declaration order. A `deny` ends the chain; an `input` goes to the next hook.
+    - `before-tool`
+  - **Re-check a rewrite**: Outpost validates the new input and evaluates permissions again.
+    - `permissions`
+  - → **Run**: then
+- **Run**: The tool executes against the sandbox.
+  - Steps
+  - → **Return**: then
+- **Return**: The model receives the result.
+  - Steps
+  - **Run after-tool hooks**: Also for denied and failed calls. Each can replace the result.
+    - `after-tool`
 
 Hooks of the same phase run in declaration order. For `stop`, the first hook that returns `{ continue }` wins, and the extra step still counts toward `limits.maxSteps`.
 

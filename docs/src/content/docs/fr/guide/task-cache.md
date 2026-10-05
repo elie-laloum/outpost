@@ -1,34 +1,48 @@
 ---
-title: "Cache de résultats"
-description: "Réutiliser le résultat JSON d’une tâche quand ses entrées n’ont pas changé, pour ne pas payer deux fois une même relecture ou analyse."
+title: "Réutiliser les résultats des tâches"
+description: "Mettez en cache les sorties JSON lorsqu’une tâche peut réutiliser un résultat pour les mêmes entrées."
 ---
 
 ## Mettre une tâche en cache
 
-Donnez à une tâche un `cache` avec un store, une `version` et une `key`. La seconde exécution trouve une entrée de même empreinte et restaure sa valeur sans exécuter la tâche.
+Ajoutez une politique de cache si une tâche peut réutiliser le même résultat JSON pour les mêmes entrées. Indiquez un stockage, une version et une clé qui identifie les entrées dont dépend le résultat.
 
-```ts
+<!-- tabs -->
+
+```ts title="cache-store.ts"
 import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import {
-  createLocalTransport,
-  defineTask,
   createTaskCacheStore,
-  defineWorkflow,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
 
-const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
-const store = createTaskCacheStore({
+export const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
+export const store = createTaskCacheStore({
   transporter: createLocalTransport({ directory }),
 });
-let executions = 0;
-const summarize = () =>
+```
+
+```ts title="summarize.ts"
+import { defineTask } from "@elie-laloum/outpost";
+import { store } from "./cache-store.ts";
+
+export let executions = 0;
+export const summarize = () =>
   defineTask({
     key: "summary",
     cache: { store, version: "summary-v1", key: () => ["notes", "v7.1"] },
     perform: () => ({ summary: "3 fixes", execution: ++executions }),
   });
+export function executionCount() {
+  return executions;
+}
+```
+
+```ts title="run-cache.ts"
+import { summarize } from "./summarize.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
 
 for (let run = 1; run <= 2; run++) {
   const summary = summarize();
@@ -36,8 +50,6 @@ for (let run = 1; run <= 2; run++) {
   result.unwrap();
   console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
 }
-// { summary: '3 fixes', execution: 1 } false
-// { summary: '3 fixes', execution: 1 } true
 ```
 
 <!-- check:run -->
@@ -48,31 +60,32 @@ La seconde exécution restaure le premier résultat : `execution` reste à 1 et 
 
 L’empreinte combine le nom du workflow, la clé de la tâche, `version` et la valeur JSON renvoyée par `key(ctx)`. Mettez-y tout ce qui peut changer la réponse.
 
-| Entrée                                             | Où la placer                              |
-| -------------------------------------------------- | ----------------------------------------- |
-| État du dépôt, modifications locales comprises     | `await repositoryFingerprint(repository)` |
-| Texte du brief ou du prompt                        | La clé                                    |
-| Agent et modèle                                    | La clé                                    |
-| Valeurs des dépendances                            | La clé, lues avec `ctx.value(task)`       |
-| Code de la tâche, forme du résultat, configuration | `version` : changez-la quand ils changent |
+Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/) et [TaskCacheEntry](../../reference/taskcacheentry/).
 
-```ts title="review.mts"
+<!-- tabs -->
+
+```ts title="review-cache.ts"
 import {
-  createLocalTransport,
   createTaskCacheStore,
-  defineIsolatedTask,
-  defineTask,
-  repositoryFingerprint,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { repository } from "./outpost.config.ts";
 
-const brief = "Review the parser for unsafe input handling. Do not edit files.";
-const store = createTaskCacheStore({
+export const brief =
+  "Review the parser for unsafe input handling. Do not edit files.";
+export const store = createTaskCacheStore({
   transporter: createLocalTransport({
     directory: `${repository}/.outpost/storage`,
   }),
 });
-const reviewer = defineIsolatedTask({
+```
+
+```ts title="review-task.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { brief } from "./review-cache.ts";
+
+export const reviewer = defineIsolatedTask({
   key: "reviewer",
   request: () => ({
     repository,
@@ -81,7 +94,15 @@ const reviewer = defineIsolatedTask({
     brief: { text: brief },
   }),
 });
-const review = defineTask({
+```
+
+```ts title="review.ts"
+import { defineTask, repositoryFingerprint } from "@elie-laloum/outpost";
+import { store, brief } from "./review-cache.ts";
+import { repository } from "./outpost.config.ts";
+import { reviewer } from "./review-task.ts";
+
+export const review = defineTask({
   key: "review",
   cache: {
     store,
@@ -97,7 +118,7 @@ const review = defineTask({
 
 `repositoryFingerprint()` calcule l’empreinte de `HEAD`, de l’index, des modifications non commitées et des fichiers non suivis non ignorés, hors `.outpost/` : une modification locale change donc la clé. Une clé qui lève une erreur ou n’est pas du JSON sans perte fait échouer la tâche.
 
-## Savoir ce que restaure un hit
+## Comprendre un résultat trouvé en cache
 
 | Lors d’un hit                                                      | Résultat                                      |
 | ------------------------------------------------------------------ | --------------------------------------------- |
@@ -112,21 +133,15 @@ Mettez en cache les tâches dont la valeur est le produit : relectures, classifi
 
 Le résultat doit être du JSON sans perte ou `undefined` ; sinon, la tâche échoue après son exécution, sans nouvelle tentative.
 
-| Tâche                                                                                                                                           | `cache`                                                                      |
-| ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`defineTask`](../../reference/definetask/) et les fonctions construites dessus (`defineCommandTask`, `defineArtifactTask`, `defineQueuedTask`) | Oui                                                                          |
-| [`defineLoopTask`](../../reference/definelooptask/)                                                                                             | Oui : un hit saute tous les tours                                            |
-| `defineAgentTask`, `defineIsolatedTask`                                                                                                         | Non : appelez-la depuis un `defineTask` qui renvoie du JSON, comme ci-dessus |
-| Gates (`defineApprovalTask`, `definePauseTask`) et tâches interactives                                                                          | Non                                                                          |
+Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/), [TaskOptions](../../reference/taskoptions/) et [QueuedTaskOptions](../../reference/queuedtaskoptions/).
 
-## Expirer ou rafraîchir les entrées
+## Faire expirer ou renouveler les entrées
 
-| Option                 | Effet                                                                                                   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| `maxAgeMs: 86_400_000` | Une entrée de plus d’un jour est un miss ; la tâche s’exécute et la remplace.                           |
-| `mode: "refresh"`      | Saute la lecture, exécute la tâche et remplace son entrée, par exemple après une mise à jour de modèle. |
+Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/).
 
 ## Suivre les événements du cache
+
+Affichez les événements du cache depuis l’observateur du workflow pour suivre les résultats trouvés, les absences et les erreurs de stockage. Un échec du cache n’empêche pas la tâche de s’exécuter ou de terminer.
 
 ```ts
 import type { Workflow } from "@elie-laloum/outpost";
@@ -141,12 +156,7 @@ await workflow.start({
 });
 ```
 
-| `event.cache` | Signification                                                                       |
-| ------------- | ----------------------------------------------------------------------------------- |
-| `hit`         | La valeur a été restaurée.                                                          |
-| `miss`        | Aucune entrée utilisable : absente, expirée ou `mode: "refresh"`.                   |
-| `stored`      | Le résultat a été écrit après la réussite de la tâche.                              |
-| `failed`      | Le store a échoué ou une entrée était invalide ; `event.error` contient le message. |
+Référence API : [TaskCacheOutcome](../../reference/taskcacheoutcome/).
 
 Le cache ne décide jamais du résultat : après une lecture `failed`, la tâche s’exécute ; après une écriture `failed`, elle se termine normalement.
 

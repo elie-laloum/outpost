@@ -1,34 +1,48 @@
 ---
-title: "Result cache"
-description: "Reuse a task's JSON result when its inputs have not changed, so a repeated review or analysis is not paid for twice."
+title: "Reuse task results"
+description: "Cache JSON outputs when a task can safely reuse a result for the same inputs."
 ---
 
 ## Cache a task
 
-Give a task a `cache` with a store, a `version` and a `key`. The second run finds an entry with the same fingerprint and restores its value without executing the task.
+Add a cache policy when a task can reuse the same JSON result for the same inputs. Give the policy a store, a version and a key that identifies the inputs affecting the result.
 
-```ts
+<!-- tabs -->
+
+```ts title="cache-store.ts"
 import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import {
-  createLocalTransport,
-  defineTask,
   createTaskCacheStore,
-  defineWorkflow,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
 
-const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
-const store = createTaskCacheStore({
+export const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
+export const store = createTaskCacheStore({
   transporter: createLocalTransport({ directory }),
 });
-let executions = 0;
-const summarize = () =>
+```
+
+```ts title="summarize.ts"
+import { defineTask } from "@elie-laloum/outpost";
+import { store } from "./cache-store.ts";
+
+export let executions = 0;
+export const summarize = () =>
   defineTask({
     key: "summary",
     cache: { store, version: "summary-v1", key: () => ["notes", "v7.1"] },
     perform: () => ({ summary: "3 fixes", execution: ++executions }),
   });
+export function executionCount() {
+  return executions;
+}
+```
+
+```ts title="run-cache.ts"
+import { summarize } from "./summarize.ts";
+import { defineWorkflow } from "@elie-laloum/outpost";
 
 for (let run = 1; run <= 2; run++) {
   const summary = summarize();
@@ -36,8 +50,6 @@ for (let run = 1; run <= 2; run++) {
   result.unwrap();
   console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
 }
-// { summary: '3 fixes', execution: 1 } false
-// { summary: '3 fixes', execution: 1 } true
 ```
 
 <!-- check:run -->
@@ -48,31 +60,32 @@ The second run restores the first result: `execution` stays at 1 and `cacheHit` 
 
 The fingerprint combines the workflow name, the task key, `version` and the JSON value `key(ctx)` returns. Put in it everything that can change the answer.
 
-| Input                                   | Where it goes                             |
-| --------------------------------------- | ----------------------------------------- |
-| Repository state, including local edits | `await repositoryFingerprint(repository)` |
-| Brief or prompt text                    | The key                                   |
-| Agent and model                         | The key                                   |
-| Values from dependencies                | The key, read with `ctx.value(task)`      |
-| Task code, output shape, configuration  | `version`: change it when they change     |
+API reference: [TaskCacheOptions](../../reference/taskcacheoptions/) and [TaskCacheEntry](../../reference/taskcacheentry/).
 
-```ts title="review.mts"
+<!-- tabs -->
+
+```ts title="review-cache.ts"
 import {
-  createLocalTransport,
   createTaskCacheStore,
-  defineIsolatedTask,
-  defineTask,
-  repositoryFingerprint,
+  createLocalTransport,
 } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { repository } from "./outpost.config.ts";
 
-const brief = "Review the parser for unsafe input handling. Do not edit files.";
-const store = createTaskCacheStore({
+export const brief =
+  "Review the parser for unsafe input handling. Do not edit files.";
+export const store = createTaskCacheStore({
   transporter: createLocalTransport({
     directory: `${repository}/.outpost/storage`,
   }),
 });
-const reviewer = defineIsolatedTask({
+```
+
+```ts title="review-task.ts"
+import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { brief } from "./review-cache.ts";
+
+export const reviewer = defineIsolatedTask({
   key: "reviewer",
   request: () => ({
     repository,
@@ -81,7 +94,15 @@ const reviewer = defineIsolatedTask({
     brief: { text: brief },
   }),
 });
-const review = defineTask({
+```
+
+```ts title="review.ts"
+import { defineTask, repositoryFingerprint } from "@elie-laloum/outpost";
+import { store, brief } from "./review-cache.ts";
+import { repository } from "./outpost.config.ts";
+import { reviewer } from "./review-task.ts";
+
+export const review = defineTask({
   key: "review",
   cache: {
     store,
@@ -97,7 +118,7 @@ const review = defineTask({
 
 `repositoryFingerprint()` hashes `HEAD`, the index, uncommitted changes and non-ignored untracked files outside `.outpost/`, so a local edit changes the key. A key that throws or is not lossless JSON fails the task.
 
-## Know what a hit restores
+## Understand a cache hit
 
 | On a hit                                                  | Result                                 |
 | --------------------------------------------------------- | -------------------------------------- |
@@ -112,21 +133,15 @@ Cache tasks whose value is the product: reviews, classifications, summaries, ana
 
 The result must be lossless JSON or `undefined`; otherwise the task fails after it executes, without a retry.
 
-| Task                                                                                                                                | `cache`                                                     |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| [`defineTask`](../../reference/definetask/) and helpers built on it (`defineCommandTask`, `defineArtifactTask`, `defineQueuedTask`) | Yes                                                         |
-| [`defineLoopTask`](../../reference/definelooptask/)                                                                                 | Yes: a hit skips every round                                |
-| `defineAgentTask`, `defineIsolatedTask`                                                                                             | No: call it from a `defineTask` that returns JSON, as above |
-| Gates (`defineApprovalTask`, `definePauseTask`) and interactive tasks                                                               | No                                                          |
+API reference: [TaskCacheOptions](../../reference/taskcacheoptions/), [TaskOptions](../../reference/taskoptions/) and [QueuedTaskOptions](../../reference/queuedtaskoptions/).
 
 ## Expire or refresh entries
 
-| Option                 | Effect                                                                                 |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `maxAgeMs: 86_400_000` | An entry older than one day is a miss; the task runs and replaces it.                  |
-| `mode: "refresh"`      | Skip the lookup, run the task and replace its entry, for example after a model update. |
+API reference: [TaskCacheOptions](../../reference/taskcacheoptions/).
 
 ## Watch cache events
+
+Log cache outcomes from the workflow observer to see hits, misses and storage errors. A cache failure does not prevent the task from running or completing.
 
 ```ts
 import type { Workflow } from "@elie-laloum/outpost";
@@ -141,12 +156,7 @@ await workflow.start({
 });
 ```
 
-| `event.cache` | Meaning                                                                     |
-| ------------- | --------------------------------------------------------------------------- |
-| `hit`         | The value was restored.                                                     |
-| `miss`        | No usable entry: missing, expired, or `mode: "refresh"`.                    |
-| `stored`      | The result was written after the task succeeded.                            |
-| `failed`      | The store failed, or an entry was invalid; `event.error` holds the message. |
+API reference: [TaskCacheOutcome](../../reference/taskcacheoutcome/).
 
 The cache never decides the outcome: after a `failed` read the task runs, after a `failed` write it completes normally.
 

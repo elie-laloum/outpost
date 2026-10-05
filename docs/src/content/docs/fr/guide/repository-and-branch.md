@@ -1,16 +1,16 @@
 ---
-title: "Dépôt et branche"
-description: "Choisir le checkout que l’agent modifie, la branche où arrivent ses commits et le moment où ils rejoignent votre branche."
+title: "Choisir le dépôt et la branche"
+description: "Choisissez la copie du dépôt modifiée par l’agent et le moment où ses commits sont intégrés."
 ---
 
-## Désigner un checkout
+## Choisir le dépôt de travail
 
-`repository` est un chemin quelconque dans un checkout Git local qui contient au moins un commit. Outpost travaille depuis sa racine. Sans `repository`, il utilise le répertoire courant du processus.
+Passez `repository` pour choisir le dépôt Git utilisé par la tâche. Vos scripts de workflow peuvent se trouver ailleurs ; calculez le chemin du dépôt à partir du dossier du script pour pouvoir le lancer depuis n’importe quel répertoire courant.
 
 ```ts
 import { resolve } from "node:path";
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, sandboxProvider } from "./outpost.config.mts";
+import { coder, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository: resolve(import.meta.dirname, "../application"),
@@ -24,44 +24,49 @@ console.log(result.branch, result.commits.length);
 
 Le script affiche `outpost/update-deps` et le nombre de commits. Un chemin relatif se résout depuis le répertoire courant : le résoudre depuis `import.meta.dirname` permet de lancer le script de n’importe où.
 
-## Choisir où arrivent les commits
+## Choisir la stratégie de branche
 
-`branch` fixe la politique. Sans elle, les providers locaux utilisent `current` et les [sandboxes cloud](../cloud-sandboxes/) `integrate`.
+Gardez le travail sur une branche nommée pour examiner les commits avant de les fusionner. Choisissez l’intégration automatique si une tâche réussie doit fusionner ses commits dans votre branche de départ.
 
-| Mode        | L’agent travaille sur              | Worktree                                         | Après une tâche réussie                      | À utiliser pour                            |
-| ----------- | ---------------------------------- | ------------------------------------------------ | -------------------------------------------- | ------------------------------------------ |
-| `current`   | Votre branche courante             | Aucun : votre checkout, tel quel                 | Les commits sont déjà sur votre branche      | Des tâches locales rapides que vous suivez |
-| `named`     | La branche `name`                  | `.outpost/workspaces/`, supprimé s’il est propre | La branche reste pour la revue               | Relire avant de fusionner                  |
-| `integrate` | Une branche temporaire `outpost/…` | `.outpost/workspaces/`, supprimé s’il est propre | Fusionnée dans votre branche, puis supprimée | Des changements livrés sans surveillance   |
-
-`from` fixe la révision de départ d’une nouvelle branche `named` ou `integrate` ; par défaut, `HEAD`. Une branche `named` existante repart de son propre sommet. `result.branch` contient le nom de la branche.
+Référence API : [BranchPolicy](../../reference/branchpolicy/).
 
 ## Conditionner l’intégration à une vérification
 
 `dispatch()` et `workspace.dispatch()` fusionnent une branche `integrate` dès que l’agent réussit. Pour lancer d’abord votre propre vérification, ouvrez le workspace vous-même et travaillez dans une [session de sandbox](../sandbox-sessions/).
 
-```ts
-import { openWorkspace } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const workspace = await openWorkspace({
+```ts title="change.ts"
+import type { Workspace } from "@elie-laloum/outpost";
+import { sandboxProvider, coder } from "./outpost.config.ts";
+
+export async function change(workspace: Workspace) {
+  await using sandbox = await workspace.sandbox({
+    sandboxProvider,
+    agent: coder,
+  });
+  await sandbox.dispatch({
+    brief: { text: "Fix the failing tests and commit the fix." },
+  });
+  const check = await sandbox.command({
+    executable: "npm",
+    arguments: ["test"],
+  });
+  if (check.status !== 0) throw new Error(check.stderr || "Tests failed");
+}
+```
+
+```ts title="integrate.ts"
+import { openWorkspace } from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.ts";
+import { change } from "./change.ts";
+
+export const workspace = await openWorkspace({
   repository,
   branch: { mode: "integrate" },
 });
 try {
-  const sandbox = await workspace.sandbox({ sandboxProvider, agent: coder });
-  try {
-    await sandbox.dispatch({
-      brief: { text: "Fix the failing tests and commit the fix." },
-    });
-    const check = await sandbox.command({
-      executable: "npm",
-      arguments: ["test"],
-    });
-    if (check.status !== 0) throw new Error(check.stderr || "Tests failed");
-  } finally {
-    await sandbox.close();
-  }
+  await change(workspace);
   await workspace.integrate();
 } finally {
   await workspace.close();
@@ -82,7 +87,7 @@ Un nouveau worktree ne contient que les fichiers commités. `copies` liste des f
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,

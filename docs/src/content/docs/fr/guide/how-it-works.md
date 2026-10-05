@@ -1,247 +1,84 @@
 ---
-title: "Fonctionnement"
-description: "Trois briques indépendantes, le déroulé d’un run, qui possède quelle ressource et ce qui reste sur le disque."
+title: "Comment Outpost exécute une tâche"
+description: "Comprenez le rôle de l’agent, de la sandbox et du workspace, ainsi que ce qui reste après une tâche."
 ---
 
-<!-- features -->
+## Trois choix pour chaque tâche
 
-- [Agent](../choose-an-agent/): Qui fait le travail : un harness qui exécute la boucle de l’agent et, en option, un modèle.
-  - `createAgent()`
-  - `createCodexHarness()`
-  - `createHarness()`
-- [Sandbox](../choose-a-sandbox/): Où les commandes s’exécutent. Docker par défaut.
-  - Docker
-  - Podman
-  - Vercel
-  - Daytona
-  - Firecracker
-  - hôte
-- [Workspace](../repository-and-branch/): Le checkout que l’agent modifie, et la branche où atterrissent ses commits.
-  - `current`
-  - `named`
-  - `integrate`
+Votre code TypeScript fournit à Outpost un agent, un fournisseur de sandbox et un dépôt. L’agent reçoit vos consignes, le fournisseur démarre son environnement d’exécution et Outpost prépare la copie Git sur laquelle il travaille.
 
-## Remplacer une brique, garder le reste
+| Votre choix            | Ce qu’il détermine                                                         | Pour en savoir plus                                         |
+| ---------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Agent                  | L’outil en ligne de commande ou la boucle de modèle qui réalise le travail | [Choisir un agent](../choose-an-agent/)                     |
+| Fournisseur de sandbox | L’environnement qui exécute les commandes, par exemple un conteneur Docker | [Choisir une sandbox](../choose-a-sandbox/)                 |
+| Branche                | La copie du dépôt qui sera modifiée et l’emplacement des commits           | [Choisir le dépôt et la branche](../repository-and-branch/) |
 
-`run.ts` ouvre un workspace, c’est-à-dire une branche et son checkout, puis y ouvre des sandboxes. Chaque `dispatch()` y lance un agent avec un **brief**, la consigne qui lui est adressée. Les agents viennent de `agents.ts` et les sandboxes de `sandboxes.ts` : changer de brique revient à importer un autre nom.
+Vous pouvez changer d’agent en conservant le même fournisseur de sandbox. Vous pouvez aussi exécuter le même agent dans un autre environnement pris en charge.
 
-- **Même sandbox, autre harness** : chaque `dispatch()` peut prendre son propre agent. Ici, Claude relit ce que Codex a corrigé, avec les mêmes fichiers et les mêmes dépendances installées.
-- **Même workspace, autre sandbox** : une nouvelle sandbox reprend la branche et ses commits. Fermez d’abord la précédente : un workspace n’accepte qu’une sandbox ouverte à la fois.
+## Un appel à `dispatch()`
 
-<!-- tabs -->
+Un appel prépare le workspace, ouvre une sandbox, lance l’agent et récupère sa réponse, ses commits et sa consommation. Il ferme ensuite les ressources qu’il a ouvertes. Avec une branche nommée, les commits restent sur cette branche pour que vous puissiez les examiner.
 
-```ts title="run.ts" {21,29}
-import { openWorkspace } from "@elie-laloum/outpost";
-import { claude, codex } from "./agents.ts";
-import { dockerProvider, vercelProvider } from "./sandboxes.ts";
-
-await using workspace = await openWorkspace({
-  repository: process.cwd(),
-  branch: { mode: "named", name: "outpost/fix-links" },
-});
-
-const dockerSandbox = await workspace.sandbox({
-  sandboxProvider: dockerProvider,
-  agent: codex,
-});
-
-await dockerSandbox.dispatch({
-  brief: { text: "Fix the broken links in the README." },
-});
-
-// Même sandbox, autre harness.
-await dockerSandbox.dispatch({
-  agent: claude,
-  brief: { text: "Review the fix and commit it." },
-});
-
-await dockerSandbox.close();
-
-// Même workspace et même branche, autre sandbox.
-const vercelSandbox = await workspace.sandbox({
-  sandboxProvider: vercelProvider,
-  agent: claude,
-});
-
-await vercelSandbox.dispatch({
-  brief: { text: "Add a link check to the CI and commit it." },
-});
-
-await vercelSandbox.close();
-```
-
-```ts title="agents.ts"
-import {
-  createAgent,
-  createClaudeHarness,
-  createCodexHarness,
-} from "@elie-laloum/outpost";
-
-export const codex = createAgent({
-  harness: createCodexHarness({ authentication: "account" }),
-});
-
-export const claude = createAgent({
-  harness: createClaudeHarness({ authentication: "account" }),
-});
-```
-
-```ts title="sandboxes.ts"
-import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
-import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
-
-export const dockerProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
-});
-
-export const vercelProvider = createVercelSandboxProvider();
-```
-
-## Le déroulé d’un run
-
-Un run fait travailler ces objets ensemble. Chaque lien montre qui s’adresse à qui, dans le sens de la flèche.
-
-<!-- canvas -->
-
-- [Déclencheurs](../webhooks/): `serveTriggers()` reçoit les webhooks GitHub, GitLab et Slack ; `runSchedules()` suit les horaires cron.
-  - CLI · HTTP
-  - → **Workflow**: jobs
-- [Workflow](../typed-workflows/): `defineWorkflow()` enchaîne des tâches typées et s’arrête aux gates.
-  - workflow
-  - → **Tâches**: exécute
-  - → **Checkpoints**: état et sorties
-- [Tâches](../task-dependencies/): Chacune rend une valeur typée à celles qui en dépendent.
-  - workflow
-  - **Tâche hôte**: `defineTask()`
-    - → **Artefacts**: `publishArtifact()`
-  - **Tâche isolée**: `defineIsolatedTask()`
-    - → **Workspace**: `dispatch()`
-  - **Tâche d’agent**: `defineAgentTask()`
-    - → **Sandbox**: `sandbox.dispatch()`
-  - **Gate**: `defineApprovalTask()`
-    - → **Humain**: décision attendue
-  - **Question**: `defineInteractiveAgentTask()`
-    - → **Humain**: question
-    - → **Workspace**: chaque tour
-- [Humain](../approvals/): Votre CLI ou votre service HTTP relance `workflow.start()` avec la décision ou la réponse.
-  - CLI · HTTP
-  - → **Gate**: décision
-  - → **Question**: réponse
-- [Votre code](../first-request/): `run.ts` lance un workflow, ou un agent directement avec `dispatch()`.
-  - hôte
-  - → **Workflow**: `workflow.start()`
-  - → **Workspace**: `dispatch()`
-- **Dépôt Git**: Votre checkout local et sa branche de base.
-  - hôte
-  - → **Workspace**: branche de travail
-- [Workspace](../repository-and-branch/): Verrouille la branche et crée son worktree sous `.outpost/workspaces`.
-  - hôte
-  - → **Sandbox**: worktree
-  - → **Dépôt Git**: `integrate`
-- [Sandbox](../choose-a-sandbox/): Docker, Podman, Vercel, Daytona ou Firecracker. Libérée quoi qu’il arrive.
-  - sandbox
-  - → **Agents**: un appel à la fois
-  - → **Workspace**: commits
-- [Agents](../choose-an-agent/): Chacun reçoit ses identifiants dans un home privé et déroule ses tours.
-  - sandbox
-  - **Codex**: corrige les liens
-  - **Claude Code**: relit la correction
-  - **Tout autre agent**: autant d’appels que nécessaire
-  - → **Modèle**: requêtes
-  - → **Conversations**: transcript
-  - → **Journaux**: événements
-- [Modèle](../authentication/): L’API du fournisseur, avec votre compte ou une clé d’API.
-  - fournisseur
-  - → **Agents**: réponses
-- [Stockage](../storage/): `.outpost/storage` par défaut, ou tout autre `Transport`.
-  - hôte
-  - **Conversations**: pour reprendre ou forker
-  - **Checkpoints**: pour reprendre un workflow
-  - **Artefacts**: sorties publiées par les tâches
-  - **Journaux**: le déroulé de chaque `dispatch()`
-
-Si un run échoue, rien d’important n’est perdu :
-
-<!-- cards -->
-
-- **Sandbox libérée**: Fermée quoi qu’il arrive : aucun conteneur ni machine cloud ne reste allumé.
-- **Workspace conservé**: Sa branche, son dossier et ses commits restent sur le disque.
-- **Historique enregistré**: Checkpoints, artifacts, conversations et journaux restent dans le [stockage](../storage/).
-- **Travail restauré**: Pour reprendre votre run, vous pouvez [récupérer votre travail](../recovery/).
-
-## Sandbox neuve ou réutilisée
-
-`dispatch()` repart d’un environnement neuf à chaque appel. `sandbox.dispatch()` s’exécute dans une sandbox qui reste ouverte : les fichiers et les dépendances installées passent d’une opération à la suivante.
-
-<!-- tabs -->
-
-```ts title="cold.mts"
+```ts
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
-const options = { agent: coder, sandboxProvider, repository };
-await dispatch({ ...options, brief: { text: "Fix the failing date tests." } });
-// Nouvelle sandbox : les fichiers et dépendances du premier appel ont disparu.
-await dispatch({ ...options, brief: { text: "Document the date helpers." } });
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-links" },
+  brief: { text: "Fix the broken links in the README and commit the change." },
+});
+console.log(result.text);
+console.log(result.branch, result.commits);
 ```
 
-```ts title="warm.mts"
+La configuration vient de la page [Installation](../setup/). Chaque appel ouvre une nouvelle sandbox. Les dépendances installées et les fichiers temporaires de cet environnement ne passent pas au prochain appel ; le travail Git conservé dépend de la stratégie de branche.
+
+## Garder un environnement pour plusieurs opérations
+
+Utilisez `createSandbox()` si vous voulez qu’un échange avec l’agent et une commande de test partagent les fichiers et les dépendances installées. L’environnement reste ouvert jusqu’à sa fermeture.
+
+```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
-  agent: coder,
-  sandboxProvider,
   repository,
-  branch: { mode: "integrate" },
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-tests" },
 });
-await sandbox.dispatch({ brief: { text: "Fix the failing date tests." } });
-// Même sandbox : le test voit tout de suite les modifications de l’agent.
+await sandbox.dispatch({
+  brief: { text: "Fix the failing tests and commit the change." },
+});
 const tests = await sandbox.command({ executable: "npm", arguments: ["test"] });
-// C’est vous qui décidez quand la branche est fusionnée.
-if (tests.status === 0) await sandbox.workspace.integrate();
+console.log(tests.status);
 ```
 
-<!-- compare -->
+Ici, `await using` ferme la sandbox à la sortie du bloc, même en cas d’erreur. Une sandbox accepte une seule opération à la fois. Pour travailler en parallèle, utilisez des sandboxes séparées. La page [Réutiliser une sandbox](../sandbox-sessions/) détaille les commandes, les terminaux et l’intégration explicite.
 
-- `dispatch()`: Un environnement neuf à chaque appel.
-  - **Fichiers et dépendances**: Jetés à la fin de l’appel
-  - **Conversations**: `result.resume()` en restaure une dans une nouvelle sandbox
-  - **Intégration**: Automatique, selon la politique de branche
-  - **À utiliser pour**: Une tâche ponctuelle
-- `sandbox.dispatch()`: Un seul environnement, ouvert jusqu’à `close()`.
-  - **Fichiers et dépendances**: Conservés d’une opération à l’autre
-  - **Conversations**: Une nouvelle par appel, sauf si vous en [reprenez](../conversations/) une
-  - **Intégration**: À vous d’appeler `sandbox.workspace.integrate()`
-  - **À utiliser pour**: Des workflows déterministes ou plus complexes
+## Séparer le workspace de la sandbox
 
-## Qui ferme quoi
+Le workspace gère la branche et la copie du dépôt. La sandbox gère l’environnement d’exécution. `openWorkspace()` permet de conserver un workspace tout en changeant de sandbox, par exemple pour exécuter l’étape suivante dans le cloud.
 
-Celui qui ouvre une ressource la ferme.
+Fermez la sandbox courante avant d’en ouvrir une autre sur le même workspace. Quand vous ouvrez ces ressources vous-même, fermez chaque sandbox, puis le workspace. Vous pouvez appeler `close()` plusieurs fois sans risque.
 
-| Ouvert avec                        | Fermé par                                                                                 |
-| ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| `dispatch()`                       | `dispatch()` lui-même, à la fin de l’appel, avec sa sandbox et son workspace.             |
-| `createSandbox()` sans `workspace` | Vous, avec `sandbox.close()`, qui ferme aussi son workspace.                              |
-| `openWorkspace()`                  | Vous : chaque sandbox avec `sandbox.close()`, puis le workspace avec `workspace.close()`. |
+La page [Choisir le dépôt et la branche](../repository-and-branch/) explique comment réutiliser un workspace et intégrer ses commits.
 
-<!-- features -->
+## Retrouver les fichiers après une exécution
 
-- **Fermeture sans risque**: `close()` accepte un second appel ; il interrompt l’opération en cours et attend sa fin.
-- **Ordre inverse**: `await using` ferme dans l’ordre inverse de l’ouverture : la sandbox avant son workspace.
-- **Une opération à la fois**: Une deuxième opération est refusée, pas mise en attente. Pour paralléliser, ouvrez plusieurs sandboxes coordonnées par les [dépendances entre tâches](../task-dependencies/).
+Les fichiers d’exécution se trouvent dans le dossier `.outpost` du dépôt cible. Outpost exclut ce dossier de Git au moyen de `.git/info/exclude`.
 
-## Ce qui reste dans `.outpost`
+| Dossier          | Contenu                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| `workspaces/`    | Copies de travail gérées par Outpost, y compris celles conservées après un échec                 |
+| `locks/`         | Informations de réservation des workspaces et des branches                                       |
+| `storage/`       | Journaux et activité des ressources par défaut ; autres données si leur stockage y est configuré |
+| `conversations/` | Transcriptions du harness intégré et sessions de Copilot et Kimi                                 |
+| `recovery/`      | Transferts conservés après un échec de synchronisation                                           |
 
-Outpost garde son état d’exécution dans le dépôt cible et le masque à Git via `.git/info/exclude`.
+Claude Code et Codex utilisent leurs propres espaces de conversation dans votre dossier personnel. Le [guide du stockage](../storage/) précise quelles données peuvent être transférées et quels fichiers doivent rester locaux.
 
-<!-- files -->
-
-- `.outpost/`
-  - `workspaces/`: Les worktrees des branches `named` et `integrate`, y compris ceux que vous conservez.
-  - `locks/`: La propriété des checkouts, des branches et de l’intégration.
-  - `storage/`: Par défaut, les [journaux](../journals/) et l’activité des ressources, plus les checkpoints, artefacts et caches dont vous y dirigez le store ([Où vivent les données](../storage/)).
-  - `conversations/`: Les transcripts du harness intégré et les sessions Copilot et Kimi.
-  - `recovery/`: Les transferts conservés après une synchronisation en échec.
-
-Claude Code et Codex, eux, gardent leurs transcripts dans leur propre stockage, au sein de votre dossier personnel. Le dossier `.outpost` peut contenir la seule copie d’un travail inachevé : inspectez-le avec [Récupérer du travail](../recovery/) et purgez-le avec [Rétention et nettoyage](../retention/), jamais à la main.
+Après un échec, examinez le travail conservé avant de le nettoyer. Le nettoyage peut lui aussi échouer, et la récupération à distance dépend des données qui ont pu être enregistrées. Utilisez [Récupérer du travail](../recovery/) pour consulter les fichiers disponibles et [Nettoyer les données enregistrées](../retention/) pour supprimer les données admissibles.

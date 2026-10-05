@@ -1,11 +1,11 @@
 ---
-title: "MCP server login"
-description: "Connect agents to OAuth-protected HTTP MCP servers, with a CLI login made on the host or client credentials requested in the sandbox."
+title: "Connect MCP accounts"
+description: "Reuse a declared CLI server login or configure client credentials for the built-in harness."
 ---
 
 ## Choose a form
 
-Set `oauth` on an HTTP server of [`mcpServers`](../mcp-servers/). It replaces `bearerTokenVariable` and any `Authorization` header.
+Set `oauth` on a declared HTTP [MCP server](../mcp-servers/) to use a saved login or client credentials. This option replaces `bearerTokenVariable` and any `Authorization` header; choose the form supported by your harness.
 
 | Form                 | Harnesses                     | Token source                                        |
 | -------------------- | ----------------------------- | --------------------------------------------------- |
@@ -72,19 +72,24 @@ Declare both variables on the sandbox provider or in `.outpost/.env` ([Environme
 
 The HTTP bridge in the sandbox obtains the token itself, so the secret stays there and [outbound rules](../network-restrictions/) apply to the token requests.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Discover**: From the MCP server URL.
-   - **Read the metadata**: Protected resource metadata, then the authorization server metadata and its token endpoint.
-     - sandbox
-2. **Request**: One `client_credentials` grant.
-   - **Authenticate the client**: With `client_secret_basic`, or `client_secret_post` when the server advertises only that.
-     - sandbox
-   - **Bind the token**: The server URL is sent as `resource`.
-     - sandbox
-3. **Reuse**: Until the token expires.
-   - **Retry on 401**: Discover again, request a new token and retry the request once.
-     - sandbox
+- **Discover**: From the MCP server URL.
+  - Steps
+  - **Read the metadata**: Protected resource metadata, then the authorization server metadata and its token endpoint.
+    - sandbox
+  - → **Request**: then
+- **Request**: One `client_credentials` grant.
+  - Steps
+  - **Authenticate the client**: With `client_secret_basic`, or `client_secret_post` when the server advertises only that.
+    - sandbox
+  - **Bind the token**: The server URL is sent as `resource`.
+    - sandbox
+  - → **Reuse**: then
+- **Reuse**: Until the token expires.
+  - Steps
+  - **Retry on 401**: Discover again, request a new token and retry the request once.
+    - sandbox
 
 ## Limits
 

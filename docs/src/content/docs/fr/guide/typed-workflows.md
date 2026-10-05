@@ -1,49 +1,42 @@
 ---
-title: "Workflows typés"
-description: "Enchaîner des tâches qui se passent des résultats typés, boucler jusqu’à ce qu’une vérification accepte le travail, lancer les branches indépendantes en parallèle et lire chaque sortie depuis un seul résultat."
+title: "Composer des workflows typés"
+description: "Reliez les résultats des tâches et choisissez le type de tâche adapté à chaque étape."
 ---
 
-## D’une tâche à un graphe
+## Relier les étapes
 
-Un workflow est une liste de tâches ordonnée par leurs dépendances. Chaque tâche renvoie une valeur, et la suivante la lit sans perdre son type.
+Utilisez un workflow lorsque votre travail comporte plusieurs étapes avec des dépendances explicites. Chaque tâche renvoie une valeur que les tâches suivantes peuvent lire en conservant son type TypeScript.
 
 <!-- features -->
 
 - [Tâches et dépendances](../task-dependencies/): Déclarez chaque étape, reliez les sorties, lancez le graphe.
-  - `defineTask()`
-  - `defineWorkflow()`
 - [Boucles de vérification](../verification-loops/): Laissez l’agent réessayer avec le retour de la vérification jusqu’à ce qu’elle accepte.
-  - `defineLoopTask()`
-  - `maxRounds`
 - [Réponses typées](../typed-responses/): Demandez une réponse JSON balisée et validez-la avant de l’utiliser.
-  - `defineJsonResponse()`
-  - `result.value`
-- [Concurrence, relances et délais](../concurrency-and-retries/): Branches parallèles, relances après un échec et durées bornées.
-  - `concurrency`
-  - `retries`
+- [Concurrence, relances et délais](../concurrency-and-retries/): Branches parallèles, relances après un échec et durées limitées.
 - [Cache de résultats](../task-cache/): Renvoyez la valeur enregistrée d’une tâche au lieu de la relancer.
-  - `cache`
-  - `repositoryFingerprint()`
 - [Artefacts](../artifacts/): Transmettez des fichiers, et pas seulement des valeurs, d’une tâche à la suivante.
-  - `defineJsonArtifact()`
   - empreintes
 
-## Vérifier avant de garder le travail
+## Vérifier le résultat d’une tâche
 
-`defineTask()` prépare l’entrée, `defineLoopTask()` répète une tentative jusqu’à ce que sa vérification accepte, et `defineWorkflow()` les exécute dans l’ordre.
+Dans cet exemple, une première tâche prépare la liste des fichiers. Une tâche de boucle essaie ensuite de produire un résultat accepté par sa vérification. Les dépendances indiquent dans quel ordre ces tâches peuvent démarrer.
 
-```ts
-import {
-  defineLoopTask,
-  defineTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const plan = defineTask({
+```ts title="plan.ts"
+import { defineTask } from "@elie-laloum/outpost";
+
+export const plan = defineTask({
   key: "plan",
   perform: () => ({ files: ["src/parser.ts"] }),
 });
-const fix = defineLoopTask({
+```
+
+```ts title="fix.ts"
+import { defineLoopTask } from "@elie-laloum/outpost";
+import { plan } from "./plan.ts";
+
+export const fix = defineLoopTask({
   key: "fix",
   after: [plan],
   maxRounds: 3,
@@ -56,10 +49,16 @@ const fix = defineLoopTask({
       ? { done: true }
       : { done: false, feedback: "Cover the missing edge case." },
 });
+```
 
-const result = await defineWorkflow("fix-parser", [plan, fix]).start();
+```ts title="run.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { plan } from "./plan.ts";
+import { fix } from "./fix.ts";
+
+export const result = await defineWorkflow("fix-parser", [plan, fix]).start();
 result.unwrap();
-console.log(result.value(fix)); // { files: [ 'src/parser.ts' ], round: 2 }
+console.log(result.value(fix));
 ```
 
 <!-- check:run -->
@@ -68,22 +67,22 @@ Rien ne s’exécute avant `start()`. Le premier tour est rejeté, le second re�
 
 ## Choisir un type de tâche
 
-| Tâche                  | Exécute                                           | Renvoie                                   |
-| ---------------------- | ------------------------------------------------- | ----------------------------------------- |
-| `defineTask()`         | Votre propre fonction                             | Ce qu’elle renvoie                        |
-| `defineAgentTask()`    | Un agent sur le workspace partagé                 | Son texte, ses commits et sa valeur typée |
-| `defineIsolatedTask()` | Un agent dans sa propre sandbox et son worktree   | La même chose, par dépôt                  |
-| `defineLoopTask()`     | Tentative et vérification, jusqu’à acceptation    | Le candidat accepté                       |
-| `defineApprovalTask()` | Une [gate](../approvals/) qui attend une personne | La décision enregistrée                   |
+| Tâche                  | Exécute                                                  | Renvoie                                   |
+| ---------------------- | -------------------------------------------------------- | ----------------------------------------- |
+| `defineTask()`         | Votre propre fonction                                    | Ce qu’elle renvoie                        |
+| `defineAgentTask()`    | Un agent sur le workspace partagé                        | Son texte, ses commits et sa valeur typée |
+| `defineIsolatedTask()` | Un agent dans sa propre sandbox et son worktree          | La même chose, par dépôt                  |
+| `defineLoopTask()`     | Tentative et vérification, jusqu’à acceptation           | Le candidat accepté                       |
+| `defineApprovalTask()` | Une [approbation](../approvals/) donnée par une personne | La décision enregistrée                   |
 
-Les résultats sont du JSON sans perte : une [exécution durable](../durable-runs/) peut s’arrêter entre deux tâches et reprendre où elle en était.
+Pour un [workflow avec checkpoint](../durable-runs/), renvoyez des valeurs qui peuvent être enregistrées et restaurées en JSON sans perdre d’information. Le processus suivant pourra alors reprendre à partir des résultats sauvegardés.
 
 ## Limites
 
 - `context.value()` lève une erreur pour une tâche absente de `after`, même si elle a déjà tourné.
-- Une tâche ne démarre qu’une fois toutes celles de son `after` terminées ; un cycle ou une dépendance inconnue est une erreur de configuration au `start()`.
+- Une tâche ne démarre qu’une fois toutes celles de son `after` terminées ; `defineWorkflow()` refuse les cycles et les dépendances inconnues avant l’exécution.
 - Un rejet au dernier tour fait échouer la tâche de boucle avec `LoopTaskExhausted`.
-- Les valeurs de tâche doivent survivre à un aller-retour JSON. Gardez-en dehors les instances de classes, les flux et les descripteurs.
+- Pour enregistrer les résultats dans un checkpoint, utilisez des valeurs qui peuvent être restaurées depuis le JSON sans perte. Les instances de classes, les flux et les descripteurs ne conviennent pas.
 - Un workflow ne pousse, ne fusionne et ne déploie rien de lui-même. Ces étapes restent dans vos tâches.
 
 API : [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [defineLoopTask](../../reference/definelooptask/) · [TaskContext](../../reference/taskcontext/) · [WorkflowResult](../../reference/workflowresult/) · [WorkflowFailure](../../reference/workflowfailure/) · [defineJsonResponse](../../reference/definejsonresponse/).

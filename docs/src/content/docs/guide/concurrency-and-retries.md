@@ -1,7 +1,9 @@
 ---
-title: "Concurrency, retries and timeouts"
-description: "Run independent tasks in parallel, retry the ones that fail, bound their duration and decide what a failure stops."
+title: "Parallel tasks and retries"
+description: "Control task concurrency, retries, timeouts and what happens after a failure."
 ---
+
+In this example, `flaky` and `lint` start in parallel. The first task fails once, waits 100 ms and succeeds on its next attempt. Its entry in `result.tasks` then reports `attempts: 2`.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -25,8 +27,6 @@ console.log(result.value(flaky)); // { attempt: 2 }
 
 <!-- check:run -->
 
-`flaky` and `lint` start together. `flaky` fails once, waits 100 ms and succeeds on its second attempt; its task record in `result.tasks` shows `attempts: 2`.
-
 ## Run tasks in parallel
 
 `start({ concurrency })` sets how many tasks run at once. The default is `1`: tasks run one after another. A task still waits for every task in its `after` list.
@@ -39,19 +39,14 @@ Tasks that share a sandbox must not run at the same time. Order them with `after
 
 A task runs once unless you give it a `retry` policy.
 
-| Option       | Default                                 | Effect                                                 |
-| ------------ | --------------------------------------- | ------------------------------------------------------ |
-| `attempts`   | Required                                | Total attempts, the first one included.                |
-| `delayMs`    | `0`                                     | Wait before each retry.                                |
-| `backoff`    | `"fixed"`                               | `"exponential"` doubles the wait after each failure.   |
-| `maxDelayMs` | 30 000 in exponential mode, else no cap | Upper bound on the computed wait.                      |
-| `jitter`     | `"none"`                                | `"full"` picks a random wait between zero and the cap. |
-| `accepts`    | Every error is retried                  | `(error, attempt) => boolean`; `false` fails the task. |
+API reference: [WorkflowOptions](../../reference/workflowoptions/).
 
-```ts
-import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const request = defineTask({
+```ts title="request.ts"
+import { defineTask, OutpostError } from "@elie-laloum/outpost";
+
+export const request = defineTask({
   key: "request",
   retry: {
     attempts: 4,
@@ -68,9 +63,15 @@ const request = defineTask({
     return "Replace with your cancellable request";
   },
 });
-const result = await defineWorkflow("requests", [request]).start();
+```
+
+```ts title="run.ts"
+import { defineWorkflow } from "@elie-laloum/outpost";
+import { request } from "./request.ts";
+
+export const result = await defineWorkflow("requests", [request]).start();
 result.unwrap();
-console.log(result.tasks[0]?.attempts); // 1
+console.log(result.tasks[0]?.attempts);
 ```
 
 <!-- check:run -->
@@ -83,10 +84,9 @@ Each retry emits a `retry` event with its `delayMs` (see [Follow progress](../pr
 
 ## Set timeouts
 
-| Setting                | Covers                                                                                      | When it expires                                                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Task `timeoutMs`       | One attempt.                                                                                | The attempt’s `signal` aborts with the error `<key> timed out`; the task retries if attempts remain.                                |
-| `start({ timeoutMs })` | The whole `start()` call: checkpoint acquisition, conditions, every attempt and retry wait. | Running tasks are cancelled, nothing new starts, `status` is `"failed"` and `errors` holds an `OutpostError` with code `"timeout"`. |
+API reference: [TaskOptions](../../reference/taskoptions/) and [DispatchOptions](../../reference/dispatchoptions/).
+
+Set separate deadlines for each task attempt and the whole workflow. In this example, the first attempt expires after 200 ms, and the workflow deadline interrupts the retry at 300 ms.
 
 ```ts
 import { setTimeout as sleep } from "node:timers/promises";

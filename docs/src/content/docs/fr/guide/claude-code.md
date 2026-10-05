@@ -1,24 +1,21 @@
 ---
-title: "Claude Code"
-description: "Exécuter Claude Code dans une sandbox avec votre abonnement Claude ou une clé d’API Anthropic."
+title: "Configurer Claude Code"
+description: "Exécutez Claude Code avec votre compte ou une clé d’API et choisissez les réglages du modèle."
 ---
 
 ## Installer
 
-L’[image d’agent](../agent-images/) générée par `outpost init` contient déjà Claude Code. Dans les sandboxes distantes (cloud, Firecracker, conteneurs isolés), Outpost installe `claude` s’il manque, avant le premier tour. L’[exécution sur l’hôte](../host-process/) utilise le `claude` de votre `PATH`.
+L’[image d’agent](../agent-images/) contient Claude Code. Les sandboxes distantes installent `claude` s’il est absent avant le premier échange ; l’[exécution locale](../host-process/) utilise l’exécutable déjà présent dans votre `PATH`.
 
 <!-- features -->
 
 - **Version épinglée** : L’image et l’installation distante utilisent `@anthropic-ai/claude-code` à la version de [`agentVersions.claude`](../../reference/agentversions/).
-  - `agentVersions`
 - **Installation distante** : npm l’installe sous `~/.outpost-tools` dans la sandbox.
-  - `bootstrap`
 - **Image seule** : `bootstrap: false` sur `dispatch()` ou `createSandbox()` désactive l’installation ; l’image doit fournir `claude`.
-  - `bootstrap: false`
 
-## Accès par compte
+## Se connecter avec son compte
 
-Lancez `claude`, puis `/login`, sur l’hôte. `authentication: "account"` copie la connexion d’abonnement de `~/.claude/.credentials.json` (ou `$CLAUDE_CONFIG_DIR/.credentials.json`) dans le home privé de la sandbox.
+Lancez `claude`, puis `/login`, sur l’hôte. `authentication: "account"` copie la connexion d’abonnement de `~/.claude/.credentials.json` (ou `$CLAUDE_CONFIG_DIR/.credentials.json`) dans le répertoire personnel privé de la sandbox.
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -45,7 +42,7 @@ const coder = createAgent({
 
 Choisir entre compte et API, et savoir où vont les identifiants : [Authentification](../authentication/). Conditions de l’éditeur : [Claude Code authentication](https://code.claude.com/docs/en/authentication).
 
-## Accès par API
+## Utiliser une clé d’API
 
 `authentication: "usage"` transmet `ANTHROPIC_API_KEY`. Les requêtes sont facturées sur votre compte API Anthropic, pas sur un abonnement.
 
@@ -76,23 +73,9 @@ const coder = createAgent({
 });
 ```
 
-<!-- features -->
+Référence API : [ClaudeSettings](../../reference/claudesettings/) et [AgentModel](../../reference/agentmodel/).
 
-- `model` : Transmet `name` à `--model`, `reasoning` à `--effort` (`low`, `medium`, `high`, `xhigh`, `max`), `maxOutputTokens` à `CLAUDE_CODE_MAX_OUTPUT_TOKENS`.
-  - `--model`
-  - `--effort`
-- `partialMessages` : Diffuse la réponse en [événements de progression](../progress/) `text-delta` avec `--include-partial-messages`.
-  - `text-delta`
-- `permissions` : Transmet un mode de permissions Claude Code, comme `"plan"`, au lieu d’ignorer les demandes de permission.
-  - `--permission-mode`
-- `mcpServers` : Ajoute des [serveurs MCP](../mcp-servers/) avec `--mcp-config` à chaque exécution.
-  - `--mcp-config`
-- `conversations` : Remplace le [store de conversations](../conversations/), par exemple pour archiver les sessions avec `createTransportConversations()`.
-  - `createClaudeConversations()`
-- `saveConversations` : Avec `false`, les sessions restent dans la sandbox ; seule une reprise à chaud peut les poursuivre.
-  - `saveConversations`
-
-## Ce qu’il prend en charge
+## Fonctions disponibles
 
 [Choisir un agent](../choose-an-agent/) compare ces capacités d’un agent à l’autre.
 
@@ -102,17 +85,11 @@ const coder = createAgent({
   - reprise
   - fork
   - réparation des réponses
-- [Réorientation](../steering/) : Les consignes rejoignent le tour en cours par son entrée stream-json, sur tous les providers de sandbox.
-  - `injected`
+- [Réorientation](../steering/) : Les consignes rejoignent le tour en cours par son entrée stream-json, sur tous les fournisseurs de sandbox.
 - [Pauses sur quota](../quota-pauses/) : Une limite d’usage échoue avec le code `quota`, avec l’heure de réinitialisation quand Claude la fournit.
-  - `quota`
-  - `resetAt`
 - [Agents de secours](../fallback-agents/) : Les erreurs API 5xx, les surcharges et les échecs de connexion sont classés `unavailable`.
-  - `unavailable`
 - [Progression](../progress/) : Appels d’outils, réflexion et usage de tokens par message, tokens de cache compris.
-  - `message-usage`
 - [Serveurs MCP](../mcp-servers/) : Serveurs stdio et HTTP, outils exclus et connexions OAuth de l’hôte.
-  - `mcpServers`
 
 ## Limites
 

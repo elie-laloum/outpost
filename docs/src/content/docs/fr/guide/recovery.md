@@ -1,11 +1,11 @@
 ---
 title: "Récupérer du travail"
-description: "Retrouver le travail conservé par Outpost après un échec, le restaurer dans un nouveau dossier et le ramener dans votre dépôt."
+description: "Examinez les copies de travail et les transferts conservés avant de les restaurer ou de les nettoyer."
 ---
 
 ## Ce qu’Outpost conserve
 
-Un échec ne supprime jamais le travail de l’agent. Outpost le conserve dans le dossier `.outpost` du dépôt cible ou dans votre transport.
+Lorsqu’une exécution s’arrête avant l’intégration de ses modifications, examinez le travail conservé par Outpost. L’inventaire de récupération permet de retrouver les copies de travail, les transferts téléchargés et les sauvegardes avant toute restauration ou suppression.
 
 | Quoi                    | Où                                                    | Conservé quand                                                                                                                                        |
 | ----------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@ Un worktree conservé est un worktree Git ordinaire sur sa branche : ouvrez-le, 
 
 ```ts
 import { dispatch, OutpostError, recoveryDetails } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
   const result = await dispatch({
@@ -42,10 +42,7 @@ try {
 
 Deux échecs indiquent aussi leur emplacement dans `error.details`. [Erreurs](../error-handling/) liste tous les codes.
 
-| Échec                                                | Code        | Emplacement                                   |
-| ---------------------------------------------------- | ----------- | --------------------------------------------- |
-| Les changements distants n’ont pas pu être appliqués | `workspace` | `details.recovery` : le dossier du transfert. |
-| L’intégration automatique a échoué                   | `conflict`  | `details.directory` : le worktree conservé.   |
+Référence API : [recoveryDetails](../../reference/recoverydetails/).
 
 Si l’exécution elle-même a aussi échoué, l’erreur de synchronisation arrive dans une `AggregateError`.
 
@@ -53,23 +50,28 @@ Si l’exécution elle-même a aussi échoué, l’erreur de synchronisation arr
 
 Un transfert contient deux versions : `previous`, votre checkout avant les changements de la sandbox, et `incoming`, les changements de la sandbox. Restaurez l’une d’elles dans un nouveau dossier, jamais par-dessus votre checkout.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Observer**: Rien n’est modifié.
-   - **Inspecter**: Lister les workspaces, les verrous et l’activité enregistrée des sandboxes.
-     - `recovery inspect`
-   - **Vérifier**: Contrôler les fichiers, les empreintes et l’historique Git du transfert.
-     - `recovery verify`
-2. **Restaurer**: Reconstruire une version dans un nouveau dossier.
-   - **Planifier**: Prévisualiser le commit et les fichiers à restaurer.
-     - `recovery restore`
-   - **Appliquer**: Créer un checkout détaché à partir du plan.
-     - `--apply`
-3. **Intégrer**: Vous décidez de ce qui revient.
-   - **Comparer**: Examiner le checkout restauré au regard de votre dépôt.
-     - git
-   - **Rapatrier**: Committer, cherry-picker ou fusionner ce que vous gardez.
-     - git
+- **Observer**: Rien n’est modifié.
+  - Étapes
+  - **Inspecter**: Lister les workspaces, les verrous et l’activité enregistrée des sandboxes.
+    - `recovery inspect`
+  - **Vérifier**: Contrôler les fichiers, les empreintes et l’historique Git du transfert.
+    - `recovery verify`
+  - → **Restaurer**: puis
+- **Restaurer**: Reconstruire une version dans un nouveau dossier.
+  - Étapes
+  - **Planifier**: Prévisualiser le commit et les fichiers à restaurer.
+    - `recovery restore`
+  - **Appliquer**: Créer un checkout détaché à partir du plan.
+    - `--apply`
+  - → **Intégrer**: puis
+- **Intégrer**: Vous décidez de ce qui revient.
+  - Étapes
+  - **Comparer**: Examiner le checkout restauré au regard de votre dépôt.
+    - git
+  - **Rapatrier**: Committer, cherry-picker ou fusionner ce que vous gardez.
+    - git
 
 ### Inspecter
 
@@ -77,13 +79,7 @@ Un transfert contient deux versions : `previous`, votre checkout avant les chang
 npx outpost recovery inspect --repository /projects/app --git --locks --resources
 ```
 
-| Option                 | Ajoute à l’inventaire                                                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `--git`                | Branche, état propre ou modifié, `HEAD` détaché et indicateur `locked` de Git pour chaque worktree.                                      |
-| `--locks`              | Les fichiers de verrou, le PID enregistré dans chacun et son statut de possession ; un PID actif ne prouve pas à lui seul la possession. |
-| `--resources`          | L’activité enregistrée des sandboxes et sa propriété.                                                                                    |
-| `--max-entries NUMBER` | Une limite d’entrées parcourues ; 100 000 par défaut.                                                                                    |
-| `--json`               | Le rapport complet en JSON.                                                                                                              |
+Référence API : [RecoveryInspectionOptions](../../reference/recoveryinspectionoptions/).
 
 La commande se termine avec le statut 1 quand l’inventaire est incomplet.
 
@@ -104,10 +100,7 @@ npx outpost recovery restore --directory "$TRANSFER" --repository /projects/app 
 
 La commande affiche le plan. Relancez-la avec `--apply` pour créer le checkout : un clone de votre dépôt détaché sur le commit restauré, avec les patches et fichiers de la version choisie, sans remote `origin`.
 
-| `--side`   | Restaure                                                                              | Index        |
-| ---------- | ------------------------------------------------------------------------------------- | ------------ |
-| `incoming` | Les commits, les modifications non committées et les nouveaux fichiers de la sandbox. | Non restauré |
-| `previous` | Votre checkout tel qu’il était avant le transfert.                                    | Restauré     |
+Référence API : [RecoveryRestoreOptions](../../reference/recoveryrestoreoptions/).
 
 La destination ne doit pas exister et doit se trouver hors du dépôt, de ses métadonnées Git et du transfert. Le transfert reste en place.
 
@@ -127,34 +120,50 @@ Le travail est désormais la branche `outpost/recovered` de votre dépôt. Relis
 
 Chaque commande a sa fonction. `planRecoveryRestore()` renvoie le plan ; `restoreRecoveryTransfer()` vérifie que rien n’a changé depuis, puis l’applique.
 
-```ts
+<!-- tabs -->
+
+```ts title="recovery-target.ts"
+export const repository = "/projects/app";
+export const transfer = process.env.TRANSFER!;
+```
+
+```ts title="verify-transfer.ts"
+import { inspectRecovery, verifyRecoveryTransfer } from "@elie-laloum/outpost";
+import { repository, transfer } from "./recovery-target.ts";
+
+export async function verifyTransfer() {
+  const inventory = await inspectRecovery({
+    repository,
+    git: true,
+    locks: true,
+  });
+  console.log(inventory.git?.workspaces);
+  const verification = await verifyRecoveryTransfer(transfer, {
+    checksums: true,
+    restorability: true,
+    repository,
+  });
+  if (!verification.complete)
+    throw new Error("The transfer failed verification");
+}
+```
+
+```ts title="restore.ts"
+import { verifyTransfer } from "./verify-transfer.ts";
 import {
-  inspectRecovery,
   planRecoveryRestore,
   restoreRecoveryTransfer,
-  verifyRecoveryTransfer,
 } from "@elie-laloum/outpost";
+import { transfer, repository } from "./recovery-target.ts";
 
-const repository = "/projects/app";
-const transfer = process.env.TRANSFER!;
-
-const inventory = await inspectRecovery({ repository, git: true, locks: true });
-console.log(inventory.git?.workspaces);
-
-const verification = await verifyRecoveryTransfer(transfer, {
-  checksums: true,
-  restorability: true,
-  repository,
-});
-if (!verification.complete) throw new Error("The transfer failed verification");
-
-const plan = await planRecoveryRestore({
+await verifyTransfer();
+export const plan = await planRecoveryRestore({
   directory: transfer,
   repository,
   destination: "/projects/app-recovered",
   side: "incoming",
 });
-const restored = await restoreRecoveryTransfer(plan);
+export const restored = await restoreRecoveryTransfer(plan);
 console.log(restored.directory, restored.commit);
 ```
 
@@ -201,7 +210,7 @@ Ne supprimez jamais `.outpost` ni ses dossiers à la main : ils peuvent contenir
 ## Limites
 
 - Les empreintes détectent une altération par rapport à un manifeste non signé ; elles ne prouvent pas qui a produit le transfert.
-- La restaurabilité couvre les commits, le bundle et les patches, pas les sous-modules ni les dépendances externes.
+- La restaurabilité couvre les commits, l’archive et les patches, pas les sous-modules ni les dépendances externes.
 - Un transfert n’est restaurable qu’une fois la sauvegarde de l’hôte effectuée : une synchronisation échouée pendant le téléchargement ou la validation ne laisse aucun `state.json`, et le plan de restauration la rejette.
 - Un PID de verrou ou une activité enregistrée est une observation. Elle ne prouve pas qu’un processus distant s’est arrêté.
 - Un worktree signalé `clean` peut encore contenir des fichiers ignorés, comme des copies ou `node_modules`.

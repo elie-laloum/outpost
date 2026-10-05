@@ -39,9 +39,37 @@ for (const name of files) {
   if (/^(fr\/)?guide\//.test(name.replaceAll("\\", "/"))) {
     assert.doesNotMatch(
       content,
+      /\.mts\b/,
+      `Guide examples must use .ts filenames and imports: ${name}`,
+    );
+    assert.doesNotMatch(
+      content,
+      /<!--\s*flow\s*-->|class=["']flow["']/,
+      `Use a canvas for diagrams: ${name}`,
+    );
+    for (const block of content.matchAll(/^```([^\n]*)\n([\s\S]*?)^```/gm)) {
+      const lines = block[2].trimEnd().split("\n").length;
+      assert.ok(
+        lines <= 20,
+        `Split guide examples into files of at most 20 lines: ${name}: ${block[1]} (${lines} lines)`,
+      );
+    }
+    assert.doesNotMatch(
+      content,
       /<!-- (scenario|preparation):|<details>/,
       `Superseded workshop format: ${name}`,
     );
+    if (!/(?:^|\/)(?:cli|agent-images|diagnostics)\.md$/.test(name)) {
+      const prose = content.replace(
+        /^```[^\n]*\n[\s\S]*?^```[^\n]*(?:\n|$)/gm,
+        "",
+      );
+      assert.doesNotMatch(
+        prose,
+        /^\|\s*(?:Field|Champ|Decision field|Champ de décision|Member|Membre|Option|Setting|Réglage|Property|Propriété|Parameter|Paramètre)\s*\|/m,
+        `Property catalogs belong in the API reference: ${name}`,
+      );
+    }
   }
 }
 const other = (await readdir(root, { recursive: true })).filter((name) =>

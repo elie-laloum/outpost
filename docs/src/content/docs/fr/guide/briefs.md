@@ -1,11 +1,11 @@
 ---
-title: "Rédiger le brief"
-description: "Donner ses instructions à l’agent sous forme de texte ou d’un modèle Markdown avec variables et sorties de commandes."
+title: "Rédiger les consignes de l’agent"
+description: "Confiez une tâche à un agent avec du texte ou un modèle Markdown."
 ---
 
-## Choisir un texte ou un fichier
+## Envoyer du texte ou un fichier
 
-Le brief est l’instruction que reçoit l’agent. Passez une chaîne lorsque votre code construit la demande, ou un fichier lorsque vous conservez un modèle de tâche réutilisable.
+Le `brief` contient les consignes envoyées à l’agent. Utilisez `text` pour une demande écrite dans votre script, ou `file` pour des consignes que vous souhaitez conserver et réutiliser en Markdown.
 
 |                    | Brief texte `{ text }`               | Brief fichier `{ file, values }`                         |
 | ------------------ | ------------------------------------ | -------------------------------------------------------- |
@@ -16,7 +16,7 @@ Le brief est l’instruction que reçoit l’agent. Passez une chaîne lorsque v
 
 Un brief texte est envoyé tel quel. La suite de la page traite des briefs fichier.
 
-## Remplir un modèle
+## Utiliser un modèle avec des variables
 
 Écrivez les emplacements sous la forme `{{NAME}}`, avec des lettres, des chiffres et des tirets bas. Outpost lit le fichier et les remplit avant le démarrage de l’agent.
 
@@ -27,10 +27,10 @@ You work on {{WORK_BRANCH}}, created from {{BASE_BRANCH}}.
 Run `npm test` and commit your change.
 ```
 
-```ts title="feature.mts"
+```ts title="feature.ts"
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
   repository,
@@ -53,7 +53,7 @@ Un `file` relatif se résout depuis le répertoire de travail du processus. Cons
 | `{{WORK_BRANCH}}` | La branche sur laquelle travaille l’agent (voir [Dépôt et branche](../repository-and-branch/)). |
 | `{{BASE_BRANCH}}` | La branche active dans votre dépôt au démarrage de la tâche.                                    |
 
-Un emplacement sans valeur fait échouer la tâche avec le code d’erreur `prompt` avant le lancement de l’agent. Les valeurs que le fichier n’utilise pas sont signalées à votre callback `warn`.
+Un emplacement sans valeur fait échouer la tâche avec le code d’erreur `prompt` avant le lancement de l’agent. Les valeurs que le fichier n’utilise pas sont signalées à votre fonction de rappel `warn`.
 
 ## Insérer la sortie d’une commande
 
@@ -80,7 +80,7 @@ Les commandes s’exécutent dans la sandbox, dans la copie de travail de l’ag
 ```ts
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
   repository,
@@ -102,7 +102,7 @@ Les valeurs ne peuvent pas ajouter de commandes : Outpost repère les fragments 
 
 ## Demander à l’agent, contrôler dans le code
 
-Un brief demande ; il ne garantit rien. Lorsqu’une condition compte, vérifiez-la dans votre workflow.
+Les consignes indiquent à l’agent ce que vous attendez. Si une condition détermine l’acceptation du travail, vérifiez-la dans le code du workflow.
 
 | Condition            | Demander dans le brief      | Contrôler dans le code                                                                                                            |
 | -------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |

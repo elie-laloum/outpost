@@ -1,33 +1,40 @@
 ---
-title: "Job queues and workers"
-description: "Hand work to long-running worker processes through a durable queue, run a checkpointed workflow per job and keep external effects deduplicated."
+title: "Run jobs with workers"
+description: "Submit jobs to a queue and run them in workers with leases, retries and saved results."
 ---
 
 ## How a job runs
 
-A job names a registered handler and carries JSON input. Workers run only the handlers you registered, never code sent with the job.
+Producers publish a handler name and JSON input to a queue. Workers claim jobs, call the registered handler and store its result. Choose a queue shared by every producer and worker that needs to participate.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Submit**: A producer adds the job.
-   - **Enqueue**: The job is stored as `pending` under its ID.
-     - `enqueue()`
-2. **Claim**: A worker takes it.
-   - **Lease**: The worker claims a job for one of its handlers and renews a lease while it runs.
-     - `runQueueWorker()`
-3. **Run**: The handler does the work.
-   - **Handle**: It receives the input, a cancellation signal and an `idempotencyKey`.
-     - `QueueHandler`
-4. **Store**: The result stays in the queue.
-   - **Complete**: The job becomes `done`, or `failed` with an error.
-   - **Read**: Producers read it back by ID.
-     - `get()`
+- **Submit**: A producer adds the job.
+  - Steps
+  - **Enqueue**: The job is stored as `pending` under its ID.
+    - `enqueue()`
+  - → **Claim**: then
+- **Claim**: A worker takes it.
+  - Steps
+  - **Lease**: The worker claims a job for one of its handlers and renews a lease while it runs.
+    - `runQueueWorker()`
+  - → **Run**: then
+- **Run**: The handler does the work.
+  - Steps
+  - **Handle**: It receives the input, a cancellation signal and an `idempotencyKey`.
+    - `QueueHandler`
+  - → **Store**: then
+- **Store**: The result stays in the queue.
+  - Steps
+  - **Complete**: The job becomes `done`, or `failed` with an error.
+  - **Read**: Producers read it back by ID.
+    - `get()`
 
 ## Start a worker
 
 Run the worker in its own process. It polls the queue and runs one job at a time until its signal aborts.
 
-```ts title="worker.mts"
+```ts title="worker.ts"
 import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -53,7 +60,7 @@ try {
 
 A producer opens the same queue and enqueues a job under a stable ID.
 
-```ts title="submit.mts"
+```ts title="submit.ts"
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -102,7 +109,7 @@ The job ID comes from the run's `executionId` and the task key, so a resumed [du
 
 `defineWorkflowJob()` turns a handler into one [durable run](../durable-runs/) per job. The job input is `{ runId, input }`, which is what [Cron schedules](../cron-schedules/) and [Webhooks](../webhooks/) publish.
 
-```ts title="fix-job.mts"
+```ts title="fix-job.ts"
 import {
   createLocalTransport,
   createWorkflowCheckpointStore,
@@ -125,17 +132,9 @@ export const fix = defineWorkflowJob({
 
 Register it in the worker with `handlers: { fix }`. For each job, `workflow` builds the graph from `input` and starts it under the job's `runId`; the same input must build the same graph. Pass other start options, such as `concurrency`, `budget`, `onQuota` or `timeoutMs`, in `start`.
 
-The job's `result.value` summarises the run:
+The stored job result lets the producer inspect the completed workflow.
 
-| Field           | Content                                                            |
-| --------------- | ------------------------------------------------------------------ |
-| `runId`         | The checkpoint run.                                                |
-| `version`       | `checkpoint.version` plus an input digest: `1#input:<digest>`.     |
-| `executionId`   | The run's execution, needed to submit decisions and answers.       |
-| `status`        | `done`, `paused`, `waiting-input`, `failed` or `cancelled`.        |
-| `tasks`         | Each task's `key` and `status`.                                    |
-| `pauses`        | Pending gates: `key`, `id`, `kind`, `prompt`, `actors`.            |
-| `inputRequests` | Pending questions from [interactive tasks](../interactive-tasks/). |
+API reference: [QueueHandlerContext](../../reference/queuehandlercontext/).
 
 `result.usage` holds the run's cumulative token usage. A `failed` or `cancelled` run fails the job; a paused or waiting run completes it.
 
@@ -202,11 +201,7 @@ function deliveryHandler(
 }
 ```
 
-<!-- features -->
-
-- `QueueHandlerContext.idempotencyKey`: The job ID, or the original key when a quota pause republished the job.
-- `TaskContext.idempotencyKey`: Derived from the run and the task key, stable across retries and checkpoint replay.
-- **Receipt**: Store it with the effect, in the same transaction, under a unique constraint.
+API reference: [QueueHandlerContext](../../reference/queuehandlercontext/) and [TaskContext](../../reference/taskcontext/).
 
 A remote API with persistent idempotency keys works too. A receipt kept in memory, or written apart from the effect, is lost in a crash. Derive one key per effect when a handler makes several, and keep receipts as long as a job can be replayed.
 
@@ -214,7 +209,7 @@ A remote API with persistent idempotency keys works too. A receipt kept in memor
 
 `serveTaskQueue()` puts any queue behind an HTTP endpoint. `createHttpTaskQueue()` is a queue client for producers and workers on other machines.
 
-```ts title="queue-server.mts"
+```ts title="queue-server.ts"
 import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
@@ -229,14 +224,19 @@ On another machine, `createHttpTaskQueue({ url, token })` returns a queue for `r
 
 To rotate tokens, give `token` a function, read on every request. The server's returns the accepted tokens; an empty list or an error rejects every request.
 
-<!-- flow -->
+<!-- canvas -->
 
-1. **Add**: The server accepts both tokens.
-   - **Server**: Its function returns the old and the new token.
-2. **Switch**: Clients move to the new token.
-   - **Clients**: Their function returns the new token, for heartbeats and completions too.
-3. **Remove**: The server drops the old token.
-   - **Server**: Its function returns only the new token.
+- **Add**: The server accepts both tokens.
+  - Steps
+  - **Server**: Its function returns the old and the new token.
+  - → **Switch**: then
+- **Switch**: Clients move to the new token.
+  - Steps
+  - **Clients**: Their function returns the new token, for heartbeats and completions too.
+  - → **Remove**: then
+- **Remove**: The server drops the old token.
+  - Steps
+  - **Server**: Its function returns only the new token.
 
 ## Operate workers
 

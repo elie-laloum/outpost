@@ -1,103 +1,120 @@
 ---
-title: "Let agents compete"
-description: "Give the same bug to Codex and Claude Code, test each fix in its own sandbox, keep the first one that passes and check that it merges cleanly."
+title: "Compare agent approaches"
+description: "Run candidates on separate branches and use a check to select a result."
 ---
 
-## What you use
+## What this example covers
 
 :::caution[Experimental]
 `speculate()` is experimental: its options and result can still change. It selects a branch; it never merges it.
 :::
 
-Each candidate fixes the bug on its own branch, in its own sandbox. Your tests decide which one wins.
+Use this example to try several fixes for the same bug. Each candidate works in its own sandbox and branch; your test command decides which result can be accepted.
 
 <!-- features -->
 
 - [Competing candidates](../speculation/): Race up to eight candidates and keep the first acceptable one.
-  - `speculate()`
-  - `checkSpeculationIntegration()`
 - [Choose an agent](../choose-an-agent/): Compose Codex and Claude Code from their harness presets.
-  - `createCodexHarness()`
-  - `createClaudeHarness()`
 - [Claude Code](../claude-code/): Sign in on the host; the Setup image already contains its CLI.
 - [Sandbox sessions](../sandbox-sessions/): Run the tests in the candidate’s open sandbox.
-  - `sandbox.command()`
 - [Budgets](../budgets/): One budget bounds the attempts and tokens of every candidate.
-  - `budget`
 - [Repository and branch](../repository-and-branch/): Each candidate commits on a named branch in its own worktree.
 
-## The code
+## Write the script
 
-The file sits next to the `outpost.config.mts` from [Setup](../setup/).
+Save the files shown in the tabs next to the `outpost.config.ts` from [Installation](../setup/). Run `compete.ts` to compare the candidates.
 
-```ts title="compete.mts"
-import { execFileSync } from "node:child_process";
-import { createInterface } from "node:readline/promises";
+Prepare the candidates and verify their work before considering a merge.
+
+<!-- tabs -->
+
+```ts title="candidate-agents.ts"
 import {
-  checkSpeculationIntegration,
   createAgent,
-  createClaudeHarness,
   createCodexHarness,
-  speculate,
+  createClaudeHarness,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
 
-const brief = {
+export const codex = createAgent({
+  harness: createCodexHarness({ authentication: "account" }),
+});
+export const claude = createAgent({
+  harness: createClaudeHarness({ authentication: "account" }),
+});
+```
+
+```ts title="candidate-briefs.ts"
+import { codex, claude } from "./candidate-agents.ts";
+
+export const brief = {
   text: "Fix issue #42: dates before 1970 parse as NaN. Add a regression test, run npm test and commit the fix.",
 };
+export const candidates = [
+  { key: "codex", agent: codex, request: { brief } },
+  { key: "claude", agent: claude, request: { brief } },
+];
+```
 
-const result = await speculate({
-  repository,
-  sandboxProvider,
-  candidates: [
-    {
-      key: "codex",
-      agent: createAgent({
-        harness: createCodexHarness({ authentication: "account" }),
-      }),
-      request: { brief },
-    },
-    {
-      key: "claude",
-      agent: createAgent({
-        harness: createClaudeHarness({ authentication: "account" }),
-      }),
-      request: { brief },
-    },
-  ],
-  concurrency: 2,
-  budget: { attempts: 2, usage: { output: 100_000 } },
-  async validate({ result, sandbox, signal }) {
-    if (result.commits.length === 0) return false;
-    const tests = await sandbox.command({
-      executable: "npm",
-      arguments: ["test"],
-      signal,
-    });
-    return tests.status === 0;
-  },
-});
+```ts title="candidate-check.ts"
+import type { SpeculationOptions } from "@elie-laloum/outpost";
 
-for (const candidate of result.candidates)
-  console.log(candidate.key, candidate.status, candidate.branch);
+export const validate: SpeculationOptions["validate"] = async ({
+  result,
+  sandbox,
+  signal,
+}) => {
+  if (result.commits.length === 0) return false;
+  const tests = await sandbox.command({
+    executable: "npm",
+    arguments: ["test"],
+    signal,
+  });
+  return tests.status === 0;
+};
+```
 
-const { winner, integration } = result;
-if (!winner) throw new Error(`No winner: ${result.status}`);
-console.log(`${winner.key} wins, integration: ${integration?.status}`);
+```ts title="run-candidates.ts"
+import { speculate } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { candidates } from "./candidate-briefs.ts";
+import { validate } from "./candidate-check.ts";
 
-const prompt = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-const answer = await prompt.question(`Merge ${winner.branch}? [y/N] `);
-prompt.close();
-
-if (answer === "y") {
-  const check = await checkSpeculationIntegration(
+export function runCandidates() {
+  return speculate({
     repository,
-    winner.branch,
-    winner.commit,
-  );
+    sandboxProvider,
+    candidates,
+    concurrency: 2,
+    budget: { attempts: 2, usage: { output: 100_000 } },
+    validate,
+  });
+}
+```
+
+```ts title="merge-check.ts"
+import type { SpeculationResult } from "@elie-laloum/outpost";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.ts";
+
+export function verifyWinner(winner: NonNullable<SpeculationResult["winner"]>) {
+  return checkSpeculationIntegration(repository, winner.branch, winner.commit);
+}
+```
+
+Ask for confirmation in `compete.ts`, then check integration again before merging.
+
+<!-- tabs -->
+
+```ts title="merge-winner.ts"
+import type { SpeculationResult } from "@elie-laloum/outpost";
+import { verifyWinner } from "./merge-check.ts";
+import { execFileSync } from "node:child_process";
+import { repository } from "./outpost.config.ts";
+
+export async function mergeWinner(
+  winner: NonNullable<SpeculationResult["winner"]>,
+) {
+  const check = await verifyWinner(winner);
   if (check.status !== "clean")
     throw new Error(check.reason ?? `Conflicts: ${check.conflicts.join(", ")}`);
   execFileSync("git", ["merge", "--no-edit", winner.branch], {
@@ -107,19 +124,49 @@ if (answer === "y") {
 }
 ```
 
-```sh
-node compete.mts
+```ts title="merge-prompt.ts"
+import { createInterface } from "node:readline/promises";
+
+export async function askToMerge(branch: string) {
+  const prompt = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  try {
+    return (await prompt.question(`Merge ${branch}? [y/N] `)) === "y";
+  } finally {
+    prompt.close();
+  }
+}
 ```
+
+```ts title="compete.ts"
+import { runCandidates } from "./run-candidates.ts";
+import { askToMerge } from "./merge-prompt.ts";
+import { mergeWinner } from "./merge-winner.ts";
+
+export const result = await runCandidates();
+for (const candidate of result.candidates)
+  console.log(candidate.key, candidate.status, candidate.branch);
+export const { winner, integration } = result;
+if (!winner) throw new Error(`No winner: ${result.status}`);
+console.log(`${winner.key} wins, integration: ${integration?.status}`);
+if (await askToMerge(winner.branch)) await mergeWinner(winner);
+```
+
+### Run the script
 
 It prints each candidate’s status and branch, for example `claude winner outpost/speculation/<id>/claude` and `codex cancelled …`, then asks before merging. Review the branch with `git diff` before you answer.
 
-## How it works
+```sh
+node compete.ts
+```
 
-Each link shows who hands what to whom, in the direction of the arrow.
+## Understand the steps
 
 <!-- canvas -->
 
-- [Your script](../speculation/): `compete.mts` calls `speculate()`, prints each candidate, then asks before merging.
+- [Your script](../speculation/): `compete.ts` calls `speculate()`, prints each candidate, then asks before merging.
   - host
   - → **Admit**: `speculate()`
   - → **Checkout**: `git merge`, after your answer
@@ -139,53 +186,60 @@ Each link shows who hands what to whom, in the direction of the arrow.
 - **Checkout**: Your branch. `checkSpeculationIntegration()` blocks the merge if it or the winner moved since. Outpost does not push.
   - host
 
-`result.status` is `winner`, `no-winner`, `budget-exhausted`, `quota` (a usage limit stopped a candidate, see [Quota pauses](../quota-pauses/)) or `aborted` (your `signal`). Each candidate has its own status:
+API reference: [SpeculationResult](../../reference/speculationresult/), [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) and [SpeculationIntegration](../../reference/speculationintegration/).
 
-| Candidate status | Meaning                                                                     |
-| ---------------- | --------------------------------------------------------------------------- |
-| `winner`         | Passed `validate` first.                                                    |
-| `rejected`       | `validate` returned `false`.                                                |
-| `failed`         | An error in the sandbox, the agent, `validate` or the cleanup; see `error`. |
-| `quota`          | A usage or rate limit stopped it.                                           |
-| `cancelled`      | Stopped by a winner, the budget or your `signal`.                           |
-| `skipped`        | Never started.                                                              |
-
-`integration.status` is `clean`, `conflict` (file paths in `conflicts`) or `blocked` (`reason`: uncommitted changes, detached `HEAD`, a moved branch or a Git without `merge-tree --write-tree`).
-
-## Adapt it
+## Adapt the example
 
 ### Try one agent with several approaches
 
 Give the same agent different briefs. With three candidates and `concurrency: 2`, the third starts only when one of the first two finishes without winning.
 
-```ts
-import { speculate } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const approaches = {
+```ts title="approaches.ts"
+import { coder } from "./outpost.config.ts";
+
+export const approaches = {
   minimal: "Fix issue #42 with the smallest possible change.",
   parser: "Fix issue #42 by rewriting the date parser.",
   temporal: "Fix issue #42 by parsing dates with the Temporal API.",
 };
+export const candidates = Object.entries(approaches).map(([key, text]) => ({
+  key,
+  agent: coder,
+  request: { brief: { text: `${text} Run npm test and commit.` } },
+}));
+```
 
-const result = await speculate({
+```ts title="check-approach.ts"
+import type { SpeculationOptions } from "@elie-laloum/outpost";
+
+export const validate: SpeculationOptions["validate"] = async ({
+  sandbox,
+  signal,
+}) => {
+  const tests = await sandbox.command({
+    executable: "npm",
+    arguments: ["test"],
+    signal,
+  });
+  return tests.status === 0;
+};
+```
+
+```ts title="try-approaches.ts"
+import { speculate } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { candidates } from "./approaches.ts";
+import { validate } from "./check-approach.ts";
+
+export const result = await speculate({
   repository,
   sandboxProvider,
   concurrency: 2,
   budget: { attempts: 3 },
-  candidates: Object.entries(approaches).map(([key, text]) => ({
-    key,
-    agent: coder,
-    request: { brief: { text: `${text} Run npm test and commit.` } },
-  })),
-  async validate({ sandbox, signal }) {
-    const tests = await sandbox.command({
-      executable: "npm",
-      arguments: ["test"],
-      signal,
-    });
-    return tests.status === 0;
-  },
+  candidates,
+  validate,
 });
 console.log(result.winner?.key);
 ```
@@ -194,18 +248,20 @@ console.log(result.winner?.key);
 
 A reviewer dispatched in the candidate’s sandbox reads its commits and returns a [typed verdict](../typed-responses/). Pass the function as `validate: review`.
 
-```ts
-import {
-  createAgent,
-  createClaudeHarness,
-  defineJsonResponse,
-  type SpeculativeValidation,
-} from "@elie-laloum/outpost";
+<!-- tabs -->
 
-const reviewer = createAgent({
+```ts title="review-agent.ts"
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+
+export const reviewer = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),
 });
-const verdict = defineJsonResponse({
+```
+
+```ts title="review-verdict.ts"
+import { defineJsonResponse } from "@elie-laloum/outpost";
+
+export const verdict = defineJsonResponse({
   tag: "verdict",
   schema(input) {
     if (
@@ -218,8 +274,12 @@ const verdict = defineJsonResponse({
     return { approved: input.approved };
   },
 });
+```
 
-export async function review({
+```ts title="test-candidate.ts"
+import type { SpeculativeValidation } from "@elie-laloum/outpost";
+
+export async function testBranch({
   sandbox,
   signal,
 }: SpeculativeValidation<undefined>) {
@@ -228,7 +288,19 @@ export async function review({
     arguments: ["test"],
     signal,
   });
-  if (tests.status !== 0) return false;
+  return tests.status === 0;
+}
+```
+
+```ts title="review-candidate.ts"
+import type { SpeculativeValidation } from "@elie-laloum/outpost";
+import { testBranch } from "./test-candidate.ts";
+import { reviewer } from "./review-agent.ts";
+import { verdict } from "./review-verdict.ts";
+
+export async function review(candidate: SpeculativeValidation<undefined>) {
+  if (!(await testBranch(candidate))) return false;
+  const { sandbox, signal } = candidate;
   const { value } = await sandbox.dispatch({
     agent: reviewer,
     brief: {
@@ -243,7 +315,7 @@ export async function review({
 
 The review’s tokens do not count in `budget`. The winner’s commit is read after `validate`, so the reviewer must not commit.
 
-### Survive a crash
+### Resume after a crash
 
 Pass `durability` to `speculate()`: attempts, usage and outputs are saved through a [transport](../storage/), and a completed race is returned without running again.
 
@@ -253,7 +325,7 @@ import {
   createLocalTransport,
   type SpeculationDurability,
 } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.mts";
+import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {
   transporter: createLocalTransport({
