@@ -1,11 +1,12 @@
 # Changelog
 
-## 9.0.7
+## 9.0.8
 
 - Redesign the bilingual documentation home with a full-viewport hero, a four-step journey and a nine-capability grid linking to the Guide. Show a medium-sized CSV-export workflow with parallel tests and review, bounded correction rounds and human approval.
 - Add a site favicon, localized social previews, homepage search metadata and structured data, and a robots endpoint.
 - Replace direct console output in Guide, homepage and README snippets with reporters and sample-output comments. Typecheck the shared reporter and execute the offline examples in both languages.
 - Hide code-tab and snippet scrollbars while preserving horizontal scrolling, mouse dragging and keyboard navigation.
+- Include the shared reporter when executing real container documentation examples in both languages.
 
 Public library contracts and runtime behavior are unchanged.
 

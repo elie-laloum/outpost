@@ -51,6 +51,11 @@ for (const locale of ["", "fr/"]) {
         'import { createPodmanSandboxProvider as createDockerSandboxProvider } from "@elie-laloum/outpost/providers/podman";',
       );
     await writeFile(resolve(workspace, "outpost.config.ts"), config);
+    const reporter = setup.match(
+      /```ts title="reporter\.ts"\n([\s\S]*?)```/,
+    )?.[1];
+    assert.ok(reporter, `Missing published reporter: ${locale}`);
+    await writeFile(resolve(workspace, "reporter.ts"), reporter);
     await writeFile(
       resolve(workspace, "command.ts"),
       page.match(/```ts title="command\.ts"\n([\s\S]*?)```/)[1],

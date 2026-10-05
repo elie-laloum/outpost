@@ -1,11 +1,12 @@
 # Historique des versions
 
-## 9.0.7
+## 9.0.8
 
 - Refaire l’accueil bilingue de la documentation avec un hero occupant la hauteur de l’écran, un parcours en quatre étapes et une grille de neuf fonctionnalités liées au Guide. Montrer un workflow d’export CSV de taille moyenne avec tests et revue en parallèle, corrections bornées et validation humaine.
 - Ajouter un favicon, des aperçus sociaux localisés, les métadonnées de référencement et les données structurées de l’accueil, ainsi qu’un endpoint robots.
 - Remplacer les sorties console directes des snippets du Guide, de l’accueil et du README par des reporters et des commentaires montrant le résultat attendu. Vérifier les types du reporter partagé et exécuter les exemples hors ligne dans les deux langues.
 - Masquer les barres de défilement des onglets et snippets de code tout en conservant le défilement horizontal, le déplacement à la souris et la navigation au clavier.
+- Inclure le reporter partagé lors de l’exécution des exemples documentaires en conteneurs réels dans les deux langues.
 
 Les contrats publics de la bibliothèque et le comportement d’exécution restent inchangés.
 
