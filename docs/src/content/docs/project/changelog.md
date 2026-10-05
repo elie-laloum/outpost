@@ -10,6 +10,16 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 9.0.6
+
+- Rewrite the English and French Guide with clearer titles and explanations. The recommended setup builds an agent image, then imports Outpost in user-written TypeScript files; generated `init` workflow projects remain optional. Link option and property definitions to their API contracts instead of repeating them in the Guide.
+- Limit Guide code blocks to 20 lines, split longer examples into named `.ts` files in tabs and place their explanations beside them. Code tabs support horizontal scrolling and mouse dragging so every file stays reachable.
+- Replace Guide flows with pannable, zoomable canvases, illustrate cards with icons, extend notices across the content section and give page navigation actions equal widths. Reduce spacing in the sidebar.
+- Rebuild the bilingual home around what developers can accomplish with Outpost, with a direct starting point, short working examples, illustrated use cases and a canvas. Reuse the Guide's layout and components, and regenerate content when starting or building the site so development and production render the same page.
+- Keep only Guide and API in the header. Open the changelog exclusively from the version button, including on mobile, and keep the roadmap in the repository's `roadmap.md`. The version button's hover fills its whole cell, and Guide/API buttons keep their size while fonts load and the active page changes.
+
+Public library contracts and runtime behavior are unchanged.
+
 ## 9.0.5
 
 - Add a development-workflow use case that takes a ticket to a reviewed branch: an agent questions the owner and plans, the owner approves the plan, then agents write failing tests and the code that makes them pass under a reviewer agent, while the workflow checks every step and makes every commit. It replaces the “Write a specification with a human” recipe, whose URL redirects to it.

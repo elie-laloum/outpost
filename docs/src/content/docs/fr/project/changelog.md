@@ -10,6 +10,16 @@ next: false
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## 9.0.6
+
+- Réécrit le Guide en français et en anglais avec des titres et des explications plus clairs. L'installation recommandée consiste à construire une image d'agent, puis à importer Outpost dans ses propres fichiers TypeScript ; les projets générés avec `init` restent une option. Les définitions des options et des propriétés sont accessibles par des liens vers leurs contrats dans l'API, sans être répétées dans le Guide.
+- Limite les blocs de code du Guide à 20 lignes, répartit les exemples plus longs dans des fichiers `.ts` nommés et présentés en onglets, et place leurs explications à côté. Les onglets défilent horizontalement, à la souris ou par cliquer-glisser, pour que chaque fichier reste accessible.
+- Remplace les schémas de flux du Guide par des canvas déplaçables et zoomables, ajoute des icônes aux cartes, étend les encadrés à toute la section de contenu et donne la même largeur aux actions de navigation en bas de page. Réduit l'espacement dans la barre latérale.
+- Repense l'accueil bilingue autour de ce que les développeurs peuvent réaliser avec Outpost, avec un point de départ clair, de courts exemples utilisables, des cas d'usage illustrés et un canvas. Réutilise la mise en page et les composants du Guide, et régénère le contenu au démarrage et à la compilation du site pour obtenir le même rendu en développement et en production.
+- Garde uniquement Guide et API dans la barre de navigation. L'historique des versions s'ouvre exclusivement depuis le bouton de version, y compris sur mobile, et la roadmap reste dans le fichier `roadmap.md` du dépôt. Le survol du bouton de version couvre toute sa cellule ; les boutons Guide/API gardent leur taille pendant le chargement des polices et le changement de page.
+
+Les contrats publics et le comportement de la bibliothèque restent inchangés.
+
 ## 9.0.5
 
 - Nouveau cas d’usage de workflow de développement, qui mène un ticket jusqu’à une branche relue : un agent interroge le responsable et planifie, le responsable approuve le plan, puis des agents écrivent des tests qui échouent et le code qui les fait passer sous le regard d’un agent relecteur, tandis que le workflow vérifie chaque étape et fait chaque commit. Il remplace la recette « Écrire une spécification avec un humain », dont l’URL redirige vers lui.
