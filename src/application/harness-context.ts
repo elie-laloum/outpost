@@ -53,6 +53,12 @@ async function summarize(
 ): Promise<string> {
   const result = await runtime.modelProvider.request({
     model: runtime.agent.model.name,
+    ...(runtime.agent.model.reasoning === undefined
+      ? {}
+      : { reasoning: runtime.agent.model.reasoning }),
+    ...(runtime.agent.model.maxOutputTokens === undefined
+      ? {}
+      : { maxOutputTokens: runtime.agent.model.maxOutputTokens }),
     system: SUMMARY_INSTRUCTIONS,
     prompt: messages.map(render).join("\n\n") || "(no earlier messages)",
   });

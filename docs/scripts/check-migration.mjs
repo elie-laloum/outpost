@@ -39,10 +39,15 @@ for (const page of migration.pages) {
       !routes.has(route(page.source)),
       `Retired page still exists: ${page.source}`,
     );
-    const content = await readFile(
-      new URL(`../../${page.repositoryDestination}`, import.meta.url),
-      "utf8",
+    const destination = new URL(
+      `../../${page.repositoryDestination}`,
+      import.meta.url,
     );
+    if (page.repositoryRemoved) {
+      await assert.rejects(readFile(destination), { code: "ENOENT" });
+      continue;
+    }
+    const content = await readFile(destination, "utf8");
     assert.ok(
       content.trim().length > 150,
       `Empty repository destination: ${page.repositoryDestination}`,

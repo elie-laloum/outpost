@@ -1,5 +1,18 @@
 # Historique des versions
 
+## 9.1.0
+
+- Ajouter les décisions System One typées (`defineDecision`, `decide`, `defineDecisionTask`) et un provider HTTP borné commun à Jev et aux endpoints Laya compatibles. Conserver distributions natives, métadonnées et diagnostics de troncature d’entrée.
+- Ajouter le routage du modèle par étape au harness intégré, y compris aux sous-agents, avec politiques explicites de confiance et de repli, usage cumulé du routeur et transcripts de version 2 compatibles avec la version 1.
+- Documenter décisions et routage en français et en anglais, avec contrats de référence publics et tests déterministes HTTP, workflow et conversations.
+- Accepter l’arrondi cumulé à quatre décimales des distributions et scores pondérés natifs sans renormalisation, tout en continuant à refuser les réponses incohérentes.
+- Ajouter l’exemple System One exécutable, avec décisions directes et workflow typé contre un serveur Laya local ou un endpoint compatible authentifié.
+- Annoncer la prise en charge de System One dans un bandeau indigo bilingue. Afficher un bouton logo carré, des boutons Guide/API de même largeur avec icônes, les liens de sources colorés au survol et une recherche alignée sur la bordure du contenu sur les grands écrans.
+- Ouvrir `/reference/` sur le premier symbole alphabétique de l’API. Supprimer les vues d’ensemble des familles et rediriger leurs anciennes URL vers les pages pratiques correspondantes du Guide.
+- Retirer la roadmap du dépôt et conserver la trace de sa suppression dans l’audit de migration documentaire. Garder les limites de validation dans les guides et les notes de version.
+
+Les décisions directes et tâches de décision ont été exercées avec un serveur Laya 0.3.28 local sur CPU. L’inférence réelle Jev et le routage de modèles conversationnels restent à valider ; les suites ordinaires utilisent des fixtures locales déterministes.
+
 ## 9.0.8
 
 - Refaire l’accueil bilingue de la documentation avec un hero occupant la hauteur de l’écran, un parcours en quatre étapes et une grille de neuf fonctionnalités liées au Guide. Montrer un workflow d’export CSV de taille moyenne avec tests et revue en parallèle, corrections bornées et validation humaine.

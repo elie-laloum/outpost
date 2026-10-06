@@ -1,4 +1,6 @@
 import type { HarnessMcpContext } from "../domain/harness.types.ts";
+import type { ObservationHub } from "../domain/observation.types.ts";
+import type { ModelRouteEvent } from "../domain/harness-routing.types.ts";
 import type { HarnessBudget } from "./harness-budget.types.ts";
 import type { HarnessPermissions } from "../domain/permissions.types.ts";
 import type { HarnessModelScope } from "./harness-model-provider.types.ts";
@@ -15,6 +17,7 @@ import type { HarnessTool } from "../domain/tool.types.ts";
 import type { DispatchOptions, TurnContext } from "./execution.types.ts";
 
 export interface HarnessRuntime {
+  readonly observation?: ObservationHub | undefined;
   readonly verbose?: boolean;
   readonly repository: string;
   readonly conversation?: string | undefined;
@@ -58,6 +61,7 @@ export interface ToolOutcome {
 }
 
 export interface HarnessHistory {
+  recordRoute?(event: ModelRouteEvent): Promise<void>;
   readonly messages: readonly ModelMessage[];
   append(message: ModelMessage): Promise<void>;
   replace(messages: readonly ModelMessage[]): Promise<void>;

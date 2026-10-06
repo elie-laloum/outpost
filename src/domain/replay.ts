@@ -8,9 +8,11 @@ import type {
   FallbackTrigger,
 } from "./fallback-agent.types.ts";
 import { addUsage, usageDifference } from "./usage.ts";
+import { checkpointValue } from "./workflow/checkpoint-value.ts";
 import type { FaultCode } from "./errors.types.ts";
 import {
   replayDefaults,
+  replayDecisionKinds,
   replayDivergenceMessages,
   replayExecutionEvents,
   replayFaultCodes,
@@ -31,6 +33,7 @@ import type {
   ReplayJournalEvent,
   ReplayRecording,
   ReplayTurn,
+  ReplayDecisionEvent,
   WorkspaceCommitsEvent,
 } from "./replay.types.ts";
 
@@ -100,7 +103,7 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
   let finished: ReplayFailure | undefined;
   let replayable = false;
   for (const [index, entry] of journal.entries()) {
-    const { origin, event } = journalEvent(entry, index);
+    const { origin, event, subagentId } = journalEvent(entry, index);
     if (event.kind === "workspace-commits") {
       replayable = true;
       const last = drafts.at(-1);
@@ -111,6 +114,18 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
     if (event.kind === "dispatch-finished") {
       finished = dispatchFailure(event, index);
       current = undefined;
+      continue;
+    }
+    if (
+      origin === "decision" &&
+      current &&
+      replayDecisionKinds.has(event.kind)
+    ) {
+      (current.decisionEvents ??= []).push({
+        before: current.events.length,
+        event: recordedDecision(event, index),
+        ...(subagentId ? { subagentId } : {}),
+      });
       continue;
     }
     if (origin !== "agent" && origin !== "harness") continue;
@@ -201,6 +216,9 @@ function turn(
   return Object.freeze({
     prompt: draft.prompt,
     events: Object.freeze(draft.events),
+    ...(draft.decisionEvents
+      ? { decisionEvents: Object.freeze(draft.decisionEvents) }
+      : {}),
     text:
       draft.result ??
       (draft.texts.length ? draft.texts.join("") : draft.raws.join("\n")),
@@ -250,7 +268,73 @@ function journalEvent(entry: unknown, index: number): ReplayJournalEvent {
   const event: Record<string, unknown> = {};
   for (const [key, field] of Object.entries(value))
     if (!replayJournalFields.has(key)) event[key] = field;
-  return { origin: value.source, event: event as ReplayJournalEvent["event"] };
+  const scope = value.scope;
+  const subagentId =
+    scope &&
+    typeof scope === "object" &&
+    "subagentId" in scope &&
+    typeof scope.subagentId === "string"
+      ? scope.subagentId
+      : undefined;
+  return {
+    origin: value.source,
+    event: event as ReplayJournalEvent["event"],
+    ...(subagentId ? { subagentId } : {}),
+  };
+}
+
+function recordedDecision(
+  event: JournalObject,
+  index: number,
+): ReplayDecisionEvent["event"] {
+  checkpointValue(event);
+  if (event.kind === "decision-request") {
+    invariant(
+      Object.hasOwn(event, "request"),
+      `Replay decision ${index} has no request`,
+    );
+    return { kind: "decision-request", request: event.request };
+  }
+  if (event.kind === "decision-response") {
+    invariant(
+      Object.hasOwn(event, "response"),
+      `Replay decision ${index} has no response`,
+    );
+    return { kind: "decision-response", response: event.response };
+  }
+  invariant(
+    event.kind === "decision",
+    `Replay decision ${index} has an unsupported kind`,
+  );
+  invariant(
+    event.status === "started" ||
+      event.status === "finished" ||
+      event.status === "failed",
+    `Replay decision ${index} has an invalid status`,
+  );
+  invariant(
+    event.durationMs === undefined ||
+      (typeof event.durationMs === "number" && event.durationMs >= 0),
+    `Replay decision ${index} has an invalid duration`,
+  );
+  invariant(
+    event.truncated === undefined || typeof event.truncated === "boolean",
+    `Replay decision ${index} has invalid truncation`,
+  );
+  invariant(
+    event.code === undefined || typeof event.code === "string",
+    `Replay decision ${index} has an invalid fault code`,
+  );
+  return {
+    kind: "decision",
+    status: event.status,
+    provider: text(event, "provider", index),
+    model: text(event, "model", index),
+    ...(event.durationMs === undefined ? {} : { durationMs: event.durationMs }),
+    ...(event.usage === undefined ? {} : { usage: usage(event.usage, index) }),
+    ...(event.truncated === undefined ? {} : { truncated: event.truncated }),
+    ...(event.code === undefined ? {} : { code: event.code }),
+  };
 }
 
 function dispatchFailure(

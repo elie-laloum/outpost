@@ -53,6 +53,7 @@ export async function runSubagent(
           repository: runtime.repository,
           store,
           model: agent.model.name,
+          routed: Boolean(agent.harness.routing),
           ...(runtime.conversation
             ? { parentConversation: runtime.conversation }
             : {}),
@@ -70,6 +71,7 @@ export async function runSubagent(
           {
             ...runtime,
             agent,
+            observation: runtime.observation?.child({ subagentId: id }),
             mcp,
             budget,
             depth,

@@ -1,11 +1,172 @@
 [
   {
-    "title": ["Storage transports", "Transports de stockage"],
+    "title": ["Decisions", "Décisions"],
     "items": [
       {
-        "slug": "reference/overview/storage-transports",
-        "attrs": { "data-reference-overview": "" }
+        "slug": "reference/definedecision",
+        "label": "defineDecision",
+        "attrs": { "data-api-kind": "function" }
       },
+      {
+        "slug": "reference/decide",
+        "label": "decide",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definedecisiontask",
+        "label": "defineDecisionTask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createsystemonedecisionprovider",
+        "label": "createSystemOneDecisionProvider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineharnessmodelrouting",
+        "label": "defineHarnessModelRouting",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/decisionstate",
+        "label": "DecisionState",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/decisionquestion",
+        "label": "DecisionQuestion",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/decisionquestions",
+        "label": "DecisionQuestions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/decisionanswer",
+        "label": "DecisionAnswer",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/decisionanswers",
+        "label": "DecisionAnswers",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/decisiontaskoptions",
+        "label": "DecisionTaskOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/routingquestion",
+        "label": "RoutingQuestion",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/routingchoices",
+        "label": "RoutingChoices",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/choicequestion",
+        "label": "ChoiceQuestion",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/scorequestion",
+        "label": "ScoreQuestion",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/noulquestion",
+        "label": "NoulQuestion",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionoptions",
+        "label": "DecisionOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decision",
+        "label": "Decision",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/choiceanswer",
+        "label": "ChoiceAnswer",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/scoreanswer",
+        "label": "ScoreAnswer",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/noulanswer",
+        "label": "NoulAnswer",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionproviderresult",
+        "label": "DecisionProviderResult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionrequest",
+        "label": "DecisionRequest",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionprovider",
+        "label": "DecisionProvider",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionresult",
+        "label": "DecisionResult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decideoptions",
+        "label": "DecideOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/decisionevent",
+        "label": "DecisionEvent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/systemonedecisionprovideroptions",
+        "label": "SystemOneDecisionProviderOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnessmodelroutingcontext",
+        "label": "HarnessModelRoutingContext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnessmodelroutingoptions",
+        "label": "HarnessModelRoutingOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnessmodelrouting",
+        "label": "HarnessModelRouting",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/modelrouteevent",
+        "label": "ModelRouteEvent",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Storage transports", "Transports de stockage"],
+    "items": [
       {
         "slug": "reference/createlocaltransport",
         "label": "createLocalTransport",
@@ -147,10 +308,6 @@
     "title": ["Diagnostics", "Diagnostics"],
     "items": [
       {
-        "slug": "reference/overview/diagnostics",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/diagnosesandbox",
         "label": "diagnoseSandbox",
         "attrs": { "data-api-kind": "function" }
@@ -200,10 +357,6 @@
   {
     "title": ["Workspaces", "Workspaces"],
     "items": [
-      {
-        "slug": "reference/overview/workspaces",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/openworkspace",
         "label": "openWorkspace",
@@ -255,10 +408,6 @@
     "title": ["Sandboxes", "Sandboxes"],
     "items": [
       {
-        "slug": "reference/overview/sandboxes",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/createsandbox",
         "label": "createSandbox",
         "attrs": { "data-api-kind": "function" }
@@ -278,10 +427,6 @@
   {
     "title": ["Dispatch", "Dispatch"],
     "items": [
-      {
-        "slug": "reference/overview/dispatch",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/dispatch",
         "label": "dispatch",
@@ -353,10 +498,6 @@
     "title": ["Commands and terminal", "Commandes et terminal"],
     "items": [
       {
-        "slug": "reference/overview/commands",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/attach",
         "label": "attach",
         "attrs": { "data-api-kind": "function" }
@@ -396,10 +537,6 @@
   {
     "title": ["Agents", "Agents"],
     "items": [
-      {
-        "slug": "reference/overview/agents",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createagent",
         "label": "createAgent",
@@ -485,10 +622,6 @@
   {
     "title": ["Harness", "Harness"],
     "items": [
-      {
-        "slug": "reference/overview/harness",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createharness",
         "label": "createHarness",
@@ -970,10 +1103,6 @@
     "title": ["Prompts and responses", "Prompts et réponses"],
     "items": [
       {
-        "slug": "reference/overview/prompts-responses",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/definetextresponse",
         "label": "defineTextResponse",
         "attrs": { "data-api-kind": "function" }
@@ -1013,10 +1142,6 @@
   {
     "title": ["Conversations", "Conversations"],
     "items": [
-      {
-        "slug": "reference/overview/conversations",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createclaudeconversations",
         "label": "createClaudeConversations",
@@ -1117,10 +1242,6 @@
   {
     "title": ["Observability", "Observabilité"],
     "items": [
-      {
-        "slug": "reference/overview/observability",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createobservationhub",
         "label": "createObservationHub",
@@ -1272,6 +1393,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/replaydecisionevent",
+        "label": "ReplayDecisionEvent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/replayfailure",
         "label": "ReplayFailure",
         "attrs": { "data-api-kind": "interface" }
@@ -1316,10 +1442,6 @@
   {
     "title": ["Workflows", "Workflows"],
     "items": [
-      {
-        "slug": "reference/overview/workflows",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/definelooptask",
         "label": "defineLoopTask",
@@ -1561,10 +1683,6 @@
     "title": ["Providers", "Providers"],
     "items": [
       {
-        "slug": "reference/overview/providers",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/createdockersandboxprovider",
         "label": "createDockerSandboxProvider",
         "attrs": { "data-api-kind": "function" }
@@ -1680,10 +1798,6 @@
     "title": ["Model providers", "Fournisseurs de modèles"],
     "items": [
       {
-        "slug": "reference/overview/model-providers",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/createopenaimodelprovider",
         "label": "createOpenAIModelProvider",
         "attrs": { "data-api-kind": "function" }
@@ -1769,10 +1883,6 @@
     "title": ["Recovery and retention", "Récupération et rétention"],
     "items": [
       {
-        "slug": "reference/overview/recovery-retention",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/planrecoveryretention",
         "label": "planRecoveryRetention",
         "attrs": { "data-api-kind": "function" }
@@ -1838,10 +1948,6 @@
     "title": ["Errors", "Erreurs"],
     "items": [
       {
-        "slug": "reference/overview/errors",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/recoverydetails",
         "label": "recoveryDetails",
         "attrs": { "data-api-kind": "function" }
@@ -1882,10 +1988,6 @@
     "title": ["Storage reservations", "Réservations de stockage"],
     "items": [
       {
-        "slug": "reference/overview/storage-reservations",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/reserverecoverystorage",
         "label": "reserveRecoveryStorage",
         "attrs": { "data-api-kind": "function" }
@@ -1910,10 +2012,6 @@
   {
     "title": ["Recovery restoration", "Restauration de récupération"],
     "items": [
-      {
-        "slug": "reference/overview/recovery-restoration",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/planrecoveryrestore",
         "label": "planRecoveryRestore",
@@ -1944,10 +2042,6 @@
   {
     "title": ["Resource activity", "Activité des ressources"],
     "items": [
-      {
-        "slug": "reference/overview/resource-activity",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/inspectrecovery",
         "label": "inspectRecovery",
@@ -2004,10 +2098,6 @@
     "title": ["Workflow checkpoints", "Checkpoints de workflow"],
     "items": [
       {
-        "slug": "reference/overview/checkpoints",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
         "slug": "reference/workflowcheckpointvalue",
         "label": "WorkflowCheckpointValue",
         "attrs": { "data-api-kind": "type" }
@@ -2042,10 +2132,6 @@
   {
     "title": ["Approval and pause gates", "Approbations et pauses"],
     "items": [
-      {
-        "slug": "reference/overview/approvals",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/defineapprovaltask",
         "label": "defineApprovalTask",
@@ -2126,10 +2212,6 @@
   {
     "title": ["Typed artifacts", "Artefacts typés"],
     "items": [
-      {
-        "slug": "reference/overview/artifacts",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/definejsonartifact",
         "label": "defineJsonArtifact",
@@ -2215,10 +2297,6 @@
   {
     "title": ["Distributed execution", "Exécution distribuée"],
     "items": [
-      {
-        "slug": "reference/overview/distributed-execution",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createsqlitetaskqueue",
         "label": "createSqliteTaskQueue",
@@ -2339,10 +2417,6 @@
   {
     "title": ["Triggers", "Déclencheurs"],
     "items": [
-      {
-        "slug": "reference/overview/triggers",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/createcronschedule",
         "label": "createCronSchedule",
@@ -2543,10 +2617,6 @@
   {
     "title": ["Speculative execution", "Exécution spéculative"],
     "items": [
-      {
-        "slug": "reference/overview/speculation",
-        "attrs": { "data-reference-overview": "" }
-      },
       {
         "slug": "reference/speculate",
         "label": "speculate",

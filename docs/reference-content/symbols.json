@@ -564,8 +564,8 @@
     "Raison de la fin d’un résultat de modèle, normalisée par chaque provider de modèle dans ModelResult.stopReason. Valeurs : \"end\" (réponse finale), \"tool-calls\" (le modèle demande des appels d’outils), \"max-tokens\" (limite de sortie ou de fenêtre de contexte atteinte ; le harness intégré échoue avec le code limit), \"refusal\" (refus ou filtre de contenu ; le harness intégré échoue avec le code response)."
   ],
   "ObservationSource": [
-    "Component that emitted an Observation, in its source field. Values: \"agent\" (CLI agent events), \"harness\" (built-in harness events), \"workflow\" (workflow events), \"sandbox\" (sandbox allocation, dispatch and release), \"git\" (workspace allocation and branch integration), \"hooks\" (workspace lifecycle hooks), \"transfer\" (file transfers and repository synchronization), \"conversation\" (conversation capture and restore), \"recovery\" (startup-failure handling and recovery retention).",
-    "Composant qui a émis une Observation, dans son champ source. Valeurs : \"agent\" (événements d’un agent CLI), \"harness\" (événements du harness intégré), \"workflow\" (événements de workflow), \"sandbox\" (allocation, dispatch et libération de la sandbox), \"git\" (allocation du workspace et intégration de branche), \"hooks\" (hooks de cycle de vie du workspace), \"transfer\" (transferts de fichiers et synchronisation du dépôt), \"conversation\" (capture et restauration de conversation), \"recovery\" (traitement des échecs de démarrage et rétention des recovery)."
+    "Component that emitted an Observation, in its source field. Values: \"decision\" (typed decision lifecycle and verbose payloads), \"agent\" (CLI agent events), \"harness\" (built-in harness events), \"workflow\" (workflow events), \"sandbox\" (sandbox allocation, dispatch and release), \"git\" (workspace allocation and branch integration), \"hooks\" (workspace lifecycle hooks), \"transfer\" (file transfers and repository synchronization), \"conversation\" (conversation capture and restore), \"recovery\" (startup-failure handling and recovery retention).",
+    "Composant qui a émis une Observation, dans son champ source. Valeurs : \"decision\" (cycle de vie de décision typée et données verbose), \"agent\" (événements d’un agent CLI), \"harness\" (événements du harness intégré), \"workflow\" (événements de workflow), \"sandbox\" (allocation, dispatch et libération de la sandbox), \"git\" (allocation du workspace et intégration de branche), \"hooks\" (hooks de cycle de vie du workspace), \"transfer\" (transferts de fichiers et synchronisation du dépôt), \"conversation\" (capture et restauration de conversation), \"recovery\" (traitement des échecs de démarrage et rétention des recovery)."
   ],
   "PermissionEffect": [
     "Effect of a HarnessPermissionRule, and of the permissions default when no rule matches. Values: \"allow\" (the tool call runs), \"deny\" (the call is refused with the rule's reason). The first matching rule decides; an allow rule matches only when every path matches, a deny rule when any path does.",
@@ -646,5 +646,49 @@
   "WorkflowJson": [
     "JSON value that round-trips without loss: null, boolean, finite number other than -0, string, array or plain object of these. Used for task cache keys, queue job inputs and results, trigger payloads and interactive task state; checkpoint outputs must have this form or be undefined.",
     "Valeur JSON qui se sérialise sans perte : null, booléen, nombre fini autre que -0, chaîne, tableau ou objet simple de ces valeurs. Utilisée pour les clés de cache de tâche, les entrées et résultats des jobs de file, les payloads de déclencheur et l’état des tâches interactives ; les sorties de checkpoint doivent avoir cette forme ou valoir undefined."
+  ],
+  "defineDecision": [
+    "Validate, snapshot and freeze named choice, score and noul questions. No provider request occurs; literal keys and choices determine the inferred answer types.",
+    "Valider, copier et figer des questions nommées choice, score et noul. Aucune requête n’est exécutée ; les clés et choix littéraux déterminent les types inférés des réponses."
+  ],
+  "decide": [
+    "Execute one decision-provider request against lossless JSON state, validate all answers and return normalized usage and native metadata. Distribution totals and weighted scores allow accumulated four-decimal rounding without changing native values. Reported truncation fails unless explicitly allowed.",
+    "Exécuter une requête de provider de décision sur un état JSON sans perte, valider toutes les réponses et renvoyer l’usage normalisé et les métadonnées natives. Les sommes des distributions et les scores pondérés acceptent l’arrondi cumulé à quatre décimales sans modifier les valeurs natives. Une troncature signalée échoue sauf autorisation explicite."
+  ],
+  "defineDecisionTask": [
+    "Declare a sandbox-free decision task using existing workflow dependencies, retries, deadlines, caches and checkpoints. Each executed attempt computes its state and reports usage synchronously, including valid receipts for rejected truncations.",
+    "Déclarer une tâche de décision sans sandbox utilisant dépendances, nouvelles tentatives, délais, caches et checkpoints existants. Chaque tentative exécutée calcule son état et rapporte l’usage de façon synchrone, y compris les reçus valides de troncatures refusées."
+  ],
+  "createSystemOneDecisionProvider": [
+    "Build a bounded HTTP System One provider shared by Jev and compatible Laya endpoints. Append /systemone to the base URL, use explicit bearer authentication or false, retain native JSON extensions and make no internal retries.",
+    "Construire un provider HTTP System One borné commun à Jev et aux endpoints Laya compatibles. Ajouter /systemone à l’URL de base, utiliser une authentification bearer explicite ou false, conserver les extensions JSON natives et ne faire aucune nouvelle tentative interne."
+  ],
+  "defineHarnessModelRouting": [
+    "Validate and freeze a choice-to-model routing declaration. Exact candidate keys and a declared fallback are required; the built-in harness validates candidates against its model provider before allocation.",
+    "Valider et figer une déclaration de routage de choix vers modèles. Les clés exactes des candidats et un repli déclaré sont requis ; le harness intégré valide les candidats avec son provider de modèles avant allocation."
+  ],
+  "DecisionState": [
+    "Top-level text, JSON array or JSON object used as decision input. Runtime validation rejects serialization that loses or changes values.",
+    "Texte, tableau JSON ou objet JSON de premier niveau utilisé en entrée de décision. La validation refuse une sérialisation qui perd ou modifie des valeurs."
+  ],
+  "DecisionQuestions": [
+    "Readonly mapping from nonempty question keys to choice, score or noul declarations.",
+    "Mapping en lecture seule de clés de questions non vides vers des déclarations choice, score ou noul."
+  ],
+  "DecisionAnswer": [
+    "Answer type selected by the question primitive; choice values are inferred from its declared criteria keys.",
+    "Type de réponse sélectionné par la primitive de question ; les valeurs choice sont inférées depuis les clés des critères déclarés."
+  ],
+  "DecisionAnswers": [
+    "Readonly mapped answer object preserving every question key and its corresponding primitive-specific answer type.",
+    "Objet de réponses en lecture seule conservant chaque clé de question et son type de réponse propre à la primitive."
+  ],
+  "RoutingQuestion": [
+    "Keys of decision questions whose primitive is choice; score and noul questions cannot drive model routing.",
+    "Clés des questions de décision dont la primitive est choice ; les questions score et noul ne peuvent pas router les modèles."
+  ],
+  "RoutingChoices": [
+    "String literals of the selected choice question criteria, used as candidate and fallback keys.",
+    "Valeurs littérales des critères de la question choice sélectionnée, utilisées comme clés de candidats et de repli."
   ]
 }

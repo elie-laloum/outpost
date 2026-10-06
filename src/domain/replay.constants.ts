@@ -3,6 +3,12 @@ import type {
   ReplayDivergenceKind,
 } from "./replay.types.ts";
 
+export const replayDecisionKinds = new Set([
+  "decision",
+  "decision-request",
+  "decision-response",
+]);
+
 export const replayDefaults = Object.freeze({
   name: "replay",
   divergence: "fail",

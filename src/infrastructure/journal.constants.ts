@@ -1,4 +1,6 @@
 export const verboseOnly: ReadonlySet<string> = new Set([
+  "decision-request",
+  "decision-response",
   "raw",
   "text-delta",
   "stderr",

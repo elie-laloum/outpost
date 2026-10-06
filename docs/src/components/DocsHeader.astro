@@ -1,5 +1,6 @@
 ---
 import Search from "virtual:starlight/components/Search";
+import { Icon } from "@astrojs/starlight/components";
 import ThemeSelect from "virtual:starlight/components/ThemeSelect";
 import MobileMenuToggle from "starlight-theme-celestia/components/MobileMenuToggle.astro";
 import Brand from "./Brand.astro";
@@ -13,7 +14,7 @@ const space = docsSpace(route);
 ---
 
 <div class="docs-header">
-  <div class="cell brand-cell"><Brand href={docsHref(route, "")} class="docs-brand" /></div>
+  <div class="cell brand-cell"><Brand href={docsHref(route, "")} class="docs-brand" iconOnly /></div>
   <nav
     class="cell spaces"
     aria-label={isFrench(route) ? "Espaces de la documentation" : "Documentation spaces"}
@@ -21,6 +22,23 @@ const space = docsSpace(route);
     {
       spaceLinks(route).map((link) => (
         <a href={link.href} aria-current={link.space === space ? "true" : undefined}>
+          {link.space === "guide" ? (
+            <Icon name="open-book" size="1rem" />
+          ) : (
+            <svg
+              width="1rem"
+              height="1rem"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 4l-4 16" />
+            </svg>
+          )}
           {link.label}
         </a>
       ))
@@ -45,13 +63,16 @@ const space = docsSpace(route);
     border-right: 1px solid var(--sl-color-hairline-light);
   }
   .brand-cell {
-    flex: 0 0 17rem;
+    flex: 0 0 var(--docs-toolbar-height);
     align-items: stretch;
+    border-right: 0;
   }
   .brand-cell :global(.docs-brand) {
     flex: 1;
     align-items: center;
-    padding: 0 1.5rem;
+    justify-content: center;
+    padding: 0;
+    box-shadow: inset -1px 0 0 var(--sl-color-hairline-light);
     transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .brand-cell :global(.docs-brand:hover) {
@@ -59,8 +80,9 @@ const space = docsSpace(route);
   }
   .spaces {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    flex: 0 0 11rem;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    flex: 0 0 calc(var(--docs-content-start) - var(--docs-toolbar-height));
     align-items: stretch;
     font-size: 0.875rem;
     font-weight: 500;
@@ -69,6 +91,7 @@ const space = docsSpace(route);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.4rem;
     padding: 0 0.5rem;
     color: var(--sl-color-gray-3);
     text-decoration: none;
@@ -193,12 +216,8 @@ const space = docsSpace(route);
     .cell {
       border-right: 0;
     }
-    .brand-cell {
-      flex: 0 0 auto;
-      padding: 0 0.75rem 0 1rem;
-    }
     .spaces {
-      flex: 0 0 6rem;
+      flex: 1 1 0;
       font-size: 0.8rem;
     }
     .spaces a {
@@ -206,7 +225,6 @@ const space = docsSpace(route);
     }
     .docs-search {
       flex: 0 0 auto;
-      margin-left: auto;
     }
     .docs-search :global(site-search) {
       width: auto;
@@ -224,13 +242,6 @@ const space = docsSpace(route);
       display: flex;
       align-items: center;
       padding-right: 1rem;
-    }
-    .docs-header :global(.docs-brand .name) {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
     }
   }
 </style>

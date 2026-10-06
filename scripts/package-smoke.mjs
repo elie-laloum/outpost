@@ -93,6 +93,16 @@ try {
       assert.equal(typeof exports['create'+capitalized(name)+'SandboxProvider'],'function');
       assert.equal(name+'SandboxProvider' in exports,false,name);
     }
+    for (const name of ['defineDecision','decide','defineDecisionTask','createSystemOneDecisionProvider','defineHarnessModelRouting']) assert.equal(typeof api[name],'function',name);
+    const decision=api.defineDecision({questions:{needed:{type:'noul',instructions:'Needed?'}}});
+    let evaluations=0;
+    const decisionProvider={name:'fixture',request:async()=>{evaluations++;return {model:'fixture',answers:{needed:{type:'noul',noul:0.8}},usage:{input:3,cached:0,output:1}};}};
+    assert.equal((await api.decide({provider:decisionProvider,model:'fixture',decision,state:{goal:'review'}})).answers.needed.noul,0.8);
+    const triage=api.defineDecisionTask({key:'triage',provider:decisionProvider,model:'fixture',decision,state:'review'});
+    const evaluated=await api.defineWorkflow('triage',[triage]).start();evaluated.unwrap();
+    assert.equal(evaluated.value(triage).answers.needed.noul,0.8);
+    assert.equal(evaluations,2);
+    assert.equal(evaluated.usage.tokens.input,3);
     const retired={agent:'createAgent',fallbackAgent:'createFallbackAgent',replayAgent:'createReplayAgent',harness:'createHarness',harnessEditTools:'createHarnessEditTools',harnessFileTools:'createHarnessFileTools',harnessGitTools:'createHarnessGitTools',harnessSearchTools:'createHarnessSearchTools',harnessShellTools:'createHarnessShellTools',openaiModelProvider:'createOpenAIModelProvider',anthropicModelProvider:'createAnthropicModelProvider',localTransport:'createLocalTransport',artifactStore:'createArtifactStore',workflowCheckpointStore:'createWorkflowCheckpointStore',taskCacheStore:'createTaskCacheStore',transportConversations:'createTransportConversations',harnessConversations:'createHarnessConversations',mountedSandboxProvider:'createMountedSandboxProvider',remoteSandboxProvider:'createRemoteSandboxProvider',sqliteTaskQueue:'createSqliteTaskQueue',httpTaskQueue:'createHttpTaskQueue',ed25519DecisionVerifier:'createEd25519DecisionVerifier',reporter:'createReporter',workflow:'defineWorkflow',task:'defineTask',agentTask:'defineAgentTask',isolatedTask:'defineIsolatedTask',commandTask:'defineCommandTask',approvalTask:'defineApprovalTask',pauseTask:'definePauseTask',artifactTask:'defineArtifactTask',queuedTask:'defineQueuedTask',interactiveAgentTask:'defineInteractiveAgentTask',loopTask:'defineLoopTask'};
     for (const [previous,current] of Object.entries(retired)) {assert.equal(typeof api[current],'function',current); assert.equal(previous in api,false,previous);}
     for (const name of ['response','artifact','StoredConversationFormat']) assert.equal(name in api,false,name);
@@ -232,6 +242,24 @@ try {
   writeFileSync(
     consumer,
     `import { createAgent as composeAgent,  dispatch, createCodexHarness, createClaudeHarness, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineJsonResponse, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost';
+import { defineDecision, decide, defineDecisionTask, defineHarnessModelRouting, createSystemOneDecisionProvider, type DecisionProvider } from '@elie-laloum/outpost';
+const routeDeclaration=defineDecision({questions:{route:{type:'choice',instructions:'Choose',criteria:{fast:'Routine',deep:'Reasoning'}}}});
+const router: DecisionProvider={name:'fixture',request:async()=>({model:'fixture',answers:{route:{type:'choice',choice:'fast',probabilities:{fast:0.9,deep:0.1},confidence:0.8}}})};
+const routeAnswer=await decide({provider:router,model:'fixture',decision:routeDeclaration,state:{goal:'review'}});
+const routeChoice: 'fast'|'deep'=routeAnswer.answers.route.choice;
+// @ts-expect-error Answer choice is restricted to the declaration.
+const invalidChoice: 'invalid'=routeAnswer.answers.route.choice;
+const decisionTask=defineDecisionTask({key:'route',provider:router,model:'fixture',decision:routeDeclaration,state:()=>({goal:'review'})});
+const modelRouting=defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclaration,question:'route',models:{fast:'small',deep:'large'},fallback:'deep'});
+const systemOne=createSystemOneDecisionProvider({baseUrl:'http://127.0.0.1:8000/v1',apiKey:false});
+// @ts-expect-error A routing question must be declared as choice.
+defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclaration,question:'absent',models:{fast:'small',deep:'large'},fallback:'deep'});
+// @ts-expect-error Every declared candidate is required.
+defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclaration,question:'route',models:{fast:'small'},fallback:'fast'});
+// @ts-expect-error The fallback must be a declared candidate.
+defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclaration,question:'route',models:{fast:'small',deep:'large'},fallback:'absent'});
+
+void [routeChoice,invalidChoice,decisionTask,modelRouting,systemOne];
 import { defineLoopTask, defineWorkflow, type LoopTaskContext, type LoopTaskOptions, type LoopCheckResult, type LoopRoundRecord } from '@elie-laloum/outpost';
 const loopOptions: LoopTaskOptions<number> = {key:'fix',maxRounds:2,attempt:(ctx: LoopTaskContext)=>ctx.round,check:(_,value): LoopCheckResult=>value===2?{done:true}:{done:false,feedback:'again'}};
 const loop=defineLoopTask(loopOptions);

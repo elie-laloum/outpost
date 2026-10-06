@@ -1,6 +1,7 @@
 import type { AgentEvent } from "./agent.types.ts";
 import type { WorkflowEvent } from "./workflow.types.ts";
 import type { WorkspaceCommitsEvent } from "./replay.types.ts";
+import type { DecisionEvent } from "./decision.types.ts";
 
 export interface ObservationScope {
   readonly executionId?: string;
@@ -13,6 +14,7 @@ export interface ObservationScope {
 }
 
 export type ObservationSource =
+  | "decision"
   | "agent"
   | "harness"
   | "workflow"
@@ -32,6 +34,9 @@ export interface OperationEvent {
 }
 
 export type ObservationEvent =
+  | DecisionEvent
+  | { readonly kind: "decision-request"; readonly request: unknown }
+  | { readonly kind: "decision-response"; readonly response: unknown }
   | AgentEvent
   | OperationEvent
   | { readonly kind: "dispatch-start" }

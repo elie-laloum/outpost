@@ -44,10 +44,28 @@ export async function replayTurn(
     diverge({ kind: "prompt", expected: recorded.prompt, actual: prompt });
   let handedOver: Usage = { input: 0, cached: 0, output: 0 };
   for (;;) {
-    for (const event of recorded.events) {
+    const decisions = recorded.decisionEvents ?? [];
+    let position = 0;
+    const emitDecisions = (before: number) => {
+      while (decisions[position]?.before === before) {
+        options.signal?.throwIfAborted();
+        const decision = decisions[position++]!;
+        if (decision.event.kind !== "decision" && !options.observation?.verbose)
+          continue;
+        options.observation
+          ?.child({
+            pass,
+            ...(decision.subagentId ? { subagentId: decision.subagentId } : {}),
+          })
+          .emit("decision", decision.event);
+      }
+    };
+    for (const [index, event] of recorded.events.entries()) {
+      emitDecisions(index);
       options.signal?.throwIfAborted();
       notify(options.observe, { ...event, pass, at: new Date().toISOString() });
     }
+    emitDecisions(recorded.events.length);
     if (recorded.changes)
       await replayWorkspace(lease, recorded.changes, {
         ...(options.signal ? { signal: options.signal } : {}),

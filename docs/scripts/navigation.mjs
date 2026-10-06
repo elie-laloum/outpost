@@ -59,6 +59,8 @@ export const chapters = [
     [
       "guide/harness",
       "guide/model-providers",
+      "guide/decisions",
+      "guide/model-routing",
       "guide/harness-tools",
       "guide/harness-permissions",
       "guide/subagents",

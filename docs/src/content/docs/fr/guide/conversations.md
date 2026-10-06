@@ -164,3 +164,7 @@ export const reviewer = createAgent({
 - **Agents de repli** : un [agent de repli](../fallback-agents/) n’accepte pas `continuation`. `result.resume()` poursuit avec le candidat qui a répondu.
 
 API : [DispatchResult](../../reference/dispatchresult/) · [WarmDispatchResult](../../reference/warmdispatchresult/) · [Sandbox](../../reference/sandbox/) · [ConversationStore](../../reference/conversationstore/) · [createTransportConversations](../../reference/createtransportconversations/) · [createKimiConversations](../../reference/createkimiconversations/) · [createHarnessConversations](../../reference/createharnessconversations/).
+
+## Reprendre un harness routé
+
+Le [routage de modèles](../model-routing/) enregistre chaque sélection effective dans les transcripts de version 2 en conservant le format de stockage `harness`. Les transcripts de version 1 restent lisibles et sont convertis lorsqu’une continuation active le routage. Reprise et fork restaurent les messages ; l’étape suivante évalue le routeur sans rejouer les appels de modèles ou d’outils terminés. Le replay du journal émet les sélections enregistrées sans contacter Jev ou Laya.

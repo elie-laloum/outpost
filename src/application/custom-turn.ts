@@ -142,6 +142,7 @@ export async function customTurn(
           repository: context.repository,
           store: storage,
           model: agent.model.name,
+          routed: Boolean(agent.harness.routing),
           ...(context.continuation
             ? { continuation: context.continuation }
             : {}),
@@ -155,6 +156,7 @@ export async function customTurn(
       harnessLoop(
         {
           agent,
+          observation: options.observation?.child({ pass }),
           repository: context.repository,
           ...(transcript ? { conversation: transcript.id } : {}),
           budget,

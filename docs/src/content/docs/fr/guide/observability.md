@@ -251,3 +251,7 @@ Le dispatch attend les traitements en cours avant de rendre la main et signale l
 - Les événements émis sur un [worker](../job-queues/) distant restent sur le hub de ce worker.
 
 API : [createObservationHub](../../reference/createobservationhub/) · [ObservationHub](../../reference/observationhub/) · [Observation](../../reference/observation/) · [ObservationEvent](../../reference/observationevent/) · [OperationEvent](../../reference/operationevent/) · [createOpenTelemetryObserver](../../reference/createopentelemetryobserver/) · [OpenTelemetryObserver](../../reference/opentelemetryobserver/) · [createCustomReporter](../../reference/createcustomreporter/).
+
+## Observer les décisions et sélections
+
+Les [évaluations de décision](../decisions/) émettent des résumés de cycle de vie avec la source `decision`. Les harnesses routés émettent des événements d’agent `model-route` indiquant modèle effectif, motif et confiance native facultative. Passez `observation` à `decide()` pour une évaluation directe ; tâches et harnesses propagent les scopes workflow, tâche, passage et sous-agent. Les états et réponses complets exigent un hub verbose. L’usage valide est compté de façon synchrone, indépendamment des livraisons et erreurs des sinks.

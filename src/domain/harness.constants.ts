@@ -7,6 +7,7 @@ export const HARNESS_DEFAULTS = {
 } as const;
 
 export const HARNESS_FIELDS: ReadonlySet<string> = new Set([
+  "routing",
   "modelProvider",
   "instructions",
   "tools",

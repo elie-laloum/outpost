@@ -1,5 +1,18 @@
 # Changelog
 
+## 9.1.0
+
+- Add typed System One decisions (`defineDecision`, `decide`, `defineDecisionTask`) and one bounded HTTP provider for Jev and compatible Laya endpoints. Preserve native distributions, metadata and input-truncation diagnostics.
+- Add per-step model routing to the built-in harness, including subagents, explicit confidence and outage fallback policies, cumulative routing usage and version-2 transcripts with version-1 compatibility.
+- Document decisions and routing in English and French, with public reference contracts and deterministic HTTP, workflow and conversation regression tests.
+- Accept accumulated four-decimal rounding in native decision distributions and weighted scores without renormalizing them; continue rejecting incoherent responses.
+- Add the runnable System One example with direct decisions and a typed workflow against a local Laya server or an authenticated compatible endpoint.
+- Announce System One support in a bilingual indigo banner. Use a square logo button, equally sized Guide/API buttons with icons, colored source-link hovers and search aligned with the content border on wide screens.
+- Open `/reference/` at the first alphabetical API symbol. Remove family overview pages and redirect their old URLs to the corresponding practical Guide pages.
+- Retire the repository roadmap and preserve its removal in the documentation migration audit. Keep validation limits in the guides and release notes.
+
+Direct decisions and decision tasks were exercised against a local Laya 0.3.28 CPU server. Live Jev inference and conversational model routing remain unvalidated; the ordinary test suites use deterministic local fixtures.
+
 ## 9.0.8
 
 - Redesign the bilingual documentation home with a full-viewport hero, a four-step journey and a nine-capability grid linking to the Guide. Show a medium-sized CSV-export workflow with parallel tests and review, bounded correction rounds and human approval.

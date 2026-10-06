@@ -13,10 +13,7 @@ const symbolRoles = new Map([
   ["related contracts", "wide"],
   ["contrats associés", "wide"],
 ]);
-const entryHeadings = new Set(["entry points", "points d’entrée"]);
 const pageKinds = [
-  ["reference/index", "guide"],
-  ["reference/overview/", "overview"],
   ["reference/", "symbol"],
   ["guide/", "guide"],
   ["project/", "project"],
@@ -66,18 +63,6 @@ const layouts = {
             [],
           )
         : assemble("wide", undefined, section.nodes, [], []),
-    ),
-  overview: (sections) =>
-    sections.map((section) =>
-      entryHeadings.has(headingText(section))
-        ? assemble(
-            "wide",
-            "overview",
-            sectionNodes(section).map(asCells),
-            [],
-            [],
-          )
-        : bay(section, placements.guide),
     ),
   symbol(sections) {
     const byRole = { say: [], show: [], wide: [], lead: [] };

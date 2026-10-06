@@ -55,7 +55,7 @@
 }
 .bay-pin[data-pinned] {
   position: sticky;
-  top: calc(4rem + 1.5rem);
+  top: calc(var(--sl-nav-height) + 1.5rem);
 }
 
 /* Headings and prose */
@@ -310,7 +310,7 @@
 .sl-markdown-content .bay[data-role="log"] > .bay-say {
   align-self: start;
   position: sticky;
-  top: 4rem;
+  top: var(--sl-nav-height);
 }
 .sl-markdown-content .bay[data-role="log"] > .bay-show {
   padding-top: 2.5rem;

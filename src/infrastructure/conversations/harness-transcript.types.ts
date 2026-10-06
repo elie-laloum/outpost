@@ -3,6 +3,7 @@ import type { ModelMessage } from "../../domain/model.types.ts";
 import type { TranscriptRecord } from "../../domain/transcript.types.ts";
 
 export interface TranscriptOptions {
+  readonly routed?: boolean;
   readonly repository: string;
   readonly store: ConversationStore;
   readonly model: string;

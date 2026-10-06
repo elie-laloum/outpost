@@ -85,3 +85,7 @@ Chargez un SDK tiers uniquement depuis le point d’entrée de votre intégratio
 Pour ajouter à Outpost lui-même un agent ou un fournisseur intégré, suivez `AGENTS.md` dans le [dépôt](https://gitlab.elielaloum.com/elielaloum/outpost).
 
 API : [CliHarness](../../reference/cliharness/) · [AgentAdapter](../../reference/agentadapter/) · [ConversationStore](../../reference/conversationstore/) · [SandboxProvider](../../reference/sandboxprovider/) · [SandboxLease](../../reference/sandboxlease/) · [ModelProvider](../../reference/modelprovider/) · [Transport](../../reference/transport/) · [TaskQueue](../../reference/taskqueue/) · [diagnoseSandbox](../../reference/diagnosesandbox/).
+
+## Connecter des services de décision
+
+[`DecisionProvider`](../../reference/decisionprovider/) évalue des questions typées sur un état JSON sans perte. Il est indépendant de `ModelProvider` et n’alloue aucune sandbox. Utilisez l’adapter HTTP System One commun à Jev et aux endpoints Laya compatibles, ou implémentez une requête annulable renvoyant les réponses natives et l’usage disponible. Voir les [décisions typées](../decisions/) et le [routage par étape](../model-routing/).

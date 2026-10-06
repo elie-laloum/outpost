@@ -133,6 +133,7 @@ export type {
   ReplayDivergencePolicy,
   ReplayFailure,
   ReplayTurn,
+  ReplayDecisionEvent,
   WorkspaceCommitsEvent,
 } from "./domain/replay.types.ts";
 export {
@@ -633,3 +634,39 @@ export type {
   LoopTaskOptions,
   LoopRoundRecord,
 } from "./domain/workflow/loop-task.types.ts";
+export { defineDecision } from "./domain/decision.ts";
+export { decide } from "./application/decision.ts";
+export { defineDecisionTask } from "./application/decision-task.ts";
+export { createSystemOneDecisionProvider } from "./adapters/decisions/system-one-provider.ts";
+export { defineHarnessModelRouting } from "./domain/harness-routing.ts";
+export type {
+  DecisionState,
+  ChoiceQuestion,
+  ScoreQuestion,
+  NoulQuestion,
+  DecisionQuestion,
+  DecisionQuestions,
+  DecisionOptions,
+  Decision,
+  ChoiceAnswer,
+  ScoreAnswer,
+  NoulAnswer,
+  DecisionAnswer,
+  DecisionAnswers,
+  DecisionProviderResult,
+  DecisionRequest,
+  DecisionProvider,
+  DecisionResult,
+  DecideOptions,
+  DecisionEvent,
+} from "./domain/decision.types.ts";
+export type { DecisionTaskOptions } from "./application/decision.types.ts";
+export type { SystemOneDecisionProviderOptions } from "./adapters/decisions/system-one-provider.types.ts";
+export type {
+  HarnessModelRoutingContext,
+  HarnessModelRoutingOptions,
+  HarnessModelRouting,
+  RoutingQuestion,
+  RoutingChoices,
+  ModelRouteEvent,
+} from "./domain/harness-routing.types.ts";

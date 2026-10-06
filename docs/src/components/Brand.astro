@@ -3,14 +3,20 @@ interface Props {
   href: string;
   suffix?: string;
   class?: string;
+  iconOnly?: boolean;
 }
 
-const { href, suffix, class: className } = Astro.props;
+const { href, suffix, class: className, iconOnly = false } = Astro.props;
 ---
 
-<a class:list={["brand", className]} href={href} translate="no">
+<a
+  class:list={["brand", className]}
+  href={href}
+  translate="no"
+  aria-label={iconOnly ? "Outpost" : undefined}
+>
   <span class="mark" aria-hidden="true"></span>
-  <span class="name">Outpost</span>
+  {!iconOnly && <span class="name">Outpost</span>}
   {suffix && <span class="suffix">{suffix}</span>}
 </a>
 

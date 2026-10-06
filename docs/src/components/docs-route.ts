@@ -5,6 +5,7 @@ import type {
   SidebarEntry,
   SidebarLink,
 } from "./docs-route.types.ts";
+import { referenceSidebar } from "../../scripts/reference-navigation.mjs";
 
 const spaceLabels = {
   guide: ["Guide", "Guide"],
@@ -12,7 +13,7 @@ const spaceLabels = {
 } as const;
 const spaceHomes = {
   guide: "guide/introduction/",
-  reference: "reference/",
+  reference: `${referenceSidebar[0].slug}/`,
 } as const;
 
 export function docsSpace(route: DocsRoute): DocsSpace {

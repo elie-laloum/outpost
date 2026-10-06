@@ -20,6 +20,7 @@ import {
 } from "./instructions.ts";
 import { harnessSkills, skillCatalog, skillLoader } from "./skill.ts";
 import { harnessTools } from "./tool.ts";
+import { defineHarnessModelRouting } from "./harness-routing.ts";
 
 export function createHarness(options: HarnessOptions): Harness {
   invariant(
@@ -68,8 +69,21 @@ export function createHarness(options: HarnessOptions): Harness {
   if (options.conversations)
     conversationFormat("Harness", options.conversations, "harness");
   const skills = harnessSkills(options.skills);
+  invariant(
+    options.routing === undefined || options.routing?.kind === "model-routing",
+    "Declare routing with defineHarnessModelRouting",
+  );
+  const routing = (() => {
+    if (!options.routing) return undefined;
+    const { kind: _kind, ...settings } = options.routing;
+    const declared = defineHarnessModelRouting(settings);
+    for (const model of Object.values(declared.models))
+      options.modelProvider.validate?.(model);
+    return declared;
+  })();
   return Object.freeze({
     kind: "custom",
+    ...(routing ? { routing } : {}),
     modelProvider: options.modelProvider,
     instructions: Object.freeze([
       ...harnessInstructions(options.instructions),

@@ -1,0 +1,81 @@
+---
+import { docsHref, isFrench } from "./docs-route.ts";
+import Arrow from "./landing/Arrow.astro";
+
+const route = Astro.locals.starlightRoute;
+const french = isFrench(route);
+---
+
+<aside
+  class="docs-announcement"
+  aria-label={french ? "Annonce Outpost" : "Outpost announcement"}
+  data-pagefind-ignore
+>
+  <a href={docsHref(route, "guide/decisions/")}>
+    <span class="badge">{french ? "Nouveau" : "New"}</span>
+    <span class="message">
+      {french ? "Les modèles System One sont maintenant pris en charge." : "System One models are now supported."}
+    </span>
+    <span class="action"><span>{french ? "Découvrir" : "Explore"}</span><Arrow /></span>
+  </a>
+</aside>
+
+<style>
+  .docs-announcement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--docs-announcement-height);
+    background: #4f46e5;
+    color: #fff;
+  }
+  .docs-announcement a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    height: 100%;
+    padding: 0.35rem 1rem;
+    color: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    text-decoration: none;
+  }
+  .badge {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 12%);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .message {
+    text-wrap: balance;
+  }
+  .action {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+  }
+  .docs-announcement a:hover .action > span {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .docs-announcement a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -3px;
+  }
+  @media (max-width: 49.99rem) {
+    .docs-announcement a {
+      gap: 0.65rem;
+    }
+    .action > span {
+      display: none;
+    }
+  }
+</style>

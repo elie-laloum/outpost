@@ -14,6 +14,68 @@ const entry = (kind: string, fields: Record<string, unknown> = {}) => ({
 });
 const baseline = { commit: "a".repeat(40), tree: "b".repeat(40) };
 
+test("decision replay validates observations and retains their ordering and child scope", () => {
+  const decision = (kind: string, fields: Record<string, unknown> = {}) =>
+    entry(kind, {
+      source: "decision",
+      scope: { pass: 1, subagentId: "child" },
+      ...fields,
+    });
+  const summary = {
+    provider: "router",
+    model: "fixture",
+    status: "finished",
+    usage,
+    durationMs: 10,
+    truncated: false,
+    code: "response",
+  };
+  const selected = createReplayAgent({
+    journal: [
+      entry("prompt", { text: "work" }),
+      entry("step", { index: 1 }),
+      decision("decision", summary),
+      decision("decision-request", { request: { state: "work" } }),
+      decision("decision-response", { response: { model: "fixture" } }),
+      entry("summary", { tokens: usage }),
+    ],
+  });
+  const decisions = selected.turns[0]?.decisionEvents;
+  assert.equal(decisions?.length, 3);
+  assert.ok(
+    decisions?.every(
+      (event) => event.before === 1 && event.subagentId === "child",
+    ),
+  );
+  assert.equal(selected.turns[0]?.events.length, 1);
+  assert.deepEqual(selected.turns[0]?.usage, usage);
+  for (const change of [
+    { status: "invalid" },
+    { durationMs: -1 },
+    { truncated: "yes" },
+    { code: 1 },
+    { model: 1 },
+    { usage: { ...usage, input: -1 } },
+  ]) {
+    assert.throws(() =>
+      createReplayAgent({
+        journal: [
+          entry("prompt", { text: "work" }),
+          decision("decision", { ...summary, ...change }),
+        ],
+      }),
+    );
+  }
+  for (const kind of ["decision-request", "decision-response"])
+    assert.throws(
+      () =>
+        createReplayAgent({
+          journal: [entry("prompt", { text: "work" }), decision(kind)],
+        }),
+      /has no/,
+    );
+});
+
 test("replay agents parse recorded turns, text fallbacks and failures", () => {
   const selected = createReplayAgent({
     journal: [

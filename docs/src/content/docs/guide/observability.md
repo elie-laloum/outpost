@@ -251,3 +251,7 @@ The dispatch waits for pending handlers before it returns and reports the first 
 - Events emitted on a remote [worker](../job-queues/) stay on that worker’s hub.
 
 API: [createObservationHub](../../reference/createobservationhub/) · [ObservationHub](../../reference/observationhub/) · [Observation](../../reference/observation/) · [ObservationEvent](../../reference/observationevent/) · [OperationEvent](../../reference/operationevent/) · [createOpenTelemetryObserver](../../reference/createopentelemetryobserver/) · [OpenTelemetryObserver](../../reference/opentelemetryobserver/) · [createCustomReporter](../../reference/createcustomreporter/).
+
+## Observe decisions and selections
+
+[Decision evaluations](../decisions/) emit lifecycle summaries with source `decision`. Routed harnesses emit `model-route` agent events identifying the effective model, selection reason and optional native confidence. Pass `observation` to `decide()` for a direct evaluation; decision tasks and harnesses propagate workflow, task, pass and subagent scopes. Full states and answers require a verbose hub. Valid decision usage is accounted synchronously, independently of sink delivery or failures.

@@ -15,6 +15,7 @@ import type { Harness } from "@elie-laloum/outpost";
 
 | Name            | Type                                       | Presence | Meaning                                                                                                                         |
 | --------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `routing`       | `HarnessModelRouting \| undefined`         | Optional | Validated per-step routing configuration retained by the built-in harness.                                                      |
 | `kind`          | `"custom"`                                 | Required | Execution discriminator: custom.                                                                                                |
 | `modelProvider` | `ModelProvider`                            | Required | Model provider called for every step and summary request.                                                                       |
 | `instructions`  | `readonly HarnessInstructions[]`           | Required | Instruction sources resolved at the start of each turn, followed by the skill catalog when skills are set.                      |
@@ -33,6 +34,7 @@ import type { Harness } from "@elie-laloum/outpost";
 
 ```ts
 export interface Harness {
+  readonly routing?: HarnessModelRouting;
   readonly kind: "custom";
   readonly modelProvider: ModelProvider;
   readonly instructions: readonly HarnessInstructions[];
@@ -55,6 +57,7 @@ export interface Harness {
 - [HarnessContextStrategy](../harnesscontextstrategy/)
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructions](../harnessinstructions/)
+- [HarnessModelRouting](../harnessmodelrouting/)
 - [HarnessPermissions](../harnesspermissions/)
 - [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)

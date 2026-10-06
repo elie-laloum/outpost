@@ -1,5 +1,6 @@
 import type { AgentEvent, AgentFeatures, Usage } from "./agent.types.ts";
 import type { FaultCode } from "./errors.types.ts";
+import type { ObservationEvent } from "./observation.types.ts";
 
 export interface RecordedRevision {
   readonly commit: string;
@@ -40,9 +41,19 @@ export interface ReplayFailure {
 
 export type FallbackEvent = Extract<AgentEvent, { readonly kind: "fallback" }>;
 
+export interface ReplayDecisionEvent {
+  readonly before: number;
+  readonly event: Extract<
+    ObservationEvent,
+    { readonly kind: "decision" | "decision-request" | "decision-response" }
+  >;
+  readonly subagentId?: string;
+}
+
 export interface ReplayTurn {
   readonly prompt: string;
   readonly events: readonly AgentEvent[];
+  readonly decisionEvents?: readonly ReplayDecisionEvent[];
   readonly text: string;
   readonly usage: Usage;
   readonly conversation?: string;
@@ -90,6 +101,7 @@ export type JournalObject = Readonly<Record<string, unknown>>;
 export interface ReplayJournalEvent {
   readonly origin: unknown;
   readonly event: JournalObject & { readonly kind: string };
+  readonly subagentId?: string;
 }
 
 export interface ReplayRecording {
@@ -100,6 +112,7 @@ export interface ReplayRecording {
 export interface DraftTurn {
   prompt: string;
   readonly events: AgentEvent[];
+  decisionEvents?: ReplayDecisionEvent[];
   readonly texts: string[];
   readonly raws: string[];
   result?: string;

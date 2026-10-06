@@ -103,7 +103,7 @@ Conversation support varies: Claude Code, Codex and Kimi support capture, resume
 
 Docker and Podman mount the selected workspace and Git metadata by default. These mounts are not an adversarial security boundary. Cloud providers receive repository data and declared credentials; explicit local execution runs on the host without isolation. Read [SECURITY.md](SECURITY.md) before choosing an environment for untrusted code.
 
-Speculation remains experimental. See the [roadmap](roadmap.md) for validation limits and planned work, and the [changelog](CHANGELOG.md) for version history and migration notes.
+Speculation remains experimental. See the [speculation guide](https://elie-laloum.github.io/outpost/guide/speculation/) for validation limits and the [changelog](CHANGELOG.md) for version history.
 
 ## Development and contributions
 

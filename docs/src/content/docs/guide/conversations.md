@@ -164,3 +164,7 @@ export const reviewer = createAgent({
 - **Fallback agents**: A [fallback agent](../fallback-agents/) takes no `continuation`. `result.resume()` continues with the candidate that answered.
 
 API: [DispatchResult](../../reference/dispatchresult/) · [WarmDispatchResult](../../reference/warmdispatchresult/) · [Sandbox](../../reference/sandbox/) · [ConversationStore](../../reference/conversationstore/) · [createTransportConversations](../../reference/createtransportconversations/) · [createKimiConversations](../../reference/createkimiconversations/) · [createHarnessConversations](../../reference/createharnessconversations/).
+
+## Resume a routed harness
+
+[Model routing](../model-routing/) records each effective selection in version-2 transcripts while retaining the `harness` storage format. Version-1 transcripts remain readable and are upgraded when routing is enabled on continuation. Resume and fork restore messages; the next step evaluates the router again without replaying completed model or tool calls. Journal replay emits recorded selections without contacting Jev or Laya.

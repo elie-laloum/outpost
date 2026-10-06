@@ -15,6 +15,7 @@ import type { HarnessOptions } from "@elie-laloum/outpost";
 
 | Nom             | Type                                                               | Présence  | Rôle                                                                                                                                                                                                                                                                                                                         |
 | --------------- | ------------------------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routing`       | `HarnessModelRouting \| undefined`                                 | Optionnel | Routage facultatif par étape déclaré avec defineHarnessModelRouting ; tous les candidats utilisent le provider de modèles du harness.                                                                                                                                                                                        |
 | `modelProvider` | `ModelProvider`                                                    | Requis    | Fournisseur de modèles appelé à chaque étape et pour chaque résumé, par exemple createOpenAIModelProvider() ou createAnthropicModelProvider(). Son validate() contrôle le modèle de l’agent quand createAgent() compose l’agent.                                                                                             |
 | `instructions`  | `HarnessInstructionsOption \| undefined`                           | Optionnel | Instructions système en texte, résultat de defineHarnessInstructions() ou de defineMcpPrompt(), ou liste de ces valeurs. Résolues à chaque tour et jointes par des lignes vides ; les résultats vides sont ignorés.                                                                                                          |
 | `tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined` | Optionnel | Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness, outils de skills et MCP compris.                                                                                                                                                   |
@@ -32,6 +33,7 @@ import type { HarnessOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface HarnessOptions {
+  readonly routing?: HarnessModelRouting;
   readonly modelProvider: ModelProvider;
   readonly instructions?: HarnessInstructionsOption;
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
@@ -54,6 +56,7 @@ export interface HarnessOptions {
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructionsOption](../harnessinstructionsoption/)
 - [HarnessLimits](../harnesslimits/)
+- [HarnessModelRouting](../harnessmodelrouting/)
 - [HarnessPermissions](../harnesspermissions/)
 - [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)

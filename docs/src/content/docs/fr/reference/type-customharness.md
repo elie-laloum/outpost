@@ -15,6 +15,7 @@ import type { Harness } from "@elie-laloum/outpost";
 
 | Nom             | Type                                       | Présence  | Rôle                                                                                                                                                   |
 | --------------- | ------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `routing`       | `HarnessModelRouting \| undefined`         | Optionnel | Configuration validée de routage par étape conservée par le harness intégré.                                                                           |
 | `kind`          | `"custom"`                                 | Requis    | Discriminant d’exécution : custom.                                                                                                                     |
 | `modelProvider` | `ModelProvider`                            | Requis    | Fournisseur de modèles appelé à chaque étape et pour chaque résumé.                                                                                    |
 | `instructions`  | `readonly HarnessInstructions[]`           | Requis    | Sources d’instructions résolues au début de chaque tour, suivies du catalogue des skills quand des skills sont définies.                               |
@@ -33,6 +34,7 @@ import type { Harness } from "@elie-laloum/outpost";
 
 ```ts
 export interface Harness {
+  readonly routing?: HarnessModelRouting;
   readonly kind: "custom";
   readonly modelProvider: ModelProvider;
   readonly instructions: readonly HarnessInstructions[];
@@ -55,6 +57,7 @@ export interface Harness {
 - [HarnessContextStrategy](../harnesscontextstrategy/)
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructions](../harnessinstructions/)
+- [HarnessModelRouting](../harnessmodelrouting/)
 - [HarnessPermissions](../harnesspermissions/)
 - [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)

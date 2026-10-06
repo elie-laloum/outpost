@@ -22,9 +22,59 @@ import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { openTranscript } from "../../src/infrastructure/conversations/harness-transcript.ts";
 import { createHarnessConversations } from "../../src/infrastructure/conversations/harness-store.ts";
 import { git } from "../../src/infrastructure/git.ts";
+import { lock } from "../../src/infrastructure/git/lock.ts";
 import { repository } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
+
+test("transcript continuation owns the conversation before reading or upgrading it", async (t) => {
+  const root = await repository(t);
+  const store = createHarnessConversations();
+  const first = await openTranscript({
+    repository: root,
+    store,
+    model: "initial",
+  });
+  await first.append({
+    type: "message",
+    message: { role: "user", content: [{ type: "text", text: "preserve" }] },
+  });
+  await first.close();
+  let reads = 0;
+  const tracked = {
+    ...store,
+    locate: async (id: string, repository: string) => {
+      reads++;
+      return store.locate(id, repository);
+    },
+  };
+  const release = await lock(root, `harness-conversation:${first.id}`);
+  try {
+    await assert.rejects(
+      openTranscript({
+        repository: root,
+        store: tracked,
+        model: "initial",
+        continuation: { id: first.id },
+        routed: true,
+      }),
+      /already in use/,
+    );
+    assert.equal(reads, 0);
+  } finally {
+    await release();
+  }
+  const restored = await openTranscript({
+    repository: root,
+    store: tracked,
+    model: "initial",
+    continuation: { id: first.id },
+    routed: true,
+  });
+  assert.equal(restored.messages.length, 1);
+  assert.equal(reads, 1);
+  await restored.close();
+});
 type Reply = (request: ModelRequest) => ModelResult;
 
 const provider = (

@@ -17,16 +17,24 @@ export async function openTranscript(
   options: TranscriptOptions,
 ): Promise<TranscriptHandle> {
   const { continuation } = options;
-  const source = continuation
-    ? await options.store.locate(continuation.id, options.repository)
-    : undefined;
-  const text = source ? await readFile(source.file, "utf8") : undefined;
-  const messages = text ? transcriptMessages(parseTranscript(text)) : [];
   const id =
     continuation && !continuation.fork ? continuation.id : randomUUID();
   const file = harnessTranscriptPath(options.repository, id);
   const release = await lock(options.repository, `harness-conversation:${id}`);
   try {
+    const source = continuation
+      ? await options.store.locate(continuation.id, options.repository)
+      : undefined;
+    const text = source ? await readFile(source.file, "utf8") : undefined;
+    const records = text ? parseTranscript(text) : [];
+    const messages = transcriptMessages(records);
+    const version =
+      options.routed ||
+      records.some(
+        (record) => record.type === "session" && record.version === 2,
+      )
+        ? 2
+        : 1;
     await mkdir(dirname(file), { recursive: true, mode: 0o700 });
     if (!continuation || continuation.fork)
       await writeFile(
@@ -34,7 +42,7 @@ export async function openTranscript(
         lines([
           {
             type: "session",
-            version: 1,
+            version,
             id,
             model: options.model,
             ...(options.parentConversation
@@ -52,18 +60,33 @@ export async function openTranscript(
         ]),
         { flag: "wx", mode: 0o600 },
       );
-    if (continuation && !continuation.fork && source!.file !== file)
-      await writeFile(file, text!, { mode: 0o600 });
+    if (
+      continuation &&
+      !continuation.fork &&
+      (source!.file !== file ||
+        (version === 2 &&
+          records[0]?.type === "session" &&
+          records[0].version === 1))
+    )
+      await writeFile(
+        file,
+        lines(
+          records.map((record) =>
+            record.type === "session" ? { ...record, version } : record,
+          ),
+        ),
+        { mode: 0o600 },
+      );
+    return {
+      id,
+      messages,
+      append: (record) => appendFile(file, lines([record]), { mode: 0o600 }),
+      close: release,
+    };
   } catch (error) {
     await release();
     throw error;
   }
-  return {
-    id,
-    messages,
-    append: (record) => appendFile(file, lines([record]), { mode: 0o600 }),
-    close: release,
-  };
 }
 
 function lines(records: readonly TranscriptRecord[]): string {

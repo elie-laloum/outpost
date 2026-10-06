@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
-    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
   ],
   "AgentEvent.name": [
     "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
@@ -4144,8 +4144,8 @@
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
   "AgentEvent.reason": [
-    "On tool-denied, why the call was refused. On stopped, why Outpost ended the agent process: completion, idle-timeout, deadline, aborted, oversized-event or steered.",
-    "Sur tool-denied, la raison du refus de l’appel. Sur stopped, la raison pour laquelle Outpost a arrêté le processus de l’agent : completion, idle-timeout, deadline, aborted, oversized-event ou steered."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
   ],
   "ReporterHandlers.tool-denied": [
     "Receives a built-in harness tool call refused by permissions or a hook, with the reason.",
@@ -4681,8 +4681,8 @@
     "Commits du dispatch sur dispatch-finished : issus du résultat en cas de succès, du recovery de l’erreur en cas d’échec."
   ],
   "ObservationEvent.usage": [
-    "Accumulated dispatch usage, including usage observed before failure.",
-    "Usage cumulé du dispatch, incluant l’usage observé avant un échec."
+    "Accumulated dispatch usage, including usage observed before failure. Decision events include normalized router usage when available.",
+    "Usage cumulé du dispatch, incluant l’usage observé avant un échec. Les événements de décision incluent l’usage normalisé du routeur lorsqu’il est disponible."
   ],
   "ObservationEvent.status": [
     "Operation lifecycle state, dispatch outcome, candidate selection result or queue transition according to kind; agent summaries retain numeric exit status.",
@@ -4937,8 +4937,8 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
-    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
   ],
   "AgentEventDetails.name": [
     "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
@@ -5009,8 +5009,8 @@
     "Numéro d’étape, à partir de 1, dans un tour du harness intégré."
   ],
   "AgentEventDetails.reason": [
-    "On tool-denied, why the call was refused. On stopped, why Outpost ended the agent process: completion, idle-timeout, deadline, aborted, oversized-event or steered.",
-    "Sur tool-denied, la raison du refus de l’appel. Sur stopped, la raison pour laquelle Outpost a arrêté le processus de l’agent : completion, idle-timeout, deadline, aborted, oversized-event ou steered."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
   ],
   "AgentEventDetails.strategy": [
     "Name of the context strategy that rewrote the history.",
@@ -6941,5 +6941,469 @@
   "TranscriptConversationLayout.remotePath": [
     "Sandbox path where restoration writes a captured transcript for the lease workspace.",
     "Chemin de la sandbox où la restauration écrit un transcript capturé pour le workspace du bail."
+  ],
+  "HarnessOptions.routing": [
+    "Optional per-step routing declared with defineHarnessModelRouting; all candidates use this harness model provider.",
+    "Routage facultatif par étape déclaré avec defineHarnessModelRouting ; tous les candidats utilisent le provider de modèles du harness."
+  ],
+  "Harness.routing": [
+    "Validated per-step routing configuration retained by the built-in harness.",
+    "Configuration validée de routage par étape conservée par le harness intégré."
+  ],
+  "defineDecision.options": [
+    "Questions to validate, snapshot and freeze without executing a request.",
+    "Questions à valider, copier et figer sans exécuter de requête."
+  ],
+  "decide.options": [
+    "Provider, named model, declaration and lossless JSON state for one immediate evaluation.",
+    "Provider, modèle nommé, déclaration et état JSON sans perte pour une évaluation immédiate."
+  ],
+  "defineDecisionTask.options": [
+    "Fixed decision configuration and existing workflow controls; state can be computed from dependencies.",
+    "Configuration fixe de décision et contrôles du workflow ; l’état peut être calculé à partir des dépendances."
+  ],
+  "createSystemOneDecisionProvider.options": [
+    "HTTP endpoint, explicit authentication and request bounds for the System One protocol.",
+    "Endpoint HTTP, authentification explicite et limites de requête pour le protocole System One."
+  ],
+  "defineHarnessModelRouting.options": [
+    "Choice question, exact candidate mapping, fallback policy and optional state builder.",
+    "Question de choix, mapping exact des candidats, politique de repli et fonction d’état facultative."
+  ],
+  "DecisionOptions.questions": [
+    "Nonempty named questions whose keys and choice literals determine the answer types.",
+    "Questions nommées non vides dont les clés et choix littéraux déterminent les types de réponses."
+  ],
+  "Decision.kind": [
+    "Frozen declaration discriminator; evaluations require a declaration built with defineDecision.",
+    "Discriminant de déclaration figée ; les évaluations exigent une déclaration construite avec defineDecision."
+  ],
+  "Decision.questions": [
+    "Validated, immutable snapshot of the named question declarations.",
+    "Copie validée et immuable des déclarations de questions nommées."
+  ],
+  "ChoiceQuestion.type": [
+    "choice discriminator. Choose one of 2 to 255 named options.",
+    "Discriminant choice. Choisir une des 2 à 255 options nommées."
+  ],
+  "ChoiceQuestion.instructions": [
+    "Nonempty natural-language instructions for this question.",
+    "Instructions textuelles non vides pour cette question."
+  ],
+  "ScoreQuestion.type": [
+    "Score discriminator: evaluate 2 to 10 ordered levels indexed from zero.",
+    "Discriminant score : évaluer de 2 à 10 niveaux ordonnés indexés à partir de zéro."
+  ],
+  "ScoreQuestion.instructions": [
+    "Nonempty natural-language instructions for this question.",
+    "Instructions textuelles non vides pour cette question."
+  ],
+  "NoulQuestion.type": [
+    "noul discriminator. Return a probability for the yes outcome.",
+    "Discriminant noul. Renvoyer une probabilité pour le résultat oui."
+  ],
+  "NoulQuestion.instructions": [
+    "Nonempty natural-language instructions for this question.",
+    "Instructions textuelles non vides pour cette question."
+  ],
+  "ChoiceQuestion.criteria": [
+    "Named options with nonempty descriptions; keys become the allowed choice literals.",
+    "Options nommées avec descriptions non vides ; les clés deviennent les valeurs littérales autorisées."
+  ],
+  "ScoreQuestion.criteria": [
+    "Nonempty level descriptions, ordered from index 0 to the number of levels minus one.",
+    "Descriptions non vides des niveaux, ordonnées de l’indice 0 au nombre de niveaux moins un."
+  ],
+  "NoulQuestion.criteria": [
+    "Optional nonempty descriptions of both true and false outcomes.",
+    "Descriptions facultatives et non vides des deux résultats true et false."
+  ],
+  "DecisionQuestion.type": [
+    "Question primitive: choice, score or noul.",
+    "Primitive de question : choice, score ou noul."
+  ],
+  "DecisionQuestion.instructions": [
+    "Nonempty instructions for the selected question primitive.",
+    "Instructions non vides pour la primitive de question sélectionnée."
+  ],
+  "DecisionQuestion.criteria": [
+    "For choice, named descriptions; for score, ordered level descriptions; for noul, optional true/false descriptions.",
+    "Pour choice, descriptions nommées ; pour score, descriptions de niveaux ordonnés ; pour noul, descriptions true/false facultatives."
+  ],
+  "ChoiceAnswer.type": [
+    "Answer discriminator choice.",
+    "Discriminant de réponse choice."
+  ],
+  "ScoreAnswer.type": [
+    "Answer discriminator score.",
+    "Discriminant de réponse score."
+  ],
+  "NoulAnswer.type": [
+    "Answer discriminator noul.",
+    "Discriminant de réponse noul."
+  ],
+  "ChoiceAnswer.choice": [
+    "Selected declared option, inferred from the question criteria keys.",
+    "Option déclarée sélectionnée, inférée depuis les clés des critères de la question."
+  ],
+  "ChoiceAnswer.probabilities": [
+    "Native probability for every declared option; finite values in [0,1] sum to one within accumulated four-decimal rounding error. Values are retained without renormalization.",
+    "Probabilité native de chaque option déclarée ; valeurs finies dans [0,1] dont la somme vaut un à l’erreur d’arrondi cumulée de quatre décimales près. Valeurs conservées sans renormalisation."
+  ],
+  "ChoiceAnswer.confidence": [
+    "Native confidence in [0,1], retained without recomputing it from the distribution.",
+    "Confiance native dans [0,1], conservée sans recalcul depuis la distribution."
+  ],
+  "ScoreAnswer.score": [
+    "Native probability-weighted level index, between zero and the number of levels minus one; consistency allows accumulated four-decimal rounding of the score and probabilities.",
+    "Indice de niveau natif pondéré par les probabilités, entre zéro et le nombre de niveaux moins un ; la cohérence accepte l’arrondi cumulé à quatre décimales du score et des probabilités."
+  ],
+  "ScoreAnswer.probabilities": [
+    "Native distribution keyed by level indices; omitted zero-probability levels and accumulated four-decimal rounding error are allowed. Values are retained without renormalization.",
+    "Distribution native indexée par les indices des niveaux ; les niveaux de probabilité nulle peuvent être omis et l’erreur d’arrondi cumulée de quatre décimales est acceptée. Valeurs conservées sans renormalisation."
+  ],
+  "ScoreAnswer.confidence": [
+    "Native confidence in [0,1], retained without recomputing it from the distribution.",
+    "Confiance native dans [0,1], conservée sans recalcul depuis la distribution."
+  ],
+  "ScoreAnswer.legend": [
+    "Optional native mapping from all level positions to textual descriptions.",
+    "Mapping natif facultatif de toutes les positions de niveaux vers leurs descriptions textuelles."
+  ],
+  "NoulAnswer.noul": [
+    "Native finite probability of yes, between zero and one.",
+    "Probabilité native finie du oui, comprise entre zéro et un."
+  ],
+  "DecideOptions.model": [
+    "Nonempty decision model name, without generation or reasoning settings.",
+    "Nom non vide du modèle de décision, sans réglages de génération ni de raisonnement."
+  ],
+  "DecideOptions.state": [
+    "Text, object or array validated as lossless JSON before the request.",
+    "Texte, objet ou tableau validé comme JSON sans perte avant la requête."
+  ],
+  "DecideOptions.signal": [
+    "Optional caller cancellation signal forwarded to the decision provider.",
+    "Signal d’annulation facultatif de l’appelant transmis au provider de décision."
+  ],
+  "DecisionRequest.model": [
+    "Nonempty decision model name, without generation or reasoning settings.",
+    "Nom non vide du modèle de décision, sans réglages de génération ni de raisonnement."
+  ],
+  "DecisionRequest.state": [
+    "Text, object or array validated as lossless JSON before the request.",
+    "Texte, objet ou tableau validé comme JSON sans perte avant la requête."
+  ],
+  "DecisionRequest.signal": [
+    "Optional caller cancellation signal forwarded to the decision provider.",
+    "Signal d’annulation facultatif de l’appelant transmis au provider de décision."
+  ],
+  "DecideOptions.provider": [
+    "Decision provider that performs this evaluation.",
+    "Provider de décision qui réalise cette évaluation."
+  ],
+  "DecideOptions.decision": [
+    "Frozen typed question declaration created with defineDecision.",
+    "Déclaration typée et figée de questions créée avec defineDecision."
+  ],
+  "DecideOptions.observation": [
+    "Optional scoped observation hub; detailed state and answers require verbose mode.",
+    "Hub d’observation avec scope facultatif ; l’état et les réponses détaillés exigent le mode verbose."
+  ],
+  "DecideOptions.allowTruncated": [
+    "False by default; true accepts a reported truncation while retaining its flag in the result.",
+    "False par défaut ; true accepte une troncature signalée en conservant son indicateur dans le résultat."
+  ],
+  "DecisionRequest.questions": [
+    "Validated immutable named questions sent in the provider request.",
+    "Questions nommées validées et immuables envoyées dans la requête du provider."
+  ],
+  "DecisionTaskOptions.state": [
+    "Static lossless JSON state or a synchronous/asynchronous TaskContext callback, resolved on each executed attempt.",
+    "État JSON sans perte statique ou fonction synchrone/asynchrone de TaskContext, résolue à chaque tentative exécutée."
+  ],
+  "DecisionProviderResult.model": [
+    "Actual nonempty model name reported by the provider response.",
+    "Nom non vide du modèle réellement signalé par la réponse du provider."
+  ],
+  "DecisionProviderResult.truncated": [
+    "Reported input truncation; absence does not establish that the complete input was evaluated.",
+    "Troncature d’entrée signalée ; son absence ne prouve pas que l’entrée entière a été évaluée."
+  ],
+  "DecisionProviderResult.metadata": [
+    "Optional lossless JSON extensions; the System One adapter retains the full native response here.",
+    "Extensions JSON sans perte facultatives ; l’adapter System One conserve ici la réponse native complète."
+  ],
+  "DecisionResult.model": [
+    "Actual nonempty model name reported by the provider response.",
+    "Nom non vide du modèle réellement signalé par la réponse du provider."
+  ],
+  "DecisionResult.truncated": [
+    "Reported input truncation; absence does not establish that the complete input was evaluated.",
+    "Troncature d’entrée signalée ; son absence ne prouve pas que l’entrée entière a été évaluée."
+  ],
+  "DecisionResult.metadata": [
+    "Optional lossless JSON extensions; the System One adapter retains the full native response here.",
+    "Extensions JSON sans perte facultatives ; l’adapter System One conserve ici la réponse native complète."
+  ],
+  "DecisionProviderResult.answers": [
+    "Untrusted native answer objects, validated by decide against every declared question.",
+    "Objets de réponses natifs non fiables, validés par decide selon chaque question déclarée."
+  ],
+  "DecisionProviderResult.usage": [
+    "Optional normalized usage receipt; missing usage becomes incomplete rather than proof of zero consumption.",
+    "Reçu d’usage normalisé facultatif ; un usage absent devient incomplet sans prouver une consommation nulle."
+  ],
+  "DecisionResult.provider": [
+    "Name of the decision provider that executed the request.",
+    "Nom du provider de décision ayant exécuté la requête."
+  ],
+  "DecisionResult.answers": [
+    "Validated answers with keys and choice literals inferred from the decision questions.",
+    "Réponses validées dont les clés et choix littéraux sont inférés depuis les questions de décision."
+  ],
+  "DecisionResult.usage": [
+    "Normalized usage counted once by the enclosing task or routed harness; absent receipts set complete to false.",
+    "Usage normalisé compté une fois par la tâche ou le harness routé ; un reçu absent fixe complete à false."
+  ],
+  "DecisionProvider.name": [
+    "Nonempty provider name included in decision results and observations.",
+    "Nom non vide du provider inclus dans les résultats et observations de décision."
+  ],
+  "DecisionProvider.identity": [
+    "Optional stable endpoint identity for diagnostics and application fingerprints.",
+    "Identité stable facultative d’endpoint pour les diagnostics et empreintes applicatives."
+  ],
+  "DecisionProvider.request": [
+    "Execute one evaluation with caller cancellation; return native answers and any available usage without automatic retries.",
+    "Exécuter une évaluation avec annulation de l’appelant ; renvoyer les réponses natives et l’usage disponible sans nouvelle tentative automatique."
+  ],
+  "SystemOneDecisionProviderOptions.baseUrl": [
+    "HTTP(S) base URL including the version prefix, such as /v1; /systemone is appended. Credentials, query and fragment are forbidden.",
+    "URL de base HTTP(S) incluant le préfixe de version, comme /v1 ; /systemone est ajouté. Identifiants, query et fragment sont interdits."
+  ],
+  "SystemOneDecisionProviderOptions.apiKey": [
+    "Explicit nonempty bearer key, or false for an unauthenticated endpoint.",
+    "Clé bearer explicite non vide, ou false pour un endpoint sans authentification."
+  ],
+  "SystemOneDecisionProviderOptions.timeoutMs": [
+    "Request deadline including response reading, in positive integer milliseconds; defaults to 120000.",
+    "Délai de requête incluant la lecture de réponse, en millisecondes entières positives ; 120000 par défaut."
+  ],
+  "SystemOneDecisionProviderOptions.maxResponseBytes": [
+    "Positive integer bound on response bytes; defaults to 8 MiB. Oversized responses fail with response.",
+    "Limite entière positive de taille de réponse ; 8 MiB par défaut. Une réponse trop grande échoue avec response."
+  ],
+  "HarnessModelRoutingOptions.provider": [
+    "Independent decision provider used once per harness step after compaction.",
+    "Provider de décision indépendant utilisé une fois par étape du harness après compaction."
+  ],
+  "HarnessModelRoutingOptions.model": [
+    "Named router model, independently of the conversational candidate models.",
+    "Modèle nommé du routeur, indépendant des modèles conversationnels candidats."
+  ],
+  "HarnessModelRoutingOptions.decision": [
+    "Frozen question declaration containing the selected choice question.",
+    "Déclaration figée de questions contenant la question choice sélectionnée."
+  ],
+  "HarnessModelRoutingOptions.question": [
+    "Explicit choice-question key whose criteria exactly match the candidate model keys.",
+    "Clé explicite de question choice dont les critères correspondent exactement aux clés des modèles candidats."
+  ],
+  "HarnessModelRoutingOptions.models": [
+    "One candidate per declared choice; all use the harness model provider and have independent model settings.",
+    "Un candidat par choix déclaré ; tous utilisent le provider de modèles du harness et ont leurs propres réglages."
+  ],
+  "HarnessModelRoutingOptions.minConfidence": [
+    "Confidence threshold in [0,1]; lower confidence selects fallback. Defaults to 0.85 when declared.",
+    "Seuil de confiance dans [0,1] ; une confiance inférieure sélectionne le repli. Valeur par défaut à la déclaration : 0.85."
+  ],
+  "HarnessModelRoutingOptions.fallback": [
+    "Declared candidate key used for low confidence or permitted router failures.",
+    "Clé de candidat déclaré utilisée en cas de faible confiance ou d’erreur autorisée du routeur."
+  ],
+  "HarnessModelRoutingOptions.onError": [
+    "Defaults to fallback for timeout or classified unavailability only; fail propagates those faults. Other faults always propagate.",
+    "Fallback par défaut seulement pour timeout ou indisponibilité classée ; fail propage ces erreurs. Les autres erreurs se propagent toujours."
+  ],
+  "HarnessModelRoutingOptions.state": [
+    "Optional synchronous/asynchronous state builder; default state contains instructions, visible history, tools, step and active model without opaque reasoning.",
+    "Fonction d’état synchrone/asynchrone facultative ; l’état par défaut contient instructions, historique visible, outils, étape et modèle actif sans raisonnement opaque."
+  ],
+  "HarnessModelRouting.provider": [
+    "Independent decision provider used once per harness step after compaction.",
+    "Provider de décision indépendant utilisé une fois par étape du harness après compaction."
+  ],
+  "HarnessModelRouting.model": [
+    "Named router model, independently of the conversational candidate models.",
+    "Modèle nommé du routeur, indépendant des modèles conversationnels candidats."
+  ],
+  "HarnessModelRouting.decision": [
+    "Frozen question declaration containing the selected choice question.",
+    "Déclaration figée de questions contenant la question choice sélectionnée."
+  ],
+  "HarnessModelRouting.question": [
+    "Explicit choice-question key whose criteria exactly match the candidate model keys.",
+    "Clé explicite de question choice dont les critères correspondent exactement aux clés des modèles candidats."
+  ],
+  "HarnessModelRouting.models": [
+    "One candidate per declared choice; all use the harness model provider and have independent model settings.",
+    "Un candidat par choix déclaré ; tous utilisent le provider de modèles du harness et ont leurs propres réglages."
+  ],
+  "HarnessModelRouting.minConfidence": [
+    "Confidence threshold in [0,1]; lower confidence selects fallback. Defaults to 0.85 when declared.",
+    "Seuil de confiance dans [0,1] ; une confiance inférieure sélectionne le repli. Valeur par défaut à la déclaration : 0.85."
+  ],
+  "HarnessModelRouting.fallback": [
+    "Declared candidate key used for low confidence or permitted router failures.",
+    "Clé de candidat déclaré utilisée en cas de faible confiance ou d’erreur autorisée du routeur."
+  ],
+  "HarnessModelRouting.onError": [
+    "Defaults to fallback for timeout or classified unavailability only; fail propagates those faults. Other faults always propagate.",
+    "Fallback par défaut seulement pour timeout ou indisponibilité classée ; fail propage ces erreurs. Les autres erreurs se propagent toujours."
+  ],
+  "HarnessModelRouting.state": [
+    "Optional synchronous/asynchronous state builder; default state contains instructions, visible history, tools, step and active model without opaque reasoning.",
+    "Fonction d’état synchrone/asynchrone facultative ; l’état par défaut contient instructions, historique visible, outils, étape et modèle actif sans raisonnement opaque."
+  ],
+  "HarnessModelRouting.kind": [
+    "Validated routing declaration discriminator model-routing.",
+    "Discriminant model-routing de déclaration validée de routage."
+  ],
+  "HarnessModelRoutingContext.system": [
+    "Session instructions already resolved once for the run.",
+    "Instructions de session déjà résolues une fois pour l’exécution."
+  ],
+  "HarnessModelRoutingContext.messages": [
+    "Current post-compaction messages; custom state builders must explicitly exclude any opaque reasoning they do not need.",
+    "Messages courants après compaction ; les fonctions d’état doivent exclure explicitement le raisonnement opaque inutile."
+  ],
+  "HarnessModelRoutingContext.tools": [
+    "Available model-facing tool declarations for this step.",
+    "Déclarations d’outils visibles du modèle disponibles pour cette étape."
+  ],
+  "HarnessModelRoutingContext.step": [
+    "One-based harness step about to request a conversational model.",
+    "Étape du harness numérotée à partir de un, avant la requête au modèle conversationnel."
+  ],
+  "HarnessModelRoutingContext.model": [
+    "Active effective model before the new selection, also used by preceding compaction.",
+    "Modèle effectif actif avant la nouvelle sélection, utilisé aussi par la compaction précédente."
+  ],
+  "HarnessModelRoutingContext.signal": [
+    "Run cancellation signal; state callbacks and providers should honor it.",
+    "Signal d’annulation de l’exécution ; les fonctions d’état et providers doivent le respecter."
+  ],
+  "ModelRouteEvent.kind": [
+    "Selection event discriminator model-route.",
+    "Discriminant model-route de l’événement de sélection."
+  ],
+  "ModelRouteEvent.step": [
+    "Harness step for which this effective model was selected.",
+    "Étape du harness pour laquelle ce modèle effectif a été sélectionné."
+  ],
+  "ModelRouteEvent.choice": [
+    "Effective candidate key after confidence and availability fallback rules.",
+    "Clé effective de candidat après application des règles de repli de confiance et disponibilité."
+  ],
+  "ModelRouteEvent.model": [
+    "Selected normalized model with its own reasoning and output settings.",
+    "Modèle normalisé sélectionné avec ses propres réglages de raisonnement et de sortie."
+  ],
+  "ModelRouteEvent.reason": [
+    "Selected for accepted confidence, confidence for low-confidence fallback, unavailable for a permitted router fault.",
+    "Selected pour une confiance acceptée, confidence pour le repli de faible confiance, unavailable pour une erreur autorisée du routeur."
+  ],
+  "ModelRouteEvent.confidence": [
+    "Native decision confidence, present only when a valid choice response was received.",
+    "Confiance native de décision, présente seulement lorsqu’une réponse choice valide a été reçue."
+  ],
+  "ReporterHandlers.model-route": [
+    "Handle the effective model selection for a routed harness step, including its fallback reason and optional confidence.",
+    "Traiter la sélection effective de modèle d’une étape routée, avec motif de repli et confiance facultative."
+  ],
+  "DecisionEvent.kind": [
+    "Decision lifecycle discriminator decision.",
+    "Discriminant decision du cycle de vie de décision."
+  ],
+  "DecisionEvent.status": [
+    "Started before the request, finished after validation, or failed when evaluation rejects.",
+    "Started avant la requête, finished après validation, ou failed lors du rejet de l’évaluation."
+  ],
+  "DecisionEvent.provider": [
+    "Decision provider name; no credentials are included.",
+    "Nom du provider de décision ; aucun identifiant secret n’est inclus."
+  ],
+  "DecisionEvent.model": [
+    "Requested model on start/failure and actual response model on success.",
+    "Modèle demandé au démarrage/en erreur et modèle réellement renvoyé en cas de succès."
+  ],
+  "DecisionEvent.durationMs": [
+    "Elapsed evaluation time in milliseconds on completion or failure.",
+    "Durée d’évaluation écoulée en millisecondes en fin d’exécution ou en erreur."
+  ],
+  "DecisionEvent.usage": [
+    "Validated normalized usage receipt when available.",
+    "Reçu d’usage normalisé validé lorsqu’il est disponible."
+  ],
+  "DecisionEvent.truncated": [
+    "Input truncation flag when the provider reports one.",
+    "Indicateur de troncature d’entrée lorsque le provider le signale."
+  ],
+  "DecisionEvent.code": [
+    "Outpost fault code on a failed evaluation, when the error has one.",
+    "Code d’erreur Outpost lors d’une évaluation en échec, lorsque l’erreur en possède un."
+  ],
+  "ReplayTurn.decisionEvents": [
+    "Recorded decision observations positioned among the agent events; replay emits them without a router request or additional usage accounting.",
+    "Observations de décision enregistrées et positionnées parmi les événements d’agent ; le replay les émet sans requête au routeur ni comptage d’usage supplémentaire."
+  ],
+  "ReplayDecisionEvent.before": [
+    "Zero-based position in ReplayTurn.events before which this decision observation is emitted; the event count denotes the trailing position.",
+    "Position à partir de zéro dans ReplayTurn.events avant laquelle cette observation de décision est émise ; le nombre d’événements désigne la position finale."
+  ],
+  "ReplayDecisionEvent.event": [
+    "Recorded lifecycle summary or verbose decision payload. Detailed request/response events are emitted only to a verbose observation hub.",
+    "Résumé de cycle de vie ou données verbose enregistrées de décision. Les événements détaillés de requête/réponse sont émis seulement vers un hub d’observation verbose."
+  ],
+  "ReplayDecisionEvent.subagentId": [
+    "Recorded child harness identity restored into the replay observation scope, when the decision originated from a subagent.",
+    "Identité enregistrée du harness enfant restaurée dans le scope d’observation du replay lorsque la décision provient d’un sous-agent."
+  ],
+  "AgentObservation.kind": [
+    "Discriminant selecting the inherited agent event payload; model-route identifies an effective model selection.",
+    "Discriminant sélectionnant les données de l’événement d’agent hérité ; model-route identifie une sélection effective de modèle."
+  ],
+  "AgentObservation.reason": [
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
+  ],
+  "ObservationEvent.kind": [
+    "Discriminant selecting the observed payload: agent and harness events, decision summaries and verbose payloads, workflows, operations, dispatches, workspace commits, commands, candidates or queues.",
+    "Discriminant sélectionnant les données observées : événements d’agent et de harness, résumés et données verbose de décision, workflows, opérations, dispatches, commits de workspace, commandes, candidats ou files."
+  ],
+  "ObservationEvent.model": [
+    "On model-route, the effective AgentModel and its settings. On decision, the named decision-service model, with the actual response model on success.",
+    "Sur model-route, le modèle AgentModel effectif et ses réglages. Sur decision, le modèle nommé du service de décision, avec le modèle réellement renvoyé en cas de succès."
+  ],
+  "ObservationEvent.reason": [
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
+  ],
+  "ObservationEvent.truncated": [
+    "On decision, reported input truncation; absence does not prove complete input. On stderr or raw, a bounded text fragment or preview.",
+    "Sur decision, troncature d’entrée signalée ; son absence ne prouve pas une entrée complète. Sur stderr ou raw, fragment textuel ou aperçu borné."
+  ],
+  "ObservationEvent.request": [
+    "Full model or decision request, emitted only for verbose observation; decision requests contain state and declared questions.",
+    "Requête complète de modèle ou de décision, émise seulement pour une observation verbose ; les requêtes de décision contiennent l’état et les questions déclarées."
+  ],
+  "ObservationEvent.response": [
+    "Full model or normalized decision result, emitted only for verbose observation; decision results retain native metadata.",
+    "Réponse complète de modèle ou résultat normalisé de décision, émis seulement pour une observation verbose ; les résultats de décision conservent les métadonnées natives."
+  ],
+  "ObservationEvent.durationMs": [
+    "Elapsed milliseconds for the decision, operation, workflow task, candidate or dispatch indicated by kind; agent summaries aggregate all turns of the pass.",
+    "Millisecondes écoulées pour la décision, l’opération, la tâche de workflow, le candidat ou le dispatch indiqué par kind ; les résumés d’agent agrègent tous les tours du passage."
   ]
 }

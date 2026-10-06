@@ -5,6 +5,9 @@ import type { HarnessHistory } from "./harness.types.ts";
 export function harnessHistory(transcript?: TranscriptHandle): HarnessHistory {
   let messages: readonly ModelMessage[] = transcript?.messages ?? [];
   return {
+    async recordRoute(event) {
+      await transcript?.append({ type: "model-selection", ...event });
+    },
     get messages() {
       return messages;
     },

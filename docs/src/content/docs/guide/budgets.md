@@ -143,3 +143,7 @@ To continue a run its budget stopped, start it again with a larger budget and au
 - [Built-in harness](../harness/): Bound model requests, tool calls and tokens within one turn.
 
 API: [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../../reference/workflowusage/) · [Usage](../../reference/usage/) · [TaskContext](../../reference/taskcontext/) · [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/) · [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/).
+
+## Include decision usage
+
+[Decision tasks](../decisions/) contribute their normalized usage to workflow budgets. [Model routing](../model-routing/) also counts against harness, ancestor and workflow budgets, exactly once per router request. Valid usage still counts when truncation rejects the result. A missing receipt is incomplete usage, and strict token budgets reject continuation with unknown consumption.

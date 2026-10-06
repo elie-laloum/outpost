@@ -18,7 +18,7 @@ const sources = [
 <div class:list={["source-links", Astro.props.class]}>
   {
     sources.map(([label, href, icon]) => (
-      <a class="source" href={href} aria-label={label} title={label}>
+      <a class="source" data-source={icon} href={href} aria-label={label} title={label}>
         <Icon name={icon} size="1.125rem" />
       </a>
     ))
@@ -39,10 +39,26 @@ const sources = [
     border-right: 1px solid var(--sl-color-hairline-light);
     color: var(--sl-color-gray-3);
     text-decoration: none;
+    transition:
+      color 0.2s,
+      background-color 0.2s;
   }
   .source {
     height: 100%;
     aspect-ratio: 1;
+  }
+  a[data-source="gitlab"] {
+    --source-color: #fc6d26;
+  }
+  a[data-source="github"] {
+    --source-color: #8250df;
+  }
+  a[data-source="npm"] {
+    --source-color: #cb3837;
+  }
+  a:hover {
+    color: var(--source-color);
+    background: color-mix(in srgb, var(--source-color) 10%, var(--sl-color-black));
   }
   a:focus-visible {
     outline: 2px solid var(--sl-color-accent);

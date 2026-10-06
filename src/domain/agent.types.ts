@@ -1,4 +1,5 @@
 import type { Harness } from "./harness.types.ts";
+import type { ModelRouteEvent } from "./harness-routing.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
@@ -22,6 +23,7 @@ export type AgentEvent = AgentEventDetails & {
 };
 
 export type AgentEventDetails =
+  | ModelRouteEvent
   | {
       readonly kind: "subagent";
       readonly id: string;

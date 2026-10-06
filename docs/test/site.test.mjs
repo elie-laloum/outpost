@@ -1,5 +1,8 @@
 import { readFile, readdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
+import { referenceSidebar } from "../scripts/reference-navigation.mjs";
+
+const referenceEntry = `${referenceSidebar[0].slug}/`;
 
 for (const locale of ["", "fr/"]) {
   for (const width of [320, 800, 1440]) {
@@ -51,6 +54,17 @@ for (const locale of ["", "fr/"]) {
             .poll(() => page.evaluate(() => document.fonts.status))
             .toBe("loading");
           const before = await measure();
+          expect(Math.abs(before[0].width - before[1].width)).toBeLessThan(
+            0.25,
+          );
+          await expect(buttons.locator("svg")).toHaveCount(before.length);
+          const brand = await page
+            .locator(".docs-header .docs-brand")
+            .boundingBox();
+          expect(Math.abs(brand.width - brand.height)).toBeLessThan(0.25);
+          await expect(
+            page.locator(".docs-header .docs-brand .name"),
+          ).toHaveCount(0);
           if (previous) expectStable(before, previous);
           await loadFonts();
           const after = await measure();
@@ -60,7 +74,7 @@ for (const locale of ["", "fr/"]) {
             releaseFonts = resolve;
           });
           const path =
-            destination === "API" ? "reference/" : "guide/introduction/";
+            destination === "API" ? referenceEntry : "guide/introduction/";
           await Promise.all([
             page.waitForURL(new RegExp(`/${locale}${path}$`), {
               waitUntil: "domcontentloaded",
@@ -128,11 +142,13 @@ for (const [locale, title, reference] of [
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");
     await spaces.getByRole("link", { name: reference, exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/${locale}reference/$`));
+    await expect(page).toHaveURL(new RegExp(`/${locale}${referenceEntry}$`));
     await expect(
       spaces.getByRole("link", { name: reference, exact: true }),
     ).toHaveAttribute("aria-current", "true");
-    await expect(page.locator(".families > li")).toHaveCount(25);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      referenceSidebar[0].label,
+    );
   });
 
   test(`search finds the new guide (${locale || "en"})`, async ({ page }) => {
@@ -358,6 +374,9 @@ for (const [locale, heading, start, copied] of [
               document.querySelector(".story").getBoundingClientRect().top +
               window.scrollY,
             content: { left: content.left, right: content.right },
+            searchLeft: document
+              .querySelector(".docs-search")
+              .getBoundingClientRect().left,
             notice: { left: notice.left, right: notice.right },
             capabilities,
             overflow: document.documentElement.scrollWidth > window.innerWidth,
@@ -376,6 +395,10 @@ for (const [locale, heading, start, copied] of [
           };
         });
         expect(dimensions.overflow).toBe(false);
+        if (width === 2560)
+          expect(
+            Math.abs(dimensions.searchLeft - dimensions.content.left),
+          ).toBeLessThanOrEqual(1);
         expect(Math.abs(dimensions.hero - 900)).toBeLessThanOrEqual(1);
         expect(
           Math.abs(dimensions.storyTop - dimensions.hero),
@@ -481,29 +504,44 @@ test("navigation bar links the source and the released version", async ({
   );
   await page.setViewportSize({ width: 1440, height: 900 });
   const sources = [
-    ["GitLab", "https://gitlab.elielaloum.com/elielaloum/outpost"],
-    ["GitHub mirror", "https://github.com/elie-laloum/outpost"],
-    ["npm", "https://www.npmjs.com/package/@elie-laloum/outpost"],
+    [
+      "GitLab",
+      "https://gitlab.elielaloum.com/elielaloum/outpost",
+      "rgb(252, 109, 38)",
+    ],
+    [
+      "GitHub mirror",
+      "https://github.com/elie-laloum/outpost",
+      "rgb(130, 80, 223)",
+    ],
+    [
+      "npm",
+      "https://www.npmjs.com/package/@elie-laloum/outpost",
+      "rgb(203, 56, 55)",
+    ],
   ];
   // The repository is the adoption action, so it is reachable from the landing too.
   for (const route of ["", "reference/dispatch/"]) {
     await page.goto(route);
-    for (const [name, href] of sources)
-      await expect(
-        page.locator(".docs-header").getByRole("link", { name, exact: true }),
-      ).toHaveAttribute("href", href);
+    await page.evaluate(() => document.fonts.ready);
+    for (const [name, href, color] of sources) {
+      const link = page
+        .locator(".docs-header")
+        .getByRole("link", { name, exact: true });
+      await expect(link).toHaveAttribute("href", href);
+      await link.hover();
+      await expect(link).toHaveCSS("color", color);
+    }
   }
   const header = page.locator(".docs-header");
-  await expect(header.locator(".brand")).toHaveText("Outpost");
+  await expect(header.locator(".brand")).toHaveAccessibleName("Outpost");
   const version = header.locator(".version");
   await expect(version).toHaveText(`v${manifest.version}`);
   await version.click();
   await expect(page).toHaveURL(/\/project\/changelog\/$/);
-  const brand = await header.locator(".brand-cell").boundingBox();
-  const sidebar = await page.locator(".docs-sidebar").boundingBox();
-  expect(Math.round(brand.x + brand.width)).toBe(
-    Math.round(sidebar.x + sidebar.width),
-  );
+  const navigation = await header.locator(".spaces").boundingBox();
+  const pane = await page.locator(".docs-pane").boundingBox();
+  expect(Math.round(navigation.x + navigation.width)).toBe(Math.round(pane.x));
 });
 
 for (const locale of ["", "fr/"]) {
@@ -694,8 +732,8 @@ for (const locale of ["", "fr/"]) {
       ).toHaveAttribute("aria-current", "true");
     }
     await page.goto(`${locale}reference/`);
-    await expect(page).toHaveURL(new RegExp(`/${locale}reference/$`));
-    await expect(page.locator(".reference-map")).toHaveCount(5);
+    await expect(page).toHaveURL(new RegExp(`/${locale}${referenceEntry}$`));
+    await expect(page.locator(".reference-map")).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: /^(API index|Index de l’API)$/ }),
     ).toHaveCount(0);
@@ -751,36 +789,22 @@ test("reference symbol icons retain accessible names in both languages", async (
   }
 });
 
-for (const [locale, overview] of [
-  ["", "Overview"],
-  ["fr/", "Vue d’ensemble"],
-]) {
-  test(`reference map opens family overviews (${locale || "en"})`, async ({
+for (const locale of ["", "fr/"]) {
+  test(`reference entry opens the first API symbol and retired overviews redirect (${locale || "en"})`, async ({
     page,
   }) => {
     await page.goto(`${locale}reference/`);
-    const sections = page.locator(".reference-map");
-    await expect(sections.locator("h2")).toHaveText([
-      "Environment",
-      "Agents & models",
-      "Orchestration",
-      "Storage",
-      "Operations",
-    ]);
-    const agents = sections.filter({ hasText: "Agents & models" });
-    await expect(
-      agents.locator(".family-name").filter({ hasText: /^Harness$/ }),
-    ).toHaveCount(1);
-    const providers = sections.locator("a.family").filter({
-      has: page.locator(".family-name", { hasText: /^Providers$/ }),
-    });
-    await expect(providers.locator(".family-overview")).toHaveText(overview);
-    await providers.click();
-    await expect(page).toHaveURL(
-      new RegExp(`/${locale}reference/overview/providers/$`),
-    );
+    await expect(page).toHaveURL(new RegExp(`/${locale}${referenceEntry}$`));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      `Providers — ${overview}`,
+      referenceSidebar[0].label,
+    );
+    await expect(
+      page.locator(".docs-navigation a[aria-current=page]"),
+    ).toHaveText(referenceSidebar[0].label);
+    await expect(page.locator(".reference-map")).toHaveCount(0);
+    await page.goto(`${locale}reference/overview/providers/`);
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}guide/choose-a-sandbox/$`),
     );
   });
 }
@@ -832,7 +856,7 @@ for (const locale of ["", "fr/"]) {
       );
       const links = panel.locator(".reference-symbols > li > a[data-api-kind]");
       await expect(links).toHaveCount(
-        families.flatMap((family) => family.items.slice(1)).length,
+        families.flatMap((family) => family.items).length,
       );
       const names = (await links.allTextContents()).map((name) => name.trim());
       const sorted = [...names].sort(
@@ -901,7 +925,7 @@ for (const locale of ["", "fr/"]) {
         "guide/harness-permissions/",
         "guide/host-process/",
         "reference/speculate/",
-        "reference/overview/speculation/",
+        "guide/speculation/",
       ]) {
         await page.goto(`${locale}${route}`);
         const article = page.locator(".sl-markdown-content");

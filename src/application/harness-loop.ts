@@ -22,6 +22,7 @@ import {
   stopRequest,
 } from "./harness-hooks.ts";
 import { executeToolCalls } from "./tool-execution.ts";
+import { routeHarnessModel } from "./harness-routing.ts";
 
 const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
   end: async (runtime, state, result, content) => {
@@ -85,7 +86,7 @@ export async function harnessLoop(
   prompt: string,
   history: HarnessHistory,
 ): Promise<string> {
-  const { harness, model } = runtime.agent;
+  const { harness } = runtime.agent;
   const system = [
     await instructions(runtime),
     ...(await sessionInstructions(runtime, prompt)),
@@ -119,9 +120,21 @@ export async function harnessLoop(
       runtime.emit({ kind: "skills-loaded", names: newlyLoaded });
     runtime.emit({ kind: "step", index: step });
     await compact(runtime, history, step);
+    const model = await routeHarnessModel(
+      runtime,
+      history,
+      system,
+      tools,
+      step,
+    );
+    runtime = { ...runtime, agent: { ...runtime.agent, model } };
     await beforeModel(runtime, history.messages, step);
     const result = await requestModel(runtime, {
       model: model.name,
+      ...(model.reasoning === undefined ? {} : { reasoning: model.reasoning }),
+      ...(model.maxOutputTokens === undefined
+        ? {}
+        : { maxOutputTokens: model.maxOutputTokens }),
       messages: history.messages,
       ...(system ? { system } : {}),
       ...(tools.length ? { tools } : {}),

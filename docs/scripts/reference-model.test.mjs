@@ -10,6 +10,7 @@ import {
 } from "./reference-model.mjs";
 import { explain } from "./reference-explanations.mjs";
 import { referenceSidebar } from "./reference-navigation.mjs";
+import { resolveRoute } from "./route-redirects.mjs";
 
 function model(source) {
   const file = ts.createSourceFile(
@@ -125,7 +126,7 @@ test("every navigable reference is unique, ordered and free of generic boilerpla
     const purposes = new Set();
     for (const group of navigation) {
       let previous = -1;
-      for (const { slug: route, attrs } of group.items.slice(1)) {
+      for (const { slug: route, attrs } of group.items) {
         const source = await page(`${locale}${route}.md`);
         const rank = Number(source.match(/order: (\d+)/)[1]);
         assert.ok(rank >= previous, `Incorrect order: ${route}`);
@@ -261,26 +262,30 @@ test("icons distinguish callable values from callable type aliases", () => {
   }
 });
 
-test("every family starts with its own bilingual conceptual overview", async () => {
+test("reference entry opens the first symbol and retired overviews open their guides", async () => {
   assert.equal(navigation.length, groups.length);
   assert.equal(new Set(groups.map((group) => group.id)).size, groups.length);
   for (const [index, group] of groups.entries()) {
     const route = `reference/overview/${group.id}`;
-    assert.equal(navigation[index].items[0].slug, route);
+    assert.ok(
+      navigation[index].items.every((item) => item.attrs["data-api-kind"]),
+    );
     for (const locale of ["", "fr/"]) {
-      const source = await page(`${locale}${route}.md`);
-      assert.ok(source.includes(`../../../${group.guide}/`), route);
-      assert.ok(
-        source.includes(locale ? "label: Vue d’ensemble" : "label: Overview"),
-        route,
+      await assert.rejects(page(`${locale}${route}.md`), { code: "ENOENT" });
+      assert.equal(
+        resolveRoute(`/${locale}${route}/`),
+        `/${locale}${group.guide}/`,
       );
-      assert.equal([...source.matchAll(/^## /gm)].length, 3, route);
+      assert.equal(
+        resolveRoute(`/${locale}reference/`),
+        `/${locale}${referenceSidebar[0].slug}/`,
+      );
     }
   }
 });
 
 test("the reference sidebar is one alphabetical list of symbols without overviews", () => {
-  const symbols = navigation.flatMap((group) => group.items.slice(1));
+  const symbols = navigation.flatMap((group) => group.items);
   assert.equal(referenceSidebar.length, symbols.length);
   assert.ok(referenceSidebar.every((item) => item.attrs["data-api-kind"]));
   assert.ok(!referenceSidebar.some((item) => "items" in item));
@@ -394,9 +399,8 @@ test("reference prose keeps angle-bracket placeholders visible", async () => {
 });
 
 test("the speculation API is marked experimental", () => {
-  const speculation = navigation.find(
-    (group) => group.items[0].slug === "reference/overview/speculation",
-  );
+  const speculation =
+    navigation[groups.findIndex((group) => group.id === "speculation")];
   const entry = speculation.items.find(
     (item) => item.slug === "reference/speculate",
   );

@@ -188,7 +188,7 @@ const href = (path: string) =>
   }
   .rail {
     container-type: inline-size;
-    max-width: 90rem;
+    max-width: var(--docs-landing-width);
     margin-inline: auto;
     background: var(--sl-color-black);
     border-inline: 1px solid var(--docs-line);
@@ -200,7 +200,7 @@ const href = (path: string) =>
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
-    padding-top: 4rem;
+    padding-top: var(--sl-nav-height);
   }
   .hero-copy {
     display: flex;

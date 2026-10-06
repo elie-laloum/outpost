@@ -1,13 +1,20 @@
 ---
 import Landing from "./landing/Landing.astro";
+import Announcement from "./Announcement.astro";
 import { docsSpace } from "./docs-route.ts";
 
 const route = Astro.locals.starlightRoute;
 const space = docsSpace(route);
 ---
 
-<div class:list={["docs-frame", { "landing-frame": space === "landing" }]} data-space={space}>
-  <header class="docs-top"><slot name="header" /></header>
+<div
+  class:list={["docs-frame", { "landing-frame": space === "landing", "has-rail": Boolean(route.toc) }]}
+  data-space={space}
+>
+  <header class="docs-top">
+    <Announcement />
+    <div class="docs-toolbar"><slot name="header" /></div>
+  </header>
   <nav class="docs-sidebar" aria-label={Astro.locals.t("sidebarNav.accessibleLabel")}>
     <div id="starlight__sidebar"><slot name="sidebar" /></div>
   </nav>
@@ -15,9 +22,20 @@ const space = docsSpace(route);
 </div>
 
 <style>
+  :global(:root) {
+    --docs-toolbar-height: 4rem;
+    --docs-announcement-height: 2.5rem;
+    --sl-nav-height: calc(var(--docs-toolbar-height) + var(--docs-announcement-height));
+  }
   .docs-frame {
     --sl-sidebar-width: 17rem;
-    --sl-nav-height: 4rem;
+    --docs-content-width: 84rem;
+    --docs-right-rail-width: 16rem;
+    --docs-landing-width: 90rem;
+    --docs-content-start: max(
+      var(--sl-sidebar-width),
+      calc((100% + var(--sl-sidebar-width) - var(--docs-content-width)) / 2)
+    );
     --docs-line: var(--sl-color-hairline-light);
     --docs-code-bg: color-mix(in oklch, var(--sl-color-gray-6) 45%, var(--sl-color-black));
     --docs-pad: clamp(1.25rem, 2.6vw, 2.5rem);
@@ -29,13 +47,16 @@ const space = docsSpace(route);
     position: fixed;
     inset: 0 0 auto;
     z-index: var(--sl-z-index-navbar);
-    height: 4rem;
+    height: var(--sl-nav-height);
     border-bottom: 1px solid var(--docs-line);
     background: var(--sl-color-black);
   }
+  .docs-toolbar {
+    height: var(--docs-toolbar-height);
+  }
   .docs-sidebar {
     position: fixed;
-    inset: 4rem auto 0 0;
+    inset: var(--sl-nav-height) auto 0 0;
     z-index: var(--sl-z-index-menu);
     width: 17rem;
     overflow-y: auto;
@@ -47,8 +68,14 @@ const space = docsSpace(route);
   .landing-frame .docs-sidebar {
     display: none;
   }
+  .landing-frame {
+    --docs-content-start: max(
+      var(--sl-sidebar-width),
+      calc((100% - var(--docs-landing-width)) / 2)
+    );
+  }
   .docs-main {
-    padding: 4rem 0 0 17rem;
+    padding: var(--sl-nav-height) 0 0 17rem;
   }
   .docs-main :global(main) {
     padding: 0;
@@ -69,7 +96,18 @@ const space = docsSpace(route);
     outline: 2px solid var(--sl-color-accent);
     outline-offset: 2px;
   }
+  @media (min-width: 100rem) {
+    .docs-frame.has-rail:not(.landing-frame) {
+      --docs-content-start: max(
+        var(--sl-sidebar-width),
+        calc((100% + var(--sl-sidebar-width) - var(--docs-content-width) - var(--docs-right-rail-width)) / 2)
+      );
+    }
+  }
   @media (max-width: 49.99rem) {
+    :global(:root) {
+      --docs-announcement-height: 3.5rem;
+    }
     .docs-sidebar {
       display: none;
       width: 100%;

@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "decisions",
+    title: ["Decisions", "Décisions"],
+    guide: "guide/decisions",
+    names:
+      "defineDecision decide defineDecisionTask createSystemOneDecisionProvider defineHarnessModelRouting DecisionState ChoiceQuestion ScoreQuestion NoulQuestion DecisionQuestion DecisionQuestions DecisionOptions Decision ChoiceAnswer ScoreAnswer NoulAnswer DecisionAnswer DecisionAnswers DecisionProviderResult DecisionRequest DecisionProvider DecisionResult DecideOptions DecisionEvent DecisionTaskOptions SystemOneDecisionProviderOptions HarnessModelRoutingContext HarnessModelRoutingOptions HarnessModelRouting RoutingQuestion RoutingChoices ModelRouteEvent",
+  },
+  {
     id: "storage-transports",
     title: ["Storage transports", "Transports de stockage"],
     guide: "guide/storage",
@@ -73,7 +80,7 @@ export const groups = [
     title: ["Observability", "Observabilité"],
     guide: "guide/observability",
     names:
-      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
+      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     id: "workflows",
@@ -235,7 +242,7 @@ const guidePages = {
   observability:
     "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver WorkflowTelemetry",
   "record-replay":
-    "createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision",
+    "createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision",
   budgets:
     "Usage WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable",
   "verification-loops":

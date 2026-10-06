@@ -8,6 +8,7 @@ const folds: Readonly<
     (messages: ModelMessage[], record: TranscriptRecord) => ModelMessage[]
   >
 > = {
+  "model-selection": (messages) => messages,
   session: (messages) => messages,
   message: (messages, record) =>
     record.type === "message" ? [...messages, record.message] : messages,
@@ -30,7 +31,7 @@ export function parseTranscript(text: string): readonly TranscriptRecord[] {
       }
     });
   const first = records[0];
-  if (first?.type !== "session" || first.version !== 1)
+  if (first?.type !== "session" || ![1, 2].includes(first.version))
     throw new OutpostError("session", "Unsupported harness transcript");
   for (const record of records)
     if (!Object.hasOwn(folds, record?.type))

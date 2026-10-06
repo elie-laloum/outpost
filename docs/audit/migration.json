@@ -638,8 +638,9 @@
       "sourceSha256": "c2692d6e80fd4a041f2da76dbeca895dfed3d52dd0bde1760aeec690cc97d5c3",
       "sourceBodySha256": "58e5cc3cb85f2d53108c7635dc8618354cf7a18f420d0e6ff3ef9c0d95dc160b",
       "preservedBodySha256": "58e5cc3cb85f2d53108c7635dc8618354cf7a18f420d0e6ff3ef9c0d95dc160b",
-      "disposition": "Removed from the documentation; maintained in the repository roadmap.md",
-      "repositoryDestination": "roadmap.md"
+      "disposition": "Removed from the documentation; repository roadmap.md subsequently removed",
+      "repositoryDestination": "roadmap.md",
+      "repositoryRemoved": true
     },
     {
       "source": "project/changelog.md",
@@ -1457,8 +1458,9 @@
       "sourceSha256": "1e16d730b439c79343ed8365893466c64aa26f81f5b8609374d9599e4a97ad1d",
       "sourceBodySha256": "8e54f63ac2dcfa7bd7f464731a877542d381565e58e3ccc77bc9391675e165f1",
       "preservedBodySha256": "8e54f63ac2dcfa7bd7f464731a877542d381565e58e3ccc77bc9391675e165f1",
-      "disposition": "Removed from the documentation; maintained in the repository roadmap.md",
-      "repositoryDestination": "roadmap.md"
+      "disposition": "Removed from the documentation; repository roadmap.md subsequently removed",
+      "repositoryDestination": "roadmap.md",
+      "repositoryRemoved": true
     },
     {
       "source": "fr/project/changelog.md",

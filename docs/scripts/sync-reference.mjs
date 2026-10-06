@@ -155,24 +155,11 @@ for (const group of groups) {
           `Missing experimental explanation: ${name} (${language})`,
         );
   }
-  for (const locale of ["", "fr/"]) {
-    const overview = `${locale}reference/overview/${group.id}.md`;
-    const text = await readFile(
-      resolve(root, "src/content/docs", overview),
-      "utf8",
-    );
-    if (!text.includes(group.guide))
-      throw new Error(`Overview must link its practical guide: ${overview}`);
-  }
 }
 
 const navigation = groups.map((group) => ({
   title: group.title,
   items: [
-    {
-      slug: `reference/overview/${group.id}`,
-      attrs: { "data-reference-overview": "" },
-    },
     ...group.names
       .split(" ")
       .map((name) => exportedByName.get(name))
@@ -320,14 +307,6 @@ for (const [language, locale] of [
       "\n",
   );
 }
-const home = JSON.parse(
-  await readFile(resolve(root, "reference-content/home.json"), "utf8"),
-);
-for (const [language, locale] of ["", "fr/"].entries())
-  expected.set(
-    `${locale}reference/index.md`,
-    `---\ntitle: ${JSON.stringify(home.title[language])}\ndescription: ${JSON.stringify(home.description[language])}\n---\n\n${home.body[language]}\n`,
-  );
 for (const [name, raw] of expected) {
   const content = await format(raw, { parser: "markdown" });
   const target = resolve(root, "src/content/docs", name);

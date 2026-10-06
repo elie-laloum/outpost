@@ -13,10 +13,7 @@ export function harnessModelProvider(scope: HarnessModelScope): ModelProvider {
   const scoped = (request: ModelRequest): ModelRequest => {
     signal.throwIfAborted();
     budget.check();
-    const { reasoning, maxOutputTokens } = agent.model;
     return {
-      ...(reasoning === undefined ? {} : { reasoning }),
-      ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
       ...request,
       signal,
     };

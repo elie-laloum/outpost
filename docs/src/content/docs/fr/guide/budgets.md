@@ -143,3 +143,7 @@ Pour poursuivre une exécution arrêtée par son budget, relancez-la avec un bud
 - [Harness intégré](../harness/): Limitez les requêtes au modèle, les appels d’outils et les tokens d’un tour.
 
 API : [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../../reference/workflowusage/) · [Usage](../../reference/usage/) · [TaskContext](../../reference/taskcontext/) · [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/) · [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/).
+
+## Inclure l’usage des décisions
+
+Les [tâches de décision](../decisions/) ajoutent leur usage normalisé aux budgets du workflow. Le [routage de modèles](../model-routing/) compte aussi dans les budgets du harness, de ses ancêtres et du workflow, une fois par requête du routeur. L’usage valide reste compté lorsque la troncature fait rejeter le résultat. Un reçu absent représente un usage incomplet et les budgets stricts refusent une continuation dont la consommation est inconnue.

@@ -3,6 +3,9 @@ import type { Observation, ObservationEvent } from "./observation.types.ts";
 
 export function isAgentEvent(event: ObservationEvent): event is AgentEvent {
   switch (event.kind) {
+    case "decision":
+    case "decision-request":
+    case "decision-response":
     case "workflow":
     case "operation":
     case "dispatch-start":

@@ -202,3 +202,7 @@ await dispatch({
 - Model requests leave from your process, so the sandbox’s [network restrictions](../network-restrictions/) do not apply to them.
 
 API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservationHub](../../reference/createobservationhub/).
+
+## Route each model step
+
+Add an optional `routing` declaration to select among models of this harness model provider after compaction and before model hooks. Tools and hooks see the selected model while the sandbox and history remain available. See [model routing](../model-routing/) for candidate validation, state, fallback and usage behavior.

@@ -15,6 +15,7 @@ import type { HarnessOptions } from "@elie-laloum/outpost";
 
 | Name            | Type                                                               | Presence | Meaning                                                                                                                                                                                                                                                             |
 | --------------- | ------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `routing`       | `HarnessModelRouting \| undefined`                                 | Optional | Optional per-step routing declared with defineHarnessModelRouting; all candidates use this harness model provider.                                                                                                                                                  |
 | `modelProvider` | `ModelProvider`                                                    | Required | Model provider called for every step and summary request, such as createOpenAIModelProvider() or createAnthropicModelProvider(). Its validate() checks the agent model when createAgent() composes the agent.                                                       |
 | `instructions`  | `HarnessInstructionsOption \| undefined`                           | Optional | System instructions as text, a defineHarnessInstructions() or defineMcpPrompt() result, or a list of these. Resolved at each turn and joined with blank lines; empty results are skipped.                                                                           |
 | `tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined` | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness, including skill and MCP tools.                                                                                                                       |
@@ -32,6 +33,7 @@ import type { HarnessOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface HarnessOptions {
+  readonly routing?: HarnessModelRouting;
   readonly modelProvider: ModelProvider;
   readonly instructions?: HarnessInstructionsOption;
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
@@ -54,6 +56,7 @@ export interface HarnessOptions {
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructionsOption](../harnessinstructionsoption/)
 - [HarnessLimits](../harnesslimits/)
+- [HarnessModelRouting](../harnessmodelrouting/)
 - [HarnessPermissions](../harnesspermissions/)
 - [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)

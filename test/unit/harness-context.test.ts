@@ -40,6 +40,12 @@ test("transcripts fold messages and compactions and reject unknown content", () 
   );
   assert.equal(transcriptMessages(records).length, 3);
   assert.deepEqual(transcriptMessages(parseTranscript(session)), []);
+  assert.deepEqual(
+    transcriptMessages(
+      parseTranscript(session.replace('"version":1', '"version":2')),
+    ),
+    [],
+  );
   for (const [text, pattern] of [
     ["not json", /valid JSONL/],
     [
@@ -47,7 +53,7 @@ test("transcripts fold messages and compactions and reject unknown content", () 
       /Unsupported harness transcript/,
     ],
     [
-      JSON.stringify({ type: "session", version: 2 }),
+      JSON.stringify({ type: "session", version: 3 }),
       /Unsupported harness transcript/,
     ],
     [`${session}\n${JSON.stringify({ type: "other" })}`, /transcript record/],

@@ -2,6 +2,7 @@ import type { Usage } from "./agent.types.ts";
 import type { HarnessContextStrategy } from "./context.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 import type { HarnessHook } from "./hook.types.ts";
+import type { HarnessModelRouting } from "./harness-routing.types.ts";
 import type { McpServers } from "./mcp-server.types.ts";
 import type { AgentModel, ModelProvider } from "./model.types.ts";
 import type { HarnessPermissions } from "./permissions.types.ts";
@@ -53,6 +54,7 @@ export interface HarnessToolExecution {
 }
 
 export interface HarnessOptions {
+  readonly routing?: HarnessModelRouting;
   readonly modelProvider: ModelProvider;
   readonly instructions?: HarnessInstructionsOption;
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
@@ -68,6 +70,7 @@ export interface HarnessOptions {
 }
 
 export interface Harness {
+  readonly routing?: HarnessModelRouting;
   readonly kind: "custom";
   readonly modelProvider: ModelProvider;
   readonly instructions: readonly HarnessInstructions[];
