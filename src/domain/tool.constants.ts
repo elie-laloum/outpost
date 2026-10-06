@@ -26,8 +26,6 @@ export const JSON_SCHEMA_TYPES: ReadonlySet<string> = new Set([
   "null",
 ]);
 
-export const STANDARD_JSON_SCHEMA_TARGET = "draft-2020-12";
-
 export const HARNESS_TOOL_FIELDS: ReadonlySet<string> = new Set([
   "name",
   "description",

@@ -58,6 +58,11 @@ test("tagged responses support async Standard Schema and take last complete tag"
     "last",
   );
   const json = defineJsonResponse({
+    jsonSchema: {
+      type: "object",
+      properties: { ok: { type: "boolean" } },
+      required: ["ok"],
+    },
     tag: "data",
     schema: {
       "~standard": {
@@ -69,6 +74,11 @@ test("tagged responses support async Standard Schema and take last complete tag"
   await assert.rejects(json.read("<data>{no}</data>"), ResponseError);
   await assert.rejects(json.read("none"), /No complete/);
   const rejected = defineJsonResponse({
+    jsonSchema: {
+      type: "object",
+      properties: { ok: { type: "boolean" } },
+      required: ["ok"],
+    },
     tag: "data",
     schema: { "~standard": { validate: () => ({ issues: ["wrong"] }) } },
   });

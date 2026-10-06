@@ -1,5 +1,5 @@
 import { invariant } from "./errors.ts";
-import { STANDARD_JSON_SCHEMA_TARGET } from "./tool.constants.ts";
+import { STANDARD_JSON_SCHEMA_TARGET } from "./standard-schema.constants.ts";
 import type {
   StandardIssue,
   StandardPathSegment,

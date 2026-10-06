@@ -296,6 +296,11 @@ test("response repairs continue the conversation with read-only tools only", asy
     {
       brief: { text: "Return <data>JSON</data>" },
       response: defineJsonResponse({
+        jsonSchema: {
+          type: "object",
+          properties: { ok: { type: "boolean" } },
+          required: ["ok"],
+        },
         tag: "data",
         repairs: 1,
         schema: (value) => value as { ok: boolean },

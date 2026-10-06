@@ -405,7 +405,7 @@ const batchCapability = (lease: SandboxLease): FileTransfers | undefined => leas
 console.log(batchCapability);
 await using sandbox = await createSandbox({ sandboxProvider: createLocalSandboxProvider() });
 await sandbox.diagnose({transfers:true});
-const result = await sandbox.dispatch({ agent: composeAgent({ harness: createCodexHarness({}) }), brief: { text: 'Return <n>1</n>' }, response: defineJsonResponse({tag:'n', schema: value => Number(value)}) });
+const result = await sandbox.dispatch({ agent: composeAgent({ harness: createCodexHarness({}) }), brief: { text: 'Return <n>1</n>' }, response: defineJsonResponse({tag:'n', jsonSchema: {type:'number'}, schema: value => Number(value)}) });
 const n: number = result.value;
 const accountFile: AccountCredential = { file: '~/.outpost/accounts/kimi' };
 const usageKey: UsageCredential = { variable: 'TEAM_API_KEY' };

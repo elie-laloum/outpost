@@ -14,7 +14,7 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-// The contract: any Standard Schema (Valibot, Zod…) will do.
+// Valibot validates the answer; the explicit JSON Schema describes its input.
 const Summary = v.object({
   name: v.string(),
   purpose: v.string(),
@@ -45,7 +45,21 @@ const result = await dispatch({
 
   // The response is extracted between <summary> and </summary>, then validated.
   // If it's invalid, the agent gets 2 repair attempts.
-  response: defineJsonResponse({ tag: "summary", schema: Summary, repairs: 2 }),
+  response: defineJsonResponse({
+    jsonSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        purpose: { type: "string" },
+        files: { type: "array", items: { type: "string" } },
+        difficulty: { enum: ["easy", "medium", "hard"] },
+      },
+      required: ["name", "purpose", "files", "difficulty"],
+    },
+    tag: "summary",
+    schema: Summary,
+    repairs: 2,
+  }),
 });
 
 const summary = result.value; // typed: { name, purpose, files, difficulty }

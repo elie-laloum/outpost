@@ -1,5 +1,6 @@
 import type { Agent } from "../domain/agent.types.ts";
 import { mainLoopSteering, steeringInbox } from "../domain/steering.ts";
+import { responseInstructions } from "../domain/response-instructions.ts";
 import type { DispatchOptions, Turn } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 import { deliverSteering, rejectSubagentSteering } from "./steering-scope.ts";
@@ -24,9 +25,19 @@ export async function steeringTurns(
     if (agent.kind !== "custom") rejectSubagentSteering(inbox);
     const messages = inbox?.take(mainLoopSteering) ?? [];
     deliverSteering(messages, next.mode, pass, options.observe);
-    const text = [next.prompt, ...messages.map((message) => message.text)]
+    const text = [
+      next.prompt,
+      ...messages.map((message) => message.text),
+      ...(options.response ? [responseInstructions(options.response)] : []),
+    ]
       .filter(Boolean)
       .join("\n\n");
+    notify(options.observe, {
+      kind: "prompt",
+      text,
+      pass,
+      at: new Date().toISOString(),
+    });
     const turn = await run(text, next.continuation);
     turns.push(turn);
     const recorded = agent.kind === "replay" ? agent.pendingSteering() : [];

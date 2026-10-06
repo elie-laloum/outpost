@@ -584,8 +584,8 @@
     "Conversation native à continuer, par identifiant ; fork: true continue une copie et laisse l’originale intacte. Exige une seule passe et un agent qui sait reprendre."
   ],
   "DispatchOptions.response": [
-    "Typed response contract: the tagged answer is parsed and validated, and an invalid answer gets up to repairs correction turns. Requires one pass.",
-    "Contrat de réponse typée : la réponse balisée est analysée et validée, et une réponse invalide reçoit jusqu’à repairs tours de correction. Exige une seule passe."
+    "Typed response contract: appends final-answer format instructions and the JSON input schema after the rendered brief and steering messages included at turn start. Parses and validates the tagged answer, with up to repairs correction turns. Requires one pass; injection cannot be disabled.",
+    "Contrat de réponse typée : ajoute les consignes de format final et le schéma d’entrée JSON après le brief rendu et les messages de steering incorporés au début du tour. Analyse et valide la réponse balisée, avec jusqu’à repairs tours de correction. Exige une seule passe ; l’injection ne peut pas être désactivée."
   ],
   "DispatchOptions.observe": [
     "Receives each normalized agent event with its pass number and timestamp. An exception thrown here is collected in observerErrors and does not change the outcome.",
@@ -604,20 +604,20 @@
     "Conserve aussi dans le journal les événements volumineux et sensibles : lignes brutes du protocole, fragments de texte, stderr, raisonnement, requêtes et réponses du modèle, sorties d’outils et de commandes. Désactivé par défaut."
   ],
   "Brief.text": [
-    "Literal brief sent to the agent unchanged: no placeholders or commands are expanded.",
-    "Brief littéral envoyé tel quel à l’agent : aucune variable ni commande n’est développée."
+    "Literal task brief: no placeholders or commands are expanded. Dispatch appends response-format instructions when response is provided.",
+    "Brief de tâche littéral : aucune variable ni commande n’est développée. Le dispatch ajoute les consignes de format lorsqu’un response est fourni."
   ],
   "Brief.file": [
-    "Path of a template file, resolved from the process working directory and read before each pass. Its {{NAME}} placeholders are filled and each !`command` fragment is replaced by the command's stdout, run in the sandbox.",
-    "Chemin d’un fichier modèle, résolu depuis le répertoire de travail du processus et lu avant chaque passe. Ses variables {{NAME}} sont remplies et chaque fragment !`command` est remplacé par la sortie standard de la commande, exécutée dans la sandbox."
+    "Template path resolved from the process working directory and read before each pass. Expands {{NAME}} and !`command` fragments in the sandbox. Response-format instructions are appended after rendering and never expanded.",
+    "Chemin du modèle résolu depuis le répertoire de travail du processus et lu avant chaque passe. Développe les variables {{NAME}} et les fragments !`command` dans la sandbox. Les consignes de format sont ajoutées après le rendu sans être développées."
   ],
   "Brief.values": [
     "Values for the file's {{NAME}} placeholders, also inserted unquoted into commands. WORK_BRANCH and BASE_BRANCH are reserved; a missing value fails with code prompt and unused values reach warn.",
     "Valeurs des variables {{NAME}} du fichier, insérées aussi sans échappement dans les commandes. WORK_BRANCH et BASE_BRANCH sont réservées ; une valeur absente échoue avec le code prompt et les valeurs inutilisées sont signalées à warn."
   ],
   "ResponseSpec.tag": [
-    "Tag name without angle brackets. The brief must contain its opening tag, or the dispatch fails with code configuration before the sandbox starts.",
-    "Nom de la balise, sans chevrons. Le brief doit contenir sa balise ouvrante, sinon le dispatch échoue avec le code configuration avant le démarrage de la sandbox."
+    "Tag name without angle brackets. Dispatch automatically requests exactly one final tagged answer; the brief does not need to contain the tag.",
+    "Nom de la balise sans chevrons. Le dispatch demande automatiquement une seule réponse balisée finale ; le brief n’a pas besoin de contenir la balise."
   ],
   "ResponseSpec.repairs": [
     "Correction turns allowed after an invalid answer, 0 unless the options set it. Each resumes the same conversation and asks only for the corrected tag.",
@@ -1434,8 +1434,8 @@
     "Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration."
   ],
   "JsonResponseOptions.schema": [
-    "Standard Schema validator, such as Zod or Valibot, or a function that receives the parsed JSON as unknown and returns the typed value. Reported issues or a thrown error reject the answer.",
-    "Validateur Standard Schema, par exemple Zod ou Valibot, ou fonction qui reçoit le JSON analysé comme unknown et renvoie la valeur typée. Des problèmes signalés ou une erreur levée rejettent la réponse."
+    "Standard Schema validator or a function receiving parsed JSON as unknown and returning the typed value, possibly transformed. Issues or thrown errors reject the answer. Automatic input-schema conversion requires Standard JSON Schema; otherwise jsonSchema is required.",
+    "Validateur Standard Schema ou fonction recevant le JSON analysé comme unknown et renvoyant la valeur typée, éventuellement transformée. Des problèmes signalés ou une erreur levée rejettent la réponse. La conversion automatique du schéma d’entrée exige Standard JSON Schema ; sinon jsonSchema est obligatoire."
   ],
   "JsonResponseOptions.repairs": [
     "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation.",
@@ -6695,12 +6695,12 @@
     "Nom d’une variable déclarée dont la valeur est envoyée en Authorization: Bearer. Incompatible avec un en-tête Authorization."
   ],
   "defineTextResponse.options": [
-    "Tag name and the number of repair turns allowed after an invalid answer.",
-    "Nom de la balise et nombre de tours de réparation autorisés après une réponse invalide."
+    "Tag used by automatic final-answer instructions and allowed repair turns.",
+    "Balise utilisée par les consignes automatiques de réponse finale et tours de réparation autorisés."
   ],
   "defineJsonResponse.options": [
-    "Tag name, schema or parsing function, and the number of repair turns allowed after an invalid answer.",
-    "Nom de la balise, schéma ou fonction d’analyse, et nombre de tours de réparation autorisés après une réponse invalide."
+    "Tag, validator, input JSON Schema when automatic conversion is unavailable, and allowed repair turns.",
+    "Balise, validateur, JSON Schema d’entrée si la conversion automatique est indisponible, et tours de réparation autorisés."
   ],
   "defineJsonArtifact.options": [
     "Contract name, version and the schema applied on publish and on read.",
@@ -7405,5 +7405,17 @@
   "ObservationEvent.durationMs": [
     "Elapsed milliseconds for the decision, operation, workflow task, candidate or dispatch indicated by kind; agent summaries aggregate all turns of the pass.",
     "Millisecondes écoulées pour la décision, l’opération, la tâche de workflow, le candidat ou le dispatch indiqué par kind ; les résumés d’agent agrègent tous les tours du passage."
+  ],
+  "ResponseSpec.format": [
+    "Answer content format used by automatic instructions: json requests raw JSON conforming to jsonSchema; text requests text. Omit for a custom contract that needs generic tagged output.",
+    "Format du contenu utilisé par les consignes automatiques : json demande du JSON brut conforme à jsonSchema ; text demande du texte. Omettez-le pour un contrat personnalisé demandant un contenu balisé générique."
+  ],
+  "ResponseSpec.jsonSchema": [
+    "Captured input JSON Schema included in the prompt when format is json; required for that format. Describes the JSON before schema validation and any transformation.",
+    "JSON Schema d’entrée capturé et inclus dans le prompt lorsque format vaut json ; obligatoire pour ce format. Décrit le JSON avant la validation par schema et toute transformation."
+  ],
+  "JsonResponseOptions.jsonSchema": [
+    "Explicit input JSON Schema object included in automatic final-answer instructions. Required unless schema supports Standard JSON Schema conversion; takes precedence over conversion. Captured as a deeply frozen lossless JSON copy, excluding non-enumerable ~standard protocol metadata; schema remains the validator. No remote references are fetched.",
+    "Objet JSON Schema d’entrée explicite inclus dans les consignes automatiques de réponse finale. Obligatoire sauf si schema prend en charge la conversion Standard JSON Schema ; prioritaire sur la conversion. Capturé sous forme de copie JSON sans perte figée en profondeur, sans les métadonnées de protocole ~standard non énumérables ; schema reste le validateur. Aucune référence distante n’est chargée."
   ]
 }

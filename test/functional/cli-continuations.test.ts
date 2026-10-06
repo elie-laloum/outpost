@@ -119,6 +119,11 @@ for (const name of ["antigravity", "copilot", "kimi"] as const) {
     const repaired = await second.resume({
       brief: { text: "Return invalid JSON inside <answer>" },
       response: defineJsonResponse({
+        jsonSchema: {
+          type: "object",
+          properties: { ok: { type: "boolean" } },
+          required: ["ok"],
+        },
         tag: "answer",
         repairs: 1,
         schema: (value: unknown) => {

@@ -228,6 +228,11 @@ test("schema repairs resume the same conversation and observer failures are harm
   const output = await box.dispatch({
     brief: { text: "Return <answer> JSON" },
     response: defineJsonResponse({
+      jsonSchema: {
+        type: "object",
+        properties: { ok: { type: "boolean" } },
+        required: ["ok"],
+      },
       tag: "answer",
       repairs: 1,
       schema: (input) => input as { ok: boolean },

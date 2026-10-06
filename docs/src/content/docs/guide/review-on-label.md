@@ -98,6 +98,21 @@ process.once("SIGINT", async () => {
 
 Validate the queue input and verdict, and provide the GitHub operations for your application.
 
+The explicit schema in `verdict-schema.ts` describes the input JSON injected into the prompt; `verdict.ts` validates the returned answer.
+
+```ts title="verdict-schema.ts"
+export const verdictSchema = {
+  type: "object",
+  properties: {
+    approved: { type: "boolean" },
+    findings: { type: "array", items: { type: "string" } },
+  },
+  required: ["approved", "findings"],
+};
+```
+
+Import this schema in `verdict.ts` so automatic instructions describe the expected answer; the existing validation function continues to check its content.
+
 <!-- tabs -->
 
 ```ts title="review.types.ts"
@@ -112,10 +127,12 @@ export type Verdict = { approved: boolean; findings: string[] };
 
 ```ts title="verdict.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
+import { verdictSchema } from "./verdict-schema.ts";
 import type { Verdict } from "./review.types.ts";
 
 export const verdict = defineJsonResponse({
   tag: "verdict",
+  jsonSchema: verdictSchema,
   repairs: 1,
   schema(value): Verdict {
     if (typeof value !== "object" || value === null)

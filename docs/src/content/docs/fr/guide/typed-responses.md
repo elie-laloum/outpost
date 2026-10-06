@@ -21,9 +21,7 @@ const result = await dispatch({
   sandboxProvider,
   agent: coder,
   response: verdict,
-  brief: {
-    text: 'Review the last commit. End with <verdict>{"approved": true, "reasons": []}</verdict>.',
-  },
+  brief: { text: "Review the last commit." },
 });
 if (!result.value.approved) reportValue(result.value.reasons);
 // Example output: [ 'Add a regression test.' ]
@@ -31,32 +29,52 @@ if (!result.value.approved) reportValue(result.value.reasons);
 
 Référence API : [DispatchResult](../../reference/dispatchresult/) et [defineJsonResponse](../../reference/definejsonresponse/).
 
-## Indiquer le format dans les consignes
+## Laisser Outpost demander le format
 
-Outpost envoie votre brief tel quel : il n’ajoute aucune consigne de format. Indiquez la balise attendue et montrez un exemple de son contenu, comme ci-dessus.
+Fournir `response` ajoute des consignes de réponse finale après le brief rendu et les messages de steering incorporés au début du tour. Elles demandent une seule balise finale `<verdict>…</verdict>`, contenant du JSON valide, sans texte après la balise fermante. Elles remplacent les consignes de format contradictoires tout en conservant les instructions de la tâche. Aucune option ne permet de les désactiver.
 
-`dispatch()` vérifie que le brief contient la balise ouvrante (`<verdict>`) avant de démarrer une sandbox. Sans elle, l’appel échoue avec une erreur `configuration`.
+Outpost obtient automatiquement le JSON Schema d’entrée via [Standard JSON Schema](https://standardschema.dev/json-schema), pris en charge directement par Zod 4.2+. Il transmet ce schéma avec les consignes. Le schéma d’entrée décrit ce que l’agent doit renvoyer ; la validation peut transformer ce JSON en un `result.value` différent.
+
+Pour une fonction de parsing ou un validateur sans convertisseur compatible, fournissez `jsonSchema` explicitement. Ce schéma est prioritaire sur la conversion automatique. La définition échoue avec le code `configuration` si le schéma manque, si la conversion échoue ou si le schéma contient des valeurs non conservables en JSON. Outpost capture une copie du schéma, sans les métadonnées de protocole `~standard` non énumérables, et ne résout pas les références distantes.
+
+Le schéma injecté guide l’agent ; `schema` effectue toujours la validation. Les deux doivent décrire le même contrat d’entrée. Les tableaux, primitives et unions sont acceptés, comme les objets.
 
 ## Utiliser votre propre validation
 
-La fonction reçoit le JSON analysé comme `unknown` et renvoie la valeur typée. Levez une exception pour le rejeter. `read()` applique les mêmes règles que `dispatch()` : vous pouvez tester une réponse hors ligne.
+La fonction reçoit le JSON analysé comme `unknown` et renvoie la valeur typée. Levez une exception pour le rejeter. `read()` applique les mêmes règles que `dispatch()` : vous pouvez tester une réponse hors ligne. Placez le validateur dans `validate-verdict.ts`, le contrat de réponse dans `verdict.ts` et la vérification hors ligne dans `read-verdict.ts` ; lancez `node read-verdict.ts` pour lire le verdict final.
 
-```ts
-import { reportValue } from "./reporter.ts";
+<!-- tabs -->
+
+```ts title="validate-verdict.ts"
+export function validateVerdict(input: unknown) {
+  if (
+    typeof input !== "object" ||
+    input === null ||
+    !("approved" in input) ||
+    typeof input.approved !== "boolean"
+  )
+    throw new Error("Expected approved: boolean");
+  return { approved: input.approved };
+}
+```
+
+```ts title="verdict.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
-const verdict = defineJsonResponse({
+import { validateVerdict } from "./validate-verdict.ts";
+export const verdict = defineJsonResponse({
   tag: "verdict",
-  schema(input) {
-    if (
-      typeof input !== "object" ||
-      input === null ||
-      !("approved" in input) ||
-      typeof input.approved !== "boolean"
-    )
-      throw new Error("Expected approved: boolean");
-    return { approved: input.approved };
+  jsonSchema: {
+    type: "object",
+    properties: { approved: { type: "boolean" } },
+    required: ["approved"],
   },
+  schema: validateVerdict,
 });
+```
+
+```ts title="read-verdict.ts"
+import { reportValue } from "./reporter.ts";
+import { verdict } from "./verdict.ts";
 const answer =
   'Draft: <verdict>{"approved":false}</verdict>\n' +
   'Final: <verdict>{"approved":true}</verdict>';
@@ -68,9 +86,30 @@ reportValue(await verdict.read(answer));
 
 La dernière paire `<verdict>…</verdict>` complète l’emporte : un brouillon placé plus tôt dans la réponse est ignoré. Son contenu est nettoyé des espaces et peut être entouré d’un bloc de code `json`.
 
+## Valider une réponse transformée hors ligne
+
+Ce contrat accepte une chaîne JSON et renvoie sa longueur. Outpost injecte automatiquement le schéma d’entrée de type chaîne, tandis que `read()` renvoie un nombre. Enregistrez-le dans `length.ts` et lancez `node length.ts` après avoir installé Outpost et Zod comme dans l’exemple précédent.
+
+```ts
+import { reportValue } from "./reporter.ts";
+import { defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+const length = defineJsonResponse({
+  tag: "length",
+  schema: z.string().transform((value) => value.length),
+});
+reportValue(
+  length.jsonSchema?.type,
+  await length.read('<length>"hello"</length>'),
+);
+// Example output: string 5
+```
+
+<!-- check:run -->
+
 ## Renvoyer du texte brut
 
-`defineTextResponse()` renvoie le texte nettoyé contenu dans la balise, sans analyse JSON.
+`defineTextResponse()` demande automatiquement une réponse textuelle dans une balise finale et renvoie son contenu nettoyé, sans analyse JSON.
 
 ```ts
 import { reportValue } from "./reporter.ts";
@@ -101,7 +140,7 @@ try {
     sandboxProvider,
     agent: coder,
     response: defineTextResponse({ tag: "summary" }),
-    brief: { text: "Summarize the README inside <summary></summary>." },
+    brief: { text: "Summarize the README." },
   });
 } catch (error) {
   if (!(error instanceof ResponseError)) throw error;
@@ -126,7 +165,7 @@ const verdict = defineJsonResponse({
 });
 ```
 
-Chaque réparation reprend la même conversation avec l’erreur de validation et le contenu précédent. Elle demande uniquement la balise corrigée, sans modifier de fichiers ni lancer de commandes. Les tours de réparation s’ajoutent à `result.usage` et à `result.text`.
+Chaque réparation reprend la même conversation avec l’erreur de validation, le contenu précédent et les consignes de format et de schéma. Elle demande uniquement la balise corrigée, sans modifier de fichiers ni lancer de commandes. Les tours de réparation s’ajoutent à `result.usage` et à `result.text`.
 
 Les réparations exigent un agent capable de reprendre sa conversation ; sinon, `dispatch()` refuse `repairs`. [Choisir un agent](../choose-an-agent/) indique quels harness le permettent.
 

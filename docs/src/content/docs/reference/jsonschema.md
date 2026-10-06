@@ -13,7 +13,7 @@ import type { JsonSchema } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-JSON Schema object describing a harness tool's input when no Standard Schema is given, and the form HarnessTool.inputSchema exposes to the model. The root must describe an object, otherwise tool definition fails with code configuration.
+JSON Schema object describing harness tool inputs or JSON response inputs. Tools require an object input and enforce their supported keyword subset; response instructions also accept schemas describing arrays, primitives and unions.
 
 [Complete example and detailed rules](../../guide/harness-tools/).
 

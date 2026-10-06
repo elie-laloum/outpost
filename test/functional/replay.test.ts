@@ -312,6 +312,11 @@ test("replay follows recorded response repairs and multiple passes", async (t) =
       : `console.log(JSON.stringify({kind:'conversation',id:'c1'})); console.log(JSON.stringify({kind:'text',text:'<result>oops</result>'}))`,
   );
   const spec = defineJsonResponse({
+    jsonSchema: {
+      type: "object",
+      properties: { ok: { type: "boolean" } },
+      required: ["ok"],
+    },
     tag: "result",
     schema: (value) => value as { ok: boolean },
     repairs: 1,

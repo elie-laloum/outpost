@@ -113,7 +113,7 @@ Instructions tell the agent what you want it to do. If a condition determines wh
 | Files left untouched | "Do not edit `config/`."  | Inspect the diff, or deny writes with the built-in harness [permissions](../harness-permissions/).               |
 | Human sign-off       | "Do not merge yet."       | Stop at an [approval](../approvals/) gate.                                                                       |
 
-A typed response also requires the brief to contain its opening tag, such as `<result>`.
+Providing a [typed response](../typed-responses/) automatically adds its final-answer format after the rendered brief; JSON contracts also include the input JSON Schema. You do not need to put its tags in the brief.
 
 ## Limits
 

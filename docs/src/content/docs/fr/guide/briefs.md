@@ -113,7 +113,7 @@ Les consignes indiquent à l’agent ce que vous attendez. Si une condition dét
 | Fichiers intacts     | « Do not edit `config/`. »  | Inspectez le diff, ou interdisez l’écriture avec les [permissions](../harness-permissions/) du harness intégré.                   |
 | Validation humaine   | « Do not merge yet. »       | Arrêtez-vous à une étape d’[approbation](../approvals/).                                                                          |
 
-Une réponse typée exige aussi que le brief contienne sa balise ouvrante, par exemple `<result>`.
+Fournir une [réponse typée](../typed-responses/) ajoute automatiquement son format de réponse finale après le brief rendu ; les contrats JSON incluent aussi le JSON Schema d’entrée. Vous n’avez pas besoin de placer ses balises dans le brief.
 
 ## Limites
 

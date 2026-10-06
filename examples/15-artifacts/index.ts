@@ -50,7 +50,21 @@ const extract = defineArtifactTask({
       sandboxProvider,
       agent: reader,
       brief: { file: join(import.meta.dirname, "brief.md") },
-      response: defineJsonResponse({ tag: "endpoints", schema: Endpoints }),
+      response: defineJsonResponse({
+        jsonSchema: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              method: { type: "string" },
+              path: { type: "string" },
+            },
+            required: ["method", "path"],
+          },
+        },
+        tag: "endpoints",
+        schema: Endpoints,
+      }),
     });
 
     return result.value;

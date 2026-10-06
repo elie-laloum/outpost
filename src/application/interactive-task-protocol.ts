@@ -1,5 +1,6 @@
 import { invariant } from "../domain/errors.ts";
 import { defineJsonResponse } from "../domain/response.ts";
+import { interactiveResponseSchema } from "./interactive-task.constants.ts";
 import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
 import {
   inputObject,
@@ -13,6 +14,7 @@ import type {
 
 export const interactiveResponse = defineJsonResponse<InteractiveAgentTurn>({
   tag: "interaction",
+  jsonSchema: interactiveResponseSchema,
   repairs: 1,
   schema(value) {
     invariant(inputObject(value), "Interactive response must be an object");

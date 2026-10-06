@@ -136,6 +136,10 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
     }
     if (origin === "harness") source = "harness";
     if (event.kind === "prompt") {
+      if (current?.resumedBy && current.events.length === 0) {
+        current.prompt = text(event, "text", index);
+        continue;
+      }
       current = {
         prompt: text(event, "text", index),
         events: [],

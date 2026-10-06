@@ -10,6 +10,11 @@ next: false
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Non publié
+
+- Ajoute automatiquement les consignes de réponse finale balisée et le JSON Schema d’entrée pour les réponses typées, y compris les réparations et les tours repris. **Incompatible :** `defineJsonResponse()` exige désormais une conversion Standard JSON Schema ou un `jsonSchema` explicite ; les fonctions de parsing et les schémas de validation seuls doivent déclarer leur schéma d’entrée. Le comportement d’analyse et de validation existant est conservé.
+- Actualise les guides bilingues, la référence API et les exemples hors ligne. Les tests déterministes ne prouvent pas le respect des consignes injectées par des agents réels.
+
 ## 9.1.1
 
 - Ajouter les décisions System One typées (`defineDecision`, `decide`, `defineDecisionTask`) et un provider HTTP borné commun à Jev et aux endpoints Laya compatibles. Conserver distributions natives, métadonnées et diagnostics de troncature d’entrée.

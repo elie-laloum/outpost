@@ -1,5 +1,4 @@
 import type { Agent, Usage } from "../domain/agent.types.ts";
-import { invariant } from "../domain/errors.ts";
 import { ResponseError } from "../domain/response.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { addUsage } from "../domain/usage.ts";
@@ -54,25 +53,6 @@ export async function execute<T>(
     const prompt =
       repair ??
       (await renderBrief(options.brief, workspace, lease, host, options));
-    if (options.response && !repair)
-      invariant(
-        prompt.includes(`<${options.response.tag}>`),
-        `Brief must request an opening <${options.response.tag}> tag`,
-      );
-    notify(options.observe, {
-      kind: "prompt",
-      text: prompt,
-      pass: index + 1,
-      at: new Date().toISOString(),
-    });
-    notify(options.observe, {
-      kind: "phase",
-      name: "running",
-      agent: agent.name,
-      branch: workspace.branch,
-      pass: index + 1,
-      at: new Date().toISOString(),
-    });
     const steered = await steeringTurns(
       agent,
       options,
@@ -80,6 +60,14 @@ export async function execute<T>(
       continuation,
       index + 1,
       async (text, resumed) => {
+        notify(options.observe, {
+          kind: "phase",
+          name: "running",
+          agent: agent.name,
+          branch: workspace.branch,
+          pass: index + 1,
+          at: new Date().toISOString(),
+        });
         const finished = await turn(
           lease,
           agent,

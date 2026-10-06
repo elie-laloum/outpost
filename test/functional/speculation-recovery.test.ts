@@ -46,6 +46,7 @@ test("durable completion is reused without allocation and preserves structured e
     directory: join(repo, ".outpost", "storage"),
   });
   const parsed = defineJsonResponse({
+    jsonSchema: {},
     tag: "answer",
     schema: (value) => value,
   });
@@ -411,6 +412,7 @@ test("durable outputs refuse lossy serialization", async (t) => {
           request: {
             brief: { text: "Return <answer> JSON </answer>" },
             response: defineJsonResponse({
+              jsonSchema: {},
               tag: "answer",
               schema: () => new Date(),
             }),

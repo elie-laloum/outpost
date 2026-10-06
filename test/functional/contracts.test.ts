@@ -120,7 +120,15 @@ test("project environment is an allowlist with file precedence and empty-value i
 });
 
 test("JSON responses accept Markdown fences while preserving JSON string escapes", async () => {
-  const spec = defineJsonResponse({ tag: "payload", schema: (value) => value });
+  const spec = defineJsonResponse({
+    jsonSchema: {
+      type: "object",
+      properties: { code: { type: "string" }, path: { type: "string" } },
+      required: ["code", "path"],
+    },
+    tag: "payload",
+    schema: (value) => value,
+  });
   for (const language of ["json", ""]) {
     const expected = { code: "```", path: "a\\nb" };
     assert.deepEqual(
@@ -235,7 +243,7 @@ test("already cancelled operations preserve the exact reason without touching a 
   assert.equal(acquired, 0);
 });
 
-test("structured output preflight rejects missing tags and unsupported repairs before provisioning", async (t) => {
+test("structured output preflight accepts plain briefs and rejects unsupported repairs before provisioning", async (t) => {
   const root = await repository(t);
   let acquired = 0;
   const sandboxProvider = {
@@ -254,7 +262,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
       brief: { text: "no tag" },
       response: defineTextResponse({ tag: "answer" }),
     }),
-    /opening/,
+    /unreachable/,
   );
   await assert.rejects(
     dispatch({
@@ -266,7 +274,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
     }),
     /continuation/,
   );
-  assert.equal(acquired, 0);
+  assert.equal(acquired, 1);
 });
 
 test("journals retain independent complete runs and recognized raw output when verbose", async (t) => {

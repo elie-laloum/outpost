@@ -66,10 +66,26 @@ try {
 
 Définissez le rapport, l’agent et la tâche de mise à jour.
 
+Le schéma explicite de `report-schema.ts` décrit le JSON d’entrée injecté dans le prompt ; `nightly-report.ts` valide la réponse reçue.
+
+```ts title="report-schema.ts"
+export const reportSchema = {
+  type: "object",
+  properties: {
+    updated: { type: "array", items: { type: "string" } },
+    skipped: { type: "array", items: { type: "string" } },
+  },
+  required: ["updated", "skipped"],
+};
+```
+
+Importez ce schéma dans `nightly-report.ts` pour que les consignes automatiques décrivent la réponse attendue ; la fonction de validation existante continue de vérifier son contenu.
+
 <!-- tabs -->
 
 ```ts title="nightly-report.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
+import { reportSchema } from "./report-schema.ts";
 
 export function names(value: unknown): string[] {
   if (!Array.isArray(value) || !value.every((item) => typeof item === "string"))
@@ -78,6 +94,7 @@ export function names(value: unknown): string[] {
 }
 export const report = defineJsonResponse({
   tag: "report",
+  jsonSchema: reportSchema,
   schema(input) {
     if (typeof input !== "object" || input === null)
       throw new Error("Expected an object");

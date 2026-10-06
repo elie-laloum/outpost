@@ -464,12 +464,12 @@
     "Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre sous le runId du job, avec le signal du job et checkpoint.version suivi d’une empreinte de l’entrée comme version de checkpoint. La valeur du job résume l’exécution (statut, tâches, gates en pause, demandes de saisie) avec son usage de tokens ; un workflow failed ou cancelled, ou un checkpoint incompatible, termine le job avec une erreur. La création lève une erreur sans fabrique de workflow, stockage et version de checkpoint."
   ],
   "defineTextResponse": [
-    "Declare a response whose value is the trimmed text of the last complete <tag>…</tag> pair. It fails with ResponseError only when no complete pair exists; an invalid tag or repairs fails with code configuration.",
-    "Déclare une réponse dont la valeur est le texte, sans espaces aux bords, de la dernière paire <tag>…</tag> complète. Elle n’échoue avec ResponseError que si aucune paire complète n’existe ; un tag ou un repairs invalide échoue avec le code configuration."
+    "Declare a text response with automatic tagged final-answer instructions. Returns the trimmed content of the last complete tag pair; missing tags fail with ResponseError. Invalid tags or repair counts fail with code configuration.",
+    "Déclare une réponse textuelle avec des consignes automatiques de réponse finale balisée. Renvoie le contenu nettoyé de la dernière paire de balises complète ; des balises absentes lèvent ResponseError. Une balise ou un nombre de réparations invalide échoue avec le code configuration."
   ],
   "defineJsonResponse": [
-    "Declare a response read from the last complete <tag>…</tag> pair, parsed as JSON, optionally inside a Markdown code fence, then checked by schema. A missing tag, invalid JSON, schema issues or a thrown parse error fail with ResponseError; an invalid tag or repairs fails with code configuration.",
-    "Déclare une réponse lue dans la dernière paire <tag>…</tag> complète, analysée comme du JSON, éventuellement dans un bloc de code Markdown, puis vérifiée par schema. Une balise absente, un JSON invalide, des problèmes signalés par le schéma ou une erreur levée par la fonction échouent avec ResponseError ; un tag ou un repairs invalide échoue avec le code configuration."
+    "Declare a JSON response with automatic tagged final-answer instructions and an input JSON Schema. Converts Standard JSON Schema input automatically unless jsonSchema is explicit; missing, failed or non-lossless schemas fail with code configuration. Reads the last complete tag, accepts JSON code fences and validates with schema; rejected content fails with ResponseError.",
+    "Déclare une réponse JSON avec des consignes automatiques de réponse finale balisée et un JSON Schema d’entrée. Convertit automatiquement l’entrée Standard JSON Schema sauf si jsonSchema est explicite ; un schéma absent, une conversion échouée ou un schéma non conservable sans perte échoue avec le code configuration. Lit la dernière balise complète, accepte les blocs de code JSON et valide avec schema ; un contenu rejeté lève ResponseError."
   ],
   "defineJsonArtifact": [
     "Declare a named, versioned contract for a lossless JSON value; schema validates it on publish and again on read. Throws when name or version is empty or longer than 1024 characters.",
@@ -548,8 +548,8 @@
     "Texte d’instructions, ou fonction de HarnessInstructionContext (sandbox, signal, model, mcp) qui le renvoie, éventuellement de façon asynchrone. Accepté par defineHarnessInstructions() et par les instructions d’un skill ; un texte vide, ou une fonction qui ne se résout pas en chaîne, échoue avec le code configuration."
   ],
   "JsonSchema": [
-    "JSON Schema object describing a harness tool's input when no Standard Schema is given, and the form HarnessTool.inputSchema exposes to the model. The root must describe an object, otherwise tool definition fails with code configuration.",
-    "Objet JSON Schema qui décrit l’entrée d’un outil de harness quand aucun Standard Schema n’est fourni, et forme sous laquelle HarnessTool.inputSchema l’expose au modèle. La racine doit décrire un objet, sinon la définition de l’outil échoue avec le code configuration."
+    "JSON Schema object describing harness tool inputs or JSON response inputs. Tools require an object input and enforce their supported keyword subset; response instructions also accept schemas describing arrays, primitives and unions.",
+    "Objet JSON Schema décrivant l’entrée des outils de harness ou des réponses JSON. Les outils exigent une entrée objet et contrôlent leur sous-ensemble de mots-clés ; les consignes de réponse acceptent aussi les schémas décrivant tableaux, primitives et unions."
   ],
   "McpServers": [
     "MCP server declarations keyed by server name, each a stdio server (command) or an HTTP server (url). Accepted as mcpServers by createHarness() and the CLI harness presets; secrets are referenced by variable name, never by value.",

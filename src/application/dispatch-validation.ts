@@ -1,8 +1,7 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import type { Agent } from "../domain/agent.types.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
+import { responseInstructions } from "../domain/response-instructions.ts";
 import { steeringChannel } from "../domain/steering.ts";
 import { dispatchDeadlines, executionDefaults } from "./execution.constants.ts";
 import type { DispatchOptions } from "./execution.types.ts";
@@ -11,6 +10,7 @@ export function validateDispatch(options: DispatchOptions<unknown>): void {
   options.signal?.throwIfAborted();
   if (options.steering) steeringChannel(options.steering);
   validateBrief(options.brief);
+  if (options.response) responseInstructions(options.response);
   positive(options.passes ?? executionDefaults.passes, "passes");
   invariant(
     Number.isSafeInteger(options.passes ?? executionDefaults.passes),
@@ -58,15 +58,6 @@ export async function preflightDispatch(
       agent?.resumable ?? !!agent?.storage,
       "Response repair requires an adapter that supports continuation",
     );
-  const brief = options.brief;
-  const text = brief.text ?? (await readFile(resolve(brief.file!), "utf8"));
-  const resolved = text.replace(/\{\{\s*(\w+)\s*\}\}/g, (token, key: string) =>
-    brief.values?.[key] === undefined ? token : String(brief.values[key]),
-  );
-  invariant(
-    resolved.includes(`<${options.response.tag}>`),
-    `Brief must request an opening <${options.response.tag}> tag`,
-  );
 }
 
 function validateSteering(agent: Agent): void {

@@ -20,6 +20,22 @@ Save the script next to the configuration from [Installation](../setup/), and re
 
 Define the API change and the output that the clients will receive.
 
+The explicit schema in `rename-schema.ts` describes the input JSON injected into the prompt; `rename-contract.ts` validates the returned answer.
+
+```ts title="rename-schema.ts"
+export const renameSchema = {
+  type: "object",
+  properties: {
+    from: { type: "string" },
+    to: { type: "string" },
+    notes: { type: "string" },
+  },
+  required: ["from", "to", "notes"],
+};
+```
+
+Import this schema in `rename-contract.ts` so automatic instructions describe the expected answer; the existing validation function continues to check its content.
+
 <!-- tabs -->
 
 ```ts title="delivery.ts"
@@ -41,9 +57,11 @@ export const delivery = (
 
 ```ts title="rename-contract.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
+import { renameSchema } from "./rename-schema.ts";
 
 export const rename = defineJsonResponse({
   tag: "rename",
+  jsonSchema: renameSchema,
   schema(input) {
     const { from, to, notes } = Object(input) as Record<string, unknown>;
     if (

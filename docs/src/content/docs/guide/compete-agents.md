@@ -253,6 +253,8 @@ reportValue(result.winner?.key);
 
 A reviewer dispatched in the candidate’s sandbox reads its commits and returns a [typed verdict](../typed-responses/). Pass the function as `validate: review`.
 
+The explicit schema in `review-schema.ts` describes the input JSON injected into the prompt; `review-verdict.ts` validates the returned answer.
+
 <!-- tabs -->
 
 ```ts title="review-agent.ts"
@@ -263,11 +265,21 @@ export const reviewer = createAgent({
 });
 ```
 
+```ts title="review-schema.ts"
+export const reviewSchema = {
+  type: "object",
+  properties: { approved: { type: "boolean" } },
+  required: ["approved"],
+};
+```
+
 ```ts title="review-verdict.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
+import { reviewSchema } from "./review-schema.ts";
 
 export const verdict = defineJsonResponse({
   tag: "verdict",
+  jsonSchema: reviewSchema,
   schema(input) {
     if (
       typeof input !== "object" ||

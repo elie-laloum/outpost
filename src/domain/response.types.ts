@@ -1,3 +1,5 @@
+import type { JsonSchema, StandardJsonSchema } from "./tool.types.ts";
+
 export interface StandardValidator<T> {
   readonly "~standard": {
     readonly validate: (
@@ -15,14 +17,21 @@ export interface StandardValidator<T> {
 export interface ResponseSpec<T> {
   readonly tag: string;
   readonly repairs: number;
+  readonly format?: "json" | "text";
+  readonly jsonSchema?: JsonSchema;
   read(text: string): Promise<T>;
 }
 
 export type JsonResponseOptions<T> = {
   tag: string;
-  schema: StandardValidator<T> | ((input: unknown) => T | Promise<T>);
   repairs?: number;
-};
+} & (
+  | { schema: StandardJsonSchema<T>; jsonSchema?: JsonSchema }
+  | {
+      schema: StandardValidator<T> | ((input: unknown) => T | Promise<T>);
+      jsonSchema: JsonSchema;
+    }
+);
 
 export type TextResponseOptions = { tag: string; repairs?: number };
 

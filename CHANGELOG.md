@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Automatically append tagged final-answer instructions and input JSON Schema for typed responses, including repairs and resumed turns. **Breaking:** `defineJsonResponse()` now requires Standard JSON Schema conversion or an explicit `jsonSchema`; parsing functions and validation-only schemas must declare their input schema. Existing parsing and validation behavior is preserved.
+- Update the bilingual guides, API reference and offline examples. Deterministic tests do not establish live agent compliance with the injected instructions.
+
 ## 9.1.1
 
 - Add typed System One decisions (`defineDecision`, `decide`, `defineDecisionTask`) and one bounded HTTP provider for Jev and compatible Laya endpoints. Preserve native distributions, metadata and input-truncation diagnostics.

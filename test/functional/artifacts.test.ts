@@ -44,7 +44,15 @@ test("isolated repositories exchange validated artifacts and resume references i
       sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit('<api>{"endpoint":"/users"}</api>')),
       brief: { text: "Describe API as <api>{...}</api>" },
-      response: defineJsonResponse({ tag: "api", schema }),
+      response: defineJsonResponse({
+        jsonSchema: {
+          type: "object",
+          properties: { endpoint: { type: "string" } },
+          required: ["endpoint"],
+        },
+        tag: "api",
+        schema,
+      }),
     }),
   });
   const published = defineArtifactTask({

@@ -98,6 +98,21 @@ process.once("SIGINT", async () => {
 
 Validez les données du job et le verdict, puis fournissez les opérations GitHub de votre application.
 
+Le schéma explicite de `verdict-schema.ts` décrit le JSON d’entrée injecté dans le prompt ; `verdict.ts` valide la réponse reçue.
+
+```ts title="verdict-schema.ts"
+export const verdictSchema = {
+  type: "object",
+  properties: {
+    approved: { type: "boolean" },
+    findings: { type: "array", items: { type: "string" } },
+  },
+  required: ["approved", "findings"],
+};
+```
+
+Importez ce schéma dans `verdict.ts` pour que les consignes automatiques décrivent la réponse attendue ; la fonction de validation existante continue de vérifier son contenu.
+
 <!-- tabs -->
 
 ```ts title="review.types.ts"
@@ -112,10 +127,12 @@ export type Verdict = { approved: boolean; findings: string[] };
 
 ```ts title="verdict.ts"
 import { defineJsonResponse } from "@elie-laloum/outpost";
+import { verdictSchema } from "./verdict-schema.ts";
 import type { Verdict } from "./review.types.ts";
 
 export const verdict = defineJsonResponse({
   tag: "verdict",
+  jsonSchema: verdictSchema,
   repairs: 1,
   schema(value): Verdict {
     if (typeof value !== "object" || value === null)
