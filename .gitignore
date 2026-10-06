@@ -12,6 +12,8 @@ coverage/
 .outpost/storage/
 .outpost/recovery/
 
+examples/*/state/
+
 docs/.astro/
 docs/.examples/
 
