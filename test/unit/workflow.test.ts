@@ -5,8 +5,9 @@ import {
   defineWorkflow,
   defineTask,
   WorkflowFailure,
+  OutpostError,
 } from "../../src/index.ts";
-import type { Task } from "../../src/index.ts";
+import type { Task, WorkflowEvent } from "../../src/index.ts";
 
 test("typed values flow through a diamond regardless of declaration order", async () => {
   const seed = defineTask({ key: "seed", perform: () => 3 });
@@ -150,6 +151,7 @@ test("external cancellation also works before the first task", async () => {
     defineTask({ key: "never", perform: () => assert.fail() }),
   ]).start({ signal: AbortSignal.abort("stop") });
   assert.equal(result.status, "cancelled");
+  assert.equal(result.terminationCode, "aborted");
   assert.equal(result.tasks[0]?.attempts, 0);
 });
 
@@ -190,6 +192,7 @@ test("cooperative timeouts fail a task and do not publish a late value", async (
   });
   const result = await defineWorkflow("timeout", [item]).start();
   assert.equal(result.status, "failed");
+  assert.equal(result.terminationCode, "timeout");
   assert.throws(() => result.value(item));
 });
 
@@ -261,4 +264,63 @@ test("invalid numeric limits fail before execution", async () => {
   );
   assert.throws(() => defineTask({ key: "x", perform() {}, timeoutMs: -1 }));
   await assert.rejects(defineWorkflow("empty", []).start({ concurrency: 0 }));
+});
+
+test("termination codes retain wrapped Outpost faults and classify ordinary failures", async () => {
+  for (const [error, code] of [
+    [new Error("plain failure"), "failed"],
+    ["non-error failure", "failed"],
+    [
+      new Error("wrapped", {
+        cause: new OutpostError("quota", "quota reached"),
+      }),
+      "quota",
+    ],
+    [new OutpostError("response", "invalid response"), "response"],
+  ] as const) {
+    const events: WorkflowEvent[] = [];
+    const item = defineTask({
+      key: "broken",
+      perform() {
+        throw error;
+      },
+    });
+    const result = await defineWorkflow("fault", [item]).start({
+      observe: (event) => events.push(event),
+    });
+    assert.equal(result.status, "failed");
+    assert.equal(result.terminationCode, code);
+    assert.equal(
+      events.find((event) => event.type === "finish")?.terminationCode,
+      code,
+    );
+    assert.throws(
+      () => result.unwrap(),
+      (failure: unknown) =>
+        failure instanceof WorkflowFailure && failure.code === code,
+    );
+  }
+});
+
+test("workflow deadlines expose timeout even when tasks throw an AbortError", async () => {
+  const item = defineTask({
+    key: "slow",
+    perform: (ctx) => delay(10000, undefined, { signal: ctx.signal }),
+  });
+  const result = await defineWorkflow("deadline", [item]).start({
+    timeoutMs: 10,
+  });
+  assert.equal(result.status, "failed");
+  assert.equal(result.terminationCode, "timeout");
+});
+
+test("successful and conditional workflows have no termination code", async () => {
+  const item = defineTask({
+    key: "skip",
+    condition: () => false,
+    perform: () => assert.fail(),
+  });
+  const result = await defineWorkflow("skip", [item]).start();
+  assert.equal(result.status, "done");
+  assert.equal(result.terminationCode, undefined);
 });

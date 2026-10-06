@@ -13,7 +13,7 @@ import { defineApprovalTask } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Définit une tâche gate qui suspend l’exécution une fois ses dépendances terminées et attend approve ou reject d’un acteur autorisé. approve fait du WorkflowDecisionRecord la valeur de la gate ; reject ignore les tâches dépendantes et fait échouer l’exécution. Lève une erreur si le prompt est vide ou si les acteurs sont absents, vides ou dupliqués ; l’ordonnancer sans checkpoint lève aussi une erreur.
+Définit une tâche gate qui suspend l’exécution une fois ses dépendances terminées et attend approve ou reject d’un acteur autorisé. approve fait du WorkflowDecisionRecord la valeur de la gate ; reject ignore les tâches dépendantes et termine l’exécution avec status et terminationCode rejected, sauf si un échec technique indépendant ou une annulation externe est prioritaire. Lève une erreur si le prompt est vide ou si les acteurs sont absents, vides ou dupliqués ; l’ordonnancer sans checkpoint lève aussi une erreur.
 
 [Exemple complet et règles détaillées](../../guide/approvals/).
 

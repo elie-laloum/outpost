@@ -300,3 +300,18 @@ test("replay divergences expose their details", () => {
     actual: "a",
   });
 });
+
+test("replay preserves the rejected fault code instead of classifying it as process", () => {
+  const selected = createReplayAgent({
+    journal: [
+      entry("prompt", { text: "work" }),
+      entry("dispatch-finished", {
+        error: { code: "rejected", message: "Review rejected" },
+      }),
+    ],
+  });
+  assert.deepEqual(selected.turns[0]?.failure, {
+    code: "rejected",
+    message: "Review rejected",
+  });
+});

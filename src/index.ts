@@ -196,6 +196,7 @@ export type {
   WorkflowBudget,
   WorkflowUsage,
   WorkflowResult,
+  WorkflowTerminationCode,
   WorkflowTelemetry,
 } from "./domain/workflow.ts";
 

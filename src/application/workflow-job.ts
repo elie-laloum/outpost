@@ -26,6 +26,9 @@ function summary(
     version,
     executionId: result.executionId,
     status: result.status,
+    ...(result.terminationCode
+      ? { terminationCode: result.terminationCode }
+      : {}),
     tasks: result.tasks.map((record) => ({
       key: record.key,
       status: record.status,
@@ -82,7 +85,7 @@ export function defineWorkflowJob(options: WorkflowJobOptions): QueueHandler {
       },
     });
     const tokens = result.usage.tokens;
-    const failed = result.status === "failed" || result.status === "cancelled";
+    const failed = ["failed", "cancelled", "rejected"].includes(result.status);
     return {
       value: summary(runId, version, result),
       usage: {

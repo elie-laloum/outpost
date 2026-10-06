@@ -29,6 +29,7 @@ Vercel arrête une sandbox après `create.timeout` millisecondes : choisissez un
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 export const sandboxProvider = createVercelSandboxProvider({
+  repositoryMode: "isolated",
   create: { runtime: "node24", timeout: 30 * 60_000 },
 });
 ```
@@ -45,6 +46,7 @@ Créez un fournisseur Daytona avec une image Node.js 24. Utilisez ce `sandboxPro
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
 export const sandboxProvider = createDaytonaSandboxProvider({
+  repositoryMode: "isolated",
   connection: { apiKey: process.env.DAYTONA_API_KEY ?? "" },
   create: { image: "node:24" },
 });
@@ -97,6 +99,8 @@ Avant le premier tour, Outpost installe la CLI de l’agent, dans sa version ép
 ## Accès au dépôt
 
 La sandbox travaille sur sa propre copie du dépôt. Outpost la maintient alignée sur le worktree géré de votre machine. Les sandboxes [Firecracker](../firecracker/) et les conteneurs en [Git privé](../private-git/) se synchronisent de la même façon.
+
+`repositoryMode: "isolated"` rend le checkout privé explicite sur les deux providers ; l’omettre conserve le même comportement. Les fichiers de configuration Git et les hooks hôtes ne sont pas envoyés, et la synchronisation n’importe ni configuration, ni hooks, ni refs sans rapport du sandbox. L’historique de toutes les branches et de tous les tags hôtes reste inclus dans le bundle envoyé. L’option explicite est couverte par des fixtures déterministes des providers ; sa validation cloud réelle reste à effectuer.
 
 <!-- canvas -->
 

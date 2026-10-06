@@ -914,16 +914,16 @@
     "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
   ],
   "WorkflowResult.status": [
-    "Run outcome: done, paused (gate or quota), waiting-input, failed or cancelled. Precedence is cancelled, then failed, then waiting-input, then paused; an expired timeoutMs gives failed.",
-    "Résultat de l’exécution : done, paused (gate ou quota), waiting-input, failed ou cancelled. L’ordre de priorité est cancelled, puis failed, puis waiting-input, puis paused ; un timeoutMs expiré donne failed."
+    "Run outcome: done, failed, cancelled, rejected, paused (gate or quota), or waiting-input. External cancellation or the workflow deadline takes precedence, then technical failure, rejection, waiting-input and pause. A workflow deadline gives failed with terminationCode timeout.",
+    "Résultat de l’exécution : done, failed, cancelled, rejected, paused (gate ou quota), ou waiting-input. L’annulation externe ou le délai du workflow est prioritaire, puis viennent l’échec technique, le rejet, l’attente de réponse et la pause. Le délai du workflow donne failed avec terminationCode timeout."
   ],
   "WorkflowResult.tasks": [
     "One frozen record per task, in list order, with status, attempts, timestamps and error.",
     "Un enregistrement figé par tâche, dans l’ordre de la liste, avec statut, tentatives, horodatages et erreur."
   ],
   "WorkflowResult.errors": [
-    "Errors that failed the run: task failures, gate rejections, budget errors and the abort or timeout reason.",
-    "Erreurs qui ont fait échouer l’exécution : échecs de tâches, rejets de gates, erreurs de budget et motif d’annulation ou de dépassement de délai."
+    "Task failures, gate rejections, budget errors and the external abort or timeout reason. Gate rejection uses OutpostError code rejected and retains the task key, actor and reason in details; rejected runs keep this audit trail after checkpoint resumption.",
+    "Échecs de tâches, rejets de gates, erreurs de budget et motif externe d’annulation ou de dépassement de délai. Le rejet d’une gate utilise OutpostError avec le code rejected et garde la clé de tâche, l’acteur et le motif dans details ; les exécutions rejected conservent cette trace après reprise du checkpoint."
   ],
   "WorkflowResult.observerErrors": [
     "Exceptions thrown by telemetry and observe callbacks, collected independently without changing workflow status or task errors.",
@@ -2793,6 +2793,10 @@
   "LocalOptions.variables": [
     "Environment variables added to host commands, as literal values. A key the agent also declares fails with code configuration.",
     "Variables d’environnement ajoutées aux commandes hôtes, en valeurs littérales. Une clé aussi déclarée par l’agent échoue avec le code configuration."
+  ],
+  "VercelOptions.repositoryMode": [
+    "isolated (the default and only supported mode) keeps the checkout and Git directory private to the cloud sandbox. History and selected inputs upload; validated commits and file changes synchronize back without importing sandbox configuration, hooks or unrelated refs. Other modes fail with code configuration before allocation.",
+    "isolated (mode par défaut et seul mode pris en charge) conserve le checkout et le répertoire Git dans le sandbox cloud. L’historique et les entrées sélectionnées sont envoyés ; les commits et modifications validés sont synchronisés sans importer la configuration, les hooks ou les refs sans rapport du sandbox. Les autres modes échouent avec le code configuration avant allocation."
   ],
   "VercelOptions.egress": [
     "Portable policy translated to Vercel’s firewall when the provider is created: domains match the TLS server name, allowCidrs grant IP access on their own and denyCidrs take priority. Setting create.networkPolicy too fails with code configuration.",
@@ -5236,6 +5240,10 @@
     "Selected wait before the next task attempt, present on retry events and on quota events that wait for a reset in process; includes backoff, jitter and any valid server minimum for retries.",
     "Attente choisie avant la tentative suivante, présente sur les événements retry et sur les événements quota qui attendent une réinitialisation dans le processus ; inclut backoff, aléa et minimum serveur valide pour les reprises."
   ],
+  "DaytonaOptions.repositoryMode": [
+    "isolated (the default and only supported mode) keeps the checkout and Git directory private to the cloud sandbox. History and selected inputs upload; validated commits and file changes synchronize back without importing sandbox configuration, hooks or unrelated refs. Other modes fail with code configuration before allocation.",
+    "isolated (mode par défaut et seul mode pris en charge) conserve le checkout et le répertoire Git dans le sandbox cloud. L’historique et les entrées sélectionnées sont envoyés ; les commits et modifications validés sont synchronisés sans importer la configuration, les hooks ou les refs sans rapport du sandbox. Les autres modes échouent avec le code configuration avant allocation."
+  ],
   "DaytonaOptions.egress": [
     "Portable policy enforced by Daytona: deny-all, up to 100 domains or up to 10 IPv4 allowCidrs, not both, and no denyCidrs. Outpost confirms it before preparing the workspace; a refusal fails with code provider and deletes the sandbox (it needs a Tier 3 or 4 account with WRITE_SANDBOXES).",
     "Politique portable appliquée par Daytona : deny-all, jusqu’à 100 domaines ou jusqu’à 10 allowCidrs IPv4, pas les deux, et aucun denyCidrs. Outpost la confirme avant de préparer le workspace ; un refus échoue avec le code provider et supprime la sandbox (il faut un compte Tier 3 ou 4 avec WRITE_SANDBOXES)."
@@ -7417,5 +7425,17 @@
   "JsonResponseOptions.jsonSchema": [
     "Explicit input JSON Schema object included in automatic final-answer instructions. Required unless schema supports Standard JSON Schema conversion; takes precedence over conversion. Captured as a deeply frozen lossless JSON copy, excluding non-enumerable ~standard protocol metadata; schema remains the validator. No remote references are fetched.",
     "Objet JSON Schema d’entrée explicite inclus dans les consignes automatiques de réponse finale. Obligatoire sauf si schema prend en charge la conversion Standard JSON Schema ; prioritaire sur la conversion. Capturé sous forme de copie JSON sans perte figée en profondeur, sans les métadonnées de protocole ~standard non énumérables ; schema reste le validateur. Aucune référence distante n’est chargée."
+  ],
+  "WorkflowResult.terminationCode": [
+    "Reason for an unsuccessful terminal outcome: rejected for a gate refusal, aborted for external cancellation, timeout for a task or workflow deadline, limit for an exhausted workflow budget, usage-unavailable for incomplete budget accounting, the first technical failure’s OutpostError code (including wrapped causes), or failed for an unclassified error. Absent for done, paused and waiting-input; recomputed from restored gate records on resume.",
+    "Motif d’une fin sans succès : rejected pour un refus de gate, aborted pour une annulation externe, timeout pour le délai d’une tâche ou du workflow, limit pour un budget de workflow épuisé, usage-unavailable pour une comptabilité de budget incomplète, le code OutpostError du premier échec technique (y compris ses causes enveloppées), ou failed pour une erreur non classée. Absent pour done, paused et waiting-input ; recalculé depuis les gates restaurées lors de la reprise."
+  ],
+  "WorkflowEvent.terminationCode": [
+    "Termination reason on a workflow finish event, matching WorkflowResult.terminationCode when a result is returned. Also classifies errors thrown during scheduling or checkpoint persistence; absent on successful or suspended finishes and other event types.",
+    "Motif de terminaison d’un événement finish du workflow, identique à WorkflowResult.terminationCode quand un résultat est renvoyé. Classe aussi les erreurs levées pendant l’ordonnancement ou l’enregistrement du checkpoint ; absent lors d’une fin réussie ou suspendue et sur les autres types d’événements."
+  ],
+  "WorkflowFailure.code": [
+    "The result’s terminationCode, available when unwrap() throws for failed, cancelled or rejected runs; undefined for paused or waiting-input runs.",
+    "Le terminationCode du résultat, disponible quand unwrap() lève une erreur pour une exécution failed, cancelled ou rejected ; undefined pour paused ou waiting-input."
   ]
 }

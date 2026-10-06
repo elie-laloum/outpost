@@ -1518,6 +1518,11 @@
         "attrs": { "data-api-kind": "class" }
       },
       {
+        "slug": "reference/workflowterminationcode",
+        "label": "WorkflowTerminationCode",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/interactiveagentresult",
         "label": "InteractiveAgentResult",
         "attrs": { "data-api-kind": "type" }

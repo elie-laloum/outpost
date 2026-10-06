@@ -7,6 +7,7 @@ import { awaitQuotaReset, pauseForQuota } from "./quota-pause.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
 import { lookupTaskCache, storeTaskCache } from "./task-cache.ts";
 import { quotaFault } from "../quota.ts";
+import { OutpostError } from "../errors.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 import type { TaskCacheLookup } from "./task-cache.types.ts";
 
@@ -125,7 +126,13 @@ async function perform(
       item.timeoutMs === undefined
         ? undefined
         : setTimeout(
-            () => deadline.abort(new Error(`${item.key} timed out`)),
+            () =>
+              deadline.abort(
+                new OutpostError("timeout", `${item.key} timed out`, {
+                  key: item.key,
+                  timeoutMs: item.timeoutMs,
+                }),
+              ),
             item.timeoutMs,
           );
     const taskSignal = AbortSignal.any([signal, deadline.signal]);
@@ -153,7 +160,7 @@ async function perform(
         (options.onQuota && quotaFault(error)) ||
         item.retry?.accepts?.(error, attempt) === false
       )
-        throw error;
+        throw deadline.signal.aborted ? deadline.signal.reason : error;
       delayMs = retryDelay(item.retry, cycle, error);
       emit({ type: "retry", key: item.key, attempt, delayMs });
     } finally {

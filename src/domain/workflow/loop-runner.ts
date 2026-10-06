@@ -1,4 +1,5 @@
 import { checkpointValue } from "./checkpoint-value.ts";
+import { OutpostError } from "../errors.ts";
 import { LoopTaskExhausted } from "./loop-task.ts";
 import { validateLoopCheck } from "./loop-validation.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
@@ -54,7 +55,13 @@ export async function runLoopTask(
       item.timeoutMs === undefined
         ? undefined
         : setTimeout(
-            () => deadline.abort(new Error(`${item.key} timed out`)),
+            () =>
+              deadline.abort(
+                new OutpostError("timeout", `${item.key} timed out`, {
+                  key: item.key,
+                  timeoutMs: item.timeoutMs,
+                }),
+              ),
             item.timeoutMs,
           );
     const signal = AbortSignal.any([runtime.signal, deadline.signal]);
@@ -106,6 +113,8 @@ export async function runLoopTask(
       });
       signal.throwIfAborted();
       if (check.done) return result;
+    } catch (error) {
+      throw deadline.signal.aborted ? deadline.signal.reason : error;
     } finally {
       runtime.closeAttempt(item);
       clearTimeout(timer);

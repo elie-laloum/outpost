@@ -74,7 +74,9 @@ Un délai de connexion dépassé garde le code `timeout`. Quand une CLI d’agen
 
 ## Traiter un workflow en échec
 
-Une tâche en échec ne fait pas rejeter `start()`. Lisez `status` et `errors`, ou appelez `unwrap()` pour lever une exception.
+Une tâche en échec ne fait pas rejeter `start()`. Lisez `status`, `terminationCode` et `errors`, ou appelez `unwrap()` pour lever une exception. Une approbation refusée se termine avec `status: "rejected"` et `terminationCode: "rejected"`. Les échecs techniques gardent `status: "failed"` avec un code précis quand il est disponible. Les workflows réussis ou suspendus n’ont pas de code de terminaison.
+
+En passant de la version 9.x, traitez `rejected` partout où votre application vérifiait uniquement `failed`. Un échec technique dans une branche indépendante reste prioritaire sur un refus de gate.
 
 <!-- tabs -->
 
@@ -106,14 +108,14 @@ try {
 } catch (error) {
   if (!(error instanceof WorkflowFailure)) throw error;
   const [first] = error.result.errors;
-  if (first instanceof OutpostError) reportValue(first.code, first.details);
+  if (first instanceof OutpostError) reportValue(error.code, first.details);
   // Example output: provider { status: 502 }
 }
 ```
 
 <!-- check:run -->
 
-`WorkflowFailure.cause` est la première entrée de `errors` : `quotaFault()` et `unavailableFault()` s’appliquent donc directement à elle. `unwrap()` lève aussi une exception pour les exécutions `"paused"`, `"waiting-input"` et `"cancelled"`.
+`WorkflowFailure.cause` est la première entrée de `errors` : `quotaFault()` et `unavailableFault()` s’appliquent donc directement à elle. `unwrap()` lève aussi une exception pour les exécutions `"paused"`, `"waiting-input"`, `"rejected"` et `"cancelled"`. `WorkflowFailure.code` expose le code de terminaison du résultat ; [WorkflowTerminationCode](../../reference/workflowterminationcode/) décrit les motifs disponibles.
 
 Référence API : [WorkflowFailure](../../reference/workflowfailure/), [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/), [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/), [LoopTaskExhausted](../../reference/looptaskexhausted/), [ResponseError](../../reference/responseerror/), [ReplayDivergence](../../reference/replaydivergence/) et [TransportConflict](../../reference/transportconflict/).
 

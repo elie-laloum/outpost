@@ -13,7 +13,7 @@ import { definePauseTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define a gate task that holds the run once its dependencies are done until a listed actor submits resume or reject. It takes the same options and validation as defineApprovalTask(); resume makes the WorkflowDecisionRecord the gate's value.
+Define a gate task that holds the run once its dependencies are done until a listed actor submits resume or reject. It takes the same options and validation as defineApprovalTask(); resume makes the WorkflowDecisionRecord the gate's value. Reject has the same rejected termination semantics as an approval gate.
 
 [Complete example and detailed rules](../../guide/approvals/).
 

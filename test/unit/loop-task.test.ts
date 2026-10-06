@@ -155,6 +155,7 @@ test("cooperative cancellation and round timeout stop the loop", async () => {
         signal: controller.signal,
       });
       assert.equal(result.status, timeout ? "failed" : "cancelled");
+      assert.equal(result.terminationCode, timeout ? "timeout" : "aborted");
       assert.equal(calls, 1);
     }
   }

@@ -33,6 +33,7 @@ export const replayExecutionEvents: ReadonlySet<string> = new Set([
 ]);
 
 export const replayFaultCodes: ReadonlySet<string> = new Set([
+  "rejected",
   "configuration",
   "process",
   "timeout",

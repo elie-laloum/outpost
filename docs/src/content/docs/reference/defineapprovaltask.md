@@ -13,7 +13,7 @@ import { defineApprovalTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define a gate task that pauses the run once its dependencies are done and waits for approve or reject from a listed actor. Approve makes the WorkflowDecisionRecord the gate's value; reject skips dependent tasks and fails the run. Throws on a blank prompt or on empty, blank or duplicate actors; scheduling it without a checkpoint throws.
+Define a gate task that pauses the run once its dependencies are done and waits for approve or reject from a listed actor. Approve makes the WorkflowDecisionRecord the gate's value; reject skips dependent tasks and ends the run with status and terminationCode rejected, unless an independent technical failure or external cancellation takes precedence. Throws on a blank prompt or on empty, blank or duplicate actors; scheduling it without a checkpoint throws.
 
 [Complete example and detailed rules](../../guide/approvals/).
 

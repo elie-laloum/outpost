@@ -4,6 +4,7 @@ import type { Variables } from "../domain/command.types.ts";
 import type { SandboxContext } from "../domain/sandbox.types.ts";
 
 export interface VercelOptions {
+  readonly repositoryMode?: "isolated";
   readonly egress?: EgressPolicy;
   readonly create?: NonNullable<Parameters<typeof Sandbox.create>[0]>;
   readonly variables?: Variables;

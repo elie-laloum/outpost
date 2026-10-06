@@ -266,3 +266,53 @@ test("defineWorkflowJob validates its options", () => {
     /version/,
   );
 });
+
+test("workflow jobs preserve a rejected checkpoint and report its termination code", async (t) => {
+  const { queue, store, startWorker } = await fixture(t);
+  const review = () =>
+    defineWorkflow("review", [
+      defineApprovalTask({
+        key: "approve",
+        prompt: "Deploy?",
+        actors: ["maintainer"],
+      }),
+    ]);
+  startWorker({
+    review: defineWorkflowJob({
+      checkpoint: { store, version: "1" },
+      workflow: review,
+    }),
+  });
+  const input = { runId: "rejected-review", input: null };
+  await queue.enqueue({ id: "pause", handler: "review", input });
+  const paused = await settle(queue, "pause");
+  const value = plain(paused.result!.value) as {
+    executionId: string;
+    version: string;
+    pauses: { id: string }[];
+  };
+  const rejected = await review().start({
+    checkpoint: { store, runId: input.runId, version: value.version },
+    decisions: [
+      {
+        executionId: value.executionId,
+        key: "approve",
+        requestId: value.pauses[0]!.id,
+        actor: "maintainer",
+        reason: "Needs revision",
+        action: "reject",
+      },
+    ],
+  });
+  assert.equal(rejected.status, "rejected");
+  await queue.enqueue({ id: "rejected", handler: "review", input });
+  const job = await settle(queue, "rejected");
+  assert.equal(job.status, "failed");
+  assert.match(job.result!.error!, /^Workflow rejected:/);
+  const summary = plain(job.result!.value) as {
+    status: string;
+    terminationCode: string;
+  };
+  assert.equal(summary.status, "rejected");
+  assert.equal(summary.terminationCode, "rejected");
+});

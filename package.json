@@ -1,6 +1,6 @@
 {
   "name": "@elie-laloum/outpost",
-  "version": "9.1.1",
+  "version": "10.0.0",
   "description": "Programmable sandboxes, coding agents and typed workflows.",
   "type": "module",
   "license": "MIT",
@@ -136,5 +136,8 @@
   "dependencies": {
     "@clack/prompts": "^1.8.1",
     "commander": "^15.0.0"
+  },
+  "overrides": {
+    "shell-quote": "1.11.0"
   }
 }

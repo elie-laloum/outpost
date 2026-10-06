@@ -1,4 +1,5 @@
 export type FaultCode =
+  | "rejected"
   | "configuration"
   | "process"
   | "timeout"

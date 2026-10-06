@@ -13,6 +13,7 @@ export type {
   WorkflowEvent,
   WorkflowOptions,
   WorkflowResult,
+  WorkflowTerminationCode,
   WorkflowTelemetry,
 } from "./workflow.types.ts";
 export { WorkflowFailure } from "./workflow/failure.ts";

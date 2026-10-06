@@ -106,7 +106,9 @@ A gate needs a checkpoint, the saved state of the run under `.outpost/storage`. 
 - **Continue**: According to `action`.
   - Steps
   - **Approve**: Dependent tasks run and read the decision as the gate’s value.
-  - **Reject**: Dependent tasks are skipped and the run ends `failed`.
+  - **Reject**: Dependent tasks are skipped and the run ends `rejected` with `terminationCode: "rejected"`.
+
+The rejection and its reason survive checkpoint resumption. Independent branches still follow normal scheduling; if one fails technically, the workflow returns `failed` with that failure’s termination code.
 
 API reference: [WorkflowDecision](../../reference/workflowdecision/).
 

@@ -1,5 +1,5 @@
 import type { Sandbox } from "@vercel/sandbox";
-import { OutpostError } from "../domain/errors.ts";
+import { invariant, OutpostError } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
@@ -18,6 +18,11 @@ export function createVercelSandboxProvider(
     config,
   ) => (await import("@vercel/sandbox")).Sandbox.create(config),
 ): SandboxProvider {
+  invariant(
+    options.repositoryMode === undefined ||
+      options.repositoryMode === "isolated",
+    "Vercel repositoryMode must be isolated",
+  );
   const networkPolicy = vercelNetworkPolicy(options);
   const create: NonNullable<VercelOptions["create"]> = { ...options.create };
   return {

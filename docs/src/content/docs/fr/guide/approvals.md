@@ -106,7 +106,9 @@ Une étape d’approbation exige un checkpoint, l’état sauvegardé de l’ex�
 - **Poursuivre**: Selon `action`.
   - Étapes
   - **Approuver**: Les tâches dépendantes s’exécutent et lisent la décision comme valeur de l’étape d’approbation.
-  - **Rejeter**: Les tâches dépendantes sont ignorées et l’exécution se termine en `failed`.
+  - **Rejeter**: Les tâches dépendantes sont ignorées et l’exécution se termine en `rejected` avec `terminationCode: "rejected"`.
+
+Le rejet et son motif survivent à la reprise du checkpoint. Les branches indépendantes suivent toujours l’ordonnancement normal ; si l’une échoue techniquement, le workflow renvoie `failed` avec le code de terminaison de cet échec.
 
 Référence API : [WorkflowDecision](../../reference/workflowdecision/).
 

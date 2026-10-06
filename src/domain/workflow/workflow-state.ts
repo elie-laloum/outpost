@@ -8,6 +8,7 @@ import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import type { WorkflowQuotaPause } from "./quota-pause.types.ts";
 import { workflowAccounting } from "./budget.ts";
 import { randomUUID } from "node:crypto";
+import { OutpostError } from "../errors.ts";
 import type {
   Task,
   TaskContext,
@@ -111,7 +112,14 @@ export function workflowState(
   const errors: unknown[] = [],
     observerErrors: unknown[] = [];
   for (const entry of records.values())
-    if (entry.status === "rejected") errors.push(new Error(entry.error));
+    if (entry.status === "rejected")
+      errors.push(
+        new OutpostError("rejected", entry.error!, {
+          key: entry.key,
+          actor: entry.decision!.actor,
+          reason: entry.decision!.reason,
+        }),
+      );
   const accounting = workflowAccounting(
     options.budget,
     (error) => {

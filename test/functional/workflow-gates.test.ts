@@ -14,6 +14,8 @@ import {
   defineTask,
   defineWorkflow,
   createLocalTransport,
+  WorkflowFailure,
+  OutpostError,
 } from "../../src/index.ts";
 import type {
   WorkflowCheckpointStore,
@@ -145,11 +147,25 @@ test("rejection persists its audit trail and blocks dependents on every restart"
   });
   const graph = defineWorkflow("release", [review, child]);
   const first = await graph.start({ checkpoint });
+  const events: WorkflowEvent[] = [];
   const rejected = await graph.start({
     checkpoint,
     decisions: [decision(first, "reject")],
+    observe: (event) => events.push(event),
   });
-  assert.equal(rejected.status, "failed");
+  assert.equal(rejected.status, "rejected");
+  assert.equal(rejected.terminationCode, "rejected");
+  assert.equal(
+    events.find((event) => event.type === "finish")?.terminationCode,
+    "rejected",
+  );
+  assert.throws(
+    () => rejected.unwrap(),
+    (error: unknown) =>
+      error instanceof WorkflowFailure &&
+      error.code === "rejected" &&
+      error.result === rejected,
+  );
   assert.deepEqual(
     rejected.tasks.map((entry) => entry.status),
     ["rejected", "skipped"],
@@ -161,7 +177,10 @@ test("rejection persists its audit trail and blocks dependents on every restart"
     const result = await graph.start({
       checkpoint: { ...checkpoint, ...(resume ? { resume } : {}) },
     });
-    assert.equal(result.status, "failed");
+    assert.equal(result.status, "rejected");
+    assert.equal(result.terminationCode, "rejected");
+    assert.ok(result.errors[0] instanceof OutpostError);
+    assert.equal(result.errors[0].code, "rejected");
     assert.equal(result.errors.length, 1);
     assert.deepEqual(result.tasks[0]!.decision, rejected.tasks[0]!.decision);
   }
@@ -517,4 +536,56 @@ test("observer mutation cannot change a validated approval decision", async (t) 
   assert.equal(result.value(review).actor, "maintainer");
   assert.ok(result.observerErrors.length > 0);
   (await graph.start({ checkpoint })).unwrap();
+});
+
+test("technical failures take precedence over gate rejection while independent branches finish", async (t) => {
+  const { checkpoint } = await setup(t);
+  const review = defineApprovalTask(gateOptions);
+  const approved = defineApprovalTask({ ...gateOptions, key: "other" });
+  const broken = defineTask({
+    key: "broken",
+    after: [approved],
+    perform() {
+      throw new OutpostError("process", "command failed");
+    },
+  });
+  const independent = defineTask({
+    key: "independent",
+    after: [approved],
+    perform: () => 42,
+  });
+  const graph = defineWorkflow("mixed", [
+    review,
+    approved,
+    broken,
+    independent,
+  ]);
+  const paused = await graph.start({ checkpoint });
+  const result = await graph.start({
+    checkpoint,
+    stopOnError: false,
+    decisions: [
+      decision(paused, "reject"),
+      decision(paused, "approve", "other"),
+    ],
+  });
+  assert.equal(result.status, "failed");
+  assert.equal(result.terminationCode, "process");
+  assert.equal(result.value(independent), 42);
+  assert.equal(result.tasks[0]!.status, "rejected");
+});
+
+test("a rejected pause gate takes precedence over another pending gate", async (t) => {
+  const { checkpoint } = await setup(t);
+  const review = definePauseTask(gateOptions);
+  const pending = defineApprovalTask({ ...gateOptions, key: "other" });
+  const graph = defineWorkflow("mixed-gates", [review, pending]);
+  const paused = await graph.start({ checkpoint });
+  const result = await graph.start({
+    checkpoint,
+    decisions: [decision(paused, "reject")],
+  });
+  assert.equal(result.status, "rejected");
+  assert.equal(result.terminationCode, "rejected");
+  assert.equal(result.tasks[1]!.status, "paused");
 });

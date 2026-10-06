@@ -27,6 +27,7 @@ test("attempt admission is shared across concurrency and retries", async () => {
     budget: { attempts: 2 },
   });
   assert.equal(result.status, "failed");
+  assert.equal(result.terminationCode, "limit");
   assert.equal(result.usage.attempts, 2);
   assert.equal(admitted.length, 2);
   assert.equal(
@@ -275,4 +276,18 @@ test("a task throwing the public budget error without exhaustion still fails", a
   const result = await defineWorkflow("error", [run]).start();
   assert.equal(result.status, "failed");
   assert.equal(result.tasks[0]?.status, "failed");
+});
+
+test("unavailable usage has a distinct workflow termination code", async () => {
+  const run = defineTask({
+    key: "usage",
+    perform(context) {
+      context.reportUsage({ input: 1, cached: 0, output: 0, complete: false });
+    },
+  });
+  const result = await defineWorkflow("incomplete-usage", [run]).start({
+    budget: { usage: { input: 10 } },
+  });
+  assert.equal(result.status, "failed");
+  assert.equal(result.terminationCode, "usage-unavailable");
 });

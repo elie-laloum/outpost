@@ -13,7 +13,7 @@ import { defineWorkflowJob } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Return a queue handler that builds a workflow from each trigger job input and starts it under the job runId, with the job signal and checkpoint.version plus an input digest as checkpoint version. The job value summarizes the run (status, tasks, paused gates, input requests) with its token usage; a failed or cancelled workflow, or an incompatible checkpoint, completes the job with an error. Creation throws without a workflow factory, checkpoint store and version.
+Return a queue handler that builds a workflow from each trigger job input and starts it under the job runId, with the job signal and checkpoint.version plus an input digest as checkpoint version. The job value summarizes the run (status, tasks, paused gates, input requests) with its token usage; a failed or cancelled workflow, or an incompatible checkpoint, completes the job with an error. Creation throws without a workflow factory, checkpoint store and version. Its summary includes terminationCode for unsuccessful terminal outcomes; rejected workflows retain status rejected in the value and return a queue error so the job cannot appear successful.
 
 [Complete example and detailed rules](../../guide/job-queues/).
 

@@ -9,6 +9,7 @@ import type { Variables } from "../domain/command.types.ts";
 import type { SandboxContext } from "../domain/sandbox.types.ts";
 
 export interface DaytonaOptions {
+  readonly repositoryMode?: "isolated";
   readonly egress?: EgressPolicy;
   readonly connection?: DaytonaConfig;
   readonly create?:

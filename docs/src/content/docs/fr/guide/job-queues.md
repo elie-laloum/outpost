@@ -136,7 +136,7 @@ Le résultat enregistré permet au producteur de consulter le workflow terminé.
 
 Référence API : [QueueHandlerContext](../../reference/queuehandlercontext/).
 
-`result.usage` contient l’usage cumulé des tokens de l’exécution. Une exécution `failed` ou `cancelled` fait échouer le job ; une exécution en pause ou en attente le termine normalement.
+`result.usage` contient l’usage cumulé des tokens de l’exécution. Une exécution `failed`, `cancelled` ou `rejected` fait échouer le job ; une exécution en pause ou en attente le termine normalement. Le résumé dans `result.value` garde le statut du workflow et son `terminationCode` : un refus de gate reste donc identifiable comme `rejected`, même si le job porte le statut `failed`. Voir [les codes de terminaison](../../reference/workflowterminationcode/).
 
 :::note
 L’empreinte lie un `runId` à une seule entrée. Un job avec le même `runId` et une autre entrée échoue à la vérification d’identité du checkpoint, au lieu de mélanger deux demandes dans une même exécution.

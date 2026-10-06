@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { OutpostError } from "../errors.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 import type {
   WorkflowDecisionRecord,
@@ -165,7 +166,13 @@ export function applyDecisions(
     });
     if (decision.action === "reject") {
       record.error = `${item.key} rejected by ${decision.actor}: ${decision.reason}`;
-      runtime.errors.push(new Error(record.error));
+      runtime.errors.push(
+        new OutpostError("rejected", record.error, {
+          key: item.key,
+          actor: decision.actor,
+          reason: decision.reason,
+        }),
+      );
       runtime.finish(item, "rejected");
       continue;
     }

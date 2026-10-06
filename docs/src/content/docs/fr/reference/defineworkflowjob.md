@@ -13,7 +13,7 @@ import { defineWorkflowJob } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre sous le runId du job, avec le signal du job et checkpoint.version suivi d’une empreinte de l’entrée comme version de checkpoint. La valeur du job résume l’exécution (statut, tâches, gates en pause, demandes de saisie) avec son usage de tokens ; un workflow failed ou cancelled, ou un checkpoint incompatible, termine le job avec une erreur. La création lève une erreur sans fabrique de workflow, stockage et version de checkpoint.
+Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre sous le runId du job, avec le signal du job et checkpoint.version suivi d’une empreinte de l’entrée comme version de checkpoint. La valeur du job résume l’exécution (statut, tâches, gates en pause, demandes de saisie) avec son usage de tokens ; un workflow failed ou cancelled, ou un checkpoint incompatible, termine le job avec une erreur. La création lève une erreur sans fabrique de workflow, stockage et version de checkpoint. Son résumé inclut terminationCode pour les fins sans succès ; les workflows rejetés gardent le statut rejected dans la valeur et renvoient une erreur de file pour que le job ne paraisse pas réussi.
 
 [Exemple complet et règles détaillées](../../guide/job-queues/).
 

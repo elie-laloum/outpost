@@ -24,6 +24,7 @@ import type {
   TaskCacheOutcome,
 } from "./workflow/task-cache.types.ts";
 import type { Usage } from "./agent.types.ts";
+import type { FaultCode } from "./errors.types.ts";
 import type {
   WorkflowAccounting,
   WorkflowBudget,
@@ -98,6 +99,7 @@ export interface TaskRecord {
 }
 
 export interface WorkflowEvent {
+  readonly terminationCode?: WorkflowTerminationCode;
   readonly executionId: string;
   readonly workflow: string;
   readonly timestamp: string;
@@ -151,11 +153,16 @@ export interface WorkflowOptions {
   readonly observe?: (event: WorkflowEvent) => void;
 }
 
+export type WorkflowTerminationCode =
+  FaultCode | "failed" | "usage-unavailable";
+
 export interface WorkflowResult {
+  readonly terminationCode?: WorkflowTerminationCode;
   readonly inputRequests: readonly WorkflowInputRequest[];
   readonly executionId: string;
   readonly name: string;
-  readonly status: "done" | "failed" | "cancelled" | "paused" | "waiting-input";
+  readonly status:
+    "done" | "failed" | "cancelled" | "paused" | "waiting-input" | "rejected";
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];

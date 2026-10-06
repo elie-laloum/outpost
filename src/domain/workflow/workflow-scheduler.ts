@@ -14,6 +14,7 @@ import { WorkflowFailure } from "./failure.ts";
 import { runTask } from "./task-runner.ts";
 import { positive } from "./validation.ts";
 import { workflowState } from "./workflow-state.ts";
+import { terminationCode, workflowOutcome } from "./termination.ts";
 
 export async function schedule(
   name: string,
@@ -164,17 +165,9 @@ async function scheduleRun(
     }
     await state.persist();
     if (options.signal?.aborted) errors.push(options.signal.reason);
-    const paused = [...records.values()].some(
-      (entry) => entry.status === "paused",
-    );
-    let status: WorkflowResult["status"] = "done";
-    if (paused) status = "paused";
-    if ([...records.values()].some((entry) => entry.status === "waiting-input"))
-      status = "waiting-input";
-    if (errors.length) status = "failed";
-    if (options.signal?.aborted)
-      status = timedOut(options, deadline) ? "failed" : "cancelled";
-    emit({ type: "finish", status, durationMs: Date.now() - started });
+    const outcome = workflowOutcome(state, deadline);
+    const { status } = outcome;
+    emit({ type: "finish", ...outcome, durationMs: Date.now() - started });
     await state.observation.close();
     observerErrors.push(...state.observation.errors);
     const result: WorkflowResult = Object.freeze({
@@ -187,7 +180,7 @@ async function scheduleRun(
             : [],
         ),
       ),
-      status,
+      ...outcome,
       usage: state.accounting.snapshot(),
       tasks: Object.freeze(
         [...records.values()].map((value) => Object.freeze({ ...value })),
@@ -207,18 +200,14 @@ async function scheduleRun(
     });
     return result;
   } catch (error) {
+    const outcome = options.signal?.aborted
+      ? workflowOutcome(state, deadline)
+      : { status: "failed" as const, terminationCode: terminationCode(error) };
     state.emit({
       type: "finish",
-      status:
-        options.signal?.aborted && !timedOut(options, deadline)
-          ? "cancelled"
-          : "failed",
+      ...outcome,
     });
     await state.observation.close();
     throw error;
   }
-}
-
-function timedOut(options: WorkflowOptions, deadline: AbortSignal): boolean {
-  return deadline.aborted && options.signal?.reason === deadline.reason;
 }

@@ -74,7 +74,9 @@ A connection timeout keeps the code `timeout`. When a CLI agent last reported a 
 
 ## Handle a failed workflow
 
-A failing task does not make `start()` reject. Read `status` and `errors`, or call `unwrap()` to throw.
+A failing task does not make `start()` reject. Read `status`, `terminationCode` and `errors`, or call `unwrap()` to throw. A rejected approval ends with `status: "rejected"` and `terminationCode: "rejected"`. Technical failures keep `status: "failed"` with a precise code when available. Successful and suspended workflows have no termination code.
+
+When upgrading from 9.x, handle `rejected` wherever your application previously checked only `failed`. A technical failure in an independent branch still takes precedence over a gate rejection.
 
 <!-- tabs -->
 
@@ -106,14 +108,14 @@ try {
 } catch (error) {
   if (!(error instanceof WorkflowFailure)) throw error;
   const [first] = error.result.errors;
-  if (first instanceof OutpostError) reportValue(first.code, first.details);
+  if (first instanceof OutpostError) reportValue(error.code, first.details);
   // Example output: provider { status: 502 }
 }
 ```
 
 <!-- check:run -->
 
-`WorkflowFailure.cause` is the first entry of `errors`, so `quotaFault()` and `unavailableFault()` work on it directly. `unwrap()` also throws for `"paused"`, `"waiting-input"` and `"cancelled"` runs.
+`WorkflowFailure.cause` is the first entry of `errors`, so `quotaFault()` and `unavailableFault()` work on it directly. `unwrap()` also throws for `"paused"`, `"waiting-input"`, `"rejected"` and `"cancelled"` runs. `WorkflowFailure.code` exposes the result’s termination code; [WorkflowTerminationCode](../../reference/workflowterminationcode/) describes the available reasons.
 
 API reference: [WorkflowFailure](../../reference/workflowfailure/), [WorkflowBudgetExceeded](../../reference/workflowbudgetexceeded/), [WorkflowUsageUnavailable](../../reference/workflowusageunavailable/), [LoopTaskExhausted](../../reference/looptaskexhausted/), [ResponseError](../../reference/responseerror/), [ReplayDivergence](../../reference/replaydivergence/) and [TransportConflict](../../reference/transportconflict/).
 

@@ -13,7 +13,7 @@ import { definePauseTask } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Définit une tâche gate qui retient l’exécution une fois ses dépendances terminées jusqu’à ce qu’un acteur autorisé soumette resume ou reject. Elle prend les mêmes options et validations que defineApprovalTask() ; resume fait du WorkflowDecisionRecord la valeur de la gate.
+Définit une tâche gate qui retient l’exécution une fois ses dépendances terminées jusqu’à ce qu’un acteur autorisé soumette resume ou reject. Elle prend les mêmes options et validations que defineApprovalTask() ; resume fait du WorkflowDecisionRecord la valeur de la gate. Le refus produit la même terminaison rejected qu’une gate d’approbation.
 
 [Exemple complet et règles détaillées](../../guide/approvals/).
 

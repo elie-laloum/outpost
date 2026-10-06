@@ -136,7 +136,7 @@ The stored job result lets the producer inspect the completed workflow.
 
 API reference: [QueueHandlerContext](../../reference/queuehandlercontext/).
 
-`result.usage` holds the run's cumulative token usage. A `failed` or `cancelled` run fails the job; a paused or waiting run completes it.
+`result.usage` holds the run's cumulative token usage. A `failed`, `cancelled` or `rejected` run fails the job; a paused or waiting run completes it. The summary in `result.value` retains the workflow status and its `terminationCode`: a gate refusal remains identifiable as `rejected` even though the job has status `failed`. See [termination codes](../../reference/workflowterminationcode/).
 
 :::note
 The digest ties a `runId` to one input. A job with the same `runId` and a different input fails the checkpoint identity check instead of mixing two requests in one run.

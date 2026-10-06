@@ -1,5 +1,6 @@
 import type { Daytona, DaytonaConfig } from "@daytona/sdk";
 import { posix } from "node:path";
+import { invariant } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
@@ -21,6 +22,11 @@ export function createDaytonaSandboxProvider(
   ) => Promise<Pick<Daytona, "create" | "delete">> = async (config) =>
     new (await import("@daytona/sdk")).Daytona(config),
 ): SandboxProvider {
+  invariant(
+    options.repositoryMode === undefined ||
+      options.repositoryMode === "isolated",
+    "Daytona repositoryMode must be isolated",
+  );
   const networkPolicy = daytonaNetworkPolicy(options);
   const create = { ...options.create, ...networkPolicy };
   return {

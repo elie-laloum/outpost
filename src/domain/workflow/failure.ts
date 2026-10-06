@@ -1,6 +1,10 @@
-import type { WorkflowResult } from "../workflow.types.ts";
+import type {
+  WorkflowResult,
+  WorkflowTerminationCode,
+} from "../workflow.types.ts";
 
 export class WorkflowFailure extends Error {
+  readonly code: WorkflowTerminationCode | undefined;
   readonly result: WorkflowResult;
   constructor(result: WorkflowResult) {
     super(`Workflow ${result.name} ${result.status}`, {
@@ -8,5 +12,6 @@ export class WorkflowFailure extends Error {
     });
     this.name = "WorkflowFailure";
     this.result = result;
+    this.code = result.terminationCode;
   }
 }
