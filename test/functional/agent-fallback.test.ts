@@ -361,19 +361,18 @@ test("conversations of failed candidates are captured for recovery", async (t) =
 test("a workflow pauses when every candidate hits a limit and reruns the brief from the first candidate", async (t) => {
   const primaryInputs: AgentInput[] = [];
   const backupInputs: AgentInput[] = [];
-  let earliest = "";
+  const earliest = "1970-01-01T00:00:00.000Z";
   const primary = candidate(
     "primary",
     () => {
       if (primaryInputs.length > 1) return emit("done");
-      earliest = new Date(Date.now() + 1_000).toISOString();
       return `${line({ kind: "conversation", id: "primary-1" })}${limited(earliest)}`;
     },
     primaryInputs,
   );
   const backup = candidate(
     "backup",
-    () => limited(new Date(Date.now() + 3_600_000).toISOString()),
+    () => limited("1970-01-01T00:00:01.000Z"),
     backupInputs,
   );
   const sandbox = await session(t, pair(primary, backup, ["quota"]));
@@ -402,18 +401,25 @@ test("a workflow pauses when every candidate hits a limit and reruns the brief f
       return { text: output.text, selected: output.fallback?.selected.name };
     },
   });
-  const result = await defineWorkflow("nightly", [run]).start({
-    checkpoint: { store, runId: "nightly", version: "1" },
-    onQuota: { action: "pause", maxWaitMs: 5_000 },
+  const checkpoint = { store, runId: "nightly", version: "1" };
+  const graph = defineWorkflow("nightly", [run]);
+  const paused = await graph.start({
+    checkpoint,
+    onQuota: { action: "pause" },
     observe: (event) => events.push(event),
   });
+  assert.equal(paused.status, "paused");
+  assert.equal(primaryInputs.length, 1);
+  assert.equal(backupInputs.length, 1);
+  const result = await graph.start({ checkpoint });
   result.unwrap();
   assert.deepEqual(result.value(run), { text: "done", selected: "primary" });
   assert.equal(backupInputs.length, 1);
   assert.equal(primaryInputs[1]!.text, "implement");
   assert.equal(primaryInputs[1]!.continuation, undefined);
-  const waiting = events.find((event) => event.type === "quota");
-  assert.equal(waiting?.resetAt, earliest);
+  const pause = events.find((event) => event.type === "quota");
+  assert.equal(pause?.status, "paused");
+  assert.equal(pause?.resetAt, earliest);
 });
 
 test("fallback agents resume integrated work from the interrupted branch unless restarting", () => {

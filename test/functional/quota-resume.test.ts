@@ -136,7 +136,6 @@ const interrupted = (conversation: string) => {
     {
       kind: "quota",
       message: "limit",
-      resetAt: new Date(Date.now() + 2_000).toISOString(),
     },
     { kind: "failure", message: "Usage limit" },
   ];
@@ -167,10 +166,15 @@ for (const quotaResume of ["continue", "restart"] as const)
       key: "run",
       perform: async (context) => (await coder.perform(context)).text,
     });
-    const result = await defineWorkflow("nightly", [run]).start({
-      checkpoint: memoryCheckpoint().checkpoint,
-      onQuota: { action: "pause", maxWaitMs: 5_000 },
+    const memory = memoryCheckpoint();
+    const graph = defineWorkflow("nightly", [run]);
+    const paused = await graph.start({
+      checkpoint: memory.checkpoint,
+      onQuota: { action: "pause" },
     });
+    assert.equal(paused.status, "paused");
+    assert.equal(inputs.length, 1);
+    const result = await graph.start({ checkpoint: memory.checkpoint });
     result.unwrap();
     assert.equal(inputs.length, 2);
     if (quotaResume === "continue") {
@@ -203,10 +207,15 @@ test("defineIsolatedTask continues the captured conversation in a new dispatch",
     key: "run",
     perform: async (context) => (await coder.perform(context)).text,
   });
-  const result = await defineWorkflow("nightly", [run]).start({
-    checkpoint: memoryCheckpoint().checkpoint,
-    onQuota: { action: "pause", maxWaitMs: 5_000 },
+  const memory = memoryCheckpoint();
+  const graph = defineWorkflow("nightly", [run]);
+  const paused = await graph.start({
+    checkpoint: memory.checkpoint,
+    onQuota: { action: "pause" },
   });
+  assert.equal(paused.status, "paused");
+  assert.equal(inputs.length, 1);
+  const result = await graph.start({ checkpoint: memory.checkpoint });
   result.unwrap();
   assert.deepEqual(inputs[1]!.continuation, { id: "session-2" });
 });
@@ -260,10 +269,15 @@ test("an interactive turn interrupted by quota continues its own conversation", 
     sandboxProvider: createLocalSandboxProvider(),
     agent: fixture,
   });
-  const result = await defineWorkflow("interview", [interview]).start({
-    checkpoint: memoryCheckpoint().checkpoint,
-    onQuota: { action: "pause", maxWaitMs: 5_000 },
+  const memory = memoryCheckpoint();
+  const graph = defineWorkflow("interview", [interview]);
+  const paused = await graph.start({
+    checkpoint: memory.checkpoint,
+    onQuota: { action: "pause" },
   });
+  assert.equal(paused.status, "paused");
+  assert.equal(inputs.length, 1);
+  const result = await graph.start({ checkpoint: memory.checkpoint });
   result.unwrap();
   assert.equal(JSON.stringify(result.value(interview).output), '{"ok":true}');
   assert.deepEqual(inputs[1]!.continuation, { id: "turn-1" });

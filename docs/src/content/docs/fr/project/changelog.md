@@ -12,13 +12,16 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Non publié
 
-## 10.0.0
+## 10.0.1
 
 - **Incompatible :** Signaler les refus de gates par le statut de workflow `rejected`. Ajouter le `terminationCode` typé aux résultats, événements de fin et résumés des workflows en file, et l’exposer via `WorkflowFailure.code` ; préserver les erreurs classées, délais, arrêts de budget et traces de rejet conservées dans les checkpoints. Les consommateurs qui testent uniquement `failed` doivent aussi traiter `rejected`. Les tests de régression déterministes couvrent ces terminaisons ; aucun appel réel à un agent ou provider n’est nécessaire.
 - Accepte explicitement `repositoryMode: "isolated"` sur Vercel et Daytona, conformément à leur checkout privé par défaut. Refuse les modes incompatibles avant allocation. Des fixtures déterministes des providers vérifient la séparation des métadonnées Git, la synchronisation des commits/fichiers et la récupération après des modifications concurrentes sur l’hôte ; la validation cloud réelle de cette option explicite reste à effectuer.
 - Ajoute automatiquement les consignes de réponse finale balisée et le JSON Schema d’entrée pour les réponses typées, y compris les réparations et les tours repris. **Incompatible :** `defineJsonResponse()` exige désormais une conversion Standard JSON Schema ou un `jsonSchema` explicite ; les fonctions de parsing et les schémas de validation seuls doivent déclarer leur schéma d’entrée. Le comportement d’analyse et de validation existant est conservé.
 - Actualise les guides bilingues, la référence API et les exemples hors ligne. Les tests déterministes ne prouvent pas le respect des consignes injectées par des agents réels.
 - Fixer les dépendances transitives `shell-quote` à 1.11.0 et `sharp` de la documentation à 0.35.5 pour résoudre les audits de dépendances bloquant la CI.
+- Reprendre explicitement les fixtures de workflows interrompus par quota depuis leurs checkpoints durables, en conservant les vérifications de continuation des conversations et de repli sans dépendre d’un démarrage du processus avant le reset simulé.
+
+La release v10.0.0 a été bloquée par une fixture Windows sensible au timing et n’a pas été publiée.
 
 ## 9.1.1
 

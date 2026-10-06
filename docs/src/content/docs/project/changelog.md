@@ -12,13 +12,16 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
-## 10.0.0
+## 10.0.1
 
 - **Breaking:** Report gate refusals as workflow status `rejected`. Add typed `terminationCode` to workflow results, finish events and queued workflow summaries, and expose it on `WorkflowFailure.code`; preserve classified faults, deadlines, budget stops and checkpointed rejection audit trails. Consumers checking only `failed` must also handle `rejected`. Deterministic regression tests cover the termination semantics; no live agent or provider calls are required.
 - Accept explicit `repositoryMode: "isolated"` on Vercel and Daytona, matching their existing private-checkout default. Reject unsupported modes before allocation. Deterministic provider fixtures verify Git metadata separation, commit/file synchronization and recovery after concurrent host edits; live cloud validation of this explicit option remains outstanding.
 - Automatically append tagged final-answer instructions and input JSON Schema for typed responses, including repairs and resumed turns. **Breaking:** `defineJsonResponse()` now requires Standard JSON Schema conversion or an explicit `jsonSchema`; parsing functions and validation-only schemas must declare their input schema. Existing parsing and validation behavior is preserved.
 - Update the bilingual guides, API reference and offline examples. Deterministic tests do not establish live agent compliance with the injected instructions.
 - Pin the transitive `shell-quote` dependency to 1.11.0 and documentation `sharp` to 0.35.5 to resolve the dependency audits blocking CI.
+- Resume quota-interrupted workflow fixtures explicitly from durable checkpoints, preserving conversation continuation and fallback checks without relying on process startup completing before a simulated reset.
+
+The v10.0.0 release was blocked by a timing-sensitive Windows fixture and was not published.
 
 ## 9.1.1
 
