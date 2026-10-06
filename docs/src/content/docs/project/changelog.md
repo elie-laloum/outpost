@@ -10,7 +10,7 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## 9.1.0
+## 9.1.1
 
 - Add typed System One decisions (`defineDecision`, `decide`, `defineDecisionTask`) and one bounded HTTP provider for Jev and compatible Laya endpoints. Preserve native distributions, metadata and input-truncation diagnostics.
 - Add per-step model routing to the built-in harness, including subagents, explicit confidence and outage fallback policies, cumulative routing usage and version-2 transcripts with version-1 compatibility.
@@ -20,6 +20,9 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 - Announce System One support in a bilingual indigo banner. Use a square logo button, equally sized Guide/API buttons with icons, colored source-link hovers and search aligned with the content border on wide screens.
 - Open `/reference/` at the first alphabetical API symbol. Remove family overview pages and redirect their old URLs to the corresponding practical Guide pages.
 - Retire the repository roadmap and preserve its removal in the documentation migration audit. Keep validation limits in the guides and release notes.
+- Pin the documentation's transitive `source-map-js` dependency to the patched 1.2.2 version.
+
+The v9.1.0 release was blocked by the documentation dependency audit and was not published.
 
 Direct decisions and decision tasks were exercised against a local Laya 0.3.28 CPU server. Live Jev inference and conversational model routing remain unvalidated; the ordinary test suites use deterministic local fixtures.
 
