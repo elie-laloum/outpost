@@ -5,6 +5,7 @@ const repository = process.argv[2]!;
 const directory = process.argv[3]!;
 const local = createLocalSandboxProvider();
 const phase = process.argv[4] ?? "validation";
+const best = phase.startsWith("best-");
 async function interrupt() {
   process.send?.("ready");
   await new Promise<void>(() => {
@@ -23,7 +24,8 @@ await speculate({
       return {
         ...lease,
         async release() {
-          if (phase === "cleanup") await interrupt();
+          if (phase === "cleanup" || phase === "best-cleanup")
+            await interrupt();
           await lease.release();
         },
       };
@@ -40,8 +42,27 @@ await speculate({
       agent: scripted(emit("done")),
       request: { brief: { text: "fixture" } },
     },
+    ...(best
+      ? [
+          {
+            key: "later",
+            agent: scripted(emit("later")),
+            request: { brief: { text: "fixture" } },
+          },
+        ]
+      : []),
   ],
-  budget: { attempts: 2 },
+  budget: { attempts: best ? 3 : 2 },
+  ...(best
+    ? {
+        concurrency: 1,
+        select: "best" as const,
+        async score() {
+          if (phase === "best-scoring") await interrupt();
+          return 1;
+        },
+      }
+    : {}),
   async validate() {
     if (phase === "validation") await interrupt();
     return true;

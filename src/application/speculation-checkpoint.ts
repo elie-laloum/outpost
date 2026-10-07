@@ -21,6 +21,7 @@ export async function speculationIdentity<T>(
           response: request.response?.tag,
         })),
         budget: options.budget,
+        ...(options.select === "best" ? { select: "best" } : {}),
       }),
     )
     .digest("hex");
@@ -146,6 +147,7 @@ export function validateSpeculation<T>(
   value: unknown,
   identity: string,
   keys: readonly string[],
+  select: SpeculationOptions<T>["select"] = "first",
 ): asserts value is SpeculationCheckpoint<T> {
   const invalid = () =>
     new Error("Invalid or incompatible speculation checkpoint");
@@ -244,6 +246,18 @@ export function validateSpeculation<T>(
         winners++;
       }
       if (record.attempt !== undefined && record.attempt !== item.attempt)
+        throw invalid();
+      if (
+        record.score !== undefined &&
+        (typeof record.score !== "number" || !Number.isFinite(record.score))
+      )
+        throw invalid();
+      if (
+        select === "best" &&
+        item.accepted === true &&
+        ["winner", "rejected"].includes(String(record.status)) &&
+        record.score === undefined
+      )
         throw invalid();
       if (record.cleanup !== undefined && record.cleanup !== item.cleanup)
         throw invalid();

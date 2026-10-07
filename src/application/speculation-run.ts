@@ -9,6 +9,7 @@ import { taskObservation } from "./task-observation.ts";
 import { invariant, recoveryDetails } from "../domain/errors.ts";
 import { quotaFault } from "../domain/quota.ts";
 import type { QuotaFault } from "../domain/quota.types.ts";
+import type { ObservationHub } from "../domain/observation.types.ts";
 import { workflowAccounting } from "../domain/workflow/budget.ts";
 import { speculativeHostSnapshot } from "./speculation-host.ts";
 import type { Sandbox } from "./outpost.types.ts";
@@ -29,6 +30,7 @@ export async function runSpeculation<T>(
   cleanupMs: number,
 ): Promise<SpeculationResult<T>> {
   const { candidates } = options;
+  const best = options.select === "best";
   const stop = new AbortController();
   const signal = options.signal
     ? AbortSignal.any([options.signal, stop.signal])
@@ -78,6 +80,7 @@ export async function runSpeculation<T>(
     },
   );
   let winner = records.find((record) => record.status === "winner");
+  const observations = new Map<string, ObservationHub>();
   await save();
   let next = 0;
   async function worker(): Promise<void> {
@@ -101,11 +104,13 @@ export async function runSpeculation<T>(
         candidate.request.observe,
         { candidate: candidate.key },
       );
+      if (best) observations.set(candidate.key, observation);
       const initial = records[index]!;
       let sandbox: Sandbox | undefined;
       let result: SpeculativeOutput<T> | undefined;
       let error: unknown;
       let accepted = false;
+      let score: number | undefined;
       let cleanupFailed = false;
       let retainedDirectory: string | undefined;
       const usage = taskUsage(
@@ -194,6 +199,19 @@ export async function runSpeculation<T>(
           status: "validated",
         });
         signal.throwIfAborted();
+        if (accepted && best) {
+          score = await options.score!({
+            key: candidate.key,
+            result,
+            sandbox,
+            signal,
+          });
+          invariant(
+            typeof score === "number" && Number.isFinite(score),
+            "Speculation score must be a finite number",
+          );
+          signal.throwIfAborted();
+        }
         const commit = (
           await git(sandbox.workspace.directory, ["rev-parse", "HEAD"])
         ).trim();
@@ -204,6 +222,7 @@ export async function runSpeculation<T>(
           ...initial,
           status: "rejected",
           result,
+          ...(score !== undefined ? { score } : {}),
           directory: sandbox.workspace.directory,
           commit,
         };
@@ -251,18 +270,22 @@ export async function runSpeculation<T>(
         if (cleanupFailed) return "failed";
         if (signal.aborted) return "cancelled";
         if (error !== undefined) return quota ? "quota" : "failed";
-        if (accepted && !winner) return "winner";
+        if (accepted && !winner && !best) return "winner";
         return "rejected";
       }
       observation?.emit("workflow", { kind: "candidate", status: "cleanup" });
       const status = candidateStatus();
-      observation?.emit("workflow", {
-        kind: "candidate",
-        status: status === "winner" ? "accepted" : "rejected",
-      });
+      if (!best)
+        observation.emit("workflow", {
+          kind: "candidate",
+          status: status === "winner" ? "accepted" : "rejected",
+        });
       const record: SpeculativeCandidateResult<T> = {
         ...initial,
         status,
+        ...(attempt.record?.score !== undefined
+          ? { score: attempt.record.score }
+          : {}),
         ...(attempt.record?.commit ? { commit: attempt.record.commit } : {}),
         cleanup: attempt.cleanup,
         ...(attempt.resourceId ? { resourceId: attempt.resourceId } : {}),
@@ -282,7 +305,7 @@ export async function runSpeculation<T>(
         );
       }
       await save();
-      await observation.close();
+      if (!best) await observation.close();
     }
   }
   const workers = Promise.all(
@@ -324,6 +347,37 @@ export async function runSpeculation<T>(
   } finally {
     removeAbort();
   }
+  sealed = true;
+  if (best && !winner && !signal.aborted && !state.finished) {
+    let winnerIndex = -1;
+    for (const [index, record] of records.entries()) {
+      if (
+        record.status !== "rejected" ||
+        record.cleanup !== "done" ||
+        record.score === undefined ||
+        !latest.get(record.key)?.accepted
+      )
+        continue;
+      if (!winner || record.score > winner.score!) {
+        winner = record;
+        winnerIndex = index;
+      }
+    }
+    if (winner) {
+      winner = { ...winner, status: "winner" };
+      records[winnerIndex] = winner;
+      latest.get(winner.key)!.record = winner;
+    }
+  }
+  for (const record of records) {
+    const observation = observations.get(record.key);
+    if (!observation) continue;
+    observation.emit("workflow", {
+      kind: "candidate",
+      status: record.status === "winner" ? "accepted" : "rejected",
+    });
+    await observation.close();
+  }
   function outcome(): SpeculationResult<T>["status"] {
     if (winner) return "winner";
     if (options.signal?.aborted) return "aborted";
@@ -331,7 +385,6 @@ export async function runSpeculation<T>(
     if (records.some((record) => record.status === "quota")) return "quota";
     return "no-winner";
   }
-  sealed = true;
   const status = state.finished && state.status ? state.status : outcome();
   const host = await speculativeHostSnapshot(options.repository).then(
     (after) => ({

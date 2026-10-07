@@ -65,13 +65,36 @@ reportValue(result.status, result.winner?.branch);
 // Example output: winner outpost/speculation/…/codex
 ```
 
+## Choisir le meilleur score
+
+Utilisez `select: "best"` pour laisser finir tous les candidats admis. `score` s’exécute uniquement après l’acceptation par `validate`, dans la sandbox encore ouverte. Renvoyez un nombre fini : le score le plus élevé gagne après un nettoyage réussi. Les scores égaux suivent l’ordre de déclaration. Le mode par défaut `select: "first"` conserve le premier candidat accepté et annule les autres.
+
+```ts title="best.ts"
+import { speculate } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { candidates } from "./candidates.ts";
+import { validate } from "./validate.ts";
+
+export const best = await speculate({
+  repository,
+  sandboxProvider,
+  budget: { attempts: 2 },
+  candidates,
+  validate,
+  select: "best",
+  score: async ({ result }) => -result.usage.output,
+});
+```
+
+Ce score favorise une consommation moindre de tokens de sortie. Vous pouvez aussi lancer des vérifications, inspecter le diff ou appeler un agent juge via `sandbox` et `signal`. Les scores figurent dans les résultats des candidats, y compris les perdants. Une exception, `NaN` ou une valeur infinie fait échouer le candidat ; une annulation ou un arrêt par budget de tokens empêche de sélectionner un meilleur résultat partiel. La limite de tentatives restreint toujours les admissions : le gagnant peut donc provenir d’un sous-ensemble des candidats.
+
 ## Valider le comportement réel
 
 `validate` reçoit la `key` du candidat, le `result` de son dispatch et sa `sandbox`, encore ouverte. Lancez-y vos tests et renvoyez `true` seulement s’ils passent : un agent qui affirme avoir réussi ne prouve rien.
 
-Passez `signal` à chaque commande. Il se déclenche quand un autre candidat gagne ou que la course s’arrête.
+Passez `signal` à chaque commande. Il se déclenche quand un autre candidat gagne en mode first ou que la course s’arrête.
 
-Le `commit` du gagnant est le `HEAD` lu après le retour de `validate`. Un commit créé pendant la validation fait partie du gagnant ; les modifications non commitées, non. Un agent de revue lancé dans `validate` ne doit donc pas commiter : voir [Laisser un agent de revue trancher](../compete-agents/).
+Le `commit` du gagnant est le `HEAD` lu après le retour de `validate` et de l’éventuel callback `score`. Un commit créé dans l’un ou l’autre fait partie du gagnant ; les modifications non commitées, non. Un agent de revue lancé dans `validate` ne doit donc pas commiter : voir [Laisser un agent de revue trancher](../compete-agents/).
 
 ## Lire le résultat
 
@@ -87,9 +110,9 @@ Référence API : [SpeculativeCandidateResult](../../reference/speculativecandid
 
 - **Limite de tentatives**: Chaque démarrage de candidat consomme une des `budget.attempts`. Une fois atteinte, aucun nouveau candidat ne démarre ; ceux en cours terminent.
 - **Limite de tokens**: Une fois `budget.usage` atteint, tous les candidats en cours sont annulés.
-- **Gagnant**: Les candidats en cours sont annulés et ceux en attente sont ignorés.
+- **Premier gagnant**: En mode first, les candidats en cours sont annulés et ceux en attente sont ignorés. En mode best, la sélection attend les candidats admis.
 
-Les tokens consommés dans `validate`, par exemple par un agent de revue, ne comptent pas dans `budget`. Les candidats en cours peuvent dépasser la limite de tokens avant que leur usage soit remonté. [Budgets](../budgets/) explique comment les limites sont mesurées.
+Les tokens consommés dans `validate` ou `score`, par exemple par un agent de revue, ne comptent pas dans `budget`. Les candidats en cours peuvent dépasser la limite de tokens avant que leur usage soit remonté. [Budgets](../budgets/) explique comment les limites sont mesurées.
 
 Chaque sandbox est libérée à la fin de son candidat. Si elle ne se ferme pas dans le délai `cleanupMs`, le candidat indique `cleanup: "pending"`, avec son `resourceId` dans une course durable. Une course durable dont un nettoyage reste en attente reste possédée : appelez `recoverSpeculation()` avant le prochain `speculate()`.
 
@@ -140,7 +163,7 @@ export const durability: SpeculationDurability = {
 };
 ```
 
-Changez `version` quand vous modifiez les agents ou `validate`. Une course enregistrée dont les briefs, le budget, le fournisseur ou la `version` diffèrent est refusée : relancez-la sous un nouveau `runId`.
+Changez `version` quand vous modifiez les agents, `validate` ou `score`. Une course enregistrée dont les briefs, le budget, le fournisseur, le mode de sélection ou la `version` diffèrent est refusée : relancez-la sous un nouveau `runId`.
 
 Une course durable exige un fournisseur capable de retrouver et d’arrêter ses sandboxes après un arrêt brutal. Docker et Podman dans leur mode monté par défaut en sont capables ; les autres fournisseurs sont refusés, sauf si vous [implémentez la récupération](../custom-sandbox-providers/).
 
@@ -195,7 +218,7 @@ if (saved) {
 }
 ```
 
-Un candidat interrompu repart comme une nouvelle tentative, sur `…/<key>/2`, depuis le commit d’origine. Son ancienne branche et son ancien worktree figurent dans `result.previousAttempts`. Les candidats validés avant le arrêt brutal gardent leur issue.
+Un candidat interrompu repart comme une nouvelle tentative, sur `…/<key>/2`, depuis le commit d’origine. Son ancienne branche et son ancien worktree figurent dans `result.previousAttempts`. Les candidats validés et notés avant l’arrêt brutal gardent leurs scores enregistrés ; la sélection best attend toujours les candidats admis restants. Un arrêt brutal pendant la notation exige une nouvelle tentative explicitement autorisée.
 
 ## Reprendre après un quota
 

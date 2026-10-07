@@ -2603,8 +2603,8 @@
     "Nombre maximal de candidats exécutés à la fois, de 1 à 8, 2 par défaut."
   ],
   "SpeculationOptions.budget": [
-    "Limits shared by all candidates. Each start consumes one of attempts and the limit stops new starts; reaching a usage token limit cancels running candidates. Tokens used inside validate are not counted.",
-    "Limites partagées par tous les candidats. Chaque démarrage consomme une unité de attempts et la limite empêche tout nouveau démarrage ; atteindre une limite de tokens de usage annule les candidats en cours. Les tokens consommés dans validate ne sont pas comptés."
+    "Limits shared by all candidates. Each start consumes one of attempts and the limit stops new starts; reaching a usage token limit cancels running candidates. Tokens used inside validate or score are not counted.",
+    "Limites partagées par tous les candidats. Chaque démarrage consomme une unité de attempts et la limite empêche tout nouveau démarrage ; atteindre une limite de tokens de usage annule les candidats en cours. Les tokens consommés dans validate ou score ne sont pas comptés."
   ],
   "SpeculationOptions.signal": [
     "Aborting it cancels running candidates and ends the race with status aborted.",
@@ -2631,20 +2631,20 @@
     "Options de dispatch de ce candidat, par exemple brief et response. La course fournit agent et signal ; continuation n’est pas accepté."
   ],
   "SpeculativeValidation.key": [
-    "Key of the candidate being validated.",
-    "Clé du candidat en cours de validation."
+    "Key of the candidate being validated or scored.",
+    "Clé du candidat en cours de validation ou de notation."
   ],
   "SpeculativeValidation.result": [
     "Dispatch output of the candidate: text, value, commits and usage.",
     "Sortie de dispatch du candidat : texte, valeur, commits et usage."
   ],
   "SpeculativeValidation.sandbox": [
-    "Candidate's sandbox, still open; it closes after validate returns. Commits made in it during validation become part of the candidate's commit.",
-    "Sandbox du candidat, encore ouverte ; elle se ferme après le retour de validate. Les commits créés pendant la validation font partie du commit du candidat."
+    "Candidate sandbox, still open during validate and score; it closes after both callbacks. Commits made in either callback become part of the candidate commit.",
+    "Sandbox du candidat, encore ouverte pendant validate et score ; elle se ferme après les deux callbacks. Les commits créés dans l’un ou l’autre font partie du commit du candidat."
   ],
   "SpeculativeValidation.signal": [
-    "Aborts when another candidate wins, a token limit is reached or the race is cancelled; pass it to every command.",
-    "S’annule quand un autre candidat gagne, qu’une limite de tokens est atteinte ou que la course est annulée ; passez-le à chaque commande."
+    "Aborts when another candidate wins in first mode, a token limit is reached or the race is cancelled; pass it to every command in validate and score.",
+    "S’annule quand un autre candidat gagne en mode first, qu’une limite de tokens est atteinte ou que la course est annulée ; passez-le à chaque commande dans validate et score."
   ],
   "SpeculationResult.id": [
     "Race identifier used in candidate branch names; a durable race keeps it across calls.",
@@ -2663,8 +2663,8 @@
     "winner ; aborted si votre signal a annulé la course ; budget-exhausted ; quota si aucun candidat n’a gagné et qu’une limite d’usage ou de débit en a arrêté au moins un ; sinon no-winner. Une course durable terminée renvoie son statut enregistré."
   ],
   "SpeculationResult.winner": [
-    "First candidate that validate accepted and whose sandbox closed; absent otherwise.",
-    "Premier candidat accepté par validate dont la sandbox s’est fermée ; absent sinon."
+    "Accepted candidate whose sandbox closed successfully: the first in first mode, or the highest-scoring admitted candidate in best mode. Equal scores use declaration order; absent when no candidate can be selected.",
+    "Candidat accepté dont la sandbox s’est fermée sans erreur : le premier en mode first, ou le candidat admis au score le plus élevé en mode best. Les scores égaux suivent l’ordre de déclaration ; absent si aucun candidat ne peut être sélectionné."
   ],
   "SpeculationResult.candidates": [
     "Latest attempt of every candidate, in the order of options.candidates.",
@@ -2703,8 +2703,8 @@
     "Branche du candidat : outpost/speculation/<id>/<key>, ou …/<key>/<attempt> dans une course durable. Elle reste dans le dépôt."
   ],
   "SpeculativeCandidateResult.status": [
-    "winner; rejected when validate returned false or another candidate won first; failed when allocation, the agent, validate or cleanup threw; quota; cancelled by a winner, a token limit, your signal or a crash; skipped when never started.",
-    "winner ; rejected si validate a renvoyé false ou qu’un autre candidat a gagné avant ; failed si l’allocation, l’agent, validate ou le nettoyage a levé une erreur ; quota ; cancelled par un gagnant, une limite de tokens, votre signal ou un plantage ; skipped s’il n’a jamais démarré."
+    "winner; rejected when validate returned false or another candidate won by completion or score; failed when allocation, the agent, validate, score or cleanup failed; quota; cancelled by a first-mode winner, a token limit, your signal or a crash; skipped when never started.",
+    "winner ; rejected si validate a renvoyé false ou qu’un autre candidat a gagné par ordre de fin ou par score ; failed si l’allocation, l’agent, validate, score ou le nettoyage a échoué ; quota ; cancelled par un gagnant en mode first, une limite de tokens, votre signal ou un plantage ; skipped s’il n’a jamais démarré."
   ],
   "SpeculativeCandidateResult.directory": [
     "Host worktree directory of the candidate.",
@@ -2719,8 +2719,8 @@
     "Sortie de dispatch, quand le dispatch du candidat s’est terminé."
   ],
   "SpeculativeCandidateResult.error": [
-    "Failure of allocation, dispatch, validate or cleanup; a message string in a restored durable record.",
-    "Échec de l’allocation, du dispatch, de validate ou du nettoyage ; un message texte dans un enregistrement durable restauré."
+    "Failure of allocation, dispatch, validate, score or cleanup; a message string in a restored durable record.",
+    "Échec de l’allocation, du dispatch, de validate, de score ou du nettoyage ; un message texte dans un enregistrement durable restauré."
   ],
   "ContainerOptions.egress": [
     "deny-all only, applied as the none network. An allowlist, or networks other than none, fails with code configuration at creation.",
@@ -5137,8 +5137,8 @@
     "Nom stable et non vide de la course. Un seul coordinateur le possède à la fois ; un autre appel à speculate() sur ce nom rejette tant que le propriétaire n’a pas terminé ou été récupéré."
   ],
   "SpeculationDurability.version": [
-    "Nonempty version of your agents, validation and settings. With the repository, provider, candidate keys, briefs and budget, it must match the saved race, otherwise speculate() rejects.",
-    "Version non vide de vos agents, de la validation et des réglages. Avec le dépôt, le provider, les clés, briefs et budget des candidats, elle doit correspondre à la course enregistrée, sinon speculate() rejette."
+    "Nonempty version of your agents, validation, scoring and settings. With the repository, provider, candidate keys, briefs, budget and selection mode, it must match the saved race; otherwise speculate() rejects.",
+    "Version non vide de vos agents, de la validation, de la notation et des réglages. Avec le dépôt, le provider, les clés, briefs, budget et mode de sélection des candidats, elle doit correspondre à la course enregistrée ; sinon speculate() rejette."
   ],
   "SpeculationDurability.resume": [
     "retry-incomplete replays candidates interrupted while running, with their side effects, as new attempts. Without it, a race with interrupted candidates rejects.",
@@ -7541,5 +7541,17 @@
   "AgentConflictResolverOptions.logging": [
     "Journal configuration for the resolution sandbox dispatch; omitted uses the normal local journal, false disables it.",
     "Configuration du journal du dispatch dans la sandbox de résolution ; son omission utilise le journal local habituel, false le désactive."
+  ],
+  "SpeculationOptions.select": [
+    "first (default) selects the first validated candidate whose sandbox closes and cancels the others. best lets all admitted candidates finish, then chooses the highest finite score among accepted candidates with successful cleanup; ties follow candidate declaration order. Cancellation or token exhaustion prevents best selection.",
+    "first (par défaut) choisit le premier candidat validé dont la sandbox se ferme et annule les autres. best laisse finir tous les candidats admis, puis choisit le score fini le plus élevé parmi les candidats acceptés et nettoyés sans erreur ; les égalités suivent l’ordre de déclaration. Une annulation ou un budget de tokens épuisé empêche la sélection best."
+  ],
+  "SpeculationOptions.score": [
+    "Required only with select: best. Runs after validate accepts a candidate, before its sandbox closes, with the same key, result, sandbox and signal. Return a finite number; higher wins, including negative scores. A throw or invalid score fails that candidate. Saved scores are reused during durable recovery; change durability.version when this callback changes. Nested agent usage is outside the shared budget.",
+    "Obligatoire uniquement avec select: best. S’exécute après l’acceptation par validate, avant la fermeture de la sandbox, avec les mêmes key, result, sandbox et signal. Renvoyez un nombre fini ; le plus élevé gagne, même négatif. Une exception ou un score invalide fait échouer ce candidat. Les scores enregistrés sont réutilisés à la récupération durable ; changez durability.version quand ce callback change. L’usage des agents imbriqués reste hors du budget partagé."
+  ],
+  "SpeculativeCandidateResult.score": [
+    "Finite score computed for an accepted candidate in best mode, including losing candidates and candidates whose subsequent cleanup failed. Absent when no score was successfully computed. Persisted in durable checkpoints.",
+    "Score fini calculé pour un candidat accepté en mode best, y compris les perdants et les candidats dont le nettoyage ultérieur a échoué. Absent si aucun score n’a été calculé avec succès. Conservé dans les checkpoints durables."
   ]
 }

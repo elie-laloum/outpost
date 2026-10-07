@@ -56,6 +56,10 @@ export interface SpeculationOptions<T = undefined> {
   readonly sandboxProvider: NonNullable<SandboxOptions["sandboxProvider"]>;
   readonly candidates: readonly SpeculativeCandidate<T>[];
   readonly concurrency?: number;
+  readonly select?: "first" | "best";
+  readonly score?: (
+    candidate: SpeculativeValidation<T>,
+  ) => number | Promise<number>;
   readonly budget: WorkflowBudget;
   readonly signal?: AbortSignal;
   readonly sandbox?: Pick<
@@ -74,6 +78,7 @@ export interface SpeculationOptions<T = undefined> {
 
 export interface SpeculativeCandidateResult<T = undefined> {
   readonly key: string;
+  readonly score?: number;
   readonly commit?: string;
   readonly attempt?: number;
   readonly cleanup?: "pending" | "done";

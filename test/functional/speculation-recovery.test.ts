@@ -15,7 +15,11 @@ import {
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
-import type { SandboxProvider, Transport } from "../../src/index.ts";
+import type {
+  SandboxProvider,
+  SpeculativeValidation,
+  Transport,
+} from "../../src/index.ts";
 
 function recoverable(recovered: string[] = []): SandboxProvider {
   const local = createLocalSandboxProvider();
@@ -82,7 +86,13 @@ test("durable completion is reused without allocation and preserves structured e
   assert.equal(second.integration?.status, "clean");
 });
 
-for (const phase of ["allocation", "validation", "cleanup"])
+for (const phase of [
+  "allocation",
+  "validation",
+  "cleanup",
+  "best-scoring",
+  "best-cleanup",
+])
   test(`coordinator SIGKILL during ${phase} requires explicit ownership recovery and replay`, async (t) => {
     const repo = await repository(t);
     const directory = join(repo, ".outpost", "storage");
@@ -121,12 +131,31 @@ for (const phase of ["allocation", "validation", "cleanup"])
     child.kill("SIGKILL");
     await exited;
     const recovered: string[] = [];
+    const best = phase.startsWith("best-");
     const options = {
       repository: repo,
       sandboxProvider: recoverable(recovered),
       durability: { transporter, runId: "crash", version: "1" },
-      candidates: [candidate],
-      budget: { attempts: 2 },
+      candidates: [
+        candidate,
+        ...(best ? [{ ...candidate, key: "later" }] : []),
+      ],
+      budget: { attempts: best ? 3 : 2 },
+      ...(best
+        ? {
+            concurrency: 1,
+            select: "best" as const,
+            score({ key }: SpeculativeValidation<undefined>) {
+              if (phase === "best-cleanup")
+                assert.notEqual(
+                  key,
+                  "candidate",
+                  "saved score must not run again",
+                );
+              return key === "later" ? 10 : 1;
+            },
+          }
+        : {}),
       validate: () => true,
     };
     await assert.rejects(speculate(options), /already owned/);
@@ -159,6 +188,19 @@ for (const phase of ["allocation", "validation", "cleanup"])
       durability: { ...options.durability, resume: "retry-incomplete" },
     });
     assert.equal(result.status, "winner");
+    if (best) {
+      assert.equal(result.winner?.key, "later");
+      assert.equal(result.winner.score, 10);
+      assert.equal(result.candidates[0]?.score, 1);
+      assert.equal(result.candidates[0]?.status, "rejected");
+      assert.equal(result.usage.attempts, phase === "best-cleanup" ? 2 : 3);
+      assert.equal(
+        result.previousAttempts?.length,
+        phase === "best-cleanup" ? 0 : 1,
+      );
+      assert.deepEqual(recovered, ["fixture-resource"]);
+      return;
+    }
     assert.equal(result.usage.attempts, phase === "cleanup" ? 1 : 2);
     if (phase !== "cleanup") assert.equal(result.usage.tokens.complete, false);
     assert.deepEqual(recovered, ["fixture-resource"]);
@@ -485,3 +527,98 @@ test("unprintable callback failures do not break durable error reporting", async
   const restored = await speculate(options);
   assert.equal(restored.candidates[0]?.error, "Unprintable speculation error");
 });
+
+for (const aborted of [false, true])
+  test(`durable best selection preserves ${aborted ? "aborted outcomes" : "scores and the winner"} without rescoring`, async (t) => {
+    const repo = await repository(t);
+    const transporter = createLocalTransport({
+      directory: join(repo, ".outpost", "storage"),
+    });
+    const controller = new AbortController();
+    const options = {
+      repository: repo,
+      sandboxProvider: recoverable(),
+      durability: { transporter, runId: "best", version: "1" },
+      concurrency: 1,
+      candidates: [candidate, { ...candidate, key: "later" }],
+      budget: { attempts: 2 },
+      validate: () => true,
+      select: "best" as const,
+      score({ key }: SpeculativeValidation<undefined>) {
+        if (aborted && key === "later") controller.abort();
+        return key === "later" ? 2 : -1;
+      },
+    };
+    const result = await speculate({ ...options, signal: controller.signal });
+    assert.equal(result.status, aborted ? "aborted" : "winner");
+    assert.equal(result.candidates[0]?.score, -1);
+    const restored = await speculate({
+      ...options,
+      sandboxProvider: {
+        ...options.sandboxProvider,
+        acquire: async () => assert.fail("must not allocate"),
+      },
+      score: () => assert.fail("must not rescore"),
+    });
+    assert.equal(restored.status, result.status);
+    assert.deepEqual(restored.winner, result.winner);
+    assert.equal(restored.usage.attempts, 2);
+    const { score: _score, ...firstOptions } = options;
+    await assert.rejects(
+      speculate({ ...firstOptions, select: "first" }),
+      /incompatible/,
+    );
+  });
+
+for (const score of [undefined, "invalid", null])
+  test(`durable best selection rejects a corrupted score ${String(score)}`, async (t) => {
+    const repo = await repository(t);
+    const transporter = createLocalTransport({
+      directory: join(repo, ".outpost", "storage"),
+    });
+    const options = {
+      repository: repo,
+      sandboxProvider: recoverable(),
+      durability: { transporter, runId: "best-corrupt", version: "1" },
+      candidates: [candidate],
+      budget: {},
+      validate: () => true,
+      select: "best" as const,
+      score: () => 1,
+    };
+    const result = await speculate(options);
+    assert.equal(result.status, "winner");
+    const current = await entry(transporter);
+    const stored = await transporter.read(current.key);
+    assert.ok(stored);
+    const envelope: unknown = JSON.parse(Buffer.from(stored.bytes).toString());
+    assert.ok(envelope && typeof envelope === "object" && "state" in envelope);
+    const state = envelope.state;
+    assert.ok(
+      state &&
+        typeof state === "object" &&
+        "attempts" in state &&
+        Array.isArray(state.attempts),
+    );
+    const attempt: unknown = state.attempts[0];
+    assert.ok(attempt && typeof attempt === "object" && "record" in attempt);
+    const record = attempt.record;
+    assert.ok(record && typeof record === "object" && "score" in record);
+    record.score = score;
+    await transporter.write(
+      current.key,
+      Buffer.from(JSON.stringify(envelope)),
+      { ifRevision: current.revision },
+    );
+    await assert.rejects(
+      speculate({
+        ...options,
+        sandboxProvider: {
+          ...options.sandboxProvider,
+          acquire: async () => assert.fail("must not allocate"),
+          recover: async () => assert.fail("must not recover"),
+        },
+      }),
+      /incompatible/,
+    );
+  });

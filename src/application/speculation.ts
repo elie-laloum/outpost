@@ -19,6 +19,18 @@ export async function speculate<T = undefined>(
 ): Promise<SpeculationResult<T>> {
   const { candidates } = options;
   invariant(
+    options.select === undefined ||
+      options.select === "first" ||
+      options.select === "best",
+    "Speculation select must be first or best",
+  );
+  invariant(
+    options.select === "best"
+      ? typeof options.score === "function"
+      : options.score === undefined,
+    "Speculation score requires select best, and select best requires score",
+  );
+  invariant(
     candidates.length > 0 && candidates.length <= speculationLimits.candidates,
     `Speculation requires 1 to ${speculationLimits.candidates} candidates`,
   );
@@ -67,6 +79,7 @@ export async function speculate<T = undefined>(
       session.initial,
       identity,
       candidates.map((candidate) => candidate.key),
+      options.select,
     );
     state = session.initial;
   } else {

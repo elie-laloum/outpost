@@ -55,7 +55,8 @@ export async function resumeSpeculation<T>(
     if (previous.phase === "waiting" || previous.phase === "settled") continue;
     if (previous.phase === "validated" && previous.record) {
       previous.phase = "settled";
-      const accepted = previous.accepted && !recoveredWinner;
+      const accepted =
+        options.select !== "best" && previous.accepted && !recoveredWinner;
       previous.record = {
         ...previous.record,
         status: accepted ? "winner" : "rejected",
