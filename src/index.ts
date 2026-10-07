@@ -699,3 +699,18 @@ export type {
   RunReportFile,
   RunReportFailure,
 } from "./domain/run-report.types.ts";
+export { createRunObserver } from "./infrastructure/run-observer.ts";
+export { readRun, watchRun } from "./infrastructure/run-reader.ts";
+export type {
+  RunStatus,
+  RunTask,
+  RunPass,
+  RunDispatch,
+  RunError,
+  RunSnapshot,
+  RunEvent,
+  RunObserverOptions,
+  RunObserver,
+  ReadRunOptions,
+  WatchRunOptions,
+} from "./domain/run.types.ts";

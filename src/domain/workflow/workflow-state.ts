@@ -136,6 +136,10 @@ export function workflowState(
   ): void {
     const notification: WorkflowEvent = {
       ...event,
+      accounting: accounting.snapshot(),
+      ...(["start", "finish"].includes(event.type)
+        ? { tasks: [...records.values()].map((record) => ({ ...record })) }
+        : {}),
       executionId,
       workflow: name,
       timestamp: new Date().toISOString(),
@@ -157,6 +161,7 @@ export function workflowState(
       key: item.key,
       status,
       attempt: record(item).attempts,
+      ...(record(item).error ? { error: record(item).error } : {}),
       ...(record(item).startedAt
         ? { durationMs: Date.now() - Date.parse(record(item).startedAt!) }
         : {}),

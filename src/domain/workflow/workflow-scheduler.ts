@@ -167,7 +167,20 @@ async function scheduleRun(
     if (options.signal?.aborted) errors.push(options.signal.reason);
     const outcome = workflowOutcome(state, deadline);
     const { status } = outcome;
-    emit({ type: "finish", ...outcome, durationMs: Date.now() - started });
+    emit({
+      type: "finish",
+      ...outcome,
+      durationMs: Date.now() - started,
+      ...(errors.length
+        ? {
+            error: errors
+              .map((error) =>
+                error instanceof Error ? error.message : String(error),
+              )
+              .join("\n"),
+          }
+        : {}),
+    });
     await state.observation.close();
     observerErrors.push(...state.observation.errors);
     const result: WorkflowResult = Object.freeze({
@@ -206,6 +219,7 @@ async function scheduleRun(
     state.emit({
       type: "finish",
       ...outcome,
+      error: error instanceof Error ? error.message : String(error),
     });
     await state.observation.close();
     throw error;

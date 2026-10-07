@@ -130,6 +130,7 @@ export const chapters = [
       "guide/journals",
       "guide/run-reports",
       "guide/observability",
+      "guide/run-state",
       "guide/record-replay",
     ],
   ],

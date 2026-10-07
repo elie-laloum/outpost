@@ -1343,6 +1343,21 @@
     "title": ["Observability", "Observabilité"],
     "items": [
       {
+        "slug": "reference/createrunobserver",
+        "label": "createRunObserver",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/readrun",
+        "label": "readRun",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/watchrun",
+        "label": "watchRun",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createobservationhub",
         "label": "createObservationHub",
         "attrs": { "data-api-kind": "function" }
@@ -1366,6 +1381,11 @@
         "slug": "reference/createopentelemetryobserver",
         "label": "createOpenTelemetryObserver",
         "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/runstatus",
+        "label": "RunStatus",
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/observationsource",
@@ -1416,6 +1436,56 @@
         "slug": "reference/agentobservation",
         "label": "AgentObservation",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/runtask",
+        "label": "RunTask",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runpass",
+        "label": "RunPass",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/rundispatch",
+        "label": "RunDispatch",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runerror",
+        "label": "RunError",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runsnapshot",
+        "label": "RunSnapshot",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runevent",
+        "label": "RunEvent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runobserveroptions",
+        "label": "RunObserverOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runobserver",
+        "label": "RunObserver",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/readrunoptions",
+        "label": "ReadRunOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/watchrunoptions",
+        "label": "WatchRunOptions",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/observation",

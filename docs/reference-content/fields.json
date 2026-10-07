@@ -5938,8 +5938,8 @@
     "Résultat du cache sur les événements cache : hit, miss (absent, expiré ou mode refresh), stored, ou failed lorsque le store ou une entrée était inutilisable."
   ],
   "WorkflowEvent.error": [
-    "Store or entry error message on failed cache events; the task continues without the cache.",
-    "Message d’erreur du store ou de l’entrée sur les événements cache failed ; la tâche continue sans cache."
+    "Observed task failure, workflow termination details, quota message or cache-store error according to the event type. Cache failures continue without the cache.",
+    "Échec de tâche observé, détails de terminaison du workflow, message de quota ou erreur de stockage du cache selon le type d’événement. Les erreurs de cache poursuivent l’exécution sans cache."
   ],
   "TaskCacheOptions.store": [
     "Caller-owned store that reads and writes cache entries, such as createTaskCacheStore over a Transport.",
@@ -7837,5 +7837,277 @@
   "RunReportFailure.subagentId": [
     "Observed subagent identifier, or null for the main agent or an event without subagent scope.",
     "Identifiant du sous-agent observé, ou null pour l’agent principal ou un événement sans portée de sous-agent."
+  ],
+  "createRunObserver.options": [
+    "Transport, execution ID, projection kind, heartbeat policy and optional settled-workflow resume.",
+    "Transport, ID d’exécution, type de projection, politique de heartbeat et reprise optionnelle d’un workflow terminé ou suspendu."
+  ],
+  "readRun.options": [
+    "Transport and execution ID with optional cancellation and per-object byte bound.",
+    "Transport et ID d’exécution avec annulation et limite d’octets par objet optionnelles."
+  ],
+  "watchRun.options": [
+    "Run lookup, exclusive cursor, polling interval and optional reader cancellation.",
+    "Recherche du run, curseur exclusif, intervalle de lecture et annulation du lecteur optionnelle."
+  ],
+  "RunTask.key": [
+    "Declared workflow task key, including tasks that have not started.",
+    "Clé déclarée de la tâche, y compris avant son démarrage."
+  ],
+  "RunTask.status": [
+    "Latest observed workflow task lifecycle state.",
+    "Dernier état de cycle de vie observé de la tâche."
+  ],
+  "RunTask.attempts": [
+    "Cumulative attempts reported by the workflow, preserved through settled resumes.",
+    "Tentatives cumulées signalées par le workflow, conservées aux reprises."
+  ],
+  "RunTask.usage": [
+    "Tokens reported through this task’s workflow context while observed; preserved when resuming the same projection. Restored tasks without prior observed counters carry complete false. Dispatch counters are not added again.",
+    "Tokens signalés via le contexte de workflow de cette tâche pendant l’observation ; conservés à la reprise de la même projection. Les tâches restaurées sans compteurs précédemment observés portent complete false. Les compteurs des dispatchs ne sont pas ajoutés une seconde fois."
+  ],
+  "RunTask.startedAt": [
+    "Task start time from lifecycle observations or workflow record snapshots.",
+    "Heure de début de la tâche depuis les observations ou fiches du workflow."
+  ],
+  "RunTask.finishedAt": [
+    "Last task settlement time from observations or workflow records.",
+    "Dernière heure de fin ou suspension de la tâche depuis les observations ou fiches du workflow."
+  ],
+  "RunTask.error": [
+    "Latest recorded task failure message; filtered by the observation hub’s redaction.",
+    "Dernier message d’erreur enregistré pour la tâche, filtré par le masquage du hub."
+  ],
+  "RunPass.pass": [
+    "Dispatch pass number within its observation scope.",
+    "Numéro de passage du dispatch dans son contexte d’observation."
+  ],
+  "RunPass.usage": [
+    "Latest per-pass tokens, adding deltas and replacing cumulative or summary counters.",
+    "Derniers tokens du passage, additionnant les deltas et remplaçant les compteurs cumulés ou récapitulatifs."
+  ],
+  "RunDispatch.id": [
+    "Dispatch observation identity; multiple task dispatches retain distinct records.",
+    "Identité d’observation du dispatch ; plusieurs dispatchs gardent des fiches distinctes."
+  ],
+  "RunDispatch.taskKey": [
+    "Owning workflow task key from the dispatch scope, absent for standalone requests.",
+    "Clé de la tâche propriétaire depuis le contexte du dispatch, absente pour une requête autonome."
+  ],
+  "RunDispatch.attempt": [
+    "Owning workflow task attempt from the dispatch scope.",
+    "Tentative de la tâche propriétaire depuis le contexte du dispatch."
+  ],
+  "RunDispatch.status": [
+    "Latest dispatch lifecycle outcome, independent of the enclosing workflow status.",
+    "Dernier résultat du cycle de vie du dispatch, indépendant du statut du workflow englobant."
+  ],
+  "RunDispatch.agent": [
+    "Most recently observed agent name from a phase or fallback event.",
+    "Dernier nom d’agent observé via un événement de phase ou de repli."
+  ],
+  "RunDispatch.phase": [
+    "Most recently observed main-agent phase; subagent phases do not replace it.",
+    "Dernière phase de l’agent principal observée ; les phases des sous-agents ne la remplacent pas."
+  ],
+  "RunDispatch.branch": [
+    "Observed named branch, when provided by phase or completion events.",
+    "Branche nommée observée lorsqu’une phase ou fin d’exécution la fournit."
+  ],
+  "RunDispatch.completed": [
+    "Whether the dispatch reached its completion contract, reported only at settlement.",
+    "Indique si le dispatch a atteint son contrat de complétion, signalé uniquement à sa fin."
+  ],
+  "RunDispatch.commits": [
+    "Commits reported at dispatch settlement, including retained recovery commits on failure.",
+    "Commits signalés à la fin du dispatch, y compris ceux conservés pour récupération après échec."
+  ],
+  "RunDispatch.usage": [
+    "Live summed pass usage, replaced by authoritative dispatch usage at settlement.",
+    "Usage en cours cumulé des passages, remplacé par l’usage final du dispatch à sa fin."
+  ],
+  "RunDispatch.passes": [
+    "Per-pass accounting used to avoid counting cumulative reports and summaries twice.",
+    "Comptabilité par passage évitant de compter deux fois rapports cumulés et récapitulatifs."
+  ],
+  "RunDispatch.error": [
+    "Classified terminal dispatch error, when execution failed or was cancelled.",
+    "Erreur finale classée du dispatch lors d’un échec ou d’une annulation."
+  ],
+  "RunError.code": [
+    "Outpost fault code when the emitting execution provided one.",
+    "Code d’erreur Outpost lorsque l’exécution émettrice en fournit un."
+  ],
+  "RunError.message": [
+    "Observed error message after configured redaction.",
+    "Message d’erreur observé après le masquage configuré."
+  ],
+  "RunSnapshot.version": [
+    "Stored projection schema version, currently 1.",
+    "Version du schéma de projection stocké, actuellement 1."
+  ],
+  "RunSnapshot.id": [
+    "Application-selected lookup ID; independent of the workflow execution identity.",
+    "ID de recherche choisi par l’application, indépendant de l’identité d’exécution du workflow."
+  ],
+  "RunSnapshot.kind": [
+    "One standalone dispatch or one workflow containing task dispatches.",
+    "Un dispatch autonome ou un workflow contenant des dispatchs de tâches."
+  ],
+  "RunSnapshot.executionId": [
+    "Workflow execution identity learned from its start event and fenced across resumes.",
+    "Identité d’exécution du workflow obtenue au démarrage et vérifiée aux reprises."
+  ],
+  "RunSnapshot.workflow": [
+    "Declared workflow name from its lifecycle events.",
+    "Nom déclaré du workflow issu de ses événements de cycle de vie."
+  ],
+  "RunSnapshot.status": [
+    "Observed lifecycle; an expired running heartbeat is returned as suspected abandoned.",
+    "Cycle de vie observé ; un heartbeat expiré d’une exécution en cours renvoie abandoned présumé."
+  ],
+  "RunSnapshot.seq": [
+    "Last published persistent event cursor; watchRun starts strictly after it.",
+    "Dernier curseur d’événement persistant publié ; watchRun commence strictement après lui."
+  ],
+  "RunSnapshot.observationSeq": [
+    "Last delivered hub sequence, reset with a fresh hub on settled workflow resume.",
+    "Dernière séquence du hub livrée, réinitialisée avec un nouveau hub à la reprise."
+  ],
+  "RunSnapshot.complete": [
+    "False for a detected hub sequence gap or heartbeat expiry. True does not prove that no trailing events were lost.",
+    "False pour un trou détecté de séquence du hub ou un heartbeat expiré. True ne prouve pas l’absence d’événements finaux perdus."
+  ],
+  "RunSnapshot.startedAt": [
+    "Receiver creation time for the first projection, preserved on resume.",
+    "Heure de création du premier récepteur, conservée à la reprise."
+  ],
+  "RunSnapshot.updatedAt": [
+    "Time of the latest published observation; heartbeat-only updates leave it unchanged.",
+    "Heure de la dernière observation publiée ; les seuls heartbeats ne la modifient pas."
+  ],
+  "RunSnapshot.heartbeatAt": [
+    "Last successful heartbeat publication time, using the writer clock.",
+    "Heure du dernier heartbeat publié avec succès, selon l’horloge de l’écrivain."
+  ],
+  "RunSnapshot.expiresAt": [
+    "Heartbeat expiry time; readers derive abandoned only for running snapshots.",
+    "Heure d’expiration du heartbeat ; les lecteurs déduisent abandoned uniquement pour les fiches en cours."
+  ],
+  "RunSnapshot.tasks": [
+    "Declared task states populated at workflow start and refreshed at finish or resume.",
+    "États des tâches déclarées renseignés au démarrage et actualisés à la fin ou reprise du workflow."
+  ],
+  "RunSnapshot.dispatches": [
+    "Observed dispatch history grouped by identity, task and attempt.",
+    "Historique des dispatchs observés par identité, tâche et tentative."
+  ],
+  "RunSnapshot.commits": [
+    "Observed dispatch commits deduplicated by object ID.",
+    "Commits des dispatchs observés, dédupliqués par identifiant d’objet."
+  ],
+  "RunSnapshot.usage": [
+    "Authoritative cumulative workflow tokens or standalone dispatch tokens; nested reports are not added twice.",
+    "Tokens cumulés du workflow ou du dispatch autonome ; les rapports imbriqués ne sont pas ajoutés deux fois."
+  ],
+  "RunSnapshot.accounting": [
+    "Workflow budget snapshot with cumulative attempts, tokens and optional monetary estimate.",
+    "Fiche du budget du workflow avec tentatives, tokens cumulés et estimation monétaire optionnelle."
+  ],
+  "RunSnapshot.errors": [
+    "Observed task, workflow and classified dispatch failure messages.",
+    "Messages d’erreur observés des tâches, workflows et dispatchs classés."
+  ],
+  "RunEvent.seq": [
+    "Persistent published event cursor, monotonically increasing across settled workflow resumes.",
+    "Curseur persistant publié, croissant à travers les reprises de workflows terminés ou suspendus."
+  ],
+  "RunEvent.observationSeq": [
+    "Original hub sequence, which can restart with a new observer session.",
+    "Séquence du hub d’origine, pouvant redémarrer avec une nouvelle session d’observation."
+  ],
+  "RunEvent.at": [
+    "Observation timestamp from the producing hub.",
+    "Horodatage de l’observation depuis le hub producteur."
+  ],
+  "RunEvent.source": [
+    "Observation source label read from storage.",
+    "Libellé de la source d’observation lu depuis le stockage."
+  ],
+  "RunEvent.scope": [
+    "Validated observation routing scope including task, dispatch, attempt and subagent identities.",
+    "Contexte de routage validé incluant identités de tâche, dispatch, tentative et sous-agent."
+  ],
+  "RunEvent.event": [
+    "Persisted redacted event payload; validate this unknown value before inspecting its fields.",
+    "Charge d’événement persistée et masquée ; validez cette valeur unknown avant d’inspecter ses champs."
+  ],
+  "RunObserverOptions.transporter": [
+    "Transport owning run snapshots and immutable event segments; caller owns its credentials and lifecycle.",
+    "Transport des fiches et segments d’événements immuables ; l’appelant possède ses identifiants et son cycle de vie."
+  ],
+  "RunObserverOptions.id": [
+    "Unique ID of at most 128 characters in one safe transport key segment.",
+    "ID unique d’au plus 128 caractères dans un segment sûr de clé de transport."
+  ],
+  "RunObserverOptions.kind": [
+    "Choose dispatch for one request or workflow for one task graph.",
+    "Choisissez dispatch pour une requête ou workflow pour un graphe de tâches."
+  ],
+  "RunObserverOptions.heartbeatMs": [
+    "Heartbeat period in milliseconds, default 5000; positive and less than abandonAfterMs.",
+    "Période de heartbeat en millisecondes, 5000 par défaut ; positive et inférieure à abandonAfterMs."
+  ],
+  "RunObserverOptions.abandonAfterMs": [
+    "Suspected abandonment delay in milliseconds, default 30000, strictly greater than heartbeatMs.",
+    "Délai d’abandon présumé en millisecondes, 30000 par défaut, strictement supérieur à heartbeatMs."
+  ],
+  "RunObserverOptions.resume": [
+    "Explicitly append to a settled workflow record with a fresh hub; duplicate creation and unsettled takeover remain refused.",
+    "Ajoute explicitement à une fiche de workflow terminée ou suspendue avec un nouveau hub ; doublons et reprises de fiches en cours restent refusés."
+  ],
+  "RunObserver.errors": [
+    "First receiver failure, including asynchronous heartbeat or storage errors; independent of execution outcome.",
+    "Première erreur du récepteur, y compris de heartbeat ou stockage asynchrone ; indépendante du résultat d’exécution."
+  ],
+  "RunObserver.close": [
+    "Stop heartbeats and await queued writes; idempotent, throws the stored failure and does not invent a terminal execution status.",
+    "Arrête les heartbeats et attend les écritures ; idempotente, relance l’erreur conservée et n’invente pas de statut final d’exécution."
+  ],
+  "RunObserver.[Symbol.asyncDispose]": [
+    "Close the receiver when leaving an await using scope.",
+    "Ferme le récepteur à la sortie d’un bloc await using."
+  ],
+  "ReadRunOptions.transporter": [
+    "Transport targeting the same location as the execution receiver.",
+    "Transport pointant vers le même emplacement que le récepteur d’exécution."
+  ],
+  "ReadRunOptions.id": [
+    "Application-selected run ID to read without taking execution ownership.",
+    "ID de run choisi par l’application à lire sans prendre la propriété d’exécution."
+  ],
+  "ReadRunOptions.signal": [
+    "Cancel transport reads and watch polling only; never cancels the observed execution.",
+    "Annule uniquement les lectures et interrogations du suivi ; jamais l’exécution observée."
+  ],
+  "ReadRunOptions.maxBytes": [
+    "Per-object read limit in bytes, default 8388608; oversized snapshots or event segments fail.",
+    "Limite de lecture par objet en octets, 8388608 par défaut ; les fiches ou segments trop grands échouent."
+  ],
+  "WatchRunOptions.from": [
+    "Exclusive persistent cursor, default 0; negative, fractional or ahead-of-snapshot cursors fail.",
+    "Curseur persistant exclusif, 0 par défaut ; les curseurs négatifs, fractionnaires ou en avance échouent."
+  ],
+  "WatchRunOptions.pollMs": [
+    "Positive polling period in milliseconds while running, default 1000.",
+    "Période positive de lecture en millisecondes pendant l’exécution, 1000 par défaut."
+  ],
+  "WorkflowEvent.tasks": [
+    "Declared task record snapshot on start and finish, including waiting and restored checkpoint tasks.",
+    "Fiche des tâches déclarées au démarrage et à la fin, y compris celles en attente et restaurées du checkpoint."
+  ],
+  "WorkflowEvent.accounting": [
+    "Authoritative cumulative budget snapshot at this event, including restored tokens, attempts and optional cost.",
+    "Fiche cumulative du budget à cet événement, incluant tokens restaurés, tentatives et coût optionnel."
   ]
 }

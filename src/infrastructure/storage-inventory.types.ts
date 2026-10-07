@@ -9,6 +9,7 @@ export type StorageCategoryName =
   | "conversations"
   | "reservations"
   | "resources"
+  | "runs"
   | "task-cache";
 export type StorageEntryKind =
   "file" | "directory" | "symlink" | "other" | "unknown";

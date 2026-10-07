@@ -92,6 +92,7 @@ const result = await dispatch({
 | Export a run summary for review                     | [Run reports](https://elie-laloum.github.io/outpost/guide/run-reports/)                          |
 | Return data your application can validate           | [Validated output](https://elie-laloum.github.io/outpost/guide/typed-responses/)                 |
 | Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/harness/)                           |
+| Read execution state by ID                          | [Execution state](https://elie-laloum.github.io/outpost/guide/run-state/)                        |
 | Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/recovery/)                        |
 
 The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.

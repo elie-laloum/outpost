@@ -101,6 +101,8 @@ export interface TaskRecord {
 }
 
 export interface WorkflowEvent {
+  readonly tasks?: readonly Readonly<TaskRecord>[];
+  readonly accounting?: WorkflowUsage;
   readonly terminationCode?: WorkflowTerminationCode;
   readonly executionId: string;
   readonly workflow: string;

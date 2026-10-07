@@ -9,6 +9,8 @@ Utilisez les événements en direct pour suivre le travail, les journaux pour l�
 
 <!-- features -->
 
+- [État des exécutions par ID](../run-state/): Lire la fiche d’un workflow ou dispatch et suivre son curseur d’événements.
+
 - [Suivre la progression](../progress/): Recevez les événements d’un dispatch au fil de l’eau.
 - [Hub d’observation et OpenTelemetry](../observability/): Un seul flux pour toute une exécution, exporté en traces et métriques.
   - OpenTelemetry

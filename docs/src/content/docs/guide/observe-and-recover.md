@@ -9,6 +9,8 @@ Use live events to follow the work, journals to inspect it afterwards and recove
 
 <!-- features -->
 
+- [Execution state by ID](../run-state/): Read a workflow or dispatch snapshot and follow its event cursor.
+
 - [Follow progress](../progress/): Receive the events of one dispatch as they happen.
 - [Observation hub and OpenTelemetry](../observability/): One stream for a whole run, exported as traces and metrics.
   - OpenTelemetry

@@ -612,8 +612,8 @@
     "Verdict de sommes de contrôle de verifyRecoveryTransfer() pour un répertoire de recovery. Valeurs : \"unverified\" (sommes non demandées, ou manifeste absent, invalide ou illisible, ou maxBytes atteint), \"checksums-match\" (chaque entrée correspond au type, à la taille et au SHA-256 enregistrés), \"checksums-mismatch\" (au moins une entrée diffère). Les archives de recovery et les instantanés de restauration exigent \"checksums-match\"."
   ],
   "StorageCategoryName": [
-    "Category of a RecoveryInspection. inspectRecovery() scans .outpost/<name> for \"storage\" (default local transport), \"recovery\" (retained recovery transfers), \"logs\", \"locks\" (workspace ownership locks) and \"workspaces\" (runtime worktrees); with a transporter it groups keys by first segment into \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\" and \"task-cache\".",
-    "Catégorie d’une RecoveryInspection. inspectRecovery() parcourt .outpost/<name> pour \"storage\" (transport local par défaut), \"recovery\" (transferts de recovery conservés), \"logs\", \"locks\" (verrous de possession des workspaces) et \"workspaces\" (worktrees d’exécution) ; avec un transporter, elle regroupe les clés par premier segment en \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\" et \"task-cache\"."
+    "Category of a RecoveryInspection. inspectRecovery() scans .outpost/<name> for \"storage\" (default local transport), \"recovery\" (retained recovery transfers), \"logs\", \"locks\" (workspace ownership locks) and \"workspaces\" (runtime worktrees); with a transporter it groups keys by first segment into \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\", \"runs\" and \"task-cache\".",
+    "Catégorie d’une RecoveryInspection. inspectRecovery() parcourt .outpost/<name> pour \"storage\" (transport local par défaut), \"recovery\" (transferts de recovery conservés), \"logs\", \"locks\" (verrous de possession des workspaces) et \"workspaces\" (worktrees d’exécution) ; avec un transporter, elle regroupe les clés par premier segment en \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\", \"runs\" et \"task-cache\"."
   ],
   "StorageEntryKind": [
     "Kind of a StorageEntry in a storage inventory. Values: \"file\", \"directory\", \"symlink\" (counted, not followed), \"other\" (special file such as a socket or FIFO; the entry is incomplete), \"unknown\" (not measured because the entry limit was reached or the entry could not be read). Transport entries are always \"file\".",
@@ -710,5 +710,21 @@
   "WorkflowCostUnavailable": [
     "Raised when a cost budget cannot measure every reported token because usage, model attribution or a matching price is missing. Stops running attempts even if an attempt limit exists; workflow terminationCode is usage-unavailable.",
     "Levée lorsqu’un budget de coût ne peut mesurer chaque token rapporté faute d’usage, de modèle identifié ou de tarif correspondant. Arrête les tentatives actives même avec une limite de tentatives ; le terminationCode du workflow est usage-unavailable."
+  ],
+  "createRunObserver": [
+    "Create a transport-backed receiver for one dispatch or workflow under a caller-selected ID. Conditional writes reject duplicate IDs and fence stale writers. Periodic heartbeats stop on settlement, storage failure or close. Resume appends only to settled workflow projections with a fresh hub; unsettled records require a new ID after explicit execution recovery. Observation failures remain isolated from execution.",
+    "Crée un récepteur via transport pour un dispatch ou workflow sous un ID choisi. Les écritures conditionnelles refusent les doublons et bloquent les anciens écrivains. Les heartbeats cessent à la fin, à un échec de stockage ou à la fermeture. La reprise ajoute uniquement aux projections de workflows terminés ou suspendus avec un nouveau hub ; les fiches en cours exigent un nouvel ID après récupération explicite. Les erreurs d’observation restent isolées de l’exécution."
+  ],
+  "readRun": [
+    "Read and validate one atomically published execution snapshot without an execution lock. Return undefined for a missing ID. Derive abandoned and complete false when a running heartbeat has expired, without persisting that status or changing resource ownership. Stored observations can lag or be lost; this is not a checkpoint.",
+    "Lit et valide une fiche publiée atomiquement sans verrou d’exécution. Renvoie undefined pour un ID absent. Déduit abandoned et complete false si le heartbeat d’une exécution en cours expire, sans persister ce statut ni modifier la propriété des ressources. Les observations peuvent être retardées ou perdues ; cette fiche n’est pas un checkpoint."
+  ],
+  "watchRun": [
+    "Replay published observation segments strictly after from, then poll while the snapshot is running. Stop after draining a settled or abandoned snapshot. Persistent cursors continue across settled workflow resumes; heartbeat writes do not advance them. Signal cancellation affects only this reader. Missing segments, invalid records and cursors ahead of the snapshot throw.",
+    "Relit les segments publiés strictement après from, puis interroge la fiche tant qu’elle est en cours. Termine après livraison des événements d’une fiche terminée, suspendue ou abandonnée. Les curseurs persistent après reprise ; les heartbeats ne les avancent pas. Le signal n’annule que le lecteur. Les segments absents, fiches invalides et curseurs en avance lèvent une erreur."
+  ],
+  "RunStatus": [
+    "Execution projection lifecycle: running, suspected abandoned, or the settled workflow/dispatch outcome. Abandoned is derived at read time and authorizes no recovery.",
+    "Cycle de vie de la projection : en cours, abandon présumé ou résultat terminé/suspendu du workflow ou dispatch. Abandoned est déduit à la lecture et n’autorise aucune récupération."
   ]
 }

@@ -74,6 +74,7 @@ export function createLocalTransport(
           const data = await readInspectionFile(
             target,
             Math.min(info.size, limit + transportDefaults.headerBytes) || 1,
+            info,
           );
           options.signal?.throwIfAborted();
           return decodeObject(data, key, limit);

@@ -12,6 +12,7 @@ A transport stores versioned bytes under keys. The stores built on it interpret 
 | [Checkpoints](../durable-runs/)             | `createWorkflowCheckpointStore({ transporter })`       | Required                     |
 | [Artifacts](../artifacts/)                  | `createArtifactStore({ transporter })`                 | Required                     |
 | [Task cache](../task-cache/)                | `createTaskCacheStore({ transporter })`                | Required                     |
+| [Execution state](../run-state/)            | `createRunObserver({ transporter, id, kind })`         | Required                     |
 | [Durable speculation](../speculation/)      | `durability.transporter` on `speculate()`              | Required                     |
 | [Journals](../journals/)                    | `logging.transporter` on a dispatch or sandbox         | `.outpost/storage`           |
 | Resource activity                           | `activityTransport` on a dispatch or sandbox           | `.outpost/storage`           |
@@ -47,6 +48,7 @@ Creating a transport or store does not write any data. When a store saves an obj
     - `artifacts/`: Artifact bytes, addressed by digest.
     - `task-cache/`: Cached task results.
     - `logs/`: Journals.
+    - `runs/`: Execution snapshots and observation events.
     - `resources/`: Activity of open sandboxes.
     - `reservations/`: The storage reservation ledger.
     - `speculations/`: Durable speculation state.

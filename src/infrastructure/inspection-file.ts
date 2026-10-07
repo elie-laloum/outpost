@@ -25,9 +25,12 @@ function unchanged(before: Stats, after: Stats): boolean {
 export async function readInspectionFile(
   path: string,
   maxBytes: number,
+  expected?: Stats,
 ): Promise<Buffer> {
   positive(maxBytes, "maxBytes");
   const before = await lstat(path);
+  if (expected && !unchanged(expected, before))
+    throw new InspectionFileChanged();
   if (!before.isFile() || !(await isDirectInspectionPath(path)))
     throw new Error("Inspection path changed");
   if (before.size > maxBytes) throw new Error("Inspection file is too large");

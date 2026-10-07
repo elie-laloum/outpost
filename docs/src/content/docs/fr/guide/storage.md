@@ -12,6 +12,7 @@ Un transport enregistre des données binaires versionnées sous des clés. Les s
 | [Checkpoints](../durable-runs/)              | `createWorkflowCheckpointStore({ transporter })`       | Obligatoire           |
 | [Artefacts](../artifacts/)                   | `createArtifactStore({ transporter })`                 | Obligatoire           |
 | [Cache de résultats](../task-cache/)         | `createTaskCacheStore({ transporter })`                | Obligatoire           |
+| [État des exécutions](../run-state/)         | `createRunObserver({ transporter, id, kind })`         | Requis                |
 | [Spéculation durable](../speculation/)       | `durability.transporter` de `speculate()`              | Obligatoire           |
 | [Journaux](../journals/)                     | `logging.transporter` d’un dispatch ou d’une sandbox   | `.outpost/storage`    |
 | Activité des ressources                      | `activityTransport` d’un dispatch ou d’une sandbox     | `.outpost/storage`    |
@@ -47,6 +48,7 @@ Créer un transport ou un stockage n’écrit aucune donnée. Lorsqu’un objet 
     - `artifacts/`: Octets des artefacts, adressés par empreinte.
     - `task-cache/`: Résultats de tâches en cache.
     - `logs/`: Journaux.
+    - `runs/`: Fiches d’exécution et événements d’observation.
     - `resources/`: Activité des sandboxes ouvertes.
     - `reservations/`: Registre des réservations de stockage.
     - `speculations/`: État de la spéculation durable.

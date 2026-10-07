@@ -7,5 +7,6 @@ export const transportCategories: readonly StorageCategoryName[] = [
   "logs",
   "reservations",
   "resources",
+  "runs",
   "task-cache",
 ];

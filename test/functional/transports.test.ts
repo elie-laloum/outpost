@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import fs from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import {
   mkdir,
   mkdtemp,
@@ -727,4 +729,40 @@ test("transport modes reject incompatible configuration and malformed state", as
   );
   await transporter.write("unknown/file", bytes("x"), { ifRevision: null });
   assert.equal((await inspectRecovery({ transporter })).complete, false);
+});
+
+test("local transport retries a growing replacement between size sampling and inspection without relaxing byte limits", async (t) => {
+  const directory = await temporary(t);
+  const transporter = createLocalTransport({ directory });
+  const key = "activity/owner";
+  const original = await transporter.write(key, Buffer.from("small"), {
+    ifRevision: null,
+  });
+  const replacement = Buffer.from("a larger replacement snapshot");
+  const target = join(directory, "objects", `${key}.object`);
+  const lstat = fs.lstat;
+  let replaced = false;
+  t.mock.method(fs, "lstat", async (...args: Parameters<typeof lstat>) => {
+    const info = await lstat(...args);
+    if (!replaced && args[0] === target) {
+      replaced = true;
+      await transporter.write(key, replacement, {
+        ifRevision: original.revision,
+      });
+    }
+    return info;
+  });
+  syncBuiltinESMExports();
+  try {
+    const read = await transporter.read(key, { maxBytes: replacement.length });
+    assert.equal(replaced, true);
+    assert.deepEqual(read?.bytes, replacement);
+    await assert.rejects(
+      transporter.read(key, { maxBytes: 5 }),
+      /too large|oversized/,
+    );
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
 });
