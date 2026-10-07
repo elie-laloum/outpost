@@ -9,9 +9,11 @@ import type {
 } from "./container-cache.types.ts";
 import type { ContainerOptions, ContainerUser } from "./container.types.ts";
 
-export function validateCaches(config: ContainerOptions): void {
+export function validateCacheDeclarations(
+  caches: readonly DependencyCache[],
+): void {
   const names = new Set<string>();
-  for (const cache of config.caches ?? []) {
+  for (const cache of caches) {
     invariant(
       typeof cache.name === "string" &&
         cacheDefaults.namePattern.test(cache.name),
@@ -26,7 +28,11 @@ export function validateCaches(config: ContainerOptions): void {
     );
     names.add(cache.name);
   }
-  if (!names.size) return;
+}
+
+export function validateCaches(config: ContainerOptions): void {
+  validateCacheDeclarations(config.caches ?? []);
+  if (!config.caches?.length) return;
   for (const volume of config.volumes ?? []) {
     const target = posix.resolve(
       "/workspace",

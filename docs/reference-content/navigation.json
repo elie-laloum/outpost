@@ -1983,6 +1983,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/clouddependencycache",
+        "label": "CloudDependencyCache",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/verceloptions",
         "label": "VercelOptions",
         "attrs": { "data-api-kind": "interface" }

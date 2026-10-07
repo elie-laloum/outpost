@@ -1,3 +1,8 @@
+import {
+  prepareCloudCaches,
+  validateCloudCaches,
+  releaseCloudSandbox,
+} from "./cloud-cache.ts";
 import type { Daytona, DaytonaConfig } from "@daytona/sdk";
 import { posix } from "node:path";
 import { invariant } from "../domain/errors.ts";
@@ -13,6 +18,8 @@ import { daytonaCommand } from "./daytona-command.ts";
 import { daytonaFiles } from "./daytona-files.ts";
 import type { DaytonaOptions } from "./daytona.types.ts";
 
+export type { CloudDependencyCache } from "./cloud-cache.types.ts";
+
 export type { DaytonaOptions } from "./daytona.types.ts";
 
 export function createDaytonaSandboxProvider(
@@ -27,6 +34,8 @@ export function createDaytonaSandboxProvider(
       options.repositoryMode === "isolated",
     "Daytona repositoryMode must be isolated",
   );
+  const caches = (options.caches ?? []).map((cache) => ({ ...cache }));
+  validateCloudCaches(caches);
   const networkPolicy = daytonaNetworkPolicy(options);
   const create = { ...options.create, ...networkPolicy };
   return {
@@ -39,18 +48,20 @@ export function createDaytonaSandboxProvider(
       const sandbox = await client.create({ ...create });
       let closed = false,
         releasing: Promise<void> | undefined;
+      let saveCaches: () => Promise<void> = async () => {};
       let unregister = () => {};
       const release = () =>
-        (releasing ??= client
-          .delete(sandbox)
-          .then(() => {
+        (releasing ??= releaseCloudSandbox(
+          () => saveCaches(),
+          async () => {
+            await client.delete(sandbox);
             closed = true;
             unregister();
-          })
-          .catch((error) => {
-            releasing = undefined;
-            throw error;
-          }));
+          },
+        ).catch((error) => {
+          if (!closed) releasing = undefined;
+          throw error;
+        }));
       unregister = registerCleanup(release);
       let home: string;
       let root: string;
@@ -87,6 +98,28 @@ export function createDaytonaSandboxProvider(
         ...daytonaFiles(sandbox),
         release,
       };
+      try {
+        saveCaches = await prepareCloudCaches(
+          lease,
+          caches,
+          context,
+          JSON.stringify([
+            "daytona",
+            "image" in create ? create.image : null,
+            "snapshot" in create ? create.snapshot : null,
+          ]),
+        );
+      } catch (cause) {
+        try {
+          await release();
+        } catch (cleanup) {
+          throw new AggregateError(
+            [cause, cleanup],
+            "Cloud cache setup and cleanup failed",
+          );
+        }
+        throw cause;
+      }
       return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
   };

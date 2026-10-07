@@ -1,3 +1,4 @@
+import type { CloudDependencyCache } from "./cloud-cache.types.ts";
 import type { EgressPolicy } from "../domain/egress.types.ts";
 import type {
   CreateSandboxFromImageParams,
@@ -9,6 +10,7 @@ import type { Variables } from "../domain/command.types.ts";
 import type { SandboxContext } from "../domain/sandbox.types.ts";
 
 export interface DaytonaOptions {
+  readonly caches?: readonly CloudDependencyCache[];
   readonly repositoryMode?: "isolated";
   readonly egress?: EgressPolicy;
   readonly connection?: DaytonaConfig;

@@ -101,7 +101,7 @@ export const groups = [
     title: ["Providers", "Providers"],
     guide: "guide/choose-a-sandbox",
     names:
-      "createDockerSandboxProvider createPodmanSandboxProvider createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
+      "createDockerSandboxProvider createPodmanSandboxProvider createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache CloudDependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
   },
   {
     id: "model-providers",

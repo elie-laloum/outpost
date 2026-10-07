@@ -1,3 +1,8 @@
+import {
+  prepareCloudCaches,
+  validateCloudCaches,
+  releaseCloudSandbox,
+} from "./cloud-cache.ts";
 import type { Sandbox } from "@vercel/sandbox";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
@@ -9,6 +14,8 @@ import { vercelNetworkPolicy } from "./vercel-network.ts";
 import { vercelDirectory } from "./vercel-directory.ts";
 import { vercelFiles } from "./vercel-files.ts";
 import type { VercelOptions } from "./vercel.types.ts";
+
+export type { CloudDependencyCache } from "./cloud-cache.types.ts";
 
 export type { VercelOptions } from "./vercel.types.ts";
 
@@ -23,6 +30,8 @@ export function createVercelSandboxProvider(
       options.repositoryMode === "isolated",
     "Vercel repositoryMode must be isolated",
   );
+  const caches = (options.caches ?? []).map((cache) => ({ ...cache }));
+  validateCloudCaches(caches);
   const networkPolicy = vercelNetworkPolicy(options);
   const create: NonNullable<VercelOptions["create"]> = { ...options.create };
   return {
@@ -41,18 +50,20 @@ export function createVercelSandboxProvider(
       const root = options.root ?? cloudRoots.vercel;
       let closed = false;
       let releasing: Promise<void> | undefined;
+      let saveCaches: () => Promise<void> = async () => {};
       let unregister = () => {};
       const release = () =>
-        (releasing ??= sandbox
-          .stop()
-          .then(() => {
+        (releasing ??= releaseCloudSandbox(
+          () => saveCaches(),
+          async () => {
+            await sandbox.stop();
             closed = true;
             unregister();
-          })
-          .catch((error) => {
-            releasing = undefined;
-            throw error;
-          }));
+          },
+        ).catch((error) => {
+          if (!closed) releasing = undefined;
+          throw error;
+        }));
       unregister = registerCleanup(release);
       let home: string;
       try {
@@ -82,6 +93,28 @@ export function createVercelSandboxProvider(
         ...vercelFiles(sandbox),
         release,
       };
+      try {
+        saveCaches = await prepareCloudCaches(
+          lease,
+          caches,
+          context,
+          JSON.stringify([
+            "vercel",
+            create.runtime ?? create.image ?? "vercel/sandbox/universal:latest",
+            create.source ?? null,
+          ]),
+        );
+      } catch (cause) {
+        try {
+          await release();
+        } catch (cleanup) {
+          throw new AggregateError(
+            [cause, cleanup],
+            "Cloud cache setup and cleanup failed",
+          );
+        }
+        throw cause;
+      }
       return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
   };

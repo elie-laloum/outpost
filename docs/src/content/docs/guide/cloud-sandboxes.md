@@ -56,6 +56,8 @@ API reference: [DaytonaOptions](../../reference/daytonaoptions/).
 
 API: [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/) · [DaytonaOptions](../../reference/daytonaoptions/).
 
+Configure `caches: [{ name: "npm", key: "app-node24", transport: s3 }]` to restore package downloads before preparation and save them before sandbox disposal. See [cloud dependency caches](../environment-setup/#reuse-downloads-in-cloud-sandboxes) for S3 setup, compatibility, concurrent runs and retention.
+
 ## Compare Vercel and Daytona
 
 |                                          | Vercel                                                | Daytona                                     |

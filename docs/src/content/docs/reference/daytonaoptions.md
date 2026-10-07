@@ -15,6 +15,7 @@ import type { DaytonaOptions } from "@elie-laloum/outpost/providers/daytona";
 
 | Name             | Type                                                                           | Presence | Meaning                                                                                                                                                                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `caches`         | `readonly CloudDependencyCache[] \| undefined`                                 | Optional | Opt-in download caches under /outpost/cache/&lt;name>, restored on acquire and saved before deletion through each cache’s required transport. Identity includes the canonical host repository, Daytona image/snapshot, sandbox UID/GID, name and key. Non-root images must permit elevated cache-directory setup.                       |
 | `repositoryMode` | `"isolated" \| undefined`                                                      | Optional | isolated (the default and only supported mode) keeps the checkout and Git directory private to the cloud sandbox. History and selected inputs upload; validated commits and file changes synchronize back without importing sandbox configuration, hooks or unrelated refs. Other modes fail with code configuration before allocation. |
 | `egress`         | `EgressPolicy \| undefined`                                                    | Optional | Portable policy enforced by Daytona: deny-all, up to 100 domains or up to 10 IPv4 allowCidrs, not both, and no denyCidrs. Outpost confirms it before preparing the workspace; a refusal fails with code provider and deletes the sandbox (it needs a Tier 3 or 4 account with WRITE_SANDBOXES).                                         |
 | `connection`     | `DaytonaConfig \| undefined`                                                   | Optional | Settings passed to the Daytona client constructor, such as the API key and URL.                                                                                                                                                                                                                                                         |
@@ -33,6 +34,7 @@ import type {
 } from "@daytona/sdk";
 
 export interface DaytonaOptions {
+  readonly caches?: readonly CloudDependencyCache[];
   readonly repositoryMode?: "isolated";
   readonly egress?: EgressPolicy;
   readonly connection?: DaytonaConfig;
@@ -46,5 +48,6 @@ export interface DaytonaOptions {
 
 ## Related contracts
 
+- [CloudDependencyCache](../clouddependencycache/)
 - [EgressPolicy](../egresspolicy/)
 - [Variables](../variables/)

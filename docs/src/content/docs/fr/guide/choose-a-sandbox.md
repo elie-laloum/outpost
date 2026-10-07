@@ -63,7 +63,7 @@ Vercel et Daytona chargent leur SDK au moment d’allouer une sandbox. Installez
 | Isolation                                               | Conteneur            | Sandbox hébergée                | Sandbox hébergée          | MicroVM                           | Aucune                   |
 | [`attach()`](../sandbox-sessions/) interactif           | Oui                  | Non                             | Oui                       | Non                               | Oui                      |
 | Entrée en direct pour la [réorientation](../steering/)  | Oui                  | Oui                             | Oui                       | Oui                               | Oui                      |
-| [Caches de dépendances](../containers/)                 | Oui                  | Non                             | Non                       | Non                               | Non                      |
+| [Caches de dépendances](../environment-setup/)          | Oui                  | Oui, avec un transport          | Oui, avec un transport    | Non                               | Non                      |
 | [Règles de sortie](../network-restrictions/)            | `deny-all` seulement | Oui                             | Oui, avec des limites     | Non                               | Non                      |
 | Reprise de la [spéculation durable](../speculation/)    | Oui                  | Non                             | Non                       | Non                               | Non                      |
 | Installe un CLI d’agent manquant                        | Non                  | Oui                             | Oui                       | Oui                               | Non                      |

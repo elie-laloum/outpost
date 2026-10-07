@@ -597,6 +597,35 @@ if(createDaytonaSandboxProvider({egress}).name !== 'daytona') throw new Error('M
     cwd: temporary,
     stdio: "inherit",
   });
+  const vercelSdk = JSON.parse(
+    readFileSync(resolve("node_modules/@vercel/sandbox/package.json"), "utf8"),
+  );
+  runBun(
+    [
+      "add",
+      "--ignore-scripts",
+      `@vercel/sandbox@${vercelSdk.version}`,
+      "@types/async-retry@^1",
+    ],
+    temporary,
+  );
+  const cloudCacheConsumer = join(temporary, "cloud-cache.ts");
+  writeFileSync(
+    cloudCacheConsumer,
+    `import {createLocalTransport} from '@elie-laloum/outpost';
+import { createVercelSandboxProvider, type CloudDependencyCache } from '@elie-laloum/outpost/providers/vercel';
+import { createDaytonaSandboxProvider, type CloudDependencyCache as DaytonaCache } from '@elie-laloum/outpost/providers/daytona';
+const cloudCache: CloudDependencyCache = {name:'npm', key:'app-node24', transport:createLocalTransport({directory:'downloads'})};
+const daytonaCache: DaytonaCache = cloudCache;
+createVercelSandboxProvider({create:{runtime:'node24'},caches:[cloudCache]});
+createDaytonaSandboxProvider({create:{image:'node:24'},caches:[daytonaCache]});
+`,
+  );
+  checkTypes(cloudCacheConsumer);
+  execFileSync(process.execPath, [cloudCacheConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

@@ -63,7 +63,7 @@ Vercel and Daytona load their SDK when they allocate a sandbox. Install it next 
 | Isolation                                        | Container        | Hosted sandbox                 | Hosted sandbox          | MicroVM                            | None                |
 | Interactive [`attach()`](../sandbox-sessions/)   | Yes              | No                             | Yes                     | No                                 | Yes                 |
 | Live input for [steering](../steering/)          | Yes              | Yes                            | Yes                     | Yes                                | Yes                 |
-| [Dependency caches](../containers/)              | Yes              | No                             | No                      | No                                 | No                  |
+| [Dependency caches](../environment-setup/)       | Yes              | Yes, with a transport          | Yes, with a transport   | No                                 | No                  |
 | [Egress rules](../network-restrictions/)         | `deny-all` only  | Yes                            | Yes, with limits        | No                                 | No                  |
 | [Durable speculation](../speculation/) recovery  | Yes              | No                             | No                      | No                                 | No                  |
 | Installs a missing agent CLI                     | No               | Yes                            | Yes                     | Yes                                | No                  |

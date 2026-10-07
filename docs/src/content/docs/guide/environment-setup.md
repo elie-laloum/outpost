@@ -103,6 +103,40 @@ Each cache is mounted at `/outpost/cache/<name>`, owned by the container user. T
 
 Keep the install command in `sandboxReady`. The cache saves downloads, not the installed project: the package manager still checks the lockfile and fills `node_modules`.
 
+## Reuse downloads in cloud sandboxes
+
+Vercel and Daytona accept the same cache name and compatibility key, plus a `transport` for each cache. This example uses a private S3 prefix; install `@aws-sdk/client-s3` alongside Outpost. The caller owns the S3 client and must destroy it after closing all sandboxes.
+
+```ts
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+
+export const client = new S3Client({});
+const s3 = createS3Transport({
+  client,
+  bucket: "my-private-bucket",
+  prefix: "outpost-downloads",
+});
+export const sandboxProvider = createVercelSandboxProvider({
+  create: { runtime: "node24" },
+  caches: [{ name: "npm", key: "app-node24", transport: s3 }],
+  variables: { npm_config_cache: "/outpost/cache/npm" },
+});
+```
+
+Restoration finishes before `sandboxReady`; keep `npm ci` or `pip install` in that hook. Downloads are archived when the sandbox closes, after all warm commands and turns, including normal cleanup after a failed or cancelled run. Storage credentials stay on the host. `createLocalTransport()` also works when successive cloud runs share one host.
+
+The identity uses the same hash recipe as container caches: canonical host repository, execution image, UID/GID, name and key. In the cloud, the image component includes the provider and its configured runtime/image/source (Vercel) or image/snapshot (Daytona). Different providers and host checkout paths do not share archives. Pin images and change `key` when a mutable image or package-manager version changes compatibility.
+
+A cloud sandbox receives its own snapshot. The first run to publish against the revision it restored wins; a stale concurrent publisher keeps the newer snapshot and discards its update. The cache is not a merged filesystem. Missing caches start empty. Other transport, archive or transfer failures fail acquisition or closing; closing still attempts sandbox disposal and reports both failures if necessary.
+
+Archives preserve files, binary bytes, permissions and symlinks; empty directories are recreated by the package manager. The existing archive limits apply: 1 GiB of payload, 100,000 files and a 16 MiB manifest. Restoration and each cache save have a 60-second deadline. Commands create `/outpost/cache/<name>` and assign it to the sandbox user; non-root images must permit elevated setup.
+
+Objects live under `dependency-caches/` in the transport. Immutable snapshots, including superseded or unpublished snapshots, remain until you remove them. Remove a cache’s entire prefix only after stopping every reader and writer; deleting chunks used by an active restoration makes it fail. No snapshot pruning is automatic. A killed runner or an expired cloud sandbox may leave the latest downloads unsaved. Deterministic SDK fixtures cover the behavior; live Vercel, Daytona and S3 validation remains pending.
+
+API: [CloudDependencyCache](../../reference/clouddependencycache/) · [VercelOptions](../../reference/verceloptions/) · [DaytonaOptions](../../reference/daytonaoptions/) · [Transport](../../reference/transport/).
+
 ## Manage cache volumes
 
 A volume is shared by sandboxes with the same repository, image, container user, cache name and key. Closing a sandbox and `outpost image remove` keep it. Outpost labels its volumes `io.outpost.cache=true`:
@@ -116,7 +150,7 @@ Podman accepts the same commands with `podman`.
 
 ## Limits
 
-- Other providers have no `caches`: `sandboxReady` downloads everything on each allocation.
+- Local and Firecracker providers have no `caches`: `sandboxReady` downloads everything on each allocation.
 - Each hook command stops after 10 minutes unless you set `deadlineMs`.
 - At allocation, a command that exits with a nonzero status rejects with an `OutpostError` of code `process`, stops the other preparation commands and releases the sandbox. See [Errors](../error-handling/).
 - Commands run without a shell. Call `sh -c` for pipes and `&&`.
