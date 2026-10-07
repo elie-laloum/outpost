@@ -2,6 +2,7 @@
 
 ## Non publié
 
+- Ajoute la résolution explicite des conflits par agent via `workspace.integrate({ onConflict: createAgentConflictResolver(...) })`. Résout dans une branche et une sandbox séparées, impose la vérification, revérifie les garde-fous du diff final et les commits d’entrée figés, et conserve les deux workspaces en cas d’échec. Renvoie séparément l’usage et la sortie de vérification de la résolution. Les tests déterministes utilisent de vrais dépôts Git temporaires, un provider distant simulé et Docker réel en modes monté et isolé ; la validation réelle des agents et du cloud reste à effectuer.
 - Ajoute les garde-fous de diff des workspaces (`guard.protectedPaths`, `guard.maxChangedLines`) pour les branches named et integrate, indépendamment de l’agent. Vérifie le diff commité final après synchronisation puis avant de fusionner le commit inspecté ; refuse les chemins protégés, les changements textuels trop volumineux, les binaires non dénombrables avec un seuil de lignes et les inspections incomplètes avec le code `guard`. Conserve les branches et worktrees refusés ; refuse `current` avant exécution. Les tests déterministes utilisent de vrais dépôts Git temporaires, des agents locaux et un fournisseur distant simulé ; aucun appel payant à un modèle n’est nécessaire.
 
 ## 10.0.1

@@ -694,5 +694,9 @@
   "WorkflowTerminationCode": [
     "Reason for an unsuccessful workflow termination, exposed on WorkflowResult, finish events and WorkflowFailure.code. Uses FaultCode, failed for unclassified errors and usage-unavailable for incomplete budget accounting. Successful and suspended runs have no termination code.",
     "Motif d’une terminaison de workflow sans succès, exposé sur WorkflowResult, les événements finish et WorkflowFailure.code. Utilise FaultCode, failed pour les erreurs non classées et usage-unavailable pour une comptabilité de budget incomplète. Les exécutions réussies ou suspendues n’ont pas de code de terminaison."
+  ],
+  "createAgentConflictResolver": [
+    "Create an opt-in conflict strategy that prepares a merge in the supplied resolution workspace, runs one agent dispatch, then executes mandatory verification in the same sandbox. It requires both a sandboxProvider and a noninteractive verification command, returns the verified commit, usage and check output, and closes its sandbox on every outcome. It rejects unresolved entries, missing ancestry, uncommitted nonignored changes and commits changed by verification. No model or sandbox runs during construction.",
+    "Crée une stratégie explicite qui prépare une fusion dans le workspace de résolution fourni, lance un seul dispatch d’agent puis exécute la vérification obligatoire dans la même sandbox. Exige un sandboxProvider et une commande de vérification non interactive, renvoie le commit vérifié, l’usage et la sortie du contrôle, et ferme sa sandbox quel que soit le résultat. Refuse les entrées non fusionnées, l’ascendance manquante, les changements non ignorés non commités et les commits modifiés par la vérification. Aucun modèle ni sandbox ne s’exécute à la construction."
   ]
 }

@@ -1,3 +1,7 @@
+import type {
+  IntegrationOptions,
+  ConflictResolution,
+} from "./conflict-resolution.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { DiffGuard } from "../domain/diff-guard.types.ts";
 import type {
@@ -65,6 +69,7 @@ export interface Workspace extends WorkspaceRecord {
   ): Promise<AttachResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
   integrate(): Promise<void>;
+  integrate(options: IntegrationOptions): Promise<ConflictResolution | void>;
   [Symbol.asyncDispose](): Promise<void>;
 }
 

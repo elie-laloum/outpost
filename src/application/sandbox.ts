@@ -2,6 +2,7 @@ import { observedOperation } from "../domain/observed-operation.ts";
 import type { ResourceOperationKind } from "../infrastructure/resource-activity.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
+import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { Disposal } from "../domain/workspace.types.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { validateDispatch } from "./dispatch-validation.ts";
@@ -17,6 +18,13 @@ import { steeringScope } from "./steering-scope.ts";
 
 export async function createSandbox(
   options: SandboxOptions = {},
+): Promise<Sandbox> {
+  return createPreparedSandbox(options);
+}
+
+export async function createPreparedSandbox(
+  options: SandboxOptions,
+  prepare?: (lease: SandboxLease) => Promise<void>,
 ): Promise<Sandbox> {
   const context = await provisionSandbox(options);
   const { workspace, runtime, sync, stop, state, owned } = context;
@@ -142,5 +150,13 @@ export async function createSandbox(
     },
   };
   const unregister = registerCleanup(() => result.close({ preserve: true }));
+  if (prepare) {
+    try {
+      await exclusive("command", () => prepare(runtime));
+    } catch (cause) {
+      await result.close({ preserve: true });
+      throw cause;
+    }
+  }
   return result;
 }

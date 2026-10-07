@@ -363,8 +363,18 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/createagentconflictresolver",
+        "label": "createAgentConflictResolver",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/branchpolicy",
         "label": "BranchPolicy",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/conflictresolver",
+        "label": "ConflictResolver",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -385,6 +395,26 @@
       {
         "slug": "reference/diffguard",
         "label": "DiffGuard",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/integrationoptions",
+        "label": "IntegrationOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/conflictcontext",
+        "label": "ConflictContext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/conflictresolution",
+        "label": "ConflictResolution",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentconflictresolveroptions",
+        "label": "AgentConflictResolverOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {

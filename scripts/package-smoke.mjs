@@ -53,7 +53,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {signWorkflowDecision, createEd25519DecisionVerifier, createOpenAIModelProvider, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, defineWorkflow, conversations, createReporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.transported,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
+      "import {createAgentConflictResolver, signWorkflowDecision, createEd25519DecisionVerifier, createOpenAIModelProvider, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, defineWorkflow, conversations, createReporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [createAgentConflictResolver,signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.transported,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -439,6 +439,23 @@ const code: FaultCode = 'guard';
 void [sandbox,code];
 `,
   );
+  const conflictConsumer = join(temporary, "conflicts.ts");
+  writeFileSync(
+    conflictConsumer,
+    `import {createAgentConflictResolver, type Workspace, type ConflictResolution, type ConflictResolver, type DispatchAgent} from '@elie-laloum/outpost';
+import {createLocalSandboxProvider} from '@elie-laloum/outpost/providers/local';
+declare const workspace: Workspace;
+declare const agent: DispatchAgent;
+const onConflict: ConflictResolver = createAgentConflictResolver(agent,{sandboxProvider:createLocalSandboxProvider(),verify:{executable:'npm',arguments:['test']}});
+const legacy: Promise<void> = workspace.integrate();
+const extended: Promise<ConflictResolution | void> = workspace.integrate({onConflict});
+// @ts-expect-error Verification is mandatory.
+createAgentConflictResolver(agent,{sandboxProvider:createLocalSandboxProvider()});
+// @ts-expect-error The execution provider is mandatory.
+createAgentConflictResolver(agent,{verify:{executable:'npm'}});
+void [legacy,extended];
+`,
+  );
   const checkTypes = (file) =>
     execFileSync(
       process.execPath,
@@ -462,6 +479,7 @@ void [sandbox,code];
     );
   checkTypes(consumer);
   checkTypes(guardConsumer);
+  checkTypes(conflictConsumer);
   const telemetryApi = JSON.parse(
     readFileSync(
       resolve("node_modules/@opentelemetry/api/package.json"),

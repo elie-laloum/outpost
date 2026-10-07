@@ -9,7 +9,8 @@ import type { GuardSnapshot } from "./diff-guard.types.ts";
 
 export interface WorkspaceLease extends WorkspaceRecord {
   checkGuard(): Promise<GuardSnapshot | undefined>;
-  integrate(): Promise<void>;
+  integrate(candidate?: IntegrationCandidate): Promise<void>;
+  retain(): void;
   dispose(preserve?: boolean): Promise<Disposal>;
 }
 
@@ -31,4 +32,13 @@ export interface ManagedWorktreeOptions {
 export interface ManagedWorktree {
   readonly workdir: string;
   readonly created: boolean;
+}
+
+export interface IntegrationCandidate {
+  readonly mode: "merge" | "resolved";
+  readonly record: WorkspaceRecord;
+  readonly hostCommit: string;
+  readonly sourceCommit: string;
+  readonly commit: string;
+  readonly signal: AbortSignal;
 }

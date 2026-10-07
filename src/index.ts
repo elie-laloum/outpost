@@ -672,3 +672,11 @@ export type {
   RoutingChoices,
   ModelRouteEvent,
 } from "./domain/harness-routing.types.ts";
+export { createAgentConflictResolver } from "./application/agent-conflict-resolver.ts";
+export type {
+  AgentConflictResolverOptions,
+  ConflictContext,
+  ConflictResolution,
+  ConflictResolver,
+  IntegrationOptions,
+} from "./application/conflict-resolution.types.ts";

@@ -496,8 +496,8 @@
     "Libère le verrou et supprime un worktree géré propre ; une branche integrate est supprimée une fois fusionnée, une branche named est conservée. Après un refus du garde-fou de diff, avec preserve: true, un HEAD détaché ou des fichiers modifiés, non suivis ou ignorés, le worktree est conservé et renvoyé dans retainedDirectory. Échoue avec le code configuration tant qu’une sandbox est ouverte ; les appels suivants renvoient le premier résultat."
   ],
   "Workspace.integrate": [
-    "Merge the integrate branch into the base branch with git merge --no-edit in the host checkout; does nothing in current and named modes. Fails with code conflict when the host checkout switched branches, another integration holds the merge lock or the merge fails; the work branch stays. With guard, inspects the final committed diff against the unique merge base with the host, rechecks the references and merges the inspected commit. A refusal or incomplete inspection throws code guard and keeps both branch and worktree.",
-    "Fusionne la branche integrate dans la branche de base avec git merge --no-edit dans le checkout hôte ; ne fait rien en modes current et named. Échoue avec le code conflict si le checkout hôte a changé de branche, si une autre intégration détient le verrou de fusion ou si la fusion échoue ; la branche de travail reste. Avec guard, inspecte le diff commité final depuis l’unique ancêtre commun avec l’hôte, revérifie les références et fusionne le commit inspecté. Un refus ou une inspection incomplète lève le code guard et conserve la branche et le worktree."
+    "Merge the work branch only in integrate mode. Without onConflict, uses the existing direct host merge and returns no value. With onConflict, requires a closed sandbox, preflights frozen commits, invokes the strategy only for an actual Git conflict, checks final ancestry and guard, then integrates the exact verified commit. Returns ConflictResolution when the strategy ran; refusals retain source and resolution worktrees.",
+    "Fusionne la branche de travail uniquement en mode integrate. Sans onConflict, utilise la fusion directe habituelle sur l’hôte et ne renvoie aucune valeur. Avec onConflict, exige une sandbox fermée, précontrôle les commits figés, appelle la stratégie seulement pour un véritable conflit Git, vérifie ascendance et guard finaux puis intègre le commit exact vérifié. Renvoie ConflictResolution lorsque la stratégie s’est exécutée ; les refus conservent les worktrees source et de résolution."
   ],
   "Workspace.[Symbol.asyncDispose]": [
     "Close the workspace like close() without options, for await using.",
@@ -7449,5 +7449,97 @@
   "DiffGuard.maxChangedLines": [
     "Maximum total added plus deleted text lines in the final committed diff; omitted disables this limit. Must be a nonnegative safe integer; equality is accepted and zero forbids textual changes. A detected rename without content changes adds zero lines. Binary changes are refused whenever this limit is set, because Git cannot count their lines.",
     "Nombre maximal de lignes textuelles ajoutées plus supprimées dans le diff commité final ; absent désactive cette limite. Exige un entier sûr positif ou nul ; l’égalité est acceptée et zéro interdit les modifications textuelles. Un renommage détecté sans changement de contenu ajoute zéro ligne. Les changements binaires sont refusés dès que cette limite est définie, car Git ne peut pas compter leurs lignes."
+  ],
+  "createAgentConflictResolver.agent": [
+    "Agent used for one dispatch to resolve the pending merge; CLI, built-in harness and explicit fallback agents use their normal protocols and authentication.",
+    "Agent utilisé pour un dispatch de résolution de la fusion en cours ; CLI, harness intégré et agents de repli explicites utilisent leurs protocoles et authentification habituels."
+  ],
+  "createAgentConflictResolver.options": [
+    "Explicit execution provider, mandatory verification command and optional instructions, observation callback and journal for the resolution dispatch.",
+    "Provider d’exécution explicite, commande de vérification obligatoire et consignes, callback d’observation et journal optionnels du dispatch de résolution."
+  ],
+  "ConflictResolver.context": [
+    "Separate resolution workspace, exact source and host commits, conflicting paths, cancellation signal and inherited observation hub for this integration attempt.",
+    "Workspace de résolution séparé, commits source et hôte exacts, chemins en conflit, signal d’annulation et hub d’observation hérité de cette tentative d’intégration."
+  ],
+  "IntegrationOptions.onConflict": [
+    "Opt-in strategy invoked once for an actual Git merge conflict, before touching the host checkout. Requires integrate mode and a workspace with no open sandbox. Dirty or changed host branches, guard refusals and other Git failures never invoke it. Without it, integration keeps its existing direct-merge behavior.",
+    "Stratégie explicite appelée une fois pour un véritable conflit Git, avant de toucher au checkout hôte. Exige le mode integrate et un workspace sans sandbox ouverte. Un hôte sale, une branche hôte changée, un refus du guard ou un autre échec Git ne la déclenchent jamais. Sans elle, l’intégration conserve sa fusion directe habituelle."
+  ],
+  "IntegrationOptions.signal": [
+    "Cancels integration before it starts and, with onConflict, propagates through sandbox preparation, agent resolution and verification. A refused or cancelled resolution retains both workspaces.",
+    "Annule l’intégration avant son démarrage et, avec onConflict, se propage à la préparation de la sandbox, à l’agent et à la vérification. Une résolution refusée ou annulée conserve les deux workspaces."
+  ],
+  "IntegrationOptions.deadlineMs": [
+    "Positive total deadline in milliseconds for opt-in conflict integration, default 600000. Includes preflight, allocation, resolution and verification; custom strategies must observe the supplied signal. Has no effect without onConflict.",
+    "Délai total positif en millisecondes de l’intégration avec résolution explicite, 600000 par défaut. Inclut précontrôle, allocation, résolution et vérification ; les stratégies personnalisées doivent respecter le signal fourni. Sans effet sans onConflict."
+  ],
+  "ConflictContext.workspace": [
+    "Separate named workspace owned by the integration engine and starting at candidateCommit. The strategy may allocate a sandbox on it, must close that sandbox before returning, and must not integrate or close the workspace itself.",
+    "Workspace nommé séparé, possédé par le moteur d’intégration et démarrant à candidateCommit. La stratégie peut y allouer une sandbox, doit la fermer avant son retour et ne doit ni intégrer ni fermer le workspace lui-même."
+  ],
+  "ConflictContext.hostCommit": [
+    "Exact host commit to merge into the resolution workspace; final integration is refused if the host branch or commit changes.",
+    "Commit hôte exact à fusionner dans le workspace de résolution ; l’intégration finale est refusée si la branche ou le commit hôte change."
+  ],
+  "ConflictContext.candidateCommit": [
+    "Exact source branch commit captured by preflight and used to open the resolution workspace. Final integration requires it to remain unchanged and be an ancestor of the resolution.",
+    "Commit exact de la branche source capturé au précontrôle et utilisé pour ouvrir le workspace de résolution. L’intégration finale exige qu’il reste inchangé et soit un ancêtre de la résolution."
+  ],
+  "ConflictContext.conflicts": [
+    "Repository-relative paths reported as conflicted by Git merge-tree; actual unmerged entries are prepared inside the chosen sandbox.",
+    "Chemins relatifs au dépôt signalés en conflit par Git merge-tree ; les entrées réellement non fusionnées sont préparées dans la sandbox choisie."
+  ],
+  "ConflictContext.signal": [
+    "Combined integration caller and total-deadline signal. The strategy must pass it to its sandbox, agent and verification operations.",
+    "Signal combinant l’appelant de l’intégration et le délai total. La stratégie doit le transmettre à sa sandbox, à l’agent et à la vérification."
+  ],
+  "ConflictContext.observation": [
+    "Workspace observation hub inherited by the resolution; propagate it explicitly to sandbox operations and agent dispatch.",
+    "Hub d’observation du workspace hérité par la résolution ; le transmettre explicitement aux opérations de sandbox et au dispatch de l’agent."
+  ],
+  "ConflictResolution.commit": [
+    "Exact verified resolution commit, checked against the resolution workspace HEAD and required to contain both frozen input commits before fast-forward integration.",
+    "Commit exact de résolution vérifié, comparé au HEAD du workspace de résolution et devant contenir les deux commits d’entrée figés avant intégration en avance rapide."
+  ],
+  "ConflictResolution.branch": [
+    "Name of the dedicated resolution branch. Must match the supplied workspace; remains available for review after success or failure.",
+    "Nom de la branche dédiée à la résolution. Doit correspondre au workspace fourni ; reste disponible pour revue après réussite ou échec."
+  ],
+  "ConflictResolution.directory": [
+    "Host directory of the dedicated resolution worktree. Must match the supplied workspace; clean successful worktrees may be removed, while failed resolutions are retained.",
+    "Dossier hôte du worktree dédié à la résolution. Doit correspondre au workspace fourni ; les worktrees propres après réussite peuvent être supprimés, tandis que les résolutions échouées sont conservées."
+  ],
+  "ConflictResolution.usage": [
+    "Token usage of the resolution dispatch, including explicit fallback attempts. Returned separately from the original task usage; callers must add it to their workflow accounting.",
+    "Usage de tokens du dispatch de résolution, incluant les tentatives de repli explicites. Renvoyé séparément de l’usage de la tâche initiale ; l’appelant doit l’ajouter à sa comptabilité de workflow."
+  ],
+  "ConflictResolution.verification": [
+    "Actual verification command result. Nonzero status refuses integration; the built-in strategy also requires the verified commit and nonignored files to remain unchanged.",
+    "Résultat réel de la commande de vérification. Un statut non nul refuse l’intégration ; la stratégie intégrée exige aussi que le commit vérifié et les fichiers non ignorés restent inchangés."
+  ],
+  "ConflictResolution.transcript": [
+    "Captured transcript path from the resolution dispatch when its agent supports and enables conversation capture.",
+    "Chemin du transcript capturé lors du dispatch de résolution lorsque l’agent prend en charge et active la capture de conversation."
+  ],
+  "AgentConflictResolverOptions.sandboxProvider": [
+    "Explicit provider that allocates the resolution sandbox. It is independent of the agent and original task provider; there is no implicit host fallback.",
+    "Provider explicite allouant la sandbox de résolution. Indépendant de l’agent et du provider de la tâche initiale ; aucun repli implicite vers l’hôte."
+  ],
+  "AgentConflictResolverOptions.verify": [
+    "Mandatory noninteractive command executed after the agent commits the combined resolution, in the resolution sandbox root. Rejects directory, terminal and live input overrides. A nonzero status fails with code process; default deadlineMs is 300000 and caller cancellation is combined with the integration signal.",
+    "Commande obligatoire non interactive exécutée après le commit de résolution combinée par l’agent, à la racine de la sandbox de résolution. Refuse les réglages directory, terminal et entrée en direct. Un statut non nul échoue avec le code process ; deadlineMs vaut 300000 par défaut et l’annulation de l’appelant est combinée au signal d’intégration."
+  ],
+  "AgentConflictResolverOptions.instructions": [
+    "Additional literal instructions appended to the built-in resolution brief. They guide the agent; verification, ancestry and diff guards are enforced independently.",
+    "Consignes littérales supplémentaires ajoutées au brief de résolution intégré. Elles guident l’agent ; vérification, ascendance et garde-fous de diff sont imposés indépendamment."
+  ],
+  "AgentConflictResolverOptions.observe": [
+    "Historical agent observation callback for the resolution dispatch. Failures are isolated by the normal dispatch observation path.",
+    "Callback historique d’observation de l’agent pour le dispatch de résolution. Ses échecs sont isolés par le mécanisme normal d’observation du dispatch."
+  ],
+  "AgentConflictResolverOptions.logging": [
+    "Journal configuration for the resolution sandbox dispatch; omitted uses the normal local journal, false disables it.",
+    "Configuration du journal du dispatch dans la sandbox de résolution ; son omission utilise le journal local habituel, false le désactive."
   ]
 }

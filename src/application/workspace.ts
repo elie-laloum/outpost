@@ -1,3 +1,8 @@
+import type {
+  IntegrationOptions,
+  ConflictResolution,
+} from "./conflict-resolution.types.ts";
+import { integrateWorkspace } from "./workspace-integration.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import { invariant } from "../domain/errors.ts";
 import { validateDiffGuard } from "../domain/diff-guard.ts";
@@ -51,12 +56,23 @@ export async function openWorkspace(
     closed: false,
     ...(options.hooks ? { hooks: options.hooks } : {}),
   };
+  function integrate(): Promise<void>;
+  function integrate(
+    settings: IntegrationOptions,
+  ): Promise<ConflictResolution | void>;
+  function integrate(
+    settings?: IntegrationOptions,
+  ): Promise<ConflictResolution | void> {
+    return observedOperation(
+      options.observation,
+      "git",
+      "branch.integrate",
+      () => integrateWorkspace(result, lease, options, settings),
+    );
+  }
   const result: Workspace = {
     ...lease,
-    integrate: () =>
-      observedOperation(options.observation, "git", "branch.integrate", () =>
-        lease.integrate(),
-      ),
+    integrate,
     dispatch(options) {
       return dispatch({ ...options, workspace: result });
     },

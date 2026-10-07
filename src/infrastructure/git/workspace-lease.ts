@@ -1,3 +1,4 @@
+import { integrateCandidate } from "./integration-candidate.ts";
 import { observedOperation } from "../../domain/observed-operation.ts";
 import { join } from "node:path";
 import { OutpostError, recordRecovery } from "../../domain/errors.ts";
@@ -48,8 +49,20 @@ export function workspaceLease(
   return {
     ...record,
     checkGuard,
-    async integrate() {
+    retain() {
+      guardRefused = true;
+    },
+    async integrate(candidate) {
       if (policy.mode !== "integrate") return;
+      if (candidate) {
+        try {
+          await integrateCandidate(record, candidate, options);
+        } catch (cause) {
+          guardRefused = true;
+          throw cause;
+        }
+        return;
+      }
       const current = (
         await git(repository, ["symbolic-ref", "--short", "HEAD"])
       ).trim();

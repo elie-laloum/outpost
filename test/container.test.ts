@@ -10,6 +10,9 @@ import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createSandbox,
+  createAgentConflictResolver,
+  openWorkspace,
+  recoveryDetails,
   dispatch,
   readJournal,
   createReplayAgent,
@@ -1377,3 +1380,89 @@ test(
     }
   },
 );
+
+for (const repositoryMode of ["mounted", "isolated"] as const) {
+  test(
+    `real container resolves conflicts and gates integration (${repositoryMode})`,
+    { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+    async (t) => {
+      const root = await repository(t);
+      const provider =
+        process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+          ? createPodmanSandboxProvider
+          : createDockerSandboxProvider;
+      const sandboxProvider = provider({
+        image: containerImage,
+        networks: "none",
+        repositoryMode,
+      });
+      const agent = composeAgent({
+        harness: {
+          kind: "cli",
+          bind: () => ({
+            name: "conflict-fixture",
+            request: () => ({
+              executable: "sh",
+              arguments: [
+                "-c",
+                "set -eu; test -n \"$(git ls-files --unmerged)\"; printf 'host + candidate\\n' > base.txt; git add base.txt; git -c core.hooksPath=/dev/null -c commit.gpgSign=false commit -m Resolve >/dev/null; printf 'done\\n'",
+              ],
+            }),
+            events: () => [{ kind: "text", text: "done" }],
+          }),
+        },
+      });
+      for (const status of [0, 7]) {
+        await using workspace = await openWorkspace({
+          repository: root,
+          branch: { mode: "integrate" },
+        });
+        await writeFile(
+          join(workspace.directory, "base.txt"),
+          `candidate-${status}\n`,
+        );
+        await git(workspace.directory, ["commit", "-am", "Candidate"]);
+        await writeFile(join(root, "base.txt"), `host-${status}\n`);
+        await git(root, ["commit", "-am", "Host"]);
+        const host = (await git(root, ["rev-parse", "HEAD"])).trim();
+        const onConflict = createAgentConflictResolver(agent, {
+          sandboxProvider,
+          logging: false,
+          verify: {
+            executable: "node",
+            arguments: [
+              "-e",
+              status === 0
+                ? "if(require('node:fs').readFileSync('base.txt','utf8') !== 'host + candidate\\n')process.exit(9)"
+                : "process.exit(7)",
+            ],
+          },
+        });
+        if (status === 0) {
+          const result = await workspace.integrate({ onConflict });
+          assert.ok(result);
+          assert.equal(result.verification.status, 0);
+          assert.equal(
+            (await git(root, ["rev-parse", "HEAD"])).trim(),
+            result.commit,
+          );
+          assert.equal(
+            await readFile(join(root, "base.txt"), "utf8"),
+            "host + candidate\n",
+          );
+          continue;
+        }
+        await assert.rejects(workspace.integrate({ onConflict }), (error) => {
+          assert.equal(typeof recoveryDetails(error)?.directory, "string");
+          return true;
+        });
+        assert.equal((await git(root, ["rev-parse", "HEAD"])).trim(), host);
+        assert.equal(
+          await readFile(join(root, "base.txt"), "utf8"),
+          "host-7\n",
+        );
+        assert.equal((await git(root, ["ls-files", "--unmerged"])).trim(), "");
+      }
+    },
+  );
+}
