@@ -8110,6 +8110,50 @@
     "Authoritative cumulative budget snapshot at this event, including restored tokens, attempts and optional cost.",
     "Fiche cumulative du budget à cet événement, incluant tokens restaurés, tentatives et coût optionnel."
   ],
+  "defineAgentProfile.options": [
+    "Literal instructions, portable built-in tool allowlist and MCP server declarations to validate and freeze; unknown fields fail with code configuration.",
+    "Instructions littérales, liste portable d’outils intégrés autorisés et déclarations de serveurs MCP à valider et figer ; les champs inconnus échouent avec le code configuration."
+  ],
+  "AgentProfile.kind": [
+    "Stable agent-profile discriminator checked by harness composition; obtain it from defineAgentProfile().",
+    "Discriminant stable agent-profile contrôlé à la composition du harness ; obtenez-le via defineAgentProfile()."
+  ],
+  "AgentProfileOptions.instructions": [
+    "Nonempty literal instruction text, without NUL. Native system/developer configuration for Claude/Codex, request prefix for other CLIs, and system instructions before harness additions for the built-in loop; no variable or command expansion. Kimi interactive requests refuse this field.",
+    "Instructions littérales non vides, sans NUL. Configuration système/développeur native pour Claude/Codex, préfixe de demande pour les autres CLI et instructions système avant les ajouts du harness pour la boucle intégrée ; aucune expansion de variable ou commande. Les demandes interactives Kimi refusent ce champ."
+  ],
+  "AgentProfileOptions.allowedTools": [
+    "Distinct read, edit, shell or shell:<exact command> capabilities for built-in tools only. Omitted preserves existing behavior; [] denies all built-in tools. Explicit MCP declarations grant tools separately. Enforced by the built-in loop and Claude command hooks; Codex, Copilot, Kimi and Antigravity refuse any list at createAgent().",
+    "Capacités distinctes read, edit, shell ou shell:<commande exacte> pour les outils intégrés uniquement. L’absence conserve le comportement existant ; [] refuse tous les outils intégrés. Les déclarations MCP explicites accordent leurs outils séparément. Contrôlée par la boucle intégrée et les hooks de commande Claude ; Codex, Copilot, Kimi et Antigravity refusent toute liste à createAgent()."
+  ],
+  "AgentProfileOptions.mcpServers": [
+    "MCP servers granted by this profile, validated and deeply copied with secret variable references and per-server filters. Merged with harness servers by name; a duplicate name fails at harness creation and unsupported adapter options fail at composition.",
+    "Serveurs MCP accordés par ce profil, validés et copiés en profondeur avec références aux variables secrètes et filtres par serveur. Fusionnés avec ceux du harness par nom ; un nom en double échoue à la création du harness et les options non prises en charge par l’adapter échouent à la composition."
+  ],
+  "HarnessOptions.profile": [
+    "Portable profile from defineAgentProfile(). Its instructions precede local instructions, its MCP servers merge with mcpServers without duplicate names, and its built-in tool policy intersects permissions, including after hooks and in descendants. It supplies no tool implementations.",
+    "Profil portable issu de defineAgentProfile(). Ses instructions précèdent les instructions locales, ses serveurs MCP fusionnent avec mcpServers sans noms en double et sa politique d’outils intégrés se cumule avec permissions, y compris après les hooks et chez les descendants. Il ne fournit aucune implémentation d’outil."
+  ],
+  "Harness.profile": [
+    "Validated, frozen portable declaration retained by this harness; runtime permissions derived from allowedTools restrict supported built-in tool names and exact shell commands in every turn.",
+    "Déclaration portable validée et figée conservée par ce harness ; les permissions d’exécution issues de allowedTools restreignent les noms d’outils intégrés pris en charge et commandes shell exactes à chaque tour."
+  ],
+  "CommonAgentSettings.profile": [
+    "Portable declaration from defineAgentProfile(), projected into Claude Code or Codex requests. MCP servers merge with mcpServers and duplicate names fail at harness creation. Claude applies built-in tool allowlists with a command hook and requires dontAsk; Codex refuses any allowlist.",
+    "Déclaration portable issue de defineAgentProfile(), traduite dans les demandes de Claude Code ou Codex. Les serveurs MCP fusionnent avec mcpServers et les noms en double échouent à la création du harness. Claude applique les listes d’outils intégrés avec un hook de commande et exige dontAsk ; Codex refuse toute liste."
+  ],
+  "CopilotSettings.profile": [
+    "Portable declaration from defineAgentProfile(), projected into Copilot CLI requests. MCP servers merge with mcpServers and duplicate names fail at harness creation. Copilot CLI refuses any built-in tool allowlist at createAgent().",
+    "Déclaration portable issue de defineAgentProfile(), traduite dans les demandes de Copilot CLI. Les serveurs MCP fusionnent avec mcpServers et les noms en double échouent à la création du harness. Copilot CLI refuse toute liste d’outils intégrés à createAgent()."
+  ],
+  "KimiSettings.profile": [
+    "Portable declaration from defineAgentProfile(), projected into Kimi Code requests. MCP servers merge with mcpServers and duplicate names fail at harness creation. Kimi Code refuses any built-in tool allowlist at createAgent(). Kimi refuses profile instructions on interactive requests.",
+    "Déclaration portable issue de defineAgentProfile(), traduite dans les demandes de Kimi Code. Les serveurs MCP fusionnent avec mcpServers et les noms en double échouent à la création du harness. Kimi Code refuse toute liste d’outils intégrés à createAgent(). Kimi refuse les instructions du profil dans les demandes interactives."
+  ],
+  "AntigravitySettings.profile": [
+    "Portable declaration from defineAgentProfile(), projected into Antigravity requests. MCP servers merge with mcpServers and duplicate names fail at harness creation. Antigravity refuses any built-in tool allowlist at createAgent().",
+    "Déclaration portable issue de defineAgentProfile(), traduite dans les demandes d’Antigravity. Les serveurs MCP fusionnent avec mcpServers et les noms en double échouent à la création du harness. Antigravity refuse toute liste d’outils intégrés à createAgent()."
+  ],
   "DispatchOptions.watchdog": [
     "Opt-in repetition detection for decoded tool calls and file changes. Disabled when omitted; a stop rejects with code stuck, a warning continues, and an instruction uses steering. Replay agents reject this option.",
     "Détection optionnelle des répétitions d’appels d’outils et de changements de fichiers décodés. Désactivée en l’absence de l’option ; un arrêt rejette avec le code stuck, un avertissement laisse continuer, une consigne utilise le steering. Les agents de rejeu refusent cette option."

@@ -4,7 +4,7 @@ From the repository root with Node.js 24+ and installed dependencies:
 
 ```sh
 bun run build
-node examples/58-repetition-watchdog/index.ts
+node examples/59-repetition-watchdog/index.ts
 ```
 
 The offline model repeats `git status --short` through real shell tools in an
@@ -17,7 +17,7 @@ container or paid model calls are required. It runs three independent dispatches
 
 Each run prints its `stuck` action and count and asserts its observable outcome.
 The sandbox closes after each dispatch; this example makes no changes or commits.
-Reruns reuse `examples/.repos/58-repetition-watchdog`.
+Reruns reuse `examples/.repos/59-repetition-watchdog`.
 
 The detector matches decoded activity, not actual Git progress. The sample model
 responds deterministically to the instruction; a native CLI may instead need

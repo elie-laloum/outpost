@@ -1,3 +1,4 @@
+import { profileText } from "../profile-support.ts";
 import { validId } from "../../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../../domain/agent.types.ts";
 import type { Command } from "../../../domain/command.types.ts";
@@ -10,6 +11,7 @@ export function copilotRequest(
   settings: Bound<CopilotSettings>,
   input: AgentInput,
 ): Command {
+  const text = profileText(settings.profile, input.text);
   invariant(
     !input.continuation?.fork,
     "GitHub Copilot CLI does not support automated fork in Outpost",
@@ -25,10 +27,10 @@ export function copilotRequest(
       executable: "copilot",
       arguments: [
         ...args,
-        ...(input.text === undefined ? [] : ["--interactive", input.text]),
+        ...(text === undefined ? [] : ["--interactive", text]),
       ],
       interactive: true,
     };
   args.push("--output-format", "json", "--allow-all", "--no-ask-user");
-  return { executable: "copilot", arguments: args, stdin: input.text ?? "" };
+  return { executable: "copilot", arguments: args, stdin: text ?? "" };
 }

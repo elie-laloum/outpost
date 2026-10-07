@@ -1,3 +1,4 @@
+import { profilePermissions } from "../domain/agent-profile-permissions.ts";
 import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
 import type { ModelResult } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -170,9 +171,13 @@ export async function customTurn(
           ...(transcript ? { conversation: transcript.id } : {}),
           budget,
           modelScope,
-          permissions: agent.harness.permissions
-            ? [agent.harness.permissions]
-            : [],
+          permissions: [
+            ...profilePermissions(
+              agent.harness.profile,
+              agent.harness.mcpServers,
+            ),
+            ...(agent.harness.permissions ? [agent.harness.permissions] : []),
+          ],
           depth: 0,
           maxDepth:
             agent.harness.limits.maxDelegationDepth ?? MAX_DELEGATION_DEPTH,

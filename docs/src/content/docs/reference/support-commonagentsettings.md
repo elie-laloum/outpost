@@ -14,6 +14,7 @@ sidebar:
 | `saveConversations` | `boolean \| undefined`                          | Optional | Save the native conversation after each turn, default true. false disables capture and cannot be combined with conversations.                                                                                                                                                                                                       |
 | `conversations`     | `ConversationStore \| undefined`                | Optional | Conversation store used instead of the native one, such as createTransportConversations() over the agent’s format. A store of another format, or saveConversations: false, fails when the harness is created.                                                                                                                       |
 | `mcpServers`        | `McpServers \| undefined`                       | Optional | MCP servers keyed by name, passed on the command line: --mcp-config for Claude Code, -c overrides for Codex. Secrets stay variable references; an undeclared referenced variable fails before the agent starts.                                                                                                                     |
+| `profile`           | `AgentProfile \| undefined`                     | Optional | Portable declaration from defineAgentProfile(), projected into Claude Code or Codex requests. MCP servers merge with mcpServers and duplicate names fail at harness creation. Claude applies built-in tool allowlists with a command hook and requires dontAsk; Codex refuses any allowlist.                                        |
 
 ## Signature
 
@@ -24,12 +25,14 @@ export interface CommonAgentSettings {
   readonly saveConversations?: boolean;
   readonly conversations?: ConversationStore;
   readonly mcpServers?: McpServers;
+  readonly profile?: AgentProfile;
 }
 ```
 
 ## Related contracts
 
 - [AgentAuthentication](../agentauthentication/)
+- [AgentProfile](../agentprofile/)
 - [ConversationStore](../conversationstore/)
 - [McpServers](../mcpservers/)
 - [Variables](../variables/)

@@ -6,6 +6,7 @@ import {
   createAgent,
   createSteering,
   defineHarnessSubagent,
+  defineAgentProfile,
   createHarness,
   createHarnessShellTools,
   createSandbox,
@@ -140,7 +141,7 @@ function loopingModel(respondToInstruction: boolean): ModelProvider {
   };
 }
 
-test("built-in harness detects before executing the repeated tool and can accept steering", async (t) => {
+test("built-in harness detects repetition and accepts steering with a command-restricted profile", async (t) => {
   const root = await repository(t);
   for (const onStuck of [
     "stop",
@@ -155,6 +156,7 @@ test("built-in harness detects before executing the repeated tool and can accept
         model: "fixture",
         harness: createHarness({
           modelProvider: loopingModel(true),
+          profile: defineAgentProfile({ allowedTools: ["shell:pwd"] }),
           tools: [createHarnessShellTools()],
         }),
       }),

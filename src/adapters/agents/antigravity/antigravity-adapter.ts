@@ -1,3 +1,4 @@
+import { rejectProfileTools } from "../profile-support.ts";
 import {
   mcpConfigurationPlanner,
   supportMcpServers,
@@ -30,6 +31,7 @@ import type { Bound } from "../settings.types.ts";
 
 function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
   supportModel(antigravityModelSupport, settings.model);
+  rejectProfileTools(antigravityLabel, settings.profile);
   supportMcpServers(antigravityMcpSupport, settings.mcpServers);
   const credentials = credentialPlanner(
     antigravityLabel,

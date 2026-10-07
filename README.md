@@ -84,6 +84,7 @@ const result = await dispatch({
 
 | You want to…                                        | Start here                                                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Share instructions, tools and MCP configuration     | [Portable agent profiles](https://elie-laloum.github.io/outpost/guide/agent-profiles/)           |
 | Choose an agent, model and credentials              | [Agent configuration](https://elie-laloum.github.io/outpost/guide/choose-an-agent/)              |
 | Run locally in containers or in the cloud           | [Execution backends](https://elie-laloum.github.io/outpost/guide/choose-a-sandbox/)              |
 | Reuse a sandbox across commands and agent turns     | [Sandbox sessions](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/)                |

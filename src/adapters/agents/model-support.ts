@@ -1,3 +1,4 @@
+import { agentProfile, profileMcpServers } from "../../domain/agent-profile.ts";
 import { invariant } from "../../domain/errors.ts";
 import { mcpServers } from "../../domain/mcp-server.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
@@ -36,11 +37,12 @@ export function configuredSettings<Settings extends ConfigurableSettings>(
   settings: Settings,
 ): Settings {
   harnessSettings(settings);
+  const profile = agentProfile(settings.profile);
+  const servers = profileMcpServers(profile, settings.mcpServers);
   return Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),
-    ...(settings.mcpServers === undefined
-      ? {}
-      : { mcpServers: mcpServers(settings.mcpServers) }),
+    ...(profile === undefined ? {} : { profile }),
+    ...(servers === undefined ? {} : { mcpServers: mcpServers(servers) }),
   });
 }

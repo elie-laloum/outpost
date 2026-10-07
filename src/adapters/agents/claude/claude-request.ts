@@ -1,5 +1,6 @@
 import type { AgentInput } from "../../../domain/agent.types.ts";
 import type { Command } from "../../../domain/command.types.ts";
+import { claudeProfileArguments } from "./claude-profile.ts";
 import { claudeUserMessage } from "./claude-input.ts";
 import { claudeMcpArguments } from "./claude-mcp.ts";
 import { validateContinuation } from "../continuation.ts";
@@ -10,7 +11,10 @@ export function claudeRequest(
   input: AgentInput,
 ): Command {
   validateContinuation(input);
-  const args: string[] = [...claudeMcpArguments(settings.mcpServers)];
+  const args: string[] = [
+    ...claudeMcpArguments(settings.mcpServers),
+    ...claudeProfileArguments(settings),
+  ];
   if (!input.interactive)
     args.push("--print", "--verbose", "--output-format", "stream-json");
   if (!input.interactive && input.liveInput)
@@ -20,9 +24,13 @@ export function claudeRequest(
   if (settings.model) args.push("--model", settings.model.name);
   if (settings.model?.reasoning)
     args.push("--effort", settings.model.reasoning);
-  if (settings.permissions)
+  if (settings.profile?.allowedTools === undefined && settings.permissions)
     args.push("--permission-mode", settings.permissions);
-  if (!settings.permissions && !input.interactive)
+  if (
+    settings.profile?.allowedTools === undefined &&
+    !settings.permissions &&
+    !input.interactive
+  )
     args.push("--dangerously-skip-permissions");
   if (input.continuation) {
     args.push("--resume", input.continuation.id);

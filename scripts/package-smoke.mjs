@@ -325,6 +325,12 @@ const jobOptions: WorkflowJobOptions = {checkpoint,start:jobStart,workflow:(inpu
 const jobHandler: QueueHandler = defineWorkflowJob(jobOptions);
 const triggerServer: ((options: TriggerServerOptions)=>Promise<TriggerServer>) = serveTriggers;
 void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,triggerServer,runSchedules];
+import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileTool } from '@elie-laloum/outpost';
+const portableTools: readonly AgentProfileTool[] = ['read','edit','shell:npm test'];
+const portableOptions: AgentProfileOptions = {instructions:'Never modify generated files.',allowedTools:portableTools};
+const portableProfile: AgentProfile = defineAgentProfile(portableOptions);
+createClaudeHarness({profile:portableProfile});
+createCodexHarness({profile:defineAgentProfile({instructions:'Read only.'})});
 import { createRunObserver, readRun, watchRun, type RunObserverOptions, type ReadRunOptions, type WatchRunOptions, type RunObserver, type RunSnapshot, type RunEvent } from '@elie-laloum/outpost';
 const runObserverOptions: RunObserverOptions = {transporter:createLocalTransport({directory:'runs'}),id:'typed-run',kind:'workflow'};
 const receiver: RunObserver = await createRunObserver(runObserverOptions);

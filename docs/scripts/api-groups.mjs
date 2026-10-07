@@ -59,7 +59,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "guide/choose-an-agent",
     names:
-      "createAgent createFallbackAgent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning DispatchAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord",
+      "defineAgentProfile AgentProfile AgentProfileOptions AgentProfileTool createAgent createFallbackAgent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning DispatchAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord",
   },
   {
     id: "harness",

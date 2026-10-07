@@ -1,3 +1,4 @@
+import { rejectProfileTools } from "../profile-support.ts";
 import {
   createCodexConversations,
   codexConversationLayout,
@@ -41,6 +42,7 @@ import type { Bound, CodexSettings } from "../settings.types.ts";
 
 function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
   supportModel(codexModelSupport, settings.model);
+  rejectProfileTools(codexLabel, settings.profile);
   supportMcpServers(codexMcpSupport, settings.mcpServers);
   codexProvider(settings);
   const credentials = credentialPlanner(

@@ -68,6 +68,6 @@ L’ordre des clés d’objet est ignoré ; les chaînes et l’ordre des tablea
 
 Les événements de changement de fichiers exposent seulement ce que rapporte l’adaptateur : les mêmes chemins et types de changement peuvent correspondre même si le contenu diffère. Le watchdog ne lit pas les fichiers et ne compare pas les diffs Git. Un contenu absent correspond aux autres contenus absents, séparément de `null`. Les autres contenus non JSON avancent la fenêtre sans correspondance. Les agents sans événements outil ou changement de fichiers ne peuvent pas déclencher ce détecteur. Les agents de rejeu refusent l’option.
 
-L’exemple hors ligne du dépôt dans `examples/58-repetition-watchdog/` exerce arrêt, avertissement et steering avec un modèle simulé et de vraies commandes locales, sans identifiants ni appels payants. Les exécutions réelles des CLI natives et du cloud restent à valider.
+L’exemple hors ligne du dépôt dans `examples/59-repetition-watchdog/` exerce arrêt, avertissement et steering avec un modèle simulé et de vraies commandes locales, sans identifiants ni appels payants. Les exécutions réelles des CLI natives et du cloud restent à valider.
 
 API : [WatchdogOptions](../../reference/watchdogoptions/) · [RepetitionPolicy](../../reference/repetitionpolicy/) · [StuckInstruction](../../reference/stuckinstruction/) · [StuckEvent](../../reference/stuckevent/).

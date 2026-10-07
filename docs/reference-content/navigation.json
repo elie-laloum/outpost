@@ -658,6 +658,11 @@
     "title": ["Agents", "Agents"],
     "items": [
       {
+        "slug": "reference/defineagentprofile",
+        "label": "defineAgentProfile",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createagent",
         "label": "createAgent",
         "attrs": { "data-api-kind": "function" }
@@ -666,6 +671,11 @@
         "slug": "reference/createfallbackagent",
         "label": "createFallbackAgent",
         "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/agentprofiletool",
+        "label": "AgentProfileTool",
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/type-agent",
@@ -696,6 +706,16 @@
         "slug": "reference/fallbacktrigger",
         "label": "FallbackTrigger",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/agentprofile",
+        "label": "AgentProfile",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentprofileoptions",
+        "label": "AgentProfileOptions",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/cliagent",

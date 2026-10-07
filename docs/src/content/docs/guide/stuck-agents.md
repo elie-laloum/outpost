@@ -68,6 +68,6 @@ Object key order is ignored; strings and array order remain significant. Call ID
 
 File-change events expose only what the adapter reports: identical paths and change kinds may match even when the file contents differ. The watchdog does not read files or compare Git diffs. A missing payload matches other missing payloads, separately from `null`. Other non-JSON payloads advance the window without matching. Agents that expose no tool or file-change events cannot trigger this detector. Replay agents refuse the option.
 
-The offline repository example in `examples/58-repetition-watchdog/` exercises stopping, warning and steering with a simulated model and real local commands, without credentials or paid requests. Native CLI and cloud runs remain to be validated live.
+The offline repository example in `examples/59-repetition-watchdog/` exercises stopping, warning and steering with a simulated model and real local commands, without credentials or paid requests. Native CLI and cloud runs remain to be validated live.
 
 API: [WatchdogOptions](../../reference/watchdogoptions/) · [RepetitionPolicy](../../reference/repetitionpolicy/) · [StuckInstruction](../../reference/stuckinstruction/) · [StuckEvent](../../reference/stuckevent/).

@@ -1,3 +1,4 @@
+import { rejectProfileTools } from "../profile-support.ts";
 import {
   createKimiConversations,
   kimiSessionProfile,
@@ -42,6 +43,7 @@ import type { Bound } from "../settings.types.ts";
 
 function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
   supportModel(kimiModelSupport, settings.model);
+  rejectProfileTools(kimiLabel, settings.profile);
   supportMcpServers(kimiMcpSupport, settings.mcpServers);
   const credentials = credentialPlanner(
     kimiLabel,

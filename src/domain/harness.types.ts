@@ -1,3 +1,4 @@
+import type { AgentProfile } from "./agent-profile.types.ts";
 import type { Usage } from "./agent.types.ts";
 import type { HarnessContextStrategy } from "./context.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
@@ -67,6 +68,7 @@ export interface HarnessOptions {
   readonly skills?: readonly HarnessSkill[];
   readonly cache?: boolean;
   readonly mcpServers?: McpServers;
+  readonly profile?: AgentProfile;
 }
 
 export interface Harness {
@@ -84,4 +86,5 @@ export interface Harness {
   readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
   readonly mcpServers?: McpServers;
+  readonly profile?: AgentProfile;
 }
