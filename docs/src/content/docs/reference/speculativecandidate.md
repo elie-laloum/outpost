@@ -21,7 +21,7 @@ import type { SpeculativeCandidate } from "@elie-laloum/outpost";
 | --------- | ----------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `key`     | `string`                                                          | Required | Unique name of 1 to 64 letters, digits, _ or -, starting with a letter or digit. It appears in the candidate's branch name.                                                                                                               |
 | `agent`   | `DispatchAgent`                                                   | Required | Agent that runs the candidate: one from createAgent() or createReplayAgent(), or a createFallbackAgent(). A quota fault that reaches the race, including one the fallback agent does not absorb, settles the candidate with status quota. |
-| `request` | `Omit<DispatchOptions<T>, "signal" \| "agent" \| "continuation">` | Required | Dispatch options for this candidate, such as brief and response. The race supplies agent and signal; continuation is not accepted.                                                                                                        |
+| `request` | `Omit<DispatchOptions<T>, "agent" \| "signal" \| "continuation">` | Required | Dispatch options for this candidate, such as brief and response. The race supplies agent and signal; continuation is not accepted.                                                                                                        |
 
 ## Signature
 

@@ -83,6 +83,7 @@ export interface ObservationSink {
 }
 
 export interface ObservationHubOptions {
+  readonly redact?: readonly RegExp[];
   readonly sinks?: readonly ObservationSink[];
   readonly scope?: ObservationScope;
   readonly capacity?: number;
@@ -91,14 +92,17 @@ export interface ObservationHubOptions {
 }
 
 export interface ObservationHub {
+  readonly redacting: boolean;
   readonly scope: ObservationScope;
   readonly errors: readonly unknown[];
   readonly dropped: number;
   readonly verbose: boolean;
+  redact<T>(value: T): T;
   emit(source: ObservationSource, event: ObservationEvent): void;
   child(
     scope: ObservationScope,
     sinks?: readonly ObservationSink[],
+    redact?: readonly RegExp[],
   ): ObservationHub;
   flush(): Promise<void>;
   close(): Promise<void>;

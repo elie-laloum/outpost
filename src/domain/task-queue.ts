@@ -1,3 +1,4 @@
+import { validateUsage } from "./usage.ts";
 import type {
   QueueClaim,
   QueueJob,
@@ -100,24 +101,14 @@ function queueQuota(value: unknown): QueueQuota {
 export function queueResult(value: unknown): QueueResult {
   const data = queueObject(value);
   const usage = data.usage === undefined ? undefined : queueObject(data.usage);
+  if (usage) validateUsage(usage);
   if (data.quota !== undefined && data.error === undefined)
     throw new Error("Queue quota requires an error");
   return {
     value: queueJson(data.value),
     ...(data.error === undefined ? {} : { error: queueString(data.error) }),
     ...(data.quota === undefined ? {} : { quota: queueQuota(data.quota) }),
-    ...(usage === undefined
-      ? {}
-      : {
-          usage: {
-            input: queueNumber(usage.input),
-            output: queueNumber(usage.output),
-            cached: queueNumber(usage.cached),
-            ...(usage.cacheCreated === undefined
-              ? {}
-              : { cacheCreated: queueNumber(usage.cacheCreated) }),
-          },
-        }),
+    ...(usage === undefined ? {} : { usage: structuredClone(usage) }),
   };
 }
 export function queueJob(value: unknown): QueueJob {

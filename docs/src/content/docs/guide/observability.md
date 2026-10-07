@@ -255,3 +255,30 @@ API: [createObservationHub](../../reference/createobservationhub/) · [Observati
 ## Observe decisions and selections
 
 [Decision evaluations](../decisions/) emit lifecycle summaries with source `decision`. Routed harnesses emit `model-route` agent events identifying the effective model, selection reason and optional native confidence. Pass `observation` to `decide()` for a direct evaluation; decision tasks and harnesses propagate workflow, task, pass and subagent scopes. Full states and answers require a verbose hub. Valid decision usage is accounted synchronously, independently of sink delivery or failures.
+
+## Mask secrets before saving or observing
+
+Pass matching expressions to `Workflow.start()` or `dispatch()`. These rules replace every match with `[REDACTED]` before any inherited or local observation receiver, including journals and legacy callbacks. A shared hub can also receive the policy in `createObservationHub({ redact })`.
+
+```ts
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+const task = defineTask({
+  key: "record",
+  perform(context) {
+    context.observation?.emit("sandbox", {
+      kind: "command-output",
+      channel: "stdout",
+      text: "sk-exampleSecret123456789012345",
+    });
+  },
+});
+await defineWorkflow("private", [task]).start({
+  redact: [/sk-[A-Za-z0-9]{20,}/g],
+});
+```
+
+Saved harness transcripts, CLI JSONL transcripts and sidecars use the same rules. Copilot and Kimi bundles mask their decoded content before transport archival. Binary bundle entries are refused when masking is enabled. Masking operates on complete individual strings, not across streamed event boundaries; select patterns for your credentials and avoid emitting credentials in fragments. It does not infer unknown keys or decode arbitrary encodings.
+
+Prompts sent to the agent and returned task values keep their original content. Conversation resume reads the masked transcript, so hidden values and signed reasoning data may no longer be replayable. The policy covers Outpost observations and supported conversation captures; it does not rewrite the CLI’s native sandbox files, temporary transfer staging, old archives, repository files, checkpoints or an application’s own logs. Prefer a private ephemeral agent home and avoid putting credentials in prompts.
+
+API: [ObservationHubOptions](../../reference/observationhuboptions/) · [DispatchOptions](../../reference/dispatchoptions/) · [WorkflowOptions](../../reference/workflowoptions/).

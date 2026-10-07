@@ -44,7 +44,8 @@ export function harnessBudget(
           );
         const exceeded = Object.entries(limits.usage).find(
           ([key, value]) =>
-            (usage[key as Exclude<keyof Usage, "complete">] ?? 0) > value,
+            (usage[key as Exclude<keyof Usage, "complete" | "models">] ?? 0) >
+            value,
         );
         if (exceeded)
           throw new OutpostError(

@@ -51,6 +51,7 @@ export async function runSubagent(
     transcript = store
       ? await openTranscript({
           repository: runtime.repository,
+          ...(runtime.observation ? { observation: runtime.observation } : {}),
           store,
           model: agent.model.name,
           routed: Boolean(agent.harness.routing),

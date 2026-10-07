@@ -4,10 +4,15 @@ import type {
   WorkflowResult,
   WorkflowTerminationCode,
 } from "../workflow.types.ts";
-import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
+import {
+  WorkflowBudgetExceeded,
+  WorkflowUsageUnavailable,
+  WorkflowCostUnavailable,
+} from "./budget.ts";
 
 export function terminationCode(error: unknown): WorkflowTerminationCode {
   if (error instanceof WorkflowBudgetExceeded) return "limit";
+  if (error instanceof WorkflowCostUnavailable) return "usage-unavailable";
   if (error instanceof WorkflowUsageUnavailable) return "usage-unavailable";
   return findFault(error, () => true)?.code ?? "failed";
 }

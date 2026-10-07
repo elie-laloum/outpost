@@ -13,18 +13,20 @@ import type { Usage } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                   | Présence  | Rôle                                                                                                                                                                                                                                                        |
-| -------------- | ---------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `complete`     | `boolean \| undefined` | Optionnel | false quand une partie de l’usage n’a pas pu être mesurée : les compteurs sont alors une borne inférieure ; l’agrégation et la reprise d’un checkpoint le conservent. Absent, les compteurs sont complets tels que rapportés, sans garantie de facturation. |
-| `input`        | `number`               | Requis    | Tokens d’entrée tels que l’agent ou le provider de modèle les rapporte. Les providers de modèle intégrés et Codex comptent les tokens en cache dans input ; Claude Code et Kimi Code les rapportent seulement dans cached et cacheCreated.                  |
-| `cached`       | `number`               | Requis    | Tokens d’entrée rapportés comme servis depuis le cache du modèle.                                                                                                                                                                                           |
-| `cacheCreated` | `number \| undefined`  | Optionnel | Tokens rapportés comme écrits dans le cache du modèle lorsque le protocole les fournit.                                                                                                                                                                     |
-| `output`       | `number`               | Requis    | Tokens de sortie rapportés comme générés par le modèle.                                                                                                                                                                                                     |
+| Nom            | Type                                                | Présence  | Rôle                                                                                                                                                                                                                                                                                                           |
+| -------------- | --------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models`       | `Readonly<Record<string, ModelUsage>> \| undefined` | Optionnel | Compteurs facultatifs par modèle pour calculer le coût. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles. |
+| `complete`     | `boolean \| undefined`                              | Optionnel | false quand une partie de l’usage n’a pas pu être mesurée : les compteurs sont alors une borne inférieure ; l’agrégation et la reprise d’un checkpoint le conservent. Absent, les compteurs sont complets tels que rapportés, sans garantie de facturation.                                                    |
+| `input`        | `number`                                            | Requis    | Tokens d’entrée tels que l’agent ou le provider de modèle les rapporte. Les providers de modèle intégrés et Codex comptent les tokens en cache dans input ; Claude Code et Kimi Code les rapportent seulement dans cached et cacheCreated.                                                                     |
+| `cached`       | `number`                                            | Requis    | Tokens d’entrée rapportés comme servis depuis le cache du modèle.                                                                                                                                                                                                                                              |
+| `cacheCreated` | `number \| undefined`                               | Optionnel | Tokens rapportés comme écrits dans le cache du modèle lorsque le protocole les fournit.                                                                                                                                                                                                                        |
+| `output`       | `number`                                            | Requis    | Tokens de sortie rapportés comme générés par le modèle.                                                                                                                                                                                                                                                        |
 
 ## Signature
 
 ```ts
 export interface Usage {
+  readonly models?: Readonly<Record<string, ModelUsage>>;
   readonly complete?: boolean;
   readonly input: number;
   readonly cached: number;
@@ -32,3 +34,7 @@ export interface Usage {
   readonly output: number;
 }
 ```
+
+## Contrats associés
+
+- [ModelUsage](../modelusage/)

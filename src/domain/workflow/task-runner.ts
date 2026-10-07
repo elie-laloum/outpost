@@ -2,7 +2,11 @@ import { InputSuspension } from "./input.ts";
 import { loopDefinition } from "./loop-task.ts";
 import { runLoopTask } from "./loop-runner.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
-import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
+import {
+  WorkflowBudgetExceeded,
+  WorkflowUsageUnavailable,
+  WorkflowCostUnavailable,
+} from "./budget.ts";
 import { awaitQuotaReset, pauseForQuota } from "./quota-pause.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
 import { lookupTaskCache, storeTaskCache } from "./task-cache.ts";
@@ -69,7 +73,8 @@ export async function runTask(
     if (
       signal.aborted ||
       ((error instanceof WorkflowBudgetExceeded ||
-        error instanceof WorkflowUsageUnavailable) &&
+        error instanceof WorkflowUsageUnavailable ||
+        error instanceof WorkflowCostUnavailable) &&
         runtime.accounting.exhausted)
     )
       finish(item, "cancelled");

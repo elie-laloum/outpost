@@ -42,6 +42,7 @@ export function workflowState(
         },
       },
     ],
+    options.redact,
   );
   const stop = new AbortController();
   const signal = options.signal
@@ -220,6 +221,7 @@ export function workflowState(
       ...(attempt > 0 && quotaResumes.has(item)
         ? { quota: quotaResumes.get(item)! }
         : {}),
+      ...(options.budget?.prices ? { prices: options.budget.prices } : {}),
       observation: observation.child({ taskKey: item.key, attempt }),
       signal: taskSignal,
       attempt,

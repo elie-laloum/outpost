@@ -1,3 +1,4 @@
+import { modelUsage } from "../domain/usage.ts";
 import { invariant } from "../domain/errors.ts";
 import type {
   ModelProvider,
@@ -18,7 +19,21 @@ export function harnessModelProvider(scope: HarnessModelScope): ModelProvider {
       signal,
     };
   };
-  const account = (result: ModelResult): ModelResult => {
+  const account = (received: ModelResult, model: string): ModelResult => {
+    const result = scope.trackModels
+      ? {
+          ...received,
+          usage: modelUsage(
+            received.usage ?? {
+              input: 0,
+              cached: 0,
+              output: 0,
+              complete: false,
+            },
+            model,
+          ),
+        }
+      : received;
     signal.throwIfAborted();
     invariant(
       result && typeof result.text === "string",
@@ -40,7 +55,10 @@ export function harnessModelProvider(scope: HarnessModelScope): ModelProvider {
         if (event.type === "result") {
           invariant(!received, "Model stream returned more than one result");
           received = true;
-          yield { type: "result", result: account(event.result) };
+          yield {
+            type: "result",
+            result: account(event.result, request.model),
+          };
           continue;
         }
         yield event;
@@ -55,7 +73,7 @@ export function harnessModelProvider(scope: HarnessModelScope): ModelProvider {
     request: (request) =>
       track(
         Promise.resolve().then(async () =>
-          account(await provider.request(scoped(request))),
+          account(await provider.request(scoped(request)), request.model),
         ),
       ),
   };

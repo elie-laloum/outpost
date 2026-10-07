@@ -4637,8 +4637,8 @@
     "Attribue à un événement un seq, un horodatage, sa source et le scope de ce hub, puis en remet une copie aux sinks hérités et locaux. Sans effet après close() ; les échecs des sinks vont dans errors et ne sont jamais levés."
   ],
   "ObservationHub.child": [
-    "Create a scoped child sharing sequence and delivery diagnostics, optionally adding sinks only for that child and its descendants.",
-    "Crée un enfant contextualisé partageant séquence et diagnostics de livraison, avec des récepteurs supplémentaires limités à cet enfant et ses descendants."
+    "Create a child scope inheriting sinks and redaction rules; optional additional sinks and regular expressions apply before all inherited and local receivers. Closing the child flushes its deliveries without closing the parent.",
+    "Crée un scope enfant héritant des récepteurs et règles de masquage ; les récepteurs et expressions supplémentaires s’appliquent avant tous les récepteurs hérités et locaux. Fermer l’enfant vide ses livraisons sans fermer le parent."
   ],
   "ObservationHub.flush": [
     "Drain the current delivery snapshot and flush registered sinks with bounded waits; later emissions belong to a later snapshot.",
@@ -7553,5 +7553,169 @@
   "SpeculativeCandidateResult.score": [
     "Finite score computed for an accepted candidate in best mode, including losing candidates and candidates whose subsequent cleanup failed. Absent when no score was successfully computed. Persisted in durable checkpoints.",
     "Score fini calculé pour un candidat accepté en mode best, y compris les perdants et les candidats dont le nettoyage ultérieur a échoué. Absent si aucun score n’a été calculé avec succès. Conservé dans les checkpoints durables."
+  ],
+  "ModelPrice.input": [
+    "Amount per million uncached input tokens in the price table’s currency.",
+    "Montant par million de tokens d’entrée hors cache dans la devise de la table."
+  ],
+  "ModelPrice.output": [
+    "Amount per million generated output tokens, including reasoning counted in output.",
+    "Montant par million de tokens de sortie générés, raisonnement compris lorsqu’il est compté en sortie."
+  ],
+  "ModelPrice.cached": [
+    "Amount per million cache-read tokens; defaults to input when omitted.",
+    "Montant par million de tokens lus dans le cache ; utilise input si omis."
+  ],
+  "ModelPrice.cacheCreated": [
+    "Amount per million cache-write tokens; defaults to input when omitted.",
+    "Montant par million de tokens écrits dans le cache ; utilise input si omis."
+  ],
+  "ModelPriceTable.currency": [
+    "Currency shared by all model rates: EUR or USD. No implicit conversion.",
+    "Devise commune aux tarifs : EUR ou USD. Aucune conversion implicite."
+  ],
+  "ModelPriceTable.models": [
+    "Exact Outpost model names mapped to rates per million tokens; use explicit aliases to distinguish services or tiers.",
+    "Noms exacts de modèles Outpost associés aux tarifs par million de tokens ; utilisez des alias explicites pour distinguer services ou paliers."
+  ],
+  "UsageCost.currency": [
+    "Currency of the table used to estimate this usage.",
+    "Devise de la table utilisée pour estimer cet usage."
+  ],
+  "UsageCost.amount": [
+    "Estimated amount in major currency units; a lower bound when complete is false.",
+    "Montant estimé dans l’unité principale de la devise ; borne inférieure lorsque complete vaut false."
+  ],
+  "UsageCost.complete": [
+    "True only when every reported token is attributable to a priced model and all counters are complete.",
+    "True uniquement si chaque token rapporté est associé à un modèle tarifé et si tous les compteurs sont complets."
+  ],
+  "Usage.models": [
+    "Optional model-attributed counters for cost accounting. Priced dispatches fill this automatically from explicit CLI models, harness requests and built-in subagents. Custom or queued tasks must preserve or provide it. Aggregate counters stay available.",
+    "Compteurs facultatifs par modèle pour calculer le coût. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles."
+  ],
+  "ModelUsage.inputIncludesCache": [
+    "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false; built-in model providers use true.",
+    "Indique si input inclut cached et cacheCreated, true par défaut. L’attribution des CLI Claude Code et Kimi utilise false ; les providers de modèle intégrés utilisent true."
+  ],
+  "AgentFeatures.usageInput": [
+    "Input-token convention for pricing CLI usage: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.",
+    "Convention des tokens d’entrée pour tarifer l’usage CLI : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
+  ],
+  "WorkflowBudget.prices": [
+    "Model rates per million tokens. Enables model attribution in built-in workflow task helpers and adds cost to result.usage, even without a monetary limit. Copied when accounting starts.",
+    "Tarifs par million de tokens. Active l’attribution par modèle dans les helpers de tâches et ajoute cost à result.usage, même sans limite monétaire. Copiée au début de la comptabilisation."
+  ],
+  "WorkflowBudget.cost": [
+    "Shared monetary limit with currency and finite nonnegative limit. Requires prices in the same currency; reaching it cancels running attempts and blocks admissions. Unknown cost fails even with an attempts limit.",
+    "Limite monétaire partagée avec currency et limit fini positif ou nul. Exige prices dans la même devise ; l’atteindre annule les tentatives actives et bloque les admissions. Un coût inconnu échoue même avec une limite attempts."
+  ],
+  "WorkflowUsage.cost": [
+    "Estimate computed from cumulative saved model counters and the configured table; absent without prices. Resume recomputes historical estimates with the supplied table.",
+    "Estimation calculée à partir des compteurs cumulés sauvegardés et de la table configurée ; absente sans prices. La reprise recalcule les estimations historiques avec la table fournie."
+  ],
+  "TaskContext.prices": [
+    "Workflow price table, forwarded by built-in agent task helpers. Custom dispatches must pass this explicitly to collect model counters.",
+    "Table de prix du workflow, transmise par les helpers de tâches d’agent. Les dispatchs personnalisés doivent la passer explicitement pour collecter les compteurs par modèle."
+  ],
+  "DispatchOptions.prices": [
+    "Optional model rates that enable model attribution in usage. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
+    "Tarifs facultatifs activant l’attribution par modèle dans usage. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
+  ],
+  "DispatchOptions.redact": [
+    "Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.",
+    "Expressions régulières remplaçant les chaînes correspondantes observées et sauvegardées par [REDACTED]. Ajoutées aux règles héritées du hub ; les prompts envoyés à l’agent et les résultats retournés restent intacts."
+  ],
+  "WorkflowOptions.redact": [
+    "Rules applied before every workflow or nested dispatch sink and to supported captured conversations. Inherited by child observation scopes.",
+    "Règles appliquées avant chaque récepteur du workflow ou dispatch imbriqué et aux conversations capturées prises en charge. Héritées par les scopes d’observation enfants."
+  ],
+  "ObservationHubOptions.redact": [
+    "Regular expressions applied recursively to event strings, keys and scope strings before delivery. Each rule replaces all matches; its lastIndex is preserved.",
+    "Expressions régulières appliquées récursivement aux chaînes et clés des événements et aux chaînes du scope avant livraison. Chaque règle remplace toutes les occurrences ; son lastIndex est préservé."
+  ],
+  "ObservationHub.redacting": [
+    "True when this scope has any redaction rules, including inherited ones. Conversation capture uses it to refuse unsupported binary filtering only when enabled.",
+    "True lorsque ce scope possède des règles de masquage, y compris héritées. La capture l’utilise pour refuser le filtrage binaire non pris en charge uniquement lorsqu’il est activé."
+  ],
+  "ObservationHub.redact": [
+    "Copy a structured value and apply this scope’s masking rules without mutating the original. Used by transcript storage before serializing records.",
+    "Copie une valeur structurée et applique les règles de ce scope sans modifier l’original. Utilisée par le stockage de transcripts avant sérialisation."
+  ],
+  "ConversationContext.observation": [
+    "Observation scope carrying the inherited redaction policy for captured JSONL transcripts, sidecars and decoded session bundles before transport archival.",
+    "Scope d’observation portant la politique de masquage héritée pour les transcripts JSONL, fichiers annexes et bundles de session décodés avant archivage par transport."
+  ],
+  "calculateUsageCost.usage": [
+    "Aggregate token usage with optional model-attributed counters.",
+    "Usage agrégé des tokens avec compteurs facultatifs par modèle."
+  ],
+  "calculateUsageCost.prices": [
+    "Explicit rates and currency used for this estimate.",
+    "Tarifs explicites et devise utilisés pour cette estimation."
+  ],
+  "loadModelPrices.options": [
+    "Catalog selection, model aliases, currency conversion and bounded HTTP request settings.",
+    "Sélection du catalogue, alias des modèles, conversion de devise et paramètres HTTP bornés."
+  ],
+  "ModelPricesOptions.source": [
+    "Public catalog to load: models.dev (default) or openrouter.",
+    "Catalogue public à charger : models.dev par défaut ou openrouter."
+  ],
+  "ModelPricesOptions.provider": [
+    "Required models.dev provider ID; ignored for OpenRouter.",
+    "Identifiant de provider models.dev obligatoire ; ignoré pour OpenRouter."
+  ],
+  "ModelPricesOptions.models": [
+    "Outpost model names mapped to exact IDs in the selected catalog; loads only these prices.",
+    "Noms de modèles Outpost associés aux identifiants exacts du catalogue choisi ; charge uniquement ces tarifs."
+  ],
+  "ModelPricesOptions.currency": [
+    "Output currency, USD by default; EUR requires usdExchangeRate.",
+    "Devise de sortie, USD par défaut ; EUR exige usdExchangeRate."
+  ],
+  "ModelPricesOptions.usdExchangeRate": [
+    "Caller-supplied amount of EUR for one USD when currency is EUR. USD accepts only 1.",
+    "Montant en EUR fourni par l’appelant pour un USD lorsque currency vaut EUR. USD accepte uniquement 1."
+  ],
+  "ModelPricesOptions.url": [
+    "Optional absolute HTTP(S) catalog endpoint, without embedded credentials or fragment. Defaults to the public source URL.",
+    "Endpoint HTTP(S) absolu facultatif du catalogue, sans identifiants intégrés ni fragment. Utilise l’URL publique de la source par défaut."
+  ],
+  "ModelPricesOptions.signal": [
+    "Cancels the catalog request and body reading.",
+    "Annule la requête du catalogue et la lecture du corps."
+  ],
+  "ModelPricesOptions.timeoutMs": [
+    "Total catalog request deadline, 15000 ms by default.",
+    "Délai total de requête du catalogue, 15000 ms par défaut."
+  ],
+  "ModelPricesOptions.maxResponseBytes": [
+    "Maximum catalog response bytes, 32 MiB by default.",
+    "Taille maximale de réponse du catalogue, 32 Mio par défaut."
+  ],
+  "WorkflowCostUnavailable.dimension": [
+    "Always cost, identifying unavailable monetary accounting.",
+    "Toujours cost, identifiant une comptabilisation monétaire indisponible."
+  ],
+  "ModelUsage.input": [
+    "Input tokens as the agent or model provider reports them. The built-in model providers and Codex count cached tokens inside input; Claude Code and Kimi Code report them only in cached and cacheCreated.",
+    "Tokens d’entrée tels que l’agent ou le provider de modèle les rapporte. Les providers de modèle intégrés et Codex comptent les tokens en cache dans input ; Claude Code et Kimi Code les rapportent seulement dans cached et cacheCreated."
+  ],
+  "ModelUsage.cached": [
+    "Reported input tokens served from the model’s cache.",
+    "Tokens d’entrée rapportés comme servis depuis le cache du modèle."
+  ],
+  "ModelUsage.cacheCreated": [
+    "Reported tokens written into the model’s cache, when the protocol supplies them.",
+    "Tokens rapportés comme écrits dans le cache du modèle lorsque le protocole les fournit."
+  ],
+  "ModelUsage.output": [
+    "Reported output tokens generated by the model.",
+    "Tokens de sortie rapportés comme générés par le modèle."
+  ],
+  "ModelUsage.complete": [
+    "False when some usage could not be measured, so the counters are a lower bound; aggregation and checkpoint replay keep it. Omitted means the counters are complete as reported, not a billing guarantee.",
+    "false quand une partie de l’usage n’a pas pu être mesurée : les compteurs sont alors une borne inférieure ; l’agrégation et la reprise d’un checkpoint le conservent. Absent, les compteurs sont complets tels que rapportés, sans garantie de facturation."
   ]
 }

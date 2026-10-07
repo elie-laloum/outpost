@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Nom                | Type                                            | Présence  | Rôle                                                                                                                                                                                                                                                                                                                                         |
 | ------------------ | ----------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `redact`           | `readonly RegExp[] \| undefined`                | Optionnel | Règles appliquées avant chaque récepteur du workflow ou dispatch imbriqué et aux conversations capturées prises en charge. Héritées par les scopes d’observation enfants.                                                                                                                                                                    |
 | `onQuota`          | `WorkflowQuotaPolicy \| undefined`              | Optionnel | Politique optionnelle qui met une tâche en pause sur une erreur de quota au lieu de la reprendre ou de la faire échouer ; exige un checkpoint. Les pauses sur quota sont relâchées par un start() ultérieur dès que la réinitialisation est atteignable dans maxWaitMs, ou lorsqu’elle est inconnue ou passée.                               |
 | `answers`          | `readonly WorkflowAnswer[] \| undefined`        | Optionnel | Réponses aux demandes de saisie en attente, liste non vide ; requiert un checkpoint. Toutes sont validées avant d’en appliquer une, et une réponse invalide, périmée ou en double fait rejeter start().                                                                                                                                      |
 | `timeoutMs`        | `number \| undefined`                           | Optionnel | Délai en millisecondes de cet appel à start(), entier positif jusqu’à 2147483647, qui couvre l’acquisition du checkpoint, les conditions, les tentatives et les attentes de relance. À l’expiration, les tâches en cours sont annulées et le statut est failed avec une OutpostError de code timeout ; chaque appel reçoit un nouveau délai. |
@@ -33,6 +34,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly redact?: readonly RegExp[];
   readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;

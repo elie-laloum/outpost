@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Name               | Type                                            | Presence | Meaning                                                                                                                                                                                                                                                                               |
 | ------------------ | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `redact`           | `readonly RegExp[] \| undefined`                | Optional | Rules applied before every workflow or nested dispatch sink and to supported captured conversations. Inherited by child observation scopes.                                                                                                                                           |
 | `onQuota`          | `WorkflowQuotaPolicy \| undefined`              | Optional | Opt-in policy that pauses a task on a quota error instead of retrying or failing it; requires a checkpoint. Quota pauses release on a later start() once the reset is known to be reachable within maxWaitMs, or when it is unknown or past.                                          |
 | `answers`          | `readonly WorkflowAnswer[] \| undefined`        | Optional | Answers to pending input requests, not empty; requires a checkpoint. All are validated before any is applied, and an invalid, stale or duplicate answer makes start() reject.                                                                                                         |
 | `timeoutMs`        | `number \| undefined`                           | Optional | Deadline in milliseconds for this start() call, a positive integer up to 2147483647, covering checkpoint acquisition, conditions, attempts and retry waits. Expiry cancels running tasks and the status is failed with an OutpostError code timeout; each call gets a fresh deadline. |
@@ -33,6 +34,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly redact?: readonly RegExp[];
   readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;

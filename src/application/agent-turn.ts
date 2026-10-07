@@ -21,6 +21,7 @@ import {
 } from "./execution.constants.ts";
 import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
 import { steeringInterruption } from "./execution.constants.ts";
+import { modelUsage } from "../domain/usage.ts";
 import { notify } from "./observation.ts";
 
 export async function turn(
@@ -53,7 +54,19 @@ export async function turn(
   });
   const observe = (event: AgentObservation) => {
     steering.observe(event);
-    notify(options.observe, event);
+    notify(
+      options.observe,
+      event.kind === "usage" && options.prices
+        ? {
+            ...event,
+            tokens: modelUsage(
+              event.tokens,
+              agent.model?.name,
+              agent.usageInput !== "uncached",
+            ),
+          }
+        : event,
+    );
   };
   const output = agentOutput(agent, { ...options, observe }, markers, pass);
   const failure = agentFailure(agent, output);
@@ -197,6 +210,15 @@ export async function turn(
   return {
     ...(preparedConversation ? { conversation: preparedConversation } : {}),
     ...outcome,
+    ...(options.prices
+      ? {
+          usage: modelUsage(
+            outcome.usage,
+            agent.model?.name,
+            agent.usageInput !== "uncached",
+          ),
+        }
+      : {}),
     status,
     ...(interrupted ? { interrupted: "steering" as const } : {}),
     durationMs: Date.now() - start,

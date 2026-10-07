@@ -7,7 +7,7 @@ import type {
   FallbackCandidate,
   FallbackTrigger,
 } from "./fallback-agent.types.ts";
-import { addUsage, usageDifference } from "./usage.ts";
+import { addUsage, usageDifference, validateUsage } from "./usage.ts";
 import { checkpointValue } from "./workflow/checkpoint-value.ts";
 import type { FaultCode } from "./errors.types.ts";
 import {
@@ -419,7 +419,9 @@ function usage(value: unknown, index: number): Usage {
     recorded.complete === undefined || typeof recorded.complete === "boolean",
     `Replay journal entry ${index} has invalid usage completeness`,
   );
+  validateUsage(recorded);
   return {
+    ...(recorded.models ? { models: structuredClone(recorded.models) } : {}),
     input: recorded.input as number,
     cached: recorded.cached as number,
     output: recorded.output as number,

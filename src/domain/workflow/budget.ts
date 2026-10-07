@@ -1,5 +1,6 @@
 import type { Usage } from "../agent.types.ts";
-import { addUsage } from "../usage.ts";
+import { calculateUsageCost, validatePrices } from "../pricing.ts";
+import { addUsage, validateUsage } from "../usage.ts";
 import { usageDimensions } from "./budget.constants.ts";
 import type {
   WorkflowAccounting,
@@ -8,11 +9,13 @@ import type {
 } from "./budget.types.ts";
 
 export class WorkflowBudgetExceeded extends Error {
-  readonly dimension: "attempts" | Exclude<keyof Usage, "complete">;
+  readonly dimension:
+    "attempts" | "cost" | Exclude<keyof Usage, "complete" | "models">;
   readonly limit: number;
   readonly observed: number;
   constructor(
-    dimension: "attempts" | Exclude<keyof Usage, "complete">,
+    dimension:
+      "attempts" | "cost" | Exclude<keyof Usage, "complete" | "models">,
     limit: number,
     observed: number,
   ) {
@@ -36,11 +39,27 @@ export class WorkflowUsageUnavailable extends Error {
   }
 }
 
+export class WorkflowCostUnavailable extends Error {
+  readonly dimension = "cost";
+  constructor() {
+    super(
+      "Cost is incomplete: every reported token requires a known model and price",
+    );
+    this.name = "WorkflowCostUnavailable";
+  }
+}
+
 export function workflowAccounting(
   budget: WorkflowBudget | undefined,
-  exhaust: (error: WorkflowBudgetExceeded | WorkflowUsageUnavailable) => void,
+  exhaust: (
+    error:
+      | WorkflowBudgetExceeded
+      | WorkflowUsageUnavailable
+      | WorkflowCostUnavailable,
+  ) => void,
   initial?: WorkflowUsage,
 ): WorkflowAccounting {
+  budget = budget ? structuredClone(budget) : undefined;
   for (const [key, value] of Object.entries({
     attempts: budget?.attempts,
     ...budget?.usage,
@@ -50,14 +69,26 @@ export function workflowAccounting(
         `Workflow budget ${key} must be a nonnegative safe integer`,
       );
   }
+  if (budget?.prices) validatePrices(budget.prices);
+  if (
+    budget?.cost &&
+    (!Number.isFinite(budget.cost.limit) ||
+      budget.cost.limit < 0 ||
+      !budget.prices ||
+      budget.prices.currency !== budget.cost.currency)
+  )
+    throw new Error(
+      "Cost budgets require a finite nonnegative limit and prices in the same currency",
+    );
   let attempts = initial?.attempts ?? 0;
   let tokens: Usage = initial
-    ? { ...initial.tokens }
+    ? structuredClone(initial.tokens)
     : { input: 0, cached: 0, output: 0 };
   let exhausted = false;
   let usageExhausted = false;
   function fail(
-    dimension: "attempts" | Exclude<keyof Usage, "complete">,
+    dimension:
+      "attempts" | "cost" | Exclude<keyof Usage, "complete" | "models">,
     limit: number,
     observed: number,
   ): WorkflowBudgetExceeded {
@@ -86,12 +117,29 @@ export function workflowAccounting(
     }
     return error;
   }
+  const cost = () =>
+    budget?.prices ? calculateUsageCost(tokens, budget.prices) : undefined;
+  function checkCost(): Error | undefined {
+    if (!budget?.cost) return;
+    const current = cost()!;
+    if (!current.complete) {
+      const error = new WorkflowCostUnavailable();
+      if (!usageExhausted) {
+        exhausted = true;
+        usageExhausted = true;
+        exhaust(error);
+      }
+      return error;
+    }
+    if (current.amount >= budget.cost.limit)
+      return fail("cost", budget.cost.limit, current.amount);
+  }
   return {
     get exhausted() {
       return exhausted;
     },
     admit() {
-      const unavailable = checkCompleteness();
+      const unavailable = checkCost() ?? checkCompleteness();
       if (unavailable) throw unavailable;
       if (budget?.attempts !== undefined && attempts >= budget.attempts)
         throw fail("attempts", budget.attempts, attempts);
@@ -103,16 +151,11 @@ export function workflowAccounting(
       attempts++;
     },
     report(usage) {
-      if (usage.complete !== undefined && typeof usage.complete !== "boolean")
-        throw new Error("Reported usage complete must be a boolean");
-      for (const dimension of usageDimensions) {
-        const value = usage[dimension] ?? 0;
-        if (!Number.isSafeInteger(value) || value < 0)
-          throw new Error(
-            `Reported usage ${dimension} must be a nonnegative safe integer`,
-          );
-      }
-      tokens = addUsage(tokens, usage);
+      validateUsage(usage);
+      const updated = addUsage(tokens, usage);
+      if (budget?.prices) calculateUsageCost(updated, budget.prices);
+      tokens = updated;
+      checkCost();
       checkCompleteness();
       for (const dimension of usageDimensions) {
         const limit = budget?.usage?.[dimension];
@@ -121,6 +164,10 @@ export function workflowAccounting(
       }
     },
     snapshot: () =>
-      Object.freeze({ attempts, tokens: Object.freeze({ ...tokens }) }),
+      Object.freeze({
+        attempts,
+        tokens: Object.freeze(structuredClone(tokens)),
+        ...(budget?.prices ? { cost: cost()! } : {}),
+      }),
   };
 }

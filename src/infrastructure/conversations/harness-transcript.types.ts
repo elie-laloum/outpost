@@ -1,8 +1,10 @@
+import type { ObservationHub } from "../../domain/observation.types.ts";
 import type { ConversationStore } from "../../domain/conversation.types.ts";
 import type { ModelMessage } from "../../domain/model.types.ts";
 import type { TranscriptRecord } from "../../domain/transcript.types.ts";
 
 export interface TranscriptOptions {
+  readonly observation?: ObservationHub;
   readonly routed?: boolean;
   readonly repository: string;
   readonly store: ConversationStore;

@@ -9,6 +9,7 @@ sidebar:
 
 | Name                    | Type                                                  | Presence | Meaning                                                                                                                                                                                                                                                 |
 | ----------------------- | ----------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usageInput`            | `"inclusive" \| "uncached" \| undefined`              | Optional | Input-token convention for pricing CLI usage: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.                                                                                    |
 | `name`                  | `string`                                              | Required | Native agent identifier used in execution events and diagnostics.                                                                                                                                                                                       |
 | `bootstrap`             | `string \| undefined`                                 | Optional | Built-in agent whose pinned CLI Outpost installs on a remote sandbox when the executable is missing: an npm package, or a SHA-512-verified archive for antigravity. An unknown name fails.                                                              |
 | `requiresFinishedEvent` | `boolean \| undefined`                                | Optional | Require the native final event: without it, completion markers do not match and the turn fails with code process, even when the process exits with 0.                                                                                                   |
@@ -24,6 +25,7 @@ sidebar:
 
 ```ts
 export interface AgentFeatures {
+  readonly usageInput?: "inclusive" | "uncached";
   readonly name: string;
   readonly bootstrap?: string;
   readonly requiresFinishedEvent?: boolean;

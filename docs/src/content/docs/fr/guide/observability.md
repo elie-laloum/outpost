@@ -255,3 +255,30 @@ API : [createObservationHub](../../reference/createobservationhub/) · [Observat
 ## Observer les décisions et sélections
 
 Les [évaluations de décision](../decisions/) émettent des résumés de cycle de vie avec la source `decision`. Les harnesses routés émettent des événements d’agent `model-route` indiquant modèle effectif, motif et confiance native facultative. Passez `observation` à `decide()` pour une évaluation directe ; tâches et harnesses propagent les scopes workflow, tâche, passage et sous-agent. Les états et réponses complets exigent un hub verbose. L’usage valide est compté de façon synchrone, indépendamment des livraisons et erreurs des sinks.
+
+## Masquer les secrets avant sauvegarde ou observation
+
+Passez les expressions à `Workflow.start()` ou `dispatch()`. Ces règles remplacent chaque correspondance par `[REDACTED]` avant tout récepteur d’observation hérité ou local, journaux et callbacks historiques compris. Un hub partagé peut recevoir la politique via `createObservationHub({ redact })`.
+
+```ts
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+const task = defineTask({
+  key: "record",
+  perform(context) {
+    context.observation?.emit("sandbox", {
+      kind: "command-output",
+      channel: "stdout",
+      text: "sk-exampleSecret123456789012345",
+    });
+  },
+});
+await defineWorkflow("private", [task]).start({
+  redact: [/sk-[A-Za-z0-9]{20,}/g],
+});
+```
+
+Les transcripts du harness, transcripts JSONL CLI et fichiers annexes utilisent ces règles. Les bundles Copilot et Kimi masquent leur contenu décodé avant archivage par transport. Les entrées binaires sont refusées lorsque le masquage est activé. Le masquage agit sur chaque chaîne complète, sans recomposer les frontières d’événements diffusés ; choisissez les expressions adaptées aux identifiants et évitez de les émettre en fragments. Il ne déduit pas les clés inconnues et ne décode pas les encodages arbitraires.
+
+Les prompts envoyés à l’agent et les valeurs retournées gardent leur contenu original. La reprise lit le transcript masqué : les valeurs cachées et les données de raisonnement signées peuvent ne plus être rejouables. La politique couvre les observations Outpost et captures de conversation prises en charge ; elle ne réécrit pas les fichiers natifs de la CLI dans la sandbox, le staging temporaire de transfert, les anciennes archives, fichiers du dépôt, checkpoints ou journaux de votre application. Préférez un home privé éphémère et évitez les identifiants dans les prompts.
+
+API : [ObservationHubOptions](../../reference/observationhuboptions/) · [DispatchOptions](../../reference/dispatchoptions/) · [WorkflowOptions](../../reference/workflowoptions/).

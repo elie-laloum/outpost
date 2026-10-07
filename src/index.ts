@@ -680,3 +680,14 @@ export type {
   ConflictResolver,
   IntegrationOptions,
 } from "./application/conflict-resolution.types.ts";
+
+export { calculateUsageCost } from "./domain/pricing.ts";
+export type {
+  ModelPrice,
+  ModelPriceTable,
+  ModelUsage,
+  UsageCost,
+} from "./domain/pricing.types.ts";
+export { WorkflowCostUnavailable } from "./domain/workflow/budget.ts";
+export { loadModelPrices } from "./adapters/models/model-prices.ts";
+export type { ModelPricesOptions } from "./adapters/models/model-prices.types.ts";

@@ -698,5 +698,17 @@
   "createAgentConflictResolver": [
     "Create an opt-in conflict strategy that prepares a merge in the supplied resolution workspace, runs one agent dispatch, then executes mandatory verification in the same sandbox. It requires both a sandboxProvider and a noninteractive verification command, returns the verified commit, usage and check output, and closes its sandbox on every outcome. It rejects unresolved entries, missing ancestry, uncommitted nonignored changes and commits changed by verification. No model or sandbox runs during construction.",
     "Crée une stratégie explicite qui prépare une fusion dans le workspace de résolution fourni, lance un seul dispatch d’agent puis exécute la vérification obligatoire dans la même sandbox. Exige un sandboxProvider et une commande de vérification non interactive, renvoie le commit vérifié, l’usage et la sortie du contrôle, et ferme sa sandbox quel que soit le résultat. Refuse les entrées non fusionnées, l’ascendance manquante, les changements non ignorés non commités et les commits modifiés par la vérification. Aucun modèle ni sandbox ne s’exécute à la construction."
+  ],
+  "calculateUsageCost": [
+    "Estimate token charges in the table’s currency from Usage.models. Rates are per million tokens. Cache reads and writes are charged once using each model’s input convention; omitted cache rates use the input rate. Missing model attribution, prices or usage return complete: false and a lower bound. Invalid counters or prices throw. This is an estimate, not an invoice.",
+    "Estime les frais des tokens dans la devise de la table à partir de Usage.models. Les tarifs sont par million de tokens. Les lectures et écritures du cache sont facturées une fois selon la convention d’entrée de chaque modèle ; les tarifs de cache omis utilisent celui de l’entrée. Un modèle, un tarif ou un usage manquant renvoie complete: false et une borne inférieure. Les compteurs ou tarifs invalides lèvent une erreur. Il s’agit d’une estimation, pas d’une facture."
+  ],
+  "loadModelPrices": [
+    "Fetch a bounded, cancellable models.dev or OpenRouter catalog once and return a frozen price table for the explicitly selected model aliases. Catalog prices are USD; EUR requires a caller-supplied exchange rate. Normalize OpenRouter per-token rates to per-million rates. Refuse missing models, invalid prices and unsupported tier or extra charges; no refresh or network access occurs during workflow accounting.",
+    "Charge une fois un catalogue models.dev ou OpenRouter avec annulation, délai et taille bornés, puis renvoie une table figée pour les alias de modèles explicitement choisis. Les prix des catalogues sont en USD ; EUR exige un taux fourni par l’appelant. Convertit les tarifs OpenRouter par token en tarifs par million. Refuse les modèles absents, tarifs invalides, paliers et frais supplémentaires non pris en charge ; aucun rafraîchissement ni accès réseau ne se produit pendant la comptabilisation du workflow."
+  ],
+  "WorkflowCostUnavailable": [
+    "Raised when a cost budget cannot measure every reported token because usage, model attribution or a matching price is missing. Stops running attempts even if an attempt limit exists; workflow terminationCode is usage-unavailable.",
+    "Levée lorsqu’un budget de coût ne peut mesurer chaque token rapporté faute d’usage, de modèle identifié ou de tarif correspondant. Arrête les tentatives actives même avec une limite de tentatives ; le terminationCode du workflow est usage-unavailable."
   ]
 }

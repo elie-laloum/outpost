@@ -1,3 +1,4 @@
+import type { ModelUsage } from "./pricing.types.ts";
 import type { Harness } from "./harness.types.ts";
 import type { ModelRouteEvent } from "./harness-routing.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
@@ -11,6 +12,7 @@ import type {
 } from "./fallback-agent.types.ts";
 
 export interface Usage {
+  readonly models?: Readonly<Record<string, ModelUsage>>;
   readonly complete?: boolean;
   readonly input: number;
   readonly cached: number;
@@ -183,6 +185,7 @@ export interface AgentInput {
 }
 
 export interface AgentFeatures {
+  readonly usageInput?: "inclusive" | "uncached";
   readonly name: string;
   readonly bootstrap?: string;
   readonly requiresFinishedEvent?: boolean;

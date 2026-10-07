@@ -1,3 +1,4 @@
+import { modelUsage } from "../domain/usage.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { unavailableFault } from "../domain/unavailable.ts";
 import type { AgentModel, ModelToolSpec } from "../domain/model.types.ts";
@@ -67,7 +68,12 @@ export async function routeHarnessModel(
         },
         {
           account(usage) {
-            const receipt = { text: "", usage };
+            const receipt = {
+              text: "",
+              usage: runtime.modelScope.trackModels
+                ? modelUsage(usage, routing.model)
+                : usage,
+            };
             runtime.modelScope.account(receipt, runtime.subagentId);
             runtime.budget.account(receipt);
           },

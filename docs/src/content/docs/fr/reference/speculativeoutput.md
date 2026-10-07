@@ -19,9 +19,9 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 
 | Nom                   | Type                              | Présence  | Rôle                                                                                                                                                   |
 | --------------------- | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `conversation`        | `string \| undefined`             | Optionnel | Identifiant de conversation native du dernier tour, quand l’agent en a fourni un.                                                                      |
 | `completion`          | `string \| undefined`             | Optionnel | Marqueur de fin trouvé dans le texte du dernier tour.                                                                                                  |
 | `text`                | `string`                          | Requis    | Texte de tous les tours de l’exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse.                                   |
-| `conversation`        | `string \| undefined`             | Optionnel | Identifiant de conversation native du dernier tour, quand l’agent en a fourni un.                                                                      |
 | `usage`               | `Usage`                           | Requis    | Compteurs de tokens additionnés sur tous les tours ; pas un coût.                                                                                      |
 | `fallback`            | `FallbackRecord \| undefined`     | Optionnel | Présent uniquement lorsque le dispatch a utilisé un agent de secours : le candidat qui a produit ce résultat et ceux qui se sont arrêtés avant lui.    |
 | `completed`           | `boolean`                         | Requis    | Vrai quand le texte du dernier tour contient un marqueur de fin, ou quand une réponse typée a été validée.                                             |

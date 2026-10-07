@@ -1,3 +1,4 @@
+import { redactValue } from "./redaction.ts";
 import { observationDefaults } from "./observation.constants.ts";
 import type {
   Observation,
@@ -20,6 +21,7 @@ export function createObservationHub(
       throw new Error(
         "Observation capacity and timeout must be positive integers",
       );
+  redactValue({}, options.redact ?? []);
   let seq = 0,
     dropped = 0,
     emitting = false;
@@ -118,6 +120,7 @@ export function createObservationHub(
     sinks: readonly ObservationSink[],
     parentActive: () => boolean,
     parentTrack: (delivery: SinkDelivery, add: boolean) => void,
+    patterns: readonly RegExp[],
   ): ObservationHub {
     const local: SinkDelivery[] = sinks.map((sink) => ({
       sink,
@@ -135,12 +138,14 @@ export function createObservationHub(
       track(delivery, true);
     }
     const targets = [...inherited, ...local];
-    const frozen = Object.freeze({ ...scope });
+    const frozen = Object.freeze(redactValue(scope, patterns));
     let closed = false;
     let closing: Promise<void> | undefined;
     const active = () => !closed && parentActive();
     return {
       scope: frozen,
+      redacting: patterns.length > 0,
+      redact: <T>(value: T): T => redactValue(value, patterns),
       errors,
       get dropped() {
         return dropped;
@@ -162,7 +167,7 @@ export function createObservationHub(
               at: new Date().toISOString(),
               source,
               scope: frozen,
-              event: structuredClone(event),
+              event: redactValue(event, patterns),
             },
           });
           if (!draining) return;
@@ -186,8 +191,17 @@ export function createObservationHub(
           if (draining) emitting = false;
         }
       },
-      child(addition, sinks = []) {
-        return hub({ ...scope, ...addition }, targets, sinks, active, track);
+      child(addition, sinks = [], redact = []) {
+        const combined = [...patterns, ...redact];
+        redactValue({}, combined);
+        return hub(
+          { ...scope, ...addition },
+          targets,
+          sinks,
+          active,
+          track,
+          combined,
+        );
       },
       flush: () => flush(deliveries),
       close() {
@@ -210,5 +224,6 @@ export function createObservationHub(
     options.sinks ?? [],
     () => true,
     () => {},
+    [...(options.redact ?? [])],
   );
 }

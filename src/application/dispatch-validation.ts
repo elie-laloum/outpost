@@ -1,3 +1,5 @@
+import { validatePrices } from "../domain/pricing.ts";
+import { redactValue } from "../domain/redaction.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
@@ -8,6 +10,8 @@ import type { DispatchOptions } from "./execution.types.ts";
 
 export function validateDispatch(options: DispatchOptions<unknown>): void {
   options.signal?.throwIfAborted();
+  if (options.prices) validatePrices(options.prices);
+  if (options.redact) redactValue({}, options.redact);
   if (options.steering) steeringChannel(options.steering);
   validateBrief(options.brief);
   if (options.response) responseInstructions(options.response);

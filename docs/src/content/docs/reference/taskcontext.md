@@ -15,6 +15,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 | Name              | Type                                                     | Presence | Meaning                                                                                                                                                                               |
 | ----------------- | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prices`          | `ModelPriceTable \| undefined`                           | Optional | Workflow price table, forwarded by built-in agent task helpers. Custom dispatches must pass this explicitly to collect model counters.                                                |
 | `quota`           | `WorkflowQuotaPause \| undefined`                        | Optional | Quota pause resumed by this attempt, with the captured conversation and retained branch when known; present only on the first attempt after the pause and never persisted separately. |
 | `interaction`     | `TaskInteractionContext \| undefined`                    | Optional | Durable state and suspension operations, supplied only for tasks declaring an interaction.                                                                                            |
 | `idempotencyKey`  | `string`                                                 | Required | Stable SHA-256 identity of executionId and task key, preserved across retries and checkpoint replay. Pass it to an effect service with persistent deduplication.                      |
@@ -31,6 +32,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskContext {
+  readonly prices?: ModelPriceTable;
   /** Quota pause resumed by this attempt; present only on the first attempt after it. */
   readonly quota?: WorkflowQuotaPause;
   readonly interaction?: TaskInteractionContext;
@@ -48,6 +50,7 @@ export interface TaskContext {
 
 ## Related contracts
 
+- [ModelPriceTable](../modelpricetable/)
 - [ObservationHub](../observationhub/)
 - [Task](../type-task/)
 - [TaskInteractionContext](../taskinteractioncontext/)

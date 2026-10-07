@@ -15,6 +15,8 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Nom             | Type                                                             | Présence  | Rôle                                                                                                                                                                                                                                                                                                                      |
 | --------------- | ---------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prices`        | `ModelPriceTable \| undefined`                                   | Optionnel | Tarifs facultatifs activant l’attribution par modèle dans usage. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée.                                                                                                                   |
+| `redact`        | `readonly RegExp[] \| undefined`                                 | Optionnel | Expressions régulières remplaçant les chaînes correspondantes observées et sauvegardées par [REDACTED]. Ajoutées aux règles héritées du hub ; les prompts envoyés à l’agent et les résultats retournés restent intacts.                                                                                                   |
 | `observation`   | `ObservationHub \| undefined`                                    | Optionnel | Hub d’observation parent. Le dispatch ouvre un hub enfant avec son propre dispatchId et le vide avant de retourner ou de lever une erreur.                                                                                                                                                                                |
 | `agent`         | `DispatchAgent \| undefined`                                     | Optionnel | Agent qui exécute le brief : issu de createAgent() ou createReplayAgent(), ou un createFallbackAgent() qui passe au candidat suivant sur une faute quota ou unavailable listée. Un agent de secours n’accepte pas continuation.                                                                                           |
 | `logging`       | `Logging \| undefined`                                           | Optionnel | Réglages du journal : transport, conservation détaillée des événements et enregistrement des commits pour le rejeu.                                                                                                                                                                                                       |
@@ -40,6 +42,8 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly prices?: ModelPriceTable;
+  readonly redact?: readonly RegExp[];
   readonly observation?: ObservationHub;
   readonly agent?: DispatchAgent;
   readonly logging?: Logging;
@@ -74,6 +78,7 @@ export interface DispatchOptions<T = undefined> {
 - [DispatchAgent](../dispatchagent/)
 - [DispatchTelemetry](../dispatchtelemetry/)
 - [Logging](../logging/)
+- [ModelPriceTable](../modelpricetable/)
 - [ObservationHub](../observationhub/)
 - [ResponseSpec](../responsespec/)
 - [Steering](../steering/)

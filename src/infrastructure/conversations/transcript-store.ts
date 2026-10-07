@@ -1,3 +1,4 @@
+import { redactTranscript } from "./redaction.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -79,7 +80,10 @@ async function captureSidecars(
         await writeFile(
           destination,
           relocateTranscript(
-            await readFile(scratch, "utf8"),
+            redactTranscript(
+              await readFile(scratch, "utf8"),
+              context.observation,
+            ),
             resolve(repository),
           ),
           { mode: 0o600 },
@@ -129,7 +133,10 @@ async function captureTranscript(
     await writeFile(
       file,
       relocateTranscript(
-        await readFile(temporary, "utf8"),
+        redactTranscript(
+          await readFile(temporary, "utf8"),
+          context.observation,
+        ),
         resolve(repository),
       ),
       { mode: 0o600 },

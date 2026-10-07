@@ -15,6 +15,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 | Nom               | Type                                                     | Présence  | Rôle                                                                                                                                                                                                                           |
 | ----------------- | -------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prices`          | `ModelPriceTable \| undefined`                           | Optionnel | Table de prix du workflow, transmise par les helpers de tâches d’agent. Les dispatchs personnalisés doivent la passer explicitement pour collecter les compteurs par modèle.                                                   |
 | `quota`           | `WorkflowQuotaPause \| undefined`                        | Optionnel | Pause sur quota reprise par cette tentative, avec la conversation capturée et la branche conservée lorsqu’elles sont connues ; présente seulement lors de la première tentative après la pause et jamais persistée séparément. |
 | `interaction`     | `TaskInteractionContext \| undefined`                    | Optionnel | État durable et opérations de suspension, fournis uniquement aux tâches déclarant une interaction.                                                                                                                             |
 | `idempotencyKey`  | `string`                                                 | Requis    | Identité SHA-256 stable de executionId et de la clé de tâche, conservée lors des retries et reprises. À transmettre à un service d’effets avec déduplication persistante.                                                      |
@@ -31,6 +32,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskContext {
+  readonly prices?: ModelPriceTable;
   /** Quota pause resumed by this attempt; present only on the first attempt after it. */
   readonly quota?: WorkflowQuotaPause;
   readonly interaction?: TaskInteractionContext;
@@ -48,6 +50,7 @@ export interface TaskContext {
 
 ## Contrats associés
 
+- [ModelPriceTable](../modelpricetable/)
 - [ObservationHub](../observationhub/)
 - [Task](../type-task/)
 - [TaskInteractionContext](../taskinteractioncontext/)

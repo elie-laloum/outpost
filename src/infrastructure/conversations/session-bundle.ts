@@ -1,5 +1,13 @@
+import { redactBundle } from "./redaction.ts";
 import { randomUUID } from "node:crypto";
-import { access, mkdir, rename, rm } from "node:fs/promises";
+import {
+  access,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, posix } from "node:path";
 import type { NativeConversationStore } from "../../domain/conversation.types.ts";
@@ -228,6 +236,12 @@ export function createSessionBundleConversations(
           context.sandbox.invoke,
         );
         await context.sandbox.download(remote, scratch);
+        if (context.observation)
+          await writeFile(
+            scratch,
+            redactBundle(await readFile(scratch, "utf8"), context.observation),
+            { mode: 0o600 },
+          );
         await rename(scratch, file);
       } finally {
         await rm(scratch, { force: true });

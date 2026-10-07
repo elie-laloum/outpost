@@ -77,7 +77,7 @@ export async function customTurn(
     });
     watchdog.refresh(false);
   };
-  const modelScope = { track, account };
+  const modelScope = { track, account, trackModels: Boolean(options.prices) };
   const modelProvider = harnessModelProvider({
     agent,
     signal,
@@ -140,6 +140,7 @@ export async function customTurn(
     transcript = storage
       ? await openTranscript({
           repository: context.repository,
+          ...(options.observation ? { observation: options.observation } : {}),
           store: storage,
           model: agent.model.name,
           routed: Boolean(agent.harness.routing),

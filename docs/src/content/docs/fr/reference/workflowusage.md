@@ -13,10 +13,11 @@ import type { WorkflowUsage } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type     | Présence | Rôle                                                                                    |
-| ---------- | -------- | -------- | --------------------------------------------------------------------------------------- |
-| `attempts` | `number` | Requis   | Nombre cumulé de tentatives de tâches admises dans le workflow.                         |
-| `tokens`   | `Usage`  | Requis   | Usage cumulé de tokens observé sur les tentatives, y compris la comptabilité restaurée. |
+| Nom        | Type                     | Présence  | Rôle                                                                                                                                                                                    |
+| ---------- | ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `attempts` | `number`                 | Requis    | Nombre cumulé de tentatives de tâches admises dans le workflow.                                                                                                                         |
+| `tokens`   | `Usage`                  | Requis    | Usage cumulé de tokens observé sur les tentatives, y compris la comptabilité restaurée.                                                                                                 |
+| `cost`     | `UsageCost \| undefined` | Optionnel | Estimation calculée à partir des compteurs cumulés sauvegardés et de la table configurée ; absente sans prices. La reprise recalcule les estimations historiques avec la table fournie. |
 
 ## Signature
 
@@ -24,9 +25,11 @@ import type { WorkflowUsage } from "@elie-laloum/outpost";
 export interface WorkflowUsage {
   readonly attempts: number;
   readonly tokens: Usage;
+  readonly cost?: UsageCost;
 }
 ```
 
 ## Contrats associés
 
 - [Usage](../usage/)
+- [UsageCost](../usagecost/)

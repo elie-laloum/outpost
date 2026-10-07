@@ -1,3 +1,4 @@
+import type { ObservationHub } from "./observation.types.ts";
 import type { TransportReference } from "./transport.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 
@@ -9,6 +10,7 @@ export interface ConversationRecord {
 }
 
 export interface ConversationContext {
+  readonly observation?: ObservationHub;
   readonly repository: string;
   readonly sandbox: SandboxLease;
   readonly staging: string;

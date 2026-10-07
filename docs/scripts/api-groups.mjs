@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "pricing",
+    title: ["Pricing", "Tarification"],
+    guide: "guide/budgets",
+    names:
+      "calculateUsageCost loadModelPrices ModelPricesOptions ModelPrice ModelPriceTable UsageCost WorkflowCostUnavailable",
+  },
+  {
     id: "decisions",
     title: ["Decisions", "Décisions"],
     guide: "guide/decisions",
@@ -80,7 +87,7 @@ export const groups = [
     title: ["Observability", "Observabilité"],
     guide: "guide/observability",
     names:
-      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
+      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage ModelUsage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     id: "workflows",

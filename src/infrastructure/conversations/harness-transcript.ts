@@ -17,6 +17,8 @@ export async function openTranscript(
   options: TranscriptOptions,
 ): Promise<TranscriptHandle> {
   const { continuation } = options;
+  const serialize = (records: readonly TranscriptRecord[]) =>
+    lines(options.observation?.redact(records) ?? records);
   const id =
     continuation && !continuation.fork ? continuation.id : randomUUID();
   const file = harnessTranscriptPath(options.repository, id);
@@ -39,7 +41,7 @@ export async function openTranscript(
     if (!continuation || continuation.fork)
       await writeFile(
         file,
-        lines([
+        serialize([
           {
             type: "session",
             version,
@@ -64,13 +66,14 @@ export async function openTranscript(
       continuation &&
       !continuation.fork &&
       (source!.file !== file ||
+        options.observation !== undefined ||
         (version === 2 &&
           records[0]?.type === "session" &&
           records[0].version === 1))
     )
       await writeFile(
         file,
-        lines(
+        serialize(
           records.map((record) =>
             record.type === "session" ? { ...record, version } : record,
           ),
@@ -80,7 +83,8 @@ export async function openTranscript(
     return {
       id,
       messages,
-      append: (record) => appendFile(file, lines([record]), { mode: 0o600 }),
+      append: (record) =>
+        appendFile(file, serialize([record]), { mode: 0o600 }),
       close: release,
     };
   } catch (error) {

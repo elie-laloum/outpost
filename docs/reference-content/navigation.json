@@ -1,5 +1,45 @@
 [
   {
+    "title": ["Pricing", "Tarification"],
+    "items": [
+      {
+        "slug": "reference/calculateusagecost",
+        "label": "calculateUsageCost",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/loadmodelprices",
+        "label": "loadModelPrices",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowcostunavailable",
+        "label": "WorkflowCostUnavailable",
+        "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/modelpricesoptions",
+        "label": "ModelPricesOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/modelprice",
+        "label": "ModelPrice",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/modelpricetable",
+        "label": "ModelPriceTable",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/usagecost",
+        "label": "UsageCost",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Decisions", "Décisions"],
     "items": [
       {
@@ -1460,6 +1500,11 @@
       {
         "slug": "reference/usage",
         "label": "Usage",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/modelusage",
+        "label": "ModelUsage",
         "attrs": { "data-api-kind": "interface" }
       },
       {

@@ -1,5 +1,5 @@
 ---
-title: "Limit attempts and token usage"
+title: "Limit attempts, tokens and cost"
 description: "Set a workflow budget and understand how usage is counted across retries and resumes."
 ---
 
@@ -147,3 +147,71 @@ API: [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../../
 ## Include decision usage
 
 [Decision tasks](../decisions/) contribute their normalized usage to workflow budgets. [Model routing](../model-routing/) also counts against harness, ancestor and workflow budgets, exactly once per router request. Valid usage still counts when truncation rejects the result. A missing receipt is incomplete usage, and strict token budgets reject continuation with unknown consumption.
+
+## Estimate and limit monetary cost
+
+Supply rates per million tokens in one currency. The table below is illustrative, not a current vendor quote. Cache rates can differ from ordinary input rates. Built-in agent task helpers attach the configured CLI model or each harness request’s model, including subagents and routing decisions.
+
+```ts title="prices.ts"
+import type { ModelPriceTable } from "@elie-laloum/outpost";
+export const prices: ModelPriceTable = {
+  currency: "EUR",
+  models: {
+    "my-model": { input: 2, cached: 0.5, cacheCreated: 3, output: 8 },
+  },
+};
+```
+
+Custom tasks report their model counters explicitly. This workflow estimates €0.60 from 100000 input tokens and 50000 output tokens, and shares its €20 limit across all tasks and retries.
+
+```ts title="monetary-budget.ts"
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { prices } from "./prices.ts";
+const task = defineTask({
+  key: "meter",
+  perform(context) {
+    const tokens = { input: 100_000, cached: 0, output: 50_000 };
+    context.reportUsage({ ...tokens, models: { "my-model": tokens } });
+    return "recorded";
+  },
+});
+export const result = await defineWorkflow("cost", [task]).start({
+  budget: { prices, cost: { currency: "EUR", limit: 20 } },
+});
+```
+
+Read `result.usage.cost` for the currency, amount and completeness. Supplying `prices` alone displays cost without enforcing a monetary limit. A strict cost budget stops with `WorkflowCostUnavailable` when any reported tokens lack a model, price or complete usage, even with an attempt limit. Reaching the limit emits `WorkflowBudgetExceeded` with dimension `cost` and cancels running attempts. Requests already in flight can overshoot; this is not a provider billing cap.
+
+Configured CLI model names must match the table exactly; configure an explicit model rather than relying on a CLI default. Custom dispatches pass `prices: context.prices` to collect attribution. Queue workers must return model-attributed usage themselves. Decisions use the configured decision model. Use distinct model aliases for different service prices or cache conventions. Account/subscription runs show a token-price estimate, not the subscription’s actual invoice.
+
+Checkpoints retain model counters. Resuming recomputes the cumulative estimate using the supplied table; persist and reuse the table if historical estimates must stay stable. Legacy checkpoints without model counters cannot satisfy a strict cost budget. Durable speculation includes its price table in checkpoint identity.
+
+API: [ModelPriceTable](../../reference/modelpricetable/) · [calculateUsageCost](../../reference/calculateusagecost/) · [UsageCost](../../reference/usagecost/) · [WorkflowCostUnavailable](../../reference/workflowcostunavailable/).
+
+## Load a public pricing catalog
+
+`loadModelPrices()` fetches only when called, then returns an immutable table. [Models.dev](https://github.com/anomalyco/models.dev#api) publishes USD rates per million tokens. Select its provider and map Outpost names to catalog IDs. EUR requires your own exchange rate; the rate below is illustrative.
+
+```ts
+import { loadModelPrices } from "@elie-laloum/outpost";
+export const prices = await loadModelPrices({
+  provider: "openai",
+  models: { "gpt-5": "gpt-5" },
+  currency: "EUR",
+  usdExchangeRate: 0.9,
+});
+```
+
+[OpenRouter’s models endpoint](https://openrouter.ai/docs/api/api-reference/models/get-models) uses per-token USD prices. The adapter normalizes their units. Catalogs can change; inspect and save your table before starting durable work. Unsupported tiers, modality charges or nonzero extra fees are refused so you can supply an explicit rate table.
+
+```ts
+import { loadModelPrices } from "@elie-laloum/outpost";
+export const prices = await loadModelPrices({
+  source: "openrouter",
+  models: { "openai/gpt-4o-mini": "openai/gpt-4o-mini" },
+});
+```
+
+No catalogue call happens during accounting. The HTTP request has a size limit, a timeout and optional cancellation. This adapter estimates token charges; taxes, discounts, tools, images and other billing dimensions remain outside the calculation.
+
+API: [loadModelPrices](../../reference/loadmodelprices/) · [ModelPricesOptions](../../reference/modelpricesoptions/).

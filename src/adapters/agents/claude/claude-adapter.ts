@@ -66,6 +66,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     claudeMcpLogins,
   );
   return Object.freeze({
+    usageInput: "uncached",
     name: "claude",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),

@@ -4,7 +4,7 @@ import type { Agent } from "../domain/agent.types.ts";
 import type { ConversationRecord } from "../domain/conversation.types.ts";
 import { invariant, recordRecovery } from "../domain/errors.ts";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
-import { addUsage } from "../domain/usage.ts";
+import { addUsage, modelUsage } from "../domain/usage.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
 import { runWithFallback } from "./agent-fallback.ts";
@@ -69,6 +69,9 @@ export async function dispatchInSandbox<T>(
           async () =>
             storage.capture(id, {
               repository: workspace.repository,
+              ...(dispatch.observation
+                ? { observation: dispatch.observation }
+                : {}),
               sandbox: executionLease,
               staging,
               ...(options.conversationHome
@@ -141,7 +144,19 @@ export async function dispatchInSandbox<T>(
           ...(location.reference
             ? { transcriptReference: location.reference }
             : {}),
-          ...(usage ? { usage } : {}),
+          ...(usage
+            ? {
+                usage: dispatch.prices
+                  ? modelUsage(
+                      usage,
+                      selected.kind === "replay"
+                        ? undefined
+                        : selected.model?.name,
+                      selected.usageInput !== "uncached",
+                    )
+                  : usage,
+              }
+            : {}),
         };
       },
     );

@@ -9,6 +9,7 @@ sidebar:
 
 | Nom                     | Type                                                  | Présence  | Rôle                                                                                                                                                                                                                                                                                                      |
 | ----------------------- | ----------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usageInput`            | `"inclusive" \| "uncached" \| undefined`              | Optionnel | Convention des tokens d’entrée pour tarifer l’usage CLI : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés.                                                                                                 |
 | `name`                  | `string`                                              | Requis    | Identifiant d’agent natif utilisé dans les événements et diagnostics.                                                                                                                                                                                                                                     |
 | `bootstrap`             | `string \| undefined`                                 | Optionnel | Agent intégré dont Outpost installe la CLI épinglée sur une sandbox distante quand l’exécutable manque : un paquet npm, ou une archive vérifiée par SHA-512 pour antigravity. Un nom inconnu échoue.                                                                                                      |
 | `requiresFinishedEvent` | `boolean \| undefined`                                | Optionnel | Exige l’événement final natif : sans lui, les marqueurs de fin ne correspondent pas et le tour échoue avec le code process, même si le processus se termine avec 0.                                                                                                                                       |
@@ -24,6 +25,7 @@ sidebar:
 
 ```ts
 export interface AgentFeatures {
+  readonly usageInput?: "inclusive" | "uncached";
   readonly name: string;
   readonly bootstrap?: string;
   readonly requiresFinishedEvent?: boolean;

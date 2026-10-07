@@ -1,5 +1,5 @@
 ---
-title: "Limiter les tentatives et les tokens"
+title: "Limiter les tentatives, les tokens et le coût"
 description: "Définissez le budget d’un workflow et suivez la consommation au fil des tentatives et des reprises."
 ---
 
@@ -147,3 +147,71 @@ API : [WorkflowBudget](../../reference/workflowbudget/) · [WorkflowUsage](../..
 ## Inclure l’usage des décisions
 
 Les [tâches de décision](../decisions/) ajoutent leur usage normalisé aux budgets du workflow. Le [routage de modèles](../model-routing/) compte aussi dans les budgets du harness, de ses ancêtres et du workflow, une fois par requête du routeur. L’usage valide reste compté lorsque la troncature fait rejeter le résultat. Un reçu absent représente un usage incomplet et les budgets stricts refusent une continuation dont la consommation est inconnue.
+
+## Estimer et limiter le coût monétaire
+
+Fournissez des tarifs par million de tokens dans une seule devise. La table ci-dessous est illustrative, pas une cotation actuelle d’un fournisseur. Le cache peut avoir des tarifs distincts. Les helpers de tâches d’agent attribuent l’usage au modèle CLI configuré ou au modèle de chaque requête du harness, sous-agents et décisions de routage compris.
+
+```ts title="prices.ts"
+import type { ModelPriceTable } from "@elie-laloum/outpost";
+export const prices: ModelPriceTable = {
+  currency: "EUR",
+  models: {
+    "my-model": { input: 2, cached: 0.5, cacheCreated: 3, output: 8 },
+  },
+};
+```
+
+Les tâches personnalisées rapportent leurs compteurs par modèle explicitement. Ce workflow estime 0,60 € pour 100000 tokens d’entrée et 50000 de sortie et partage sa limite de 20 € entre toutes les tâches et tentatives.
+
+```ts title="monetary-budget.ts"
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { prices } from "./prices.ts";
+const task = defineTask({
+  key: "meter",
+  perform(context) {
+    const tokens = { input: 100_000, cached: 0, output: 50_000 };
+    context.reportUsage({ ...tokens, models: { "my-model": tokens } });
+    return "recorded";
+  },
+});
+export const result = await defineWorkflow("cost", [task]).start({
+  budget: { prices, cost: { currency: "EUR", limit: 20 } },
+});
+```
+
+Lisez `result.usage.cost` pour la devise, le montant et la complétude. `prices` seul affiche le coût sans imposer de limite monétaire. Un budget de coût strict s’arrête avec `WorkflowCostUnavailable` dès que des tokens n’ont pas de modèle, de tarif ou d’usage complet, même avec une limite de tentatives. Atteindre la limite produit `WorkflowBudgetExceeded` avec la dimension `cost` et annule les tentatives actives. Les requêtes déjà actives peuvent dépasser la limite ; ce n’est pas un plafond de facturation du fournisseur.
+
+Les noms de modèles CLI doivent correspondre exactement à la table ; configurez un modèle explicite au lieu du défaut de la CLI. Les dispatchs personnalisés passent `prices: context.prices` pour collecter l’attribution. Les workers de queue doivent retourner eux-mêmes l’usage par modèle. Les décisions utilisent le modèle de décision configuré. Utilisez des alias distincts pour différents services, tarifs ou conventions de cache. Un compte par abonnement affiche une estimation au tarif token, pas la facture réelle de l’abonnement.
+
+Les checkpoints conservent les compteurs par modèle. La reprise recalcule l’estimation cumulée avec la table fournie ; sauvegardez et réutilisez la table pour garder une estimation historique stable. Les anciens checkpoints sans compteurs par modèle ne satisfont pas un budget de coût strict. La spéculation durable inclut la table de prix dans l’identité du checkpoint.
+
+API : [ModelPriceTable](../../reference/modelpricetable/) · [calculateUsageCost](../../reference/calculateusagecost/) · [UsageCost](../../reference/usagecost/) · [WorkflowCostUnavailable](../../reference/workflowcostunavailable/).
+
+## Charger un catalogue public de tarifs
+
+`loadModelPrices()` charge uniquement à l’appel, puis renvoie une table immuable. [Models.dev](https://github.com/anomalyco/models.dev#api) publie des tarifs USD par million de tokens. Sélectionnez son provider et associez les noms Outpost aux identifiants du catalogue. EUR exige votre propre taux de change ; celui ci-dessous est illustratif.
+
+```ts
+import { loadModelPrices } from "@elie-laloum/outpost";
+export const prices = await loadModelPrices({
+  provider: "openai",
+  models: { "gpt-5": "gpt-5" },
+  currency: "EUR",
+  usdExchangeRate: 0.9,
+});
+```
+
+[L’endpoint de modèles OpenRouter](https://openrouter.ai/docs/api/api-reference/models/get-models) utilise des prix USD par token. L’adaptateur normalise les unités. Les catalogues peuvent changer : inspectez et sauvegardez la table avant un travail durable. Les paliers, frais multimodaux ou frais supplémentaires non nuls non pris en charge sont refusés pour que vous fournissiez une table explicite.
+
+```ts
+import { loadModelPrices } from "@elie-laloum/outpost";
+export const prices = await loadModelPrices({
+  source: "openrouter",
+  models: { "openai/gpt-4o-mini": "openai/gpt-4o-mini" },
+});
+```
+
+Aucun appel au catalogue ne se produit pendant la comptabilisation. La requête HTTP possède une limite de taille, un délai et une annulation facultative. Cet adaptateur estime les frais des tokens ; taxes, remises, outils, images et autres dimensions de facturation restent hors du calcul.
+
+API : [loadModelPrices](../../reference/loadmodelprices/) · [ModelPricesOptions](../../reference/modelpricesoptions/).

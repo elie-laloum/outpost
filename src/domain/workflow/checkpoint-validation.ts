@@ -1,3 +1,4 @@
+import { validateUsage } from "../usage.ts";
 import { validateLoopRecord } from "./loop-validation.ts";
 import { validateQuotaRecord } from "./quota-validation.ts";
 import { validateInteractionRecord } from "./input-validation.ts";
@@ -41,7 +42,13 @@ export function validateCheckpoint(
       if (typeof count !== "boolean") throw invalid();
       continue;
     }
+    if (dimension === "models") continue;
     if (!integer(count)) throw invalid();
+  }
+  try {
+    validateUsage(value.usage.tokens);
+  } catch {
+    throw invalid();
   }
   if (value.records.length !== tasks.length) throw invalid();
   const keys = new Set(tasks.map((item) => item.key));

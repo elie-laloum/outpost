@@ -1,3 +1,4 @@
+import type { ModelPriceTable } from "./pricing.types.ts";
 import type {
   TaskInteraction,
   TaskInteractionContext,
@@ -32,6 +33,7 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  readonly prices?: ModelPriceTable;
   /** Quota pause resumed by this attempt; present only on the first attempt after it. */
   readonly quota?: WorkflowQuotaPause;
   readonly interaction?: TaskInteractionContext;
@@ -138,6 +140,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly redact?: readonly RegExp[];
   readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;

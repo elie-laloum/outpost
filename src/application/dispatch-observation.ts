@@ -1,3 +1,4 @@
+import { accountTaskUsage, deliverTaskUsage } from "./task-usage.ts";
 import { access } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { agentObservation } from "../domain/agent-observation.ts";
@@ -46,46 +47,50 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
   } catch (error) {
     failures.push(error);
   }
-  const observation = root.child({ dispatchId: randomUUID() }, [
-    {
-      async observe(value) {
-        await initialized;
-        await log?.record({
-          ...value.event,
-          seq: value.seq,
-          at: value.at,
-          source: value.source,
-          scope: value.scope,
-        });
+  const observation = root.child(
+    { dispatchId: randomUUID() },
+    [
+      {
+        async observe(value) {
+          await initialized;
+          await log?.record({
+            ...value.event,
+            seq: value.seq,
+            at: value.at,
+            source: value.source,
+            scope: value.scope,
+          });
+        },
+        async flush() {
+          await initialized;
+          await log?.close();
+        },
       },
-      async flush() {
-        await initialized;
-        await log?.close();
+      {
+        observe(value) {
+          if (value.event.kind === "warning")
+            return options.warn?.(value.event.message);
+        },
       },
-    },
-    {
-      observe(value) {
-        if (value.event.kind === "warning")
-          return options.warn?.(value.event.message);
+      {
+        observe(value) {
+          if (value.source !== "agent" && value.source !== "harness") return;
+          const event = agentObservation(value);
+          if (event) return deliverTaskUsage(options.observe, event);
+        },
+        async flush() {
+          const observer = options.observe;
+          if (
+            observer &&
+            "flush" in observer &&
+            typeof observer.flush === "function"
+          )
+            await observer.flush();
+        },
       },
-    },
-    {
-      observe(value) {
-        if (value.source !== "agent" && value.source !== "harness") return;
-        const event = agentObservation(value);
-        if (event) return options.observe?.(event);
-      },
-      async flush() {
-        const observer = options.observe;
-        if (
-          observer &&
-          "flush" in observer &&
-          typeof observer.flush === "function"
-        )
-          await observer.flush();
-      },
-    },
-  ]);
+    ],
+    options.redact,
+  );
   active.add(observation);
   observation.emit("sandbox", { kind: "dispatch-start" });
   const empty = (): Usage => ({ input: 0, cached: 0, output: 0 });
@@ -95,11 +100,18 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
   const { telemetry: _telemetry, ...settings } = options;
   const observed: DispatchOptions<T> = {
     ...settings,
+    ...(options.diagnostic
+      ? {
+          diagnostic: (message: string) =>
+            options.diagnostic?.(observation.redact(message)),
+        }
+      : {}),
     observation,
     warn(message) {
       observation.emit("agent", { kind: "warning", message });
     },
     observe(event) {
+      accountTaskUsage(options.observe, event);
       if (event.kind === "phase" && event.name === "preparing prompt") {
         previous = addUsage(previous, current);
         current = empty();
@@ -127,11 +139,13 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       ...(result.commits ? { commits: result.commits } : {}),
     });
     try {
-      session?.finish({
-        status: "done",
-        usage: result.usage,
-        completed: result.completed,
-      });
+      session?.finish(
+        observation.redact({
+          status: "done" as const,
+          usage: result.usage,
+          completed: result.completed,
+        }),
+      );
     } catch (error) {
       failures.push(error);
     }
@@ -166,7 +180,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       },
     });
     try {
-      session?.finish({ status, usage });
+      session?.finish(observation.redact({ status, usage }));
     } catch (failure) {
       failures.push(failure);
     }

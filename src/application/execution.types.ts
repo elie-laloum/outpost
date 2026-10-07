@@ -1,3 +1,4 @@
+import type { ModelPriceTable } from "../domain/pricing.types.ts";
 import type { QuotaFault } from "../domain/quota.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { TransportReference } from "../domain/transport.types.ts";
@@ -10,6 +11,8 @@ import type { Logging } from "../infrastructure/journal.types.ts";
 import type { Steering } from "../domain/steering.types.ts";
 
 export interface DispatchOptions<T = undefined> {
+  readonly prices?: ModelPriceTable;
+  readonly redact?: readonly RegExp[];
   readonly observation?: ObservationHub;
   readonly agent?: DispatchAgent;
   readonly logging?: Logging;

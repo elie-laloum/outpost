@@ -19,9 +19,9 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 
 | Name                  | Type                              | Presence | Meaning                                                                                                                                     |
 | --------------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversation`        | `string \| undefined`             | Optional | Native conversation id of the last turn, when the agent reported one.                                                                       |
 | `completion`          | `string \| undefined`             | Optional | Completion marker found in the last turn's text.                                                                                            |
 | `text`                | `string`                          | Required | Text of every turn of the execution, joined with newlines, including response repair turns.                                                 |
-| `conversation`        | `string \| undefined`             | Optional | Native conversation id of the last turn, when the agent reported one.                                                                       |
 | `usage`               | `Usage`                           | Required | Token counters summed over every turn; not a cost.                                                                                          |
 | `fallback`            | `FallbackRecord \| undefined`     | Optional | Present only when the dispatch used a fallback agent: the candidate that produced this result and the candidates that stopped before it.    |
 | `completed`           | `boolean`                         | Required | True when the last turn's text contains a completion marker, or when a typed response was validated.                                        |

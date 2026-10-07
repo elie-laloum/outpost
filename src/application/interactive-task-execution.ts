@@ -63,6 +63,7 @@ export async function executeInteractiveTurn(
           ? `Human answer (JSON): ${JSON.stringify(interaction.answer!.value)}`
           : options.brief;
       const result = await sandbox.dispatch({
+        ...(context.prices ? { prices: context.prices } : {}),
         brief: { text: `${input}\n\n${interactiveTurnInstructions}` },
         response: interactiveResponse,
         signal: context.signal,

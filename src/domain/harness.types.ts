@@ -40,7 +40,7 @@ export interface HarnessLimits {
   readonly maxSteps?: number;
   readonly maxDelegationDepth?: number;
   readonly maxToolCalls?: number;
-  readonly usage?: Partial<Omit<Usage, "complete">>;
+  readonly usage?: Partial<Omit<Usage, "complete" | "models">>;
 }
 
 export interface ResolvedHarnessLimits extends HarnessLimits {

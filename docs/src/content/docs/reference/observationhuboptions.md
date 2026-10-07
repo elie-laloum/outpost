@@ -15,6 +15,7 @@ import type { ObservationHubOptions } from "@elie-laloum/outpost";
 
 | Name                | Type                                      | Presence | Meaning                                                                                                                                                                           |
 | ------------------- | ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `redact`            | `readonly RegExp[] \| undefined`          | Optional | Regular expressions applied recursively to event strings, keys and scope strings before delivery. Each rule replaces all matches; its lastIndex is preserved.                     |
 | `sinks`             | `readonly ObservationSink[] \| undefined` | Optional | Receivers attached to this root and inherited by every child.                                                                                                                     |
 | `scope`             | `ObservationScope \| undefined`           | Optional | Initial correlation fields; child scopes override only explicitly supplied fields.                                                                                                |
 | `capacity`          | `number \| undefined`                     | Optional | Maximum events waiting per asynchronous sink, default 1024; on overflow the newest are dropped and counted. A value that is not a positive integer throws.                        |
@@ -25,6 +26,7 @@ import type { ObservationHubOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface ObservationHubOptions {
+  readonly redact?: readonly RegExp[];
   readonly sinks?: readonly ObservationSink[];
   readonly scope?: ObservationScope;
   readonly capacity?: number;

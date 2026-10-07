@@ -56,6 +56,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     kimiMcpLogins,
   );
   return Object.freeze({
+    usageInput: "uncached",
     name: "kimi",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),

@@ -38,6 +38,7 @@ export function defineAgentTask<T>(
       try {
         const result = await sandbox.dispatch({
           ...options,
+          ...(context.prices ? { prices: context.prices } : {}),
           observation,
           signal: context.signal,
           observe: usage.observe,
@@ -73,6 +74,7 @@ export function defineIsolatedTask<T>(
       try {
         const result = await dispatch({
           ...options,
+          ...(context.prices ? { prices: context.prices } : {}),
           observation,
           signal: context.signal,
           observe: usage.observe,
@@ -111,7 +113,10 @@ export function defineCommandTask(
                 offset + observationDefaults.outputCharacters,
               ),
             });
-          invocation.observe?.(channel, text);
+          invocation.observe?.(
+            channel,
+            context.observation?.redact(text) ?? text,
+          );
         },
         signal: context.signal,
       });

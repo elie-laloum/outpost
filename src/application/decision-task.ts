@@ -1,3 +1,4 @@
+import { modelUsage } from "../domain/usage.ts";
 import { defineTask } from "../domain/workflow.ts";
 import {
   validateDecisionProvider,
@@ -45,7 +46,12 @@ export function defineDecisionTask<const Q extends DecisionQuestions>(
           ...(context.observation ? { observation: context.observation } : {}),
           ...(allowTruncated === undefined ? {} : { allowTruncated }),
         },
-        { account: (usage) => context.reportUsage(usage) },
+        {
+          account: (usage) =>
+            context.reportUsage(
+              context.prices ? modelUsage(usage, model) : usage,
+            ),
+        },
       );
     },
   });

@@ -1,3 +1,4 @@
+import { validateUsage } from "../domain/usage.ts";
 import { createHash } from "node:crypto";
 import { realpath } from "node:fs/promises";
 import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
@@ -83,14 +84,19 @@ function integer(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 function usage(value: unknown): boolean {
-  return (
-    object(value) &&
-    ["input", "cached", "output"].every((key) => integer(value[key])) &&
-    Object.entries(value).every(([key, count]) =>
-      key === "complete" ? typeof count === "boolean" : integer(count),
-    )
-  );
+  if (
+    !object(value) ||
+    !["input", "cached", "output"].every((key) => integer(value[key]))
+  )
+    return false;
+  try {
+    validateUsage(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
+
 function output(value: unknown): boolean {
   if (
     !object(value) ||

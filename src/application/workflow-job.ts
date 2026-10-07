@@ -88,14 +88,7 @@ export function defineWorkflowJob(options: WorkflowJobOptions): QueueHandler {
     const failed = ["failed", "cancelled", "rejected"].includes(result.status);
     return {
       value: summary(runId, version, result),
-      usage: {
-        input: tokens.input,
-        output: tokens.output,
-        cached: tokens.cached,
-        ...(tokens.cacheCreated === undefined
-          ? {}
-          : { cacheCreated: tokens.cacheCreated }),
-      },
+      usage: tokens,
       ...(failed ? { error: failure(result) } : {}),
     };
   };
