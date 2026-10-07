@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "secrets",
+    title: ["Secret sources", "Sources de secrets"],
+    guide: "guide/secret-sources",
+    names:
+      "fromSecrets createVaultSecretSource createOnePasswordSecretSource createAwsSecretSource createGcpSecretSource createAzureSecretSource createInfisicalSecretSource SecretSource SecretResolveOptions FromSecretsOptions VaultSecretSourceOptions OnePasswordSecretSourceOptions AwsSecretSourceOptions AwsSecretReference GcpSecretSourceOptions AzureSecretSourceOptions AzureSecretReference InfisicalSecretSourceOptions",
+  },
+  {
     id: "testing",
     title: ["Workflow testing", "Tests de workflows"],
     guide: "guide/testing-workflows",

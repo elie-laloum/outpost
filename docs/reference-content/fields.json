@@ -8425,5 +8425,153 @@
   "MemoryCommand.stderr": [
     "Simulated standard error delivered to command observation and returned in CommandResult; defaults to empty.",
     "Erreur standard simulée transmise à l’observation de commande et renvoyée dans CommandResult ; vide par défaut."
+  ],
+  "fromSecrets.source": [
+    "Named port implementation that resolves only the requested names on the host; its errors are sanitized and its client remains caller-owned.",
+    "Implémentation nommée du port résolvant uniquement les noms demandés sur l’hôte ; ses erreurs sont filtrées et son client reste à l’appelant."
+  ],
+  "fromSecrets.names": [
+    "Unique environment variable identifiers to resolve. The call snapshots the array; an empty array returns a frozen empty object without invoking the source.",
+    "Identifiants uniques de variables à résoudre. L’appel copie le tableau ; un tableau vide renvoie un objet vide gelé sans invoquer la source."
+  ],
+  "fromSecrets.options": [
+    "Deadline and cancellation for the entire startup resolution, including all selected names.",
+    "Délai et annulation pour toute la résolution au démarrage, y compris tous les noms sélectionnés."
+  ],
+  "SecretSource.name": [
+    "Stable name identifying the secret-manager implementation; must be nonempty when passed to fromSecrets.",
+    "Nom stable identifiant l’implémentation du gestionnaire ; doit être non vide pour fromSecrets."
+  ],
+  "SecretSource.resolve": [
+    "Read only requested names, optionally honoring the supplied signal, and return own data properties with string values or undefined for missing secrets. Do not write values to disk, mutate the host environment or enumerate undeclared secrets. Call through fromSecrets for bounded waiting and sanitized errors.",
+    "Lit uniquement les noms demandés, en respectant si possible le signal, et renvoie des propriétés propres de données contenant des chaînes ou undefined pour les secrets absents. N’écrit pas les valeurs sur disque, ne modifie pas l’environnement hôte et n’énumère pas les secrets non déclarés. Appelez via fromSecrets pour borner l’attente et filtrer les erreurs."
+  ],
+  "SecretResolveOptions.signal": [
+    "Signal supplied to the source for this resolution. HTTP Vault, AWS and Azure cancel requests; other built-in SDK adapters check it between reads while fromSecrets stops waiting independently.",
+    "Signal transmis à la source pour cette résolution. HTTP Vault, AWS et Azure annulent les requêtes ; les autres adapters SDK le vérifient entre lectures tandis que fromSecrets termine l’attente indépendamment."
+  ],
+  "FromSecretsOptions.timeoutMs": [
+    "Positive safe integer deadline for the complete resolution, default 30000 ms; at most 2147483647. Expiry rejects with code timeout and signals the source.",
+    "Délai entier sûr strictement positif pour toute la résolution, 30000 ms par défaut ; au plus 2147483647. Son expiration rejette avec timeout et signale la source."
+  ],
+  "VaultSecretSourceOptions.address": [
+    "Explicit absolute HTTP(S) server URL for Vault or OpenBao, optionally with a proxy base path; credentials, queries and fragments are refused.",
+    "URL HTTP(S) absolue explicite du serveur Vault ou OpenBao, éventuellement avec un chemin de proxy ; identifiants, paramètres et fragments sont refusés."
+  ],
+  "VaultSecretSourceOptions.token": [
+    "Declared host-side read token, sent only in X-Vault-Token headers. Must be nonempty without line breaks; never forwarded as a sandbox variable by this adapter.",
+    "Jeton de lecture déclaré sur l’hôte, transmis uniquement dans X-Vault-Token. Doit être non vide sans saut de ligne ; cet adapter ne le transmet jamais comme variable à la sandbox."
+  ],
+  "VaultSecretSourceOptions.mount": [
+    "KV v2 mount name, such as kv or secret; encoded path segments must be nonempty without traversal.",
+    "Nom du point de montage KV v2, comme kv ou secret ; les segments encodés doivent être non vides sans traversée."
+  ],
+  "VaultSecretSourceOptions.path": [
+    "Document path relative to mount, such as outpost/prod. One document is fetched and its requested fields are selected; do not include the API data segment.",
+    "Chemin du document relatif au montage, comme outpost/prod. Un document est récupéré puis ses champs demandés sont sélectionnés ; n’incluez pas le segment API data."
+  ],
+  "VaultSecretSourceOptions.version": [
+    "Positive integer KV v2 document version; omitted selects the service’s latest version.",
+    "Version entière strictement positive du document KV v2 ; omise, sélectionne la dernière version du service."
+  ],
+  "VaultSecretSourceOptions.namespace": [
+    "Optional namespace header for the chosen Vault/OpenBao server, with no line breaks.",
+    "En-tête optionnel d’espace de noms pour le serveur Vault/OpenBao choisi, sans saut de ligne."
+  ],
+  "AwsSecretSourceOptions.client": [
+    "Caller-owned SecretsManager SDK client, authenticated on the host. The adapter uses only send with GetSecretValueCommand and passes abortSignal; it never destroys the client.",
+    "Client SDK SecretsManager appartenant à l’appelant, authentifié sur l’hôte. L’adapter utilise uniquement send avec GetSecretValueCommand et transmet abortSignal ; il ne détruit jamais le client."
+  ],
+  "AwsSecretSourceOptions.secrets": [
+    "Explicit mapping from environment identifiers to AWS secret IDs or ARNs and optional field/version selectors. The complete selection is checked before a read, and mappings are snapshotted at construction.",
+    "Correspondances explicites entre identifiants de variables et identifiants ou ARN AWS avec sélecteurs de champ/version optionnels. La sélection entière est vérifiée avant lecture, et les correspondances sont copiées à la création."
+  ],
+  "AwsSecretReference.id": [
+    "Exact Secrets Manager secret name or ARN sent as SecretId.",
+    "Nom ou ARN exact du secret Secrets Manager transmis comme SecretId."
+  ],
+  "AwsSecretReference.field": [
+    "Own top-level JSON field to extract from SecretString. Without it, use the full text value. The enclosing secret is still fetched; arrays, absent fields and non-string values fail.",
+    "Champ JSON propre de premier niveau à extraire du SecretString. Sans lui, utilise toute la valeur textuelle. Le secret contenant le champ reste récupéré ; tableaux, champs absents et valeurs non textuelles échouent."
+  ],
+  "AwsSecretReference.versionId": [
+    "Optional immutable AWS version ID forwarded as VersionId; if combined with versionStage both must identify the same version.",
+    "Identifiant optionnel de version AWS immuable transmis comme VersionId ; avec versionStage, les deux doivent désigner la même version."
+  ],
+  "AwsSecretReference.versionStage": [
+    "Optional AWS version label forwarded as VersionStage; the service defaults to AWSCURRENT when no version selector is supplied.",
+    "Libellé optionnel de version AWS transmis comme VersionStage ; le service utilise AWSCURRENT si aucun sélecteur n’est fourni."
+  ],
+  "GcpSecretSourceOptions.client": [
+    "Caller-owned SecretManagerServiceClient authenticated on the host; only accessSecretVersion is used. fromSecrets bounds waiting but cannot cancel an already-started SDK call; the caller closes the client.",
+    "SecretManagerServiceClient appartenant à l’appelant et authentifié sur l’hôte ; seul accessSecretVersion est utilisé. fromSecrets borne l’attente sans annuler un appel SDK déjà lancé ; l’appelant ferme le client."
+  ],
+  "GcpSecretSourceOptions.secrets": [
+    "Environment-name mapping to projects/<project>/secrets/<secret>/versions/<version>, optionally with locations/<location> after the project. Version is latest or a positive integer; only selected resources are accessed.",
+    "Correspondances entre variables et projects/<project>/secrets/<secret>/versions/<version>, avec éventuellement locations/<location> après le projet. La version est latest ou un entier positif ; seules les ressources sélectionnées sont lues."
+  ],
+  "AzureSecretSourceOptions.client": [
+    "Caller-owned Azure SecretClient with the chosen vault URL and host credentials. Only getSecret is used, with abortSignal; client ownership stays with the caller.",
+    "SecretClient Azure appartenant à l’appelant, avec l’URL du coffre et les identifiants hôtes choisis. Seul getSecret est utilisé, avec abortSignal ; le client reste à l’appelant."
+  ],
+  "AzureSecretSourceOptions.secrets": [
+    "Mapping from environment identifiers to vault names and optional versions, copied at construction and checked for the full selection before reading.",
+    "Correspondances entre identifiants de variables, noms du coffre et versions optionnelles, copiées à la création et vérifiées pour toute la sélection avant lecture."
+  ],
+  "AzureSecretReference.name": [
+    "Key Vault secret name using letters, digits and hyphens; can differ from the environment variable identifier.",
+    "Nom du secret Key Vault avec lettres, chiffres et tirets ; peut différer de l’identifiant de la variable."
+  ],
+  "AzureSecretReference.version": [
+    "Optional nonempty Key Vault version string; omitted lets the service select its latest version.",
+    "Chaîne optionnelle non vide de version Key Vault ; omise, laisse le service sélectionner sa dernière version."
+  ],
+  "OnePasswordSecretSourceOptions.client": [
+    "Caller-authenticated host client exposing secrets.resolve, such as the official 1Password SDK with service-account authentication. It remains caller-owned; no desktop login or system keychain lookup is selected by Outpost.",
+    "Client hôte authentifié par l’appelant exposant secrets.resolve, comme le SDK officiel 1Password avec un compte de service. Il reste à l’appelant ; Outpost ne choisit aucune connexion de bureau ni lecture du trousseau système."
+  ],
+  "OnePasswordSecretSourceOptions.secrets": [
+    "Mapping of environment identifiers to explicit op://vault/item/field or op://vault/item/section/field references; only selected mappings are resolved, with no vault/item enumeration.",
+    "Correspondances entre identifiants de variables et références explicites op://vault/item/field ou op://vault/item/section/field ; seules les correspondances sélectionnées sont résolues, sans énumérer les coffres ou éléments."
+  ],
+  "InfisicalSecretSourceOptions.client": [
+    "Caller-authenticated host client exposing secrets().getSecret(), such as InfisicalSDK for cloud or self-hosted instances. The caller selects its site URL and authentication, owns renewal and retains client ownership.",
+    "Client hôte authentifié par l’appelant exposant secrets().getSecret(), comme InfisicalSDK pour les instances cloud ou auto-hébergées. L’appelant choisit l’URL et l’authentification, gère le renouvellement et conserve le client."
+  ],
+  "InfisicalSecretSourceOptions.projectId": [
+    "Explicit Infisical project identifier applied to every selected-name read.",
+    "Identifiant explicite du projet Infisical appliqué à chaque lecture de nom sélectionné."
+  ],
+  "InfisicalSecretSourceOptions.environment": [
+    "Nonempty Infisical environment slug, such as dev or prod, applied to each selected-name read.",
+    "Identifiant non vide de l’environnement Infisical, comme dev ou prod, appliqué à chaque lecture sélectionnée."
+  ],
+  "InfisicalSecretSourceOptions.path": [
+    "Absolute Infisical folder path without traversal, default /. Imports and reference expansion stay disabled independently of this path.",
+    "Chemin absolu du dossier Infisical sans traversée, / par défaut. Imports et développement des références restent désactivés indépendamment du chemin."
+  ],
+  "createVaultSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the Vault adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Vault."
+  ],
+  "createOnePasswordSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the OnePassword adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter OnePassword."
+  ],
+  "createAwsSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the Aws adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Aws."
+  ],
+  "createGcpSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the Gcp adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Gcp."
+  ],
+  "createAzureSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the Azure adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Azure."
+  ],
+  "createInfisicalSecretSource.options": [
+    "Host client or connection configuration and explicit secret selection for the Infisical adapter.",
+    "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Infisical."
   ]
 }

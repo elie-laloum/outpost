@@ -48,6 +48,39 @@ try {
     false,
     "Base consumers must not require the optional BullMQ dependency",
   );
+  for (const sdk of [
+    "@aws-sdk/client-secrets-manager",
+    "@google-cloud/secret-manager",
+    "@azure/keyvault-secrets",
+    "@1password/sdk",
+    "@infisical/sdk",
+  ])
+    assert.equal(
+      existsSync(join(temporary, "node_modules", sdk)),
+      false,
+      `Base consumers must not require ${sdk}`,
+    );
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      `
+    import assert from 'node:assert/strict';
+    import {fromSecrets} from '@elie-laloum/outpost';
+    import {createVaultSecretSource} from '@elie-laloum/outpost/secrets/vault';
+    import {createOnePasswordSecretSource} from '@elie-laloum/outpost/secrets/onepassword';
+    import {createGcpSecretSource} from '@elie-laloum/outpost/secrets/gcp';
+    import {createAzureSecretSource} from '@elie-laloum/outpost/secrets/azure';
+    import {createInfisicalSecretSource} from '@elie-laloum/outpost/secrets/infisical';
+    for (const fn of [createVaultSecretSource,createOnePasswordSecretSource,createGcpSecretSource,createAzureSecretSource,createInfisicalSecretSource]) assert.equal(typeof fn,'function');
+    assert.deepEqual(await fromSecrets({name:'fixture',resolve:async()=>({KEY:'value',OTHER:'private'})},['KEY']),{KEY:'value'});
+    const source=createOnePasswordSecretSource({client:{secrets:{resolve:async()=> 'value'}},secrets:{KEY:'op://vault/item/field'}});
+    assert.deepEqual(await fromSecrets(source,['KEY']),{KEY:'value'});
+  `,
+    ],
+    { cwd: temporary, stdio: "inherit" },
+  );
   execFileSync(
     process.execPath,
     [
@@ -511,6 +544,20 @@ void [legacy,extended];
   checkTypes(consumer);
   checkTypes(guardConsumer);
   checkTypes(conflictConsumer);
+  const secretsConsumer = join(temporary, "secrets.ts");
+  writeFileSync(
+    secretsConsumer,
+    `
+import {fromSecrets, type SecretSource, type FromSecretsOptions} from '@elie-laloum/outpost';
+import {createVaultSecretSource, type VaultSecretSourceOptions} from '@elie-laloum/outpost/secrets/vault';
+const connection: VaultSecretSourceOptions = {address:'https://vault.example',token:'fixture',mount:'kv',path:'outpost'};
+const source: SecretSource = createVaultSecretSource(connection);
+const options: FromSecretsOptions = {timeoutMs:1000};
+const values: Readonly<Record<string,string>> = await fromSecrets(source,[],options);
+void values;
+`,
+  );
+  checkTypes(secretsConsumer);
   const testingConsumer = join(temporary, "testing.ts");
   writeFileSync(
     testingConsumer,
@@ -659,6 +706,60 @@ createDaytonaSandboxProvider({create:{image:'node:24'},caches:[daytonaCache]});
   );
   checkTypes(cloudCacheConsumer);
   execFileSync(process.execPath, [cloudCacheConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
+  const secretSdks = [
+    "@aws-sdk/client-secrets-manager",
+    "@google-cloud/secret-manager",
+    "@azure/keyvault-secrets",
+    "@1password/sdk",
+    "@infisical/sdk",
+  ];
+  runBun(
+    [
+      "add",
+      "--ignore-scripts",
+      ...secretSdks.map(
+        (name) =>
+          `${name}@${JSON.parse(readFileSync(resolve("node_modules", name, "package.json"), "utf8")).version}`,
+      ),
+    ],
+    temporary,
+  );
+  const adaptersConsumer = join(temporary, "secret-adapters.ts");
+  writeFileSync(
+    adaptersConsumer,
+    `
+import assert from 'node:assert/strict';
+import {fromSecrets} from '@elie-laloum/outpost';
+import {SecretsManagerClient} from '@aws-sdk/client-secrets-manager';
+import {SecretManagerServiceClient} from '@google-cloud/secret-manager';
+import {SecretClient} from '@azure/keyvault-secrets';
+import type {Client} from '@1password/sdk';
+import {InfisicalSDK} from '@infisical/sdk';
+import {createAwsSecretSource} from '@elie-laloum/outpost/secrets/aws';
+import {createGcpSecretSource} from '@elie-laloum/outpost/secrets/gcp';
+import {createAzureSecretSource} from '@elie-laloum/outpost/secrets/azure';
+import {createOnePasswordSecretSource} from '@elie-laloum/outpost/secrets/onepassword';
+import {createInfisicalSecretSource} from '@elie-laloum/outpost/secrets/infisical';
+const aws=new SecretsManagerClient({region:'us-east-1'});
+const gcp=new SecretManagerServiceClient({fallback:true});
+try {
+  const sources=[
+    createAwsSecretSource({client:aws,secrets:{KEY:{id:'outpost'}}}),
+    createGcpSecretSource({client:gcp,secrets:{KEY:'projects/demo/secrets/key/versions/latest'}}),
+    createAzureSecretSource({client:new SecretClient('https://example.vault.azure.net',{getToken:async()=>null}),secrets:{KEY:{name:'key'}}}),
+    createInfisicalSecretSource({client:new InfisicalSDK(),projectId:'project',environment:'dev'}),
+  ];
+  for(const source of sources) assert.deepEqual(await fromSecrets(source,[]),{});
+} finally {aws.destroy();await gcp.close();}
+function composeOnePassword(client:Client){return createOnePasswordSecretSource({client,secrets:{KEY:'op://vault/item/field'}});}
+void composeOnePassword;
+`,
+  );
+  checkTypes(adaptersConsumer);
+  execFileSync(process.execPath, [adaptersConsumer], {
     cwd: temporary,
     stdio: "inherit",
   });

@@ -33,6 +33,8 @@ export const coder = createAgent({
 
 Les valeurs sont des chaînes. Sélectionnez chaque nom dans `process.env` explicitement : recopier tout `process.env` enverrait chaque secret de l’hôte dans la sandbox. Les `variables` par commande sont présentées dans [Sessions de sandbox](../sandbox-sessions/).
 
+Chargez les noms déclarés depuis un [gestionnaire de secrets](../secret-sources/) avec `fromSecrets()` avant de composer l’agent ou la sandbox. Les adapters Vault/OpenBao, 1Password, Infisical, AWS, Google Cloud et Azure renvoient des variables sans fichier d’environnement.
+
 ## Comprendre la priorité des valeurs
 
 Quand un nom apparaît à plusieurs endroits, la source la plus spécifique l’emporte :

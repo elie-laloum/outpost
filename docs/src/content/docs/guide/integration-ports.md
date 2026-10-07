@@ -15,6 +15,7 @@ Choose the contract that matches the integration you want to add. Each contract 
 - [Model providers](../model-providers/): Send the built-in harness’s requests to a model API.
 - [Where data lives](../storage/): Read, list and conditionally write versioned bytes for every durable store.
 - [Job queues](../job-queues/): Persist jobs, fence worker leases and keep their results.
+- [Secret sources](../secret-sources/): Resolve declared names on the host before allocating a sandbox.
 
 ## Replace one integration
 

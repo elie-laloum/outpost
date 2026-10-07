@@ -1,5 +1,100 @@
 [
   {
+    "title": ["Secret sources", "Sources de secrets"],
+    "items": [
+      {
+        "slug": "reference/fromsecrets",
+        "label": "fromSecrets",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createvaultsecretsource",
+        "label": "createVaultSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createonepasswordsecretsource",
+        "label": "createOnePasswordSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createawssecretsource",
+        "label": "createAwsSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/creategcpsecretsource",
+        "label": "createGcpSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createazuresecretsource",
+        "label": "createAzureSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createinfisicalsecretsource",
+        "label": "createInfisicalSecretSource",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/secretsource",
+        "label": "SecretSource",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/secretresolveoptions",
+        "label": "SecretResolveOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fromsecretsoptions",
+        "label": "FromSecretsOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/vaultsecretsourceoptions",
+        "label": "VaultSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/onepasswordsecretsourceoptions",
+        "label": "OnePasswordSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/awssecretsourceoptions",
+        "label": "AwsSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/awssecretreference",
+        "label": "AwsSecretReference",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gcpsecretsourceoptions",
+        "label": "GcpSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/azuresecretsourceoptions",
+        "label": "AzureSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/azuresecretreference",
+        "label": "AzureSecretReference",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/infisicalsecretsourceoptions",
+        "label": "InfisicalSecretSourceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Workflow testing", "Tests de workflows"],
     "items": [
       {

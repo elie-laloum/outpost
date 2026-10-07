@@ -727,6 +727,12 @@ export type {
   WatchRunOptions,
 } from "./domain/run.types.ts";
 export { changed } from "./domain/lifecycle.ts";
+export { fromSecrets } from "./application/secrets.ts";
+export type {
+  SecretSource,
+  SecretResolveOptions,
+  FromSecretsOptions,
+} from "./domain/secrets.types.ts";
 export type {
   ChangedCondition,
   LifecycleCommand,

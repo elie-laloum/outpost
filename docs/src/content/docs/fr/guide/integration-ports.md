@@ -15,6 +15,7 @@ Choisissez le contrat qui correspond à l’intégration souhaitée. Chaque cont
 - [Fournisseurs de modèles](../model-providers/): Envoyer les requêtes du harness intégré à une API de modèle.
 - [Où vivent les données](../storage/): Lire, lister et écrire sous condition des octets versionnés pour chaque stockage durable.
 - [Files de jobs](../job-queues/): Conserver les jobs, protéger les baux des workers et garder leurs résultats.
+- [Sources de secrets](../secret-sources/) : Résolvez les noms déclarés sur l’hôte avant d’allouer une sandbox.
 
 ## Remplacer une intégration
 

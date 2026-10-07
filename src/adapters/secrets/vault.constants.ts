@@ -1,0 +1,1 @@
+export const VAULT_RESPONSE_BYTES = 2_097_152;

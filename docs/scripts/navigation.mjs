@@ -80,6 +80,7 @@ export const chapters = [
       "guide/host-process",
       "guide/firecracker",
       "guide/environment-variables",
+      "guide/secret-sources",
       "guide/isolation",
       "guide/network-restrictions",
       "guide/private-git",

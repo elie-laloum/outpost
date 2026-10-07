@@ -33,6 +33,8 @@ export const coder = createAgent({
 
 Values are strings. Select each name from `process.env` explicitly: spreading `process.env` would send every host secret into the sandbox. Per-command `variables` are shown in [Sandbox sessions](../sandbox-sessions/).
 
+Load declared names from [secret managers](../secret-sources/) with `fromSecrets()` before composing your agent or sandbox. Vault/OpenBao, 1Password, Infisical, AWS, Google Cloud and Azure adapters return variables without an environment file.
+
 ## Understand value precedence
 
 When a name appears in several places, the more specific source wins:

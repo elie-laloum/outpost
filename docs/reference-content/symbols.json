@@ -746,5 +746,33 @@
   "createMemorySandboxProvider": [
     "Create a provider that simulates sandbox commands without starting an agent CLI or arbitrary subprocess. Scripted agent turns bypass the command queue; other invocations consume commands in order across all acquired leases, matching executable and arguments exactly. Unexpected commands throw code provider without consuming an entry. Git workspaces and scripted commits use the real host filesystem and Git. File transfers, terminals, live input and elevation are refused. Invocation honors cancellation, deadlines and output retention. Release cancels active work and is idempotent; no container or network isolation is provided.",
     "Crée un fournisseur qui simule les commandes de sandbox sans démarrer de CLI d’agent ni de sous-processus arbitraire. Les tours scriptés ne consomment pas la file de commandes ; les autres appels consomment les commandes dans l’ordre entre toutes les allocations, en comparant exactement exécutable et arguments. Une commande inattendue lève le code provider sans consommer d’entrée. Les workspaces et commits scriptés utilisent le système de fichiers hôte et Git réels. Transferts, terminal, entrée en direct et élévation sont refusés. Chaque appel respecte l’annulation, les délais et la rétention des sorties. La libération annule le travail actif et est idempotente ; aucune isolation par conteneur ou réseau n’est fournie."
+  ],
+  "fromSecrets": [
+    "Resolve an explicit selection at startup into a frozen string mapping. Reject invalid declarations before reading, missing or invalid values after reading, and sanitize source errors without their causes. Bound the complete call with a deadline and optional cancellation, without changing process.env, writing values to disk, closing clients or caching values.",
+    "Résout une sélection explicite au démarrage en un objet gelé de chaînes. Refuse les déclarations invalides avant lecture, les valeurs absentes ou invalides après lecture et filtre les erreurs sans leurs causes. Borne l’appel entier par un délai et une annulation optionnelle, sans modifier process.env, écrire les valeurs sur disque, fermer les clients ou mettre les valeurs en cache."
+  ],
+  "createVaultSecretSource": [
+    "Create a host-side Vault/OpenBao KV v2 reader for one declared mount and document path. Fetch that document once per nonempty selection and return only requested fields, optionally at a pinned version and namespace. Send the host token in HTTP headers, refuse redirects and bound response bytes; KV v1 and dynamic credentials are unsupported.",
+    "Crée un lecteur KV v2 Vault/OpenBao sur l’hôte pour un point de montage et un document déclarés. Récupère le document une fois par sélection non vide et ne restitue que les champs demandés, avec version et espace de noms optionnels. Transmet le jeton dans les en-têtes HTTP, refuse les redirections et borne la réponse ; KV v1 et les identifiants dynamiques ne sont pas pris en charge."
+  ],
+  "createOnePasswordSecretSource": [
+    "Create a reader using the caller’s authenticated 1Password SDK client. Resolve only selected environment-name mappings to explicit op:// references, validate the complete selection before any read and retain caller ownership of the client. Cancellation through fromSecrets stops waiting, but does not cancel an in-flight SDK request.",
+    "Crée un lecteur utilisant le client SDK 1Password authentifié de l’appelant. Résout uniquement les correspondances sélectionnées vers des références op:// explicites, valide toute la sélection avant lecture et laisse le client à l’appelant. L’annulation par fromSecrets termine l’attente, sans annuler une requête SDK en cours."
+  ],
+  "createAwsSecretSource": [
+    "Create a host-side AWS Secrets Manager reader using a caller-owned SDK client. Read only selected mappings with GetSecretValue, preserve version selectors and optionally extract an own field from a JSON SecretString. Refuse binary secrets and invalid fields; pass cancellation to the SDK. No identity is installed in the sandbox.",
+    "Crée un lecteur AWS Secrets Manager sur l’hôte avec un client SDK appartenant à l’appelant. Lit uniquement les correspondances sélectionnées avec GetSecretValue, conserve les sélecteurs de version et extrait éventuellement un champ propre d’un SecretString JSON. Refuse les secrets binaires et champs invalides ; transmet l’annulation au SDK. Aucune identité n’est installée dans la sandbox."
+  ],
+  "createGcpSecretSource": [
+    "Create a Google Cloud Secret Manager reader using a caller-owned SDK client. Access only selected complete version resources, including regional names, and decode bytes or REST base64 into strict UTF-8. Refuse missing or invalid text; cancellation through fromSecrets stops waiting while an in-flight SDK call may finish.",
+    "Crée un lecteur Google Cloud Secret Manager avec un client SDK appartenant à l’appelant. Accède uniquement aux ressources de version sélectionnées, y compris régionales, et décode les octets ou le base64 REST en UTF-8 strict. Refuse un contenu absent ou invalide ; l’annulation par fromSecrets termine l’attente, tandis qu’un appel SDK en cours peut terminer."
+  ],
+  "createAzureSecretSource": [
+    "Create an Azure Key Vault reader using the caller’s host SDK client and credentials. Map selected environment names to vault names and optional versions, pass cancellation to getSecret and return text values. The caller owns the client and the vault endpoint.",
+    "Crée un lecteur Azure Key Vault avec le client SDK et les identifiants hôtes de l’appelant. Associe les variables sélectionnées aux noms du coffre et versions optionnelles, transmet l’annulation à getSecret et renvoie les valeurs textuelles. L’appelant possède le client et choisit le coffre."
+  ],
+  "createInfisicalSecretSource": [
+    "Create a named-secret reader in one Infisical project, environment and path using a caller-authenticated host client. Fetch only requested names with imports and reference expansion disabled, reveal values explicitly and refuse hidden values. Own neither login nor token renewal; cancellation through fromSecrets stops waiting while an in-flight SDK request may finish.",
+    "Crée un lecteur de secrets nommés dans un projet, environnement et chemin Infisical avec un client hôte authentifié par l’appelant. Récupère uniquement les noms demandés, sans imports ni développement des références, demande explicitement les valeurs et refuse celles qui sont masquées. Ne gère ni la connexion ni le renouvellement ; l’annulation par fromSecrets termine l’attente, tandis qu’une requête SDK en cours peut terminer."
   ]
 }

@@ -32,14 +32,15 @@ Use the repository as the source of truth for versions, supported options and co
 
 ## Architecture and responsibilities
 
-| Location               | Responsibility                                                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------- |
-| `src/domain/`          | Contracts, validation, prompts, responses, usage, task graphs and workflow rules.            |
-| `src/application/`     | Use cases, resource ownership, dispatch, lifecycle orchestration and remote synchronization. |
-| `src/adapters/agents/` | One folder per agent: request building, event decoding, descriptor. Plus the catalog.        |
-| `src/providers/`       | Sandbox allocation, command execution, file transfer and disposal.                           |
-| `src/infrastructure/`  | Processes, binary streams, Git, files, native conversation storage and logging.              |
-| `src/cli/`             | Argument handling, project scaffolding and image commands.                                   |
+| Location                | Responsibility                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `src/domain/`           | Contracts, validation, prompts, responses, usage, task graphs and workflow rules.            |
+| `src/application/`      | Use cases, resource ownership, dispatch, lifecycle orchestration and remote synchronization. |
+| `src/adapters/agents/`  | One folder per agent: request building, event decoding, descriptor. Plus the catalog.        |
+| `src/adapters/secrets/` | Optional secret-manager adapters with host-side, declared-name resolution.                   |
+| `src/providers/`        | Sandbox allocation, command execution, file transfer and disposal.                           |
+| `src/infrastructure/`   | Processes, binary streams, Git, files, native conversation storage and logging.              |
+| `src/cli/`              | Argument handling, project scaffolding and image commands.                                   |
 
 `scripts/check-architecture.mjs` enforces these internal dependency directions:
 
@@ -51,6 +52,8 @@ Use the repository as the source of truth for versions, supported options and co
 - CLI composes the other layers.
 
 These are allowed boundaries, not a reason to add unnecessary dependencies. Keep vendor SDKs and protocol details out of the domain. Optional cloud SDKs must remain optional and load through their provider entry points.
+
+Secret managers implement `SecretSource` independently of sandbox providers. `fromSecrets()` resolves an explicit name selection before allocation, bounds startup and sanitizes vendor errors without writing values to disk or changing `process.env`. Service adapters live behind `/secrets/*` entry points, use caller-owned host SDK clients and never enumerate secrets; Vault/OpenBao KV v2 necessarily fetches the selected document, then filters its fields. Infisical disables imports and reference expansion. SDK clients and manager credentials remain on the host; only the selected variables reach the sandbox.
 
 Apply SRP throughout the codebase: allocation, request building, event decoding, process supervision, transfer, storage and cleanup have different reasons to change. Split them accordingly. Do not centralize Claude and Codex implementations in a provider file. Compatibility facades such as `providers/agents.ts` re-export; internal services import their owning modules directly.
 
