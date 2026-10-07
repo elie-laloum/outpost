@@ -87,11 +87,13 @@ export async function createPreparedSandbox(
       command.signal?.throwIfAborted();
       return exclusive("command", async () => {
         try {
+          const signal = command.signal
+            ? AbortSignal.any([command.signal, stop.signal])
+            : stop.signal;
+          await context.readyHooks(signal);
           return await runtime.invoke({
             ...command,
-            signal: command.signal
-              ? AbortSignal.any([command.signal, stop.signal])
-              : stop.signal,
+            signal,
           });
         } finally {
           await observedOperation(

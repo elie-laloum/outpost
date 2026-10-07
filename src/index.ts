@@ -726,3 +726,8 @@ export type {
   ReadRunOptions,
   WatchRunOptions,
 } from "./domain/run.types.ts";
+export { changed } from "./domain/lifecycle.ts";
+export type {
+  ChangedCondition,
+  LifecycleCommand,
+} from "./domain/lifecycle.types.ts";

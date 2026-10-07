@@ -40,6 +40,7 @@ export async function attachInSandbox(
   const signal = settings.signal
     ? AbortSignal.any([settings.signal, stop.signal])
     : stop.signal;
+  await context.readyHooks(signal);
   const { selected, adapter, executionLease } = await selectAgent(
     chosen,
     signal,

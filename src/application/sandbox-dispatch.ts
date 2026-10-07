@@ -44,6 +44,7 @@ export async function dispatchInSandbox<T>(
   const signal = dispatch.signal
     ? AbortSignal.any([dispatch.signal, stop.signal])
     : stop.signal;
+  await context.readyHooks(signal, true, dispatch.observation);
   const sessions: CandidateSession[] = [];
   let transcript: ConversationRecord | undefined;
   const prepare = async (requestedAgent: Agent): Promise<PreparedCandidate> => {

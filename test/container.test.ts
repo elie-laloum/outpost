@@ -10,6 +10,7 @@ import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createSandbox,
+  changed,
   OutpostError,
   createAgentConflictResolver,
   openWorkspace,
@@ -1521,5 +1522,56 @@ test(
     });
     assert.equal(result.text.trim(), "changed approach");
     assert.equal(result.turns.length, 2);
+  },
+);
+
+test(
+  "real container reruns preparation only for changed live sandbox files",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    await writeFile(join(root, "lock"), "one");
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    await using box = await createSandbox({
+      repository: root,
+      sandboxProvider: factory({ image: containerImage, networks: "none" }),
+      hooks: {
+        sandboxReady: [
+          {
+            executable: "node",
+            arguments: ["-e", "require('fs').appendFileSync('installed','x')"],
+            when: changed(["lock"]),
+          },
+        ],
+      },
+    });
+    const read = {
+      executable: "node",
+      arguments: [
+        "-e",
+        "process.stdout.write(require('fs').readFileSync('installed'))",
+      ],
+    };
+    assert.equal((await box.command(read)).stdout, "x");
+    assert.equal((await box.command(read)).stdout, "x");
+    assert.equal(
+      (
+        await box.command({
+          executable: "node",
+          arguments: ["-e", "require('fs').writeFileSync('lock','two')"],
+        })
+      ).status,
+      0,
+    );
+    assert.equal((await box.command(read)).stdout, "xx");
+    const failed = await box.command({
+      executable: "node",
+      arguments: ["-e", "process.exit(7)"],
+    });
+    assert.equal(failed.status, 7);
+    assert.equal((await box.command(read)).stdout, "xx");
   },
 );

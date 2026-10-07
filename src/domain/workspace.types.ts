@@ -1,4 +1,4 @@
-import type { Command } from "./command.types.ts";
+import type { LifecycleCommand } from "./lifecycle.types.ts";
 
 export interface StageLimits {
   readonly copyMs?: number;
@@ -32,7 +32,7 @@ export interface Disposal {
 }
 
 export interface LifecycleHooks {
-  readonly workspaceReady?: readonly Command[];
-  readonly hostReady?: readonly Command[];
-  readonly sandboxReady?: readonly Command[];
+  readonly workspaceReady?: readonly LifecycleCommand[];
+  readonly hostReady?: readonly LifecycleCommand[];
+  readonly sandboxReady?: readonly LifecycleCommand[];
 }

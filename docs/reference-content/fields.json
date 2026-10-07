@@ -16,8 +16,8 @@
     "Workspace ouvert dans lequel travailler, issu d’openWorkspace() ; close() le laisse ouvert. Le combiner avec repository, branch, guard, copies ou storageQuota, ou passer un workspace déjà lié à une sandbox ouverte, échoue avec le code configuration."
   ],
   "SandboxOptions.hooks": [
-    "Setup commands, each required to exit 0 within its deadlineMs, default 600000 (10 minutes): workspaceReady on the host once a new worktree exists, then hostReady (host, in order) and sandboxReady (sandbox, all at once) concurrently; a nonzero exit fails setup with code process. With a supplied workspace, workspaceReady does not run and hooks given here replace the workspace's hostReady and sandboxReady.",
-    "Commandes de préparation, chacune tenue de sortir avec 0 avant son deadlineMs, 600000 par défaut (10 minutes) : workspaceReady sur l’hôte une fois un nouveau worktree créé, puis hostReady (hôte, dans l’ordre) et sandboxReady (sandbox, toutes ensemble) en parallèle ; une sortie non nulle fait échouer la préparation avec le code process. Avec un workspace fourni, workspaceReady ne s’exécute pas et les hooks donnés ici remplacent les hostReady et sandboxReady du workspace."
+    "Setup commands, each required to exit 0 within its deadlineMs, default 600000 (10 minutes): workspaceReady on the host once a new worktree exists, then hostReady (host, in order) and sandboxReady (sandbox, all at once) concurrently; a nonzero exit fails setup with code process. With a supplied workspace, workspaceReady does not run and hooks given here replace the workspace's hostReady and sandboxReady. With when: changed(files), checked again before each warm command, dispatch or attachment; successful fingerprints are scoped to this sandbox.",
+    "Commandes de préparation, chacune tenue de sortir avec 0 avant son deadlineMs, 600000 par défaut (10 minutes) : workspaceReady sur l’hôte une fois un nouveau worktree créé, puis hostReady (hôte, dans l’ordre) et sandboxReady (sandbox, toutes ensemble) en parallèle ; une sortie non nulle fait échouer la préparation avec le code process. Avec un workspace fourni, workspaceReady ne s’exécute pas et les hooks donnés ici remplacent les hostReady et sandboxReady du workspace. Avec when: changed(files), revérification avant chaque commande, dispatch ou attachement sur une sandbox réutilisée ; les empreintes réussies sont propres à cette sandbox."
   ],
   "SandboxOptions.signal": [
     "Aborting it cancels sandbox setup: allocation, repository seeding, agent installation and setup hooks. createSandbox() stops watching it once the sandbox is returned.",
@@ -132,12 +132,12 @@
     "Commandes hôte exécutées l’une après l’autre dans le worktree une fois celui-ci préparé et les copies en place, avant toute sandbox. Un échec ferme le workspace et rejette l’ouverture ; ignorées quand la sandbox reçoit un workspace déjà ouvert."
   ],
   "LifecycleHooks.hostReady": [
-    "Host commands run one after another in the worktree after each sandbox is allocated, at the same time as sandboxReady. The first failure stops both groups and the sandbox allocation fails.",
-    "Commandes hôte exécutées l’une après l’autre dans le worktree après l’allocation de chaque sandbox, en même temps que sandboxReady. Le premier échec arrête les deux groupes et l’allocation de la sandbox échoue."
+    "Host commands run one after another in the worktree after each sandbox is allocated, at the same time as sandboxReady. The first failure stops both groups and the sandbox allocation fails. With when: changed(files), checked again before each warm command, dispatch or attachment; successful fingerprints are scoped to this sandbox.",
+    "Commandes hôte exécutées l’une après l’autre dans le worktree après l’allocation de chaque sandbox, en même temps que sandboxReady. Le premier échec arrête les deux groupes et l’allocation de la sandbox échoue. Avec when: changed(files), revérification avant chaque commande, dispatch ou attachement sur une sandbox réutilisée ; les empreintes réussies sont propres à cette sandbox."
   ],
   "LifecycleHooks.sandboxReady": [
-    "Commands started together inside the sandbox, in the repository root, once the repository is in place, at the same time as hostReady; chain dependent steps in one shell command. The first failure stops both groups.",
-    "Commandes lancées ensemble dans la sandbox, à la racine du dépôt, une fois le dépôt en place, en même temps que hostReady ; enchaînez les étapes dépendantes dans une seule commande shell. Le premier échec arrête les deux groupes."
+    "Commands started together inside the sandbox, in the repository root, once the repository is in place, at the same time as hostReady; chain dependent steps in one shell command. The first failure stops both groups. With when: changed(files), checked again before each warm command, dispatch or attachment; successful fingerprints are scoped to this sandbox.",
+    "Commandes lancées ensemble dans la sandbox, à la racine du dépôt, une fois le dépôt en place, en même temps que hostReady ; enchaînez les étapes dépendantes dans une seule commande shell. Le premier échec arrête les deux groupes. Avec when: changed(files), revérification avant chaque commande, dispatch ou attachement sur une sandbox réutilisée ; les empreintes réussies sont propres à cette sandbox."
   ],
   "Command.executable": [
     "Program to execute without implicit shell parsing.",
@@ -730,8 +730,8 @@
     "Chemin du dépôt dans la sandbox ; les commandes sans directory s’y exécutent."
   ],
   "Sandbox.dispatch": [
-    "Run a brief in a new conversation on this sandbox and resolve with a warm result whose resume() and fork() stay here. The branch is not integrated and the sandbox stays open, also on failure, where the error's recovery names the branch and directory.",
-    "Exécute un brief dans une nouvelle conversation sur cette sandbox et se résout avec un résultat chaud dont resume() et fork() restent ici. La branche n’est pas intégrée et la sandbox reste ouverte, y compris en cas d’échec, où le recovery de l’erreur indique la branche et le répertoire."
+    "Run a brief in a new conversation on this sandbox and resolve with a warm result whose resume() and fork() stay here. The branch is not integrated and the sandbox stays open, also on failure, where the error's recovery names the branch and directory. Conditional preparation hooks are checked first; their failure prevents execution and leaves the sandbox open for retry.",
+    "Exécute un brief dans une nouvelle conversation sur cette sandbox et se résout avec un résultat chaud dont resume() et fork() restent ici. La branche n’est pas intégrée et la sandbox reste ouverte, y compris en cas d’échec, où le recovery de l’erreur indique la branche et le répertoire. Les hooks de préparation conditionnels sont vérifiés d’abord ; leur échec bloque l’exécution et laisse la sandbox ouverte pour réessayer."
   ],
   "Sandbox.resume": [
     "Continue the native conversation with this id on this sandbox, restoring it first when it was captured elsewhere. The agent must support resume.",
@@ -742,12 +742,12 @@
     "Poursuit une copie de la conversation native de cet identifiant sur cette sandbox, sans modifier l’originale. L’agent doit prendre en charge le fork automatisé."
   ],
   "Sandbox.attach": [
-    "Start the agent's CLI in your terminal inside this sandbox, with an optional brief or continuation, and resolve when you quit with its status and commits. Requires a single CLI agent; the session is stopped after 86400000 (24 hours).",
-    "Lance le CLI de l’agent dans votre terminal, à l’intérieur de cette sandbox, avec un brief ou une continuation facultatifs, et se résout à votre sortie avec son statut et ses commits. Exige un agent CLI unique ; la session est arrêtée après 86400000 (24 heures)."
+    "Start the agent's CLI in your terminal inside this sandbox, with an optional brief or continuation, and resolve when you quit with its status and commits. Requires a single CLI agent; the session is stopped after 86400000 (24 hours). Conditional preparation hooks are checked first; their failure prevents execution and leaves the sandbox open for retry.",
+    "Lance le CLI de l’agent dans votre terminal, à l’intérieur de cette sandbox, avec un brief ou une continuation facultatifs, et se résout à votre sortie avec son statut et ses commits. Exige un agent CLI unique ; la session est arrêtée après 86400000 (24 heures). Les hooks de préparation conditionnels sont vérifiés d’abord ; leur échec bloque l’exécution et laisse la sandbox ouverte pour réessayer."
   ],
   "Sandbox.command": [
-    "Run one executable in this sandbox and resolve with its status and output, even when the status is nonzero; it rejects on its deadline, its signal or sandbox close. On a remote provider, the sandbox's changes are then pulled into the host worktree.",
-    "Exécute un programme dans cette sandbox et se résout avec son statut et sa sortie, même pour un statut non nul ; rejette à l’échéance de son délai, à l’annulation de son signal ou à la fermeture de la sandbox. Sur un provider distant, les modifications de la sandbox sont ensuite rapatriées dans le worktree de l’hôte."
+    "Run one executable in this sandbox and resolve with its status and output, even when the status is nonzero; it rejects on its deadline, its signal or sandbox close. On a remote provider, the sandbox's changes are then pulled into the host worktree. Conditional preparation hooks are checked first; their failure prevents execution and leaves the sandbox open for retry.",
+    "Exécute un programme dans cette sandbox et se résout avec son statut et sa sortie, même pour un statut non nul ; rejette à l’échéance de son délai, à l’annulation de son signal ou à la fermeture de la sandbox. Sur un provider distant, les modifications de la sandbox sont ensuite rapatriées dans le worktree de l’hôte. Les hooks de préparation conditionnels sont vérifiés d’abord ; leur échec bloque l’exécution et laisse la sandbox ouverte pour réessayer."
   ],
   "Sandbox.close": [
     "Abort the running operation, release the environment and, when createSandbox() opened the workspace, close it; resolves with retainedDirectory when the worktree is kept. preserve: true keeps the worktree; repeated calls return the first call's promise.",
@@ -8265,5 +8265,73 @@
   "FallbackEvent.kind": [
     "Always fallback: a failed agent candidate hands execution to the next explicitly configured candidate.",
     "Toujours fallback : un candidat agent en échec cède l’exécution au candidat suivant explicitement configuré."
+  ],
+  "changed.files": [
+    "Nonempty unique list of exact relative file paths, resolved from the hook directory; rejects absolute paths, backslashes, empty segments and traversal. Content, creation and deletion participate in the fingerprint, timestamps do not.",
+    "Liste non vide et unique de chemins relatifs exacts, résolus depuis le répertoire du hook ; refuse chemins absolus, antislashs, segments vides et traversée. Le contenu, la création et la suppression participent à l’empreinte, pas les horodatages."
+  ],
+  "ChangedCondition.kind": [
+    "Literal changed discriminator, used by lifecycle preparation to select file-content checks.",
+    "Discriminant littéral changed utilisé par la préparation pour sélectionner les vérifications de contenu."
+  ],
+  "ChangedCondition.files": [
+    "Exact files to hash in declaration order, relative to the command directory in the hook environment. Missing files are stable entries; unreadable files fail preparation.",
+    "Fichiers exacts à hacher dans l’ordre déclaré, relatifs au répertoire de la commande dans l’environnement du hook. Les fichiers absents sont des entrées stables ; les fichiers illisibles font échouer la préparation."
+  ],
+  "LifecycleCommand.when": [
+    "Optional condition from changed(); without it the command runs only during initial preparation. Records the pre-command fingerprint after success and checks it before each subsequent sandbox command, dispatch or attachment. workspaceReady remains a single opening phase.",
+    "Condition facultative issue de changed() ; sans elle la commande ne s’exécute qu’à la préparation initiale. Enregistre l’empreinte calculée avant la commande après sa réussite, puis la vérifie avant chaque commande, dispatch ou attachement suivant. workspaceReady reste une phase unique à l’ouverture."
+  ],
+  "LifecycleCommand.executable": [
+    "Program run for this preparation hook without implicit shell parsing.",
+    "Programme exécuté pour ce hook de préparation, sans analyse shell implicite."
+  ],
+  "LifecycleCommand.arguments": [
+    "Literal arguments of the preparation command; use an explicit shell for pipelines or dependent steps.",
+    "Arguments littéraux de la préparation ; utilisez un shell explicite pour les pipes ou les étapes dépendantes."
+  ],
+  "LifecycleCommand.stdin": [
+    "Initial text sent to the hook standard input before an optional input stream.",
+    "Texte initial envoyé à l’entrée du hook avant un éventuel flux input."
+  ],
+  "LifecycleCommand.input": [
+    "Live input stream for the hook, after stdin; not used by the file fingerprint probe.",
+    "Flux d’entrée du hook après stdin ; non utilisé par la sonde d’empreinte des fichiers."
+  ],
+  "LifecycleCommand.directory": [
+    "Working directory and base for watched paths: defaults to the host worktree for workspaceReady/hostReady and sandbox.root for sandboxReady.",
+    "Répertoire de travail et base des chemins surveillés : worktree hôte par défaut pour workspaceReady/hostReady et sandbox.root pour sandboxReady."
+  ],
+  "LifecycleCommand.variables": [
+    "Per-hook environment variables, applied both to the fingerprint probe and the preparation command over the execution environment variables.",
+    "Variables propres au hook, appliquées à la sonde d’empreinte et à la commande en plus des variables de l’environnement d’exécution."
+  ],
+  "LifecycleCommand.signal": [
+    "Optional hook cancellation signal combined with the lifecycle operation signal. A cancelled warm hook does not save its fingerprint and leaves the sandbox open.",
+    "Signal facultatif du hook combiné au signal de l’opération de cycle de vie. Un hook annulé sur une sandbox réutilisée n’enregistre pas son empreinte et laisse la sandbox ouverte."
+  ],
+  "LifecycleCommand.deadlineMs": [
+    "Deadline for the fingerprint probe and separately for the hook command, default 600000 ms each. A timeout prevents the requested operation and leaves a warm sandbox available for retry.",
+    "Délai de la sonde d’empreinte et, séparément, de la commande du hook, 600000 ms chacun par défaut. Une expiration bloque l’opération et laisse une sandbox réutilisée disponible pour réessayer."
+  ],
+  "LifecycleCommand.interactive": [
+    "Run the hook using the execution environment terminal support; the fingerprint probe always runs without a terminal.",
+    "Exécute le hook avec le support terminal de l’environnement ; la sonde d’empreinte s’exécute toujours sans terminal."
+  ],
+  "LifecycleCommand.elevated": [
+    "Request elevated execution for both the fingerprint probe and command, subject to the provider capabilities; host execution ignores this option.",
+    "Demande une exécution élevée pour la sonde d’empreinte et la commande selon les capacités du provider ; l’exécution hôte ignore cette option."
+  ],
+  "LifecycleCommand.retain": [
+    "Retained trailing output for the hook command; the fingerprint probe uses its own bounded output.",
+    "Sortie finale conservée pour la commande du hook ; la sonde d’empreinte utilise sa propre sortie bornée."
+  ],
+  "LifecycleCommand.observe": [
+    "Receives preparation-command output chunks, excluding fingerprint-probe output. An exception fails preparation and prevents saving the fingerprint.",
+    "Reçoit les fragments de sortie de la commande de préparation, hors sortie de la sonde d’empreinte. Une exception fait échouer la préparation et empêche l’enregistrement de l’empreinte."
+  ],
+  "LifecycleCommand.terminal": [
+    "Terminal streams connected to the preparation command; the fingerprint probe does not use them.",
+    "Flux de terminal connectés à la commande de préparation ; la sonde d’empreinte ne les utilise pas."
   ]
 }

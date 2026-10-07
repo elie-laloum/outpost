@@ -42,9 +42,41 @@ Chaque entrée est une [commande](../sandbox-sessions/) : `executable`, `argumen
 
 ## Préparer une fois pour plusieurs tours
 
-Une sandbox exécute ses hooks une seule fois, à son allocation. `sandbox.dispatch()`, `sandbox.resume()` et `sandbox.command()` réutilisent l’environnement préparé. Chaque `dispatch()` de premier niveau alloue une sandbox neuve et les rejoue.
+Une sandbox exécute ses hooks sans condition une seule fois, à son allocation. `sandbox.dispatch()`, `sandbox.resume()` et `sandbox.command()` réutilisent l’environnement préparé. Chaque `dispatch()` de premier niveau alloue une sandbox neuve et les rejoue.
 
 Un workspace ouvert par `openWorkspace()` exécute `workspaceReady` une fois, à l’ouverture. Il exécute `hostReady` et `sandboxReady` pour chaque sandbox qu’il crée, sauf si cette sandbox passe ses propres `hooks`, qui remplacent ceux du workspace.
+
+## Réinstaller seulement quand les fichiers changent
+
+Ajoutez `when: changed(["package-lock.json"])` pour vérifier le contenu avant chaque `sandbox.command()`, `dispatch()` (y compris resume et fork) ou `attach()`. La première préparation exécute toujours le hook ; les opérations suivantes le sautent tant qu’aucun fichier surveillé ne change. Ces ajouts sont implémentés dans la section Unreleased.
+
+```ts
+import { changed, createSandbox } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+
+await using sandbox = await createSandbox({
+  repository,
+  sandboxProvider,
+  hooks: {
+    sandboxReady: [
+      {
+        executable: "npm",
+        arguments: ["ci"],
+        when: changed(["package-lock.json"]),
+      },
+    ],
+  },
+});
+await sandbox.command({ executable: "npm", arguments: ["test"] });
+```
+
+Outpost calcule l’empreinte dans l’environnement du hook, avec des chemins relatifs à son `directory` ou à la racine du workspace. Indiquez des chemins exacts, sans glob, chemin absolu ou `..`. Les changements de contenu, créations et suppressions comptent ; les horodatages ne comptent pas. Un fichier absent a une empreinte stable ; un fichier illisible fait échouer la préparation. Node.js doit être disponible dans cet environnement.
+
+Chaque hook garde sa propre empreinte en mémoire pour cette sandbox, uniquement après réussite. Une préparation échouée, expirée ou annulée bloque l’opération demandée et sera réessayée au prochain appel ; la sandbox reste ouverte. Toute nouvelle sandbox prépare à nouveau. Seuls les fichiers déclarés sont surveillés : supprimer `node_modules` seul ne déclenche pas l’installation. Un hook qui modifie un fichier surveillé s’exécute à nouveau à l’opération suivante.
+
+`hostReady` accepte la même condition sur les fichiers hôte. `workspaceReady` est évalué une seule fois à l’ouverture du workspace. L’ordre reste identique : commandes hôte séquentielles, commandes de sandbox concurrentes et deux groupes en parallèle. Aucun hook ne s’exécute entre les passes d’un même dispatch ; les changements produits pendant une opération sont vérifiés à l’opération suivante.
+
+API : [changed](../../reference/changed/) · [LifecycleCommand](../../reference/lifecyclecommand/) · [ChangedCondition](../../reference/changedcondition/). Le fichier `examples/60-incremental-preparation/index.ts` du dépôt démontre `npm ci` sans identifiants de compte ni accès réseau.
 
 ## Réutiliser les téléchargements entre conteneurs
 
@@ -86,7 +118,7 @@ Podman accepte les mêmes commandes avec `podman`.
 
 - Les autres fournisseurs n’ont pas de `caches` : `sandboxReady` retélécharge tout à chaque allocation.
 - Chaque commande de hook s’arrête après 10 minutes, sauf si vous fixez `deadlineMs`.
-- Une commande qui se termine avec un statut non nul rejette avec une `OutpostError` de code `process`, arrête les autres commandes de préparation et libère la sandbox. Voir [Erreurs](../error-handling/).
+- À l’allocation, une commande qui se termine avec un statut non nul rejette avec une `OutpostError` de code `process`, arrête les autres commandes de préparation et libère la sandbox. Voir [Erreurs](../error-handling/).
 - Les commandes s’exécutent sans shell. Appelez `sh -c` pour les pipes et `&&`.
 - Un nom de cache commence par une lettre minuscule et compte au plus 48 lettres minuscules, chiffres ou tirets. Les `volumes` explicites ne peuvent pas chevaucher `/outpost/cache`.
 - Toute sandbox qui monte un cache peut en modifier le contenu, et les sandboxes suivantes le lisent. Gardez les identifiants hors des caches ([Sécurité](../security/)).

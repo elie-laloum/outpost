@@ -408,6 +408,11 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/changed",
+        "label": "changed",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/branchpolicy",
         "label": "BranchPolicy",
         "attrs": { "data-api-kind": "type" }
@@ -475,6 +480,16 @@
       {
         "slug": "reference/lifecyclehooks",
         "label": "LifecycleHooks",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/changedcondition",
+        "label": "ChangedCondition",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/lifecyclecommand",
+        "label": "LifecycleCommand",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

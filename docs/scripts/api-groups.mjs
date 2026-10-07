@@ -32,7 +32,7 @@ export const groups = [
     title: ["Workspaces", "Workspaces"],
     guide: "guide/repository-and-branch",
     names:
-      "openWorkspace createAgentConflictResolver Workspace WorkspaceOptions WorkspaceRecord BranchPolicy DiffGuard IntegrationOptions ConflictResolver ConflictContext ConflictResolution AgentConflictResolverOptions Commit Disposal StageLimits LifecycleHooks",
+      "openWorkspace createAgentConflictResolver Workspace WorkspaceOptions WorkspaceRecord BranchPolicy DiffGuard IntegrationOptions ConflictResolver ConflictContext ConflictResolution AgentConflictResolverOptions Commit Disposal StageLimits LifecycleHooks changed ChangedCondition LifecycleCommand",
   },
   {
     id: "sandboxes",
@@ -217,7 +217,8 @@ const guidePages = {
     "createTransportConversations TransportConversationOptions ContinuationOptions WarmDispatchResult",
   recovery:
     "archiveRecovery materializeRecoveryArchive RecoveryArchiveOptions RecoveryArchiveRestoreOptions",
-  "environment-setup": "LifecycleHooks DependencyCache",
+  "environment-setup":
+    "LifecycleHooks DependencyCache changed ChangedCondition LifecycleCommand",
   "limits-and-cancellation": "StageLimits",
   steering:
     "createSteering SteeringMode SteeringState Steering SteeringDelivery SteeringSendOptions",

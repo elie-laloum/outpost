@@ -42,9 +42,41 @@ Each entry is a [command](../sandbox-sessions/): `executable`, `arguments`, and 
 
 ## Prepare once for several turns
 
-A sandbox runs its hooks once, when it is allocated. `sandbox.dispatch()`, `sandbox.resume()` and `sandbox.command()` reuse the prepared environment. Each top-level `dispatch()` allocates a fresh sandbox and runs them again.
+A sandbox runs unconditional hooks once, when it is allocated. `sandbox.dispatch()`, `sandbox.resume()` and `sandbox.command()` reuse the prepared environment. Each top-level `dispatch()` allocates a fresh sandbox and runs them again.
 
 A workspace from `openWorkspace()` runs `workspaceReady` once when it opens. It runs `hostReady` and `sandboxReady` for each sandbox it creates, unless that sandbox passes its own `hooks`, which replace the workspace's.
+
+## Reinstall only when files change
+
+Add `when: changed(["package-lock.json"])` to check file contents before each `sandbox.command()`, `dispatch()` (including resume and fork) or `attach()`. The first preparation always runs the hook; later operations skip it until a watched file changes. These additions are implemented under Unreleased.
+
+```ts
+import { changed, createSandbox } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+
+await using sandbox = await createSandbox({
+  repository,
+  sandboxProvider,
+  hooks: {
+    sandboxReady: [
+      {
+        executable: "npm",
+        arguments: ["ci"],
+        when: changed(["package-lock.json"]),
+      },
+    ],
+  },
+});
+await sandbox.command({ executable: "npm", arguments: ["test"] });
+```
+
+Outpost hashes the watched files inside the hook's execution environment, relative to its `directory` or the workspace root. List exact file paths, without glob patterns, absolute paths or `..`. Content changes, creation and deletion count; timestamps do not. Missing files have a stable fingerprint; an unreadable file fails preparation. Node.js must be available in that environment.
+
+Each hook keeps its own fingerprint in memory for this sandbox, recorded only after success. A failed, timed-out or cancelled preparation blocks the requested operation and is retried on the next call; the sandbox remains open. A new sandbox always prepares again. Only declared files are watched: deleting `node_modules` alone does not trigger installation. A hook that changes a watched file runs again on the next operation.
+
+`hostReady` supports the same condition on host files. `workspaceReady` is evaluated once at workspace opening. Ordering stays the same: host commands run sequentially, sandbox commands run concurrently, and both groups overlap. No hook runs between passes of one dispatch; file changes made during an operation are checked at the next operation.
+
+API: [changed](../../reference/changed/) · [LifecycleCommand](../../reference/lifecyclecommand/) · [ChangedCondition](../../reference/changedcondition/). The repository's `examples/60-incremental-preparation/index.ts` demonstrates `npm ci` without account credentials or network access.
 
 ## Reuse downloads across containers
 
@@ -86,7 +118,7 @@ Podman accepts the same commands with `podman`.
 
 - Other providers have no `caches`: `sandboxReady` downloads everything on each allocation.
 - Each hook command stops after 10 minutes unless you set `deadlineMs`.
-- A command that exits with a nonzero status rejects with an `OutpostError` of code `process`, stops the other preparation commands and releases the sandbox. See [Errors](../error-handling/).
+- At allocation, a command that exits with a nonzero status rejects with an `OutpostError` of code `process`, stops the other preparation commands and releases the sandbox. See [Errors](../error-handling/).
 - Commands run without a shell. Call `sh -c` for pipes and `&&`.
 - Cache names start with a lowercase letter and hold at most 48 lowercase letters, digits or hyphens. Explicit `volumes` cannot overlap `/outpost/cache`.
 - Every sandbox that mounts a cache can change its content, and later sandboxes read it. Keep credentials out of caches ([Security](../security/)).

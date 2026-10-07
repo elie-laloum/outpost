@@ -4,7 +4,7 @@ import { lstat } from "node:fs/promises";
 import { join, posix } from "node:path";
 import type { Agent } from "../domain/agent.types.ts";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
-import { invariant } from "../domain/errors.ts";
+import { invariant, recordRecovery } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { executeProcess } from "../infrastructure/process.ts";
@@ -15,7 +15,7 @@ import { trackedSandboxLease } from "./sandbox-activity.ts";
 import { boundedTransfers } from "../infrastructure/transfer.ts";
 import { createDockerSandboxProvider } from "../providers/docker.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
-import { hooks } from "./lifecycle-hooks.ts";
+import { createLifecycleHookRunner } from "./lifecycle-hooks.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
 import { uploadFiles } from "./remote-upload.ts";
 import { seedRemote } from "./remote-workspace.ts";
@@ -71,6 +71,7 @@ export async function provisionSandbox(
     : stop.signal;
   let lease: SandboxLease | undefined, sync: RemoteSync | undefined;
   let activity: ResourceActivity | undefined;
+  let readyHooks: ProvisionedSandbox["readyHooks"];
   let acquisitionStarted = false;
   const prepared = new Map<Agent, Agent>();
   const staging = join(
@@ -189,33 +190,61 @@ export async function provisionSandbox(
           ),
         );
     }
-    const initialized = await Promise.allSettled(
-      [
-        hooks(
-          lifecycle?.hostReady ?? [],
-          workspace.directory,
-          executeProcess,
-          setupSignal,
-          false,
-          options.observation,
-        ),
-        hooks(
-          lifecycle?.sandboxReady ?? [],
-          lease.root,
-          lease.invoke.bind(lease),
-          setupSignal,
-          true,
-          options.observation,
-        ),
-      ].map((pending) =>
-        pending.catch((cause) => {
-          stop.abort(cause);
-          throw cause;
-        }),
-      ),
+    const hostHooks = createLifecycleHookRunner(
+      lifecycle?.hostReady ?? [],
+      workspace.directory,
+      executeProcess,
     );
-    const failure = initialized.find((item) => item.status === "rejected");
-    if (failure?.status === "rejected") throw failure.reason;
+    const sandboxHooks = createLifecycleHookRunner(
+      lifecycle?.sandboxReady ?? [],
+      lease.root,
+      lease.invoke.bind(lease),
+      true,
+    );
+    readyHooks = async (
+      signal,
+      incremental = true,
+      observation = options.observation,
+    ) => {
+      const controller = new AbortController();
+      const combined = AbortSignal.any([signal, controller.signal]);
+      const outcomes = await Promise.allSettled(
+        [
+          hostHooks(combined, incremental, observation),
+          sandboxHooks(combined, incremental, observation),
+        ].map((pending) =>
+          pending.catch((cause) => {
+            controller.abort(cause);
+            throw cause;
+          }),
+        ),
+      );
+      const failure = outcomes.find((item) => item.status === "rejected");
+      if (failure?.status !== "rejected") return;
+      let failureCause: unknown = failure.reason;
+      if (incremental && sync) {
+        try {
+          await observedOperation(
+            observation,
+            "transfer",
+            "repository.refresh",
+            () => sync!.pull(),
+          );
+        } catch (cause) {
+          failureCause = new AggregateError(
+            [failure.reason, cause],
+            "Preparation and recovery both failed",
+          );
+        }
+      }
+      if (incremental)
+        recordRecovery(failureCause, {
+          branch: workspace.branch,
+          directory: workspace.directory,
+        });
+      throw failureCause;
+    };
+    await readyHooks(setupSignal, false);
     await activity.phase("ready");
   } catch (cause) {
     await observedOperation(
@@ -263,5 +292,6 @@ export async function provisionSandbox(
     sync,
     prepared,
     staging,
+    readyHooks,
   };
 }

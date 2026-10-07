@@ -18,6 +18,11 @@ export interface WorkspaceState {
 }
 
 export interface ProvisionedSandbox {
+  readyHooks(
+    signal: AbortSignal,
+    incremental?: boolean,
+    observation?: import("../domain/observation.types.ts").ObservationHub,
+  ): Promise<void>;
   readonly options: SandboxOptions;
   readonly sandboxProvider: SandboxProvider;
   readonly workspace: Workspace;
