@@ -1,3 +1,5 @@
+import { createRunReport, collectRunReportDiff } from "./run-report.ts";
+import type { RunReportDiff } from "../domain/run-report.types.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import { readFile } from "node:fs/promises";
 import type { Agent } from "../domain/agent.types.ts";
@@ -241,7 +243,43 @@ export async function dispatchInSandbox<T>(
     throw cause;
   }
   const { selected } = session;
+  let diff: RunReportDiff | null = null;
+  const warnings: string[] = [];
+  try {
+    const head = (
+      await git(
+        workspace.directory,
+        ["rev-parse", "HEAD"],
+        options.limits?.collectMs,
+      )
+    ).trim();
+    diff = await collectRunReportDiff(
+      workspace.directory,
+      baseline,
+      head,
+      options.limits?.collectMs,
+    );
+  } catch {
+    warnings.push("Committed diff statistics could not be collected.");
+  }
   return {
+    report: createRunReport({
+      version: 1,
+      completed: execution.completed,
+      text: execution.text,
+      branch: workspace.branch,
+      commits: changes,
+      durationMs: execution.turns.reduce(
+        (sum, turn) => sum + turn.durationMs,
+        0,
+      ),
+      usage: execution.usage,
+      cost: null,
+      diff,
+      failedTools: [],
+      omittedFailures: 0,
+      warnings,
+    }),
     ...execution,
     branch: workspace.branch,
     directory: workspace.directory,

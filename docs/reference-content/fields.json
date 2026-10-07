@@ -7717,5 +7717,125 @@
   "ModelUsage.complete": [
     "False when some usage could not be measured, so the counters are a lower bound; aggregation and checkpoint replay keep it. Omitted means the counters are complete as reported, not a billing guarantee.",
     "false quand une partie de l’usage n’a pas pu être mesurée : les compteurs sont alors une borne inférieure ; l’agrégation et la reprise d’un checkpoint le conservent. Absent, les compteurs sont complets tels que rapportés, sans garantie de facturation."
+  ],
+  "DispatchResult.report": [
+    "Render the immutable run snapshot as Markdown (default) or a JSON string, without filesystem reads. Includes committed Git statistics, observed failed tools, wall-clock duration and reported usage; unavailable data is explicit. Redaction applies to every report string.",
+    "Rend l’instantané immuable du run en Markdown (par défaut) ou en chaîne JSON, sans lecture du disque. Inclut les statistiques Git commitées, les outils échoués observés, la durée totale et l’usage déclaré ; les données indisponibles sont explicites. Le masquage s’applique à toutes les chaînes du rapport."
+  ],
+  "RunReportOptions.format": [
+    "Output serialization: markdown by default, or json for a pretty-printed version-1 RunReport string. An unsupported format throws when report() is called.",
+    "Sérialisation de sortie : markdown par défaut, ou json pour une chaîne RunReport version 1 indentée. Un format non pris en charge lève une erreur à l’appel de report()."
+  ],
+  "RunReport.version": [
+    "JSON snapshot schema version, currently 1.",
+    "Version du schéma de l’instantané JSON, actuellement 1."
+  ],
+  "RunReport.completed": [
+    "Whether dispatch matched its completion condition; this does not certify passing tests or successful tools.",
+    "Indique si le dispatch a satisfait sa condition de fin ; ne certifie ni la réussite des tests ni celle des outils."
+  ],
+  "RunReport.text": [
+    "Final dispatch answer, joined across cold passes and masked by inherited redact patterns. Markdown renders it as literal text.",
+    "Réponse finale du dispatch, concaténée entre les passes froides et masquée par les expressions redact héritées. Le Markdown la rend comme du texte littéral."
+  ],
+  "RunReport.branch": [
+    "Work branch recorded before the workspace closes; it is not a pull-request URL.",
+    "Branche de travail enregistrée avant la fermeture du workspace ; ce n’est pas une URL de pull request."
+  ],
+  "RunReport.commits": [
+    "Commit identities and subjects collected during this dispatch, including every cold pass.",
+    "Identités et sujets des commits collectés pendant ce dispatch, y compris chaque passe froide."
+  ],
+  "RunReport.durationMs": [
+    "Wall-clock dispatch duration in milliseconds, including preparation, execution, synchronization and owned-resource cleanup; warm dispatch leaves borrowed resources open.",
+    "Durée totale du dispatch en millisecondes, avec préparation, exécution, synchronisation et nettoyage des ressources possédées ; un dispatch chaud garde les ressources empruntées ouvertes."
+  ],
+  "RunReport.usage": [
+    "Cumulative reported token usage, including repairs, steering, fallback attempts and subagents; zero counters alone do not prove no consumption.",
+    "Usage déclaré cumulé en tokens, avec réparations, instructions en cours de run, tentatives de secours et sous-agents ; des compteurs nuls seuls ne prouvent pas une absence de consommation."
+  ],
+  "RunReport.cost": [
+    "Estimate from dispatch prices and cumulative model usage, or null without prices or when calculation fails. complete=false marks known partial charges, never an invoice.",
+    "Estimation issue des prices du dispatch et de l’usage cumulé par modèle, ou null sans tarifs ou si le calcul échoue. complete=false signale des coûts connus partiels ; ce n’est jamais une facture."
+  ],
+  "RunReport.diff": [
+    "Net committed diff frozen after synchronization and before workspace cleanup, or null when inspection fails. Excludes uncommitted and untracked files.",
+    "Diff commité net figé après synchronisation et avant nettoyage du workspace, ou null si l’inspection échoue. Exclut les fichiers non commités et non suivis."
+  ],
+  "RunReport.failedTools": [
+    "Up to 100 failed tool-result events in observation order, correlated with tool calls by dispatch, pass, subagent and call ID. Includes shell and non-shell tools; unsupported agent events cannot be inferred.",
+    "Jusqu’à 100 événements tool-result échoués dans l’ordre d’observation, associés aux appels par dispatch, passe, sous-agent et identifiant. Inclut les outils shell et les autres ; les événements absents d’un agent ne sont pas déduits."
+  ],
+  "RunReport.omittedFailures": [
+    "Number of observed failures beyond the 100-entry report limit; these do not appear in failedTools.",
+    "Nombre d’échecs observés au-delà de la limite de 100 entrées du rapport ; ils n’apparaissent pas dans failedTools."
+  ],
+  "RunReport.warnings": [
+    "Collection limitations such as unavailable Git statistics, lost observation events, truncated descriptions or uncomputable cost. These do not change dispatch success.",
+    "Limites de collecte : statistiques Git indisponibles, observations perdues, descriptions tronquées ou coût impossible à calculer. Elles ne changent pas la réussite du dispatch."
+  ],
+  "RunReportDiff.baseline": [
+    "Exact HEAD commit before execution; for several cold passes, the first pass baseline.",
+    "Commit HEAD exact avant l’exécution ; pour plusieurs passes froides, base de la première passe."
+  ],
+  "RunReportDiff.head": [
+    "Exact HEAD commit after synchronization; for several cold passes, the last pass head.",
+    "Commit HEAD exact après synchronisation ; pour plusieurs passes froides, HEAD de la dernière passe."
+  ],
+  "RunReportDiff.files": [
+    "Git numstat entries between baseline and head with rename detection. A renamed file occupies one entry containing both paths.",
+    "Entrées numstat Git entre baseline et head avec détection des renommages. Un fichier renommé occupe une entrée contenant les deux chemins."
+  ],
+  "RunReportDiff.filesChanged": [
+    "Number of changed file entries in the net committed diff; a rename counts once.",
+    "Nombre d’entrées de fichiers modifiés dans le diff commité net ; un renommage compte une fois."
+  ],
+  "RunReportDiff.added": [
+    "Sum of added text lines in the net committed diff; binary entries contribute zero.",
+    "Somme des lignes de texte ajoutées dans le diff commité net ; les entrées binaires contribuent zéro."
+  ],
+  "RunReportDiff.removed": [
+    "Sum of removed text lines in the net committed diff; binary entries contribute zero.",
+    "Somme des lignes de texte supprimées dans le diff commité net ; les entrées binaires contribuent zéro."
+  ],
+  "RunReportDiff.binaryFiles": [
+    "Number of diff entries Git reports as binary, whose changed lines cannot be counted.",
+    "Nombre d’entrées de diff que Git considère binaires et dont les lignes modifiées ne sont pas dénombrables."
+  ],
+  "RunReportFile.paths": [
+    "Repository-relative path, or old and new paths for a rename. Paths retain their literal characters in JSON and are escaped in Markdown.",
+    "Chemin relatif au dépôt, ou anciens et nouveaux chemins pour un renommage. Les caractères restent littéraux en JSON et sont échappés en Markdown."
+  ],
+  "RunReportFile.added": [
+    "Added text lines for this file; zero for binary files even when their bytes changed.",
+    "Lignes de texte ajoutées pour ce fichier ; zéro pour les binaires même si leurs octets ont changé."
+  ],
+  "RunReportFile.removed": [
+    "Removed text lines for this file; zero for binary files even when their bytes changed.",
+    "Lignes de texte supprimées pour ce fichier ; zéro pour les binaires même si leurs octets ont changé."
+  ],
+  "RunReportFile.binary": [
+    "True when Git numstat cannot count this file’s added and removed lines.",
+    "Vrai quand numstat Git ne peut pas compter les lignes ajoutées et supprimées de ce fichier."
+  ],
+  "RunReportFailure.tool": [
+    "Tool name from the matched call, then the result, or unknown when neither identifies it.",
+    "Nom d’outil issu de l’appel associé, puis du résultat, ou unknown si aucun ne l’identifie."
+  ],
+  "RunReportFailure.command": [
+    "String input or command/cmd field from the matched tool call, limited to 4096 characters; null when unavailable. It is a description, never executed by report().",
+    "Entrée chaîne ou champ command/cmd de l’appel d’outil associé, limité à 4096 caractères ; null si indisponible. C’est une description, jamais exécutée par report()."
+  ],
+  "RunReportFailure.preview": [
+    "Failure preview supplied by the adapter, limited to 4096 characters. May already be an excerpt; no full stdout or stderr is collected.",
+    "Aperçu d’échec fourni par l’adaptateur, limité à 4096 caractères. Peut déjà être un extrait ; aucune sortie stdout ou stderr complète n’est collectée."
+  ],
+  "RunReportFailure.pass": [
+    "One-based observed pass number, or null when the event had no pass scope.",
+    "Numéro de passe observé à partir de 1, ou null si l’événement n’avait pas de portée de passe."
+  ],
+  "RunReportFailure.subagentId": [
+    "Observed subagent identifier, or null for the main agent or an event without subagent scope.",
+    "Identifiant du sous-agent observé, ou null pour l’agent principal ou un événement sans portée de sous-agent."
   ]
 }

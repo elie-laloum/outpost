@@ -45,7 +45,7 @@ export const groups = [
     title: ["Dispatch", "Dispatch"],
     guide: "guide/first-request",
     names:
-      "dispatch createSteering DispatchOptions DispatchResult WarmDispatchResult ContinuationOptions Execution Turn SteeringMode SteeringState Steering SteeringDelivery SteeringSendOptions",
+      "dispatch createSteering DispatchOptions DispatchResult WarmDispatchResult RunReport RunReportOptions RunReportDiff RunReportFile RunReportFailure ContinuationOptions Execution Turn SteeringMode SteeringState Steering SteeringDelivery SteeringSendOptions",
   },
   {
     id: "commands",

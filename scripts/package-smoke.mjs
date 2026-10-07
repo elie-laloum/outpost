@@ -421,7 +421,14 @@ const kimiSettings: KimiSettings = { authentication: 'usage' };
 composeAgent({ harness: createAntigravityHarness(antigravitySettings), model: 'fixture' });
 composeAgent({ harness: createCopilotHarness(copilotSettings) });
 composeAgent({ harness: createKimiHarness(kimiSettings), model: 'fixture' });
+import type { RunReport, RunReportOptions, RunReportDiff, RunReportFile, RunReportFailure } from '@elie-laloum/outpost';
 const once = await dispatch({agent:composeAgent({ harness: createCodexHarness({}) }),sandboxProvider:createLocalSandboxProvider(),brief:{text:'hello'}});
+const reportOptions: RunReportOptions = {format:'json'};
+const report: RunReport = JSON.parse(once.report(reportOptions));
+const reportDiff: RunReportDiff | null = report.diff;
+const reportFile: RunReportFile | undefined = reportDiff?.files[0];
+const reportFailure: RunReportFailure | undefined = report.failedTools[0];
+const markdownReport: string = result.report();
 await once.fork({brief:{text:'alternative'},branch:{mode:'named',name:'outpost/alternative'},hooks:{workspaceReady:[]}});
 // @ts-expect-error Warm results cannot replace their sandbox configuration.
 await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/wrong'}});

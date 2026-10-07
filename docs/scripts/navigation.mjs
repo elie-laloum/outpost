@@ -128,6 +128,7 @@ export const chapters = [
       "guide/storage",
       "guide/object-storage",
       "guide/journals",
+      "guide/run-reports",
       "guide/observability",
       "guide/record-replay",
     ],

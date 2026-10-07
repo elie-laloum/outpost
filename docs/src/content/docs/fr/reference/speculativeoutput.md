@@ -41,7 +41,7 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 ```ts
 export type SpeculativeOutput<T> = Omit<
   WarmDispatchResult<T>,
-  "resume" | "fork"
+  "resume" | "fork" | "report"
 >;
 ```
 

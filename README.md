@@ -89,6 +89,7 @@ const result = await dispatch({
 | Reuse a sandbox across commands and agent turns     | [Sandbox sessions](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/)                |
 | Connect tasks and run independent work in parallel  | [Task dependencies](https://elie-laloum.github.io/outpost/guide/task-dependencies/)              |
 | Coordinate changes across repositories              | [Multi-repository workflows](https://elie-laloum.github.io/outpost/guide/multiple-repositories/) |
+| Export a run summary for review                     | [Run reports](https://elie-laloum.github.io/outpost/guide/run-reports/)                          |
 | Return data your application can validate           | [Validated output](https://elie-laloum.github.io/outpost/guide/typed-responses/)                 |
 | Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/harness/)                           |
 | Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/recovery/)                        |

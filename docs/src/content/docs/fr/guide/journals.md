@@ -3,6 +3,8 @@ title: "Lire les journaux d’exécution"
 description: "Enregistrez les événements d’agent et consultez le journal d’une tâche terminée ou en échec."
 ---
 
+Utilisez les [rapports de run](../run-reports/) pour enregistrer un résumé du dispatch avec fichiers commités, échecs observés, durée et usage déclaré. Les rapports restent disponibles après le nettoyage du workspace.
+
 ## Enregistrer un journal
 
 Chaque tâche d’agent enregistre ses événements dans un journal par défaut. Définissez `logging.transporter` pour choisir son emplacement, puis utilisez `readJournal()` pour consulter les événements après l’exécution.

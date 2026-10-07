@@ -178,6 +178,7 @@ export async function runSpeculation<T>(
         const {
           resume: _resume,
           fork: _fork,
+          report: _report,
           ...output
         } = await sandbox.dispatch({
           ...candidate.request,

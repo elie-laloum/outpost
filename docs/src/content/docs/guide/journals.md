@@ -3,6 +3,8 @@ title: "Read execution journals"
 description: "Record agent events and read the journal of a completed or failed dispatch."
 ---
 
+Use [run reports](../run-reports/) to save a dispatch summary with committed files, observed failures, duration and reported usage. Reports remain available after workspace cleanup.
+
 ## Record a journal
 
 Each dispatch records its events in a journal by default. Set `logging.transporter` to choose its storage location, then use `readJournal()` to inspect the recorded events after the run.

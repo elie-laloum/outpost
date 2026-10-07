@@ -691,3 +691,11 @@ export type {
 export { WorkflowCostUnavailable } from "./domain/workflow/budget.ts";
 export { loadModelPrices } from "./adapters/models/model-prices.ts";
 export type { ModelPricesOptions } from "./adapters/models/model-prices.types.ts";
+
+export type {
+  RunReport,
+  RunReportOptions,
+  RunReportDiff,
+  RunReportFile,
+  RunReportFailure,
+} from "./domain/run-report.types.ts";

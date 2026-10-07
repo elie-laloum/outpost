@@ -1,3 +1,8 @@
+import { performance } from "node:perf_hooks";
+import type { UsageCost } from "../domain/pricing.types.ts";
+import { calculateUsageCost } from "../domain/pricing.ts";
+import { createRunReportEvents } from "./run-report-events.ts";
+import { createRunReport, runReportSnapshot } from "./run-report.ts";
 import { accountTaskUsage, deliverTaskUsage } from "./task-usage.ts";
 import { access } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -30,6 +35,8 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
 ): Promise<R> {
   if (options.observation && active.has(options.observation))
     return action(options);
+  const started = performance.now();
+  const reportEvents = createRunReportEvents();
   const root = options.observation ?? createObservationHub();
   const failures: unknown[] = [];
   let log: Journal | undefined;
@@ -50,6 +57,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
   const observation = root.child(
     { dispatchId: randomUUID() },
     [
+      reportEvents,
       {
         async observe(value) {
           await initialized;
@@ -91,6 +99,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
     ],
     options.redact,
   );
+  const initialDropped = observation.dropped;
   active.add(observation);
   observation.emit("sandbox", { kind: "dispatch-start" });
   const empty = (): Usage => ({ input: 0, cached: 0, output: 0 });
@@ -150,8 +159,40 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       failures.push(error);
     }
     await finish();
+    const snapshot = result.report && runReportSnapshot(result.report);
+    const warnings = [...(snapshot?.warnings ?? []), ...reportEvents.warnings];
+    if (observation.dropped > initialDropped)
+      warnings.push(
+        "Observation delivery lost events; the failure list may be incomplete.",
+      );
+    let cost: UsageCost | null = null;
+    if (options.prices) {
+      try {
+        cost = calculateUsageCost(result.usage, options.prices);
+      } catch {
+        warnings.push("Usage cost could not be calculated.");
+      }
+    }
     return {
       ...result,
+      ...(snapshot
+        ? {
+            report: createRunReport(
+              observation.redact({
+                ...snapshot,
+                completed: result.completed,
+                text: result.text ?? snapshot.text,
+                commits: result.commits ?? snapshot.commits,
+                usage: result.usage,
+                cost,
+                durationMs: performance.now() - started,
+                failedTools: reportEvents.failures,
+                omittedFailures: reportEvents.omittedFailures,
+                warnings,
+              }),
+            ),
+          }
+        : {}),
       ...(log?.reference ? { logReference: log.reference } : {}),
       observerErrors: [...failures, ...observation.errors],
     };

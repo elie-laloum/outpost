@@ -543,6 +543,31 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/runreport",
+        "label": "RunReport",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runreportoptions",
+        "label": "RunReportOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runreportdiff",
+        "label": "RunReportDiff",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runreportfile",
+        "label": "RunReportFile",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runreportfailure",
+        "label": "RunReportFailure",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/execution",
         "label": "Execution",
         "attrs": { "data-api-kind": "interface" }
