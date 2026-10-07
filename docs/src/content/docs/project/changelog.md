@@ -12,6 +12,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add `@elie-laloum/outpost/testing` with `scriptedAgent()` and `createMemorySandboxProvider()` for offline workflow CI: predefined events, usage, real Git commits, response repairs and strict command fixtures. Add bilingual Guide/API documentation and an executable workflow example; Git workspaces remain on disk and transfers, cold conversation resume and arbitrary command execution are unsupported.
 - Add opt-in Vercel and Daytona dependency download caches backed by a caller-owned Transport: restore before preparation, archive before disposal, retain compatibility hashing and fence concurrent publishers. Add bilingual Guide/API documentation and a cloud example without a README. Deterministic SDK and filesystem fixtures cover binary transfers, permissions, concurrency and cleanup failures; live cloud/S3 validation remains pending.
 - Add incremental lifecycle preparation with `when: changed(files)`: fingerprint exact file contents in the hook environment and rerun conditional hooks before operations on a reused sandbox. Save fingerprints only after success and retry failed preparations without closing a warm sandbox. Add bilingual Guide/API documentation and an offline `npm ci` example. Deterministic local-process and simulated-remote tests cover reuse, failures, cancellation and deadlines; real Docker checks the live sandbox files. Live cloud validation remains pending.
 

@@ -52,6 +52,10 @@
     "./queues/bullmq": {
       "types": "./dist/infrastructure/task-queue-bullmq.d.ts",
       "import": "./dist/infrastructure/task-queue-bullmq.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
     }
   },
   "files": [

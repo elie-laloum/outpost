@@ -92,6 +92,7 @@ export const chapters = [
       "guide/typed-workflows",
       "guide/task-dependencies",
       "guide/concurrency-and-retries",
+      "guide/testing-workflows",
       "guide/verification-loops",
       "guide/multiple-repositories",
       "guide/speculation",

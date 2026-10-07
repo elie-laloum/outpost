@@ -1,5 +1,45 @@
 [
   {
+    "title": ["Workflow testing", "Tests de workflows"],
+    "items": [
+      {
+        "slug": "reference/scriptedagent",
+        "label": "scriptedAgent",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/creatememorysandboxprovider",
+        "label": "createMemorySandboxProvider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/scriptedagentoptions",
+        "label": "ScriptedAgentOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/scriptedturn",
+        "label": "ScriptedTurn",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/scriptedcommit",
+        "label": "ScriptedCommit",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/memorysandboxoptions",
+        "label": "MemorySandboxOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/memorycommand",
+        "label": "MemoryCommand",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Pricing", "Tarification"],
     "items": [
       {

@@ -511,6 +511,42 @@ void [legacy,extended];
   checkTypes(consumer);
   checkTypes(guardConsumer);
   checkTypes(conflictConsumer);
+  const testingConsumer = join(temporary, "testing.ts");
+  writeFileSync(
+    testingConsumer,
+    `import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {dispatch} from '@elie-laloum/outpost';
+import {scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
+const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
+try {
+  const git = (...args: string[]) => execFileSync('git',args,{cwd:repository});
+  git('init','-b','main');
+  git('config','user.name','Test');
+  git('config','user.email','test@example.invalid');
+  await writeFile(join(repository,'base.txt'),'base');
+  git('add','.');
+  git('commit','-m','Initial');
+  const commit: ScriptedCommit = {message:'fix: parser',files:{'src/p.ts':'fixed'}};
+  const turn: ScriptedTurn = {text:'Done',commit};
+  const options: ScriptedAgentOptions = {turns:[turn]};
+  const command: MemoryCommand = {executable:'verify',status:0};
+  const memory: MemorySandboxOptions = {commands:[command]};
+  const result = await dispatch({repository,agent:scriptedAgent(options),sandboxProvider:createMemorySandboxProvider(memory),brief:{text:'Fix'},logging:false});
+  assert.equal(result.text,'Done');
+  assert.equal(result.commits.length,1);
+} finally {await rm(repository,{recursive:true,force:true});}
+`,
+  );
+  checkTypes(testingConsumer);
+  execFileSync(process.execPath, [testingConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
+
   const telemetryApi = JSON.parse(
     readFileSync(
       resolve("node_modules/@opentelemetry/api/package.json"),

@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "testing",
+    title: ["Workflow testing", "Tests de workflows"],
+    guide: "guide/testing-workflows",
+    names:
+      "scriptedAgent createMemorySandboxProvider ScriptedAgentOptions ScriptedTurn ScriptedCommit MemorySandboxOptions MemoryCommand",
+  },
+  {
     id: "pricing",
     title: ["Pricing", "Tarification"],
     guide: "guide/budgets",

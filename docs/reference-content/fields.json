@@ -8353,5 +8353,77 @@
   "DaytonaOptions.caches": [
     "Opt-in download caches under /outpost/cache/<name>, restored on acquire and saved before deletion through each cache’s required transport. Identity includes the canonical host repository, Daytona image/snapshot, sandbox UID/GID, name and key. Non-root images must permit elevated cache-directory setup.",
     "Caches de téléchargements optionnels sous /outpost/cache/<name>, restaurés à l’acquisition et sauvegardés avant suppression via le transport obligatoire de chaque cache. L’identité inclut le dépôt hôte canonique, l’image/snapshot Daytona, les UID/GID, le nom et la clé. Les images non root doivent permettre la préparation privilégiée des répertoires de cache."
+  ],
+  "scriptedAgent.options": [
+    "Snapshot of the name and ordered turns for one test agent. No sandbox is allocated until dispatch or createSandbox.",
+    "Copie du nom et des tours ordonnés d’un agent de test. Aucune sandbox n’est allouée avant dispatch ou createSandbox."
+  ],
+  "createMemorySandboxProvider.options": [
+    "Optional predefined command results. A fresh provider starts with an unconsumed command queue.",
+    "Résultats de commandes prédéfinis facultatifs. Un nouveau fournisseur commence avec une file de commandes non consommée."
+  ],
+  "ScriptedAgentOptions.name": [
+    "Observer-visible agent name; defaults to scripted. Empty names are rejected.",
+    "Nom d’agent visible dans les observations ; scripted par défaut. Les noms vides sont refusés."
+  ],
+  "ScriptedAgentOptions.turns": [
+    "Nonempty sequence consumed once per agent request, across sandboxes, passes, retries and repairs. Recreate the agent to reset it.",
+    "Séquence non vide consommée une fois par requête d’agent, entre sandboxes, passes, retries et réparations. Recréez l’agent pour la réinitialiser."
+  ],
+  "ScriptedTurn.text": [
+    "Text event appended after the supplied events; omitted means no additional answer text.",
+    "Événement text ajouté après les événements fournis ; son absence n’ajoute aucun texte de réponse."
+  ],
+  "ScriptedTurn.events": [
+    "Events emitted in order before text and usage. Conversation IDs belong to the agent and cannot be supplied here. A finished event is appended when absent.",
+    "Événements émis dans l’ordre avant text et usage. Les identifiants de conversation appartiennent à l’agent et ne peuvent pas être fournis ici. Un événement finished est ajouté s’il manque."
+  ],
+  "ScriptedTurn.usage": [
+    "Simulated token counters for normal workflow accounting. Defaults to complete zero counters unless events contains usage; combining both sources is rejected.",
+    "Compteurs de tokens simulés pour la comptabilité normale du workflow. Compteurs nuls complets par défaut sauf si events contient usage ; combiner les deux sources est refusé."
+  ],
+  "ScriptedTurn.commit": [
+    "Real host Git commit applied before emitting events, even for a nonzero scripted status. No commit is made when omitted.",
+    "Commit Git réel sur l’hôte appliqué avant les événements, même avec un statut scripté non nul. Aucun commit n’est créé si ce champ est absent."
+  ],
+  "ScriptedTurn.status": [
+    "Simulated process exit status, an integer from 0 to 255, default 0. Nonzero status exercises normal dispatch failure and workflow retry behavior.",
+    "Statut de sortie simulé, entier de 0 à 255, 0 par défaut. Un statut non nul exerce l’échec normal du dispatch et les retries du workflow."
+  ],
+  "ScriptedTurn.stderr": [
+    "Simulated standard error emitted after the events; empty by default.",
+    "Erreur standard simulée émise après les événements ; vide par défaut."
+  ],
+  "ScriptedCommit.message": [
+    "Nonempty commit message. Test commits use Outpost Test identity, with signing and host hooks disabled.",
+    "Message de commit non vide. Les commits de test utilisent l’identité Outpost Test, sans signature ni hooks hôte."
+  ],
+  "ScriptedCommit.files": [
+    "Nonempty map of repository-relative paths to UTF-8 contents; null deletes an existing file. Traversal, .git, .outpost and symlinks are refused. Only these paths enter the commit; separately staged work remains staged.",
+    "Table non vide de chemins relatifs au dépôt vers leur contenu UTF-8 ; null supprime un fichier existant. Traversées, .git, .outpost et liens symboliques sont refusés. Seuls ces chemins entrent dans le commit ; le travail indexé séparément reste indexé."
+  ],
+  "MemorySandboxOptions.commands": [
+    "Ordered queue of exact executable/argument matches and their simulated results, shared across leases of this provider. Defaults to empty; scripted agent requests do not consume it.",
+    "File ordonnée de correspondances exactes exécutable/arguments et de leurs résultats simulés, partagée entre les allocations du fournisseur. Vide par défaut ; les requêtes d’agents scriptés ne la consomment pas."
+  ],
+  "MemoryCommand.executable": [
+    "Executable name expected for the next non-agent command. It is compared literally and never launched.",
+    "Nom d’exécutable attendu pour la prochaine commande hors agent. Il est comparé littéralement et n’est jamais lancé."
+  ],
+  "MemoryCommand.arguments": [
+    "Exact ordered arguments expected for this command; defaults to an empty array.",
+    "Arguments exacts ordonnés attendus pour cette commande ; tableau vide par défaut."
+  ],
+  "MemoryCommand.status": [
+    "Simulated command exit status; defaults to 0. A nonzero value fails defineCommandTask through its normal retry policy.",
+    "Statut de sortie simulé ; 0 par défaut. Une valeur non nulle fait échouer defineCommandTask selon sa politique normale de retry."
+  ],
+  "MemoryCommand.stdout": [
+    "Simulated standard output delivered to command observation and returned in CommandResult; defaults to empty.",
+    "Sortie standard simulée transmise à l’observation de commande et renvoyée dans CommandResult ; vide par défaut."
+  ],
+  "MemoryCommand.stderr": [
+    "Simulated standard error delivered to command observation and returned in CommandResult; defaults to empty.",
+    "Erreur standard simulée transmise à l’observation de commande et renvoyée dans CommandResult ; vide par défaut."
   ]
 }
