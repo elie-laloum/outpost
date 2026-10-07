@@ -1,3 +1,6 @@
+// Agent conflict resolution — an agent combines conflicting changes in a separate workspace.
+// Integration requires a successful verification command; refused work stays available for review.
+
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";

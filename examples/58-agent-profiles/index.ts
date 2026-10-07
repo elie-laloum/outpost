@@ -1,3 +1,6 @@
+// Agent profiles — share instructions and MCP declarations across harnesses, with explicit tool restrictions.
+// An offline run checks MCP filtering and denied edits; unsupported CLI allowlists are refused.
+
 import assert from "node:assert/strict";
 import { stat } from "node:fs/promises";
 import { join } from "node:path";

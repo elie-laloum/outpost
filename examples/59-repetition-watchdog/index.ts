@@ -1,3 +1,6 @@
+// Repetition watchdog — detect repeated tool calls and stop, warn or steer the agent with an instruction.
+// An offline model demonstrates all three policies using real local commands, without paid calls.
+
 import assert from "node:assert/strict";
 import {
   createAgent,

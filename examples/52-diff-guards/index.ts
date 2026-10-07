@@ -1,3 +1,6 @@
+// Diff guards — check protected paths and changed-line limits before integrating commits.
+// Refused changes leave the host branch untouched and keep the agent's work for review.
+
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";

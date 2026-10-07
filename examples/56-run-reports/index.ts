@@ -1,4 +1,6 @@
+// Run reports — export commits, diff statistics, failed tools, usage and cost as Markdown and JSON.
 // Offline model, real local commands and Git commits; no credentials or paid calls.
+
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";

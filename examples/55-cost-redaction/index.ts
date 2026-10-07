@@ -1,4 +1,6 @@
+// Cost and redaction — price workflow usage and mask a dummy secret in events, transcripts and journals.
 // Offline demonstration with a simulated model; no account or paid call is needed.
+
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";

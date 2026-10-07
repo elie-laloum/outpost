@@ -1,3 +1,6 @@
+// Run state — persist a workflow's execution, read its status and follow events by run ID.
+// An offline model runs locally; the final snapshot includes tasks, dispatches, commits and usage.
+
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
