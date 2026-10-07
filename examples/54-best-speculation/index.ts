@@ -2,7 +2,6 @@
 // Run with Node.js 24+, the root .env settings and the outpost:sandbox Docker image.
 
 import { execFileSync } from "node:child_process";
-import { cp, mkdir, mkdtemp } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
@@ -13,6 +12,7 @@ import {
   speculate,
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
+import { demoRepository } from "../shared/repository.ts";
 import { score } from "./score.ts";
 import { validate } from "./validate.ts";
 
@@ -29,18 +29,9 @@ const coder = createAgent({
   }),
 });
 
-const state = join(import.meta.dirname, "state");
-await mkdir(state, { recursive: true });
-const repository = await mkdtemp(join(state, "run-"));
-await cp(join(import.meta.dirname, "repo"), repository, { recursive: true });
+const repository = demoRepository(import.meta.dirname);
 const git = (...args: string[]) =>
   execFileSync("git", args, { cwd: repository, encoding: "utf8" }).trim();
-git("init", "-b", "main");
-git("config", "user.name", "Outpost demo");
-git("config", "user.email", "demo@example.invalid");
-git("config", "core.autocrlf", "false");
-git("add", ".");
-git("commit", "-m", "Initial commit");
 
 console.log("Repository:", repository);
 const approaches = ["minimal", "regex", "loop"];

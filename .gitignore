@@ -13,6 +13,7 @@ coverage/
 .outpost/recovery/
 
 examples/*/state/
+examples/.repos/
 
 docs/.astro/
 docs/.examples/

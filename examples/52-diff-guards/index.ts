@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cp, mkdir, mkdtemp, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
@@ -12,6 +12,7 @@ import {
   recoveryDetails,
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
+import { demoRepository } from "../shared/repository.ts";
 
 const coder = createAgent({
   model,
@@ -25,18 +26,9 @@ const coder = createAgent({
   }),
 });
 
-const state = join(import.meta.dirname, "state");
-await mkdir(state, { recursive: true });
-const repository = await mkdtemp(join(state, "run-"));
-await cp(join(import.meta.dirname, "repo"), repository, { recursive: true });
+const repository = demoRepository(import.meta.dirname);
 const git = (...args: string[]) =>
   execFileSync("git", args, { cwd: repository, encoding: "utf8" }).trim();
-git("init", "-b", "main");
-git("config", "user.name", "Outpost demo");
-git("config", "user.email", "demo@example.invalid");
-git("config", "core.autocrlf", "false");
-git("add", ".");
-git("commit", "-m", "Initial commit");
 
 const guard = {
   protectedPaths: [".github/**", "migrations/**"],

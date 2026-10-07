@@ -1,8 +1,6 @@
 // Offline demonstration with a simulated model; no account or paid call is needed.
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { mkdtemp, readFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
@@ -15,22 +13,10 @@ import {
   readJournal,
 } from "@elie-laloum/outpost";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
+import { demoRepository } from "../shared/repository.ts";
 import { illustrativePrices, pricesFromCatalog } from "./prices.ts";
 
-const repository = await mkdtemp(join(tmpdir(), "outpost-cost-demo-"));
-const git = (...args: string[]) =>
-  execFileSync("git", args, { cwd: repository, encoding: "utf8" });
-git("init", "-b", "main");
-git("config", "user.name", "Outpost demo");
-git("config", "user.email", "demo@example.invalid");
-git(
-  "-c",
-  "core.hooksPath=/dev/null",
-  "commit",
-  "--allow-empty",
-  "-m",
-  "Initial",
-);
+const repository = demoRepository(import.meta.dirname);
 
 const dummySecret = "sk-" + "A".repeat(24);
 const agent = createAgent({
@@ -91,7 +77,7 @@ const result = await defineWorkflow("private-cost", [task]).start({
 await observation.close();
 assert.ok(!JSON.stringify(seen).includes(dummySecret));
 console.log("Status:", result.status, "Cost:", result.usage.cost);
-console.log("Repository retained for inspection:", repository);
+console.log("Demo repository:", repository);
 if (result.status === "done") {
   const output = result.value(task);
   assert.ok(output.transcript && output.logReference);

@@ -2,7 +2,7 @@
 
 Build the root package with `bun run build`, then run `node examples/55-cost-redaction/index.ts` with Node.js 24+. This deterministic example uses a simulated model and an explicitly unisolated local sandbox; no account, API key or container is required.
 
-It creates and retains a temporary Git repository, estimates €2.60 using illustrative per-million rates, and checks that observation receivers, the saved harness transcript and journal contain no dummy key. The original prompt reaches the model; returned values stay intact. Inspect the printed repository path, then remove that temporary repository yourself.
+Like the other examples, it prepares a sample Git repository through `demoRepository()` in `examples/.repos/55-cost-redaction` and reuses it on subsequent runs. It estimates €2.60 using illustrative per-million rates, and checks that observation receivers, the saved harness transcript and journal contain no dummy key. The original prompt reaches the model; returned values stay intact. Inspect the printed repository path to review the saved files.
 
 Run `OUTPOST_COST_LIMIT=0.01 node examples/55-cost-redaction/index.ts` to stop at the first usage report. The estimate can exceed the limit because usage arrives after a request; provider billing limits remain necessary.
 

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
@@ -13,6 +13,7 @@ import {
   recoveryDetails,
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
+import { demoRepository } from "../shared/repository.ts";
 
 const coder = createAgent({
   model,
@@ -25,29 +26,25 @@ const coder = createAgent({
     ],
   }),
 });
-const state = join(import.meta.dirname, "state");
-await mkdir(state, { recursive: true });
+const repository = demoRepository(import.meta.dirname);
+const git = (...args: string[]) =>
+  execFileSync("git", args, { cwd: repository, encoding: "utf8" }).trim();
 
 for (const failedVerification of [false, true]) {
-  const repository = await mkdtemp(join(state, "run-"));
-  const git = (...args: string[]) =>
-    execFileSync("git", args, { cwd: repository, encoding: "utf8" }).trim();
-  git("init", "-b", "main");
-  git("config", "user.name", "Outpost demo");
-  git("config", "user.email", "demo@example.invalid");
-  await writeFile(join(repository, "greeting.txt"), "Hi!\n");
-  git("add", ".");
-  git("commit", "-m", "Initial");
   await using workspace = await openWorkspace({
     repository,
     branch: { mode: "integrate" },
     guard: { maxChangedLines: 10 },
   });
-  await writeFile(join(workspace.directory, "greeting.txt"), "Bonjour!\n");
+  const greeting = await readFile(join(repository, "greeting.txt"), "utf8");
+  await writeFile(
+    join(workspace.directory, "greeting.txt"),
+    `${greeting}Bonjour!\n`,
+  );
   execFileSync("git", ["commit", "-am", "French greeting"], {
     cwd: workspace.directory,
   });
-  await writeFile(join(repository, "greeting.txt"), "Hello!\n");
+  await writeFile(join(repository, "greeting.txt"), `${greeting}Hello!\n`);
   git("commit", "-am", "English greeting");
   const hostCommit = git("rev-parse", "HEAD");
   console.log("Repository:", repository);
