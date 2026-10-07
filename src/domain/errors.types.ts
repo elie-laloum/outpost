@@ -1,4 +1,5 @@
 export type FaultCode =
+  | "guard"
   | "rejected"
   | "configuration"
   | "process"

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add workspace diff guards (`guard.protectedPaths`, `guard.maxChangedLines`) for named and integration branches, independently of the agent. Check the final committed diff after synchronization and again before merging the inspected commit; reject protected paths, oversized text changes, uncountable binaries with a line limit and incomplete inspection with code `guard`. Retain rejected branches and worktrees; refuse `current` before execution. Deterministic tests use real temporary Git repositories, local agents and a simulated remote provider; no paid model calls are required.
+
 ## 10.0.1
 
 - **Breaking:** Report gate refusals as workflow status `rejected`. Add typed `terminationCode` to workflow results, finish events and queued workflow summaries, and expose it on `WorkflowFailure.code`; preserve classified faults, deadlines, budget stops and checkpointed rejection audit trails. Consumers checking only `failed` must also handle `rejected`. Deterministic regression tests cover the termination semantics; no live agent or provider calls are required.

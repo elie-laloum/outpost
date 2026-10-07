@@ -383,6 +383,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/diffguard",
+        "label": "DiffGuard",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/commit",
         "label": "Commit",
         "attrs": { "data-api-kind": "interface" }

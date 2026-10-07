@@ -32,6 +32,33 @@ Gardez le travail sur une branche nommée pour examiner les commits avant de les
 
 Référence API : [BranchPolicy](../../reference/branchpolicy/).
 
+## Refuser les changements commités indésirables
+
+Définissez un `guard` sur le workspace pour refuser les chemins protégés ou un diff commité final trop volumineux, indépendamment de l’agent. Ce dispatch intègre uniquement si les deux règles passent. Un refus lève `OutpostError` avec le code `guard`, libère la sandbox et conserve la branche et le worktree pour relecture.
+
+```ts
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Fix the failing tests and commit the fix." },
+  branch: { mode: "integrate" },
+  guard: {
+    protectedPaths: [".github/**", "migrations/**"],
+    maxChangedLines: 800,
+  },
+});
+```
+
+Le compte additionne les lignes ajoutées et supprimées ; un total de 800 est accepté. Les renommages détectés sans changement de contenu comptent zéro ligne, mais les deux chemins sont vérifiés. Avec un seuil de lignes, les changements binaires sont refusés car Git ne peut pas compter leurs lignes. Consultez [DiffGuard](../../reference/diffguard/) pour la syntaxe des motifs et les options.
+
+Le contrôle s’exécute après synchronisation puis sous le verrou d’intégration, avant de fusionner le commit inspecté. Il inclut les changements hérités via `branch.from`, depuis l’ancêtre commun avec la branche hôte. En mode `named`, il vérifie depuis le commit d’ouverture du workspace au fil des exécutions. `current` est refusé avant exécution. Configurez `guard` dans `openWorkspace()` si vous fournissez un workspace existant ; les agents successifs partagent sa politique.
+
+Seul le diff commité final est contrôlé : un fichier protégé modifié puis restauré est accepté, et les fichiers non commités sont exclus. C’est une règle d’intégration, pas une permission sur le système de fichiers. Une inspection échouée ou incomplète refuse aussi l’intégration. Consultez `error.details` pour les violations et les commits comparés, et `recoveryDetails(error)` pour la branche et le répertoire conservés. Fermer le même workspace conserve un worktree refusé même sans `preserve: true`. Une passe ultérieure en échec n’annule pas les intégrations précédentes.
+
 ## Conditionner l’intégration à une vérification
 
 `dispatch()` et `workspace.dispatch()` fusionnent une branche `integrate` dès que l’agent réussit. Pour lancer d’abord votre propre vérification, ouvrez le workspace vous-même et travaillez dans une [session de sandbox](../sandbox-sessions/).

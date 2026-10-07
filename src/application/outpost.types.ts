@@ -1,4 +1,5 @@
 import type { ObservationHub } from "../domain/observation.types.ts";
+import type { DiffGuard } from "../domain/diff-guard.types.ts";
 import type {
   Transport,
   TransportReference,
@@ -29,6 +30,7 @@ import type { DispatchOptions, Execution } from "./execution.types.ts";
 import type { VariableQuestion } from "./interactive-brief.types.ts";
 
 export interface WorkspaceOptions {
+  readonly guard?: DiffGuard;
   readonly observation?: ObservationHub;
   readonly storageQuota?: Omit<StorageReservationOptions, "signal">;
   readonly signal?: AbortSignal;

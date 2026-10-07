@@ -262,6 +262,7 @@ export {
 export type { ResponseSpec, StandardValidator } from "./domain/response.ts";
 
 export { OutpostError, recoveryDetails } from "./domain/errors.ts";
+export type { DiffGuard } from "./domain/diff-guard.types.ts";
 
 export type { FaultCode } from "./domain/errors.ts";
 

@@ -428,6 +428,17 @@ await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/
 console.log(n,once.commits);
 `,
   );
+  const guardConsumer = join(temporary, "guard.ts");
+  writeFileSync(
+    guardConsumer,
+    `import { type DiffGuard, type WorkspaceOptions, type SandboxOptions, type FaultCode } from '@elie-laloum/outpost';
+const guard: DiffGuard = {protectedPaths:['.github/**'],maxChangedLines:800};
+const workspace: WorkspaceOptions = {branch:{mode:'integrate'},guard};
+const sandbox: SandboxOptions = workspace;
+const code: FaultCode = 'guard';
+void [sandbox,code];
+`,
+  );
   const checkTypes = (file) =>
     execFileSync(
       process.execPath,
@@ -450,6 +461,7 @@ console.log(n,once.commits);
       { cwd: temporary, stdio: "inherit" },
     );
   checkTypes(consumer);
+  checkTypes(guardConsumer);
   const telemetryApi = JSON.parse(
     readFileSync(
       resolve("node_modules/@opentelemetry/api/package.json"),

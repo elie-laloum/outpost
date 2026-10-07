@@ -1,6 +1,6 @@
 import { observedOperation } from "../../domain/observed-operation.ts";
 import { join } from "node:path";
-import { OutpostError } from "../../domain/errors.ts";
+import { OutpostError, recordRecovery } from "../../domain/errors.ts";
 import type {
   Disposal,
   WorkspaceRecord,
@@ -8,6 +8,8 @@ import type {
 import { inside } from "../files.ts";
 import { git } from "./command.ts";
 import { lock } from "./lock.ts";
+import { inspectDiffGuard, verifyGuardSnapshot } from "./diff-guard.ts";
+import type { GuardSnapshot } from "./diff-guard.types.ts";
 import type {
   AcquireWorkspaceOptions,
   WorkspaceLease,
@@ -20,8 +22,32 @@ export function workspaceLease(
 ): WorkspaceLease {
   const { policy, repository, baseBranch, branch, directory: workdir } = record;
   let disposal: Promise<Disposal> | undefined;
+  let guardRefused = false;
+  const guard = options.guard
+    ? Object.freeze({
+        ...options.guard,
+        ...(options.guard.protectedPaths
+          ? { protectedPaths: Object.freeze([...options.guard.protectedPaths]) }
+          : {}),
+      })
+    : undefined;
+  const checkGuard = async () => {
+    if (!guard) return undefined;
+    try {
+      return await observedOperation(
+        options.observation,
+        "git",
+        "diff.guard",
+        () => inspectDiffGuard(record, guard, options.limits?.collectMs),
+      );
+    } catch (cause) {
+      guardRefused = true;
+      throw cause;
+    }
+  };
   return {
     ...record,
+    checkGuard,
     async integrate() {
       if (policy.mode !== "integrate") return;
       const current = (
@@ -39,13 +65,37 @@ export function workspaceLease(
         "integration.lock",
         async () => lock(repository, `merge:${baseBranch}`),
       );
+      let snapshot: GuardSnapshot | undefined;
       try {
+        snapshot = await checkGuard();
+        if (snapshot)
+          await verifyGuardSnapshot(
+            record,
+            snapshot,
+            options.limits?.collectMs,
+          );
         await git(
           repository,
-          ["merge", "--no-edit", branch],
+          ["merge", "--no-edit", snapshot?.candidateCommit ?? branch],
           options.limits?.mergeMs,
         );
       } catch (cause) {
+        if (cause instanceof OutpostError && cause.code === "guard") {
+          guardRefused = true;
+          const error = new OutpostError(
+            "guard",
+            cause.message,
+            {
+              ...cause.details,
+              ...snapshot,
+              directory: workdir,
+              branch,
+            },
+            cause.cause,
+          );
+          recordRecovery(error, { branch, directory: workdir });
+          throw error;
+        }
         throw new OutpostError(
           "conflict",
           "Automatic integration failed; workspace retained",
@@ -66,7 +116,7 @@ export function workspaceLease(
       disposal = (async () => {
         try {
           if (policy.mode === "current") return {};
-          if (preserve) return { retainedDirectory: workdir };
+          if (preserve || guardRefused) return { retainedDirectory: workdir };
           const attached = await git(workdir, [
             "symbolic-ref",
             "--quiet",

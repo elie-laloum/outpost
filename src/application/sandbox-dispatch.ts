@@ -213,6 +213,18 @@ export async function dispatchInSandbox<T>(
   }
   invariant(outcome, "Execution did not produce a result");
   const { session, execution, fallback } = outcome;
+  try {
+    await context.state.lease.checkGuard();
+  } catch (cause) {
+    recordRecovery(cause, {
+      branch: workspace.branch,
+      directory: workspace.directory,
+      commits: changes,
+      transcript: transcript?.file,
+      transcriptReference: transcript?.reference,
+    });
+    throw cause;
+  }
   const { selected } = session;
   return {
     ...execution,

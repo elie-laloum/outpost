@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Non publié
 
+- Ajoute les garde-fous de diff des workspaces (`guard.protectedPaths`, `guard.maxChangedLines`) pour les branches named et integrate, indépendamment de l’agent. Vérifie le diff commité final après synchronisation puis avant de fusionner le commit inspecté ; refuse les chemins protégés, les changements textuels trop volumineux, les binaires non dénombrables avec un seuil de lignes et les inspections incomplètes avec le code `guard`. Conserve les branches et worktrees refusés ; refuse `current` avant exécution. Les tests déterministes utilisent de vrais dépôts Git temporaires, des agents locaux et un fournisseur distant simulé ; aucun appel payant à un modèle n’est nécessaire.
+
 ## 10.0.1
 
 - **Incompatible :** Signaler les refus de gates par le statut de workflow `rejected`. Ajouter le `terminationCode` typé aux résultats, événements de fin et résumés des workflows en file, et l’exposer via `WorkflowFailure.code` ; préserver les erreurs classées, délais, arrêts de budget et traces de rejet conservées dans les checkpoints. Les consommateurs qui testent uniquement `failed` doivent aussi traiter `rejected`. Les tests de régression déterministes couvrent ces terminaisons ; aucun appel réel à un agent ou provider n’est nécessaire.

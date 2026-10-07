@@ -2,6 +2,7 @@ import { observedOperation } from "../../domain/observed-operation.ts";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { OutpostError, recordRecovery } from "../../domain/errors.ts";
+import { validateDiffGuard } from "../../domain/diff-guard.ts";
 import { copySelected, inside } from "../files.ts";
 import { git } from "./command.ts";
 import { lock } from "./lock.ts";
@@ -16,6 +17,7 @@ import type {
 export async function acquireWorkspace(
   options: AcquireWorkspaceOptions,
 ): Promise<WorkspaceLease> {
+  validateDiffGuard(options.guard, options.branch ?? { mode: "current" });
   const repository = await observedOperation(
     options.observation,
     "git",

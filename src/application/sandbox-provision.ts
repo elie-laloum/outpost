@@ -45,9 +45,10 @@ export async function provisionSandbox(
     !options.workspace ||
       (!options.repository &&
         !options.branch &&
+        !options.guard &&
         !options.copies &&
         !options.storageQuota),
-    "A supplied workspace owns its repository, branch, copied inputs and storage quota",
+    "A supplied workspace owns its repository, branch, diff guard, copied inputs and storage quota",
   );
   const owned = !options.workspace;
   invariant(

@@ -12,8 +12,8 @@
     "Agent par défaut de dispatch(), resume(), fork() et attach() sur cette sandbox ; l’agent d’une opération le remplace. Sur un provider distant avec bootstrap actif, son premier candidat est installé à l’allocation ; attach() refuse un agent de secours sur tous les providers."
   ],
   "SandboxOptions.workspace": [
-    "Open workspace to run in, from openWorkspace(); close() leaves it open. Combining it with repository, branch, copies or storageQuota, or passing a workspace already bound to an open sandbox, fails with code configuration.",
-    "Workspace ouvert dans lequel travailler, issu d’openWorkspace() ; close() le laisse ouvert. Le combiner avec repository, branch, copies ou storageQuota, ou passer un workspace déjà lié à une sandbox ouverte, échoue avec le code configuration."
+    "Open workspace to run in, from openWorkspace(); close() leaves it open. Combining it with repository, branch, guard, copies or storageQuota, or passing a workspace already bound to an open sandbox, fails with code configuration.",
+    "Workspace ouvert dans lequel travailler, issu d’openWorkspace() ; close() le laisse ouvert. Le combiner avec repository, branch, guard, copies ou storageQuota, ou passer un workspace déjà lié à une sandbox ouverte, échoue avec le code configuration."
   ],
   "SandboxOptions.hooks": [
     "Setup commands, each required to exit 0 within its deadlineMs, default 600000 (10 minutes): workspaceReady on the host once a new worktree exists, then hostReady (host, in order) and sandboxReady (sandbox, all at once) concurrently; a nonzero exit fails setup with code process. With a supplied workspace, workspaceReady does not run and hooks given here replace the workspace's hostReady and sandboxReady.",
@@ -52,8 +52,8 @@
     "Fichiers ou dossiers relatifs au dépôt, copiés depuis le checkout hôte dans le nouveau worktree avant workspaceReady ; les entrées absentes sont ignorées. Exige named ou integrate, et les chemins absolus, avec .. ou .git échouent avec le code configuration. Une copie non suivie ou ignorée fait conserver le worktree à la fermeture. Sur un provider distant sans includeUncommitted, une copie non ignorée par un .gitignore commité fait échouer la première synchronisation avec le code workspace."
   ],
   "WorkspaceOptions.limits": [
-    "Deadlines in milliseconds for copying, Git preparation, commit collection and integration. Past a deadline the stage fails with code timeout, or conflict for integration.",
-    "Délais en millisecondes de copie, de préparation Git, de collecte des commits et d’intégration. Au-delà, l’étape échoue avec le code timeout, ou conflict pour l’intégration."
+    "Deadlines in milliseconds for copying, Git preparation, commit collection and integration. Past a deadline the stage fails with code timeout, or conflict for integration. collectMs also bounds each Git command inspecting a diff guard; incomplete inspection fails with code guard.",
+    "Délais en millisecondes de copie, de préparation Git, de collecte des commits et d’intégration. Au-delà, l’étape échoue avec le code timeout, ou conflict pour l’intégration. collectMs borne aussi chaque commande Git d’inspection du garde-fou de diff ; une inspection incomplète échoue avec le code guard."
   ],
   "WorkspaceOptions.label": [
     "Name used in the integrate branch (outpost/<label>-<id>), the worktree directory under .outpost/workspaces and the startup-failure journal; lowercased, other characters replaced by -, cut to 48.",
@@ -492,12 +492,12 @@
     "Ouvre le terminal interactif d’un agent dans une nouvelle sandbox sur ce workspace. Si le terminal sort avec le statut 0, il fusionne une branche integrate ; la sandbox est fermée et le workspace reste ouvert."
   ],
   "Workspace.close": [
-    "Release the lock and remove a clean managed worktree; an integrate branch is deleted once merged, a named branch is kept. With preserve: true, a detached HEAD or uncommitted, untracked or ignored files, the worktree stays and is returned as retainedDirectory. Fails with code configuration while a sandbox is open; later calls return the first result.",
-    "Libère le verrou et supprime un worktree géré propre ; une branche integrate est supprimée une fois fusionnée, une branche named est conservée. Avec preserve: true, un HEAD détaché ou des fichiers modifiés, non suivis ou ignorés, le worktree est conservé et renvoyé dans retainedDirectory. Échoue avec le code configuration tant qu’une sandbox est ouverte ; les appels suivants renvoient le premier résultat."
+    "Release the lock and remove a clean managed worktree; an integrate branch is deleted once merged, a named branch is kept. After a diff guard refusal, with preserve: true, a detached HEAD or uncommitted, untracked or ignored files, the worktree stays and is returned as retainedDirectory. Fails with code configuration while a sandbox is open; later calls return the first result.",
+    "Libère le verrou et supprime un worktree géré propre ; une branche integrate est supprimée une fois fusionnée, une branche named est conservée. Après un refus du garde-fou de diff, avec preserve: true, un HEAD détaché ou des fichiers modifiés, non suivis ou ignorés, le worktree est conservé et renvoyé dans retainedDirectory. Échoue avec le code configuration tant qu’une sandbox est ouverte ; les appels suivants renvoient le premier résultat."
   ],
   "Workspace.integrate": [
-    "Merge the integrate branch into the base branch with git merge --no-edit in the host checkout; does nothing in current and named modes. Fails with code conflict when the host checkout switched branches, another integration holds the merge lock or the merge fails; the work branch stays.",
-    "Fusionne la branche integrate dans la branche de base avec git merge --no-edit dans le checkout hôte ; ne fait rien en modes current et named. Échoue avec le code conflict si le checkout hôte a changé de branche, si une autre intégration détient le verrou de fusion ou si la fusion échoue ; la branche de travail reste."
+    "Merge the integrate branch into the base branch with git merge --no-edit in the host checkout; does nothing in current and named modes. Fails with code conflict when the host checkout switched branches, another integration holds the merge lock or the merge fails; the work branch stays. With guard, inspects the final committed diff against the unique merge base with the host, rechecks the references and merges the inspected commit. A refusal or incomplete inspection throws code guard and keeps both branch and worktree.",
+    "Fusionne la branche integrate dans la branche de base avec git merge --no-edit dans le checkout hôte ; ne fait rien en modes current et named. Échoue avec le code conflict si le checkout hôte a changé de branche, si une autre intégration détient le verrou de fusion ou si la fusion échoue ; la branche de travail reste. Avec guard, inspecte le diff commité final depuis l’unique ancêtre commun avec l’hôte, revérifie les références et fusionne le commit inspecté. Un refus ou une inspection incomplète lève le code guard et conserve la branche et le worktree."
   ],
   "Workspace.[Symbol.asyncDispose]": [
     "Close the workspace like close() without options, for await using.",
@@ -7437,5 +7437,17 @@
   "WorkflowFailure.code": [
     "The result’s terminationCode, available when unwrap() throws for failed, cancelled or rejected runs; undefined for paused or waiting-input runs.",
     "Le terminationCode du résultat, disponible quand unwrap() lève une erreur pour une exécution failed, cancelled ou rejected ; undefined pour paused ou waiting-input."
+  ],
+  "WorkspaceOptions.guard": [
+    "Optional committed-diff policy owned by this workspace and reused by every sandbox and agent. Requires named or integrate; current fails with code configuration before execution. Successful dispatches and terminal sessions check it after synchronization; integrate checks again under the merge lock. Refusal throws code guard and retains the branch and worktree when this workspace closes, even without preserve. Named workspaces compare their opening commit with the current commit across executions; integration workspaces compare the candidate with its unique merge base with the host, including inherited commits.",
+    "Politique facultative du diff commité, détenue par ce workspace et réutilisée par chaque sandbox et agent. Exige named ou integrate ; current échoue avec le code configuration avant exécution. Les dispatchs et sessions de terminal réussis la vérifient après synchronisation ; integrate la revérifie sous le verrou de fusion. Un refus lève le code guard et conserve la branche et le worktree à la fermeture de ce workspace, même sans preserve. Les workspaces named comparent leur commit d’ouverture avec le commit courant au fil des exécutions ; les workspaces integrate comparent le candidat avec son unique ancêtre commun avec l’hôte, commits hérités compris."
+  ],
+  "DiffGuard.protectedPaths": [
+    "Root-relative, case-sensitive patterns for paths forbidden in the final committed diff; omitted or empty disables path restrictions. Supports *, ? and ** with forward slashes; leading /, drive prefixes, backslashes, NUL and . or .. segments are refused. Checks both paths of a rename. Restored changes and uncommitted files are excluded.",
+    "Motifs relatifs à la racine et sensibles à la casse des chemins interdits dans le diff commité final ; absent ou vide désactive les restrictions de chemins. Accepte *, ? et ** avec des barres obliques ; / initial, préfixes de lecteur, barres inverses, NUL et segments . ou .. sont refusés. Vérifie les deux chemins d’un renommage. Les modifications restaurées et les fichiers non commités sont exclus."
+  ],
+  "DiffGuard.maxChangedLines": [
+    "Maximum total added plus deleted text lines in the final committed diff; omitted disables this limit. Must be a nonnegative safe integer; equality is accepted and zero forbids textual changes. A detected rename without content changes adds zero lines. Binary changes are refused whenever this limit is set, because Git cannot count their lines.",
+    "Nombre maximal de lignes textuelles ajoutées plus supprimées dans le diff commité final ; absent désactive cette limite. Exige un entier sûr positif ou nul ; l’égalité est acceptée et zéro interdit les modifications textuelles. Un renommage détecté sans changement de contenu ajoute zéro ligne. Les changements binaires sont refusés dès que cette limite est définie, car Git ne peut pas compter leurs lignes."
   ]
 }

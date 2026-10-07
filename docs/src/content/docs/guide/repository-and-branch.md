@@ -32,6 +32,33 @@ Keep the work on a named branch to review commits before merging. Choose automat
 
 API reference: [BranchPolicy](../../reference/branchpolicy/).
 
+## Refuse unwanted committed changes
+
+Set a workspace `guard` to reject protected paths or an oversized final committed diff, independently of the agent. This dispatch integrates only when both rules pass. A refusal throws `OutpostError` with code `guard`, releases the sandbox and retains the branch and worktree for review.
+
+```ts
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Fix the failing tests and commit the fix." },
+  branch: { mode: "integrate" },
+  guard: {
+    protectedPaths: [".github/**", "migrations/**"],
+    maxChangedLines: 800,
+  },
+});
+```
+
+The count adds inserted and deleted lines; a total of 800 passes. Detected renames without content changes count zero lines, but both paths are checked. With a line limit, binary changes are refused because Git cannot count their lines. See [DiffGuard](../../reference/diffguard/) for the pattern syntax and options.
+
+The check runs after synchronization and again under the integration lock, before merging the inspected commit. It includes changes inherited through `branch.from`, starting at the common ancestor with the host branch. In `named` mode, it checks from the workspace’s opening commit across successive executions. `current` is refused before execution. Configure `guard` on `openWorkspace()` when supplying an existing workspace; successive agents share its policy.
+
+Only the final committed diff is checked: a protected file modified and then restored is permitted, and uncommitted files are excluded. This is an integration rule, not a filesystem permission. A failed or incomplete inspection also refuses integration. Inspect `error.details` for violations and compared commits, and `recoveryDetails(error)` for the retained branch and directory. Closing the same workspace preserves a refused worktree even without `preserve: true`. A later failed pass does not undo earlier integrations.
+
 ## Gate integration on a check
 
 `dispatch()` and `workspace.dispatch()` merge an `integrate` branch as soon as the agent succeeds. To run your own check first, open the workspace yourself and work in a [sandbox session](../sandbox-sessions/).

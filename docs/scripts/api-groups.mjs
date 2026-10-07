@@ -25,7 +25,7 @@ export const groups = [
     title: ["Workspaces", "Workspaces"],
     guide: "guide/repository-and-branch",
     names:
-      "openWorkspace Workspace WorkspaceOptions WorkspaceRecord BranchPolicy Commit Disposal StageLimits LifecycleHooks",
+      "openWorkspace Workspace WorkspaceOptions WorkspaceRecord BranchPolicy DiffGuard Commit Disposal StageLimits LifecycleHooks",
   },
   {
     id: "sandboxes",

@@ -91,6 +91,7 @@ export async function attachInSandbox(
     restoreTerminal();
     await sync?.pull();
   }
+  if (output.status === 0) await context.state.lease.checkGuard();
   return {
     ...output,
     branch: workspace.branch,

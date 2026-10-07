@@ -4,13 +4,17 @@ import type {
   StageLimits,
   WorkspaceRecord,
 } from "../../domain/workspace.types.ts";
+import type { DiffGuard } from "../../domain/diff-guard.types.ts";
+import type { GuardSnapshot } from "./diff-guard.types.ts";
 
 export interface WorkspaceLease extends WorkspaceRecord {
+  checkGuard(): Promise<GuardSnapshot | undefined>;
   integrate(): Promise<void>;
   dispose(preserve?: boolean): Promise<Disposal>;
 }
 
 export interface AcquireWorkspaceOptions {
+  readonly guard?: DiffGuard;
   readonly observation?: import("../../domain/observation.types.ts").ObservationHub;
   readonly repository?: string;
   readonly branch?: BranchPolicy;

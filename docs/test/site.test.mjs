@@ -1086,7 +1086,12 @@ for (const locale of ["", "fr/"]) {
     await expect(page.locator(".title-show")).toContainText(
       'import { dispatch } from "@elie-laloum/outpost"',
     );
-    await expect(page.locator(".prop")).toHaveCount(34);
+    await expect(page.locator(".prop")).toHaveCount(35);
+    const guard = page.locator(".prop").filter({
+      has: page.locator(".prop-name").filter({ hasText: "options.guard" }),
+    });
+    await expect(guard).toHaveCount(1);
+    await expect(guard.locator(".prop-type")).toContainText("DiffGuard");
     await expect(
       page.locator(".prop").first().locator(".prop-presence"),
     ).toHaveAttribute("data-required", "");

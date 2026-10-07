@@ -1,5 +1,6 @@
 import { observedOperation } from "../domain/observed-operation.ts";
 import { invariant } from "../domain/errors.ts";
+import { validateDiffGuard } from "../domain/diff-guard.ts";
 import { allocateWorkspace } from "./workspace-allocation.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import { attach } from "./attach.ts";
@@ -14,6 +15,7 @@ export async function openWorkspace(
   options: WorkspaceOptions = {},
 ): Promise<Workspace> {
   options.signal?.throwIfAborted();
+  validateDiffGuard(options.guard, options.branch ?? { mode: "current" });
   const lease = await observedOperation(
     options.observation,
     "git",
