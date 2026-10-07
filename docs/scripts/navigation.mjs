@@ -92,7 +92,6 @@ export const chapters = [
       "guide/typed-workflows",
       "guide/task-dependencies",
       "guide/concurrency-and-retries",
-      "guide/testing-workflows",
       "guide/verification-loops",
       "guide/multiple-repositories",
       "guide/speculation",
@@ -142,6 +141,7 @@ export const chapters = [
     "Diagnostic et nettoyage",
     [
       "guide/diagnostics",
+      "guide/testing-workflows",
       "guide/error-handling",
       "guide/recovery",
       "guide/retention",
