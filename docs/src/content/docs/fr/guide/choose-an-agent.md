@@ -102,3 +102,7 @@ Pour OAuth, Claude Code, Codex et Kimi peuvent utiliser une connexion enregistr�
 `createHarness()` pilote directement l’API d’un modèle, avec les outils, permissions et sous-agents que vous déclarez. Il n’installe aucune CLI et exige un [fournisseur de modèle](../model-providers/). Voir [Harness intégré](../harness/).
 
 API : [createAgent](../../reference/createagent/) · [AgentOptions](../../reference/agentoptions/) · [ModelSpec](../../reference/modelspec/) · [AgentModel](../../reference/agentmodel/) · [createClaudeHarness](../../reference/createclaudeharness/) · [createCodexHarness](../../reference/createcodexharness/) · [createCopilotHarness](../../reference/createcopilotharness/) · [createKimiHarness](../../reference/createkimiharness/) · [createAntigravityHarness](../../reference/createantigravityharness/) · [createHarness](../../reference/createharness/) · [createFallbackAgent](../../reference/createfallbackagent/).
+
+## Partager une configuration
+
+Utilisez [les profils d’agents portables](../agent-profiles/) pour réutiliser les instructions, restrictions d’outils et serveurs MCP. Les projections non prises en charge échouent explicitement à la composition de l’agent.

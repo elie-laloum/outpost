@@ -1,4 +1,5 @@
 import { conversationFormat, isConversationStore } from "./conversation.ts";
+import { agentProfile, profileMcpServers } from "./agent-profile.ts";
 import { invariant, positive } from "./errors.ts";
 import {
   HARNESS_DEFAULTS,
@@ -68,6 +69,8 @@ export function createHarness(options: HarnessOptions): Harness {
   );
   if (options.conversations)
     conversationFormat("Harness", options.conversations, "harness");
+  const profile = agentProfile(options.profile);
+  const servers = profileMcpServers(profile, options.mcpServers);
   const skills = harnessSkills(options.skills);
   invariant(
     options.routing === undefined || options.routing?.kind === "model-routing",
@@ -83,9 +86,11 @@ export function createHarness(options: HarnessOptions): Harness {
   })();
   return Object.freeze({
     kind: "custom",
+    ...(profile === undefined ? {} : { profile }),
     ...(routing ? { routing } : {}),
     modelProvider: options.modelProvider,
     instructions: Object.freeze([
+      ...harnessInstructions(profile?.instructions),
       ...harnessInstructions(options.instructions),
       ...(skills.length
         ? [defineHarnessInstructions(skillCatalog(skills))]
@@ -106,9 +111,9 @@ export function createHarness(options: HarnessOptions): Harness {
       ? {}
       : { conversations: options.conversations }),
     cache: options.cache ?? HARNESS_DEFAULTS.cache,
-    ...(options.mcpServers === undefined
+    ...(servers === undefined
       ? {}
-      : { mcpServers: harnessMcpServers(options.mcpServers) }),
+      : { mcpServers: harnessMcpServers(servers) }),
   });
 }
 

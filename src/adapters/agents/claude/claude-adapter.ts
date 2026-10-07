@@ -1,3 +1,4 @@
+import { supportClaudeProfile } from "./claude-profile.ts";
 import {
   createClaudeConversations,
   claudeConversationLayout,
@@ -40,6 +41,7 @@ import type { Bound, ClaudeSettings } from "../settings.types.ts";
 
 function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
   supportModel(claudeModelSupport, settings.model);
+  supportClaudeProfile(settings);
   supportMcpServers(claudeMcpSupport, settings.mcpServers);
   const maxOutputTokens = settings.model?.maxOutputTokens;
   invariant(

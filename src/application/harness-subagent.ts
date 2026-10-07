@@ -1,3 +1,4 @@
+import { profilePermissions } from "../domain/agent-profile-permissions.ts";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { OutpostError, recordRecovery } from "../domain/errors.ts";
@@ -87,6 +88,10 @@ export async function runSubagent(
             tools,
             permissions: [
               ...runtime.permissions,
+              ...profilePermissions(
+                agent.harness.profile,
+                agent.harness.mcpServers,
+              ),
               ...(agent.harness.permissions ? [agent.harness.permissions] : []),
             ],
             sandbox: context.sandbox,

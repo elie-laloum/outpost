@@ -2,6 +2,7 @@ import type { AgentInput } from "../../../domain/agent.types.ts";
 import type { Command } from "../../../domain/command.types.ts";
 import { codexAppInitialize } from "./codex-app-session.ts";
 import { codexMcpArguments } from "./codex-mcp.ts";
+import { codexProfileArguments } from "./codex-profile.ts";
 import { codexProvider } from "./codex-provider.ts";
 import { validateContinuation } from "../continuation.ts";
 import type { Bound, CodexSettings } from "../settings.types.ts";
@@ -11,7 +12,10 @@ export function codexRequest(
   input: AgentInput,
 ): Command {
   validateContinuation(input);
-  const mcp = codexMcpArguments(settings.mcpServers);
+  const mcp = [
+    ...codexMcpArguments(settings.mcpServers),
+    ...codexProfileArguments(settings.profile),
+  ];
   if (input.liveInput && !input.interactive)
     return {
       executable: "codex",

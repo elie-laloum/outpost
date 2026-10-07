@@ -42,6 +42,7 @@ export const chapters = [
     "Agents",
     [
       "guide/choose-an-agent",
+      "guide/agent-profiles",
       "guide/authentication",
       "guide/claude-code",
       "guide/codex",

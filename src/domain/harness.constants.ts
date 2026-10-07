@@ -10,6 +10,7 @@ export const HARNESS_FIELDS: ReadonlySet<string> = new Set([
   "routing",
   "modelProvider",
   "instructions",
+  "profile",
   "tools",
   "limits",
   "toolExecution",

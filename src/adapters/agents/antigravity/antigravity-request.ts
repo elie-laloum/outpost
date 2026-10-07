@@ -1,3 +1,4 @@
+import { profileText } from "../profile-support.ts";
 import { validId } from "../../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../../domain/agent.types.ts";
 import type { Command } from "../../../domain/command.types.ts";
@@ -10,6 +11,7 @@ export function antigravityRequest(
   settings: Bound<AntigravitySettings>,
   input: AgentInput,
 ): Command {
+  const text = profileText(settings.profile, input.text);
   invariant(
     !input.continuation?.fork,
     "Antigravity does not support automated fork in Outpost",
@@ -27,9 +29,7 @@ export function antigravityRequest(
       variables: antigravityVariables,
       arguments: [
         ...args,
-        ...(input.text === undefined
-          ? []
-          : ["--prompt-interactive", input.text]),
+        ...(text === undefined ? [] : ["--prompt-interactive", text]),
       ],
       interactive: true,
     };
@@ -39,6 +39,6 @@ export function antigravityRequest(
     executable: "agy",
     variables: antigravityVariables,
     arguments: args,
-    stdin: `${JSON.stringify({ event: "user", message: { content: input.text ?? "" } })}\n`,
+    stdin: `${JSON.stringify({ event: "user", message: { content: text ?? "" } })}\n`,
   };
 }

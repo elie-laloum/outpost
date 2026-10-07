@@ -1,3 +1,4 @@
+import { rejectProfileTools } from "../profile-support.ts";
 import {
   createCopilotConversations,
   copilotSessionProfile,
@@ -37,6 +38,7 @@ import type { Bound } from "../settings.types.ts";
 
 function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
   supportModel(copilotModelSupport, settings.model);
+  rejectProfileTools(copilotLabel, settings.profile);
   supportMcpServers(copilotMcpSupport, settings.mcpServers);
   const credentials = credentialPlanner(
     copilotLabel,

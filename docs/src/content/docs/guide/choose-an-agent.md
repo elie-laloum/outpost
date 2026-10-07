@@ -102,3 +102,7 @@ For OAuth, Claude Code, Codex and Kimi can use a login saved on the host; the bu
 `createHarness()` drives a model API directly, with the tools, permissions and subagents you declare. It installs no CLI and requires a [model provider](../model-providers/). See [Built-in harness](../harness/).
 
 API: [createAgent](../../reference/createagent/) · [AgentOptions](../../reference/agentoptions/) · [ModelSpec](../../reference/modelspec/) · [AgentModel](../../reference/agentmodel/) · [createClaudeHarness](../../reference/createclaudeharness/) · [createCodexHarness](../../reference/createcodexharness/) · [createCopilotHarness](../../reference/createcopilotharness/) · [createKimiHarness](../../reference/createkimiharness/) · [createAntigravityHarness](../../reference/createantigravityharness/) · [createHarness](../../reference/createharness/) · [createFallbackAgent](../../reference/createfallbackagent/).
+
+## Share a configuration
+
+Use [portable agent profiles](../agent-profiles/) to reuse instructions, tool restrictions and MCP servers. Unsupported projections fail explicitly when composing the agent.

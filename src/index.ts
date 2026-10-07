@@ -1,3 +1,9 @@
+export { defineAgentProfile } from "./domain/agent-profile.ts";
+export type {
+  AgentProfile,
+  AgentProfileOptions,
+  AgentProfileTool,
+} from "./domain/agent-profile.types.ts";
 export { createAgent } from "./domain/agent.ts";
 export { defineHarnessSubagent } from "./domain/subagent.ts";
 export type {

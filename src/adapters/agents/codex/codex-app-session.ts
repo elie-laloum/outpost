@@ -42,6 +42,9 @@ export function codexAppSession(
     return { id, data: line({ id, method, params }) };
   };
   const policy = {
+    ...(settings.profile?.instructions === undefined
+      ? {}
+      : { developerInstructions: settings.profile.instructions }),
     approvalPolicy:
       settings.approvalReviewer === "auto_review" ? "on-request" : "never",
     sandbox: "danger-full-access",

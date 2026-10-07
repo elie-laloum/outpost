@@ -1,3 +1,4 @@
+import { profileText } from "../profile-support.ts";
 import { validId } from "../../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../../domain/agent.types.ts";
 import { authenticationForm } from "../../../domain/authentication.ts";
@@ -18,6 +19,7 @@ export function kimiRequest(
   settings: Bound<KimiSettings>,
   input: AgentInput,
 ): Command {
+  const text = profileText(settings.profile, input.text);
   invariant(
     !input.continuation?.fork,
     "Kimi Code requires native fork preparation in Outpost",
@@ -29,7 +31,7 @@ export function kimiRequest(
   }
   if (input.interactive) {
     invariant(
-      input.text === undefined,
+      text === undefined,
       "Kimi Code starts interactive sessions without an initial prompt",
     );
     return { executable: "kimi", arguments: args, interactive: true };
@@ -39,7 +41,7 @@ export function kimiRequest(
     arguments: [
       ...args,
       "--prompt",
-      input.text ?? "",
+      text ?? "",
       "--output-format",
       "stream-json",
     ],

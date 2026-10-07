@@ -726,5 +726,13 @@
   "RunStatus": [
     "Execution projection lifecycle: running, suspected abandoned, or the settled workflow/dispatch outcome. Abandoned is derived at read time and authorizes no recovery.",
     "Cycle de vie de la projection : en cours, abandon présumé ou résultat terminé/suspendu du workflow ou dispatch. Abandoned est déduit à la lecture et n’autorise aucune récupération."
+  ],
+  "defineAgentProfile": [
+    "Declare a CLI-independent, frozen agent profile without executing anything. Validate literal instructions, built-in tool allowlists and MCP declarations; copy nested lists and server configuration so later caller edits cannot change the profile. Each harness projects the declaration and refuses unsupported capabilities.",
+    "Déclare un profil d’agent figé indépendant des CLI sans rien exécuter. Valide les instructions littérales, listes d’outils intégrés autorisés et déclarations MCP ; copie les listes imbriquées et configurations de serveur pour que les modifications ultérieures de l’appelant ne changent pas le profil. Chaque harness traduit la déclaration et refuse les capacités non prises en charge."
+  ],
+  "AgentProfileTool": [
+    "Portable built-in tool capability: read, edit, unrestricted shell, or shell:<exact command>. Exact commands compare the entire string, including whitespace and shell syntax; no wildcard or prefix expansion occurs.",
+    "Capacité portable d’outil intégré : read, edit, shell sans restriction ou shell:<commande exacte>. Les commandes exactes comparent la chaîne entière, espaces et syntaxe shell compris ; aucune expansion de joker ou préfixe n’a lieu."
   ]
 }
