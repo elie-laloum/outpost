@@ -1,3 +1,5 @@
+import type { WatchdogOptions } from "../domain/watchdog.types.ts";
+import type { RepetitionWatchdog } from "./repetition-watchdog.types.ts";
 import type { ModelPriceTable } from "../domain/pricing.types.ts";
 import type { QuotaFault } from "../domain/quota.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
@@ -11,6 +13,7 @@ import type { Logging } from "../infrastructure/journal.types.ts";
 import type { Steering } from "../domain/steering.types.ts";
 
 export interface DispatchOptions<T = undefined> {
+  readonly watchdog?: WatchdogOptions;
   readonly prices?: ModelPriceTable;
   readonly redact?: readonly RegExp[];
   readonly observation?: ObservationHub;
@@ -37,6 +40,7 @@ export interface DispatchOptions<T = undefined> {
 }
 
 export interface TurnContext {
+  readonly repetition?: RepetitionWatchdog;
   readonly repository: string;
   readonly repair: boolean;
 }
@@ -70,6 +74,7 @@ export interface AgentOutput {
 }
 
 export interface ActivityWatchdog {
+  observe(event: AgentObservation): void;
   refresh(completed: boolean): void;
   hold(): () => void;
   close(): void;

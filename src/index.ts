@@ -1,3 +1,9 @@
+export type {
+  WatchdogOptions,
+  RepetitionPolicy,
+  StuckInstruction,
+  StuckEvent,
+} from "./domain/watchdog.types.ts";
 export { createAgent } from "./domain/agent.ts";
 export { defineHarnessSubagent } from "./domain/subagent.ts";
 export type {

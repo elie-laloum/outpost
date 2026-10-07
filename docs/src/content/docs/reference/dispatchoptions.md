@@ -15,6 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Name            | Type                                                             | Presence | Meaning                                                                                                                                                                                                                                                                                          |
 | --------------- | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `watchdog`      | `WatchdogOptions \| undefined`                                   | Optional | Opt-in repetition detection for decoded tool calls and file changes. Disabled when omitted; a stop rejects with code stuck, a warning continues, and an instruction uses steering. Replay agents reject this option.                                                                             |
 | `prices`        | `ModelPriceTable \| undefined`                                   | Optional | Optional model rates that enable model attribution in usage. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.                                                                                                                         |
 | `redact`        | `readonly RegExp[] \| undefined`                                 | Optional | Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.                                                                                                                 |
 | `observation`   | `ObservationHub \| undefined`                                    | Optional | Parent observation hub. The dispatch opens a child hub with its own dispatchId and drains it before returning or throwing.                                                                                                                                                                       |
@@ -42,6 +43,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly watchdog?: WatchdogOptions;
   readonly prices?: ModelPriceTable;
   readonly redact?: readonly RegExp[];
   readonly observation?: ObservationHub;
@@ -82,3 +84,4 @@ export interface DispatchOptions<T = undefined> {
 - [ObservationHub](../observationhub/)
 - [ResponseSpec](../responsespec/)
 - [Steering](../steering/)
+- [WatchdogOptions](../watchdogoptions/)

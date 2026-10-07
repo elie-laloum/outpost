@@ -126,6 +126,8 @@ API reference: [StageLimits](../../reference/stagelimits/).
 
 <!-- features -->
 
+- [Detect repeated activity](../stuck-agents/): Stop, warn or redirect an agent repeating tools or edits.
+
 - [Budgets](../budgets/): Token and attempt ceilings shared by the tasks of a workflow.
 - [Concurrency, retries and timeouts](../concurrency-and-retries/): `timeoutMs` for each task attempt and for a whole run.
 - [Built-in harness](../harness/): `limits` on steps, tool calls and usage of one agent loop.

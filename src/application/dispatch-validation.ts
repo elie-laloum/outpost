@@ -1,3 +1,4 @@
+import { validateWatchdog } from "../domain/watchdog.ts";
 import { validatePrices } from "../domain/pricing.ts";
 import { redactValue } from "../domain/redaction.ts";
 import type { Agent } from "../domain/agent.types.ts";
@@ -10,6 +11,7 @@ import type { DispatchOptions } from "./execution.types.ts";
 
 export function validateDispatch(options: DispatchOptions<unknown>): void {
   options.signal?.throwIfAborted();
+  if (options.watchdog) validateWatchdog(options.watchdog);
   if (options.prices) validatePrices(options.prices);
   if (options.redact) redactValue({}, options.redact);
   if (options.steering) steeringChannel(options.steering);
@@ -45,7 +47,16 @@ export async function preflightDispatch(
   agent?: Agent,
 ): Promise<void> {
   validateDispatch(options);
-  if (options.steering && agent) validateSteering(agent);
+  if (options.watchdog && agent)
+    invariant(
+      agent.kind !== "replay",
+      "Replay agents cannot use an activity watchdog",
+    );
+  if (
+    (options.steering || typeof options.watchdog?.onStuck === "object") &&
+    agent
+  )
+    validateSteering(agent);
   if (options.continuation)
     invariant(
       agent?.resumable !== false,

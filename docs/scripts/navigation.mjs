@@ -34,6 +34,7 @@ export const chapters = [
       "guide/conversations",
       "guide/limits-and-cancellation",
       "guide/steering",
+      "guide/stuck-agents",
       "guide/progress",
     ],
   ],

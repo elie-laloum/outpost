@@ -1,3 +1,4 @@
+import type { StuckEvent } from "./watchdog.types.ts";
 import type { ModelUsage } from "./pricing.types.ts";
 import type { Harness } from "./harness.types.ts";
 import type { ModelRouteEvent } from "./harness-routing.types.ts";
@@ -53,7 +54,8 @@ export type AgentEventDetails =
         | "deadline"
         | "aborted"
         | "oversized-event"
-        | "steered";
+        | "steered"
+        | "stuck";
     }
   | {
       readonly kind: "steer";
@@ -160,7 +162,8 @@ export type AgentEventDetails =
       readonly value: unknown;
       readonly bytes?: number;
       readonly truncated?: boolean;
-    };
+    }
+  | StuckEvent;
 
 export type AgentObservation = AgentEvent & {
   readonly pass: number;

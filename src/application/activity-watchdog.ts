@@ -1,5 +1,6 @@
 import { OutpostError } from "../domain/errors.ts";
 import { executionDefaults } from "./execution.constants.ts";
+import type { RepetitionWatchdog } from "./repetition-watchdog.types.ts";
 import type { ActivityWatchdog, DispatchOptions } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 
@@ -7,6 +8,7 @@ export function activityWatchdog(
   controller: AbortController,
   options: DispatchOptions<unknown>,
   pass: number,
+  repetition?: RepetitionWatchdog,
 ): ActivityWatchdog {
   let idle: NodeJS.Timeout | undefined, settle: NodeJS.Timeout | undefined;
   let lastActivity = Date.now();
@@ -49,6 +51,7 @@ export function activityWatchdog(
   }, warningInterval);
 
   return {
+    observe: (event) => repetition?.observe(event, controller),
     refresh,
     hold() {
       holds++;

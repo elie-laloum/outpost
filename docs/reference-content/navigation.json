@@ -528,6 +528,26 @@
         "attrs": { "data-api-kind": "type" }
       },
       {
+        "slug": "reference/watchdogoptions",
+        "label": "WatchdogOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/repetitionpolicy",
+        "label": "RepetitionPolicy",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/stuckinstruction",
+        "label": "StuckInstruction",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/stuckevent",
+        "label": "StuckEvent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/dispatchoptions",
         "label": "DispatchOptions",
         "attrs": { "data-api-kind": "interface" }

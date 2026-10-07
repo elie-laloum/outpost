@@ -1,3 +1,7 @@
+import { createSteering } from "../domain/steering.ts";
+import { steeringScope } from "./steering-scope.ts";
+import { repetitionWatchdog } from "./repetition-watchdog.ts";
+import type { RepetitionWatchdog } from "./repetition-watchdog.types.ts";
 import type { Agent, Usage } from "../domain/agent.types.ts";
 import { ResponseError } from "../domain/response.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -25,6 +29,41 @@ export async function execute<T>(
   afterTurn?: (turn: Turn) => Promise<Turn>,
 ): Promise<Execution<T>> {
   validateDispatch(options);
+  const steering =
+    options.steering ??
+    (typeof options.watchdog?.onStuck === "object"
+      ? createSteering()
+      : undefined);
+  const settings = { ...options, ...(steering ? { steering } : {}) };
+  const repetition = repetitionWatchdog(settings);
+  try {
+    return await steeringScope(steering, async () => {
+      const result = await executeTurns(
+        workspace,
+        lease,
+        agent,
+        host,
+        settings,
+        repetition,
+        afterTurn,
+      );
+      repetition.finish();
+      return result;
+    });
+  } finally {
+    if (steering && !options.steering) steering.close();
+  }
+}
+
+async function executeTurns<T>(
+  workspace: WorkspaceRecord,
+  lease: SandboxLease,
+  agent: Agent,
+  host: boolean,
+  options: DispatchOptions<T>,
+  repetition: RepetitionWatchdog,
+  afterTurn?: (turn: Turn) => Promise<Turn>,
+): Promise<Execution<T>> {
   const markers =
     options.until === undefined
       ? [executionDefaults.completion]
@@ -76,7 +115,11 @@ export async function execute<T>(
           resumed,
           markers,
           index + 1,
-          { repository: workspace.repository, repair: repair !== undefined },
+          {
+            repository: workspace.repository,
+            repair: repair !== undefined,
+            repetition,
+          },
         );
         return afterTurn ? await afterTurn(finished) : finished;
       },

@@ -15,6 +15,7 @@ export function stopReason(
     if (error.details.stopReason === "oversized-event")
       return "oversized-event";
     if (error.details.stopReason === "idle-timeout") return "idle-timeout";
+    if (error.code === "stuck") return "stuck";
     if (error.code === "timeout") return "deadline";
     if (error.code === "aborted") return "aborted";
   }

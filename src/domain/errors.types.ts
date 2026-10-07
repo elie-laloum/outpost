@@ -1,4 +1,5 @@
 export type FaultCode =
+  | "stuck"
   | "guard"
   | "rejected"
   | "configuration"

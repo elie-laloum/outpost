@@ -392,12 +392,12 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
-    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished, stuck or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished, stuck or raw."
   ],
   "AgentEvent.name": [
-    "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
-    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result et tool-denied ; nom de l’outil de délégation pour subagent."
+    "Phase name on phase events; tool name on tool, tool-result, tool-denied and stuck tool-activity events; delegating tool name on subagent events.",
+    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result, tool-denied et stuck avec activité tool ; nom de l’outil de délégation pour subagent."
   ],
   "AgentEvent.agent": [
     "Name of the agent running the pass, on phase events: claude, codex, antigravity, copilot or kimi, custom for a built-in harness agent, replay for a replay agent.",
@@ -4148,8 +4148,8 @@
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
   "AgentEvent.reason": [
-    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
-    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event, steered or stuck. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event, steered ou stuck. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
   ],
   "ReporterHandlers.tool-denied": [
     "Receives a built-in harness tool call refused by permissions or a hook, with the reason.",
@@ -4941,12 +4941,12 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
-    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished, stuck or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-route, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished, stuck or raw."
   ],
   "AgentEventDetails.name": [
-    "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
-    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result et tool-denied ; nom de l’outil de délégation pour subagent."
+    "Phase name on phase events; tool name on tool, tool-result, tool-denied and stuck tool-activity events; delegating tool name on subagent events.",
+    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result, tool-denied et stuck avec activité tool ; nom de l’outil de délégation pour subagent."
   ],
   "AgentEventDetails.agent": [
     "Name of the agent running the pass, on phase events: claude, codex, antigravity, copilot or kimi, custom for a built-in harness agent, replay for a replay agent.",
@@ -5013,8 +5013,8 @@
     "Numéro d’étape, à partir de 1, dans un tour du harness intégré."
   ],
   "AgentEventDetails.reason": [
-    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event or steered. On model-route, selected, confidence or unavailable explains the effective selection.",
-    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event ou steered. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the process: completion, idle-timeout, deadline, aborted, oversized-event, steered or stuck. On model-route, selected, confidence or unavailable explains the effective selection.",
+    "Sur tool-denied, le motif du refus. Sur stopped, la raison de l’arrêt du processus : completion, idle-timeout, deadline, aborted, oversized-event, steered ou stuck. Sur model-route, selected, confidence ou unavailable explique la sélection effective."
   ],
   "AgentEventDetails.strategy": [
     "Name of the context strategy that rewrote the history.",
@@ -8109,5 +8109,117 @@
   "WorkflowEvent.accounting": [
     "Authoritative cumulative budget snapshot at this event, including restored tokens, attempts and optional cost.",
     "Fiche cumulative du budget à cet événement, incluant tokens restaurés, tentatives et coût optionnel."
+  ],
+  "DispatchOptions.watchdog": [
+    "Opt-in repetition detection for decoded tool calls and file changes. Disabled when omitted; a stop rejects with code stuck, a warning continues, and an instruction uses steering. Replay agents reject this option.",
+    "Détection optionnelle des répétitions d’appels d’outils et de changements de fichiers décodés. Désactivée en l’absence de l’option ; un arrêt rejette avec le code stuck, un avertissement laisse continuer, une consigne utilise le steering. Les agents de rejeu refusent cette option."
+  ],
+  "WatchdogOptions.repetition": [
+    "Sliding activity window and occurrence threshold for identical tool name/input or identical file-change payloads, compared before redaction.",
+    "Fenêtre glissante d’activité et seuil d’occurrences pour un même nom/entrée d’outil ou un même contenu de changement de fichiers, comparés avant masquage."
+  ],
+  "WatchdogOptions.onStuck": [
+    "Required policy: stop aborts with code stuck; warn emits a warning and continues; an instruction object steers the active loop or resumes its CLI conversation. After the intervention limit, further repetition stops. Detection resets its window after each alert.",
+    "Politique obligatoire : stop interrompt avec le code stuck ; warn émet un avertissement et continue ; un objet de consigne dirige la boucle active ou reprend sa conversation CLI. Après la limite d’interventions, toute nouvelle répétition arrête l’agent. La fenêtre est réinitialisée après chaque alerte."
+  ],
+  "RepetitionPolicy.window": [
+    "Positive integer from 2 to 10000: number of latest decoded tool/file-change events retained across resumed turns in one execution, reset between passes and alerts. Text and results do not advance the window; duplicate call IDs within the window count once per kind and scope.",
+    "Entier positif de 2 à 10000 : nombre de derniers événements outil/changement de fichiers décodés conservés entre les tours repris d’une exécution, réinitialisé entre passes et alertes. Le texte et les résultats ne font pas avancer la fenêtre ; les IDs d’appel dupliqués dans la fenêtre comptent une fois par type et portée."
+  ],
+  "RepetitionPolicy.maxRepeats": [
+    "Occurrence count that triggers stuck, including the first call. Integer from 2 to window; calls need not be consecutive. Object key order is ignored, array order and exact strings are significant; missing inputs match each other separately from null, and other unsupported non-JSON inputs advance the window but do not match.",
+    "Nombre d’occurrences déclenchant stuck, premier appel compris. Entier de 2 à window ; les appels ne doivent pas nécessairement être consécutifs. L’ordre des clés d’objet est ignoré, celui des tableaux et les chaînes exactes sont significatifs ; les entrées absentes correspondent entre elles séparément de null, et les autres entrées non JSON avancent la fenêtre sans correspondance."
+  ],
+  "StuckInstruction.instruction": [
+    "Nonempty literal steering text sent on repetition. No brief expansion is performed. Built-in subagent events target that subagent; CLI instructions use live input when available or stop and resume once a conversation is known. Undelivered instructions fail with code steering.",
+    "Texte littéral de steering non vide envoyé à la détection d’une répétition, sans expansion du brief. Les événements des sous-agents intégrés ciblent ce sous-agent ; les consignes CLI utilisent l’entrée directe si disponible ou arrêtent puis reprennent dès qu’une conversation est connue. Les consignes non remises échouent avec le code steering."
+  ],
+  "StuckInstruction.maxInterventions": [
+    "Positive integer, default 1: total watchdog instructions allowed across resumed turns and response repairs of one execution. Further stuck episodes stop with code stuck. Separate cold passes, fallback candidates and later dispatches have fresh limits.",
+    "Entier positif, 1 par défaut : total des consignes autorisées entre tours repris et réparations de réponse d’une exécution. Les épisodes suivants arrêtent avec le code stuck. Les passes froides distinctes, candidats de repli et dispatchs suivants ont une nouvelle limite."
+  ],
+  "StuckEvent.kind": [
+    "Always stuck: Outpost detected repeated decoded activity.",
+    "Toujours stuck : Outpost a détecté une activité décodée répétitive."
+  ],
+  "StuckEvent.activity": [
+    "Repeated decoded event category: tool or file-change.",
+    "Catégorie d’événement décodé répétitif : tool ou file-change."
+  ],
+  "StuckEvent.name": [
+    "Tool name when activity is tool; absent for file-change. Inputs and file payloads are not included.",
+    "Nom de l’outil si activity vaut tool ; absent pour file-change. Les entrées et contenus de fichiers ne sont pas inclus."
+  ],
+  "StuckEvent.repeats": [
+    "Occurrences of the matching activity when the configured threshold was reached.",
+    "Occurrences de l’activité identique quand le seuil configuré a été atteint."
+  ],
+  "StuckEvent.window": [
+    "Configured maximum number of decoded activity events in the sliding window.",
+    "Nombre maximal configuré d’événements d’activité décodés dans la fenêtre glissante."
+  ],
+  "StuckEvent.action": [
+    "Selected policy action: stop, warn or steer. An exhausted instruction allowance selects stop.",
+    "Action de la politique sélectionnée : stop, warn ou steer. Un nombre d’interventions épuisé sélectionne stop."
+  ],
+  "ReporterHandlers.stuck": [
+    "Receives a repetition alert with its activity category, count and selected policy action.",
+    "Reçoit une alerte de répétition avec la catégorie d’activité, le nombre d’occurrences et l’action choisie."
+  ],
+  "AgentEvent.activity": [
+    "Repeated decoded event category: tool or file-change.",
+    "Catégorie d’événement décodé répétitif : tool ou file-change."
+  ],
+  "AgentEvent.repeats": [
+    "Occurrences of the matching activity when the configured threshold was reached.",
+    "Occurrences de l’activité identique quand le seuil configuré a été atteint."
+  ],
+  "AgentEvent.window": [
+    "Configured maximum number of decoded activity events in the sliding window.",
+    "Nombre maximal configuré d’événements d’activité décodés dans la fenêtre glissante."
+  ],
+  "AgentEvent.action": [
+    "Selected policy action: stop, warn or steer. An exhausted instruction allowance selects stop.",
+    "Action de la politique sélectionnée : stop, warn ou steer. Un nombre d’interventions épuisé sélectionne stop."
+  ],
+  "AgentEventDetails.activity": [
+    "Repeated decoded event category: tool or file-change.",
+    "Catégorie d’événement décodé répétitif : tool ou file-change."
+  ],
+  "AgentEventDetails.repeats": [
+    "Occurrences of the matching activity when the configured threshold was reached.",
+    "Occurrences de l’activité identique quand le seuil configuré a été atteint."
+  ],
+  "AgentEventDetails.window": [
+    "Configured maximum number of decoded activity events in the sliding window.",
+    "Nombre maximal configuré d’événements d’activité décodés dans la fenêtre glissante."
+  ],
+  "AgentEventDetails.action": [
+    "Selected policy action: stop, warn or steer. An exhausted instruction allowance selects stop.",
+    "Action de la politique sélectionnée : stop, warn ou steer. Un nombre d’interventions épuisé sélectionne stop."
+  ],
+  "AgentObservation.activity": [
+    "Repeated decoded event category: tool or file-change.",
+    "Catégorie d’événement décodé répétitif : tool ou file-change."
+  ],
+  "AgentObservation.repeats": [
+    "Occurrences of the matching activity when the configured threshold was reached.",
+    "Occurrences de l’activité identique quand le seuil configuré a été atteint."
+  ],
+  "AgentObservation.window": [
+    "Configured maximum number of decoded activity events in the sliding window.",
+    "Nombre maximal configuré d’événements d’activité décodés dans la fenêtre glissante."
+  ],
+  "AgentObservation.action": [
+    "Selected policy action: stop, warn or steer. An exhausted instruction allowance selects stop.",
+    "Action de la politique sélectionnée : stop, warn ou steer. Un nombre d’interventions épuisé sélectionne stop."
+  ],
+  "HarnessToolEvent.kind": [
+    "Tool-authored event category: text, warning or raw. Tools cannot emit execution or watchdog events.",
+    "Catégorie d’événement émis par un outil : text, warning ou raw. Les outils ne peuvent pas émettre d’événements d’exécution ou de watchdog."
+  ],
+  "FallbackEvent.kind": [
+    "Always fallback: a failed agent candidate hands execution to the next explicitly configured candidate.",
+    "Toujours fallback : un candidat agent en échec cède l’exécution au candidat suivant explicitement configuré."
   ]
 }

@@ -52,6 +52,12 @@ export async function turn(
     completed: () => output.completed,
     interrupt: () => controller.abort(steeringInterruption),
   });
+  const watchdog = activityWatchdog(
+    controller,
+    options,
+    pass,
+    context.repetition,
+  );
   const observe = (event: AgentObservation) => {
     steering.observe(event);
     notify(
@@ -67,10 +73,10 @@ export async function turn(
           }
         : event,
     );
+    watchdog.observe(event);
   };
   const output = agentOutput(agent, { ...options, observe }, markers, pass);
   const failure = agentFailure(agent, output);
-  const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
   const stderr = boundedLines((text, truncated) => {
     failure.observe(text);
@@ -146,6 +152,11 @@ export async function turn(
     commandCompleted = true;
     status = result.status;
     output.flush();
+    if (
+      controller.signal.reason instanceof OutpostError &&
+      controller.signal.reason.code === "stuck"
+    )
+      throw controller.signal.reason;
     if (status !== 0)
       throw new OutpostError("process", `Agent exited with status ${status}`, {
         ...result,

@@ -36,7 +36,12 @@ export async function customTurn(
   const signal = options.signal
     ? AbortSignal.any([options.signal, controller.signal])
     : controller.signal;
-  const watchdog = activityWatchdog(controller, options, pass);
+  const watchdog = activityWatchdog(
+    controller,
+    options,
+    pass,
+    context.repetition,
+  );
   const timer = setTimeout(
     () =>
       controller.abort(
@@ -56,7 +61,10 @@ export async function customTurn(
   const emit = (event: AgentEvent) => {
     signal.throwIfAborted();
     watchdog.refresh(false);
-    notify(options.observe, { ...event, pass, at: new Date().toISOString() });
+    const observed = { ...event, pass, at: new Date().toISOString() };
+    notify(options.observe, observed);
+    watchdog.observe(observed);
+    signal.throwIfAborted();
   };
   const budget = harnessBudget(agent.harness.limits);
   const inbox = steeringInbox(options.steering);

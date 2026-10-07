@@ -55,6 +55,11 @@ export function createReporter(
       case "stop-prevented":
         write(`${prefix} stop prevented: ${event.message}\n`);
         break;
+      case "stuck":
+        write(
+          `${prefix} stuck: ${event.activity}${event.name ? ` (${event.name})` : ""} repeated ${event.repeats} times · ${event.action}\n`,
+        );
+        break;
       case "steer":
         write(`\n${prefix} steering ${event.mode}: ${event.text}\n`);
         break;

@@ -1086,8 +1086,8 @@ for (const locale of ["", "fr/"]) {
     await expect(page.locator(".title-show")).toContainText(
       'import { dispatch } from "@elie-laloum/outpost"',
     );
-    await expect(page.locator(".prop")).toHaveCount(37);
-    for (const name of ["options.prices", "options.redact"])
+    await expect(page.locator(".prop")).toHaveCount(38);
+    for (const name of ["options.prices", "options.redact", "options.watchdog"])
       await expect(
         page.locator(".prop-name").filter({ hasText: name }),
       ).toHaveCount(1);

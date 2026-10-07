@@ -10,6 +10,7 @@ import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createSandbox,
+  OutpostError,
   createAgentConflictResolver,
   openWorkspace,
   recoveryDetails,
@@ -27,7 +28,7 @@ import {
 import type { ModelRequest } from "../src/index.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
-import { conversationStore, repository } from "./helpers.ts";
+import { conversationStore, repository, scripted } from "./helpers.ts";
 import type {
   AgentEvent,
   AgentInput,
@@ -1466,3 +1467,59 @@ for (const repositoryMode of ["mounted", "isolated"] as const) {
     },
   );
 }
+
+test(
+  "real container watchdog stops repetition, retains edits and resumes with another instruction",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    const box = await createSandbox({
+      repository: root,
+      sandboxProvider: factory({ image: containerImage, networks: "none" }),
+      logging: false,
+    });
+    t.after(() => box.close());
+    const fixture = scripted((input) => {
+      if (input.continuation)
+        return `console.log(JSON.stringify({kind:'text',text:'changed approach'}));`;
+      return `import fs from 'node:fs';fs.writeFileSync('saved.txt','keep');console.log(JSON.stringify({kind:'conversation',id:'container-loop'}));for(let n=0;n<3;n++)console.log(JSON.stringify({kind:'tool',name:'shell',input:'ls',callId:String(n)}));setInterval(()=>{},1000);`;
+    });
+    const agent = {
+      ...fixture,
+      request: (input: AgentInput) => ({
+        ...fixture.request(input),
+        executable: "node",
+      }),
+    };
+    const repetition = { window: 20, maxRepeats: 3 };
+    await assert.rejects(
+      box.dispatch({
+        agent,
+        brief: { text: "work" },
+        watchdog: { repetition, onStuck: "stop" },
+      }),
+      (error: unknown) =>
+        error instanceof OutpostError && error.code === "stuck",
+    );
+    const retained = await box.command({
+      executable: "node",
+      arguments: [
+        "-e",
+        "console.log(require('fs').readFileSync('saved.txt','utf8'))",
+      ],
+    });
+    assert.equal(retained.status, 0);
+    assert.equal(retained.stdout.trim(), "keep");
+    const result = await box.dispatch({
+      agent,
+      brief: { text: "work" },
+      watchdog: { repetition, onStuck: { instruction: "Change approach" } },
+    });
+    assert.equal(result.text.trim(), "changed approach");
+    assert.equal(result.turns.length, 2);
+  },
+);
