@@ -23,9 +23,18 @@ export interface RecipeComponentGraph {
 }
 
 export interface RecipeComponentScope {
+  readonly observerErrors: readonly unknown[];
+  readonly redactions: readonly RegExp[];
+  protect(values: readonly string[]): void;
+  redact<T>(value: T): T;
   resolve(name: string, kind: string): Promise<unknown>;
   prepare(): Promise<void>;
   close(): Promise<void>;
+}
+
+export interface RecipeOwnedComponent {
+  readonly kind: string;
+  close(): void | Promise<void>;
 }
 
 export interface ConsoleSinkOptions {

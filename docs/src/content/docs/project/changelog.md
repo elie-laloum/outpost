@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Extend YAML configuration with named providers, native sandbox and workspace options, portable profiles, CLI harness settings, MCP declarations, local transports and host-side secret selections. Generate option schemas from TypeScript contracts, reject dependency cycles before imports, resolve installed ESM-only extensions, and redact selected values from observation and reports. Cover local lifecycle execution and YAML/TypeScript request equivalence; cloud and paid agent calls remain unvalidated.
+
 - Begin YAML composition parity with configuration format 2, recipe format 3, the `/recipes` registry/runtime API, explicit observation and final reports, static extension validation and a versioned public-contract inventory. Recipe execution is silent unless outputs or `--json` are requested; failures still print diagnostics.
 
 - Add reusable YAML recipes with typed inputs, defaults and enums, dependency result references and editor schemas. Run with separate recipe and execution YAML files covering sandbox providers, CLI agents, model selection and explicit credential references; retain literal format 1 and TypeScript configuration compatibility. Add `recipe init`, allocation-free `validate`, `list` and integrity-checked `fetch`, repeated `--input` flags, three bundled Git catalogue recipes and third-party HTTPS catalogues. Fix CLI Git integration, bounded outputs and diagnostics, and final reporting after cleanup. Cover real local Git execution and cross-repository reuse; HTTP downloads are tested with simulated responses and paid agent/cloud runs remain unvalidated.

@@ -105,7 +105,7 @@ npx outpost recipe run --file recipe.yaml --config outpost.yaml \
   --input 'goal=Handle empty parser input' --input runner=npm --json
 ```
 
-The CLI waits for integration and cleanup before publishing its final report. Successful runs call workspace integration according to the configured branch policy. Failure or cancellation preserves the workspace. `status` includes finalization failures; `workflowStatus` describes the tasks separately. Reports include bounded task outputs, command diagnostics, usage and workspace location. SIGINT/SIGTERM cancel setup or execution and wait for cleanup. See [CLI commands](../cli/#outpost-recipe-run) for flags and exit codes.
+When a final report is requested, the CLI waits for integration and cleanup before publishing it. Successful runs call workspace integration according to the configured branch policy. Failure or cancellation preserves the workspace. `status` includes finalization failures; `workflowStatus` describes the tasks separately. Reports include bounded task outputs, command diagnostics, usage and workspace location. SIGINT/SIGTERM cancel setup or execution and wait for cleanup. See [CLI commands](../cli/#outpost-recipe-run) for flags and exit codes.
 
 ## Use the engine in TypeScript
 
@@ -209,3 +209,79 @@ The exported `sink` implements `ObservationSink`. A borrowed object is never clo
 The `/recipes` package entry exposes `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` and `createRecipeRuntime`. Runtime construction validates without allocating; `run()` allocates and cleans each invocation, and `close()` cancels an active invocation and prevents further runs. `examples/65-recipe-observation/` exercises declared observation and reporting without model calls.
 
 The parity inventory in `recipes/parity.json` classifies public contracts and tracks deliveries. Native workflow durability, service commands and the remaining component families are tracked there; the registry foundation alone does not establish full YAML/TypeScript parity.
+
+## Compose native configuration components
+
+Configuration version 2 keeps `sandbox` and `agents` as short forms. A named provider can also be reused through an explicit `$ref`. References name a family and component; unknown names, incompatible categories and cycles fail before allocation. Add these declarations to the local configuration with its required repository.
+
+```yaml title="outpost.yaml — named provider"
+sandbox:
+  $ref: sandboxProviders.build
+sandboxProviders:
+  build:
+    type: docker
+    image: outpost:sandbox
+    repositoryMode: isolated
+    cpus: 2
+    memoryMb: 4096
+```
+
+Provider options follow their TypeScript contracts, including mounts, dependency caches and egress restrictions. Cloud caches can reference named transports. Provider SDKs load only when used. Firecracker remains experimental and requires `experimental: true`; declaring it does not validate the host setup. See [sandbox selection](../choose-a-sandbox/) and the provider API for supported options and live-validation limits.
+
+Put preparation, diff guards, stage limits, copies, logging and storage settings under `workspace`. Keep repository, branch, sandbox provider and observation at the configuration root. Host paths resolve from that file's directory; paths inside the sandbox retain their provider semantics. `examples/66-recipe-components/` executes preparation and a command against temporary local Git resources.
+
+```yaml title="outpost.yaml — workspace preparation"
+workspace:
+  guard:
+    protectedPaths: [".github/**"]
+  hooks:
+    sandboxReady:
+      - executable: npm
+        arguments: [ci]
+        when:
+          kind: changed
+          files: [package-lock.json]
+```
+
+Portable profiles and all CLI harness settings use the same factories as TypeScript. Declare a profile once and reference it from an agent role; MCP declarations and explicit authentication retain their existing capability checks. The local provider remains unisolated. Account files resolve on the host and remain separate from conversation storage.
+
+```yaml title="outpost.yaml — a shared profile"
+profiles:
+  reviewer:
+    type: portable
+    instructions: Review the change without editing files.
+    allowedTools: [read]
+agents:
+  reviewer:
+    harness: claude
+    authentication: account
+    profile:
+      $ref: profiles.reviewer
+```
+
+## Select secrets before allocation
+
+An environment value can use `{ env: VARIABLE_NAME }`. Secret-manager components use their public options; clients supplied by installed SDKs are borrowed `object` extensions. For example, the Vault token below is read on the host only during execution. Native secret sources are under `secrets`; `variables.secrets` selects explicit names through `fromSecrets()`.
+
+```yaml title="outpost.yaml — a host-side secret source"
+secrets:
+  build:
+    type: vault
+    address: https://vault.example.com
+    token: { env: VAULT_TOKEN }
+    mount: secret
+    path: build
+variables:
+  selected:
+    type: secrets
+    source: { $ref: secrets.build }
+    names: [BUILD_TOKEN]
+sandbox:
+  provider: docker
+  image: outpost:sandbox
+  variables: { $ref: variables.selected }
+```
+
+Only the selected values reach the sandbox. Validation neither imports user modules nor reads secret values. Missing values fail before allocation; the runtime masks selected values in observations, returned reports and execution diagnostics. It does not modify the host environment. See [secret sources](../secret-sources/) for manager-specific restrictions and credential ownership.
+
+Static schemas are generated from the installed public TypeScript types and checked in CI. Local lifecycle execution, extension loading, secret selection and CLI request equivalence have offline regressions. These tests do not exercise real cloud providers, secret-manager services or paid agents.

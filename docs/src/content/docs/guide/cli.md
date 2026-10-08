@@ -53,7 +53,7 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 | `--input`  | None     | Repeat `name=value` for declared version-2 inputs. Numbers and booleans use JSON scalar syntax.                         |
 | `--json`   | Off      | Final report with overall `status`, `workflowStatus`, tasks, bounded `outputs`, `errors`, usage and workspace location. |
 
-Paths are relative to the current directory. Without `--json`, the CLI prints the final status, task outputs, diagnostics and any retained workspace. Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr. Successful runs integrate according to the branch policy; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved. Loading, execution or finalization failures exit 1. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Keep configuration stdout quiet for parseable JSON output.
+Paths are relative to the current directory. Successful execution is silent unless observation or reports are declared in configuration version 2. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr. Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr. Successful runs integrate according to the branch policy; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved. Loading, execution or finalization failures exit 1. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Keep configuration stdout quiet for parseable JSON output.
 
 ## `outpost recipe init`
 

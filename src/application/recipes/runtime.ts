@@ -1,12 +1,12 @@
 import { createSandbox } from "../sandbox.ts";
-import { readRecipeConfiguration } from "../recipe-configuration.ts";
-import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
+import { recipeExecutionConfiguration } from "./configuration.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import { runRecipe } from "../recipe-run.ts";
 import { readRecipeProject } from "./project.ts";
 import { createRecipeComponentScope } from "./scope.ts";
 import { observationGuards } from "./observation.ts";
 import { publishRecipeReport } from "./reports.ts";
+import { recipeDiagnostic } from "../recipe-report.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
 import type { RecipeRuntime, RecipeProjectOptions } from "./project.types.ts";
 
@@ -35,6 +35,7 @@ export async function createRecipeRuntime(
         signal,
       );
       const execution = (async () => {
+        let securedObservation: ObservationHub | undefined;
         try {
           await scope.prepare();
           let observation: ObservationHub | undefined;
@@ -47,42 +48,54 @@ export async function createRecipeRuntime(
               throw new Error("Invalid recipe observation hub");
             observation = value;
           }
-          const configuration = await readRecipeConfiguration(
-            JSON.stringify({
-              ...Object.fromEntries(
-                Object.entries(project.configuration).filter(([key]) =>
-                  recipeConfigurationKeys.root.some(
-                    (allowed) => allowed === key,
-                  ),
-                ),
-              ),
-              version: 1,
-            }),
-            project.options.config,
+          const configuration = await recipeExecutionConfiguration(
+            project,
+            scope,
           );
+          securedObservation = observation?.child({}, [], scope.redactions);
+          observation = securedObservation;
           signal.throwIfAborted();
           const sandbox = await createSandbox({
             ...configuration.sandbox,
             signal,
             ...(observation ? { observation } : {}),
           });
-          return await runRecipe(
-            project.document,
-            {
-              sandbox,
-              ...(configuration.agents ? { agents: configuration.agents } : {}),
-              inputs,
-            },
-            signal,
-            observation,
+          return scope.redact(
+            await runRecipe(
+              project.document,
+              {
+                sandbox,
+                ...(configuration.agents
+                  ? { agents: configuration.agents }
+                  : {}),
+                inputs,
+              },
+              signal,
+              observation,
+            ),
           );
+        } catch (error) {
+          if (error instanceof Error && scope.redactions.length)
+            throw new Error(scope.redact(error.message));
+          throw error;
         } finally {
+          await securedObservation?.close();
           await scope.close();
         }
       })();
       active = execution;
       try {
-        const report = await execution;
+        const result = await execution;
+        const report = {
+          ...result,
+          ...(scope.observerErrors.length
+            ? {
+                observerErrors: scope.redact(
+                  scope.observerErrors.map((error) => recipeDiagnostic(error)),
+                ),
+              }
+            : {}),
+        };
         publishRecipeReport(report, project.reports, settings.report);
         return report;
       } finally {

@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: prepared-command
+tasks:
+  - key: check
+    command:
+      executable: node
+      arguments:
+        - -e
+        - "if (require('fs').readFileSync('prepared', 'utf8') !== 'ready') process.exit(2); console.log(process.env.DEMO_VALUE)"

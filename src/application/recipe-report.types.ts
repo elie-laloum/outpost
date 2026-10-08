@@ -10,6 +10,7 @@ export interface RecipeDiagnostic {
 }
 
 export interface RecipeReport {
+  readonly observerErrors?: readonly RecipeDiagnostic[];
   readonly name: string;
   readonly executionId?: string;
   readonly status: WorkflowResult["status"];

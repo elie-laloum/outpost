@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+branch:
+  mode: current
+sandbox:
+  $ref: sandboxProviders.local
+sandboxProviders:
+  local:
+    type: local
+    variables:
+      DEMO_VALUE:
+        env: OUTPOST_RECIPE_DEMO_VALUE
+workspace:
+  limits:
+    gitMs: 10000
+  hooks:
+    sandboxReady:
+      - executable: node
+        arguments:
+          - -e
+          - "require('fs').writeFileSync('prepared', 'ready')"
+reports:
+  - type: json

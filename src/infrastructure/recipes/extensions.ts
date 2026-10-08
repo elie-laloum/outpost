@@ -1,6 +1,6 @@
-import { createRequire } from "node:module";
 import { isAbsolute, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
+import { resolve as resolveModule } from "import-meta-resolve";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import type { RecipeExtensionDeclaration } from "../../domain/recipes/component.types.ts";
 
@@ -11,9 +11,15 @@ export function recipeModulePath(module: string, directory: string): string {
     );
   if (module.startsWith(".") || isAbsolute(module))
     return resolve(directory, module);
-  return createRequire(
-    pathToFileURL(resolve(directory, "outpost.yaml")),
-  ).resolve(module);
+  const url = resolveModule(
+    module,
+    pathToFileURL(resolve(directory, "outpost.yaml")).href,
+  );
+  if (!url.startsWith("file:"))
+    throw new Error(
+      "Recipe extensions require installed packages or local files",
+    );
+  return fileURLToPath(url);
 }
 
 export async function importRecipeExtension(

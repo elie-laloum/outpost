@@ -209,3 +209,79 @@ L’export `sink` implémente `ObservationSink`. Le runtime ne ferme jamais un o
 Le point d’entrée `/recipes` expose `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` et `createRecipeRuntime`. La construction du runtime valide sans allouer ; `run()` alloue et nettoie chaque invocation, et `close()` annule une invocation active et empêche les suivantes. `examples/65-recipe-observation/` vérifie observation et rapports déclarés sans appel de modèle.
 
 L’inventaire `recipes/parity.json` classe les contrats publics et suit les livraisons. La durabilité native des workflows, les commandes de services et les autres familles y sont suivies ; le registre seul ne constitue pas la parité complète YAML/TypeScript.
+
+## Composer les composants natifs de configuration
+
+La configuration version 2 conserve les formes courtes `sandbox` et `agents`. Un provider nommé peut aussi être réutilisé par une référence `$ref` explicite. Les références nomment une famille et un composant ; noms absents, catégories incompatibles et cycles échouent avant allocation. Ajoutez ces déclarations à la configuration locale avec son dépôt obligatoire.
+
+```yaml title="outpost.yaml — provider nommé"
+sandbox:
+  $ref: sandboxProviders.build
+sandboxProviders:
+  build:
+    type: docker
+    image: outpost:sandbox
+    repositoryMode: isolated
+    cpus: 2
+    memoryMb: 4096
+```
+
+Les options des providers suivent leurs contrats TypeScript, dont les montages, caches de dépendances et restrictions réseau. Les caches cloud peuvent référencer des transports nommés. Les SDK des providers ne sont chargés que lorsqu’ils sont utilisés. Firecracker reste expérimental et exige `experimental: true` ; sa déclaration ne valide pas la préparation de l’hôte. Consultez [le choix de sandbox](../choose-a-sandbox/) et l’API du provider pour les options prises en charge et les limites de validation réelle.
+
+Placez préparation, guards de diff, délais d’étapes, copies, journalisation et réglages de stockage sous `workspace`. Gardez dépôt, branche, provider et observation à la racine de la configuration. Les chemins hôte sont résolus depuis le dossier du fichier ; les chemins internes à la sandbox conservent la sémantique du provider. `examples/66-recipe-components/` exécute préparation et commande sur des ressources Git locales temporaires.
+
+```yaml title="outpost.yaml — préparation du workspace"
+workspace:
+  guard:
+    protectedPaths: [".github/**"]
+  hooks:
+    sandboxReady:
+      - executable: npm
+        arguments: [ci]
+        when:
+          kind: changed
+          files: [package-lock.json]
+```
+
+Les profils portables et tous les réglages des harness CLI utilisent les mêmes factories que TypeScript. Déclarez un profil puis référencez-le depuis un rôle d’agent ; les déclarations MCP et l’authentification explicite conservent leurs contrôles de capacités. Le provider local reste non isolé. Les fichiers de compte sont résolus sur l’hôte et restent séparés du stockage des conversations.
+
+```yaml title="outpost.yaml — profil partagé"
+profiles:
+  reviewer:
+    type: portable
+    instructions: Review the change without editing files.
+    allowedTools: [read]
+agents:
+  reviewer:
+    harness: claude
+    authentication: account
+    profile:
+      $ref: profiles.reviewer
+```
+
+## Sélectionner les secrets avant allocation
+
+Une valeur d’environnement peut utiliser `{ env: VARIABLE_NAME }`. Les composants de gestion de secrets reprennent leurs options publiques ; les clients SDK installés sont des extensions `object` empruntées. Le token Vault ci-dessous est ainsi lu sur l’hôte uniquement à l’exécution. Les sources natives sont déclarées sous `secrets` ; `variables.secrets` sélectionne des noms explicites avec `fromSecrets()`.
+
+```yaml title="outpost.yaml — source de secrets sur l’hôte"
+secrets:
+  build:
+    type: vault
+    address: https://vault.example.com
+    token: { env: VAULT_TOKEN }
+    mount: secret
+    path: build
+variables:
+  selected:
+    type: secrets
+    source: { $ref: secrets.build }
+    names: [BUILD_TOKEN]
+sandbox:
+  provider: docker
+  image: outpost:sandbox
+  variables: { $ref: variables.selected }
+```
+
+Seules les valeurs sélectionnées atteignent la sandbox. La validation n’importe aucun module utilisateur et ne lit aucune valeur de secret. Une valeur absente échoue avant allocation ; le runtime masque les valeurs sélectionnées dans les observations, les rapports retournés et les diagnostics d’exécution. Il ne modifie pas l’environnement hôte. Consultez [les sources de secrets](../secret-sources/) pour les restrictions des services et la propriété des identifiants.
+
+Les schémas statiques sont générés depuis les types TypeScript publics installés et vérifiés en CI. Le lifecycle local, le chargement d’extensions, la sélection de secrets et l’équivalence des requêtes CLI disposent de régressions hors ligne. Ces tests n’exercent pas les vrais providers cloud, services de secrets ou agents payants.

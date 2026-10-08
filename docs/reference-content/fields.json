@@ -8793,5 +8793,9 @@
   "RecipeDiagnostic.cause": [
     "Nested cause retained up to the diagnostic depth limit.",
     "Cause imbriquée conservée jusqu’à la limite de profondeur du diagnostic."
+  ],
+  "RecipeReport.observerErrors": [
+    "Failures while closing owned observer components, reported without changing the execution status. Secret values selected by this runtime are redacted.",
+    "Échecs de fermeture des composants d’observation possédés, rapportés sans modifier le statut d’exécution. Les valeurs des secrets sélectionnés par ce runtime sont masquées."
   ]
 }

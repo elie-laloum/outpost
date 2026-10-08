@@ -327,10 +327,10 @@
       "harness": "Harness",
       "model": "ModelSpec"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:AgentProfile": {
     "signatures": [],
@@ -352,10 +352,10 @@
       "allowedTools": "readonly AgentProfileTool[] | undefined",
       "mcpServers": "McpServers | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:AgentProfileTool": {
     "signatures": [],
@@ -412,10 +412,10 @@
       "profile": "AgentProfile | undefined",
       "mode": "\"accept-edits\" | \"plan\" | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:archiveRecovery": {
     "signatures": [
@@ -702,10 +702,10 @@
       "mcpServers": "McpServers | undefined",
       "profile": "AgentProfile | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:CliAgent": {
     "signatures": [],
@@ -774,10 +774,10 @@
       "mcpServers": "McpServers | undefined",
       "profile": "AgentProfile | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:Command": {
     "signatures": [],
@@ -1015,10 +1015,10 @@
       "mcpServers": "McpServers | undefined",
       "profile": "AgentProfile | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createAgent": {
     "signatures": [
@@ -1028,9 +1028,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createAgentConflictResolver": {
     "signatures": [
@@ -1054,9 +1054,9 @@
     "signatures": ["(settings?: AntigravitySettings): CliHarness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createArtifactStore": {
     "signatures": ["(options: ArtifactStoreOptions): ArtifactStore"],
@@ -1078,9 +1078,9 @@
     "signatures": ["(settings?: ClaudeSettings): CliHarness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createCodexConversations": {
     "signatures": ["(): NativeConversationStore"],
@@ -1094,9 +1094,9 @@
     "signatures": ["(settings?: CodexSettings): CliHarness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createCopilotConversations": {
     "signatures": ["(): NativeConversationStore"],
@@ -1110,9 +1110,9 @@
     "signatures": ["(settings?: CopilotSettings): CliHarness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createCronSchedule": {
     "signatures": ["(expression: string, options?: CronOptions): CronSchedule"],
@@ -1244,17 +1244,17 @@
     "signatures": ["(settings?: KimiSettings): CliHarness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createLocalTransport": {
     "signatures": ["(options: LocalTransportOptions): Transport"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:createMountedSandboxProvider": {
     "signatures": ["(definition: ProviderDefinition): SandboxProvider"],
@@ -1666,9 +1666,9 @@
     "signatures": ["(options: AgentProfileOptions): AgentProfile"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:defineAgentTask": {
     "signatures": [
@@ -2307,9 +2307,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:FromSecretsOptions": {
     "signatures": [],
@@ -2986,10 +2986,10 @@
       "mcpServers": "McpServers | undefined",
       "profile": "AgentProfile | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:labelAdded": {
     "signatures": [
@@ -3049,10 +3049,10 @@
     "options": {
       "directory": "string"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:Logging": {
     "signatures": [],
@@ -4815,7 +4815,7 @@
     "options": {
       "errors": "readonly unknown[]",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9314": "() => Promise<void>",
+      "__@asyncDispose@9328": "() => Promise<void>",
       "observe": "(observation: Observation) => void | Promise<void>",
       "flush": "(() => void | Promise<void>) | undefined"
     },
@@ -5018,7 +5018,7 @@
       "attach": "(options?: AttachOptions) => Promise<AttachResult>",
       "command": "(command: Command) => Promise<CommandResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
-      "__@asyncDispose@9314": "() => Promise<void>"
+      "__@asyncDispose@9328": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -5110,10 +5110,10 @@
       "limits": "StageLimits | undefined",
       "label": "string | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   ".:SandboxProvider": {
     "signatures": [],
@@ -5565,7 +5565,7 @@
       "repository": "string",
       "reserveBytes": "number",
       "release": "() => Promise<void>",
-      "__@asyncDispose@9314": "() => Promise<void>"
+      "__@asyncDispose@9328": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -6935,7 +6935,7 @@
       "attach": "(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & AttachOptions & { readonly agent: Agent; }) => Promise<AttachResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
       "integrate": "{ (): Promise<void>; (options: IntegrationOptions): Promise<ConflictResolution | void>; }",
-      "__@asyncDispose@9314": "() => Promise<void>",
+      "__@asyncDispose@9328": "() => Promise<void>",
       "repository": "string",
       "directory": "string",
       "branch": "string",
@@ -7048,9 +7048,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/daytona:DaytonaOptions": {
     "signatures": [],
@@ -7064,10 +7064,10 @@
       "root": "string | undefined",
       "retain": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/daytona:EgressPolicy": {
     "signatures": [],
@@ -7101,10 +7101,10 @@
       "retain": "number | undefined",
       "userns": "false | \"keep-id\" | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/docker:createDockerSandboxProvider": {
     "signatures": [
@@ -7112,9 +7112,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/docker:DependencyCache": {
     "signatures": [],
@@ -7144,9 +7144,9 @@
     "signatures": ["(options: FirecrackerOptions): SandboxProvider"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/firecracker:FirecrackerOptions": {
     "signatures": [],
@@ -7166,18 +7166,18 @@
       "variables": "Readonly<Record<string, string>> | undefined",
       "jailer": "{ readonly binary: string; readonly directory: string; readonly cgroup: string; readonly uid: number; readonly gid: number; readonly cpuQuotaUs: number; readonly memoryMaxMb: number; readonly processes: number; } | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/local:createLocalSandboxProvider": {
     "signatures": ["(options?: LocalOptions): SandboxProvider"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/podman:ContainerOptions": {
     "signatures": [],
@@ -7198,10 +7198,10 @@
       "retain": "number | undefined",
       "userns": "false | \"keep-id\" | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/podman:createPodmanSandboxProvider": {
     "signatures": [
@@ -7209,9 +7209,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/podman:DependencyCache": {
     "signatures": [],
@@ -7255,9 +7255,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./providers/vercel:EgressPolicy": {
     "signatures": [],
@@ -7283,10 +7283,10 @@
       "root": "string | undefined",
       "retain": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./queues/bullmq:BullMQTaskQueue": {
     "signatures": [],
@@ -7448,7 +7448,7 @@
     "options": {
       "run": "(options?: RecipeRunOptions) => Promise<RecipeReport>",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9314": "() => Promise<void>"
+      "__@asyncDispose@9328": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 1,
@@ -7484,18 +7484,18 @@
       "client": "Pick<SecretsManagerClient, \"send\">",
       "secrets": "Readonly<Record<string, AwsSecretReference>>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/aws:createAwsSecretSource": {
     "signatures": ["(options: AwsSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/azure:AzureSecretReference": {
     "signatures": [],
@@ -7514,26 +7514,26 @@
       "client": "Pick<SecretClient, \"getSecret\">",
       "secrets": "Readonly<Record<string, AzureSecretReference>>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/azure:createAzureSecretSource": {
     "signatures": ["(options: AzureSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/gcp:createGcpSecretSource": {
     "signatures": ["(options: GcpSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/gcp:GcpSecretSourceOptions": {
     "signatures": [],
@@ -7541,18 +7541,18 @@
       "client": "Pick<import(\"@google-cloud/secret-manager/build/src/v1/secret_manager_service_client.js\").SecretManagerServiceClient, \"accessSecretVersion\">",
       "secrets": "Readonly<Record<string, string>>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/infisical:createInfisicalSecretSource": {
     "signatures": ["(options: InfisicalSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/infisical:InfisicalSecretSourceOptions": {
     "signatures": [],
@@ -7562,18 +7562,18 @@
       "environment": "string",
       "path": "string | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/onepassword:createOnePasswordSecretSource": {
     "signatures": ["(options: OnePasswordSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/onepassword:OnePasswordSecretSourceOptions": {
     "signatures": [],
@@ -7581,18 +7581,18 @@
       "client": "{ readonly secrets: Pick<Client[\"secrets\"], \"resolve\">; }",
       "secrets": "Readonly<Record<string, string>>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/vault:createVaultSecretSource": {
     "signatures": ["(options: VaultSecretSourceOptions): SecretSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./secrets/vault:VaultSecretSourceOptions": {
     "signatures": [],
@@ -7604,10 +7604,10 @@
       "version": "number | undefined",
       "namespace": "string | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 2,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-components.test.ts"
   },
   "./testing:createMemorySandboxProvider": {
     "signatures": ["(options?: MemorySandboxOptions): SandboxProvider"],

@@ -25,6 +25,7 @@ export const recipeFamilies: Readonly<Record<string, string>> = {
   transports: "transport",
   stores: "store",
   secrets: "secretSource",
+  variables: "variables",
   tools: "tool",
   toolsets: "toolset",
   permissions: "permissions",

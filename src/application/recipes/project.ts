@@ -9,6 +9,8 @@ import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
 import { readRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
+import { nativeRecipeComponents, sandboxOptionsComponent } from "./native.ts";
+import { secretSelectionComponent } from "./variables.ts";
 import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
 import type {
@@ -47,6 +49,7 @@ export async function readRecipeProject(
       "reports",
       "extensions",
       "experimental",
+      "workspace",
       ...Object.keys(recipeFamilies),
     ]);
     for (const key of Object.keys(configuration)) {
@@ -62,15 +65,29 @@ export async function readRecipeProject(
         ),
       ),
       version: 1,
+      ...(configuration.version === 2
+        ? { sandbox: { provider: "local" }, agents: {} }
+        : {}),
     });
     const legacy = await readRecipeConfiguration(legacySource, config, false);
     for (const step of document.tasks) {
-      if (step.agent && !Object.hasOwn(legacy.agents ?? {}, step.agent))
+      if (
+        step.agent &&
+        !Object.hasOwn(
+          configuration.version === 2
+            ? recipeRecord(configuration.agents ?? {}, "agents")
+            : (legacy.agents ?? {}),
+          step.agent,
+        )
+      )
         throw new Error(`Unknown recipe agent: ${step.agent}`);
     }
     const registry = createRecipeRegistry({
       components: [
         ...observationComponents,
+        ...nativeRecipeComponents,
+        sandboxOptionsComponent,
+        secretSelectionComponent,
         ...(options.registry?.components ?? []),
       ],
     });

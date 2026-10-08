@@ -1,6 +1,6 @@
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
+import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
 import {
-  recipeObject,
   recipeRecord,
   recipeReference,
   recipeString,
@@ -25,14 +25,52 @@ export function recipeComponentGraph(
   const nodes = new Map<string, RecipeComponentNode>();
   const expected = new Map<string, string>();
   const declarations = new Map<string, unknown>();
+  const extensions = new Map<string, RecipeExtensionDeclaration>();
+  if (configuration.version === 2) {
+    const workspace = recipeRecord(configuration.workspace ?? {}, "workspace");
+    for (const key of [
+      "repository",
+      "branch",
+      "sandboxProvider",
+      "observation",
+    ])
+      if (Object.hasOwn(workspace, key))
+        throw new Error(
+          `workspace.${key} must be declared at the configuration root`,
+        );
+    const provider = recipeRecord(configuration.sandbox, "sandbox");
+    const { provider: shorthand, ...options } = provider;
+    declarations.set(
+      "sandbox",
+      shorthand ? { ...options, type: shorthand } : provider,
+    );
+    expected.set("sandbox", "sandboxProvider");
+    declarations.set("workspace", { ...workspace, type: "options" });
+    expected.set("workspace", "sandboxOptions");
+  }
   for (const [family, kind] of Object.entries(recipeFamilies)) {
     if (configuration[family] === undefined) continue;
-    // Legacy agent declarations are normalized by the configuration reader.
-    if (family === "agents") continue;
+    if (family === "agents" && configuration.version === 1) continue;
     for (const [name, value] of Object.entries(
       recipeRecord(configuration[family], family),
     )) {
       const key = `${family}.${name}`;
+      if (family === "agents" && !recipeReference(value)) {
+        const agent = recipeRecord(value, key);
+        if (typeof agent.harness === "string") {
+          const { harness, model, type, ...settings } = agent;
+          declarations.set(key, {
+            type: type ?? "composed",
+            harness: { type: harness, ...settings },
+            ...(model === undefined ? {} : { model }),
+          });
+          expected.set(key, kind);
+          continue;
+        }
+        declarations.set(key, { type: "composed", ...agent });
+        expected.set(key, kind);
+        continue;
+      }
       declarations.set(key, value);
       expected.set(key, kind);
     }
@@ -52,23 +90,34 @@ export function recipeComponentGraph(
       throw new Error(
         `Borrowed extension ${name} cannot declare options or disposal`,
       );
-    if (extension.schema)
-      validateRecipeSchema(
-        extension.schema,
-        extension.options ?? {},
-        `extensions.${name}.options`,
-      );
     const key = `extensions.${name}`;
-    nodes.set(key, {
-      name: key,
-      kind: extension.kind,
-      extension,
-      options: extension.options ?? {},
-      dependencies: [],
-    });
+    extensions.set(key, extension);
     expected.set(key, extension.kind);
   }
   const building = new Set<string>();
+  function normalize(
+    schema: Readonly<Record<string, unknown>>,
+    options: unknown,
+    name: string,
+    dependencies: string[],
+  ): Record<string, unknown> {
+    const normalized = recipeRecord(
+      mapRecipeSchema(
+        schema,
+        options,
+        (shape, value, path) => {
+          if (typeof shape.component !== "string") return value;
+          const target = component(value, shape.component, path);
+          dependencies.push(target);
+          return { $ref: target };
+        },
+        name,
+      ),
+      name,
+    );
+    validateRecipeSchema(schema, normalized, name);
+    return normalized;
+  }
   function component(source: unknown, kind: string, name: string): string {
     const reference = recipeReference(source);
     if (reference) {
@@ -92,33 +141,12 @@ export function recipeComponentGraph(
     const options = Object.fromEntries(
       Object.entries(record).filter(([key]) => key !== "type"),
     );
-    function visit(schema: unknown, value: unknown, path: string): unknown {
-      if (!recipeObject(schema)) return value;
-      if (typeof schema.component === "string") {
-        const target = component(value, schema.component, path);
-        dependencies.push(target);
-        return { $ref: target };
-      }
-      if (Array.isArray(value) && schema.items)
-        return value.map((item, index) =>
-          visit(schema.items, item, `${path}.${index}`),
-        );
-      if (recipeObject(value) && recipeObject(schema.properties)) {
-        const properties = schema.properties;
-        return Object.fromEntries(
-          Object.entries(value).map(([key, item]) => [
-            key,
-            visit(properties[key], item, `${path}.${key}`),
-          ]),
-        );
-      }
-      return value;
-    }
-    const normalized = recipeRecord(
-      visit(definition.schema, options, name),
+    const normalized = normalize(
+      definition.schema,
+      options,
       name,
+      dependencies,
     );
-    validateRecipeSchema(definition.schema, normalized, name);
     nodes.set(name, {
       name,
       kind,
@@ -135,6 +163,21 @@ export function recipeComponentGraph(
     building.add(name);
     const kind = expected.get(name);
     if (!kind) throw new Error(`Unknown recipe component reference: ${name}`);
+    const extension = extensions.get(name);
+    if (extension) {
+      const dependencies: string[] = [];
+      const options = extension.schema
+        ? normalize(
+            extension.schema,
+            extension.options ?? {},
+            name,
+            dependencies,
+          )
+        : {};
+      nodes.set(name, { name, kind, extension, options, dependencies });
+      building.delete(name);
+      return;
+    }
     const target = component(declarations.get(name), kind, name);
     if (target !== name) {
       nodes.set(name, {
@@ -147,6 +190,7 @@ export function recipeComponentGraph(
     building.delete(name);
   }
   for (const name of declarations.keys()) build(name);
+  for (const name of extensions.keys()) build(name);
   const observation =
     configuration.observation === undefined
       ? undefined

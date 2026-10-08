@@ -18,6 +18,7 @@ validator.addKeyword({
   valid: true,
 });
 validator.addKeyword({ keyword: "secret", schemaType: "boolean", valid: true });
+validator.addKeyword({ keyword: "regexp", schemaType: "boolean", valid: true });
 
 export function validateRecipeSchema<T>(
   schema: JsonSchema,

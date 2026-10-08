@@ -1,9 +1,12 @@
 import { recipeReference } from "../../domain/recipes/values.ts";
 import { importRecipeExtension } from "../../infrastructure/recipes/extensions.ts";
+import { nativeRecipeGuards, resolveRecipeOptions } from "./native.ts";
+import { redactValue } from "../../domain/redaction.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
 import type {
   RecipeComponentGraph,
   RecipeComponentScope,
+  RecipeOwnedComponent,
 } from "./components.types.ts";
 
 export function createRecipeComponentScope(
@@ -14,10 +17,25 @@ export function createRecipeComponentScope(
 ): RecipeComponentScope {
   const modules = new Map<string, Record<string, unknown>>();
   const values = new Map<string, Promise<unknown>>();
-  const owned: (() => void | Promise<void>)[] = [];
+  const owned: RecipeOwnedComponent[] = [];
+  const observerErrors: unknown[] = [];
+  const secrets = new Set<string>();
+  const redactions: RegExp[] = [];
   let closing: Promise<void> | undefined;
   let preparation: Promise<void> | undefined;
   const scope: RecipeComponentScope = {
+    observerErrors,
+    redactions,
+    protect(items) {
+      for (const value of items) {
+        if (!value || secrets.has(value)) continue;
+        secrets.add(value);
+        redactions.push(
+          new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+        );
+      }
+    },
+    redact: <T>(value: T): T => redactValue(value, redactions),
     prepare() {
       preparation ??= (async () => {
         for (const node of graph.nodes.values()) {
@@ -52,13 +70,21 @@ export function createRecipeComponentScope(
               throw new Error(
                 `Missing declared environment variable: ${variable}`,
               );
+            scope.protect([value]);
             return value;
           },
         };
         if (node.definition) {
           const value = await node.definition.create(node.options, context);
+          if (
+            kind === "variables" &&
+            nativeRecipeGuards.variables!(value) &&
+            typeof value === "object" &&
+            value !== null
+          )
+            scope.protect(Object.values(value));
           const dispose = node.definition.dispose;
-          if (dispose) owned.push(() => dispose(value));
+          if (dispose) owned.push({ kind, close: () => dispose(value) });
           if (!node.definition.accepts(value))
             throw new Error(
               `Invalid ${kind} created by ${node.definition.name}`,
@@ -70,22 +96,38 @@ export function createRecipeComponentScope(
           const exported = module[node.extension.export];
           const value: unknown =
             node.extension.factory && typeof exported === "function"
-              ? await exported(node.options, context)
+              ? await exported(
+                  await resolveRecipeOptions(
+                    node.extension.schema ?? {},
+                    node.options,
+                    context,
+                  ),
+                  context,
+                )
               : exported;
+          if (
+            kind === "variables" &&
+            nativeRecipeGuards.variables!(value) &&
+            typeof value === "object" &&
+            value !== null
+          )
+            scope.protect(Object.values(value));
           const dispose = node.extension.dispose
             ? module[node.extension.dispose]
             : undefined;
           if (typeof dispose === "function")
-            owned.push(async () => {
-              await dispose(value);
+            owned.push({
+              kind,
+              close: async () => {
+                await dispose(value);
+              },
             });
           const candidates = registry.components.filter(
             (component) => component.kind === kind,
           );
           const valid =
-            kind === "callback"
-              ? typeof value === "function"
-              : candidates.some((component) => component.accepts(value));
+            nativeRecipeGuards[kind]?.(value) ??
+            candidates.some((component) => component.accepts(value));
           if (!valid)
             throw new Error(`Extension ${name} returned an invalid ${kind}`);
           return value;
@@ -99,10 +141,14 @@ export function createRecipeComponentScope(
       closing ??= (async () => {
         await Promise.allSettled(values.values());
         const failures: unknown[] = [];
-        for (const dispose of owned.reverse()) {
+        for (const component of owned.reverse()) {
           try {
-            await dispose();
+            await component.close();
           } catch (error) {
+            if (["observation", "sink"].includes(component.kind)) {
+              observerErrors.push(error);
+              continue;
+            }
             failures.push(error);
           }
         }
