@@ -1,6 +1,6453 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "queued.options": {
+    type: "object",
+    properties: {
+      queue: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "queue",
+      },
+      handler: {
+        type: "string",
+      },
+      deadline: {
+        type: "number",
+      },
+      pollMs: {
+        type: "number",
+      },
+      input: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "queued.options.input",
+      },
+      decode: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "queued.options.decode",
+      },
+    },
+    required: ["queue", "handler"],
+    additionalProperties: false,
+  },
+  "queue.sqlite": {
+    type: "object",
+    properties: {
+      file: {
+        type: "string",
+        hostPath: true,
+      },
+    },
+    required: ["file"],
+    additionalProperties: false,
+  },
+  "queue.http": {
+    type: "object",
+    properties: {
+      url: {
+        type: "string",
+      },
+      token: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.http.token",
+          },
+        ],
+      },
+      timeoutMs: {
+        type: "number",
+      },
+    },
+    required: ["url", "token"],
+    additionalProperties: false,
+  },
+  "queue.bullmq": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      connection: {
+        type: "object",
+        properties: {
+          Connector: {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          retryStrategy: {
+            anyOf: [
+              {
+                type: "null",
+              },
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.retryStrategy",
+              },
+            ],
+          },
+          commandTimeout: {
+            type: "number",
+          },
+          blockingTimeout: {
+            type: "number",
+          },
+          blockingTimeoutGrace: {
+            type: "number",
+          },
+          socketTimeout: {
+            type: "number",
+          },
+          keepAlive: {
+            type: "number",
+          },
+          noDelay: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          connectionName: {
+            type: "string",
+          },
+          disableClientInfo: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          clientInfoTag: {
+            type: "string",
+          },
+          username: {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          password: {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          db: {
+            type: "number",
+          },
+          autoResubscribe: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          autoResendUnfulfilledCommands: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          reconnectOnError: {
+            anyOf: [
+              {
+                type: "null",
+              },
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.reconnectOnError",
+              },
+            ],
+          },
+          readOnly: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          stringNumbers: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          connectTimeout: {
+            type: "number",
+          },
+          monitor: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          maxRetriesPerRequest: {
+            anyOf: [
+              {
+                type: "null",
+              },
+              {
+                type: "number",
+              },
+            ],
+          },
+          maxLoadingRetryTime: {
+            type: "number",
+          },
+          enableAutoPipelining: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          autoPipeliningIgnoredCommands: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          offlineQueue: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          commandQueue: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          enableOfflineQueue: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          enableReadyCheck: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          lazyConnect: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          scripts: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                lua: {
+                  type: "string",
+                },
+                numberOfKeys: {
+                  type: "number",
+                },
+                readOnly: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+              },
+              required: ["lua"],
+              additionalProperties: false,
+            },
+          },
+          keyPrefix: {
+            type: "string",
+          },
+          showFriendlyErrorStack: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          name: {
+            type: "string",
+          },
+          role: {
+            anyOf: [
+              {
+                const: "master",
+              },
+              {
+                const: "slave",
+              },
+            ],
+          },
+          tls: {
+            type: "object",
+            properties: {
+              host: {
+                type: "string",
+              },
+              port: {
+                type: "number",
+              },
+              path: {
+                type: "string",
+              },
+              socket: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              checkServerIdentity: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.tls.checkServerIdentity",
+              },
+              servername: {
+                type: "string",
+              },
+              session: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              minDHSize: {
+                type: "number",
+              },
+              lookup: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.tls.lookup",
+              },
+              timeout: {
+                type: "number",
+              },
+              pskCallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.tls.pskCallback",
+              },
+              ALPNCallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.tls.ALPNCallback",
+              },
+              allowPartialTrustChain: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              ca: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              cert: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              sigalgs: {
+                type: "string",
+              },
+              ciphers: {
+                type: "string",
+              },
+              clientCertEngine: {
+                type: "string",
+              },
+              crl: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              dhparam: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                ],
+              },
+              ecdhCurve: {
+                type: "string",
+              },
+              honorCipherOrder: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              key: {
+                $ref: "#/$defs/option0",
+              },
+              privateKeyEngine: {
+                type: "string",
+              },
+              privateKeyIdentifier: {
+                type: "string",
+              },
+              maxVersion: {
+                anyOf: [
+                  {
+                    const: "TLSv1.3",
+                  },
+                  {
+                    const: "TLSv1.2",
+                  },
+                  {
+                    const: "TLSv1.1",
+                  },
+                  {
+                    const: "TLSv1",
+                  },
+                ],
+              },
+              minVersion: {
+                anyOf: [
+                  {
+                    const: "TLSv1.3",
+                  },
+                  {
+                    const: "TLSv1.2",
+                  },
+                  {
+                    const: "TLSv1.1",
+                  },
+                  {
+                    const: "TLSv1",
+                  },
+                ],
+              },
+              passphrase: {
+                type: "string",
+              },
+              pfx: {
+                $ref: "#/$defs/option1",
+              },
+              secureOptions: {
+                type: "number",
+              },
+              secureProtocol: {
+                type: "string",
+              },
+              sessionIdContext: {
+                type: "string",
+              },
+              ticketKeys: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              sessionTimeout: {
+                type: "number",
+              },
+              secureContext: {
+                type: "object",
+                properties: {
+                  context: {},
+                },
+                required: ["context"],
+                additionalProperties: false,
+              },
+              enableTrace: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              requestCert: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              ALPNProtocols: {
+                anyOf: [
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option8",
+                  },
+                  {
+                    $ref: "#/$defs/option8",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      BYTES_PER_ELEMENT: {
+                        type: "number",
+                      },
+                      buffer: {
+                        $ref: "#/$defs/option5",
+                      },
+                      byteLength: {
+                        type: "number",
+                      },
+                      byteOffset: {
+                        type: "number",
+                      },
+                      at: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.at",
+                      },
+                      copyWithin: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.copyWithin",
+                      },
+                      every: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.every",
+                      },
+                      fill: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.fill",
+                      },
+                      filter: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.filter",
+                      },
+                      find: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.find",
+                      },
+                      findIndex: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.findIndex",
+                      },
+                      findLast: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.findLast",
+                      },
+                      findLastIndex: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.findLastIndex",
+                      },
+                      forEach: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.forEach",
+                      },
+                      includes: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.includes",
+                      },
+                      indexOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.indexOf",
+                      },
+                      join: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.join",
+                      },
+                      lastIndexOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.lastIndexOf",
+                      },
+                      length: {
+                        type: "number",
+                      },
+                      map: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.map",
+                      },
+                      reduce: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.reduce",
+                      },
+                      reduceRight: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.reduceRight",
+                      },
+                      reverse: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.reverse",
+                      },
+                      set: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.set",
+                      },
+                      slice: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.slice",
+                      },
+                      some: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.some",
+                      },
+                      sort: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.sort",
+                      },
+                      subarray: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.subarray",
+                      },
+                      toLocaleString: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      toReversed: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.toReversed",
+                      },
+                      toSorted: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.toSorted",
+                      },
+                      toString: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      valueOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      with: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.with",
+                      },
+                      entries: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.entries",
+                      },
+                      keys: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.keys",
+                      },
+                      values: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.values",
+                      },
+                    },
+                    required: [
+                      "BYTES_PER_ELEMENT",
+                      "buffer",
+                      "byteLength",
+                      "byteOffset",
+                      "at",
+                      "copyWithin",
+                      "every",
+                      "fill",
+                      "filter",
+                      "find",
+                      "findIndex",
+                      "findLast",
+                      "findLastIndex",
+                      "forEach",
+                      "includes",
+                      "indexOf",
+                      "join",
+                      "lastIndexOf",
+                      "length",
+                      "map",
+                      "reduce",
+                      "reduceRight",
+                      "reverse",
+                      "set",
+                      "slice",
+                      "some",
+                      "sort",
+                      "subarray",
+                      "toLocaleString",
+                      "toReversed",
+                      "toSorted",
+                      "toString",
+                      "valueOf",
+                      "with",
+                      "entries",
+                      "keys",
+                      "values",
+                    ],
+                    additionalProperties: false,
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    $ref: "#/$defs/option4",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      buffer: {
+                        $ref: "#/$defs/option5",
+                      },
+                      byteLength: {
+                        type: "number",
+                      },
+                      byteOffset: {
+                        type: "number",
+                      },
+                      getFloat32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getFloat32",
+                      },
+                      getFloat64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getFloat64",
+                      },
+                      getInt8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getInt8",
+                      },
+                      getInt16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getInt16",
+                      },
+                      getInt32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getInt32",
+                      },
+                      getUint8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getUint8",
+                      },
+                      getUint16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getUint16",
+                      },
+                      getUint32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getUint32",
+                      },
+                      setFloat32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setFloat32",
+                      },
+                      setFloat64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setFloat64",
+                      },
+                      setInt8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setInt8",
+                      },
+                      setInt16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setInt16",
+                      },
+                      setInt32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setInt32",
+                      },
+                      setUint8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setUint8",
+                      },
+                      setUint16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setUint16",
+                      },
+                      setUint32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setUint32",
+                      },
+                      getBigInt64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getBigInt64",
+                      },
+                      getBigUint64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getBigUint64",
+                      },
+                      setBigInt64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setBigInt64",
+                      },
+                      setBigUint64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setBigUint64",
+                      },
+                      getFloat16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.getFloat16",
+                      },
+                      setFloat16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.tls.ALPNProtocols.setFloat16",
+                      },
+                    },
+                    required: [
+                      "buffer",
+                      "byteLength",
+                      "byteOffset",
+                      "getFloat32",
+                      "getFloat64",
+                      "getInt8",
+                      "getInt16",
+                      "getInt32",
+                      "getUint8",
+                      "getUint16",
+                      "getUint32",
+                      "setFloat32",
+                      "setFloat64",
+                      "setInt8",
+                      "setInt16",
+                      "setInt32",
+                      "setUint8",
+                      "setUint16",
+                      "setUint32",
+                      "getBigInt64",
+                      "getBigUint64",
+                      "setBigInt64",
+                      "setBigUint64",
+                      "getFloat16",
+                      "setFloat16",
+                    ],
+                    additionalProperties: false,
+                  },
+                ],
+              },
+              SNICallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.tls.SNICallback",
+              },
+              rejectUnauthorized: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              requestOCSP: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+          sentinelUsername: {
+            type: "string",
+          },
+          sentinelPassword: {
+            type: "string",
+          },
+          sentinels: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                port: {
+                  type: "number",
+                },
+                host: {
+                  type: "string",
+                },
+                family: {
+                  type: "number",
+                },
+              },
+              additionalProperties: false,
+            },
+          },
+          sentinelRetryStrategy: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelRetryStrategy",
+          },
+          sentinelReconnectStrategy: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelReconnectStrategy",
+          },
+          preferredSlaves: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.preferredSlaves",
+              },
+              {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    port: {
+                      type: "string",
+                    },
+                    ip: {
+                      type: "string",
+                    },
+                    prio: {
+                      type: "number",
+                    },
+                  },
+                  required: ["port", "ip"],
+                  additionalProperties: false,
+                },
+              },
+              {
+                type: "object",
+                properties: {
+                  port: {
+                    type: "string",
+                  },
+                  ip: {
+                    type: "string",
+                  },
+                  prio: {
+                    type: "number",
+                  },
+                },
+                required: ["port", "ip"],
+                additionalProperties: false,
+              },
+            ],
+          },
+          disconnectTimeout: {
+            type: "number",
+          },
+          sentinelCommandTimeout: {
+            type: "number",
+          },
+          enableTLSForSentinelMode: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          sentinelTLS: {
+            type: "object",
+            properties: {
+              host: {
+                type: "string",
+              },
+              port: {
+                type: "number",
+              },
+              path: {
+                type: "string",
+              },
+              socket: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              checkServerIdentity: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract:
+                  "queue.bullmq.connection.sentinelTLS.checkServerIdentity",
+              },
+              servername: {
+                type: "string",
+              },
+              session: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              minDHSize: {
+                type: "number",
+              },
+              lookup: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.sentinelTLS.lookup",
+              },
+              timeout: {
+                type: "number",
+              },
+              pskCallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.sentinelTLS.pskCallback",
+              },
+              ALPNCallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.sentinelTLS.ALPNCallback",
+              },
+              allowPartialTrustChain: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              ca: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              cert: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              sigalgs: {
+                type: "string",
+              },
+              ciphers: {
+                type: "string",
+              },
+              clientCertEngine: {
+                type: "string",
+              },
+              crl: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "object",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              dhparam: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                ],
+              },
+              ecdhCurve: {
+                type: "string",
+              },
+              honorCipherOrder: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              key: {
+                $ref: "#/$defs/option0",
+              },
+              privateKeyEngine: {
+                type: "string",
+              },
+              privateKeyIdentifier: {
+                type: "string",
+              },
+              maxVersion: {
+                anyOf: [
+                  {
+                    const: "TLSv1.3",
+                  },
+                  {
+                    const: "TLSv1.2",
+                  },
+                  {
+                    const: "TLSv1.1",
+                  },
+                  {
+                    const: "TLSv1",
+                  },
+                ],
+              },
+              minVersion: {
+                anyOf: [
+                  {
+                    const: "TLSv1.3",
+                  },
+                  {
+                    const: "TLSv1.2",
+                  },
+                  {
+                    const: "TLSv1.1",
+                  },
+                  {
+                    const: "TLSv1",
+                  },
+                ],
+              },
+              passphrase: {
+                type: "string",
+              },
+              pfx: {
+                $ref: "#/$defs/option1",
+              },
+              secureOptions: {
+                type: "number",
+              },
+              secureProtocol: {
+                type: "string",
+              },
+              sessionIdContext: {
+                type: "string",
+              },
+              ticketKeys: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              sessionTimeout: {
+                type: "number",
+              },
+              secureContext: {
+                type: "object",
+                properties: {
+                  context: {},
+                },
+                required: ["context"],
+                additionalProperties: false,
+              },
+              enableTrace: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              requestCert: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              ALPNProtocols: {
+                anyOf: [
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                  {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option13",
+                  },
+                  {
+                    $ref: "#/$defs/option13",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      BYTES_PER_ELEMENT: {
+                        type: "number",
+                      },
+                      buffer: {
+                        $ref: "#/$defs/option10",
+                      },
+                      byteLength: {
+                        type: "number",
+                      },
+                      byteOffset: {
+                        type: "number",
+                      },
+                      at: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.at",
+                      },
+                      copyWithin: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.copyWithin",
+                      },
+                      every: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.every",
+                      },
+                      fill: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.fill",
+                      },
+                      filter: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.filter",
+                      },
+                      find: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.find",
+                      },
+                      findIndex: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findIndex",
+                      },
+                      findLast: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLast",
+                      },
+                      findLastIndex: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLastIndex",
+                      },
+                      forEach: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.forEach",
+                      },
+                      includes: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.includes",
+                      },
+                      indexOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.indexOf",
+                      },
+                      join: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.join",
+                      },
+                      lastIndexOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.lastIndexOf",
+                      },
+                      length: {
+                        type: "number",
+                      },
+                      map: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.map",
+                      },
+                      reduce: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduce",
+                      },
+                      reduceRight: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduceRight",
+                      },
+                      reverse: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reverse",
+                      },
+                      set: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.set",
+                      },
+                      slice: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.slice",
+                      },
+                      some: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.some",
+                      },
+                      sort: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.sort",
+                      },
+                      subarray: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.subarray",
+                      },
+                      toLocaleString: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      toReversed: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toReversed",
+                      },
+                      toSorted: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toSorted",
+                      },
+                      toString: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      valueOf: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                      },
+                      with: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.with",
+                      },
+                      entries: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.entries",
+                      },
+                      keys: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.keys",
+                      },
+                      values: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.values",
+                      },
+                    },
+                    required: [
+                      "BYTES_PER_ELEMENT",
+                      "buffer",
+                      "byteLength",
+                      "byteOffset",
+                      "at",
+                      "copyWithin",
+                      "every",
+                      "fill",
+                      "filter",
+                      "find",
+                      "findIndex",
+                      "findLast",
+                      "findLastIndex",
+                      "forEach",
+                      "includes",
+                      "indexOf",
+                      "join",
+                      "lastIndexOf",
+                      "length",
+                      "map",
+                      "reduce",
+                      "reduceRight",
+                      "reverse",
+                      "set",
+                      "slice",
+                      "some",
+                      "sort",
+                      "subarray",
+                      "toLocaleString",
+                      "toReversed",
+                      "toSorted",
+                      "toString",
+                      "valueOf",
+                      "with",
+                      "entries",
+                      "keys",
+                      "values",
+                    ],
+                    additionalProperties: false,
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    $ref: "#/$defs/option9",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      buffer: {
+                        $ref: "#/$defs/option10",
+                      },
+                      byteLength: {
+                        type: "number",
+                      },
+                      byteOffset: {
+                        type: "number",
+                      },
+                      getFloat32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getFloat32",
+                      },
+                      getFloat64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getFloat64",
+                      },
+                      getInt8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getInt8",
+                      },
+                      getInt16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getInt16",
+                      },
+                      getInt32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getInt32",
+                      },
+                      getUint8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getUint8",
+                      },
+                      getUint16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getUint16",
+                      },
+                      getUint32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getUint32",
+                      },
+                      setFloat32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setFloat32",
+                      },
+                      setFloat64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setFloat64",
+                      },
+                      setInt8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setInt8",
+                      },
+                      setInt16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setInt16",
+                      },
+                      setInt32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setInt32",
+                      },
+                      setUint8: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setUint8",
+                      },
+                      setUint16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setUint16",
+                      },
+                      setUint32: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setUint32",
+                      },
+                      getBigInt64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getBigInt64",
+                      },
+                      getBigUint64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getBigUint64",
+                      },
+                      setBigInt64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setBigInt64",
+                      },
+                      setBigUint64: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setBigUint64",
+                      },
+                      getFloat16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.getFloat16",
+                      },
+                      setFloat16: {
+                        type: "object",
+                        properties: {
+                          $ref: {
+                            type: "string",
+                            minLength: 1,
+                          },
+                        },
+                        required: ["$ref"],
+                        additionalProperties: false,
+                        component: "callback",
+                        contract:
+                          "queue.bullmq.connection.sentinelTLS.ALPNProtocols.setFloat16",
+                      },
+                    },
+                    required: [
+                      "buffer",
+                      "byteLength",
+                      "byteOffset",
+                      "getFloat32",
+                      "getFloat64",
+                      "getInt8",
+                      "getInt16",
+                      "getInt32",
+                      "getUint8",
+                      "getUint16",
+                      "getUint32",
+                      "setFloat32",
+                      "setFloat64",
+                      "setInt8",
+                      "setInt16",
+                      "setInt32",
+                      "setUint8",
+                      "setUint16",
+                      "setUint32",
+                      "getBigInt64",
+                      "getBigUint64",
+                      "setBigInt64",
+                      "setBigUint64",
+                      "getFloat16",
+                      "setFloat16",
+                    ],
+                    additionalProperties: false,
+                  },
+                ],
+              },
+              SNICallback: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.sentinelTLS.SNICallback",
+              },
+              rejectUnauthorized: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              requestOCSP: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+          natMap: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {},
+                additionalProperties: {
+                  type: "object",
+                  properties: {
+                    host: {
+                      type: "string",
+                    },
+                    port: {
+                      type: "number",
+                    },
+                  },
+                  required: ["host", "port"],
+                  additionalProperties: false,
+                },
+              },
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "queue.bullmq.connection.natMap",
+              },
+            ],
+          },
+          updateSentinels: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          sentinelMaxConnections: {
+            type: "number",
+          },
+          failoverDetector: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          port: {
+            type: "number",
+          },
+          host: {
+            type: "string",
+          },
+          family: {
+            type: "number",
+          },
+          path: {
+            type: "string",
+          },
+          skipVersionCheck: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          url: {
+            type: "string",
+          },
+        },
+        additionalProperties: false,
+      },
+      prefix: {
+        type: "string",
+      },
+      stalledIntervalMs: {
+        type: "number",
+      },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "queue.bullmq.onError",
+      },
+    },
+    required: ["name", "connection"],
+    additionalProperties: false,
+    $defs: {
+      option0: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          {
+            type: "array",
+            items: {
+              anyOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      option1: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          {
+            $ref: "#/$defs/option2",
+          },
+        ],
+      },
+      option2: {
+        type: "array",
+        items: {
+          $ref: "#/$defs/option3",
+        },
+      },
+      option3: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          {
+            type: "object",
+            properties: {
+              buf: {
+                anyOf: [
+                  {
+                    type: "string",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "object",
+                  },
+                ],
+              },
+              passphrase: {
+                type: "string",
+              },
+            },
+            required: ["buf"],
+            additionalProperties: false,
+          },
+        ],
+      },
+      option4: {
+        type: "object",
+        properties: {
+          BYTES_PER_ELEMENT: {
+            type: "number",
+          },
+          buffer: {
+            $ref: "#/$defs/option5",
+          },
+          byteLength: {
+            type: "number",
+          },
+          byteOffset: {
+            type: "number",
+          },
+          copyWithin: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.copyWithin",
+          },
+          every: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.every",
+          },
+          fill: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.fill",
+          },
+          filter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.filter",
+          },
+          find: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.find",
+          },
+          findIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findIndex",
+          },
+          forEach: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.forEach",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.indexOf",
+          },
+          join: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.join",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.lastIndexOf",
+          },
+          length: {
+            type: "number",
+          },
+          map: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.map",
+          },
+          reduce: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reduce",
+          },
+          reduceRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reduceRight",
+          },
+          reverse: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reverse",
+          },
+          set: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.set",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.slice",
+          },
+          some: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.some",
+          },
+          sort: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.sort",
+          },
+          subarray: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.subarray",
+          },
+          toLocaleString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          entries: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.entries",
+          },
+          keys: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.keys",
+          },
+          values: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.values",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.includes",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.at",
+          },
+          findLast: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findLast",
+          },
+          findLastIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findLastIndex",
+          },
+          toReversed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.toReversed",
+          },
+          toSorted: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.toSorted",
+          },
+          with: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.with",
+          },
+        },
+        required: [
+          "BYTES_PER_ELEMENT",
+          "buffer",
+          "byteLength",
+          "byteOffset",
+          "copyWithin",
+          "every",
+          "fill",
+          "filter",
+          "find",
+          "findIndex",
+          "forEach",
+          "indexOf",
+          "join",
+          "lastIndexOf",
+          "length",
+          "map",
+          "reduce",
+          "reduceRight",
+          "reverse",
+          "set",
+          "slice",
+          "some",
+          "sort",
+          "subarray",
+          "toLocaleString",
+          "toString",
+          "valueOf",
+          "entries",
+          "keys",
+          "values",
+          "includes",
+          "at",
+          "findLast",
+          "findLastIndex",
+          "toReversed",
+          "toSorted",
+          "with",
+        ],
+        additionalProperties: false,
+      },
+      option5: {
+        anyOf: [
+          {
+            $ref: "#/$defs/option6",
+          },
+          {
+            $ref: "#/$defs/option7",
+          },
+        ],
+      },
+      option6: {
+        type: "object",
+        properties: {
+          byteLength: {
+            type: "number",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.buffer.slice",
+          },
+          maxByteLength: {
+            type: "number",
+          },
+          resizable: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          resize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.buffer.resize",
+          },
+          detached: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          transfer: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.tls.ALPNProtocols.buffer.transfer",
+          },
+          transferToFixedLength: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.tls.ALPNProtocols.buffer.transferToFixedLength",
+          },
+        },
+        required: [
+          "byteLength",
+          "slice",
+          "maxByteLength",
+          "resizable",
+          "resize",
+          "detached",
+          "transfer",
+          "transferToFixedLength",
+        ],
+        additionalProperties: false,
+      },
+      option7: {
+        type: "object",
+        properties: {
+          byteLength: {
+            type: "number",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.buffer.slice",
+          },
+          growable: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          maxByteLength: {
+            type: "number",
+          },
+          grow: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.buffer.grow",
+          },
+        },
+        required: ["byteLength", "slice", "growable", "maxByteLength", "grow"],
+        additionalProperties: false,
+      },
+      option8: {
+        type: "object",
+        properties: {
+          BYTES_PER_ELEMENT: {
+            type: "number",
+          },
+          buffer: {
+            $ref: "#/$defs/option5",
+          },
+          byteLength: {
+            type: "number",
+          },
+          byteOffset: {
+            type: "number",
+          },
+          copyWithin: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.copyWithin",
+          },
+          entries: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.entries",
+          },
+          every: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.every",
+          },
+          fill: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.fill",
+          },
+          filter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.filter",
+          },
+          find: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.find",
+          },
+          findIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findIndex",
+          },
+          forEach: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.forEach",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.includes",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.indexOf",
+          },
+          join: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.join",
+          },
+          keys: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.keys",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.lastIndexOf",
+          },
+          length: {
+            type: "number",
+          },
+          map: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.map",
+          },
+          reduce: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reduce",
+          },
+          reduceRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reduceRight",
+          },
+          reverse: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.reverse",
+          },
+          set: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.set",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.slice",
+          },
+          some: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.some",
+          },
+          sort: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.sort",
+          },
+          subarray: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.subarray",
+          },
+          toLocaleString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          values: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.values",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.at",
+          },
+          findLast: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findLast",
+          },
+          findLastIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.findLastIndex",
+          },
+          toReversed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.toReversed",
+          },
+          toSorted: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.toSorted",
+          },
+          with: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.tls.ALPNProtocols.with",
+          },
+        },
+        required: [
+          "BYTES_PER_ELEMENT",
+          "buffer",
+          "byteLength",
+          "byteOffset",
+          "copyWithin",
+          "entries",
+          "every",
+          "fill",
+          "filter",
+          "find",
+          "findIndex",
+          "forEach",
+          "includes",
+          "indexOf",
+          "join",
+          "keys",
+          "lastIndexOf",
+          "length",
+          "map",
+          "reduce",
+          "reduceRight",
+          "reverse",
+          "set",
+          "slice",
+          "some",
+          "sort",
+          "subarray",
+          "toLocaleString",
+          "toString",
+          "valueOf",
+          "values",
+          "at",
+          "findLast",
+          "findLastIndex",
+          "toReversed",
+          "toSorted",
+          "with",
+        ],
+        additionalProperties: false,
+      },
+      option9: {
+        type: "object",
+        properties: {
+          BYTES_PER_ELEMENT: {
+            type: "number",
+          },
+          buffer: {
+            $ref: "#/$defs/option10",
+          },
+          byteLength: {
+            type: "number",
+          },
+          byteOffset: {
+            type: "number",
+          },
+          copyWithin: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.copyWithin",
+          },
+          every: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.every",
+          },
+          fill: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.fill",
+          },
+          filter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.filter",
+          },
+          find: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.find",
+          },
+          findIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findIndex",
+          },
+          forEach: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.forEach",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.indexOf",
+          },
+          join: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.join",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.lastIndexOf",
+          },
+          length: {
+            type: "number",
+          },
+          map: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.map",
+          },
+          reduce: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduce",
+          },
+          reduceRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduceRight",
+          },
+          reverse: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reverse",
+          },
+          set: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.set",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.slice",
+          },
+          some: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.some",
+          },
+          sort: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.sort",
+          },
+          subarray: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.subarray",
+          },
+          toLocaleString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          entries: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.entries",
+          },
+          keys: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.keys",
+          },
+          values: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.values",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.includes",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.at",
+          },
+          findLast: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLast",
+          },
+          findLastIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLastIndex",
+          },
+          toReversed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toReversed",
+          },
+          toSorted: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toSorted",
+          },
+          with: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.with",
+          },
+        },
+        required: [
+          "BYTES_PER_ELEMENT",
+          "buffer",
+          "byteLength",
+          "byteOffset",
+          "copyWithin",
+          "every",
+          "fill",
+          "filter",
+          "find",
+          "findIndex",
+          "forEach",
+          "indexOf",
+          "join",
+          "lastIndexOf",
+          "length",
+          "map",
+          "reduce",
+          "reduceRight",
+          "reverse",
+          "set",
+          "slice",
+          "some",
+          "sort",
+          "subarray",
+          "toLocaleString",
+          "toString",
+          "valueOf",
+          "entries",
+          "keys",
+          "values",
+          "includes",
+          "at",
+          "findLast",
+          "findLastIndex",
+          "toReversed",
+          "toSorted",
+          "with",
+        ],
+        additionalProperties: false,
+      },
+      option10: {
+        anyOf: [
+          {
+            $ref: "#/$defs/option11",
+          },
+          {
+            $ref: "#/$defs/option12",
+          },
+        ],
+      },
+      option11: {
+        type: "object",
+        properties: {
+          byteLength: {
+            type: "number",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.slice",
+          },
+          maxByteLength: {
+            type: "number",
+          },
+          resizable: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          resize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.resize",
+          },
+          detached: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          transfer: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.transfer",
+          },
+          transferToFixedLength: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.transferToFixedLength",
+          },
+        },
+        required: [
+          "byteLength",
+          "slice",
+          "maxByteLength",
+          "resizable",
+          "resize",
+          "detached",
+          "transfer",
+          "transferToFixedLength",
+        ],
+        additionalProperties: false,
+      },
+      option12: {
+        type: "object",
+        properties: {
+          byteLength: {
+            type: "number",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.slice",
+          },
+          growable: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          maxByteLength: {
+            type: "number",
+          },
+          grow: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.buffer.grow",
+          },
+        },
+        required: ["byteLength", "slice", "growable", "maxByteLength", "grow"],
+        additionalProperties: false,
+      },
+      option13: {
+        type: "object",
+        properties: {
+          BYTES_PER_ELEMENT: {
+            type: "number",
+          },
+          buffer: {
+            $ref: "#/$defs/option10",
+          },
+          byteLength: {
+            type: "number",
+          },
+          byteOffset: {
+            type: "number",
+          },
+          copyWithin: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.copyWithin",
+          },
+          entries: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.entries",
+          },
+          every: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.every",
+          },
+          fill: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.fill",
+          },
+          filter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.filter",
+          },
+          find: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.find",
+          },
+          findIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findIndex",
+          },
+          forEach: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.forEach",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.includes",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.indexOf",
+          },
+          join: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.join",
+          },
+          keys: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.keys",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.lastIndexOf",
+          },
+          length: {
+            type: "number",
+          },
+          map: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.map",
+          },
+          reduce: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduce",
+          },
+          reduceRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reduceRight",
+          },
+          reverse: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.reverse",
+          },
+          set: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.set",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.slice",
+          },
+          some: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.some",
+          },
+          sort: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.sort",
+          },
+          subarray: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.subarray",
+          },
+          toLocaleString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          values: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.values",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.at",
+          },
+          findLast: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLast",
+          },
+          findLastIndex: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.findLastIndex",
+          },
+          toReversed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toReversed",
+          },
+          toSorted: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "queue.bullmq.connection.sentinelTLS.ALPNProtocols.toSorted",
+          },
+          with: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "queue.bullmq.connection.sentinelTLS.ALPNProtocols.with",
+          },
+        },
+        required: [
+          "BYTES_PER_ELEMENT",
+          "buffer",
+          "byteLength",
+          "byteOffset",
+          "copyWithin",
+          "entries",
+          "every",
+          "fill",
+          "filter",
+          "find",
+          "findIndex",
+          "forEach",
+          "includes",
+          "indexOf",
+          "join",
+          "keys",
+          "lastIndexOf",
+          "length",
+          "map",
+          "reduce",
+          "reduceRight",
+          "reverse",
+          "set",
+          "slice",
+          "some",
+          "sort",
+          "subarray",
+          "toLocaleString",
+          "toString",
+          "valueOf",
+          "values",
+          "at",
+          "findLast",
+          "findLastIndex",
+          "toReversed",
+          "toSorted",
+          "with",
+        ],
+        additionalProperties: false,
+      },
+    },
+  },
+  "service.worker": {
+    type: "object",
+    properties: {
+      queue: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "queue",
+      },
+      pollMs: {
+        type: "number",
+      },
+      worker: {
+        type: "string",
+      },
+      handlers: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "job",
+        },
+      },
+      leaseMs: {
+        type: "number",
+      },
+    },
+    required: ["queue", "worker", "handlers"],
+    additionalProperties: false,
+  },
+  "service.queue": {
+    type: "object",
+    properties: {
+      queue: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "queue",
+      },
+      token: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "service.queue.token",
+          },
+        ],
+      },
+      host: {
+        type: "string",
+      },
+      port: {
+        type: "number",
+      },
+    },
+    required: ["queue", "token"],
+    additionalProperties: false,
+  },
+  "service.triggers": {
+    type: "object",
+    properties: {
+      queue: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "queue",
+      },
+      port: {
+        type: "number",
+      },
+      host: {
+        type: "string",
+      },
+      maxBytes: {
+        type: "number",
+      },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "service.triggers.onError",
+      },
+      routes: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            on: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "triggerMapper",
+            },
+            path: {
+              type: "string",
+            },
+            source: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "triggerSource",
+            },
+          },
+          required: ["on", "path", "source"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["queue", "routes"],
+    additionalProperties: false,
+  },
+  "service.schedules": {
+    type: "object",
+    properties: {
+      queue: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "queue",
+      },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "service.schedules.onError",
+      },
+      schedules: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "schedule",
+        },
+      },
+      maxLateMs: {
+        type: "number",
+      },
+    },
+    required: ["queue", "schedules"],
+    additionalProperties: false,
+  },
+  "job.workflow": {
+    type: "object",
+    properties: {
+      workflow: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "job.workflow.workflow",
+      },
+      checkpoint: {
+        type: "object",
+        properties: {
+          store: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "checkpointStore",
+          },
+          version: {
+            type: "string",
+          },
+          resume: {
+            const: "retry-incomplete",
+          },
+        },
+        required: ["store", "version"],
+        additionalProperties: false,
+      },
+      start: {
+        type: "object",
+        properties: {
+          timeoutMs: {
+            type: "number",
+          },
+          redact: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                pattern: {
+                  type: "string",
+                },
+                flags: {
+                  type: "string",
+                },
+              },
+              required: ["pattern"],
+              additionalProperties: false,
+              regexp: true,
+            },
+          },
+          onQuota: {
+            type: "object",
+            properties: {
+              action: {
+                const: "pause",
+              },
+              maxWaitMs: {
+                type: "number",
+              },
+            },
+            required: ["action"],
+            additionalProperties: false,
+          },
+          observation: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "observation",
+          },
+          decisionVerifier: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "verifier",
+          },
+          concurrency: {
+            type: "number",
+          },
+          budget: {
+            type: "object",
+            properties: {
+              prices: {
+                type: "object",
+                properties: {
+                  currency: {
+                    anyOf: [
+                      {
+                        const: "EUR",
+                      },
+                      {
+                        const: "USD",
+                      },
+                    ],
+                  },
+                  models: {
+                    type: "object",
+                    properties: {},
+                    additionalProperties: {
+                      type: "object",
+                      properties: {
+                        input: {
+                          type: "number",
+                        },
+                        output: {
+                          type: "number",
+                        },
+                        cached: {
+                          type: "number",
+                        },
+                        cacheCreated: {
+                          type: "number",
+                        },
+                      },
+                      required: ["input", "output"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["currency", "models"],
+                additionalProperties: false,
+              },
+              cost: {
+                type: "object",
+                properties: {
+                  currency: {
+                    anyOf: [
+                      {
+                        const: "EUR",
+                      },
+                      {
+                        const: "USD",
+                      },
+                    ],
+                  },
+                  limit: {
+                    type: "number",
+                  },
+                },
+                required: ["currency", "limit"],
+                additionalProperties: false,
+              },
+              attempts: {
+                type: "number",
+              },
+              usage: {
+                type: "object",
+                properties: {
+                  input: {
+                    type: "number",
+                  },
+                  cached: {
+                    type: "number",
+                  },
+                  cacheCreated: {
+                    type: "number",
+                  },
+                  output: {
+                    type: "number",
+                  },
+                },
+                additionalProperties: false,
+              },
+            },
+            additionalProperties: false,
+          },
+          stopOnError: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          telemetry: {
+            type: "object",
+            properties: {
+              observe: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "job.workflow.start.telemetry.observe",
+              },
+            },
+            required: ["observe"],
+            additionalProperties: false,
+          },
+          observe: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "job.workflow.start.observe",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+    required: ["workflow", "checkpoint"],
+    additionalProperties: false,
+  },
+  "job.recipe": {
+    type: "object",
+    properties: {
+      file: {
+        type: "string",
+        hostPath: true,
+      },
+      config: {
+        type: "string",
+        hostPath: true,
+      },
+      retryIncomplete: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+    },
+    required: ["file", "config"],
+    additionalProperties: false,
+  },
+  "cron.schedule": {
+    type: "object",
+    properties: {
+      expression: {
+        type: "string",
+      },
+      timeZone: {
+        type: "string",
+      },
+    },
+    required: ["expression"],
+    additionalProperties: false,
+  },
+  "schedule.cron": {
+    type: "object",
+    properties: {
+      input: {
+        anyOf: [
+          {
+            type: "null",
+          },
+          {
+            type: "string",
+          },
+          {
+            type: "number",
+          },
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+          {
+            type: "array",
+            items: {},
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: {},
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "schedule.cron.input",
+          },
+        ],
+      },
+      handler: {
+        type: "string",
+      },
+      name: {
+        type: "string",
+      },
+      cron: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "cron",
+      },
+      runId: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "schedule.cron.runId",
+      },
+    },
+    required: ["handler", "name", "cron"],
+    additionalProperties: false,
+  },
+  "triggerMapper.job": {
+    type: "object",
+    properties: {
+      handler: {
+        type: "string",
+      },
+      runIdPrefix: {
+        type: "string",
+      },
+      kinds: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      actions: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      input: {
+        anyOf: [
+          {
+            type: "null",
+          },
+          {
+            type: "string",
+          },
+          {
+            type: "number",
+          },
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+          {
+            type: "array",
+            items: {},
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: {},
+          },
+        ],
+      },
+    },
+    required: ["handler"],
+    additionalProperties: false,
+  },
+  "triggerSource.github": {
+    type: "object",
+    properties: {
+      secret: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "triggerSource.github.secret",
+          },
+        ],
+      },
+    },
+    required: ["secret"],
+    additionalProperties: false,
+  },
+  "triggerSource.gitlab": {
+    anyOf: [
+      {
+        type: "object",
+        properties: {
+          signingToken: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {
+                  env: {
+                    type: "string",
+                    pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                  },
+                },
+                required: ["env"],
+                additionalProperties: false,
+                secret: true,
+              },
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "triggerSource.gitlab.signingToken",
+              },
+            ],
+          },
+          toleranceMs: {
+            type: "number",
+          },
+        },
+        required: ["signingToken"],
+        additionalProperties: false,
+      },
+      {
+        type: "object",
+        properties: {
+          token: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {
+                  env: {
+                    type: "string",
+                    pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                  },
+                },
+                required: ["env"],
+                additionalProperties: false,
+                secret: true,
+              },
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "triggerSource.gitlab.token",
+              },
+            ],
+          },
+        },
+        required: ["token"],
+        additionalProperties: false,
+      },
+    ],
+  },
+  "triggerSource.slack": {
+    type: "object",
+    properties: {
+      signingSecret: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "triggerSource.slack.signingSecret",
+          },
+        ],
+      },
+      toleranceMs: {
+        type: "number",
+      },
+    },
+    required: ["signingSecret"],
+    additionalProperties: false,
+  },
+  "triggerSource.standard": {
+    type: "object",
+    properties: {
+      secret: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "triggerSource.standard.secret",
+          },
+        ],
+      },
+      toleranceMs: {
+        type: "number",
+      },
+      source: {
+        type: "string",
+      },
+    },
+    required: ["secret"],
+    additionalProperties: false,
+  },
   "transport.s3": {
     type: "object",
     properties: {
@@ -230,6 +6677,9 @@ export const nativeRecipeSchemas: Readonly<
   "interactive.options": {
     type: "object",
     properties: {
+      timeoutMs: {
+        type: "number",
+      },
       repository: {
         type: "string",
         hostPath: true,
@@ -284,9 +6734,6 @@ export const nativeRecipeSchemas: Readonly<
       maxTurns: {
         type: "number",
       },
-      timeoutMs: {
-        type: "number",
-      },
     },
     required: ["repository", "agent", "brief", "actors"],
     additionalProperties: false,
@@ -300,10 +6747,10 @@ export const nativeRecipeSchemas: Readonly<
       kind: {
         anyOf: [
           {
-            const: "approval",
+            const: "pause",
           },
           {
-            const: "pause",
+            const: "approval",
           },
         ],
       },
@@ -380,9 +6827,6 @@ export const nativeRecipeSchemas: Readonly<
   "task.options": {
     type: "object",
     properties: {
-      timeoutMs: {
-        type: "number",
-      },
       interaction: {
         type: "object",
         properties: {
@@ -408,10 +6852,10 @@ export const nativeRecipeSchemas: Readonly<
           kind: {
             anyOf: [
               {
-                const: "approval",
+                const: "pause",
               },
               {
-                const: "pause",
+                const: "approval",
               },
             ],
           },
@@ -490,6 +6934,9 @@ export const nativeRecipeSchemas: Readonly<
         required: ["attempts"],
         additionalProperties: false,
       },
+      timeoutMs: {
+        type: "number",
+      },
       cache: {
         type: "object",
         properties: {
@@ -547,72 +6994,33 @@ export const nativeRecipeSchemas: Readonly<
       timeoutMs: {
         type: "number",
       },
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      onQuota: {
+      checkpoint: {
         type: "object",
         properties: {
-          action: {
-            const: "pause",
+          store: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "checkpointStore",
           },
-          maxWaitMs: {
-            type: "number",
-          },
-        },
-        required: ["action"],
-        additionalProperties: false,
-      },
-      answers: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            executionId: {
-              type: "string",
-            },
-            key: {
-              type: "string",
-            },
-            requestId: {
-              type: "string",
-            },
-            actor: {
-              type: "string",
-            },
-            value: {
-              type: "string",
-            },
-          },
-          required: ["executionId", "key", "requestId", "actor", "value"],
-          additionalProperties: false,
-        },
-      },
-      decisionVerifier: {
-        type: "object",
-        properties: {
-          $ref: {
+          runId: {
             type: "string",
-            minLength: 1,
+          },
+          version: {
+            type: "string",
+          },
+          resume: {
+            const: "retry-incomplete",
           },
         },
-        required: ["$ref"],
+        required: ["store", "runId", "version"],
         additionalProperties: false,
-        component: "verifier",
       },
       decisions: {
         type: "array",
@@ -675,33 +7083,72 @@ export const nativeRecipeSchemas: Readonly<
           additionalProperties: false,
         },
       },
-      checkpoint: {
+      answers: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            executionId: {
+              type: "string",
+            },
+            key: {
+              type: "string",
+            },
+            requestId: {
+              type: "string",
+            },
+            actor: {
+              type: "string",
+            },
+            value: {
+              type: "string",
+            },
+          },
+          required: ["executionId", "key", "requestId", "actor", "value"],
+          additionalProperties: false,
+        },
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      onQuota: {
         type: "object",
         properties: {
-          store: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "checkpointStore",
+          action: {
+            const: "pause",
           },
-          runId: {
-            type: "string",
-          },
-          version: {
-            type: "string",
-          },
-          resume: {
-            const: "retry-incomplete",
+          maxWaitMs: {
+            type: "number",
           },
         },
-        required: ["store", "runId", "version"],
+        required: ["action"],
         additionalProperties: false,
+      },
+      decisionVerifier: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "verifier",
       },
       concurrency: {
         type: "number",
@@ -922,6 +7369,48 @@ export const nativeRecipeSchemas: Readonly<
   "isolated.options": {
     type: "object",
     properties: {
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.observe",
+      },
       repository: {
         type: "string",
         hostPath: true,
@@ -1170,13 +7659,13 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
+                                    const: "deadline",
+                                  },
+                                  {
                                     const: "completion",
                                   },
                                   {
                                     const: "idle-timeout",
-                                  },
-                                  {
-                                    const: "deadline",
                                   },
                                   {
                                     const: "aborted",
@@ -2516,48 +9005,6 @@ export const nativeRecipeSchemas: Readonly<
         type: "string",
         hostPath: true,
       },
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      telemetry: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "telemetry",
-      },
-      observe: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "isolated.options.observe",
-      },
       includeUncommitted: {
         anyOf: [
           {
@@ -3075,6 +9522,9 @@ export const nativeRecipeSchemas: Readonly<
       storageQuota: {
         type: "object",
         properties: {
+          maxBytes: {
+            type: "number",
+          },
           transporter: {
             type: "object",
             properties: {
@@ -3086,9 +9536,6 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "transport",
-          },
-          maxBytes: {
-            type: "number",
           },
           reserveBytes: {
             type: "number",
@@ -3377,6 +9824,9 @@ export const nativeRecipeSchemas: Readonly<
                     },
                   ],
                 },
+                input: {
+                  type: "number",
+                },
                 complete: {
                   anyOf: [
                     {
@@ -3386,9 +9836,6 @@ export const nativeRecipeSchemas: Readonly<
                       const: true,
                     },
                   ],
-                },
-                input: {
-                  type: "number",
                 },
                 cached: {
                   type: "number",
@@ -4763,6 +11210,16 @@ export const nativeRecipeSchemas: Readonly<
       fallback: {
         type: "string",
       },
+      onError: {
+        anyOf: [
+          {
+            const: "fallback",
+          },
+          {
+            const: "fail",
+          },
+        ],
+      },
       state: {
         type: "object",
         properties: {
@@ -4805,16 +11262,6 @@ export const nativeRecipeSchemas: Readonly<
       },
       minConfidence: {
         type: "number",
-      },
-      onError: {
-        anyOf: [
-          {
-            const: "fallback",
-          },
-          {
-            const: "fail",
-          },
-        ],
       },
     },
     required: [
@@ -11747,13 +18194,13 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
+                                    const: "deadline",
+                                  },
+                                  {
                                     const: "completion",
                                   },
                                   {
                                     const: "idle-timeout",
-                                  },
-                                  {
-                                    const: "deadline",
                                   },
                                   {
                                     const: "aborted",
@@ -13504,6 +19951,9 @@ export const nativeRecipeSchemas: Readonly<
       storageQuota: {
         type: "object",
         properties: {
+          maxBytes: {
+            type: "number",
+          },
           transporter: {
             type: "object",
             properties: {
@@ -13515,9 +19965,6 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "transport",
-          },
-          maxBytes: {
-            type: "number",
           },
           reserveBytes: {
             type: "number",
@@ -13625,6 +20072,9 @@ export const nativeRecipeSchemas: Readonly<
                     },
                   ],
                 },
+                input: {
+                  type: "number",
+                },
                 complete: {
                   anyOf: [
                     {
@@ -13634,9 +20084,6 @@ export const nativeRecipeSchemas: Readonly<
                       const: true,
                     },
                   ],
-                },
-                input: {
-                  type: "number",
                 },
                 cached: {
                   type: "number",
@@ -15490,6 +21937,22 @@ export const nativeRecipeSchemas: Readonly<
 export const nativeRecipeFactoryParameters: Readonly<
   Record<string, readonly string[]>
 > = {
+  "queue.sqlite": [],
+  "queue.http": [],
+  "queue.bullmq": [],
+  "service.worker": [],
+  "service.queue": [],
+  "service.triggers": [],
+  "service.schedules": [],
+  "job.workflow": [],
+  "job.recipe": [],
+  "cron.schedule": [],
+  "schedule.cron": [],
+  "triggerMapper.job": [],
+  "triggerSource.github": [],
+  "triggerSource.gitlab": [],
+  "triggerSource.slack": [],
+  "triggerSource.standard": [],
   "transport.s3": [],
   "checkpointStore.transport": [],
   "taskCacheStore.transport": [],

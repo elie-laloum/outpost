@@ -251,6 +251,7 @@ const expressions = {
   },
 };
 for (const [field, kind] of Object.entries({
+  queued: "queued",
   gate: "gate",
   interactive: "interactive",
   artifact: "artifactTask",
@@ -272,6 +273,7 @@ for (const field of ["value", "state", "arguments", "data"])
 taskV3.properties.quotaResume = { enum: ["continue", "restart"] };
 taskV3.properties.when = { $ref: "#/$defs/condition" };
 const actions = [
+  "queued",
   "gate",
   "interactive",
   "artifact",
@@ -309,7 +311,7 @@ taskV3.allOf = [
     },
   },
   {
-    if: { not: { required: ["call"] } },
+    if: { not: { anyOf: [{ required: ["call"] }, { required: ["queued"] }] } },
     then: { not: { required: ["arguments"] } },
   },
   {

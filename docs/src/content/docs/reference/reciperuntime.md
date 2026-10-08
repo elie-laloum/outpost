@@ -15,6 +15,8 @@ import type { RecipeRuntime } from "@elie-laloum/outpost/recipes";
 
 | Name                    | Type                                                       | Presence | Meaning                                                                                                                                                                                                    |
 | ----------------------- | ---------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `serve`                 | `(options: RecipeServeOptions) => Promise<void>`           | Required | Start one named service and its dependencies until cancellation or runtime closure; other declared services remain unconstructed.                                                                          |
+| `enqueue`               | `(options: RecipeEnqueueOptions) => Promise<QueueJob>`     | Required | Publish a typed recipe parameter mapping to a named queue without starting a workflow or service; close only runtime-owned queue resources.                                                                |
 | `run`                   | `(options?: RecipeRunOptions) => Promise<RecipeReport>`    | Required | Run one invocation at a time; close its owned resources before returning its report.                                                                                                                       |
 | `resume`                | `(options: RecipeResumeOptions) => Promise<RecipeReport>`  | Required | Resume an existing durable run with its original inputs, workspace records and cumulative accounting. Changed identities or missing workspaces fail; interrupted tasks need explicit replay authorization. |
 | `status`                | `(runId: string) => Promise<RecipeRunStatus \| undefined>` | Required | Read checkpoint revision, ownership, task summaries and retained workspace records without acquiring it; settled runs include their redacted final report.                                                 |
@@ -25,6 +27,8 @@ import type { RecipeRuntime } from "@elie-laloum/outpost/recipes";
 
 ```ts
 export interface RecipeRuntime {
+  serve(options: RecipeServeOptions): Promise<void>;
+  enqueue(options: RecipeEnqueueOptions): Promise<QueueJob>;
   run(options?: RecipeRunOptions): Promise<RecipeReport>;
   resume(options: RecipeResumeOptions): Promise<RecipeReport>;
   status(runId: string): Promise<RecipeRunStatus | undefined>;
@@ -35,7 +39,10 @@ export interface RecipeRuntime {
 
 ## Related contracts
 
+- [QueueJob](../queuejob/)
+- [RecipeEnqueueOptions](../recipeenqueueoptions/)
 - [RecipeReport](../support-recipereport/)
 - [RecipeResumeOptions](../reciperesumeoptions/)
 - [RecipeRunOptions](../reciperunoptions/)
 - [RecipeRunStatus](../reciperunstatus/)
+- [RecipeServeOptions](../recipeserveoptions/)

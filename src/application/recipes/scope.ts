@@ -1,3 +1,5 @@
+import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
+import { recipeObject } from "../../domain/recipes/values.ts";
 import { recipeReference } from "../../domain/recipes/values.ts";
 import { importRecipeExtension } from "../../infrastructure/recipes/extensions.ts";
 import { nativeRecipeGuards, resolveRecipeOptions } from "./native.ts";
@@ -23,6 +25,43 @@ export function createRecipeComponentScope(
   const redactions: RegExp[] = [];
   let closing: Promise<void> | undefined;
   let preparation: Promise<void> | undefined;
+  function environment(variable: string): string {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(variable))
+      throw new Error("Invalid environment variable reference");
+    const value = process.env[variable];
+    if (value === undefined)
+      throw new Error(`Missing declared environment variable: ${variable}`);
+    scope.protect([value]);
+    return value;
+  }
+  function preflight(name: string, visited = new Set<string>()): void {
+    if (visited.has(name)) return;
+    visited.add(name);
+    const node = graph.nodes.get(name);
+    if (!node) return;
+    mapRecipeSchema(
+      node.definition?.schema ?? node.extension?.schema ?? {},
+      node.options,
+      (shape, value) => {
+        if (
+          shape.secret &&
+          recipeObject(value) &&
+          typeof value.env === "string"
+        )
+          environment(value.env);
+        return value;
+      },
+    );
+    for (const dependency of node.dependencies) preflight(dependency, visited);
+  }
+  function accepts(kind: string, value: unknown): boolean {
+    return (
+      nativeRecipeGuards[kind]?.(value) ??
+      registry.components.some(
+        (component) => component.kind === kind && component.accepts(value),
+      )
+    );
+  }
   const scope: RecipeComponentScope = {
     observerErrors,
     redactions,
@@ -39,10 +78,24 @@ export function createRecipeComponentScope(
     prepare() {
       preparation ??= (async () => {
         for (const node of graph.nodes.values()) {
-          if (node.extension)
-            modules.set(
-              node.name,
-              await importRecipeExtension(node.extension, directory),
+          if (!node.extension) continue;
+          const module = await importRecipeExtension(node.extension, directory);
+          modules.set(node.name, module);
+          if (node.extension.factory) continue;
+          const value = module[node.extension.export];
+          const dispose = node.extension.dispose
+            ? module[node.extension.dispose]
+            : undefined;
+          if (typeof dispose === "function")
+            owned.push({
+              kind: node.kind,
+              close: async () => {
+                await dispose(value);
+              },
+            });
+          if (!accepts(node.kind, value))
+            throw new Error(
+              `Extension ${node.name} returned an invalid ${node.kind}`,
             );
         }
       })();
@@ -56,6 +109,7 @@ export function createRecipeComponentScope(
         throw new Error(`Unknown ${kind} reference: ${name}`);
       const existing = values.get(name);
       if (existing) return existing;
+      preflight(name);
       const pending = (async () => {
         await scope.prepare();
         const context = {
@@ -67,17 +121,7 @@ export function createRecipeComponentScope(
             if (!node) throw new Error(`Unknown recipe component: ${name}`);
             return node.kind;
           },
-          environment(variable: string) {
-            if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(variable))
-              throw new Error("Invalid environment variable reference");
-            const value = process.env[variable];
-            if (value === undefined)
-              throw new Error(
-                `Missing declared environment variable: ${variable}`,
-              );
-            scope.protect([value]);
-            return value;
-          },
+          environment,
         };
         if (node.definition) {
           const value = await node.definition.create(node.options, context);
@@ -120,20 +164,14 @@ export function createRecipeComponentScope(
           const dispose = node.extension.dispose
             ? module[node.extension.dispose]
             : undefined;
-          if (typeof dispose === "function")
+          if (node.extension.factory && typeof dispose === "function")
             owned.push({
               kind,
               close: async () => {
                 await dispose(value);
               },
             });
-          const candidates = registry.components.filter(
-            (component) => component.kind === kind,
-          );
-          const valid =
-            nativeRecipeGuards[kind]?.(value) ??
-            candidates.some((component) => component.accepts(value));
-          if (!valid)
+          if (!accepts(kind, value))
             throw new Error(`Extension ${name} returned an invalid ${kind}`);
           return value;
         }

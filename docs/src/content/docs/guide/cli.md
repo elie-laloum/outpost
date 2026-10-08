@@ -68,6 +68,18 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 
 Answer and decide read one native WorkflowAnswer or WorkflowDecision from a bounded JSON file; signed gates require the original proof. `resume --input` must match the persisted inputs; omit it to reload them. Run also accepts `--run-id` for a new checkpoint. Run, resume, answer and decide print a final report only when declared or requested through `--json`; status always prints its requested result. See [durable recipes](../recipe-durability/) for state, ownership and recovery behavior.
 
+## `outpost recipe enqueue` and `serve`
+
+Enqueue publishes without execution. It requires `--file`, a YAML `--config`, `--queue`, `--handler` and `--run-id`; repeated `--input` values use the recipe's parameter types. `--job-id` overrides the deterministic default ID, `--idempotency-key` preserves an effect key across distinct job IDs, and `--deadline` is an absolute epoch millisecond timestamp. `--json` requests a receipt; success is otherwise silent.
+
+```sh
+outpost recipe enqueue --file recipe.yaml --config outpost.yaml \
+  --queue jobs --handler review --run-id change-42 --json
+outpost recipe serve --file recipe.yaml --config outpost.yaml --service worker
+```
+
+Serve requires `--file`, a YAML `--config` and `--service`. It starts only that service, blocks until interrupted and emits no implicit progress or final report. See [recipe services](../recipe-services/) for workers, HTTP queues, cron and verified webhooks.
+
 ## `outpost recipe init`
 
 Create a version-2 starter with a required goal, a named agent and a test command. The editor schema comment points to the installed package. Existing files are never overwritten; the parent directory must exist.

@@ -54,6 +54,25 @@ function taggedComponent(
 export const nativeRecipeGuards: Readonly<
   Record<string, (value: unknown) => boolean>
 > = {
+  queue: (value) =>
+    recipeMethods(value, [
+      "enqueue",
+      "get",
+      "claim",
+      "renew",
+      "complete",
+      "cancel",
+    ]),
+  job: (value) => typeof value === "function",
+  cron: (value) => recipeMethods(value, ["next", "previous"]),
+  schedule: (value) =>
+    recipeObject(value) &&
+    typeof value.name === "string" &&
+    typeof value.handler === "string" &&
+    recipeMethods(value.cron, ["next", "previous"]),
+  triggerSource: (value) => recipeMethods(value, ["verify"]),
+  triggerMapper: (value) => typeof value === "function",
+  service: (value) => recipeMethods(value, ["start"]),
   checkpointStore: (value) => recipeMethods(value, ["acquire"]),
   taskCacheStore: (value) => recipeMethods(value, ["read", "write"]),
   artifactStore: (value) => recipeMethods(value, ["put", "get"]),
@@ -176,7 +195,7 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
       kind,
       schema,
       accepts,
-      ...(name === "sink.run"
+      ...(["sink.run", "queue.sqlite", "queue.bullmq"].includes(name)
         ? {
             async dispose(value: unknown) {
               if (recipeObject(value) && typeof value.close === "function")

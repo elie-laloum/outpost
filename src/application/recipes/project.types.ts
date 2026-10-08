@@ -1,3 +1,8 @@
+import type {
+  RecipeServeOptions,
+  RecipeEnqueueOptions,
+} from "./service-components.types.ts";
+import type { QueueJob } from "../../domain/task-queue.types.ts";
 import type { RecipeResumeOptions, RecipeRunStatus } from "./durable.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
@@ -45,6 +50,8 @@ export interface RecipeRunOptions {
 }
 
 export interface RecipeRuntime {
+  serve(options: RecipeServeOptions): Promise<void>;
+  enqueue(options: RecipeEnqueueOptions): Promise<QueueJob>;
   run(options?: RecipeRunOptions): Promise<RecipeReport>;
   resume(options: RecipeResumeOptions): Promise<RecipeReport>;
   status(runId: string): Promise<RecipeRunStatus | undefined>;

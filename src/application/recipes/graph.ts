@@ -37,6 +37,7 @@ export function recipeComponentGraph(
   }
   for (const step of document?.tasks ?? []) {
     for (const [field, kind] of Object.entries({
+      queued: "queued",
       gate: "gate",
       interactive: "interactive",
       artifact: "artifactTask",
@@ -159,9 +160,16 @@ export function recipeComponentGraph(
             typeof value.$ref === "string" &&
             Object.keys(value).length === 1
           ) {
+            const reference = value.$ref;
             const actual =
               expected.get(value.$ref) ?? nodes.get(value.$ref)?.kind;
-            return actual === undefined || actual === kind;
+            return (
+              actual === kind ||
+              (actual === undefined &&
+                ["extensions", ...Object.keys(recipeFamilies)].some((family) =>
+                  reference.startsWith(`${family}.`),
+                ))
+            );
           }
           return registry.components.some(
             (definition) =>

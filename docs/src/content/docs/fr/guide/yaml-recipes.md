@@ -138,7 +138,7 @@ Les recettes exigent une concurrence de 1. Les résultats d’agents ne peuvent 
 
 ## Trouver et télécharger des recettes
 
-Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `review`, `review-change`, `review-and-approve` et `update-docs`. Listez-le et copiez une recette dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
+Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` et `update-docs`. Listez-le et copiez une recette dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
 
 ```sh
 npx outpost recipe list

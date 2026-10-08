@@ -1,3 +1,4 @@
+import { defineQueuedTask } from "../queued-task.ts";
 import { defineInteractiveAgentTask } from "../interactive-task.ts";
 import {
   defineApprovalTask,
@@ -133,6 +134,32 @@ export function bindRecipeWorkflow(
           }),
     };
     const save = (task: Task) => tasks.set(step.key, task);
+    if (step.queued) {
+      if (!configuration.queued)
+        throw new Error("Recipe queued tasks require createRecipeRuntime");
+      const options = configuration.queued;
+      if (options.input && Object.hasOwn(step, "arguments"))
+        throw new Error(
+          `${step.key}: provide either arguments or queued.input`,
+        );
+      const queued = defineQueuedTask({
+        ...common,
+        ...options,
+        input:
+          options.input ??
+          ((context) => evaluate(step.arguments ?? {}, context)),
+        decode: options.decode ?? recipeJson,
+      });
+      save(
+        defineTask({
+          ...queued,
+          async perform(context) {
+            return { value: recipeJson(await queued.perform(context)) };
+          },
+        }),
+      );
+      continue;
+    }
     if (step.gate) {
       if (!configuration.gate)
         throw new Error("Recipe gates require createRecipeRuntime");

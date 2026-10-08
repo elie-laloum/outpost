@@ -11,6 +11,7 @@ import type {
 } from "./workflow-components.types.ts";
 
 export const workflowOptionComponents: readonly RecipeComponentDefinition[] = [
+  "queued",
   "gate",
   "interactive",
   "artifactTask",
@@ -54,6 +55,7 @@ export async function prepareRecipeWorkflow(
   for (const step of document.tasks) {
     const values: Record<string, unknown> = {};
     for (const [field, kind] of Object.entries({
+      queued: "queued",
       gate: "gate",
       interactive: "interactive",
       artifact: "artifactTask",

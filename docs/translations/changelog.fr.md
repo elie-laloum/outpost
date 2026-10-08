@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Composition YAML des files SQLite/HTTP/BullMQ, jobs de recettes et workflows natifs, tâches en file, cron et services webhook authentifiés. Ajout explicite de recipe enqueue/serve avec propriété, annulation, rotation des tokens et identités natives. Validation locale et Redis 7 réel sans appels payants.
+
 - Ajout des checkpoints YAML durables avec restauration exacte des workspaces Git, artefacts, caches, gates signées, dialogues, pauses quota et budgets cumulés. Ajout de recipe status/resume/answer/decide ; rejeu explicite et récupération protégée par révision après interruption. Tests entre processus, conservation des fichiers non commités et guards d’origine hors ligne ; restauration cloud réelle non validée.
 
 - Composez des workflows de format 3 avec paramètres JSON structurés, références typées de résultats, conditions, transformations, callbacks locaux, boucles et décisions natives, et dispatch isolés sur plusieurs dépôts. Conservez l’ordonnancement et la consommation natifs, refusez les workspaces partagés simultanés et projetez les résultats en JSON. Ajoutez un exemple hors ligne et des tests d’équivalence YAML/TypeScript sur de vrais dépôts Git.

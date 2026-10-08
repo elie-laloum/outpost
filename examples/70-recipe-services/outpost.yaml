@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox: { provider: local }
+transports:
+  state: { type: local, directory: ./.outpost/state }
+stores:
+  checkpoint: { type: transport, transporter: { $ref: transports.state } }
+queues:
+  jobs: { type: sqlite, file: ./.outpost/jobs.sqlite }
+jobs:
+  message: { type: recipe, file: ./recipe.yaml, config: ./outpost.yaml }
+services:
+  worker:
+    type: worker
+    queue: { $ref: queues.jobs }
+    worker: example-worker
+    handlers:
+      message: { $ref: jobs.message }
+    pollMs: 10

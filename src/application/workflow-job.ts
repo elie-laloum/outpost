@@ -3,12 +3,17 @@ import { queueMaxStringLength } from "../domain/task-queue.constants.ts";
 import { triggerJobInput } from "../domain/trigger-job.ts";
 import { canonicalJson } from "../domain/workflow/canonical-json.ts";
 import type { QueueResult } from "../domain/task-queue.types.ts";
-import type { WorkflowResult } from "../domain/workflow.types.ts";
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { QueueHandler } from "./queue-worker.types.ts";
-import type { WorkflowJobOptions } from "./workflow-job.types.ts";
+import type {
+  WorkflowJobOptions,
+  WorkflowJobOutcome,
+} from "./workflow-job.types.ts";
 
-function inputVersion(version: string, input: WorkflowJson): string {
+export function workflowJobVersion(
+  version: string,
+  input: WorkflowJson,
+): string {
   const digest = createHash("sha256")
     .update(canonicalJson(input))
     .digest("hex")
@@ -19,7 +24,7 @@ function inputVersion(version: string, input: WorkflowJson): string {
 function summary(
   runId: string,
   version: string,
-  result: WorkflowResult,
+  result: WorkflowJobOutcome,
 ): WorkflowJson {
   return {
     runId,
@@ -54,7 +59,7 @@ function summary(
   };
 }
 
-function failure(result: WorkflowResult): string {
+function failure(result: WorkflowJobOutcome): string {
   const [first] = result.errors;
   const detail = first instanceof Error ? `: ${first.message}` : "";
   return `Workflow ${result.status}${detail}`.slice(0, queueMaxStringLength);
@@ -71,7 +76,7 @@ export function defineWorkflowJob(options: WorkflowJobOptions): QueueHandler {
   return async (value, context): Promise<QueueResult> => {
     const { runId, input } = triggerJobInput(value);
     const workflow = await options.workflow(input, { ...context, runId });
-    const version = inputVersion(options.checkpoint.version, input);
+    const version = workflowJobVersion(options.checkpoint.version, input);
     const result = await workflow.start({
       ...options.start,
       signal: context.signal,
@@ -84,12 +89,19 @@ export function defineWorkflowJob(options: WorkflowJobOptions): QueueHandler {
           : {}),
       },
     });
-    const tokens = result.usage.tokens;
-    const failed = ["failed", "cancelled", "rejected"].includes(result.status);
-    return {
-      value: summary(runId, version, result),
-      usage: tokens,
-      ...(failed ? { error: failure(result) } : {}),
-    };
+    return workflowJobResult(runId, version, result);
+  };
+}
+
+export function workflowJobResult(
+  runId: string,
+  version: string,
+  result: WorkflowJobOutcome,
+): QueueResult {
+  const failed = ["failed", "cancelled", "rejected"].includes(result.status);
+  return {
+    value: summary(runId, version, result),
+    usage: result.usage.tokens,
+    ...(failed ? { error: failure(result) } : {}),
   };
 }

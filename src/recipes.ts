@@ -21,3 +21,9 @@ export type {
   RecipeResumeOptions,
   RecipeRunStatus,
 } from "./application/recipes/durable.types.ts";
+
+export type {
+  RecipeServeOptions,
+  RecipeEnqueueOptions,
+  RecipeService,
+} from "./application/recipes/service-components.types.ts";

@@ -15,7 +15,7 @@ export async function recipeYamlCommand(
     throw new Error("Recipe requires --file and --config");
   const action = positionals[1];
   const runId = values["run-id"];
-  if (action !== "run" && !runId)
+  if (action !== "run" && action !== "serve" && !runId)
     throw new Error(`Recipe ${action} requires --run-id`);
   const controller = new AbortController();
   const interrupt = () => {
@@ -33,6 +33,32 @@ export async function recipeYamlCommand(
       file: values.file,
       config: values.config,
     });
+    if (action === "serve") {
+      if (!values.service) throw new Error("Recipe serve requires --service");
+      await runtime.serve({
+        service: values.service,
+        signal: controller.signal,
+      });
+      return;
+    }
+    if (action === "enqueue") {
+      if (!values.queue || !values.handler)
+        throw new Error("Recipe enqueue requires --queue and --handler");
+      const job = await runtime.enqueue({
+        queue: values.queue,
+        handler: values.handler,
+        runId: runId!,
+        ...(inputs ? { inputs } : {}),
+        signal: controller.signal,
+        ...(values["job-id"] ? { id: values["job-id"] } : {}),
+        ...(values["idempotency-key"]
+          ? { idempotencyKey: values["idempotency-key"] }
+          : {}),
+        ...(values.deadline ? { deadline: Number(values.deadline) } : {}),
+      });
+      if (values.json) process.stdout.write(`${JSON.stringify(job)}\n`);
+      return;
+    }
     if (action === "status") {
       const status = await runtime.status(runId!);
       process.stdout.write(

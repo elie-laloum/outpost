@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../recipe.schema.json
+version: 3
+name: queued-review
+recipeVersion: "1.0.0"
+description: Delegate a review to an explicitly configured queue worker and retain its workflow summary.
+inputs:
+  runId:
+    type: string
+    description: Stable checkpoint ID for the worker's review recipe.
+  goal:
+    type: string
+    description: Change or area to review.
+tasks:
+  - key: review
+    queued:
+      queue: { $ref: queues.reviews }
+      handler: review
+    arguments:
+      runId: { $input: runId }
+      input: { goal: { $input: goal } }

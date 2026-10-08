@@ -8893,5 +8893,57 @@
   "RecipeResumeOptions.report": [
     "Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.",
     "Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation."
+  ],
+  "RecipeRuntime.enqueue": [
+    "Publish a typed recipe parameter mapping to a named queue without starting a workflow or service; close only runtime-owned queue resources.",
+    "Publie les paramètres typés vers une file nommée sans démarrer de workflow ni service ; ferme uniquement les ressources de file possédées."
+  ],
+  "RecipeRuntime.serve": [
+    "Start one named service and its dependencies until cancellation or runtime closure; other declared services remain unconstructed.",
+    "Démarre un service nommé et ses dépendances jusqu’à annulation ou fermeture du runtime ; les autres services déclarés restent non construits."
+  ],
+  "RecipeService.start": [
+    "Start the explicitly selected service, honor cancellation and close its server or worker before resolving.",
+    "Démarre le service explicitement sélectionné, respecte l’annulation et ferme son serveur ou worker avant résolution."
+  ],
+  "RecipeServeOptions.service": [
+    "Service name, with an optional services. prefix; unknown names fail before resource preparation.",
+    "Nom du service avec préfixe services. facultatif ; un nom absent échoue avant préparation des ressources."
+  ],
+  "RecipeServeOptions.signal": [
+    "Cancel this service invocation while retaining runtime ownership of its prepared dependencies.",
+    "Annule cette invocation tout en conservant la responsabilité de fermeture des dépendances préparées."
+  ],
+  "RecipeEnqueueOptions.queue": [
+    "Named queue, with an optional queues. prefix; only this queue and its dependencies are prepared.",
+    "File nommée avec préfixe queues. facultatif ; seules cette file et ses dépendances sont préparées."
+  ],
+  "RecipeEnqueueOptions.handler": [
+    "Trusted handler name registered by a separately started worker.",
+    "Nom du handler de confiance enregistré par un worker démarré séparément."
+  ],
+  "RecipeEnqueueOptions.runId": [
+    "Checkpoint run ID included with the recipe parameters in the native trigger job input.",
+    "Run ID de checkpoint joint aux paramètres dans l’entrée native du job."
+  ],
+  "RecipeEnqueueOptions.id": [
+    "Explicit queue job ID; defaults to recipe:<handler>:<runId> for deterministic repeated publication.",
+    "ID de job explicite ; vaut recipe:<handler>:<runId> par défaut pour une publication répétée déterministe."
+  ],
+  "RecipeEnqueueOptions.idempotencyKey": [
+    "Stable effect key when deliberately publishing a distinct job ID for the same effect; persistent destination deduplication remains necessary.",
+    "Clé d’effet stable lors de la publication volontaire d’un nouvel ID pour le même effet ; la destination doit conserver sa déduplication."
+  ],
+  "RecipeEnqueueOptions.deadline": [
+    "Absolute epoch millisecond deadline enforced by the selected queue.",
+    "Échéance absolue en millisecondes epoch appliquée par la file sélectionnée."
+  ],
+  "RecipeEnqueueOptions.inputs": [
+    "Recipe parameter mapping validated and completed with defaults before preparing the queue.",
+    "Paramètres de recette validés et complétés par les valeurs par défaut avant préparation de la file."
+  ],
+  "RecipeEnqueueOptions.signal": [
+    "Cancel queue preparation before publication; the native enqueue operation has no cancellation parameter.",
+    "Annule la préparation avant publication ; l’opération native enqueue n’accepte pas de paramètre d’annulation."
   ]
 }

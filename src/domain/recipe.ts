@@ -122,6 +122,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
   Object.assign(common, additions);
   if (version === 3) {
     const actions = [
+      "queued",
       "command",
       "agent",
       "value",
@@ -136,6 +137,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
     if (actions.length !== 1)
       throw new Error(`${path} requires exactly one task action`);
     for (const field of [
+      "queued",
       "call",
       "loop",
       "decision",
@@ -147,8 +149,8 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       if (item[field] === undefined) continue;
       if (item.brief !== undefined || item.dispatch !== undefined)
         throw new Error(`${path}: brief and dispatch require an agent task`);
-      if (item.arguments !== undefined && field !== "call")
-        throw new Error(`${path}: arguments require call`);
+      if (item.arguments !== undefined && !["call", "queued"].includes(field))
+        throw new Error(`${path}: arguments require call or queued`);
       if (item.state !== undefined && field !== "decision")
         throw new Error(`${path}: state requires decision`);
       return {

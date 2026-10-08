@@ -1118,9 +1118,9 @@
     "signatures": ["(expression: string, options?: CronOptions): CronSchedule"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createCustomReporter": {
     "signatures": [
@@ -1156,17 +1156,17 @@
     "signatures": ["(options: GithubWebhookOptions): TriggerSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createGitlabWebhook": {
     "signatures": ["(options: GitlabWebhookOptions): TriggerSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createHarness": {
     "signatures": ["(options: HarnessOptions): Harness"],
@@ -1228,9 +1228,9 @@
     "signatures": ["(options: QueueClientOptions): TaskQueue"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createKimiConversations": {
     "signatures": ["(): NativeConversationStore"],
@@ -1336,25 +1336,25 @@
     "signatures": ["(options: SlackRequestOptions): TriggerSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createSqliteTaskQueue": {
     "signatures": ["(path: string): Promise<DurableTaskQueue>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createStandardWebhook": {
     "signatures": ["(options: StandardWebhookOptions): TriggerSource"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:createSteering": {
     "signatures": ["(): Steering"],
@@ -1886,9 +1886,9 @@
     "signatures": ["<T>(options: QueuedTaskOptions<T>): Task<T>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:defineRecipe": {
     "signatures": ["(source: string, bindings: RecipeBindings): Workflow"],
@@ -1926,9 +1926,9 @@
     "signatures": ["(options: WorkflowJobOptions): QueueHandler"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:diagnoseAgentProtocol": {
     "signatures": ["(agent: DoctorAgent): AgentProtocolReport"],
@@ -4854,9 +4854,9 @@
     "signatures": ["(options: QueueWorkerOptions): Promise<void>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:RunReport": {
     "signatures": [],
@@ -4936,9 +4936,9 @@
     "signatures": ["(options: RunSchedulesOptions): Promise<void>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:RunSchedulesOptions": {
     "signatures": [],
@@ -5191,17 +5191,17 @@
     "signatures": ["(options: QueueServerOptions): Promise<QueueServer>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:serveTriggers": {
     "signatures": ["(options: TriggerServerOptions): Promise<TriggerServer>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   ".:SessionBundleFiles": {
     "signatures": [],
@@ -7324,9 +7324,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/redis.test.ts"
   },
   "./recipes:createRecipeRegistry": {
     "signatures": ["(options?: RecipeRegistryOptions): RecipeRegistry"],
@@ -7383,6 +7383,23 @@
     "lot": 1,
     "status": "implemented",
     "test": "test/functional/recipe-runtime.test.ts"
+  },
+  "./recipes:RecipeEnqueueOptions": {
+    "signatures": [],
+    "options": {
+      "queue": "string",
+      "handler": "string",
+      "runId": "string",
+      "id": "string | undefined",
+      "idempotencyKey": "string | undefined",
+      "deadline": "number | undefined",
+      "signal": "AbortSignal | undefined",
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   "./recipes:RecipeProjectOptions": {
     "signatures": [],
@@ -7482,6 +7499,8 @@
   "./recipes:RecipeRuntime": {
     "signatures": [],
     "options": {
+      "serve": "(options: RecipeServeOptions) => Promise<void>",
+      "enqueue": "(options: RecipeEnqueueOptions) => Promise<QueueJob>",
       "run": "(options?: RecipeRunOptions) => Promise<RecipeReport>",
       "resume": "(options: RecipeResumeOptions) => Promise<RecipeReport>",
       "status": "(runId: string) => Promise<RecipeRunStatus | undefined>",
@@ -7492,6 +7511,27 @@
     "lot": 1,
     "status": "implemented",
     "test": "test/functional/recipe-runtime.test.ts"
+  },
+  "./recipes:RecipeServeOptions": {
+    "signatures": [],
+    "options": {
+      "service": "string",
+      "signal": "AbortSignal | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
+  },
+  "./recipes:RecipeService": {
+    "signatures": [],
+    "options": {
+      "start": "(signal: AbortSignal) => Promise<void>"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/recipe-services.test.ts"
   },
   "./recipes:validateRecipeProject": {
     "signatures": [

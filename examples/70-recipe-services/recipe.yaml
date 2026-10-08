@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: queued-message
+inputs:
+  message:
+    type: string
+    description: Message preserved by the queued workflow.
+    default: Hello from the queue
+workflow:
+  checkpoint:
+    store: { $ref: stores.checkpoint }
+    runId: queued-message
+    version: "1"
+tasks:
+  - key: message
+    value: { $input: message }

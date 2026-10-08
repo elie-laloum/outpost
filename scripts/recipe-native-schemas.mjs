@@ -42,16 +42,27 @@ const environment = {
 };
 function schema(type, component, path = "", ancestors = new Set()) {
   if (type.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Never)) return false;
-  if (nativeRecipeSecrets[component]?.includes(path))
-    return type.isUnion() &&
-      type.types.some(
-        (t) =>
-          t.flags & ts.TypeFlags.BooleanLiteral && t.intrinsicName === "false",
+  if (nativeRecipeSecrets[component]?.includes(path)) {
+    const parts = type.isUnion() ? type.types : [type];
+    const choices = [environment];
+    if (parts.some((part) => part.getCallSignatures().length))
+      choices.push({
+        ...reference("callback"),
+        contract: `${component}.${path}`,
+      });
+    if (
+      parts.some(
+        (part) =>
+          part.flags & ts.TypeFlags.BooleanLiteral &&
+          part.intrinsicName === "false",
       )
-      ? { anyOf: [environment, { const: false }] }
-      : environment;
+    )
+      choices.push({ const: false });
+    return choices.length === 1 ? environment : { anyOf: choices };
+  }
   if (path.endsWith(".client") || path === "client") return reference("object");
   const name = type.aliasSymbol?.name ?? type.symbol?.name;
+  if (name === "WorkflowJson") return {};
   if (
     type.symbol?.declarations?.some((declaration) =>
       ts.isClassDeclaration(declaration),

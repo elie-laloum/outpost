@@ -86,6 +86,21 @@
         "slug": "reference/reciperunstatus",
         "label": "RecipeRunStatus",
         "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeenqueueoptions",
+        "label": "RecipeEnqueueOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeserveoptions",
+        "label": "RecipeServeOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeservice",
+        "label": "RecipeService",
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

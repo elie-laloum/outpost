@@ -1,3 +1,4 @@
+import { serveRecipeProject, enqueueRecipeProject } from "./services.ts";
 import { runDurableRecipe } from "./durable-run.ts";
 import { inspectRecipeRun } from "./status.ts";
 import type { RecipeResumeOptions } from "./durable.types.ts";
@@ -167,7 +168,32 @@ export async function createRecipeRuntime(
       active = undefined;
     }
   }
+  async function operation<T>(
+    settings: Pick<RecipeRunOptions, "signal">,
+    perform: (signal: AbortSignal) => Promise<T>,
+  ): Promise<T> {
+    if (closed || active)
+      throw new Error("Recipe runtime is closed or already running");
+    const signal = settings.signal
+      ? AbortSignal.any([stop.signal, settings.signal])
+      : stop.signal;
+    const result = perform(signal);
+    active = result;
+    try {
+      return await result;
+    } finally {
+      active = undefined;
+    }
+  }
   const runtime: RecipeRuntime = {
+    serve: (settings) =>
+      operation(settings, (signal) =>
+        serveRecipeProject(project, settings, signal),
+      ),
+    enqueue: (settings) =>
+      operation(settings, (signal) =>
+        enqueueRecipeProject(project, settings, signal),
+      ),
     run: (settings) => execute(settings),
     resume: (settings) => execute(settings, true),
     async status(runId) {

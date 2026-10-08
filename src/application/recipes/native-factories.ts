@@ -1,6 +1,52 @@
 export const nativeRecipeFactories: Readonly<
   Record<string, () => Promise<unknown>>
 > = {
+  "queue.sqlite": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeSqliteQueue,
+  "queue.http": async () =>
+    (await import("../../infrastructure/task-queue-http.ts"))
+      .createHttpTaskQueue,
+  "queue.bullmq": async () =>
+    (await import("../../infrastructure/task-queue-bullmq.ts"))
+      .createBullMQTaskQueue,
+  "service.worker": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeWorker,
+  "service.queue": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeQueueServer,
+  "service.triggers": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeTriggerServer,
+  "service.schedules": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeSchedules,
+  "job.workflow": async () =>
+    (await import("../../application/workflow-job.ts")).defineWorkflowJob,
+  "job.recipe": async () =>
+    (await import("../../application/recipes/job.ts")).defineRecipeJob,
+  "cron.schedule": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeCron,
+  "schedule.cron": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeSchedule,
+  "triggerMapper.job": async () =>
+    (await import("../../application/recipes/service-components.ts"))
+      .createRecipeTriggerMapper,
+  "triggerSource.github": async () =>
+    (await import("../../adapters/triggers/github-webhook.ts"))
+      .createGithubWebhook,
+  "triggerSource.gitlab": async () =>
+    (await import("../../adapters/triggers/gitlab-webhook.ts"))
+      .createGitlabWebhook,
+  "triggerSource.slack": async () =>
+    (await import("../../adapters/triggers/slack-request.ts"))
+      .createSlackSource,
+  "triggerSource.standard": async () =>
+    (await import("../../adapters/triggers/standard-webhook.ts"))
+      .createStandardWebhook,
   "transport.s3": async () =>
     (await import("../../infrastructure/s3-transport.ts")).createS3Transport,
   "checkpointStore.transport": async () =>

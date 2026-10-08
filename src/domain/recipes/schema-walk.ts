@@ -74,7 +74,16 @@ export function recipeSchemaBranch(
   const schema = recipeObject(found) ? found : source;
   const branches = schema.anyOf ?? schema.oneOf;
   if (!Array.isArray(branches)) return schema;
+  const component = branches.find((candidate) => {
+    const shape = dereference(candidate, root);
+    return (
+      recipeObject(shape) &&
+      typeof shape.component === "string" &&
+      matches(shape, value, root, componentMatch)
+    );
+  });
   const branch: unknown =
+    component ??
     branches.find((candidate) =>
       matches(candidate, value, root, componentMatch),
     ) ??

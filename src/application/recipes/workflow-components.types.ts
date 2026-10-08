@@ -1,3 +1,4 @@
+import type { RecipeQueuedSettings } from "./service-components.types.ts";
 import type {
   RecipeGateSettings,
   RecipeInteractiveSettings,
@@ -43,6 +44,7 @@ export interface RecipeCallSettings {
   ) => unknown | Promise<unknown>;
 }
 export interface RecipeWorkflowStepComponents {
+  readonly queued?: RecipeQueuedSettings;
   readonly gate?: RecipeGateSettings;
   readonly interactive?: RecipeInteractiveSettings;
   readonly artifact?: RecipeArtifactSettings;

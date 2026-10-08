@@ -9,6 +9,13 @@
       "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
     },
     {
+      "name": "queued-review",
+      "version": "1.0.0",
+      "description": "Delegate a review to an explicitly configured queue worker and retain its workflow summary.",
+      "source": "./queued-review.yaml",
+      "sha256": "d3cb5fbadad379c8e887f25c23539d8f428d903a8d63350c8a2e34b6c4c67e9c"
+    },
+    {
       "name": "review-and-approve",
       "version": "1.0.0",
       "description": "Review a change, retain the review and wait for a maintainer decision.",

@@ -1,6 +1,10 @@
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { WorkflowCheckpointStore } from "../domain/workflow/checkpoint.types.ts";
-import type { Workflow, WorkflowOptions } from "../domain/workflow.types.ts";
+import type {
+  Workflow,
+  WorkflowOptions,
+  WorkflowResult,
+} from "../domain/workflow.types.ts";
 import type { QueueHandlerContext } from "./queue-worker.types.ts";
 
 export interface WorkflowJobContext extends QueueHandlerContext {
@@ -29,3 +33,14 @@ export interface WorkflowJobOptions {
   readonly checkpoint: WorkflowJobCheckpoint;
   readonly start?: WorkflowJobStartOptions;
 }
+
+export type WorkflowJobOutcome = Pick<
+  WorkflowResult,
+  | "status"
+  | "errors"
+  | "usage"
+  | "executionId"
+  | "terminationCode"
+  | "tasks"
+  | "inputRequests"
+>;

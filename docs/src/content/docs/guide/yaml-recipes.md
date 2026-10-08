@@ -138,7 +138,7 @@ Recipes require concurrency 1. Agent results cannot be stored as lossless JSON c
 
 ## Find and download recipes
 
-The package includes the official Git-versioned catalogue: `fix-and-check`, `review`, `review-change`, `review-and-approve` and `update-docs`. List it and copy a recipe into your project. Fetching never executes code or overwrites an existing file. Keep the local configuration separate and bind the required agent roles before running.
+The package includes the official Git-versioned catalogue: `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` and `update-docs`. List it and copy a recipe into your project. Fetching never executes code or overwrites an existing file. Keep the local configuration separate and bind the required agent roles before running.
 
 ```sh
 npx outpost recipe list

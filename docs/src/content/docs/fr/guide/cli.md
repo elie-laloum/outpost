@@ -68,6 +68,18 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 
 Answer et decide lisent une WorkflowAnswer ou WorkflowDecision native dans un fichier JSON borné ; une gate signée exige sa preuve originale. `resume --input` doit correspondre aux paramètres persistés ; omettez-le pour les recharger. Run accepte aussi `--run-id` pour créer un checkpoint. Run, resume, answer et decide n’affichent un rapport final que s’il est déclaré ou demandé via `--json` ; status affiche toujours son résultat demandé. Consultez les [recettes durables](../recipe-durability/) pour l’état, la propriété et la récupération.
 
+## `outpost recipe enqueue` et `serve`
+
+Enqueue publie sans exécuter. Il exige `--file`, un `--config` YAML, `--queue`, `--handler` et `--run-id` ; les `--input` répétés suivent les types de paramètres. `--job-id` remplace l’ID déterministe par défaut, `--idempotency-key` conserve une clé d’effet entre jobs distincts et `--deadline` est une date absolue en millisecondes epoch. `--json` demande un reçu ; le succès reste sinon silencieux.
+
+```sh
+outpost recipe enqueue --file recipe.yaml --config outpost.yaml \
+  --queue jobs --handler review --run-id change-42 --json
+outpost recipe serve --file recipe.yaml --config outpost.yaml --service worker
+```
+
+Serve exige `--file`, un `--config` YAML et `--service`. Il démarre uniquement ce service, bloque jusqu’à interruption et n’émet aucune progression ni rapport implicite. Les [services de recettes](../recipe-services/) détaillent workers, files HTTP, cron et webhooks vérifiés.
+
 ## `outpost recipe init`
 
 Créez un modèle de version 2 avec un objectif obligatoire, un agent nommé et une commande de test. Le commentaire du schéma pour l’éditeur pointe vers le paquet installé. Les fichiers existants ne sont jamais écrasés ; le dossier parent doit exister.

@@ -1,5 +1,24 @@
 import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
+  service: { type: "string", description: "Named service to start explicitly" },
+  queue: { type: "string", description: "Named queue receiving a recipe job" },
+  handler: {
+    type: "string",
+    description: "Trusted worker handler registered for the job",
+  },
+  "job-id": {
+    type: "string",
+    description:
+      "Deterministic queue job ID; defaults to recipe:<handler>:<run-id>",
+  },
+  "idempotency-key": {
+    type: "string",
+    description: "Stable effect key retained when publishing a new job ID",
+  },
+  deadline: {
+    type: "string",
+    description: "Absolute queue deadline as epoch milliseconds",
+  },
   "run-id": {
     type: "string",
     description: "Durable recipe execution identifier",
@@ -107,6 +126,25 @@ export const cliOptions = {
 } as const;
 
 export const commandOptions = {
+  "recipe enqueue": {
+    description: "Publish one recipe job without executing its workflow",
+    options: [
+      "file",
+      "config",
+      "queue",
+      "handler",
+      "run-id",
+      "job-id",
+      "idempotency-key",
+      "deadline",
+      "input",
+      "json",
+    ],
+  },
+  "recipe serve": {
+    description: "Start only the selected local service until interrupted",
+    options: ["file", "config", "service"],
+  },
   "recipe list": {
     description: "List the bundled or selected recipe catalogue",
     options: ["catalog", "json"],

@@ -446,3 +446,95 @@ test("BullMQ preserves effect keys and quota results", async (t) => {
     '{"resetAt":"2026-09-28T18:00:00.000Z","conversation":"c"}',
   );
 });
+
+test("YAML BullMQ components publish and execute a checkpointed recipe through an explicitly selected worker", async (t) => {
+  const { first, options } = await fixture(t);
+  const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+  const { createRecipeRuntime, validateRecipeProject } =
+    await import("../src/recipes.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-recipe-redis-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "outpost.yaml");
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "redis-recipe",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.state" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [{ key: "value", value: { ready: true } }],
+    }),
+  );
+  await writeFile(
+    config,
+    JSON.stringify({
+      version: 2,
+      repository: ".",
+      sandbox: { provider: "local" },
+      transports: { state: { type: "local", directory: "./state" } },
+      stores: {
+        state: { type: "transport", transporter: { $ref: "transports.state" } },
+      },
+      queues: {
+        redis: {
+          type: "bullmq",
+          name: options.name,
+          prefix: options.prefix,
+          connection,
+        },
+      },
+      jobs: {
+        workflow: {
+          type: "recipe",
+          file: "./recipe.yaml",
+          config: "./outpost.yaml",
+        },
+      },
+      services: {
+        worker: {
+          type: "worker",
+          queue: { $ref: "queues.redis" },
+          worker: "yaml-worker",
+          handlers: { work: { $ref: "jobs.workflow" } },
+          pollMs: 10,
+          leaseMs: 5000,
+        },
+      },
+    }),
+  );
+  await validateRecipeProject({ file, config });
+  await using publisher = await createRecipeRuntime({ file, config });
+  const queued = await publisher.enqueue({
+    queue: "redis",
+    handler: "work",
+    runId: "yaml-redis",
+  });
+  assert.equal(queued.status, "pending");
+  await using worker = await createRecipeRuntime({ file, config });
+  const serving = worker.serve({ service: "worker" });
+  t.after(async () => {
+    await worker.close();
+    await serving;
+  });
+  let completed: QueueJob | undefined;
+  for (let count = 0; count < 200; count++) {
+    const job = await first.get(queued.id);
+    if (job?.status === "done" || job?.status === "failed") {
+      completed = job;
+      break;
+    }
+    await delay(20);
+  }
+  assert.equal(completed?.status, "done", JSON.stringify(completed?.result));
+  assert.equal((await publisher.status("yaml-redis"))?.report?.status, "done");
+  await worker.close();
+  await serving;
+});
