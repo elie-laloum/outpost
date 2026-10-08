@@ -1,5 +1,11 @@
 export const groups = [
   {
+    id: "recipes",
+    title: ["YAML recipes", "Recettes YAML"],
+    guide: "guide/yaml-recipes",
+    names: "defineRecipe RecipeBindings",
+  },
+  {
     id: "secrets",
     title: ["Secret sources", "Sources de secrets"],
     guide: "guide/secret-sources",

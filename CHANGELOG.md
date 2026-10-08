@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add the local YAML recipe engine `defineRecipe()` and `outpost recipe run --file --config [--json]`. Compile literal command and named-agent steps into existing sequential workflow tasks with dependencies, retries and timeouts; validate YAML and dependency graphs before execution. The CLI owns and closes the factory's sandbox, preserves failed or cancelled workspaces and handles SIGINT/SIGTERM. Add bilingual Guide/API documentation and the offline executable test `examples/64-yaml-recipes/`; a recipe catalogue and remote discovery remain unimplemented, and paid agent/cloud runs remain unvalidated.
+
 ## 11.0.1
 
 This major release adds workspace integration safeguards, portable agent profiles, execution reports and state tracking, monetary budgets, incremental preparation, cloud dependency caches, offline workflow testing and optional secret sources. Update exhaustive consumers for `FaultCode` (`guard`, `stuck`), `AgentEvent` and `ObservationEvent` (`stuck`), stopped reasons (`stuck`), `StorageCategoryName` (`runs`) and `WorkflowBudgetExceeded.dimension` (`cost`). Implementations and test doubles of `DispatchResult` and `WarmDispatchResult` must provide `report()`; custom `ObservationHub` implementations must provide `redacting` and `redact()`. Existing entry points remain available. Best-of-N speculation remains experimental, and the live-validation limits below still apply.

@@ -9,6 +9,7 @@ Use the CLI to build images, check prerequisites and inspect retained work. Writ
 
 <!-- features -->
 
+- [`outpost recipe run`](../yaml-recipes/): Runs a local YAML recipe with explicit sandbox and agent bindings.
 - [`outpost doctor`](../diagnostics/): Checks the host, the sandbox provider and an image.
 - [`outpost image build`](../agent-images/): Builds the agent image from its recipe.
 - [`outpost image remove`](../agent-images/): Deletes the agent image.
@@ -22,12 +23,12 @@ In a project that depends on `@elie-laloum/outpost`, run `npx outpost <command>`
 
 ## Common options
 
-| Option       | Commands             | Effect                                         |
-| ------------ | -------------------- | ---------------------------------------------- |
-| `-h, --help` | All                  | Prints the usage and options, then exits.      |
-| `--json`     | `doctor`, `recovery` | Writes the report as JSON on stdout.           |
-| `-y, --yes`  | `init`               | Accepts the defaults without prompting.        |
-| `--apply`    | `restore`, `prune`   | Performs the change; without it, only preview. |
+| Option       | Commands                       | Effect                                         |
+| ------------ | ------------------------------ | ---------------------------------------------- |
+| `-h, --help` | All                            | Prints the usage and options, then exits.      |
+| `--json`     | `doctor`, `recovery`, `recipe` | Writes the report as JSON on stdout.           |
+| `-y, --yes`  | `init`                         | Accepts the defaults without prompting.        |
+| `--apply`    | `restore`, `prune`             | Performs the change; without it, only preview. |
 
 | Exit code | Meaning                                                                            |
 | --------- | ---------------------------------------------------------------------------------- |
@@ -35,6 +36,22 @@ In a project that depends on `@elie-laloum/outpost`, run `npx outpost <command>`
 | `1`       | A check failed, a report is incomplete, or the command failed (message on stderr). |
 | `130`     | Interrupted with Ctrl+C, or an `init` prompt was cancelled.                        |
 | `143`     | Stopped with SIGTERM.                                                              |
+
+## `outpost recipe run`
+
+Execute a [local YAML recipe](../yaml-recipes/) with a TypeScript configuration supplying the sandbox and agents. The CLI validates YAML before loading the factory, then closes the sandbox after execution.
+
+```sh
+outpost recipe run --file recipe.yaml --config outpost.recipe.ts [--json]
+```
+
+| Flag       | Default  | Effect                                                                                                            |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--file`   | Required | Local YAML recipe, limited to 1 MiB.                                                                              |
+| `--config` | Required | TypeScript or JavaScript module with a default factory receiving an `AbortSignal` and returning `RecipeBindings`. |
+| `--json`   | Off      | Final report containing `name`, `executionId`, `status`, `tasks` and `usage`.                                     |
+
+Paths are relative to the current directory. Without `--json`, output is `name: status`. Loading or execution failures exit 1, with errors on stderr. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Failed or cancelled workspaces are preserved. Keep the configuration's stdout quiet for parseable JSON output.
 
 ## `outpost doctor`
 

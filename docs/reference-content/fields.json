@@ -8573,5 +8573,21 @@
   "createInfisicalSecretSource.options": [
     "Host client or connection configuration and explicit secret selection for the Infisical adapter.",
     "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Infisical."
+  ],
+  "defineRecipe.source": [
+    "Literal YAML 1.2 text containing version: 1, name and a nonempty tasks list, bounded to 1 MiB and 1,000 tasks; aliases and custom tags are refused. Each task selects command or agent with brief, with optional after, retry and timeoutMs. Values are never interpolated.",
+    "Texte YAML 1.2 littéral contenant version: 1, name et une liste tasks non vide, limité à 1 Mio et 1 000 tâches ; les alias et tags personnalisés sont refusés. Chaque tâche choisit command ou agent avec brief, avec after, retry et timeoutMs optionnels. Les valeurs ne sont jamais interpolées."
+  ],
+  "defineRecipe.bindings": [
+    "Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.",
+    "Sandbox ouverte et registre d’agents optionnel empruntés par chaque tâche de la recette. defineRecipe() n’alloue ni ne ferme de ressource ; l’appelant en conserve la propriété."
+  ],
+  "RecipeBindings.sandbox": [
+    "Caller-owned open sandbox shared by all command and agent steps. Keep it open until Workflow.start() settles, then close it; recipe concurrency must be 1.",
+    "Sandbox ouverte appartenant à l’appelant, partagée par toutes les étapes de commande et d’agent. Gardez-la ouverte jusqu’à la fin de Workflow.start(), puis fermez-la ; la concurrence de la recette doit être 1."
+  ],
+  "RecipeBindings.agents": [
+    "Composed Outpost agents keyed by the exact names used in YAML agent fields. Missing names are rejected at declaration; command-only recipes may omit this registry. Authentication and model choices stay in the composed agents.",
+    "Agents Outpost composés, indexés par les noms exacts des champs agent du YAML. Les noms absents sont refusés à la déclaration ; les recettes de commandes seules peuvent omettre ce registre. L’authentification et les modèles restent dans les agents composés."
   ]
 }

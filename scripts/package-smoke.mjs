@@ -566,7 +566,7 @@ import {execFileSync} from 'node:child_process';
 import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {dispatch} from '@elie-laloum/outpost';
+import {dispatch, createSandbox, defineRecipe, type RecipeBindings} from '@elie-laloum/outpost';
 import {scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
 const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
 try {
@@ -585,6 +585,12 @@ try {
   const result = await dispatch({repository,agent:scriptedAgent(options),sandboxProvider:createMemorySandboxProvider(memory),brief:{text:'Fix'},logging:false});
   assert.equal(result.text,'Done');
   assert.equal(result.commits.length,1);
+  await using sandbox = await createSandbox({repository,sandboxProvider:createMemorySandboxProvider(memory),logging:false});
+  const bindings: RecipeBindings = {sandbox};
+  const recipe = defineRecipe(JSON.stringify({version:1,name:'consumer',tasks:[{key:'verify',command:{executable:'verify'}}]}),bindings);
+  const run = await recipe.start();
+  run.unwrap();
+  assert.equal(run.tasks[0]?.status,'done');
 } finally {await rm(repository,{recursive:true,force:true});}
 `,
   );

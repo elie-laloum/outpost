@@ -774,5 +774,9 @@
   "createInfisicalSecretSource": [
     "Create a named-secret reader in one Infisical project, environment and path using a caller-authenticated host client. Fetch only requested names with imports and reference expansion disabled, reveal values explicitly and refuse hidden values. Own neither login nor token renewal; cancellation through fromSecrets stops waiting while an in-flight SDK request may finish.",
     "Crée un lecteur de secrets nommés dans un projet, environnement et chemin Infisical avec un client hôte authentifié par l’appelant. Récupère uniquement les noms demandés, sans imports ni développement des références, demande explicitement les valeurs et refuse celles qui sont masquées. Ne gère ni la connexion ni le renouvellement ; l’annulation par fromSecrets termine l’attente, tandis qu’une requête SDK en cours peut terminer."
+  ],
+  "defineRecipe": [
+    "Parse and validate a version-1 local YAML recipe, bind its command and named-agent steps to the supplied sandbox, and return a Workflow without executing it. Dependencies may refer forward; unknown fields, duplicate keys, unsupported YAML constructs, missing agents and invalid graphs throw before execution. The caller owns the sandbox. start() requires concurrency 1 and uses the existing workflow retries, cancellation, results and usage accounting.",
+    "Analyse et valide une recette YAML locale de version 1, lie ses étapes de commande et d’agent nommé à la sandbox fournie et renvoie un Workflow sans l’exécuter. Les dépendances peuvent référencer des tâches déclarées plus loin ; champs inconnus, clés dupliquées, constructions YAML non prises en charge, agents absents et graphes invalides lèvent une erreur avant exécution. L’appelant possède la sandbox. start() exige une concurrence de 1 et utilise les retries, l’annulation, les résultats et le suivi d’usage du workflow existant."
   ]
 }

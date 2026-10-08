@@ -1,0 +1,13 @@
+version: 1
+name: parser-recipe
+tasks:
+  - key: verify
+    after: [fix]
+    command:
+      executable: npm
+      arguments: [test]
+  - key: fix
+    agent: coder
+    brief: Fix the parser and commit the change.
+    retry:
+      attempts: 2

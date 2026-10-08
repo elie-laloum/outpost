@@ -1,5 +1,9 @@
 import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
+  config: {
+    type: "string",
+    description: "TypeScript or JavaScript recipe bindings module",
+  },
   "base-url": {
     type: "string",
     description: "Custom Codex Responses API base URL (requires --model)",
@@ -61,13 +65,18 @@ export const cliOptions = {
   destination: { type: "string", description: "New restoration directory" },
   side: { type: "string", description: "Transfer side: previous or incoming" },
   engine: { type: "string", description: "Container engine: docker or podman" },
-  file: { type: "string", description: "Container recipe path" },
+  file: { type: "string", description: "YAML or container recipe path" },
   image: { type: "string", description: "Container image name" },
   uid: { type: "string", description: "Container user ID" },
   gid: { type: "string", description: "Container group ID" },
 } as const;
 
 export const commandOptions = {
+  "recipe run": {
+    description:
+      "Run a local YAML recipe with explicit sandbox and agent bindings",
+    options: ["file", "config", "json"],
+  },
   init: {
     description: "Create a standalone workflow project",
     options: [

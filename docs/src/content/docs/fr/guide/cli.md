@@ -9,6 +9,7 @@ Utilisez la ligne de commande pour construire les images, vérifier les prérequ
 
 <!-- features -->
 
+- [`outpost recipe run`](../yaml-recipes/): Exécute une recette YAML locale avec une sandbox et des agents explicites.
 - [`outpost doctor`](../diagnostics/) : Vérifie l’hôte, le fournisseur de sandbox et une image.
 - [`outpost image build`](../agent-images/) : Construit l’image d’agent à partir de sa recette.
 - [`outpost image remove`](../agent-images/) : Supprime l’image d’agent.
@@ -22,12 +23,12 @@ Dans un projet qui dépend de `@elie-laloum/outpost`, lancez `npx outpost <comma
 
 ## Options communes
 
-| Option       | Commandes            | Effet                                                  |
-| ------------ | -------------------- | ------------------------------------------------------ |
-| `-h, --help` | Toutes               | Affiche l’usage et les options, puis s’arrête.         |
-| `--json`     | `doctor`, `recovery` | Écrit le rapport en JSON sur stdout.                   |
-| `-y, --yes`  | `init`               | Accepte les valeurs par défaut sans poser de question. |
-| `--apply`    | `restore`, `prune`   | Effectue la modification ; sans elle, simple aperçu.   |
+| Option       | Commandes                      | Effet                                                  |
+| ------------ | ------------------------------ | ------------------------------------------------------ |
+| `-h, --help` | Toutes                         | Affiche l’usage et les options, puis s’arrête.         |
+| `--json`     | `doctor`, `recovery`, `recipe` | Écrit le rapport en JSON sur stdout.                   |
+| `-y, --yes`  | `init`                         | Accepte les valeurs par défaut sans poser de question. |
+| `--apply`    | `restore`, `prune`             | Effectue la modification ; sans elle, simple aperçu.   |
 
 | Code de sortie | Signification                                                                                |
 | -------------- | -------------------------------------------------------------------------------------------- |
@@ -35,6 +36,22 @@ Dans un projet qui dépend de `@elie-laloum/outpost`, lancez `npx outpost <comma
 | `1`            | Un contrôle a échoué, un rapport est incomplet ou la commande a échoué (message sur stderr). |
 | `130`          | Interruption par Ctrl+C, ou question d’`init` annulée.                                       |
 | `143`          | Arrêt par SIGTERM.                                                                           |
+
+## `outpost recipe run`
+
+Exécutez une [recette YAML locale](../yaml-recipes/) avec une configuration TypeScript qui fournit la sandbox et les agents. La CLI valide le YAML avant de charger la fabrique, puis ferme la sandbox après l’exécution.
+
+```sh
+outpost recipe run --file recipe.yaml --config outpost.recipe.ts [--json]
+```
+
+| Option     | Défaut      | Effet                                                                                                                 |
+| ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| `--file`   | Obligatoire | Recette YAML locale, limitée à 1 Mio.                                                                                 |
+| `--config` | Obligatoire | Module TypeScript ou JavaScript avec une fabrique par défaut recevant un `AbortSignal` et renvoyant `RecipeBindings`. |
+| `--json`   | Désactivé   | Rapport final avec `name`, `executionId`, `status`, `tasks` et `usage`.                                               |
+
+Les chemins sont relatifs au répertoire courant. Sans `--json`, la sortie est `nom: statut`. Un échec de chargement ou d’exécution sort avec le code 1 ; les erreurs vont sur stderr. SIGINT/SIGTERM annulent le run, attendent la fermeture et sortent avec 130/143. Les workspaces échoués ou annulés sont conservés. La configuration doit rester silencieuse sur stdout pour une sortie JSON exploitable.
 
 ## `outpost doctor`
 

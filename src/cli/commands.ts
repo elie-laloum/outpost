@@ -3,6 +3,7 @@ import { recoveryCommand } from "./recovery-command.ts";
 import { doctorCommand } from "./doctor-command.ts";
 import { imageCommand } from "./image-command.ts";
 import { initializeCommand } from "./init-command.ts";
+import { recipeCommand } from "./recipe-command.ts";
 import { cliOptions, commandOptions } from "./main.constants.ts";
 import type { CliCommand, CliValues } from "./main.types.ts";
 
@@ -19,6 +20,7 @@ export async function runCli(
     doctor: doctorCommand,
     image: imageCommand,
     recovery: recoveryCommand,
+    recipe: recipeCommand,
   };
   for (const [name, definition] of Object.entries(commandOptions)) {
     const path = name.split(" ");

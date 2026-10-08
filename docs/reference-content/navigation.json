@@ -1,5 +1,20 @@
 [
   {
+    "title": ["YAML recipes", "Recettes YAML"],
+    "items": [
+      {
+        "slug": "reference/definerecipe",
+        "label": "defineRecipe",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recipebindings",
+        "label": "RecipeBindings",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Secret sources", "Sources de secrets"],
     "items": [
       {

@@ -10,6 +10,10 @@ next: false
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Unreleased
+
+- Ajout du moteur local de recettes YAML `defineRecipe()` et de `outpost recipe run --file --config [--json]`. Les étapes de commande et d’agent nommé deviennent des tâches de workflow séquentielles avec dépendances, retries et délais ; le YAML et le graphe sont validés avant l’exécution. La CLI possède et ferme la sandbox de la fabrique, conserve les workspaces échoués ou annulés et gère SIGINT/SIGTERM. Documentation Guide/API bilingue et test exécutable hors ligne `examples/64-yaml-recipes/` ; le catalogue de recettes et la découverte distante restent non implémentés, les agents payants et le cloud non validés.
+
 ## 11.0.1
 
 Cette version majeure ajoute les garde-fous d’intégration des workspaces, les profils d’agents portables, les rapports et le suivi d’état des exécutions, les budgets monétaires, la préparation incrémentale, les caches de dépendances cloud, les tests de workflows hors ligne et les sources de secrets optionnelles. Adaptez les traitements exhaustifs de `FaultCode` (`guard`, `stuck`), d’`AgentEvent` et d’`ObservationEvent` (`stuck`), des raisons d’arrêt (`stuck`), de `StorageCategoryName` (`runs`) et de `WorkflowBudgetExceeded.dimension` (`cost`). Les implémentations et doublures de test de `DispatchResult` et `WarmDispatchResult` doivent fournir `report()` ; les implémentations personnalisées d’`ObservationHub` doivent fournir `redacting` et `redact()`. Les points d’entrée existants restent disponibles. La spéculation meilleur des N reste expérimentale et les limites de validation réelle ci-dessous restent applicables.

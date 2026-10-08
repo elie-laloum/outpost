@@ -218,6 +218,8 @@ export {
   defineIsolatedTask,
 } from "./application/tasks.ts";
 export type { QuotaResumePolicy } from "./application/quota-resume.types.ts";
+export { defineRecipe } from "./application/recipe.ts";
+export type { RecipeBindings } from "./application/recipe.types.ts";
 
 export {
   createAntigravityHarness,
