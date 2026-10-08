@@ -11,6 +11,8 @@ export interface RecipeDiagnostic {
 }
 
 export interface RecipeReport {
+  readonly runId?: string;
+  readonly inputRequests?: WorkflowResult["inputRequests"];
   readonly observerErrors?: readonly RecipeDiagnostic[];
   readonly name: string;
   readonly executionId?: string;

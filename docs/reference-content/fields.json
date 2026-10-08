@@ -8801,5 +8801,97 @@
   "RecipeComponentContext.kindOf": [
     "Returns the declared category of a named component without constructing it; unknown references fail.",
     "Retourne la catégorie déclarée d’un composant nommé sans le construire ; une référence absente échoue."
+  ],
+  "RecipeRunOptions.runId": [
+    "Override the configured checkpoint run ID for a new durable execution. Existing runs require resume.",
+    "Remplace le run ID configuré du checkpoint pour une nouvelle exécution durable. Une exécution existante nécessite resume."
+  ],
+  "RecipeResumeOptions.runId": [
+    "Existing checkpoint run ID; a missing run is refused without allocating a workspace.",
+    "Run ID du checkpoint existant ; une exécution absente est refusée sans allouer de workspace."
+  ],
+  "RecipeResumeOptions.retryIncomplete": [
+    "Explicitly authorize the native scheduler to retry incomplete tasks; completed tasks and cumulative usage remain persisted.",
+    "Autorise explicitement l’ordonnanceur natif à rejouer les tâches incomplètes ; les tâches terminées et la consommation cumulée restent persistées."
+  ],
+  "RecipeResumeOptions.answers": [
+    "Native answers to pending dialogue requests, including the execution, task, request and authorized actor.",
+    "Réponses natives aux demandes de dialogue en attente, avec exécution, tâche, demande et acteur autorisé."
+  ],
+  "RecipeResumeOptions.decisions": [
+    "Native gate decisions with trusted actor metadata and any required signature proof; verified by the workflow engine.",
+    "Décisions natives de gates avec métadonnées d’acteur de confiance et preuve de signature exigée ; vérifiées par le moteur de workflow."
+  ],
+  "RecipeResumeOptions.recoverRevision": [
+    "Explicitly recover checkpoint ownership at this exact storage revision after stopping its previous coordinator; does not recover workspace locks or authorize replay.",
+    "Récupère explicitement la propriété du checkpoint à cette révision exacte après arrêt du coordinateur précédent ; ne récupère pas les verrous de workspace et n’autorise pas le rejeu."
+  ],
+  "RecipeRuntime.resume": [
+    "Resume an existing durable run with its original inputs, workspace records and cumulative accounting. Changed identities or missing workspaces fail; interrupted tasks need explicit replay authorization.",
+    "Reprend une exécution durable existante avec ses paramètres, workspaces et compteurs cumulés. Une identité modifiée ou un workspace absent échoue ; les tâches interrompues exigent une autorisation explicite de rejeu."
+  ],
+  "RecipeRuntime.status": [
+    "Read checkpoint revision, ownership, task summaries and retained workspace records without acquiring it; settled runs include their redacted final report.",
+    "Lit révision, propriété, résumés des tâches et workspaces du checkpoint sans l’acquérir ; les exécutions terminées incluent leur rapport expurgé."
+  ],
+  "RecipeReport.runId": [
+    "Checkpoint run ID for a durable recipe invocation.",
+    "Run ID du checkpoint pour une invocation de recette durable."
+  ],
+  "RecipeReport.inputRequests": [
+    "Persisted dialogue questions awaiting an authorized answer.",
+    "Questions de dialogue persistées attendant une réponse autorisée."
+  ],
+  "RecipeRunStatus.runId": [
+    "Requested durable checkpoint identifier.",
+    "Identifiant du checkpoint durable demandé."
+  ],
+  "RecipeRunStatus.revision": [
+    "Exact storage revision used to fence an explicit checkpoint recovery.",
+    "Révision de stockage exacte utilisée pour protéger une récupération explicite du checkpoint."
+  ],
+  "RecipeRunStatus.owned": [
+    "Whether the checkpoint records an owner; this does not prove that the owner is alive or authorize recovery.",
+    "Indique si le checkpoint enregistre un propriétaire ; ne prouve pas sa présence et n’autorise pas sa récupération."
+  ],
+  "RecipeRunStatus.executionId": [
+    "Native workflow execution ID retained across resumes, when initialized.",
+    "Identifiant d’exécution natif conservé entre les reprises, lorsqu’il est initialisé."
+  ],
+  "RecipeRunStatus.report": [
+    "Last redacted invocation report, returned only after checkpoint ownership is released.",
+    "Dernier rapport d’invocation expurgé, renvoyé uniquement après libération de la propriété du checkpoint."
+  ],
+  "RecipeRunStatus.tasks": [
+    "Read-only task key, status and attempt summaries; private interaction state and outputs are omitted.",
+    "Résumés en lecture seule des clés, statuts et tentatives ; l’état privé des interactions et leurs sorties sont omis."
+  ],
+  "RecipeRunStatus.usage": [
+    "Persisted cumulative attempts and token accounting, including interrupted attempts.",
+    "Tentatives et jetons cumulés persistés, y compris les tentatives interrompues."
+  ],
+  "RecipeRunStatus.workspaces": [
+    "Persisted allocation state and original Git workspace identity for each runtime-owned resource.",
+    "État d’allocation persisté et identité Git d’origine de chaque workspace possédé par le runtime."
+  ],
+  "RecipeWorkspaceCheckpoint.state": [
+    "Allocation and cleanup state; allocating requires explicit recovery and closed resources are never replaced during resume.",
+    "État d’allocation et de nettoyage ; allocating exige une récupération explicite et les ressources closed ne sont jamais remplacées à la reprise."
+  ],
+  "RecipeWorkspaceCheckpoint.record": [
+    "Original repository, branch, directory, Git metadata and diff baseline retained for exact workspace restoration.",
+    "Dépôt, branche, répertoire, métadonnées Git et base de comparaison d’origine conservés pour restaurer le workspace exact."
+  ],
+  "RecipeResumeOptions.inputs": [
+    "Optional original input values; omitted values reload from the checkpoint and changed values reject resume.",
+    "Paramètres d’origine facultatifs ; leur absence recharge le checkpoint et toute modification refuse la reprise."
+  ],
+  "RecipeResumeOptions.signal": [
+    "Cancel this invocation while awaiting owned-resource cleanup.",
+    "Annule cette invocation en attendant le nettoyage des ressources possédées."
+  ],
+  "RecipeResumeOptions.report": [
+    "Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.",
+    "Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation."
   ]
 }

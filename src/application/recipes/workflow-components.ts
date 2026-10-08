@@ -11,6 +11,9 @@ import type {
 } from "./workflow-components.types.ts";
 
 export const workflowOptionComponents: readonly RecipeComponentDefinition[] = [
+  "gate",
+  "interactive",
+  "artifactTask",
   "task",
   "workflow",
   "loop",
@@ -44,9 +47,16 @@ export async function prepareRecipeWorkflow(
   const workflow = await scope.resolve("workflow", "workflowOptions");
   if (!workflowOptions(workflow))
     throw new Error("Invalid recipe workflow options");
+  if (workflow.checkpoint?.resume)
+    throw new Error(
+      "Recipe checkpoint replay must be authorized with resume({ retryIncomplete: true }) or --retry-incomplete",
+    );
   for (const step of document.tasks) {
     const values: Record<string, unknown> = {};
     for (const [field, kind] of Object.entries({
+      gate: "gate",
+      interactive: "interactive",
+      artifact: "artifactTask",
       options: "task",
       dispatch: "dispatch",
       loop: "loop",
@@ -70,6 +80,13 @@ export async function prepareRecipeWorkflow(
           prepared.isolated.workspace?.repository ??
           process.cwd(),
         prepared.isolated.sandboxProvider?.variables ?? {},
+        scope,
+      );
+    if (prepared.interactive)
+      await preflightRecipeAgent(
+        prepared.interactive.agent,
+        prepared.interactive.repository,
+        prepared.interactive.sandboxProvider?.variables ?? {},
         scope,
       );
     steps[step.key] = prepared;

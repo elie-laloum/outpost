@@ -1,3 +1,4 @@
+import type { WorkspaceLease } from "../infrastructure/git/workspace.types.ts";
 import type {
   IntegrationOptions,
   ConflictResolution,
@@ -50,6 +51,13 @@ export async function openWorkspace(
     await lease.dispose();
     throw cause;
   }
+  return createLeasedWorkspace(lease, options);
+}
+
+export function createLeasedWorkspace(
+  lease: WorkspaceLease,
+  options: WorkspaceOptions,
+): Workspace {
   const state = {
     lease,
     active: false,

@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../recipe.schema.json
+version: 3
+name: review-and-approve
+recipeVersion: "1.0.0"
+description: Review a change, retain the review and wait for a maintainer decision.
+inputs:
+  goal:
+    type: string
+    description: Change or area to review.
+workflow:
+  checkpoint:
+    store: { $ref: stores.checkpoint }
+    runId: review-and-approve
+    version: "1"
+tasks:
+  - key: review
+    agent: reviewer
+    brief: "Review the change and report actionable findings: {{ inputs.goal }}"
+  - key: approve
+    after: [review]
+    gate:
+      kind: approval
+      prompt: Accept this review?
+      actors: [maintainer]
+  - key: result
+    after: [review, approve]
+    value: { $step: review }

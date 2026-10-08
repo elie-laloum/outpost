@@ -219,6 +219,63 @@
           },
           "required": ["type"],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "kind": {
+              "anyOf": [
+                {
+                  "const": "dispatch"
+                },
+                {
+                  "const": "workflow"
+                }
+              ]
+            },
+            "heartbeatMs": {
+              "type": "number"
+            },
+            "abandonAfterMs": {
+              "type": "number"
+            },
+            "resume": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
+                }
+              ]
+            },
+            "type": {
+              "const": "run"
+            }
+          },
+          "required": ["transporter", "id", "kind", "type"],
+          "additionalProperties": false
         }
       ]
     },
@@ -272,6 +329,270 @@
             }
           },
           "required": [],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "transport": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "client": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "bucket": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "deleteMode": {
+              "anyOf": [
+                {
+                  "const": "conditional"
+                },
+                {
+                  "const": "tombstone"
+                }
+              ]
+            },
+            "type": {
+              "const": "s3"
+            }
+          },
+          "required": ["client", "bucket", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "directory": {
+              "type": "string"
+            },
+            "type": {
+              "const": "local"
+            }
+          },
+          "required": ["directory", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "checkpointStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "taskCacheStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "maxBytes": {
+              "type": "number"
+            },
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "artifactStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "maxBytes": {
+              "type": "number"
+            },
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "artifact": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "jsonSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {}
+            },
+            "schema": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "type": {
+              "const": "json"
+            }
+          },
+          "required": ["jsonSchema", "name", "version", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "type": {
+              "const": "binary"
+            }
+          },
+          "required": ["name", "version", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "verifier": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "keys": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "type": {
+              "const": "ed25519"
+            }
+          },
+          "required": ["keys", "type"],
           "additionalProperties": false
         }
       ]
@@ -2555,6 +2876,11 @@
             "input": {
               "anyOf": [
                 {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": {}
+                },
+                {
                   "anyOf": [
                     {
                       "type": "object",
@@ -2568,11 +2894,6 @@
                       "additionalProperties": false
                     }
                   ]
-                },
-                {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": {}
                 }
               ]
             },
@@ -7367,11 +7688,11 @@
                 {
                   "type": "object",
                   "properties": {
-                    "timeout": {
-                      "type": "number"
-                    },
                     "name": {
                       "type": "string"
+                    },
+                    "timeout": {
+                      "type": "number"
                     },
                     "ports": {
                       "type": "array",
@@ -7913,11 +8234,11 @@
                 {
                   "type": "object",
                   "properties": {
-                    "timeout": {
-                      "type": "number"
-                    },
                     "name": {
                       "type": "string"
+                    },
+                    "timeout": {
+                      "type": "number"
                     },
                     "ports": {
                       "type": "array",
@@ -13020,23 +13341,6 @@
         }
       ]
     },
-    "transport": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "directory": {
-              "type": "string"
-            },
-            "type": {
-              "const": "local"
-            }
-          },
-          "required": ["directory", "type"],
-          "additionalProperties": false
-        }
-      ]
-    },
     "variables": {
       "anyOf": [
         {
@@ -13760,6 +14064,164 @@
             }
           }
         },
+        "gate": {
+          "type": "object",
+          "properties": {
+            "authentication": {
+              "const": "signed"
+            },
+            "kind": {
+              "anyOf": [
+                {
+                  "const": "approval"
+                },
+                {
+                  "const": "pause"
+                }
+              ]
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "actors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["kind", "prompt", "actors"],
+          "additionalProperties": false
+        },
+        "interactive": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "agent": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/agent"
+                }
+              ]
+            },
+            "brief": {
+              "type": "string"
+            },
+            "actors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sandboxProvider": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/sandboxProvider"
+                }
+              ]
+            },
+            "bootstrap": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
+                }
+              ]
+            },
+            "conversationHome": {
+              "type": "string"
+            },
+            "maxTurns": {
+              "type": "number"
+            },
+            "timeoutMs": {
+              "type": "number"
+            }
+          },
+          "required": ["repository", "agent", "brief", "actors"],
+          "additionalProperties": false
+        },
+        "artifact": {
+          "type": "object",
+          "properties": {
+            "store": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/artifactStore"
+                }
+              ]
+            },
+            "parents": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "produce": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": ["store", "contract"],
+          "additionalProperties": false
+        },
         "dispatch": {
           "type": "object",
           "properties": {
@@ -14072,6 +14534,9 @@
         "options": {
           "type": "object",
           "properties": {
+            "timeoutMs": {
+              "type": "number"
+            },
             "interaction": {
               "type": "object",
               "properties": {
@@ -14183,48 +14648,26 @@
               "required": ["attempts"],
               "additionalProperties": false
             },
-            "timeoutMs": {
-              "type": "number"
-            },
             "cache": {
               "type": "object",
               "properties": {
                 "store": {
-                  "type": "object",
-                  "properties": {
-                    "read": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "required": ["$ref"],
-                          "properties": {
-                            "$ref": {
-                              "type": "string",
-                              "pattern": "\\S"
-                            }
-                          },
-                          "additionalProperties": false
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
                         }
-                      ]
+                      },
+                      "additionalProperties": false
                     },
-                    "write": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "required": ["$ref"],
-                          "properties": {
-                            "$ref": {
-                              "type": "string",
-                              "pattern": "\\S"
-                            }
-                          },
-                          "additionalProperties": false
-                        }
-                      ]
+                    {
+                      "$ref": "#/$defs/taskCacheStore"
                     }
-                  },
-                  "required": ["read", "write"],
-                  "additionalProperties": false
+                  ]
                 },
                 "version": {
                   "type": "string"
@@ -14363,61 +14806,8 @@
         "isolated": {
           "type": "object",
           "properties": {
-            "redact": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "pattern": {
-                    "type": "string"
-                  },
-                  "flags": {
-                    "type": "string"
-                  }
-                },
-                "required": ["pattern"],
-                "additionalProperties": false
-              }
-            },
-            "telemetry": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "required": ["$ref"],
-                  "properties": {
-                    "$ref": {
-                      "type": "string",
-                      "pattern": "\\S"
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              ]
-            },
-            "observe": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "required": ["$ref"],
-                  "properties": {
-                    "$ref": {
-                      "type": "string",
-                      "pattern": "\\S"
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              ]
-            },
-            "includeUncommitted": {
-              "anyOf": [
-                {
-                  "const": false
-                },
-                {
-                  "const": true
-                }
-              ]
+            "repository": {
+              "type": "string"
             },
             "agent": {
               "anyOf": [
@@ -15980,6 +16370,53 @@
                 }
               ]
             },
+            "brief": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "file": false,
+                    "values": false
+                  },
+                  "required": ["text"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "text": false,
+                    "values": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "const": false
+                          },
+                          {
+                            "const": true
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": ["file"],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "sandboxProvider": {
               "anyOf": [
                 {
@@ -15995,6 +16432,75 @@
                 },
                 {
                   "$ref": "#/$defs/sandboxProvider"
+                }
+              ]
+            },
+            "bootstrap": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
+                }
+              ]
+            },
+            "conversationHome": {
+              "type": "string"
+            },
+            "redact": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "flags": {
+                    "type": "string"
+                  }
+                },
+                "required": ["pattern"],
+                "additionalProperties": false
+              }
+            },
+            "telemetry": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "observe": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "includeUncommitted": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
                 }
               ]
             },
@@ -16502,19 +17008,6 @@
                 }
               ]
             },
-            "bootstrap": {
-              "anyOf": [
-                {
-                  "const": false
-                },
-                {
-                  "const": true
-                }
-              ]
-            },
-            "conversationHome": {
-              "type": "string"
-            },
             "recoveryTransport": {
               "anyOf": [
                 {
@@ -16599,9 +17092,6 @@
               },
               "required": ["maxBytes", "reserveBytes"],
               "additionalProperties": false
-            },
-            "repository": {
-              "type": "string"
             },
             "branch": {
               "anyOf": [
@@ -16756,53 +17246,6 @@
               "required": ["currency", "models"],
               "additionalProperties": false
             },
-            "brief": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "text": {
-                      "type": "string"
-                    },
-                    "file": false,
-                    "values": false
-                  },
-                  "required": ["text"],
-                  "additionalProperties": false
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "file": {
-                      "type": "string"
-                    },
-                    "text": false,
-                    "values": {
-                      "type": "object",
-                      "properties": {},
-                      "additionalProperties": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "const": false
-                          },
-                          {
-                            "const": true
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "required": ["file"],
-                  "additionalProperties": false
-                }
-              ]
-            },
             "passes": {
               "type": "number"
             },
@@ -16948,15 +17391,132 @@
         "arguments": {
           "$ref": "#/$defs/expression"
         },
+        "data": {
+          "$ref": "#/$defs/expression"
+        },
+        "quotaResume": {
+          "enum": ["continue", "restart"]
+        },
         "when": {
           "$ref": "#/$defs/condition"
         }
       },
       "oneOf": [
         {
+          "required": ["gate"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
+                "required": ["command"]
+              },
+              {
+                "required": ["agent"]
+              },
+              {
+                "required": ["value"]
+              },
+              {
+                "required": ["call"]
+              },
+              {
+                "required": ["loop"]
+              },
+              {
+                "required": ["decision"]
+              },
+              {
+                "required": ["isolated"]
+              }
+            ]
+          }
+        },
+        {
+          "required": ["interactive"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["gate"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
+                "required": ["command"]
+              },
+              {
+                "required": ["agent"]
+              },
+              {
+                "required": ["value"]
+              },
+              {
+                "required": ["call"]
+              },
+              {
+                "required": ["loop"]
+              },
+              {
+                "required": ["decision"]
+              },
+              {
+                "required": ["isolated"]
+              }
+            ]
+          }
+        },
+        {
+          "required": ["artifact"],
+          "not": {
+            "anyOf": [
+              {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["command"]
+              },
+              {
+                "required": ["agent"]
+              },
+              {
+                "required": ["value"]
+              },
+              {
+                "required": ["call"]
+              },
+              {
+                "required": ["loop"]
+              },
+              {
+                "required": ["decision"]
+              },
+              {
+                "required": ["isolated"]
+              }
+            ]
+          }
+        },
+        {
           "required": ["command"],
           "not": {
             "anyOf": [
+              {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
               {
                 "required": ["agent"]
               },
@@ -16983,6 +17543,15 @@
           "not": {
             "anyOf": [
               {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
                 "required": ["command"]
               },
               {
@@ -17007,6 +17576,15 @@
           "required": ["value"],
           "not": {
             "anyOf": [
+              {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
               {
                 "required": ["command"]
               },
@@ -17033,6 +17611,15 @@
           "not": {
             "anyOf": [
               {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
                 "required": ["command"]
               },
               {
@@ -17057,6 +17644,15 @@
           "required": ["loop"],
           "not": {
             "anyOf": [
+              {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
               {
                 "required": ["command"]
               },
@@ -17083,6 +17679,15 @@
           "not": {
             "anyOf": [
               {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
                 "required": ["command"]
               },
               {
@@ -17108,6 +17713,15 @@
           "not": {
             "anyOf": [
               {
+                "required": ["gate"]
+              },
+              {
+                "required": ["interactive"]
+              },
+              {
+                "required": ["artifact"]
+              },
+              {
                 "required": ["command"]
               },
               {
@@ -17130,6 +17744,37 @@
         }
       ],
       "allOf": [
+        {
+          "if": {
+            "not": {
+              "required": ["artifact"]
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["data"]
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["agent"]
+                },
+                {
+                  "required": ["isolated"]
+                }
+              ]
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["quotaResume"]
+            }
+          }
+        },
         {
           "if": {
             "not": {
@@ -17451,6 +18096,9 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/verifier"
                 }
               ]
             },
@@ -17530,6 +18178,9 @@
                         }
                       },
                       "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/$defs/checkpointStore"
                     }
                   ]
                 },

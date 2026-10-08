@@ -25,10 +25,6 @@ export function validateRecipeWorkflowSettings(
       !settings.checkpoint.version.trim()
     )
       throw new Error("Checkpoint runId and version must not be empty");
-    if (document.tasks.some((step) => step.command || step.agent))
-      throw new Error(
-        "Durable shared sandboxes require workspace restoration support",
-      );
   }
   if (
     !settings.checkpoint &&
@@ -36,7 +32,11 @@ export function validateRecipeWorkflowSettings(
       settings.answers?.length ||
       settings.decisions?.length ||
       Object.values(components.steps).some(
-        (step) => step.options?.gate || step.options?.interaction,
+        (step) =>
+          step.gate ||
+          step.interactive ||
+          step.options?.gate ||
+          step.options?.interaction,
       ))
   )
     throw new Error(

@@ -1,4 +1,9 @@
 import type {
+  RecipeGateSettings,
+  RecipeInteractiveSettings,
+  RecipeArtifactSettings,
+} from "./storage-components.types.ts";
+import type {
   TaskContext,
   TaskOptions,
   WorkflowOptions,
@@ -38,6 +43,9 @@ export interface RecipeCallSettings {
   ) => unknown | Promise<unknown>;
 }
 export interface RecipeWorkflowStepComponents {
+  readonly gate?: RecipeGateSettings;
+  readonly interactive?: RecipeInteractiveSettings;
+  readonly artifact?: RecipeArtifactSettings;
   readonly options?: RecipeTaskSettings;
   readonly dispatch?: RecipeDispatchSettings;
   readonly loop?: RecipeLoopSettings;
@@ -51,4 +59,11 @@ export interface RecipeWorkflowComponents {
 }
 export type RecipeExecutionBindings = Omit<RecipeBindings, "sandbox"> & {
   readonly sandbox?: Sandbox | undefined;
+  acquireSandbox?(context: TaskContext): Promise<Sandbox>;
+  prepareIsolated?(
+    key: string,
+    request: RecipeIsolatedSettings,
+    context: TaskContext,
+  ): Promise<RecipeIsolatedSettings>;
+  releaseIsolated?(key: string): Promise<void>;
 };

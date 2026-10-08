@@ -46,7 +46,7 @@ The operators are `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `exists`, `all`, `
 
 ## Reuse TypeScript task contracts
 
-Task `options` use [TaskOptions](../../reference/taskoptions/), excluding the key, dependency objects and action. Recipe-level `workflow` uses [WorkflowOptions](../../reference/workflowoptions/), with the runtime supplying cancellation and the common observation hub. Retries, timeouts, budgets, error policy and callbacks retain the existing engine's behavior. Durable options require configured storage; shared durable sandboxes are refused until restoration is supported.
+Task `options` use [TaskOptions](../../reference/taskoptions/), excluding the key, dependency objects and action. Recipe-level `workflow` uses [WorkflowOptions](../../reference/workflowoptions/), with the runtime supplying cancellation and the common observation hub. Retries, timeouts, budgets, error policy and callbacks retain the existing engine's behavior. Configure persistent storage to [resume durable recipes](../recipe-durability/) with their original workspaces.
 
 ```yaml title="recipe.yaml — execution policy"
 workflow:

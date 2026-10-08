@@ -55,6 +55,19 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 
 Les chemins sont relatifs au dossier courant. Une exécution réussie est silencieuse sans observation ni rapports déclarés dans la configuration version 2. `--json` demande explicitement un seul rapport final JSON ; les échecs affichent toujours leurs diagnostics sur stderr. Les champs textuels sont limités à 16 384 caractères avec un marqueur de troncature. Les diagnostics de commandes comprennent leur code de sortie d’origine, stdout et stderr. Les exécutions réussies intègrent selon la politique de branche ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés. Les échecs de chargement, d’exécution ou de finalisation sortent avec le code 1. SIGINT/SIGTERM annulent le run, attendent le nettoyage et sortent avec 130/143. Gardez stdout silencieux dans la configuration pour un JSON exploitable.
 
+## `outpost recipe status`, `resume`, `answer` et `decide`
+
+Ces commandes exigent le format 3, un `--config` YAML, `--file` et `--run-id`. Status lit le checkpoint sans l’acquérir. Resume continue l’exécution ; `--retry-incomplete` autorise explicitement le rejeu des tâches interrompues. Après arrêt du coordinateur abandonné, `--recover-revision <revision>` protège la récupération du checkpoint indépendamment du rejeu et des verrous de workspace.
+
+```sh
+outpost recipe status --file recipe.yaml --config outpost.yaml --run-id change --json
+outpost recipe resume --file recipe.yaml --config outpost.yaml --run-id change
+outpost recipe answer --file recipe.yaml --config outpost.yaml --run-id change --answer answer.json
+outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change --decision decision.json
+```
+
+Answer et decide lisent une WorkflowAnswer ou WorkflowDecision native dans un fichier JSON borné ; une gate signée exige sa preuve originale. `resume --input` doit correspondre aux paramètres persistés ; omettez-le pour les recharger. Run accepte aussi `--run-id` pour créer un checkpoint. Run, resume, answer et decide n’affichent un rapport final que s’il est déclaré ou demandé via `--json` ; status affiche toujours son résultat demandé. Consultez les [recettes durables](../recipe-durability/) pour l’état, la propriété et la récupération.
+
 ## `outpost recipe init`
 
 Créez un modèle de version 2 avec un objectif obligatoire, un agent nommé et une commande de test. Le commentaire du schéma pour l’éditeur pointe vers le paquet installé. Les fichiers existants ne sont jamais écrasés ; le dossier parent doit exister.

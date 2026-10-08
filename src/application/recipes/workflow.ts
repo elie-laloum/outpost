@@ -1,3 +1,9 @@
+import { defineInteractiveAgentTask } from "../interactive-task.ts";
+import {
+  defineApprovalTask,
+  definePauseTask,
+} from "../../domain/workflow/gates.ts";
+import { defineArtifactTask } from "../artifact-tasks.ts";
 import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { dispatchFields } from "./workflow.constants.ts";
 import { defineTask, defineWorkflow } from "../../domain/workflow.ts";
@@ -83,7 +89,8 @@ export function bindRecipeWorkflow(
   validateRecipeWorkflowSettings(document, components);
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const tasks = new Map<string, Task>();
-  const sandbox = () => {
+  const sandbox = async (context: TaskContext) => {
+    if (bindings.acquireSandbox) return bindings.acquireSandbox(context);
     if (!bindings.sandbox)
       throw new Error("Recipe task requires a shared sandbox");
     return bindings.sandbox;
@@ -126,6 +133,56 @@ export function bindRecipeWorkflow(
           }),
     };
     const save = (task: Task) => tasks.set(step.key, task);
+    if (step.gate) {
+      if (!configuration.gate)
+        throw new Error("Recipe gates require createRecipeRuntime");
+      const { kind, ...gate } = configuration.gate;
+      const factories = {
+        approval: defineApprovalTask,
+        pause: definePauseTask,
+      };
+      save(
+        defineTask({
+          ...factories[kind]({ key: step.key, after, ...gate }),
+          ...common,
+        }),
+      );
+      continue;
+    }
+    if (step.interactive) {
+      if (!configuration.interactive)
+        throw new Error("Recipe dialogues require createRecipeRuntime");
+      const interactive = defineInteractiveAgentTask({
+        ...common,
+        ...configuration.interactive,
+      });
+      save(
+        defineTask({
+          ...interactive,
+          ...common,
+          async perform(context) {
+            return { value: recipeJson(await interactive.perform(context)) };
+          },
+        }),
+      );
+      continue;
+    }
+    if (step.artifact) {
+      if (!configuration.artifact)
+        throw new Error("Recipe artifacts require createRecipeRuntime");
+      const artifact = configuration.artifact;
+      if ((artifact.produce !== undefined) === Object.hasOwn(step, "data"))
+        throw new Error(`${step.key}: provide either data or artifact.produce`);
+      save(
+        defineArtifactTask({
+          ...common,
+          ...artifact,
+          produce:
+            artifact.produce ?? ((context) => evaluate(step.data, context)),
+        }),
+      );
+      continue;
+    }
     if (step.loop) {
       if (!configuration.loop)
         throw new Error("Recipe loop components require createRecipeRuntime");
@@ -170,19 +227,29 @@ export function bindRecipeWorkflow(
       const request = configuration.isolated;
       const isolated = defineIsolatedTask({
         ...common,
-        request: (context) => ({
-          ...request,
-          brief:
-            request.brief.text === undefined
-              ? request.brief
-              : { text: text(request.brief.text, context) },
-        }),
+        ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
+        request: async (context) => {
+          const rendered = {
+            ...request,
+            brief:
+              request.brief.text === undefined
+                ? request.brief
+                : { text: text(request.brief.text, context) },
+          };
+          return bindings.prepareIsolated
+            ? bindings.prepareIsolated(step.key, rendered, context)
+            : rendered;
+        },
       });
       save(
         defineTask({
           ...isolated,
           async perform(context) {
-            return recipeDispatchProjection(await isolated.perform(context));
+            try {
+              return recipeDispatchProjection(await isolated.perform(context));
+            } finally {
+              await bindings.releaseIsolated?.(step.key);
+            }
           },
         }),
       );
@@ -223,10 +290,10 @@ export function bindRecipeWorkflow(
       save(
         defineTask({
           ...common,
-          perform: (context) =>
+          perform: async (context) =>
             defineCommandTask({
               key: step.key,
-              sandbox: sandbox(),
+              sandbox: await sandbox(context),
               command: renderRecipeCommand(command, (value) =>
                 text(value, context),
               ),
@@ -246,8 +313,9 @@ export function bindRecipeWorkflow(
         ...common,
         async perform(context) {
           const task = defineAgentTask({
+            ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
             key: step.key,
-            sandbox: sandbox(),
+            sandbox: await sandbox(context),
             request: () => ({
               ...configuration.dispatch,
               agent,

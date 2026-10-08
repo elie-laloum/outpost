@@ -16,3 +16,8 @@ export type {
   RecipeRunOptions,
   RecipeRuntime,
 } from "./application/recipes/project.types.ts";
+
+export type {
+  RecipeResumeOptions,
+  RecipeRunStatus,
+} from "./application/recipes/durable.types.ts";

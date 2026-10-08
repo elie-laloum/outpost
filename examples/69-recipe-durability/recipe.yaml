@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: reviewed-artifact
+workflow:
+  checkpoint:
+    store: { $ref: stores.checkpoint }
+    runId: reviewed-artifact
+    version: "1"
+tasks:
+  - key: evidence
+    artifact:
+      store: { $ref: artifactStores.results }
+      contract: { $ref: artifacts.evidence }
+    data: { checked: true, files: [src/index.ts] }
+  - key: review
+    after: [evidence]
+    gate:
+      kind: approval
+      actors: [maintainer]
+      prompt: Accept this evidence?
+  - key: publish
+    after: [evidence, review]
+    value: { $step: evidence }

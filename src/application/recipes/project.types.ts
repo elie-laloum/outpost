@@ -1,3 +1,4 @@
+import type { RecipeResumeOptions, RecipeRunStatus } from "./durable.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
@@ -37,6 +38,7 @@ export interface RecipeReportDeclaration {
 }
 
 export interface RecipeRunOptions {
+  readonly runId?: string;
   readonly inputs?: Readonly<Record<string, WorkflowJson>>;
   readonly signal?: AbortSignal;
   readonly report?: "json";
@@ -44,6 +46,8 @@ export interface RecipeRunOptions {
 
 export interface RecipeRuntime {
   run(options?: RecipeRunOptions): Promise<RecipeReport>;
+  resume(options: RecipeResumeOptions): Promise<RecipeReport>;
+  status(runId: string): Promise<RecipeRunStatus | undefined>;
   close(): Promise<void>;
   [Symbol.asyncDispose](): Promise<void>;
 }

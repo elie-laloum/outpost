@@ -1,0 +1,25 @@
+import type { Workspace, Sandbox, SandboxOptions } from "../outpost.types.ts";
+import type { RecipeReport } from "../recipe-report.types.ts";
+import type {
+  TaskContext,
+  WorkflowResult,
+} from "../../domain/workflow.types.ts";
+import type { RecipeIsolatedSettings } from "./workflow-components.types.ts";
+
+export interface RecipeDurableWorkspace {
+  readonly workspace: Workspace;
+  readonly options: SandboxOptions;
+}
+
+export interface RecipeDurableResources {
+  shared(context: TaskContext): Promise<Sandbox>;
+  isolated(
+    key: string,
+    request: RecipeIsolatedSettings,
+    context: TaskContext,
+  ): Promise<RecipeIsolatedSettings>;
+  releaseIsolated(key: string): Promise<void>;
+  settle(result: WorkflowResult): Promise<void>;
+  close(): Promise<void>;
+  workspace(): RecipeReport["workspace"];
+}

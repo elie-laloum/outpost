@@ -1,9 +1,388 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "transport.s3": {
+    type: "object",
+    properties: {
+      client: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "object",
+      },
+      bucket: {
+        type: "string",
+      },
+      prefix: {
+        type: "string",
+      },
+      deleteMode: {
+        anyOf: [
+          {
+            const: "conditional",
+          },
+          {
+            const: "tombstone",
+          },
+        ],
+      },
+    },
+    required: ["client", "bucket"],
+    additionalProperties: false,
+  },
+  "checkpointStore.transport": {
+    type: "object",
+    properties: {
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+    },
+    required: ["transporter"],
+    additionalProperties: false,
+  },
+  "taskCacheStore.transport": {
+    type: "object",
+    properties: {
+      maxBytes: {
+        type: "number",
+      },
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+    },
+    required: ["transporter"],
+    additionalProperties: false,
+  },
+  "artifactStore.transport": {
+    type: "object",
+    properties: {
+      maxBytes: {
+        type: "number",
+      },
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+    },
+    required: ["transporter"],
+    additionalProperties: false,
+  },
+  "artifact.json": {
+    type: "object",
+    properties: {
+      jsonSchema: {
+        type: "object",
+        properties: {},
+        additionalProperties: {},
+      },
+      schema: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "validator",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "artifact.json.schema",
+          },
+        ],
+      },
+      name: {
+        type: "string",
+      },
+      version: {
+        type: "string",
+      },
+    },
+    required: ["jsonSchema", "name", "version"],
+    additionalProperties: false,
+  },
+  "artifact.binary": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      version: {
+        type: "string",
+      },
+    },
+    required: ["name", "version"],
+    additionalProperties: false,
+  },
+  "verifier.ed25519": {
+    type: "object",
+    properties: {
+      keys: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "verifier.ed25519.keys",
+      },
+    },
+    required: ["keys"],
+    additionalProperties: false,
+  },
+  "sink.run": {
+    type: "object",
+    properties: {
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+      id: {
+        type: "string",
+      },
+      kind: {
+        anyOf: [
+          {
+            const: "dispatch",
+          },
+          {
+            const: "workflow",
+          },
+        ],
+      },
+      heartbeatMs: {
+        type: "number",
+      },
+      abandonAfterMs: {
+        type: "number",
+      },
+      resume: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+    },
+    required: ["transporter", "id", "kind"],
+    additionalProperties: false,
+  },
+  "interactive.options": {
+    type: "object",
+    properties: {
+      repository: {
+        type: "string",
+        hostPath: true,
+      },
+      agent: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "agent",
+      },
+      brief: {
+        type: "string",
+      },
+      actors: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
+      },
+      bootstrap: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      conversationHome: {
+        type: "string",
+        hostPath: true,
+      },
+      maxTurns: {
+        type: "number",
+      },
+      timeoutMs: {
+        type: "number",
+      },
+    },
+    required: ["repository", "agent", "brief", "actors"],
+    additionalProperties: false,
+  },
+  "gate.options": {
+    type: "object",
+    properties: {
+      authentication: {
+        const: "signed",
+      },
+      kind: {
+        anyOf: [
+          {
+            const: "approval",
+          },
+          {
+            const: "pause",
+          },
+        ],
+      },
+      prompt: {
+        type: "string",
+      },
+      actors: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+    },
+    required: ["kind", "prompt", "actors"],
+    additionalProperties: false,
+  },
+  "artifactTask.options": {
+    type: "object",
+    properties: {
+      store: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "artifactStore",
+      },
+      contract: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "artifact",
+      },
+      parents: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "artifactTask.options.parents",
+      },
+      produce: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "artifactTask.options.produce",
+      },
+    },
+    required: ["store", "contract"],
+    additionalProperties: false,
+  },
   "task.options": {
     type: "object",
     properties: {
+      timeoutMs: {
+        type: "number",
+      },
       interaction: {
         type: "object",
         properties: {
@@ -111,44 +490,20 @@ export const nativeRecipeSchemas: Readonly<
         required: ["attempts"],
         additionalProperties: false,
       },
-      timeoutMs: {
-        type: "number",
-      },
       cache: {
         type: "object",
         properties: {
           store: {
             type: "object",
             properties: {
-              read: {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "callback",
-                contract: "task.options.cache.store.read",
-              },
-              write: {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "callback",
-                contract: "task.options.cache.store.write",
+              $ref: {
+                type: "string",
+                minLength: 1,
               },
             },
-            required: ["read", "write"],
+            required: ["$ref"],
             additionalProperties: false,
+            component: "taskCacheStore",
           },
           version: {
             type: "string",
@@ -567,57 +922,9 @@ export const nativeRecipeSchemas: Readonly<
   "isolated.options": {
     type: "object",
     properties: {
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      telemetry: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "telemetry",
-      },
-      observe: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "isolated.options.observe",
-      },
-      includeUncommitted: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: true,
-          },
-        ],
+      repository: {
+        type: "string",
+        hostPath: true,
       },
       agent: {
         anyOf: [
@@ -2135,6 +2442,54 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
+      brief: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              text: {
+                type: "string",
+              },
+              file: false,
+              values: false,
+            },
+            required: ["text"],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {
+              file: {
+                type: "string",
+                hostPath: true,
+              },
+              text: false,
+              values: {
+                type: "object",
+                properties: {},
+                additionalProperties: {
+                  anyOf: [
+                    {
+                      type: "string",
+                    },
+                    {
+                      type: "number",
+                    },
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+              },
+            },
+            required: ["file"],
+            additionalProperties: false,
+          },
+        ],
+      },
       sandboxProvider: {
         type: "object",
         properties: {
@@ -2146,6 +2501,72 @@ export const nativeRecipeSchemas: Readonly<
         required: ["$ref"],
         additionalProperties: false,
         component: "sandboxProvider",
+      },
+      bootstrap: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      conversationHome: {
+        type: "string",
+        hostPath: true,
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.observe",
+      },
+      includeUncommitted: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
       },
       workspace: {
         type: "object",
@@ -2612,20 +3033,6 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
-      bootstrap: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: true,
-          },
-        ],
-      },
-      conversationHome: {
-        type: "string",
-        hostPath: true,
-      },
       recoveryTransport: {
         type: "object",
         properties: {
@@ -2692,10 +3099,6 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["maxBytes", "reserveBytes"],
         additionalProperties: false,
-      },
-      repository: {
-        type: "string",
-        hostPath: true,
       },
       branch: {
         anyOf: [
@@ -2849,54 +3252,6 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["currency", "models"],
         additionalProperties: false,
-      },
-      brief: {
-        anyOf: [
-          {
-            type: "object",
-            properties: {
-              text: {
-                type: "string",
-              },
-              file: false,
-              values: false,
-            },
-            required: ["text"],
-            additionalProperties: false,
-          },
-          {
-            type: "object",
-            properties: {
-              file: {
-                type: "string",
-                hostPath: true,
-              },
-              text: false,
-              values: {
-                type: "object",
-                properties: {},
-                additionalProperties: {
-                  anyOf: [
-                    {
-                      type: "string",
-                    },
-                    {
-                      type: "number",
-                    },
-                    {
-                      const: false,
-                    },
-                    {
-                      const: true,
-                    },
-                  ],
-                },
-              },
-            },
-            required: ["file"],
-            additionalProperties: false,
-          },
-        ],
       },
       passes: {
         type: "number",
@@ -3714,6 +4069,11 @@ export const nativeRecipeSchemas: Readonly<
         anyOf: [
           {
             type: "object",
+            properties: {},
+            additionalProperties: {},
+          },
+          {
+            type: "object",
             properties: {
               $ref: {
                 type: "string",
@@ -3723,11 +4083,6 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "validator",
-          },
-          {
-            type: "object",
-            properties: {},
-            additionalProperties: {},
           },
         ],
       },
@@ -5946,11 +6301,11 @@ export const nativeRecipeSchemas: Readonly<
           {
             type: "object",
             properties: {
-              timeout: {
-                type: "number",
-              },
               name: {
                 type: "string",
+              },
+              timeout: {
+                type: "number",
               },
               ports: {
                 type: "array",
@@ -6473,11 +6828,11 @@ export const nativeRecipeSchemas: Readonly<
           {
             type: "object",
             properties: {
-              timeout: {
-                type: "number",
-              },
               name: {
                 type: "string",
+              },
+              timeout: {
+                type: "number",
               },
               ports: {
                 type: "array",
@@ -15135,6 +15490,14 @@ export const nativeRecipeSchemas: Readonly<
 export const nativeRecipeFactoryParameters: Readonly<
   Record<string, readonly string[]>
 > = {
+  "transport.s3": [],
+  "checkpointStore.transport": [],
+  "taskCacheStore.transport": [],
+  "artifactStore.transport": [],
+  "artifact.json": [],
+  "artifact.binary": [],
+  "verifier.ed25519": [],
+  "sink.run": [],
   "steering.controller": [],
   "harness.outpost": [],
   "modelProvider.openai": [],

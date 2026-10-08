@@ -54,6 +54,12 @@ function taggedComponent(
 export const nativeRecipeGuards: Readonly<
   Record<string, (value: unknown) => boolean>
 > = {
+  checkpointStore: (value) => recipeMethods(value, ["acquire"]),
+  taskCacheStore: (value) => recipeMethods(value, ["read", "write"]),
+  artifactStore: (value) => recipeMethods(value, ["put", "get"]),
+  artifact: (value) => recipeMethods(value, ["encode", "decode"]),
+  verifier: (value) => typeof value === "function",
+  sink: (value) => recipeMethods(value, ["observe"]),
   sandboxProvider: (value) =>
     recipeMethods(value, ["acquire"]) &&
     recipeObject(value) &&
@@ -170,6 +176,14 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
       kind,
       schema,
       accepts,
+      ...(name === "sink.run"
+        ? {
+            async dispose(value: unknown) {
+              if (recipeObject(value) && typeof value.close === "function")
+                await value.close();
+            },
+          }
+        : {}),
       ...(name === "sandboxProvider.firecracker" ? { experimental: true } : {}),
       async create(options, context) {
         const value = await resolveRecipeOptions(schema, options, context);

@@ -39,14 +39,12 @@ export function bindRecipe(
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const tasks = new Map<string, Task>();
   for (const step of document.tasks) {
-    const {
-      command,
-      agent: name,
-      brief,
-      after,
-      dispatch: settings,
-      ...common
-    } = step;
+    const { command, agent: name, brief, after, dispatch: settings } = step;
+    const common = {
+      key: step.key,
+      ...(step.timeoutMs === undefined ? {} : { timeoutMs: step.timeoutMs }),
+      ...(step.retry ? { retry: step.retry } : {}),
+    };
     if (settings && !requests[step.key])
       throw new Error("Recipe dispatch components require createRecipeRuntime");
     const render = (text: string, context: TaskContext) => {

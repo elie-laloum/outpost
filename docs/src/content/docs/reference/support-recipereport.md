@@ -9,6 +9,8 @@ sidebar:
 
 | Name             | Type                                                                                                         | Presence | Meaning                                                                                                                                                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runId`          | `string \| undefined`                                                                                        | Optional | Checkpoint run ID for a durable recipe invocation.                                                                                                                                                                                                               |
+| `inputRequests`  | `readonly WorkflowInputRequest[] \| undefined`                                                               | Optional | Persisted dialogue questions awaiting an authorized answer.                                                                                                                                                                                                      |
 | `observerErrors` | `readonly RecipeDiagnostic[] \| undefined`                                                                   | Optional | Failures while closing owned observer components, reported without changing the execution status. Secret values selected by this runtime are redacted.                                                                                                           |
 | `name`           | `string`                                                                                                     | Required | Recipe name associated with this invocation.                                                                                                                                                                                                                     |
 | `executionId`    | `string \| undefined`                                                                                        | Optional | Workflow execution identifier, present once the workflow has started.                                                                                                                                                                                            |
@@ -24,6 +26,8 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly runId?: string;
+  readonly inputRequests?: WorkflowResult["inputRequests"];
   readonly observerErrors?: readonly RecipeDiagnostic[];
   readonly name: string;
   readonly executionId?: string;

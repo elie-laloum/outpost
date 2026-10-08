@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox: { provider: local }
+transports:
+  state: { type: local, directory: ./.outpost/state }
+stores:
+  checkpoint: { type: transport, transporter: { $ref: transports.state } }
+artifactStores:
+  results: { type: transport, transporter: { $ref: transports.state } }
+artifacts:
+  evidence:
+    type: json
+    name: evidence
+    version: "1"
+    jsonSchema:
+      type: object
+      additionalProperties: false
+      required: [checked, files]
+      properties:
+        checked: { type: boolean }
+        files: { type: array, items: { type: string } }

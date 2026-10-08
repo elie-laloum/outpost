@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add durable YAML checkpoints with exact Git workspace restoration, artifacts, caches, signed gates, dialogues, quota pauses and cumulative budgets. Add recipe status/resume/answer/decide; require explicit replay and revision-fenced recovery after interruption. Exercise separate processes, preserved uncommitted files and original diff guards offline; live cloud restoration remains unvalidated.
+
 - Compose format-3 workflows with structured JSON inputs, typed result references, conditions, transformations, local task callbacks, native loop and decision tasks, and isolated multi-repository dispatch. Preserve native scheduling and usage accounting, refuse overlapping shared workspaces, and project execution results to JSON. Add an offline example and YAML/TypeScript equivalence tests using real Git repositories.
 
 - Compose the Outpost harness, model and decision providers, tools, skills, hooks, permissions, context strategies, routing, fallback agents and conversation stores from YAML. Format-3 agent steps accept dispatch options and structured response references. Callback extensions declare a static slot contract; schemas distinguish data schemas from component references. Compare delegated YAML and TypeScript runs offline, and exercise the compiled CLI against a local streaming model fixture.

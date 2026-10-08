@@ -46,7 +46,7 @@ Les opérateurs sont `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `exists`, `all`
 
 ## Réutiliser les contrats TypeScript
 
-Les `options` d’une tâche suivent [TaskOptions](../../reference/taskoptions/), sans clé, objets de dépendances ni action. Le bloc `workflow` suit [WorkflowOptions](../../reference/workflowoptions/) ; le runtime fournit l’annulation et le hub d’observation commun. Retries, délais, budgets, politique d’erreur et callbacks conservent le comportement du moteur. Les options durables demandent un stockage configuré ; une sandbox partagée durable est refusée tant que sa restauration n’est pas prise en charge.
+Les `options` d’une tâche suivent [TaskOptions](../../reference/taskoptions/), sans clé, objets de dépendances ni action. Le bloc `workflow` suit [WorkflowOptions](../../reference/workflowoptions/) ; le runtime fournit l’annulation et le hub d’observation commun. Retries, délais, budgets, politique d’erreur et callbacks conservent le comportement du moteur. Configurez le stockage pour [reprendre les recettes durables](../recipe-durability/) avec leurs workspaces d’origine.
 
 ```yaml title="recipe.yaml — politique d’exécution"
 workflow:

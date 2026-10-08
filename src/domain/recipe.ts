@@ -95,9 +95,24 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
         }),
   };
   defineTask({ ...common, after: [], perform() {} });
-  const additions =
+  if (
+    item.quotaResume !== undefined &&
+    !["continue", "restart"].includes(String(item.quotaResume))
+  )
+    throw new Error(`${path}.quotaResume must be continue or restart`);
+  if (item.quotaResume !== undefined && !item.agent && !item.isolated)
+    throw new Error(`${path}.quotaResume requires an agent or isolated task`);
+  if (item.data !== undefined && !item.artifact)
+    throw new Error(`${path}.data requires an artifact task`);
+  const quotaResume = item.quotaResume === "restart" ? "restart" : "continue";
+  const additions: Pick<
+    RecipeStep,
+    "quotaResume" | "data" | "when" | "options"
+  > =
     version === 3
       ? {
+          ...(item.quotaResume === undefined ? {} : { quotaResume }),
+          ...(item.data === undefined ? {} : { data: recipeJson(item.data) }),
           ...(item.when === undefined ? {} : { when: recipeJson(item.when) }),
           ...(item.options === undefined
             ? {}
@@ -114,10 +129,21 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       "loop",
       "decision",
       "isolated",
+      "gate",
+      "interactive",
+      "artifact",
     ].filter((key) => Object.hasOwn(item, key));
     if (actions.length !== 1)
       throw new Error(`${path} requires exactly one task action`);
-    for (const field of ["call", "loop", "decision", "isolated"]) {
+    for (const field of [
+      "call",
+      "loop",
+      "decision",
+      "isolated",
+      "gate",
+      "interactive",
+      "artifact",
+    ]) {
       if (item[field] === undefined) continue;
       if (item.brief !== undefined || item.dispatch !== undefined)
         throw new Error(`${path}: brief and dispatch require an agent task`);
@@ -286,7 +312,7 @@ export function validateRecipe(value: unknown): RecipeDocument {
       )
         validateRecipeExpression(step.isolated.brief.text, context);
       if (step.when !== undefined) validateRecipeCondition(step.when, context);
-      for (const field of ["value", "arguments", "state"] as const)
+      for (const field of ["value", "arguments", "state", "data"] as const)
         if (step[field] !== undefined)
           validateRecipeExpression(step[field], context);
       if (step.when !== undefined && step.options?.condition !== undefined)

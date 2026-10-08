@@ -6,7 +6,7 @@ import {
   publishRecipeReport,
   printRecipeErrors,
 } from "../application/recipes/reports.ts";
-import { createRecipeRuntime } from "../application/recipes/runtime.ts";
+import { recipeYamlCommand } from "./recipe-yaml.ts";
 import { validateRecipeProject } from "../application/recipes/project.ts";
 import type {
   RecipeBindings,
@@ -153,7 +153,10 @@ export async function recipeCommand({
       "Recipe run requires --file recipe.yaml and --config outpost.yaml",
     );
   const document = parseRecipe(await readRecipe(resolve(values.file)));
-  const inputs = readRecipeInputs(document, values.input);
+  const inputs =
+    positionals[1] === "run" || values.input
+      ? readRecipeInputs(document, values.input)
+      : undefined;
   const configuration = resolve(values.config);
   if (
     ![".yaml", ".yml", ".ts", ".mts", ".js", ".mjs"].includes(
@@ -163,36 +166,10 @@ export async function recipeCommand({
     throw new Error(
       "Recipe configuration must be YAML or a .ts, .mts, .js or .mjs module",
     );
-  if (/\.ya?ml$/.test(configuration)) {
-    const controller = new AbortController();
-    const interrupt = () => {
-      process.exitCode = 130;
-      controller.abort();
-    };
-    const terminate = () => {
-      process.exitCode = 143;
-      controller.abort();
-    };
-    process.on("SIGINT", interrupt);
-    process.on("SIGTERM", terminate);
-    try {
-      await using runtime = await createRecipeRuntime({
-        file: values.file,
-        config: configuration,
-      });
-      const report = await runtime.run({
-        inputs,
-        signal: controller.signal,
-        ...(values.json ? { report: "json" } : {}),
-      });
-      printRecipeErrors(report);
-      if (report.status !== "done" && !process.exitCode) process.exitCode = 1;
-    } finally {
-      process.off("SIGINT", interrupt);
-      process.off("SIGTERM", terminate);
-    }
-    return;
-  }
+  if (/\.ya?ml$/.test(configuration))
+    return recipeYamlCommand({ values, positionals }, inputs);
+  if (positionals[1] !== "run" || values["run-id"])
+    throw new Error("Durable recipe commands require YAML configuration");
   const module: unknown = await import(pathToFileURL(configuration).href);
   if (!module || typeof module !== "object" || !("default" in module))
     throw new Error(
@@ -231,7 +208,7 @@ export async function recipeCommand({
     }
     const report = await runRecipe(
       document,
-      { ...bindings, inputs },
+      { ...bindings, ...(inputs ? { inputs } : {}) },
       controller.signal,
     );
     publishRecipeReport(report, [], values.json ? "json" : undefined);

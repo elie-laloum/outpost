@@ -19,6 +19,63 @@
           },
           "required": ["type"],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "id": {
+              "type": "string"
+            },
+            "kind": {
+              "anyOf": [
+                {
+                  "const": "dispatch"
+                },
+                {
+                  "const": "workflow"
+                }
+              ]
+            },
+            "heartbeatMs": {
+              "type": "number"
+            },
+            "abandonAfterMs": {
+              "type": "number"
+            },
+            "resume": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
+                }
+              ]
+            },
+            "type": {
+              "const": "run"
+            }
+          },
+          "required": ["transporter", "id", "kind", "type"],
+          "additionalProperties": false
         }
       ]
     },
@@ -72,6 +129,270 @@
             }
           },
           "required": [],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "transport": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "client": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "bucket": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "deleteMode": {
+              "anyOf": [
+                {
+                  "const": "conditional"
+                },
+                {
+                  "const": "tombstone"
+                }
+              ]
+            },
+            "type": {
+              "const": "s3"
+            }
+          },
+          "required": ["client", "bucket", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "directory": {
+              "type": "string"
+            },
+            "type": {
+              "const": "local"
+            }
+          },
+          "required": ["directory", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "checkpointStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "taskCacheStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "maxBytes": {
+              "type": "number"
+            },
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "artifactStore": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "maxBytes": {
+              "type": "number"
+            },
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "type": {
+              "const": "transport"
+            }
+          },
+          "required": ["transporter", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "artifact": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "jsonSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {}
+            },
+            "schema": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "type": {
+              "const": "json"
+            }
+          },
+          "required": ["jsonSchema", "name", "version", "type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "type": {
+              "const": "binary"
+            }
+          },
+          "required": ["name", "version", "type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "verifier": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "keys": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "type": {
+              "const": "ed25519"
+            }
+          },
+          "required": ["keys", "type"],
           "additionalProperties": false
         }
       ]
@@ -2355,6 +2676,11 @@
             "input": {
               "anyOf": [
                 {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": {}
+                },
+                {
                   "anyOf": [
                     {
                       "type": "object",
@@ -2368,11 +2694,6 @@
                       "additionalProperties": false
                     }
                   ]
-                },
-                {
-                  "type": "object",
-                  "properties": {},
-                  "additionalProperties": {}
                 }
               ]
             },
@@ -7167,11 +7488,11 @@
                 {
                   "type": "object",
                   "properties": {
-                    "timeout": {
-                      "type": "number"
-                    },
                     "name": {
                       "type": "string"
+                    },
+                    "timeout": {
+                      "type": "number"
                     },
                     "ports": {
                       "type": "array",
@@ -7713,11 +8034,11 @@
                 {
                   "type": "object",
                   "properties": {
-                    "timeout": {
-                      "type": "number"
-                    },
                     "name": {
                       "type": "string"
+                    },
+                    "timeout": {
+                      "type": "number"
                     },
                     "ports": {
                       "type": "array",
@@ -12820,23 +13141,6 @@
         }
       ]
     },
-    "transport": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "directory": {
-              "type": "string"
-            },
-            "type": {
-              "const": "local"
-            }
-          },
-          "required": ["directory", "type"],
-          "additionalProperties": false
-        }
-      ]
-    },
     "variables": {
       "anyOf": [
         {
@@ -14388,11 +14692,11 @@
                     {
                       "type": "object",
                       "properties": {
-                        "timeout": {
-                          "type": "number"
-                        },
                         "name": {
                           "type": "string"
+                        },
+                        "timeout": {
+                          "type": "number"
                         },
                         "ports": {
                           "type": "array",
@@ -14934,11 +15238,11 @@
                     {
                       "type": "object",
                       "properties": {
-                        "timeout": {
-                          "type": "number"
-                        },
                         "name": {
                           "type": "string"
+                        },
+                        "timeout": {
+                          "type": "number"
                         },
                         "ports": {
                           "type": "array",
@@ -16223,6 +16527,51 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/checkpointStore"
+              }
+            ]
+          }
+        },
+        "caches": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": ["$ref"],
+                "properties": {
+                  "$ref": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/taskCacheStore"
+              }
+            ]
+          }
+        },
+        "artifactStores": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": ["$ref"],
+                "properties": {
+                  "$ref": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/artifactStore"
               }
             ]
           }
@@ -16574,6 +16923,9 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/verifier"
               }
             ]
           }
@@ -16610,6 +16962,9 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/artifact"
               }
             ]
           }

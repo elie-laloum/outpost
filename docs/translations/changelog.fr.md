@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ajout des checkpoints YAML durables avec restauration exacte des workspaces Git, artefacts, caches, gates signées, dialogues, pauses quota et budgets cumulés. Ajout de recipe status/resume/answer/decide ; rejeu explicite et récupération protégée par révision après interruption. Tests entre processus, conservation des fichiers non commités et guards d’origine hors ligne ; restauration cloud réelle non validée.
+
 - Composez des workflows de format 3 avec paramètres JSON structurés, références typées de résultats, conditions, transformations, callbacks locaux, boucles et décisions natives, et dispatch isolés sur plusieurs dépôts. Conservez l’ordonnancement et la consommation natifs, refusez les workspaces partagés simultanés et projetez les résultats en JSON. Ajoutez un exemple hors ligne et des tests d’équivalence YAML/TypeScript sur de vrais dépôts Git.
 
 - Composition YAML du harness Outpost, des fournisseurs de modèles et décisions, outils, skills, hooks, permissions, stratégies de contexte, routage, agents de secours et conversations. Les étapes agent du format 3 acceptent les options de dispatch et les références de réponses structurées. Les extensions callback déclarent un contrat statique ; les schémas distinguent schémas de données et références de composants. Comparaison hors ligne d’exécutions YAML et TypeScript avec délégation, et test de la CLI compilée contre un modèle HTTP local en streaming.

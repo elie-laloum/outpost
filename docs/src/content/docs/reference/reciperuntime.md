@@ -13,17 +13,21 @@ import type { RecipeRuntime } from "@elie-laloum/outpost/recipes";
 
 ## Parameters and properties
 
-| Name                    | Type                                                    | Presence | Meaning                                                                                      |
-| ----------------------- | ------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| `run`                   | `(options?: RecipeRunOptions) => Promise<RecipeReport>` | Required | Run one invocation at a time; close its owned resources before returning its report.         |
-| `close`                 | `() => Promise<void>`                                   | Required | Prevent further runs, cancel the active run and wait for its cleanup; repeat calls are safe. |
-| `[Symbol.asyncDispose]` | `() => Promise<void>`                                   | Required | Close the runtime when leaving an await using scope.                                         |
+| Name                    | Type                                                       | Presence | Meaning                                                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run`                   | `(options?: RecipeRunOptions) => Promise<RecipeReport>`    | Required | Run one invocation at a time; close its owned resources before returning its report.                                                                                                                       |
+| `resume`                | `(options: RecipeResumeOptions) => Promise<RecipeReport>`  | Required | Resume an existing durable run with its original inputs, workspace records and cumulative accounting. Changed identities or missing workspaces fail; interrupted tasks need explicit replay authorization. |
+| `status`                | `(runId: string) => Promise<RecipeRunStatus \| undefined>` | Required | Read checkpoint revision, ownership, task summaries and retained workspace records without acquiring it; settled runs include their redacted final report.                                                 |
+| `close`                 | `() => Promise<void>`                                      | Required | Prevent further runs, cancel the active run and wait for its cleanup; repeat calls are safe.                                                                                                               |
+| `[Symbol.asyncDispose]` | `() => Promise<void>`                                      | Required | Close the runtime when leaving an await using scope.                                                                                                                                                       |
 
 ## Signature
 
 ```ts
 export interface RecipeRuntime {
   run(options?: RecipeRunOptions): Promise<RecipeReport>;
+  resume(options: RecipeResumeOptions): Promise<RecipeReport>;
+  status(runId: string): Promise<RecipeRunStatus | undefined>;
   close(): Promise<void>;
   [Symbol.asyncDispose](): Promise<void>;
 }
@@ -32,4 +36,6 @@ export interface RecipeRuntime {
 ## Related contracts
 
 - [RecipeReport](../support-recipereport/)
+- [RecipeResumeOptions](../reciperesumeoptions/)
 - [RecipeRunOptions](../reciperunoptions/)
+- [RecipeRunStatus](../reciperunstatus/)

@@ -9,6 +9,13 @@
       "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
     },
     {
+      "name": "review-and-approve",
+      "version": "1.0.0",
+      "description": "Review a change, retain the review and wait for a maintainer decision.",
+      "source": "./review-and-approve.yaml",
+      "sha256": "852a869a0cf8870deb27a3df04d689c75e1a12ea855b3522836accdec7ef8d33"
+    },
+    {
       "name": "review-change",
       "version": "1.0.0",
       "description": "Review a structured change request when its file list is nonempty.",

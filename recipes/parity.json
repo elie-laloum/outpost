@@ -1062,9 +1062,9 @@
     "signatures": ["(options: ArtifactStoreOptions): ArtifactStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:createClaudeConversations": {
     "signatures": ["(): NativeConversationStore"],
@@ -1138,9 +1138,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:createFallbackAgent": {
     "signatures": [
@@ -1310,9 +1310,9 @@
     "signatures": ["(options: RunObserverOptions): Promise<RunObserver>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:createSandbox": {
     "signatures": ["(options?: SandboxOptions): Promise<Sandbox>"],
@@ -1378,9 +1378,9 @@
     "signatures": ["(options: TaskCacheStoreOptions): TaskCacheStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:createTranscriptConversations": {
     "signatures": [
@@ -1406,9 +1406,9 @@
     "signatures": ["(options: TransportStoreOptions): WorkflowCheckpointStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:CronOptions": {
     "signatures": [],
@@ -1686,9 +1686,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineArtifactTask": {
     "signatures": [
@@ -1696,9 +1696,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineBinaryArtifact": {
     "signatures": [
@@ -1706,9 +1706,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineCommandTask": {
     "signatures": [
@@ -1826,9 +1826,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineIsolatedTask": {
     "signatures": [
@@ -1844,9 +1844,9 @@
     "signatures": ["<T>(options: JsonArtifactOptions<T>): ArtifactContract<T>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineJsonResponse": {
     "signatures": ["<T>(options: JsonResponseOptions<T>): ResponseSpec<T>"],
@@ -1878,9 +1878,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   ".:defineQueuedTask": {
     "signatures": ["<T>(options: QueuedTaskOptions<T>): Task<T>"],
@@ -7432,9 +7432,27 @@
     "status": "implemented",
     "test": "test/functional/recipe-runtime.test.ts"
   },
+  "./recipes:RecipeResumeOptions": {
+    "signatures": [],
+    "options": {
+      "runId": "string",
+      "retryIncomplete": "boolean | undefined",
+      "answers": "readonly WorkflowAnswer[] | undefined",
+      "decisions": "readonly WorkflowDecision[] | undefined",
+      "recoverRevision": "string | undefined",
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
+      "signal": "AbortSignal | undefined",
+      "report": "\"json\" | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
+  },
   "./recipes:RecipeRunOptions": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
       "signal": "AbortSignal | undefined",
       "report": "\"json\" | undefined"
@@ -7444,10 +7462,29 @@
     "status": "implemented",
     "test": "test/functional/recipe-runtime.test.ts"
   },
+  "./recipes:RecipeRunStatus": {
+    "signatures": [],
+    "options": {
+      "runId": "string",
+      "revision": "string",
+      "owned": "boolean",
+      "executionId": "string | undefined",
+      "report": "RecipeReport | undefined",
+      "tasks": "readonly Readonly<import(\"../../index.js\").TaskRecord>[]",
+      "usage": "import(\"../../index.js\").WorkflowUsage | undefined",
+      "workspaces": "Readonly<Record<string, RecipeWorkspaceCheckpoint>>"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
+  },
   "./recipes:RecipeRuntime": {
     "signatures": [],
     "options": {
       "run": "(options?: RecipeRunOptions) => Promise<RecipeReport>",
+      "resume": "(options: RecipeResumeOptions) => Promise<RecipeReport>",
+      "status": "(runId: string) => Promise<RecipeRunStatus | undefined>",
       "close": "() => Promise<void>",
       "[Symbol.asyncDispose]": "() => Promise<void>"
     },
@@ -7691,9 +7728,9 @@
     "signatures": ["(options: S3TransportOptions): Transport"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/recipe-durable.test.ts"
   },
   "./transports/s3:S3TransportOptions": {
     "signatures": [],

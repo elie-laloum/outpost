@@ -1,6 +1,27 @@
 export const nativeRecipeFactories: Readonly<
   Record<string, () => Promise<unknown>>
 > = {
+  "transport.s3": async () =>
+    (await import("../../infrastructure/s3-transport.ts")).createS3Transport,
+  "checkpointStore.transport": async () =>
+    (await import("../../infrastructure/recipes/checkpoint-store.ts"))
+      .createRecipeCheckpointStore,
+  "taskCacheStore.transport": async () =>
+    (await import("../../infrastructure/transport-task-cache.ts"))
+      .createTaskCacheStore,
+  "artifactStore.transport": async () =>
+    (await import("../../infrastructure/transport-artifact-store.ts"))
+      .createArtifactStore,
+  "artifact.json": async () =>
+    (await import("../../application/recipes/storage-components.ts"))
+      .defineRecipeJsonArtifact,
+  "artifact.binary": async () =>
+    (await import("../../domain/artifact.ts")).defineBinaryArtifact,
+  "verifier.ed25519": async () =>
+    (await import("../../infrastructure/workflow-decision-signature.ts"))
+      .createEd25519DecisionVerifier,
+  "sink.run": async () =>
+    (await import("../../infrastructure/run-observer.ts")).createRunObserver,
   "steering.controller": async () =>
     (await import("../../domain/steering.ts")).createSteering,
   "harness.outpost": async () =>

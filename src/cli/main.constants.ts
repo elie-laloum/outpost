@@ -1,5 +1,27 @@
 import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
+  "run-id": {
+    type: "string",
+    description: "Durable recipe execution identifier",
+  },
+  "retry-incomplete": {
+    type: "boolean",
+    description: "Explicitly authorize replay of interrupted tasks",
+  },
+  "recover-revision": {
+    type: "string",
+    description:
+      "Explicitly recover a stopped checkpoint owner at this revision",
+  },
+  answer: {
+    type: "string",
+    description: "JSON file containing a WorkflowAnswer",
+  },
+  decision: {
+    type: "string",
+    description:
+      "JSON file containing a WorkflowDecision, including any required proof",
+  },
   catalog: {
     type: "string",
     description: "Local catalogue JSON or HTTPS catalogue URL",
@@ -102,7 +124,31 @@ export const commandOptions = {
   "recipe run": {
     description:
       "Run a local YAML recipe with explicit sandbox and agent bindings",
-    options: ["file", "config", "input", "json"],
+    options: ["file", "config", "input", "run-id", "json"],
+  },
+  "recipe status": {
+    description: "Inspect a durable recipe without acquiring its checkpoint",
+    options: ["file", "config", "run-id", "json"],
+  },
+  "recipe resume": {
+    description: "Resume an existing durable recipe",
+    options: [
+      "file",
+      "config",
+      "run-id",
+      "input",
+      "retry-incomplete",
+      "recover-revision",
+      "json",
+    ],
+  },
+  "recipe answer": {
+    description: "Submit a persisted dialogue answer and resume its recipe",
+    options: ["file", "config", "run-id", "answer", "json"],
+  },
+  "recipe decide": {
+    description: "Submit a gate decision and resume its recipe",
+    options: ["file", "config", "run-id", "decision", "json"],
   },
   "recipe validate": {
     description:

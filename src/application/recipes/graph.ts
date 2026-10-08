@@ -37,6 +37,9 @@ export function recipeComponentGraph(
   }
   for (const step of document?.tasks ?? []) {
     for (const [field, kind] of Object.entries({
+      gate: "gate",
+      interactive: "interactive",
+      artifact: "artifactTask",
       options: "task",
       dispatch: "dispatch",
       loop: "loop",

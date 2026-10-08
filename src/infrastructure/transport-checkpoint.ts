@@ -9,7 +9,7 @@ import type {
   CheckpointRecoveryOptions,
 } from "./transport-checkpoint.types.ts";
 
-function key(runId: string): string {
+export function workflowCheckpointKey(runId: string): string {
   if (!runId.trim()) throw new Error("Checkpoint runId must not be empty");
   return `checkpoints/${createHash("sha256").update(runId).digest("hex")}.json`;
 }
@@ -35,7 +35,7 @@ export function createWorkflowCheckpointStore(
   const { transporter } = options;
   return {
     async acquire(runId) {
-      const target = key(runId);
+      const target = workflowCheckpointKey(runId);
       const previous = await transporter.read(target, {
         maxBytes: workflowCheckpointMaxBytes + 1024,
       });
@@ -119,7 +119,7 @@ export function createWorkflowCheckpointStore(
 export async function recoverWorkflowCheckpoint(
   options: CheckpointRecoveryOptions,
 ): Promise<void> {
-  const target = key(options.runId);
+  const target = workflowCheckpointKey(options.runId);
   const current = await options.transporter.read(target, {
     maxBytes: workflowCheckpointMaxBytes + 1024,
   });

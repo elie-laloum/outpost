@@ -55,6 +55,19 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 
 Paths are relative to the current directory. Successful execution is silent unless observation or reports are declared in configuration version 2. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr. Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr. Successful runs integrate according to the branch policy; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved. Loading, execution or finalization failures exit 1. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Keep configuration stdout quiet for parseable JSON output.
 
+## `outpost recipe status`, `resume`, `answer` and `decide`
+
+These commands require format 3, a YAML `--config`, `--file` and `--run-id`. Status reads the checkpoint without acquiring it. Resume continues settled tasks; `--retry-incomplete` explicitly authorizes replay of interrupted tasks. After stopping an abandoned coordinator, `--recover-revision <revision>` fences checkpoint ownership recovery independently of replay and workspace lock recovery.
+
+```sh
+outpost recipe status --file recipe.yaml --config outpost.yaml --run-id change --json
+outpost recipe resume --file recipe.yaml --config outpost.yaml --run-id change
+outpost recipe answer --file recipe.yaml --config outpost.yaml --run-id change --answer answer.json
+outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change --decision decision.json
+```
+
+Answer and decide read one native WorkflowAnswer or WorkflowDecision from a bounded JSON file; signed gates require the original proof. `resume --input` must match the persisted inputs; omit it to reload them. Run also accepts `--run-id` for a new checkpoint. Run, resume, answer and decide print a final report only when declared or requested through `--json`; status always prints its requested result. See [durable recipes](../recipe-durability/) for state, ownership and recovery behavior.
+
 ## `outpost recipe init`
 
 Create a version-2 starter with a required goal, a named agent and a test command. The editor schema comment points to the installed package. Existing files are never overwritten; the parent directory must exist.

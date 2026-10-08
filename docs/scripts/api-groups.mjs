@@ -4,7 +4,7 @@ export const groups = [
     title: ["YAML recipes", "Recettes YAML"],
     guide: "guide/yaml-recipes",
     names:
-      "defineRecipe RecipeBindings RecipeConfiguration defineRecipeComponent createRecipeRegistry validateRecipeProject createRecipeRuntime RecipeComponentDefinition RecipeComponentContext RecipeRegistry RecipeRegistryOptions RecipeProjectOptions RecipeProjectValidation RecipeRunOptions RecipeRuntime",
+      "defineRecipe RecipeBindings RecipeConfiguration defineRecipeComponent createRecipeRegistry validateRecipeProject createRecipeRuntime RecipeComponentDefinition RecipeComponentContext RecipeRegistry RecipeRegistryOptions RecipeProjectOptions RecipeProjectValidation RecipeRunOptions RecipeRuntime RecipeResumeOptions RecipeRunStatus",
   },
   {
     id: "secrets",

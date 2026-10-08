@@ -76,6 +76,16 @@
         "slug": "reference/reciperuntime",
         "label": "RecipeRuntime",
         "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperesumeoptions",
+        "label": "RecipeResumeOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperunstatus",
+        "label": "RecipeRunStatus",
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

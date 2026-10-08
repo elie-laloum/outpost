@@ -251,6 +251,9 @@ const expressions = {
   },
 };
 for (const [field, kind] of Object.entries({
+  gate: "gate",
+  interactive: "interactive",
+  artifact: "artifactTask",
   dispatch: "dispatch",
   options: "task",
   loop: "loop",
@@ -264,10 +267,14 @@ for (const [field, kind] of Object.entries({
 taskV3.properties.call = clean(
   nativeRecipeSchemas["call.options"].properties.perform,
 );
-for (const field of ["value", "state", "arguments"])
+for (const field of ["value", "state", "arguments", "data"])
   taskV3.properties[field] = { $ref: "#/$defs/expression" };
+taskV3.properties.quotaResume = { enum: ["continue", "restart"] };
 taskV3.properties.when = { $ref: "#/$defs/condition" };
 const actions = [
+  "gate",
+  "interactive",
+  "artifact",
   "command",
   "agent",
   "value",
@@ -285,6 +292,16 @@ taskV3.oneOf = actions.map((action) => ({
   },
 }));
 taskV3.allOf = [
+  {
+    if: { not: { required: ["artifact"] } },
+    then: { not: { required: ["data"] } },
+  },
+  {
+    if: {
+      not: { anyOf: [{ required: ["agent"] }, { required: ["isolated"] }] },
+    },
+    then: { not: { required: ["quotaResume"] } },
+  },
   {
     if: { not: { required: ["agent"] } },
     then: {
