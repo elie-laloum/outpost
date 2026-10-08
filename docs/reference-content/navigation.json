@@ -8,6 +8,26 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/definerecipecomponent",
+        "label": "defineRecipeComponent",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createreciperegistry",
+        "label": "createRecipeRegistry",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/validaterecipeproject",
+        "label": "validateRecipeProject",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createreciperuntime",
+        "label": "createRecipeRuntime",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/recipebindings",
         "label": "RecipeBindings",
         "attrs": { "data-api-kind": "interface" }
@@ -15,6 +35,46 @@
       {
         "slug": "reference/recipeconfiguration",
         "label": "RecipeConfiguration",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipecomponentdefinition",
+        "label": "RecipeComponentDefinition",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipecomponentcontext",
+        "label": "RecipeComponentContext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperegistry",
+        "label": "RecipeRegistry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperegistryoptions",
+        "label": "RecipeRegistryOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeprojectoptions",
+        "label": "RecipeProjectOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeprojectvalidation",
+        "label": "RecipeProjectValidation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperunoptions",
+        "label": "RecipeRunOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/reciperuntime",
+        "label": "RecipeRuntime",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

@@ -1,133 +1,231 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Outpost recipe execution configuration",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["version", "repository", "sandbox"],
-  "properties": {
-    "$schema": {
-      "type": "string",
-      "pattern": "\\S"
-    },
-    "version": {
-      "const": 1
-    },
-    "repository": {
-      "type": "string",
-      "pattern": "\\S"
-    },
-    "sandbox": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["provider"],
-      "properties": {
-        "provider": {
-          "enum": ["docker", "podman", "local", "vercel", "daytona"]
-        },
-        "image": {
-          "type": "string",
-          "pattern": "\\S"
-        },
-        "cpus": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9007199254740991
-        },
-        "memoryMb": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9007199254740991
-        }
-      }
-    },
-    "branch": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["mode"],
-      "properties": {
-        "mode": {
-          "enum": ["current", "named", "integrate"]
-        },
-        "name": {
-          "type": "string",
-          "pattern": "\\S"
-        },
-        "from": {
-          "type": "string",
-          "pattern": "\\S"
-        }
-      }
-    },
-    "agents": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["harness", "authentication"],
-        "properties": {
-          "harness": {
-            "type": "string",
-            "pattern": "\\S"
+  "$defs": {
+    "sink": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "enum": ["text", "json"]
+            },
+            "stream": {
+              "enum": ["stdout", "stderr"]
+            },
+            "type": {
+              "const": "console"
+            }
           },
-          "model": {
-            "oneOf": [
-              {
+          "required": ["type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "observation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "sinks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "required": ["$ref"],
+                    "properties": {
+                      "$ref": {
+                        "type": "string",
+                        "pattern": "\\S"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "$ref": "#/$defs/sink"
+                  }
+                ]
+              }
+            },
+            "redact": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "deliveryTimeoutMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "verbose": {
+              "type": "boolean"
+            },
+            "type": {
+              "const": "hub"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "repository", "sandbox"],
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "version": {
+          "const": 1
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "sandbox": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider"],
+          "properties": {
+            "provider": {
+              "enum": ["docker", "podman", "local", "vercel", "daytona"]
+            },
+            "image": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "cpus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "memoryMb": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "branch": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": {
+              "enum": ["current", "named", "integrate"]
+            },
+            "name": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "from": {
+              "type": "string",
+              "pattern": "\\S"
+            }
+          }
+        },
+        "agents": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["harness", "authentication"],
+            "properties": {
+              "harness": {
                 "type": "string",
                 "pattern": "\\S"
               },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["name"],
-                "properties": {
-                  "name": {
+              "model": {
+                "oneOf": [
+                  {
                     "type": "string",
                     "pattern": "\\S"
                   },
-                  "reasoning": {
-                    "enum": [
-                      "none",
-                      "minimal",
-                      "low",
-                      "medium",
-                      "high",
-                      "xhigh",
-                      "max"
-                    ]
-                  },
-                  "maxOutputTokens": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 9007199254740991
-                  }
-                }
-              }
-            ]
-          },
-          "authentication": {
-            "oneOf": [
-              {
-                "enum": ["account", "usage"]
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["account"],
-                "properties": {
-                  "account": {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": ["file"],
-                        "properties": {
-                          "file": {
-                            "type": "string",
-                            "pattern": "\\S"
-                          }
-                        }
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "pattern": "\\S"
                       },
-                      {
+                      "reasoning": {
+                        "enum": [
+                          "none",
+                          "minimal",
+                          "low",
+                          "medium",
+                          "high",
+                          "xhigh",
+                          "max"
+                        ]
+                      },
+                      "maxOutputTokens": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  }
+                ]
+              },
+              "authentication": {
+                "oneOf": [
+                  {
+                    "enum": ["account", "usage"]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["account"],
+                    "properties": {
+                      "account": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["file"],
+                            "properties": {
+                              "file": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["variable"],
+                            "properties": {
+                              "variable": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["usage"],
+                    "properties": {
+                      "usage": {
                         "type": "object",
                         "additionalProperties": false,
                         "required": ["variable"],
@@ -138,43 +236,321 @@
                           }
                         }
                       }
-                    ]
+                    }
                   }
-                }
+                ]
+              }
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "repository", "sandbox"],
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "version": {
+          "const": 2
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "sandbox": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider"],
+          "properties": {
+            "provider": {
+              "enum": ["docker", "podman", "local", "vercel", "daytona"]
+            },
+            "image": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "cpus": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "memoryMb": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "branch": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode"],
+          "properties": {
+            "mode": {
+              "enum": ["current", "named", "integrate"]
+            },
+            "name": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "from": {
+              "type": "string",
+              "pattern": "\\S"
+            }
+          }
+        },
+        "agents": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["harness", "authentication"],
+            "properties": {
+              "harness": {
+                "type": "string",
+                "pattern": "\\S"
               },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["usage"],
-                "properties": {
-                  "usage": {
+              "model": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "\\S"
+                  },
+                  {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["variable"],
+                    "required": ["name"],
                     "properties": {
-                      "variable": {
+                      "name": {
                         "type": "string",
-                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                        "pattern": "\\S"
+                      },
+                      "reasoning": {
+                        "enum": [
+                          "none",
+                          "minimal",
+                          "low",
+                          "medium",
+                          "high",
+                          "xhigh",
+                          "max"
+                        ]
+                      },
+                      "maxOutputTokens": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
                       }
                     }
                   }
+                ]
+              },
+              "authentication": {
+                "oneOf": [
+                  {
+                    "enum": ["account", "usage"]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["account"],
+                    "properties": {
+                      "account": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["file"],
+                            "properties": {
+                              "file": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["variable"],
+                            "properties": {
+                              "variable": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["usage"],
+                    "properties": {
+                      "usage": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["variable"],
+                        "properties": {
+                          "variable": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          }
+        },
+        "observation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["$ref"],
+              "properties": {
+                "$ref": {
+                  "type": "string",
+                  "pattern": "\\S"
                 }
+              },
+              "additionalProperties": false
+            },
+            {
+              "$ref": "#/$defs/observation"
+            }
+          ]
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": ["json", "text"]
+              },
+              "stream": {
+                "enum": ["stdout", "stderr"]
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "module": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "export": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "kind": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "version": {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              "factory": {
+                "type": "boolean"
+              },
+              "schema": {
+                "type": "object"
+              },
+              "options": {
+                "type": "object"
+              },
+              "dispose": {
+                "type": "string",
+                "pattern": "\\S"
+              }
+            },
+            "required": ["module", "export", "kind", "version"],
+            "additionalProperties": false
+          }
+        },
+        "experimental": {
+          "type": "boolean"
+        },
+        "observations": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": ["$ref"],
+                "properties": {
+                  "$ref": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/observation"
+              }
+            ]
+          }
+        },
+        "sinks": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": ["$ref"],
+                "properties": {
+                  "$ref": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "$ref": "#/$defs/sink"
               }
             ]
           }
         }
       }
-    },
-    "environment": {
-      "type": "object",
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
-      },
-      "additionalProperties": {
-        "type": "string",
-        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
-      }
     }
-  }
+  ]
 }

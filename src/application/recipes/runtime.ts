@@ -1,0 +1,102 @@
+import { createSandbox } from "../sandbox.ts";
+import { readRecipeConfiguration } from "../recipe-configuration.ts";
+import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
+import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
+import { runRecipe } from "../recipe-run.ts";
+import { readRecipeProject } from "./project.ts";
+import { createRecipeComponentScope } from "./scope.ts";
+import { observationGuards } from "./observation.ts";
+import { publishRecipeReport } from "./reports.ts";
+import type { ObservationHub } from "../../domain/observation.types.ts";
+import type { RecipeRuntime, RecipeProjectOptions } from "./project.types.ts";
+
+export async function createRecipeRuntime(
+  options: RecipeProjectOptions,
+): Promise<RecipeRuntime> {
+  const project = await readRecipeProject(options);
+  const stop = new AbortController();
+  let active: Promise<unknown> | undefined;
+  let closed = false;
+  const runtime: RecipeRuntime = {
+    async run(settings = {}) {
+      if (closed || active)
+        throw new Error("Recipe runtime is closed or already running");
+      const inputs = resolveRecipeInputs(
+        project.document.inputs,
+        settings.inputs,
+      );
+      const signal = settings.signal
+        ? AbortSignal.any([settings.signal, stop.signal])
+        : stop.signal;
+      const scope = createRecipeComponentScope(
+        project.graph,
+        project.registry,
+        project.directory,
+        signal,
+      );
+      const execution = (async () => {
+        try {
+          await scope.prepare();
+          let observation: ObservationHub | undefined;
+          if (project.graph.observation) {
+            const value = await scope.resolve(
+              project.graph.observation,
+              "observation",
+            );
+            if (!observationGuards.observation(value))
+              throw new Error("Invalid recipe observation hub");
+            observation = value;
+          }
+          const configuration = await readRecipeConfiguration(
+            JSON.stringify({
+              ...Object.fromEntries(
+                Object.entries(project.configuration).filter(([key]) =>
+                  recipeConfigurationKeys.root.some(
+                    (allowed) => allowed === key,
+                  ),
+                ),
+              ),
+              version: 1,
+            }),
+            project.options.config,
+          );
+          signal.throwIfAborted();
+          const sandbox = await createSandbox({
+            ...configuration.sandbox,
+            signal,
+            ...(observation ? { observation } : {}),
+          });
+          return await runRecipe(
+            project.document,
+            {
+              sandbox,
+              ...(configuration.agents ? { agents: configuration.agents } : {}),
+              inputs,
+            },
+            signal,
+            observation,
+          );
+        } finally {
+          await scope.close();
+        }
+      })();
+      active = execution;
+      try {
+        const report = await execution;
+        publishRecipeReport(report, project.reports, settings.report);
+        return report;
+      } finally {
+        active = undefined;
+      }
+    },
+    async close() {
+      closed = true;
+      stop.abort();
+      await active?.catch(() => undefined);
+    },
+    async [Symbol.asyncDispose]() {
+      await runtime.close();
+    },
+  };
+  return runtime;
+}

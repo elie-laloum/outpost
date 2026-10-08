@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Début de la parité de composition YAML avec configuration version 2, recette version 3, API registre/runtime `/recipes`, observation et rapports explicites, validation statique des extensions et inventaire versionné des contrats publics. Les exécutions sont silencieuses sans sortie déclarée ni `--json` ; les échecs affichent leurs diagnostics.
+
 - Ajout de recettes YAML réutilisables avec paramètres typés, valeurs par défaut et enum, références aux résultats des dépendances et schémas pour l’éditeur. Exécution avec deux fichiers YAML séparés pour la recette et sa configuration : fournisseurs de sandbox, agents CLI, choix de modèle et références explicites aux identifiants ; maintien du format 1 littéral et des configurations TypeScript. Ajout de `recipe init`, `validate` sans allocation, `list` et `fetch` avec vérification d’intégrité, des options `--input` répétées, de trois recettes dans le catalogue Git inclus et des catalogues tiers HTTPS. Correction de l’intégration Git, des sorties et diagnostics bornés et du rapport final après nettoyage. Tests Git locaux et de réutilisation entre dépôts ; téléchargements HTTP simulés et exécutions réelles agents/cloud non validées.
 
 ## 11.0.1

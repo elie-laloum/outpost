@@ -1,0 +1,7 @@
+version: 3
+name: observed-command
+tasks:
+  - key: hello
+    command:
+      executable: node
+      arguments: [-e, "console.log('Hello from the recipe')"]

@@ -166,3 +166,46 @@ Les catalogues tiers utilisent le JSON `{ "version": 1, "recipes": [...] }`. Cha
 Utilisez les [tests de workflows](../testing-workflows/) pour tester sans compte payant. `examples/64-yaml-recipes/` fournit une configuration YAML de production et une fixture TypeScript séparée avec agents scriptés, commande simulée et vrais commits Git. Son commentaire de deux lignes dans index explique l’exécution et l’exemple tourne en CI. Les tests fonctionnels exécutent aussi une recette inchangée avec une configuration YAML sur deux vrais dépôts et vérifient arguments, intégration et rapports d’échec. Les tests de téléchargement simulent les réponses HTTP ; les serveurs de catalogue réels, appels d’agents et exécutions cloud restent non validés.
 
 API : [defineRecipe](../../reference/definerecipe/) · [RecipeBindings](../../reference/recipebindings/) · [RecipeConfiguration](../../reference/recipeconfiguration/).
+
+## Déclarer l’observation et les rapports finaux
+
+La configuration version 2 peut attacher un hub à l’allocation, aux tâches, à l’activité des agents et au nettoyage. Une exécution réussie sans sortie déclarée est silencieuse. Les erreurs restent sur stderr ; `--json` sélectionne explicitement un rapport final JSON et remplace les rapports configurés pour cette invocation.
+
+```yaml title="outpost.yaml — observation et rapports"
+version: 2
+repository: .
+sandbox:
+  provider: docker
+  image: outpost:dev
+observation:
+  sinks:
+    - type: console
+      format: json
+reports:
+  - type: json
+    stream: stdout
+```
+
+Le sink console écrit les événements sur stderr par défaut. Le rapport final paraît après nettoyage de la sandbox et des composants. Omettez `reports` pour recevoir les événements sans rendu final ; omettez `observation` pour demander seulement le rapport final. Les formats de recette 1 et 2 restent pris en charge ; le format 3 démarre avec les mêmes contrats de tâches commande et agent, puis s’étend avec les familles natives disponibles.
+
+## Réutiliser des objets observateurs locaux
+
+Déclarez les extensions uniquement dans la configuration locale. Un module peut exporter un objet déjà construit, emprunté pour l’invocation, ou une factory avec un JSON Schema statique et un nettoyage explicitement nommé. La validation statique contrôle ces déclarations sans importer le module ; la validation runtime vérifie l’export réel avant allocation.
+
+```yaml title="outpost.yaml — observateur emprunté"
+extensions:
+  audit:
+    module: ./audit.ts
+    export: sink
+    kind: sink
+    version: "1"
+observation:
+  sinks:
+    - $ref: extensions.audit
+```
+
+L’export `sink` implémente `ObservationSink`. Le runtime ne ferme jamais un objet emprunté. Pour une factory, ajoutez `factory: true`, `schema`, puis éventuellement `options` et `dispose`, nommant un autre export. La factory reçoit ses options et un contexte avec annulation, dossier de configuration et résolution des composants nommés. Seuls les modules locaux et paquets déjà installés sont acceptés ; une recette téléchargée ne peut pas importer elle-même ses extensions.
+
+Le point d’entrée `/recipes` expose `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` et `createRecipeRuntime`. La construction du runtime valide sans allouer ; `run()` alloue et nettoie chaque invocation, et `close()` annule une invocation active et empêche les suivantes. `examples/65-recipe-observation/` vérifie observation et rapports déclarés sans appel de modèle.
+
+L’inventaire `recipes/parity.json` classe les contrats publics et suit les livraisons. La durabilité native des workflows, les commandes de services et les autres familles y sont suivies ; le registre seul ne constitue pas la parité complète YAML/TypeScript.

@@ -166,3 +166,46 @@ Third-party catalogues use JSON `{ "version": 1, "recipes": [...] }`. Each entry
 Use [workflow testing](../testing-workflows/) for tests without paid accounts. `examples/64-yaml-recipes/` provides a production YAML configuration and a separate TypeScript test fixture with scripted agents, a simulated command and real Git commits. Its two-line index comment explains execution, and the example runs in CI. Functional tests also execute an unchanged recipe through YAML configuration against two real repositories and verify argument preservation, integration and failure reports. Download tests use simulated HTTP responses; live catalogue servers, agent calls and cloud runs remain unvalidated.
 
 API: [defineRecipe](../../reference/definerecipe/) · [RecipeBindings](../../reference/recipebindings/) · [RecipeConfiguration](../../reference/recipeconfiguration/).
+
+## Declare observation and final reports
+
+Configuration version 2 can attach one observation hub to allocation, workflow tasks, agent activity and cleanup. A successful run without declared outputs is silent. Errors still reach stderr; `--json` explicitly selects one final JSON report and replaces configured final reports for that invocation.
+
+```yaml title="outpost.yaml — observation and reports"
+version: 2
+repository: .
+sandbox:
+  provider: docker
+  image: outpost:dev
+observation:
+  sinks:
+    - type: console
+      format: json
+reports:
+  - type: json
+    stream: stdout
+```
+
+The console sink writes events to stderr by default. The final report is published after sandbox and component cleanup. Omit `reports` to receive events without a final rendering; omit `observation` to request only the final report. Recipe formats 1 and 2 remain supported; format 3 starts with the same command and agent task contracts and is extended as native component families become available.
+
+## Reuse local observer objects
+
+Declare extensions only in your local configuration. A module can export an already constructed object, borrowed for the invocation, or a factory with a static JSON Schema and an explicitly named disposer. Static validation checks these declarations without importing the module; runtime validation checks the actual export before sandbox allocation.
+
+```yaml title="outpost.yaml — borrowed observer"
+extensions:
+  audit:
+    module: ./audit.ts
+    export: sink
+    kind: sink
+    version: "1"
+observation:
+  sinks:
+    - $ref: extensions.audit
+```
+
+The exported `sink` implements `ObservationSink`. A borrowed object is never closed by the runtime. For a factory, add `factory: true`, `schema`, optional `options` and optional `dispose` naming another export. Factories receive their options and a context with cancellation, the configuration directory and named component resolution. Only local modules and already installed packages are accepted; a downloaded recipe cannot import extensions itself.
+
+The `/recipes` package entry exposes `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` and `createRecipeRuntime`. Runtime construction validates without allocating; `run()` allocates and cleans each invocation, and `close()` cancels an active invocation and prevents further runs. `examples/65-recipe-observation/` exercises declared observation and reporting without model calls.
+
+The parity inventory in `recipes/parity.json` classifies public contracts and tracks deliveries. Native workflow durability, service commands and the remaining component families are tracked there; the registry foundation alone does not establish full YAML/TypeScript parity.

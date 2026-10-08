@@ -8601,5 +8601,197 @@
   "RecipeConfiguration.agents": [
     "Locally composed agents keyed by the roles referenced in recipe tasks. The CLI rejects missing roles before opening a sandbox. Keep models, credentials and provider-specific choices in this trusted local configuration.",
     "Agents composés localement, indexés par les rôles référencés dans les tâches. La CLI refuse les rôles absents avant d’ouvrir une sandbox. Gardez modèles, identifiants et choix propres aux fournisseurs dans cette configuration locale de confiance."
+  ],
+  "defineRecipeComponent.definition": [
+    "Factory descriptor to validate and freeze; it defines one component name and category.",
+    "Descripteur de factory à valider et figer ; il définit un nom et une catégorie de composant."
+  ],
+  "createRecipeRegistry.options": [
+    "Additional named component descriptors; omitted options create an empty extension registry.",
+    "Descripteurs nommés supplémentaires ; omettre les options crée un registre d’extensions vide."
+  ],
+  "validateRecipeProject.options": [
+    "Paths of the two YAML files and optional descriptors used to validate named components.",
+    "Chemins des deux YAML et descripteurs optionnels utilisés pour valider les composants nommés."
+  ],
+  "createRecipeRuntime.options": [
+    "Recipe and local configuration paths, plus optional caller-provided component descriptors.",
+    "Chemins de recette et de configuration locale, avec descripteurs optionnels fournis par l’appelant."
+  ],
+  "RecipeComponentDefinition.name": [
+    "Unique factory identifier in category.name form, such as sink.console.",
+    "Identifiant unique de factory sous la forme catégorie.nom, par exemple sink.console."
+  ],
+  "RecipeComponentDefinition.kind": [
+    "Category of the produced object; references must request this exact category.",
+    "Catégorie de l’objet produit ; les références doivent demander cette catégorie exacte."
+  ],
+  "RecipeComponentDefinition.schema": [
+    "Static JSON Schema for options; component annotations identify nested typed references.",
+    "JSON Schema statique des options ; les annotations component identifient les références typées imbriquées."
+  ],
+  "RecipeComponentDefinition.experimental": [
+    "Require experimental: true in local YAML before accepting this factory.",
+    "Exige experimental: true dans le YAML local avant d’accepter cette factory."
+  ],
+  "RecipeComponentDefinition.create": [
+    "Construct the component after static validation; dependencies resolve through the context.",
+    "Construit le composant après validation statique ; les dépendances se résolvent via le contexte."
+  ],
+  "RecipeComponentDefinition.accepts": [
+    "Validate the runtime object returned by this factory or a local extension in the same category.",
+    "Valide l’objet renvoyé par cette factory ou une extension locale de la même catégorie."
+  ],
+  "RecipeComponentDefinition.dispose": [
+    "Release objects created by this factory after dependents; omitted for objects without owned resources.",
+    "Libère les objets créés par cette factory après leurs consommateurs ; absent pour les objets sans ressources possédées."
+  ],
+  "RecipeComponentContext.directory": [
+    "Absolute directory containing the local execution YAML; resolve local extension paths from it.",
+    "Dossier absolu du YAML d’exécution local ; les chemins d’extensions locales s’y résolvent."
+  ],
+  "RecipeComponentContext.signal": [
+    "Cancellation shared with the active recipe invocation.",
+    "Annulation partagée avec l’invocation active de la recette."
+  ],
+  "RecipeComponentContext.resolve": [
+    "Resolve one named component and require its declared category; repeated requests share its instance.",
+    "Résout un composant nommé en exigeant sa catégorie déclarée ; les demandes répétées partagent son instance."
+  ],
+  "RecipeComponentContext.environment": [
+    "Read one explicitly named host environment variable; absent or malformed names fail.",
+    "Lit une variable hôte explicitement nommée ; les noms invalides ou absents échouent."
+  ],
+  "RecipeRegistry.components": [
+    "Immutable list of registered component descriptors.",
+    "Liste immuable des descripteurs de composants enregistrés."
+  ],
+  "RecipeRegistry.get": [
+    "Find an exact factory name; unknown names fail explicitly.",
+    "Recherche un nom exact de factory ; les noms inconnus échouent explicitement."
+  ],
+  "RecipeRegistryOptions.components": [
+    "Additional factory descriptors, each with a unique name.",
+    "Descripteurs supplémentaires de factories, chacun avec un nom unique."
+  ],
+  "RecipeProjectOptions.file": [
+    "Recipe YAML path resolved from the process working directory.",
+    "Chemin de recette YAML résolu depuis le dossier courant du processus."
+  ],
+  "RecipeProjectOptions.config": [
+    "Required separate local execution YAML path; its directory anchors repository and extension paths.",
+    "Chemin obligatoire du YAML local d’exécution séparé ; son dossier ancre les chemins du dépôt et des extensions."
+  ],
+  "RecipeProjectOptions.registry": [
+    "Additional trusted descriptors combined with native components; duplicate factory names fail.",
+    "Descripteurs de confiance supplémentaires combinés aux composants natifs ; les noms dupliqués échouent."
+  ],
+  "RecipeProjectValidation.name": [
+    "Validated recipe name.",
+    "Nom de la recette validée."
+  ],
+  "RecipeProjectValidation.version": [
+    "Recipe format version read from the recipe file.",
+    "Version du format lue dans la recette."
+  ],
+  "RecipeProjectValidation.configurationVersion": [
+    "Configuration format version read from the execution file.",
+    "Version du format lue dans le fichier d’exécution."
+  ],
+  "RecipeProjectValidation.tasks": [
+    "Task keys in dependency order.",
+    "Clés des tâches dans l’ordre des dépendances."
+  ],
+  "RecipeProjectValidation.agents": [
+    "Distinct agent roles required by the recipe.",
+    "Rôles d’agents distincts requis par la recette."
+  ],
+  "RecipeProjectValidation.extensions": [
+    "Extension component names whose metadata was validated without importing their modules.",
+    "Noms des extensions dont les métadonnées ont été validées sans importer leurs modules."
+  ],
+  "RecipeRunOptions.inputs": [
+    "Explicit recipe parameters; required values and defaults are checked before extension imports.",
+    "Paramètres explicites de recette ; valeurs obligatoires et défauts sont vérifiés avant les imports d’extensions."
+  ],
+  "RecipeRunOptions.signal": [
+    "Cancel this invocation while awaiting owned-resource cleanup.",
+    "Annule cette invocation en attendant le nettoyage des ressources possédées."
+  ],
+  "RecipeRunOptions.report": [
+    "Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.",
+    "Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation."
+  ],
+  "RecipeRuntime.run": [
+    "Run one invocation at a time; close its owned resources before returning its report.",
+    "Exécute une invocation à la fois ; ferme ses ressources possédées avant de renvoyer son rapport."
+  ],
+  "RecipeRuntime.close": [
+    "Prevent further runs, cancel the active run and wait for its cleanup; repeat calls are safe.",
+    "Empêche de nouvelles exécutions, annule l’exécution active et attend son nettoyage ; les appels répétés sont sûrs."
+  ],
+  "RecipeRuntime.[Symbol.asyncDispose]": [
+    "Close the runtime when leaving an await using scope.",
+    "Ferme le runtime à la sortie d’un scope await using."
+  ],
+  "RecipeReport.name": [
+    "Recipe name associated with this invocation.",
+    "Nom de recette associé à cette invocation."
+  ],
+  "RecipeReport.executionId": [
+    "Workflow execution identifier, present once the workflow has started.",
+    "Identifiant d’exécution du workflow, présent une fois le workflow démarré."
+  ],
+  "RecipeReport.status": [
+    "Final invocation status including integration, cancellation and sandbox cleanup.",
+    "Statut final incluant intégration, annulation et nettoyage de la sandbox."
+  ],
+  "RecipeReport.workflowStatus": [
+    "Workflow task outcome before integration and cleanup.",
+    "Résultat des tâches du workflow avant intégration et nettoyage."
+  ],
+  "RecipeReport.tasks": [
+    "Task execution records returned by the workflow.",
+    "Enregistrements d’exécution des tâches renvoyés par le workflow."
+  ],
+  "RecipeReport.usage": [
+    "Aggregated workflow usage when an execution result is available.",
+    "Consommation agrégée du workflow lorsqu’un résultat est disponible."
+  ],
+  "RecipeReport.outputs": [
+    "Bounded scalar outputs of completed recipe tasks, keyed by task name.",
+    "Sorties scalaires bornées des tâches terminées, indexées par leur nom."
+  ],
+  "RecipeReport.errors": [
+    "Bounded diagnostics for task, integration and cleanup failures.",
+    "Diagnostics bornés des échecs de tâches, intégration et nettoyage."
+  ],
+  "RecipeReport.workspace": [
+    "Workspace branch and directory, including retainedDirectory when work was preserved.",
+    "Branche et dossier du workspace, avec retainedDirectory lorsque le travail est conservé."
+  ],
+  "RecipeDiagnostic.message": [
+    "Bounded error message.",
+    "Message d’erreur borné."
+  ],
+  "RecipeDiagnostic.code": [
+    "Outpost fault code when the error is an OutpostError.",
+    "Code d’erreur Outpost lorsque l’erreur est une OutpostError."
+  ],
+  "RecipeDiagnostic.status": [
+    "Failed process exit status when supplied by the underlying error.",
+    "Statut du processus en échec lorsque l’erreur sous-jacente le fournit."
+  ],
+  "RecipeDiagnostic.stdout": [
+    "Bounded standard output captured for the failed command.",
+    "Sortie standard bornée capturée pour la commande en échec."
+  ],
+  "RecipeDiagnostic.stderr": [
+    "Bounded standard error captured for the failed command.",
+    "Sortie d’erreur bornée capturée pour la commande en échec."
+  ],
+  "RecipeDiagnostic.cause": [
+    "Nested cause retained up to the diagnostic depth limit.",
+    "Cause imbriquée conservée jusqu’à la limite de profondeur du diagnostic."
   ]
 }

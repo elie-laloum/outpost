@@ -778,5 +778,21 @@
   "defineRecipe": [
     "Parse and validate a local YAML recipe, bind commands and named agents to a caller-owned sandbox, and return a sequential Workflow. Version 1 keeps strings literal; version 2 resolves typed inputs and explicit references to direct dependency outputs. Never allocate, integrate or close the sandbox; the caller owns those actions. Workflow retries, cancellation and usage accounting remain available.",
     "Analyse et valide une recette YAML locale, lie commandes et agents nommés à la sandbox de l’appelant et renvoie un Workflow séquentiel. La version 1 garde les chaînes littérales ; la version 2 résout les paramètres typés et les références explicites aux sorties des dépendances directes. N’alloue, n’intègre et ne ferme jamais la sandbox ; l’appelant possède ces actions. Les retries, l’annulation et le suivi de consommation des workflows restent disponibles."
+  ],
+  "defineRecipeComponent": [
+    "Declare a named YAML component factory with a static options schema, result validator and optional owned-resource disposer. Declaration does not invoke the factory.",
+    "Déclare une factory YAML nommée avec schéma statique des options, validation du résultat et nettoyage optionnel des ressources possédées. La déclaration ne lance pas la factory."
+  ],
+  "createRecipeRegistry": [
+    "Create an immutable registry of additional component descriptors. Duplicate names fail immediately; the recipe runtime combines this registry with its native descriptors.",
+    "Crée un registre immuable de descripteurs supplémentaires. Les doublons échouent immédiatement ; le runtime combine ce registre avec ses descripteurs natifs."
+  ],
+  "validateRecipeProject": [
+    "Read the separate recipe and configuration files and validate graph, named component references and extension metadata. Does not import user modules, read secret values or allocate sandboxes. Extension exports are checked only when running.",
+    "Lit la recette et la configuration séparées, puis valide graphe, références de composants et métadonnées des extensions. N’importe aucun module utilisateur, ne lit aucune valeur secrète et n’alloue aucune sandbox. Les exports des extensions sont vérifiés à l’exécution."
+  ],
+  "createRecipeRuntime": [
+    "Validate a YAML project and create a caller-owned runtime. Each run imports declared extensions, creates its owned components and sandbox, executes the workflow, integrates according to branch policy and closes resources before publishing explicitly configured reports.",
+    "Valide un projet YAML et crée un runtime appartenant à l’appelant. Chaque exécution importe les extensions déclarées, crée ses composants et sa sandbox, exécute le workflow, intègre selon la politique de branche puis ferme les ressources avant les rapports explicitement configurés."
   ]
 }

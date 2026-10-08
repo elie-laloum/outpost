@@ -12,7 +12,7 @@ export interface RecipeStep {
 }
 
 export interface RecipeDocument {
-  readonly version: 1 | 2;
+  readonly version: 1 | 2 | 3;
   readonly name: string;
   readonly description?: string;
   readonly recipeVersion?: string;

@@ -1,0 +1,30 @@
+---
+title: "RecipeRunOptions"
+description: "RecipeRunOptions — Outpost API"
+sidebar:
+  order: 20
+---
+
+## Import
+
+```ts
+import type { RecipeRunOptions } from "@elie-laloum/outpost/recipes";
+```
+
+## Parameters and properties
+
+| Name     | Type                                                                 | Presence | Meaning                                                                                                  |
+| -------- | -------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `inputs` | `Readonly<Record<string, string \| number \| boolean>> \| undefined` | Optional | Explicit recipe parameters; required values and defaults are checked before extension imports.           |
+| `signal` | `AbortSignal \| undefined`                                           | Optional | Cancel this invocation while awaiting owned-resource cleanup.                                            |
+| `report` | `"json" \| undefined`                                                | Optional | Explicitly replace configured final reports with one JSON report on stdout; does not enable observation. |
+
+## Signature
+
+```ts
+export interface RecipeRunOptions {
+  readonly inputs?: Readonly<Record<string, string | number | boolean>>;
+  readonly signal?: AbortSignal;
+  readonly report?: "json";
+}
+```

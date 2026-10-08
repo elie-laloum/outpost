@@ -133,7 +133,8 @@ export default async (signal) => {
     arguments: [cli, "recipe", "run", "--file", file, "--config", config],
   });
   assert.equal(text.status, 0, text.stderr);
-  assert.match(text.stdout, /recipe-test: done\n\[ok\] stdout\ndone\n/);
+  assert.equal(text.stdout, "");
+  assert.equal(text.stderr, "");
 
   await using sandbox = await createSandbox({
     repository: directory,

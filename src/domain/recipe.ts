@@ -147,10 +147,10 @@ export function validateRecipe(value: unknown): RecipeDocument {
   const record = fields(
     mapping,
     "recipe",
-    mapping.version === 2 ? recipeKeys.documentV2 : recipeKeys.document,
+    mapping.version !== 1 ? recipeKeys.documentV2 : recipeKeys.document,
   );
-  if (record.version !== 1 && record.version !== 2)
-    throw new Error("Recipe version must be 1 or 2");
+  if (record.version !== 1 && record.version !== 2 && record.version !== 3)
+    throw new Error("Recipe version must be 1, 2 or 3");
   const name = text(record.name, "recipe.name");
   if (
     !Array.isArray(record.tasks) ||

@@ -567,6 +567,7 @@ import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {dispatch, createSandbox, defineRecipe, type RecipeBindings, type RecipeConfiguration} from '@elie-laloum/outpost';
+import {createRecipeRegistry, defineRecipeComponent, validateRecipeProject, createRecipeRuntime} from '@elie-laloum/outpost/recipes';
 import {scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
 const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
 try {
@@ -592,6 +593,10 @@ try {
   assert.equal(configSchema.title, 'Outpost recipe execution configuration');
   const executionConfiguration: RecipeConfiguration = {sandbox:{repository}};
   assert.equal(executionConfiguration.sandbox.repository,repository);
+  const registry = createRecipeRegistry({components:[defineRecipeComponent({name:'sink.example',kind:'sink',schema:{type:'object'},create:()=>({observe(){}}),accepts:value=>!!value})]});
+  assert.equal(registry.get('sink.example').kind,'sink');
+  assert.equal(typeof validateRecipeProject,'function');
+  assert.equal(typeof createRecipeRuntime,'function');
   const cli = (await import('node:url')).fileURLToPath(new URL('./cli/main.js',import.meta.resolve('@elie-laloum/outpost')));
   const catalog = JSON.parse(execFileSync(process.execPath,[cli,'recipe','list','--json'],{encoding:'utf8'}));
   assert.ok(catalog.recipes.some((recipe: {name:string}) => recipe.name === 'review'));

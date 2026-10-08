@@ -82,7 +82,11 @@
       "import": "./dist/adapters/secrets/infisical.js"
     },
     "./recipe.schema.json": "./recipe.schema.json",
-    "./recipe-configuration.schema.json": "./recipe-configuration.schema.json"
+    "./recipe-configuration.schema.json": "./recipe-configuration.schema.json",
+    "./recipes": {
+      "types": "./dist/recipes.d.ts",
+      "import": "./dist/recipes.js"
+    }
   },
   "files": [
     "dist",
@@ -92,7 +96,8 @@
     "LICENSE",
     "recipe.schema.json",
     "recipe-configuration.schema.json",
-    "recipes"
+    "recipes/*.yaml",
+    "recipes/catalog.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -194,6 +199,7 @@
   "homepage": "https://elie-laloum.github.io/outpost/",
   "dependencies": {
     "@clack/prompts": "^1.8.1",
+    "ajv": "8.20.0",
     "commander": "^15.0.0",
     "yaml": "^2.9.1"
   },

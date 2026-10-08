@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox:
+  provider: local
+branch:
+  mode: integrate
+observation:
+  sinks:
+    - type: console
+      format: json
+reports:
+  - type: json
