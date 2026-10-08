@@ -18,6 +18,7 @@ import {
 } from "../../src/index.ts";
 import { nativeRecipeGuards } from "../../src/application/recipes/native.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
+import { repository } from "../helpers.ts";
 
 function isCliAgent(value: unknown): value is CliAgent {
   return (
@@ -28,6 +29,94 @@ function isCliAgent(value: unknown): value is CliAgent {
     value.kind === "cli"
   );
 }
+
+test("native workspace copies retain repository-relative paths", async (t) => {
+  const directory = await repository(t);
+  const git = (...args: string[]) =>
+    promisify(execFile)("git", args, { cwd: directory });
+  await writeFile(join(directory, ".gitignore"), "ignored.txt\n");
+  await git("add", ".gitignore");
+  await git("commit", "-m", "Ignore local fixture");
+  await writeFile(join(directory, "ignored.txt"), "copied fixture");
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "outpost.yaml");
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "copies",
+      tasks: [
+        {
+          key: "read",
+          command: {
+            executable: process.execPath,
+            arguments: [
+              "-e",
+              "console.log(require('fs').readFileSync('ignored.txt', 'utf8'))",
+            ],
+          },
+        },
+      ],
+    }),
+  );
+  await writeFile(
+    config,
+    JSON.stringify({
+      version: 2,
+      repository: ".",
+      sandbox: { provider: "local" },
+      branch: { mode: "integrate" },
+      workspace: { copies: ["ignored.txt"] },
+    }),
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const result = await runtime.run();
+  assert.equal(result.status, "done", JSON.stringify(result.errors));
+  assert.equal(result.outputs.read?.stdout, "copied fixture\n");
+  assert.equal(
+    await readFile(join(directory, "ignored.txt"), "utf8"),
+    "copied fixture",
+  );
+});
+
+test("missing explicitly selected agent credentials fail before repository allocation", async (t) => {
+  const directory = await mkdtemp(
+    join(tmpdir(), "outpost-recipe-credentials-"),
+  );
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "outpost.yaml");
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "credentials",
+      tasks: [{ key: "review", agent: "reviewer", brief: "Review" }],
+    }),
+  );
+  await writeFile(
+    config,
+    JSON.stringify({
+      version: 2,
+      repository: "./missing",
+      sandbox: { provider: "local" },
+      agents: {
+        reviewer: {
+          harness: "claude",
+          authentication: {
+            usage: { variable: "OUTPOST_RECIPE_MISSING_CREDENTIAL_FIXTURE" },
+          },
+        },
+      },
+    }),
+  );
+  await validateRecipeProject({ file, config });
+  await using runtime = await createRecipeRuntime({ file, config });
+  await assert.rejects(
+    runtime.run(),
+    /Missing OUTPOST_RECIPE_MISSING_CREDENTIAL_FIXTURE/,
+  );
+});
 
 test("YAML profiles and authentication compose the same CLI requests as TypeScript", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "outpost-native-components-"));

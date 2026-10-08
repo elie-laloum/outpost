@@ -3,3 +3,5 @@ export type RecipeSchemaVisitor = (
   value: unknown,
   path: string,
 ) => unknown;
+
+export type RecipeComponentMatch = (kind: string, value: unknown) => boolean;

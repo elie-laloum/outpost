@@ -1,6 +1,7 @@
 import type { JsonSchema } from "../tool.types.ts";
 
 export interface RecipeComponentContext {
+  kindOf(name: string): string;
   readonly directory: string;
   readonly signal: AbortSignal;
   resolve(name: string, kind: string): Promise<unknown>;
@@ -35,6 +36,7 @@ export interface RecipeComponentDeclaration {
 }
 
 export interface RecipeExtensionDeclaration {
+  readonly contract?: string;
   readonly module: string;
   readonly export: string;
   readonly kind: string;

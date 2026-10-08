@@ -285,3 +285,65 @@ sandbox:
 Only the selected values reach the sandbox. Validation neither imports user modules nor reads secret values. Missing values fail before allocation; the runtime masks selected values in observations, returned reports and execution diagnostics. It does not modify the host environment. See [secret sources](../secret-sources/) for manager-specific restrictions and credential ownership.
 
 Static schemas are generated from the installed public TypeScript types and checked in CI. Local lifecycle execution, extension loading, secret selection and CLI request equivalence have offline regressions. These tests do not exercise real cloud providers, secret-manager services or paid agents.
+
+## Run the Outpost harness from YAML
+
+The `outpost` harness accepts named or inline tools, permissions, context strategies, hooks, skills, model routing and conversations. Bind a model provider under `models`, then reference the harness from the recipe's agent role. All executions use the existing TypeScript harness loop, including its permission checks and cumulative subagent budgets.
+
+```yaml title="outpost.yaml — built-in harness"
+models:
+  coding:
+    type: openai
+    api: responses
+    baseUrl: https://api.openai.com/v1
+    apiKey: { env: OPENAI_API_KEY }
+harnesses:
+  coding:
+    type: outpost
+    modelProvider: { $ref: models.coding }
+    tools:
+      - type: files
+      - type: edit
+agents:
+  coder:
+    harness: { $ref: harnesses.coding }
+    model: your-model-name
+```
+
+Select a supported model for your provider before running; this configuration uses API-key billing. See [the Outpost harness](../harness/) for behavior and [model providers](../model-providers/) for connection settings. `examples/67-recipe-harness/` replaces the service with a local HTTP fixture and runs without credentials or paid calls.
+
+Format-3 agent steps accept `dispatch` options. A named response contract supplies JSON Schema validation and the existing final-answer instructions. Dispatch component references require the two-file runtime; the original `defineRecipe` bindings continue to serve borrowed-sandbox command and agent recipes.
+
+```yaml title="recipe.yaml — a structured result"
+version: 3
+name: structured-review
+tasks:
+  - key: review
+    agent: reviewer
+    brief: Review the change.
+    dispatch:
+      response: { $ref: responses.verdict }
+```
+
+Declare `responses.verdict` in the local configuration with `type: json`, a `tag` and `jsonSchema`. Optional `repairs` uses the existing response-repair loop. For custom validation, `schema` references a validator object or a callback extension. Native `text` responses, fallback agents and conversation-store components retain their TypeScript contracts.
+
+## Bind typed callbacks locally
+
+Callbacks stay in local modules and are selected through configuration. Their static `contract` names the component option they implement. The validator rejects a callback intended for another slot before loading its module; the runtime then checks that the export is callable before sandbox allocation. Callback return values remain subject to the native engine's validation.
+
+```yaml title="outpost.yaml — a hook extension"
+extensions:
+  before:
+    module: ./hooks.ts
+    export: before
+    kind: callback
+    contract: hook.custom.run
+    version: "1"
+hooks:
+  before:
+    type: custom
+    on: before-model
+    run: { $ref: extensions.before }
+```
+
+Attach the hook through `hooks: [{ $ref: hooks.before }]` on a harness. Apply the same pattern to tool execution, custom context, instructions and routing state; errors identify the required contract. Factories can also receive typed component references through schema annotations. Owned components close in dependency order; observer cleanup errors appear in `observerErrors` without changing a successful task outcome.

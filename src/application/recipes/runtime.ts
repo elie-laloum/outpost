@@ -9,6 +9,12 @@ import { publishRecipeReport } from "./reports.ts";
 import { recipeDiagnostic } from "../recipe-report.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
 import type { RecipeRuntime, RecipeProjectOptions } from "./project.types.ts";
+import type { RecipeDispatchSettings } from "./agent-components.types.ts";
+import { recipeObject } from "../../domain/recipes/values.ts";
+
+function isDispatchSettings(value: unknown): value is RecipeDispatchSettings {
+  return recipeObject(value);
+}
 
 export async function createRecipeRuntime(
   options: RecipeProjectOptions,
@@ -52,6 +58,17 @@ export async function createRecipeRuntime(
             project,
             scope,
           );
+          const requests: Record<string, RecipeDispatchSettings> = {};
+          for (const step of project.document.tasks) {
+            if (!step.dispatch) continue;
+            const request = await scope.resolve(
+              `tasks.${step.key}.dispatch`,
+              "dispatchOptions",
+            );
+            if (!isDispatchSettings(request))
+              throw new Error(`Invalid dispatch options: ${step.key}`);
+            requests[step.key] = request;
+          }
           securedObservation = observation?.child({}, [], scope.redactions);
           observation = securedObservation;
           signal.throwIfAborted();
@@ -72,6 +89,7 @@ export async function createRecipeRuntime(
               },
               signal,
               observation,
+              requests,
             ),
           );
         } catch (error) {

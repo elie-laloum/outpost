@@ -9,7 +9,11 @@ import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
 import { readRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
-import { nativeRecipeComponents, sandboxOptionsComponent } from "./native.ts";
+import {
+  nativeRecipeComponents,
+  sandboxOptionsComponent,
+  dispatchOptionsComponent,
+} from "./native.ts";
 import { secretSelectionComponent } from "./variables.ts";
 import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
@@ -87,12 +91,18 @@ export async function readRecipeProject(
         ...observationComponents,
         ...nativeRecipeComponents,
         sandboxOptionsComponent,
+        dispatchOptionsComponent,
         secretSelectionComponent,
         ...(options.registry?.components ?? []),
       ],
     });
     const directory = dirname(config);
-    const graph = recipeComponentGraph(configuration, registry, directory);
+    const graph = recipeComponentGraph(
+      configuration,
+      registry,
+      directory,
+      document,
+    );
     const reports = configuration.reports ?? [];
     if (!Array.isArray(reports)) throw new Error("reports must be a list");
     return {

@@ -1,6 +1,1869 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "steering.controller": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "harness.outpost": {
+    type: "object",
+    properties: {
+      routing: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "routing",
+      },
+      modelProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "modelProvider",
+      },
+      instructions: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "instructions",
+          },
+          {
+            type: "array",
+            items: {
+              anyOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "instructions",
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tools: {
+        type: "array",
+        items: {
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "tool",
+            },
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "toolset",
+            },
+          ],
+        },
+      },
+      limits: {
+        type: "object",
+        properties: {
+          maxSteps: {
+            type: "number",
+          },
+          maxDelegationDepth: {
+            type: "number",
+          },
+          maxToolCalls: {
+            type: "number",
+          },
+          usage: {
+            type: "object",
+            properties: {
+              input: {
+                type: "number",
+              },
+              cached: {
+                type: "number",
+              },
+              cacheCreated: {
+                type: "number",
+              },
+              output: {
+                type: "number",
+              },
+            },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+      },
+      toolExecution: {
+        type: "object",
+        properties: {
+          concurrency: {
+            type: "number",
+          },
+          deadlineMs: {
+            type: "number",
+          },
+          onError: {
+            anyOf: [
+              {
+                const: "return-to-model",
+              },
+              {
+                const: "fail",
+              },
+            ],
+          },
+        },
+        additionalProperties: false,
+      },
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "hook",
+        },
+      },
+      permissions: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "permissions",
+      },
+      context: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "context",
+      },
+      conversations: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "conversations",
+          },
+        ],
+      },
+      skills: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "skill",
+        },
+      },
+      cache: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      mcpServers: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                command: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                environment: {
+                  type: "object",
+                  properties: {},
+                  additionalProperties: {
+                    type: "string",
+                  },
+                },
+                variables: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                tools: {
+                  type: "object",
+                  properties: {
+                    include: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    exclude: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  additionalProperties: false,
+                },
+                startupTimeoutMs: {
+                  type: "number",
+                },
+              },
+              required: ["command"],
+              additionalProperties: false,
+            },
+            {
+              type: "object",
+              properties: {
+                url: {
+                  type: "string",
+                },
+                headers: {
+                  type: "object",
+                  properties: {},
+                  additionalProperties: {
+                    type: "string",
+                  },
+                },
+                bearerTokenVariable: {
+                  type: "string",
+                },
+                oauth: {
+                  anyOf: [
+                    {
+                      const: "login",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        clientIdVariable: {
+                          type: "string",
+                        },
+                        clientSecretVariable: {
+                          type: "string",
+                        },
+                        scopes: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                        },
+                      },
+                      required: ["clientIdVariable", "clientSecretVariable"],
+                      additionalProperties: false,
+                    },
+                  ],
+                },
+                tools: {
+                  type: "object",
+                  properties: {
+                    include: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    exclude: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  additionalProperties: false,
+                },
+                startupTimeoutMs: {
+                  type: "number",
+                },
+              },
+              required: ["url"],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+      profile: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "profile",
+      },
+    },
+    required: ["modelProvider"],
+    additionalProperties: false,
+  },
+  "modelProvider.openai": {
+    type: "object",
+    properties: {
+      api: {
+        anyOf: [
+          {
+            const: "chat-completions",
+          },
+          {
+            const: "responses",
+          },
+        ],
+      },
+      baseUrl: {
+        type: "string",
+      },
+      apiKey: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            const: false,
+          },
+        ],
+      },
+      timeoutMs: {
+        type: "number",
+      },
+      maxResponseBytes: {
+        type: "number",
+      },
+    },
+    required: ["baseUrl", "apiKey"],
+    additionalProperties: false,
+  },
+  "modelProvider.anthropic": {
+    type: "object",
+    properties: {
+      apiKey: {
+        type: "object",
+        properties: {
+          env: {
+            type: "string",
+            pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+          },
+        },
+        required: ["env"],
+        additionalProperties: false,
+        secret: true,
+      },
+      baseUrl: {
+        type: "string",
+      },
+      cacheSystem: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      timeoutMs: {
+        type: "number",
+      },
+      maxResponseBytes: {
+        type: "number",
+      },
+    },
+    required: ["apiKey"],
+    additionalProperties: false,
+  },
+  "decisionProvider.system-one": {
+    type: "object",
+    properties: {
+      baseUrl: {
+        type: "string",
+      },
+      apiKey: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              env: {
+                type: "string",
+                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+              },
+            },
+            required: ["env"],
+            additionalProperties: false,
+            secret: true,
+          },
+          {
+            const: false,
+          },
+        ],
+      },
+      timeoutMs: {
+        type: "number",
+      },
+      maxResponseBytes: {
+        type: "number",
+      },
+    },
+    required: ["baseUrl", "apiKey"],
+    additionalProperties: false,
+  },
+  "tool.custom": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+      },
+      input: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "validator",
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: {},
+          },
+        ],
+      },
+      readOnly: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      resources: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "tool.custom.resources",
+      },
+      execute: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "tool.custom.execute",
+      },
+    },
+    required: ["name", "description", "input", "execute"],
+    additionalProperties: false,
+  },
+  "tool.subagent": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+      },
+      agent: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "agent",
+      },
+    },
+    required: ["name", "description", "agent"],
+    additionalProperties: false,
+  },
+  "toolset.custom": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      tools: {
+        type: "array",
+        items: {
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "tool",
+            },
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "toolset",
+            },
+          ],
+        },
+      },
+    },
+    required: ["name", "tools"],
+    additionalProperties: false,
+  },
+  "toolset.files": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "toolset.edit": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "toolset.git": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "toolset.search": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "toolset.shell": {
+    type: "object",
+    properties: {
+      deadlineMs: {
+        type: "number",
+      },
+    },
+    additionalProperties: false,
+  },
+  "permissions.rules": {
+    type: "object",
+    properties: {
+      rules: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            effect: {
+              anyOf: [
+                {
+                  const: "allow",
+                },
+                {
+                  const: "deny",
+                },
+              ],
+            },
+            tools: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+            paths: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+            commands: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+            reason: {
+              type: "string",
+            },
+          },
+          required: ["effect"],
+          additionalProperties: false,
+        },
+      },
+      default: {
+        anyOf: [
+          {
+            const: "allow",
+          },
+          {
+            const: "deny",
+          },
+        ],
+      },
+    },
+    required: ["rules"],
+    additionalProperties: false,
+  },
+  "hook.custom": {
+    type: "object",
+    properties: {
+      on: {
+        anyOf: [
+          {
+            const: "session-start",
+          },
+          {
+            const: "before-model",
+          },
+          {
+            const: "after-model",
+          },
+          {
+            const: "before-tool",
+          },
+          {
+            const: "after-tool",
+          },
+          {
+            const: "stop",
+          },
+        ],
+      },
+      name: {
+        type: "string",
+      },
+      run: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "hook.custom.run",
+      },
+    },
+    required: ["on", "run"],
+    additionalProperties: false,
+  },
+  "skill.custom": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      description: {
+        type: "string",
+      },
+      instructions: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "skill.custom.instructions",
+          },
+        ],
+      },
+      tools: {
+        type: "array",
+        items: {
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "tool",
+            },
+            {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "toolset",
+            },
+          ],
+        },
+      },
+    },
+    required: ["name", "description", "instructions"],
+    additionalProperties: false,
+  },
+  "context.custom": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      compact: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "context.custom.compact",
+      },
+    },
+    required: ["name", "compact"],
+    additionalProperties: false,
+  },
+  "context.truncate": {
+    type: "object",
+    properties: {
+      keepRecent: {
+        type: "number",
+      },
+      maxCharacters: {
+        type: "number",
+      },
+    },
+    additionalProperties: false,
+  },
+  "context.summarize": {
+    type: "object",
+    properties: {
+      triggerCharacters: {
+        type: "number",
+      },
+      keepRecentMessages: {
+        type: "number",
+      },
+    },
+    additionalProperties: false,
+  },
+  "instructions.source": {
+    type: "object",
+    properties: {
+      source: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "instructions.source.source",
+          },
+        ],
+      },
+    },
+    required: ["source"],
+    additionalProperties: false,
+  },
+  "instructions.mcp": {
+    type: "object",
+    properties: {
+      server: {
+        type: "string",
+      },
+      name: {
+        type: "string",
+      },
+      arguments: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          type: "string",
+        },
+      },
+    },
+    required: ["server", "name"],
+    additionalProperties: false,
+  },
+  "agent.fallback": {
+    type: "object",
+    properties: {
+      agents: {
+        type: "array",
+        prefixItems: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "agent",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "agent",
+          },
+        ],
+        minItems: 2,
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "agent",
+        },
+      },
+      on: {
+        type: "array",
+        items: {
+          anyOf: [
+            {
+              const: "quota",
+            },
+            {
+              const: "unavailable",
+            },
+          ],
+        },
+      },
+    },
+    required: ["agents", "on"],
+    additionalProperties: false,
+  },
+  "agent.replay": {
+    type: "object",
+    properties: {
+      journal: {
+        type: "array",
+        items: {},
+      },
+      divergence: {
+        anyOf: [
+          {
+            const: "fail",
+          },
+          {
+            const: "warn",
+          },
+        ],
+      },
+    },
+    required: ["journal"],
+    additionalProperties: false,
+  },
+  "response.json": {
+    type: "object",
+    properties: {
+      tag: {
+        type: "string",
+      },
+      repairs: {
+        type: "number",
+      },
+      jsonSchema: {
+        type: "object",
+        properties: {},
+        additionalProperties: {},
+      },
+      schema: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "validator",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "response.json.schema",
+          },
+        ],
+      },
+    },
+    required: ["tag", "jsonSchema"],
+    additionalProperties: false,
+  },
+  "response.text": {
+    type: "object",
+    properties: {
+      tag: {
+        type: "string",
+      },
+      repairs: {
+        type: "number",
+      },
+    },
+    required: ["tag"],
+    additionalProperties: false,
+  },
+  "decision.questions": {
+    type: "object",
+    properties: {
+      questions: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          anyOf: [
+            {
+              type: "object",
+              properties: {
+                type: {
+                  const: "choice",
+                },
+                instructions: {
+                  type: "string",
+                },
+                criteria: {
+                  type: "object",
+                  properties: {},
+                  additionalProperties: {
+                    type: "string",
+                  },
+                },
+              },
+              required: ["type", "instructions", "criteria"],
+              additionalProperties: false,
+            },
+            {
+              type: "object",
+              properties: {
+                type: {
+                  const: "score",
+                },
+                instructions: {
+                  type: "string",
+                },
+                criteria: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+              },
+              required: ["type", "instructions", "criteria"],
+              additionalProperties: false,
+            },
+            {
+              type: "object",
+              properties: {
+                type: {
+                  const: "noul",
+                },
+                instructions: {
+                  type: "string",
+                },
+                criteria: {
+                  type: "object",
+                  properties: {
+                    true: {
+                      type: "string",
+                    },
+                    false: {
+                      type: "string",
+                    },
+                  },
+                  required: ["true", "false"],
+                  additionalProperties: false,
+                },
+              },
+              required: ["type", "instructions"],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+    },
+    required: ["questions"],
+    additionalProperties: false,
+  },
+  "routing.decision": {
+    type: "object",
+    properties: {
+      question: {
+        type: "string",
+      },
+      models: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          anyOf: [
+            {
+              type: "string",
+            },
+            {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                },
+                reasoning: {
+                  anyOf: [
+                    {
+                      const: "none",
+                    },
+                    {
+                      const: "minimal",
+                    },
+                    {
+                      const: "low",
+                    },
+                    {
+                      const: "medium",
+                    },
+                    {
+                      const: "high",
+                    },
+                    {
+                      const: "xhigh",
+                    },
+                    {
+                      const: "max",
+                    },
+                  ],
+                },
+                maxOutputTokens: {
+                  type: "number",
+                },
+              },
+              required: ["name"],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+      fallback: {
+        type: "string",
+      },
+      provider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "decisionProvider",
+      },
+      model: {
+        type: "string",
+      },
+      decision: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "decision",
+      },
+      minConfidence: {
+        type: "number",
+      },
+      onError: {
+        anyOf: [
+          {
+            const: "fail",
+          },
+          {
+            const: "fallback",
+          },
+        ],
+      },
+      state: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "routing.decision.state",
+      },
+    },
+    required: [
+      "question",
+      "models",
+      "fallback",
+      "provider",
+      "model",
+      "decision",
+    ],
+    additionalProperties: false,
+  },
+  "conversations.transport": {
+    type: "object",
+    properties: {
+      base: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "conversations",
+      },
+      namespace: {
+        type: "string",
+      },
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+    },
+    required: ["base", "namespace", "transporter"],
+    additionalProperties: false,
+  },
+  "conversations.harness": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "conversations.claude": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "conversations.codex": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "conversations.copilot": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "conversations.kimi": {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  "conversations.transcript": {
+    type: "object",
+    properties: {
+      format: {
+        type: "string",
+      },
+      sidecars: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      searchRoot: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.searchRoot",
+      },
+      remoteSearchRoot: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.remoteSearchRoot",
+      },
+      pattern: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.pattern",
+      },
+      matches: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.matches",
+      },
+      directory: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.directory",
+      },
+      preferredPath: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.preferredPath",
+      },
+      capturePath: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.capturePath",
+      },
+      remotePath: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.transcript.remotePath",
+      },
+    },
+    required: [
+      "format",
+      "sidecars",
+      "searchRoot",
+      "remoteSearchRoot",
+      "pattern",
+      "matches",
+      "directory",
+      "capturePath",
+      "remotePath",
+    ],
+    additionalProperties: false,
+  },
+  "conversations.bundle": {
+    type: "object",
+    properties: {
+      format: {
+        type: "string",
+      },
+      root: {
+        type: "object",
+        properties: {
+          variable: {
+            type: "string",
+          },
+          directory: {
+            type: "string",
+          },
+        },
+        required: ["directory"],
+        additionalProperties: false,
+      },
+      sessions: {
+        type: "string",
+      },
+      buckets: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      include: {
+        type: "object",
+        properties: {
+          pattern: {
+            type: "string",
+          },
+          flags: {
+            type: "string",
+          },
+        },
+        required: ["pattern"],
+        additionalProperties: false,
+        regexp: true,
+      },
+      exclude: {
+        type: "object",
+        properties: {
+          pattern: {
+            type: "string",
+          },
+          flags: {
+            type: "string",
+          },
+        },
+        required: ["pattern"],
+        additionalProperties: false,
+        regexp: true,
+      },
+      required: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      relocated: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      validate: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.bundle.validate",
+      },
+      bucket: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.bundle.bucket",
+      },
+      relocate: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "conversations.bundle.relocate",
+      },
+    },
+    required: ["format", "root", "sessions", "include", "required"],
+    additionalProperties: false,
+  },
+  "dispatch.options": {
+    type: "object",
+    properties: {
+      warn: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "dispatch.options.warn",
+      },
+      watchdog: {
+        type: "object",
+        properties: {
+          repetition: {
+            type: "object",
+            properties: {
+              window: {
+                type: "number",
+              },
+              maxRepeats: {
+                type: "number",
+              },
+            },
+            required: ["window", "maxRepeats"],
+            additionalProperties: false,
+          },
+          onStuck: {
+            anyOf: [
+              {
+                const: "stop",
+              },
+              {
+                const: "warn",
+              },
+              {
+                type: "object",
+                properties: {
+                  instruction: {
+                    type: "string",
+                  },
+                  maxInterventions: {
+                    type: "number",
+                  },
+                },
+                required: ["instruction"],
+                additionalProperties: false,
+              },
+            ],
+          },
+        },
+        required: ["repetition", "onStuck"],
+        additionalProperties: false,
+      },
+      prices: {
+        type: "object",
+        properties: {
+          currency: {
+            anyOf: [
+              {
+                const: "EUR",
+              },
+              {
+                const: "USD",
+              },
+            ],
+          },
+          models: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                input: {
+                  type: "number",
+                },
+                output: {
+                  type: "number",
+                },
+                cached: {
+                  type: "number",
+                },
+                cacheCreated: {
+                  type: "number",
+                },
+              },
+              required: ["input", "output"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["currency", "models"],
+        additionalProperties: false,
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      label: {
+        type: "string",
+      },
+      passes: {
+        type: "number",
+      },
+      until: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+        ],
+      },
+      idleMs: {
+        type: "number",
+      },
+      idleWarningMs: {
+        type: "number",
+      },
+      settleMs: {
+        type: "number",
+      },
+      deadlineMs: {
+        type: "number",
+      },
+      expansionMs: {
+        type: "number",
+      },
+      steering: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "steering",
+      },
+      continuation: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+          },
+          fork: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+        },
+        required: ["id"],
+        additionalProperties: false,
+      },
+      response: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "response",
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "dispatch.options.observe",
+      },
+      diagnostic: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "dispatch.options.diagnostic",
+      },
+    },
+    additionalProperties: false,
+  },
   "sandboxProvider.docker": {
     type: "object",
     properties: {
@@ -699,9 +2562,10 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               runtime: {
-                $ref: "#/$defs/option16",
+                $ref: "#/$defs/option18",
               },
               image: false,
               fetch: {
@@ -715,6 +2579,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             additionalProperties: false,
@@ -857,10 +2722,11 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               runtime: false,
               image: {
-                $ref: "#/$defs/option17",
+                $ref: "#/$defs/option20",
               },
               fetch: {
                 type: "object",
@@ -873,6 +2739,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             additionalProperties: false,
@@ -1012,6 +2879,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               source: {
                 type: "object",
@@ -1039,6 +2907,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             required: ["source"],
@@ -1182,9 +3051,10 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               runtime: {
-                $ref: "#/$defs/option16",
+                $ref: "#/$defs/option18",
               },
               image: false,
               token: {
@@ -1216,6 +3086,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             required: ["token", "projectId", "teamId"],
@@ -1359,10 +3230,11 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               runtime: false,
               image: {
-                $ref: "#/$defs/option17",
+                $ref: "#/$defs/option20",
               },
               token: {
                 type: "object",
@@ -1393,6 +3265,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             required: ["token", "projectId", "teamId"],
@@ -1533,6 +3406,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.onResume",
               },
               source: {
                 type: "object",
@@ -1578,6 +3452,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandboxProvider.vercel.create.fetch",
               },
             },
             required: ["source", "token", "projectId", "teamId"],
@@ -1628,6 +3503,19 @@ export const nativeRecipeSchemas: Readonly<
       },
       retain: {
         type: "number",
+      },
+      connect: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sandboxProvider.vercel.connect",
       },
     },
     additionalProperties: false,
@@ -2043,6 +3931,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.charAt",
           },
           charCodeAt: {
             type: "object",
@@ -2055,6 +3944,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.charCodeAt",
           },
           concat: {
             type: "object",
@@ -2067,6 +3957,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.concat",
           },
           indexOf: {
             type: "object",
@@ -2079,6 +3970,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.indexOf",
           },
           lastIndexOf: {
             type: "object",
@@ -2091,6 +3983,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.lastIndexOf",
           },
           localeCompare: {
             type: "object",
@@ -2103,6 +3996,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.localeCompare",
           },
           match: {
             type: "object",
@@ -2115,6 +4009,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.match",
           },
           replace: {
             type: "object",
@@ -2127,6 +4022,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.replace",
           },
           search: {
             type: "object",
@@ -2139,6 +4035,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.search",
           },
           slice: {
             type: "object",
@@ -2151,6 +4048,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.slice",
           },
           split: {
             type: "object",
@@ -2163,6 +4061,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.split",
           },
           substring: {
             type: "object",
@@ -2175,6 +4074,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.substring",
           },
           toLowerCase: {
             type: "object",
@@ -2187,6 +4087,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.toLowerCase",
           },
           toLocaleLowerCase: {
             type: "object",
@@ -2199,6 +4100,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.toLocaleLowerCase",
           },
           toUpperCase: {
             type: "object",
@@ -2211,6 +4113,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.toUpperCase",
           },
           toLocaleUpperCase: {
             type: "object",
@@ -2223,6 +4126,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.toLocaleUpperCase",
           },
           trim: {
             type: "object",
@@ -2235,6 +4139,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.trim",
           },
           length: {
             type: "number",
@@ -2250,6 +4155,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.substr",
           },
           valueOf: {
             type: "object",
@@ -2273,6 +4179,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.codePointAt",
           },
           includes: {
             type: "object",
@@ -2285,6 +4192,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.includes",
           },
           endsWith: {
             type: "object",
@@ -2297,6 +4205,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.endsWith",
           },
           normalize: {
             type: "object",
@@ -2309,6 +4218,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.normalize",
           },
           repeat: {
             type: "object",
@@ -2321,6 +4231,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.repeat",
           },
           startsWith: {
             type: "object",
@@ -2333,6 +4244,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.startsWith",
           },
           anchor: {
             type: "object",
@@ -2345,6 +4257,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.anchor",
           },
           big: {
             type: "object",
@@ -2357,6 +4270,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.big",
           },
           blink: {
             type: "object",
@@ -2369,6 +4283,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.blink",
           },
           bold: {
             type: "object",
@@ -2381,6 +4296,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.bold",
           },
           fixed: {
             type: "object",
@@ -2393,6 +4309,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.fixed",
           },
           fontcolor: {
             type: "object",
@@ -2405,6 +4322,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.fontcolor",
           },
           fontsize: {
             type: "object",
@@ -2417,6 +4335,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.fontsize",
           },
           italics: {
             type: "object",
@@ -2429,6 +4348,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.italics",
           },
           link: {
             type: "object",
@@ -2441,6 +4361,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.link",
           },
           small: {
             type: "object",
@@ -2453,6 +4374,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.small",
           },
           strike: {
             type: "object",
@@ -2465,6 +4387,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.strike",
           },
           sub: {
             type: "object",
@@ -2477,6 +4400,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.sub",
           },
           sup: {
             type: "object",
@@ -2489,6 +4413,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.sup",
           },
           padStart: {
             type: "object",
@@ -2501,6 +4426,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.padStart",
           },
           padEnd: {
             type: "object",
@@ -2513,6 +4439,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.padEnd",
           },
           trimEnd: {
             type: "object",
@@ -2525,6 +4452,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.trimEnd",
           },
           trimStart: {
             type: "object",
@@ -2537,6 +4465,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.trimStart",
           },
           trimLeft: {
             type: "object",
@@ -2549,6 +4478,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.trimLeft",
           },
           trimRight: {
             type: "object",
@@ -2561,6 +4491,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.trimRight",
           },
           matchAll: {
             type: "object",
@@ -2573,6 +4504,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.matchAll",
           },
           replaceAll: {
             type: "object",
@@ -2585,6 +4517,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.replaceAll",
           },
           at: {
             type: "object",
@@ -2597,6 +4530,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.at",
           },
           isWellFormed: {
             type: "object",
@@ -2609,6 +4543,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.isWellFormed",
           },
           toWellFormed: {
             type: "object",
@@ -2621,6 +4556,7 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "callback",
+            contract: "sandboxProvider.vercel.create.region.toWellFormed",
           },
         },
         required: [
@@ -2681,13 +4617,808 @@ export const nativeRecipeSchemas: Readonly<
       option15: {
         type: "array",
         items: {
-          $ref: "#/$defs/option13",
+          $ref: "#/$defs/option16",
         },
       },
       option16: {
         anyOf: [
           {
-            $ref: "#/$defs/option14",
+            const: "iad1",
+          },
+          {
+            const: "sfo1",
+          },
+          {
+            const: "cle1",
+          },
+          {
+            const: "cdg1",
+          },
+          {
+            const: "fra1",
+          },
+          {
+            const: "arn1",
+          },
+          {
+            const: "sin1",
+          },
+          {
+            const: "pdx1",
+          },
+          {
+            const: "lhr1",
+          },
+          {
+            const: "icn1",
+          },
+          {
+            const: "bom1",
+          },
+          {
+            const: "cpt1",
+          },
+          {
+            const: "dub1",
+          },
+          {
+            const: "gru1",
+          },
+          {
+            const: "hkg1",
+          },
+          {
+            const: "syd1",
+          },
+          {
+            const: "yul1",
+          },
+          {
+            const: "hnd1",
+          },
+          {
+            const: "kix1",
+          },
+          {
+            $ref: "#/$defs/option17",
+          },
+        ],
+      },
+      option17: {
+        type: "object",
+        properties: {
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          charAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.charAt",
+          },
+          charCodeAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.charCodeAt",
+          },
+          concat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.concat",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.indexOf",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.lastIndexOf",
+          },
+          localeCompare: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.localeCompare",
+          },
+          match: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.match",
+          },
+          replace: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.replace",
+          },
+          search: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.search",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.slice",
+          },
+          split: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.split",
+          },
+          substring: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.substring",
+          },
+          toLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.toLowerCase",
+          },
+          toLocaleLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.toLocaleLowerCase",
+          },
+          toUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.toUpperCase",
+          },
+          toLocaleUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.toLocaleUpperCase",
+          },
+          trim: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.trim",
+          },
+          length: {
+            type: "number",
+          },
+          substr: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.substr",
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          codePointAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.codePointAt",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.includes",
+          },
+          endsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.endsWith",
+          },
+          normalize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.normalize",
+          },
+          repeat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.repeat",
+          },
+          startsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.startsWith",
+          },
+          anchor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.anchor",
+          },
+          big: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.big",
+          },
+          blink: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.blink",
+          },
+          bold: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.bold",
+          },
+          fixed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.fixed",
+          },
+          fontcolor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.fontcolor",
+          },
+          fontsize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.fontsize",
+          },
+          italics: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.italics",
+          },
+          link: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.link",
+          },
+          small: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.small",
+          },
+          strike: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.strike",
+          },
+          sub: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.sub",
+          },
+          sup: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.sup",
+          },
+          padStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.padStart",
+          },
+          padEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.padEnd",
+          },
+          trimEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.trimEnd",
+          },
+          trimStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.trimStart",
+          },
+          trimLeft: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.trimLeft",
+          },
+          trimRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.trimRight",
+          },
+          matchAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.matchAll",
+          },
+          replaceAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.replaceAll",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.failoverRegions.*.at",
+          },
+          isWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.isWellFormed",
+          },
+          toWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract:
+              "sandboxProvider.vercel.create.failoverRegions.*.toWellFormed",
+          },
+        },
+        required: [
+          "toString",
+          "charAt",
+          "charCodeAt",
+          "concat",
+          "indexOf",
+          "lastIndexOf",
+          "localeCompare",
+          "match",
+          "replace",
+          "search",
+          "slice",
+          "split",
+          "substring",
+          "toLowerCase",
+          "toLocaleLowerCase",
+          "toUpperCase",
+          "toLocaleUpperCase",
+          "trim",
+          "length",
+          "substr",
+          "valueOf",
+          "codePointAt",
+          "includes",
+          "endsWith",
+          "normalize",
+          "repeat",
+          "startsWith",
+          "anchor",
+          "big",
+          "blink",
+          "bold",
+          "fixed",
+          "fontcolor",
+          "fontsize",
+          "italics",
+          "link",
+          "small",
+          "strike",
+          "sub",
+          "sup",
+          "padStart",
+          "padEnd",
+          "trimEnd",
+          "trimStart",
+          "trimLeft",
+          "trimRight",
+          "matchAll",
+          "replaceAll",
+          "at",
+          "isWellFormed",
+          "toWellFormed",
+        ],
+        additionalProperties: false,
+      },
+      option18: {
+        anyOf: [
+          {
+            $ref: "#/$defs/option19",
           },
           {
             const: "node26",
@@ -2703,10 +5434,718 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
-      option17: {
+      option19: {
+        type: "object",
+        properties: {
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          charAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.charAt",
+          },
+          charCodeAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.charCodeAt",
+          },
+          concat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.concat",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.indexOf",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.lastIndexOf",
+          },
+          localeCompare: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.localeCompare",
+          },
+          match: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.match",
+          },
+          replace: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.replace",
+          },
+          search: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.search",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.slice",
+          },
+          split: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.split",
+          },
+          substring: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.substring",
+          },
+          toLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.toLowerCase",
+          },
+          toLocaleLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.toLocaleLowerCase",
+          },
+          toUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.toUpperCase",
+          },
+          toLocaleUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.toLocaleUpperCase",
+          },
+          trim: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.trim",
+          },
+          length: {
+            type: "number",
+          },
+          substr: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.substr",
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          codePointAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.codePointAt",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.includes",
+          },
+          endsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.endsWith",
+          },
+          normalize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.normalize",
+          },
+          repeat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.repeat",
+          },
+          startsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.startsWith",
+          },
+          anchor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.anchor",
+          },
+          big: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.big",
+          },
+          blink: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.blink",
+          },
+          bold: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.bold",
+          },
+          fixed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.fixed",
+          },
+          fontcolor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.fontcolor",
+          },
+          fontsize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.fontsize",
+          },
+          italics: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.italics",
+          },
+          link: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.link",
+          },
+          small: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.small",
+          },
+          strike: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.strike",
+          },
+          sub: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.sub",
+          },
+          sup: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.sup",
+          },
+          padStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.padStart",
+          },
+          padEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.padEnd",
+          },
+          trimEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.trimEnd",
+          },
+          trimStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.trimStart",
+          },
+          trimLeft: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.trimLeft",
+          },
+          trimRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.trimRight",
+          },
+          matchAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.matchAll",
+          },
+          replaceAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.replaceAll",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.at",
+          },
+          isWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.isWellFormed",
+          },
+          toWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.runtime.toWellFormed",
+          },
+        },
+        required: [
+          "toString",
+          "charAt",
+          "charCodeAt",
+          "concat",
+          "indexOf",
+          "lastIndexOf",
+          "localeCompare",
+          "match",
+          "replace",
+          "search",
+          "slice",
+          "split",
+          "substring",
+          "toLowerCase",
+          "toLocaleLowerCase",
+          "toUpperCase",
+          "toLocaleUpperCase",
+          "trim",
+          "length",
+          "substr",
+          "valueOf",
+          "codePointAt",
+          "includes",
+          "endsWith",
+          "normalize",
+          "repeat",
+          "startsWith",
+          "anchor",
+          "big",
+          "blink",
+          "bold",
+          "fixed",
+          "fontcolor",
+          "fontsize",
+          "italics",
+          "link",
+          "small",
+          "strike",
+          "sub",
+          "sup",
+          "padStart",
+          "padEnd",
+          "trimEnd",
+          "trimStart",
+          "trimLeft",
+          "trimRight",
+          "matchAll",
+          "replaceAll",
+          "at",
+          "isWellFormed",
+          "toWellFormed",
+        ],
+        additionalProperties: false,
+      },
+      option20: {
         anyOf: [
           {
-            $ref: "#/$defs/option14",
+            $ref: "#/$defs/option21",
           },
           {
             const: "vercel/sandbox/universal",
@@ -2730,6 +6169,714 @@ export const nativeRecipeSchemas: Readonly<
             const: "vercel/sandbox/arch",
           },
         ],
+      },
+      option21: {
+        type: "object",
+        properties: {
+          toString: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          charAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.charAt",
+          },
+          charCodeAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.charCodeAt",
+          },
+          concat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.concat",
+          },
+          indexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.indexOf",
+          },
+          lastIndexOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.lastIndexOf",
+          },
+          localeCompare: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.localeCompare",
+          },
+          match: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.match",
+          },
+          replace: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.replace",
+          },
+          search: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.search",
+          },
+          slice: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.slice",
+          },
+          split: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.split",
+          },
+          substring: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.substring",
+          },
+          toLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.toLowerCase",
+          },
+          toLocaleLowerCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.toLocaleLowerCase",
+          },
+          toUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.toUpperCase",
+          },
+          toLocaleUpperCase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.toLocaleUpperCase",
+          },
+          trim: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.trim",
+          },
+          length: {
+            type: "number",
+          },
+          substr: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.substr",
+          },
+          valueOf: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+          },
+          codePointAt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.codePointAt",
+          },
+          includes: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.includes",
+          },
+          endsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.endsWith",
+          },
+          normalize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.normalize",
+          },
+          repeat: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.repeat",
+          },
+          startsWith: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.startsWith",
+          },
+          anchor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.anchor",
+          },
+          big: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.big",
+          },
+          blink: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.blink",
+          },
+          bold: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.bold",
+          },
+          fixed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.fixed",
+          },
+          fontcolor: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.fontcolor",
+          },
+          fontsize: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.fontsize",
+          },
+          italics: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.italics",
+          },
+          link: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.link",
+          },
+          small: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.small",
+          },
+          strike: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.strike",
+          },
+          sub: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.sub",
+          },
+          sup: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.sup",
+          },
+          padStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.padStart",
+          },
+          padEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.padEnd",
+          },
+          trimEnd: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.trimEnd",
+          },
+          trimStart: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.trimStart",
+          },
+          trimLeft: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.trimLeft",
+          },
+          trimRight: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.trimRight",
+          },
+          matchAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.matchAll",
+          },
+          replaceAll: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.replaceAll",
+          },
+          at: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.at",
+          },
+          isWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.isWellFormed",
+          },
+          toWellFormed: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sandboxProvider.vercel.create.image.toWellFormed",
+          },
+        },
+        required: [
+          "toString",
+          "charAt",
+          "charCodeAt",
+          "concat",
+          "indexOf",
+          "lastIndexOf",
+          "localeCompare",
+          "match",
+          "replace",
+          "search",
+          "slice",
+          "split",
+          "substring",
+          "toLowerCase",
+          "toLocaleLowerCase",
+          "toUpperCase",
+          "toLocaleUpperCase",
+          "trim",
+          "length",
+          "substr",
+          "valueOf",
+          "codePointAt",
+          "includes",
+          "endsWith",
+          "normalize",
+          "repeat",
+          "startsWith",
+          "anchor",
+          "big",
+          "blink",
+          "bold",
+          "fixed",
+          "fontcolor",
+          "fontsize",
+          "italics",
+          "link",
+          "small",
+          "strike",
+          "sub",
+          "sup",
+          "padStart",
+          "padEnd",
+          "trimEnd",
+          "trimStart",
+          "trimLeft",
+          "trimRight",
+          "matchAll",
+          "replaceAll",
+          "at",
+          "isWellFormed",
+          "toWellFormed",
+        ],
+        additionalProperties: false,
       },
     },
   },
@@ -3270,6 +7417,19 @@ export const nativeRecipeSchemas: Readonly<
       },
       retain: {
         type: "number",
+      },
+      connect: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sandboxProvider.daytona.connect",
       },
     },
     additionalProperties: false,
@@ -3906,13 +8066,13 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
+                                    const: "unavailable",
+                                  },
+                                  {
                                     const: "selected",
                                   },
                                   {
                                     const: "confidence",
-                                  },
-                                  {
-                                    const: "unavailable",
                                   },
                                 ],
                               },
@@ -4260,10 +8420,10 @@ export const nativeRecipeSchemas: Readonly<
                               channel: {
                                 anyOf: [
                                   {
-                                    const: "stderr",
+                                    const: "stdout",
                                   },
                                   {
-                                    const: "stdout",
+                                    const: "stderr",
                                   },
                                 ],
                               },
@@ -4698,13 +8858,13 @@ export const nativeRecipeSchemas: Readonly<
                               action: {
                                 anyOf: [
                                   {
+                                    const: "stop",
+                                  },
+                                  {
                                     const: "warn",
                                   },
                                   {
                                     const: "steer",
-                                  },
-                                  {
-                                    const: "stop",
                                   },
                                 ],
                               },
@@ -4834,6 +8994,18 @@ export const nativeRecipeSchemas: Readonly<
                         code: {
                           anyOf: [
                             {
+                              const: "quota",
+                            },
+                            {
+                              const: "provider",
+                            },
+                            {
+                              const: "steering",
+                            },
+                            {
+                              const: "response",
+                            },
+                            {
                               const: "timeout",
                             },
                             {
@@ -4847,9 +9019,6 @@ export const nativeRecipeSchemas: Readonly<
                             },
                             {
                               const: "prompt",
-                            },
-                            {
-                              const: "quota",
                             },
                             {
                               const: "guard",
@@ -4870,19 +9039,10 @@ export const nativeRecipeSchemas: Readonly<
                               const: "conflict",
                             },
                             {
-                              const: "response",
-                            },
-                            {
                               const: "session",
                             },
                             {
-                              const: "provider",
-                            },
-                            {
                               const: "limit",
-                            },
-                            {
-                              const: "steering",
                             },
                           ],
                         },
@@ -5045,6 +9205,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandbox.options.agent.nextTurn",
               },
               pendingSteering: {
                 type: "object",
@@ -5057,6 +9218,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandbox.options.agent.pendingSteering",
               },
               usageInput: {
                 anyOf: [
@@ -5188,6 +9350,7 @@ export const nativeRecipeSchemas: Readonly<
                 required: ["$ref"],
                 additionalProperties: false,
                 component: "callback",
+                contract: "sandbox.options.agent.transcriptUsage",
               },
             },
             required: [
@@ -5228,10 +9391,10 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   anyOf: [
                     {
-                      const: "unavailable",
+                      const: "quota",
                     },
                     {
-                      const: "quota",
+                      const: "unavailable",
                     },
                   ],
                 },
@@ -5270,13 +9433,403 @@ export const nativeRecipeSchemas: Readonly<
         type: "object",
         properties: {
           workspaceReady: {
-            $ref: "#/$defs/option2",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "sandbox.options.hooks.workspaceReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
           },
           hostReady: {
-            $ref: "#/$defs/option2",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "sandbox.options.hooks.hostReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
           },
           sandboxReady: {
-            $ref: "#/$defs/option2",
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "sandbox.options.hooks.sandboxReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
           },
         },
         additionalProperties: false,
@@ -5473,7 +10026,6 @@ export const nativeRecipeSchemas: Readonly<
         type: "array",
         items: {
           type: "string",
-          hostPath: true,
         },
       },
       limits: {
@@ -5613,10 +10165,10 @@ export const nativeRecipeSchemas: Readonly<
           failure: {
             anyOf: [
               {
-                const: "unavailable",
+                const: "quota",
               },
               {
-                const: "quota",
+                const: "unavailable",
               },
             ],
           },
@@ -5634,141 +10186,6 @@ export const nativeRecipeSchemas: Readonly<
         additionalProperties: false,
       },
       option2: {
-        type: "array",
-        items: {
-          $ref: "#/$defs/option3",
-        },
-      },
-      option3: {
-        type: "object",
-        properties: {
-          when: {
-            type: "object",
-            properties: {
-              kind: {
-                const: "changed",
-              },
-              files: {
-                type: "array",
-                items: {
-                  type: "string",
-                },
-              },
-            },
-            required: ["kind", "files"],
-            additionalProperties: false,
-          },
-          executable: {
-            type: "string",
-          },
-          arguments: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-          stdin: {
-            type: "string",
-          },
-          input: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "object",
-          },
-          directory: {
-            type: "string",
-          },
-          variables: {
-            anyOf: [
-              {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "variables",
-              },
-              {
-                type: "object",
-                additionalProperties: {
-                  anyOf: [
-                    {
-                      type: "string",
-                    },
-                    {
-                      type: "object",
-                      properties: {
-                        env: {
-                          type: "string",
-                          pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
-                        },
-                      },
-                      required: ["env"],
-                      additionalProperties: false,
-                      secret: true,
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          deadlineMs: {
-            type: "number",
-          },
-          interactive: {
-            anyOf: [
-              {
-                const: false,
-              },
-              {
-                const: true,
-              },
-            ],
-          },
-          terminal: {
-            $ref: "#/$defs/option4",
-          },
-          elevated: {
-            anyOf: [
-              {
-                const: false,
-              },
-              {
-                const: true,
-              },
-            ],
-          },
-          retain: {
-            type: "number",
-          },
-          observe: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "callback",
-          },
-        },
-        required: ["executable"],
-        additionalProperties: false,
-      },
-      option4: {
         type: "object",
         properties: {
           input: {
@@ -7515,4 +11932,63 @@ export const nativeRecipeSchemas: Readonly<
     required: ["directory"],
     additionalProperties: false,
   },
+};
+export const nativeRecipeFactoryParameters: Readonly<
+  Record<string, readonly string[]>
+> = {
+  "steering.controller": [],
+  "harness.outpost": [],
+  "modelProvider.openai": [],
+  "modelProvider.anthropic": [],
+  "decisionProvider.system-one": [],
+  "tool.custom": [],
+  "tool.subagent": [],
+  "toolset.custom": [],
+  "toolset.files": [],
+  "toolset.edit": [],
+  "toolset.git": [],
+  "toolset.search": [],
+  "toolset.shell": [],
+  "permissions.rules": [],
+  "hook.custom": [],
+  "skill.custom": [],
+  "context.custom": [],
+  "context.truncate": [],
+  "context.summarize": [],
+  "instructions.source": [],
+  "instructions.mcp": [],
+  "agent.fallback": [],
+  "agent.replay": [],
+  "response.json": [],
+  "response.text": [],
+  "decision.questions": [],
+  "routing.decision": [],
+  "conversations.transport": [],
+  "conversations.harness": [],
+  "conversations.claude": [],
+  "conversations.codex": [],
+  "conversations.copilot": [],
+  "conversations.kimi": [],
+  "conversations.transcript": [],
+  "conversations.bundle": [],
+  "sandboxProvider.docker": [],
+  "sandboxProvider.podman": [],
+  "sandboxProvider.local": [],
+  "sandboxProvider.vercel": ["connect"],
+  "sandboxProvider.daytona": ["connect"],
+  "sandboxProvider.firecracker": [],
+  "profile.portable": [],
+  "secretSource.vault": [],
+  "secretSource.aws": [],
+  "secretSource.azure": [],
+  "secretSource.gcp": [],
+  "secretSource.onepassword": [],
+  "secretSource.infisical": [],
+  "harness.codex": [],
+  "harness.claude": [],
+  "harness.agy": [],
+  "harness.copilot": [],
+  "harness.kimi": [],
+  "agent.composed": [],
+  "transport.local": [],
 };

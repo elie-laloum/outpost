@@ -8,6 +8,8 @@ import type { SandboxOptions } from "../outpost.types.ts";
 import { nativeRecipeGuards } from "./native.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
+import { dispatchCandidates } from "../../domain/fallback-agent.ts";
+import { resolveVariables } from "../../infrastructure/settings.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -51,6 +53,22 @@ export async function recipeExecutionConfiguration(
     const agent = await scope.resolve(`agents.${role}`, "agent");
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
     agents[role] = agent;
+  }
+  for (const role of new Set(
+    project.document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
+  )) {
+    for (const candidate of dispatchCandidates(agents[role]!)) {
+      if (candidate.kind !== "cli") continue;
+      const variables = await resolveVariables(
+        legacy.sandbox.repository!,
+        candidate.variables,
+        { ...provider.variables, ...environment },
+      );
+      scope.protect(Object.values(variables));
+      const credentials = candidate.credentials?.(variables);
+      if (credentials) scope.protect(Object.values(credentials.variables));
+      candidate.configuration?.({ ...variables, ...credentials?.variables });
+    }
   }
   return {
     sandbox: {

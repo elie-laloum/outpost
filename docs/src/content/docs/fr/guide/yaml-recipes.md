@@ -285,3 +285,65 @@ sandbox:
 Seules les valeurs sélectionnées atteignent la sandbox. La validation n’importe aucun module utilisateur et ne lit aucune valeur de secret. Une valeur absente échoue avant allocation ; le runtime masque les valeurs sélectionnées dans les observations, les rapports retournés et les diagnostics d’exécution. Il ne modifie pas l’environnement hôte. Consultez [les sources de secrets](../secret-sources/) pour les restrictions des services et la propriété des identifiants.
 
 Les schémas statiques sont générés depuis les types TypeScript publics installés et vérifiés en CI. Le lifecycle local, le chargement d’extensions, la sélection de secrets et l’équivalence des requêtes CLI disposent de régressions hors ligne. Ces tests n’exercent pas les vrais providers cloud, services de secrets ou agents payants.
+
+## Exécuter le harness Outpost depuis le YAML
+
+Le harness `outpost` accepte outils, permissions, stratégies de contexte, hooks, skills, routage et conversations nommés ou déclarés directement. Déclarez un fournisseur de modèles sous `models`, puis référencez le harness depuis le rôle d’agent de la recette. L’exécution utilise la boucle TypeScript existante, ses permissions et ses budgets cumulatifs de sous-agents.
+
+```yaml title="outpost.yaml — harness intégré"
+models:
+  coding:
+    type: openai
+    api: responses
+    baseUrl: https://api.openai.com/v1
+    apiKey: { env: OPENAI_API_KEY }
+harnesses:
+  coding:
+    type: outpost
+    modelProvider: { $ref: models.coding }
+    tools:
+      - type: files
+      - type: edit
+agents:
+  coder:
+    harness: { $ref: harnesses.coding }
+    model: your-model-name
+```
+
+Sélectionnez un modèle pris en charge par votre fournisseur avant exécution ; cette configuration utilise la facturation par clé API. Consultez [le harness Outpost](../harness/) pour son comportement et [les fournisseurs de modèles](../model-providers/) pour la connexion. `examples/67-recipe-harness/` remplace le service par une fixture HTTP locale et fonctionne sans identifiants ni appel payant.
+
+Les étapes agent du format 3 acceptent les options `dispatch`. Un contrat de réponse nommé fournit la validation JSON Schema et les instructions finales existantes. Les références de composants du dispatch nécessitent le runtime à deux fichiers ; les bindings historiques de `defineRecipe` continuent de servir les recettes commande et agent sur sandbox empruntée.
+
+```yaml title="recipe.yaml — résultat structuré"
+version: 3
+name: structured-review
+tasks:
+  - key: review
+    agent: reviewer
+    brief: Review the change.
+    dispatch:
+      response: { $ref: responses.verdict }
+```
+
+Déclarez `responses.verdict` dans la configuration locale avec `type: json`, un `tag` et `jsonSchema`. L’option `repairs` utilise la boucle de réparation existante. Pour une validation personnalisée, `schema` référence un objet validateur ou une extension callback. Les réponses natives `text`, agents de secours et composants de conversations conservent leurs contrats TypeScript.
+
+## Brancher des callbacks typés locaux
+
+Les callbacks restent dans des modules locaux sélectionnés par la configuration. Leur `contract` statique nomme l’option de composant qu’ils implémentent. La validation refuse un callback destiné à une autre option avant chargement du module ; le runtime vérifie ensuite que l’export est une fonction avant allocation de la sandbox. Les résultats restent soumis à la validation du moteur natif.
+
+```yaml title="outpost.yaml — extension de hook"
+extensions:
+  before:
+    module: ./hooks.ts
+    export: before
+    kind: callback
+    contract: hook.custom.run
+    version: "1"
+hooks:
+  before:
+    type: custom
+    on: before-model
+    run: { $ref: extensions.before }
+```
+
+Attachez le hook au harness avec `hooks: [{ $ref: hooks.before }]`. Appliquez le même modèle à l’exécution d’outils, au contexte personnalisé, aux instructions et à l’état du routage ; les erreurs indiquent le contrat attendu. Les factories peuvent aussi recevoir des références typées par les annotations de leur schéma. Les composants possédés sont fermés dans l’ordre des dépendances ; les erreurs de fermeture des observateurs figurent dans `observerErrors` sans modifier la réussite des tâches.

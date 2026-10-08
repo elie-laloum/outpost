@@ -6,12 +6,14 @@ import type { Disposal } from "../domain/workspace.types.ts";
 import { recipeDiagnostic, recipeOutput } from "./recipe-report.ts";
 import type { RecipeReport } from "./recipe-report.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
+import type { RecipeDispatchSettings } from "./recipes/agent-components.types.ts";
 
 export async function runRecipe(
   document: RecipeDocument,
   bindings: RecipeBindings,
   signal: AbortSignal,
   observation?: ObservationHub,
+  requests?: Readonly<Record<string, RecipeDispatchSettings>>,
 ): Promise<RecipeReport> {
   const { sandbox } = bindings;
   let result: WorkflowResult | undefined;
@@ -20,7 +22,7 @@ export async function runRecipe(
   let disposal: Disposal = {};
   const errors: unknown[] = [];
   try {
-    workflow = bindRecipe(document, bindings);
+    workflow = bindRecipe(document, bindings, requests);
     result = await workflow.start({
       signal,
       ...(observation ? { observation } : {}),

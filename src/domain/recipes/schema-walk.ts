@@ -1,5 +1,8 @@
 import { recipeObject } from "./values.ts";
-import type { RecipeSchemaVisitor } from "./schema-walk.types.ts";
+import type {
+  RecipeSchemaVisitor,
+  RecipeComponentMatch,
+} from "./schema-walk.types.ts";
 
 function dereference(schema: unknown, root: unknown): unknown {
   if (
@@ -13,9 +16,16 @@ function dereference(schema: unknown, root: unknown): unknown {
   return schema;
 }
 
-function matches(source: unknown, value: unknown, root: unknown): boolean {
+function matches(
+  source: unknown,
+  value: unknown,
+  root: unknown,
+  componentMatch?: RecipeComponentMatch,
+): boolean {
   const schema = dereference(source, root);
   if (!recipeObject(schema)) return schema !== false;
+  if (typeof schema.component === "string" && componentMatch)
+    return componentMatch(schema.component, value);
   if (schema.component)
     return (
       recipeObject(value) &&
@@ -26,7 +36,9 @@ function matches(source: unknown, value: unknown, root: unknown): boolean {
   if (schema.const !== undefined) return value === schema.const;
   if (Array.isArray(schema.enum)) return schema.enum.includes(value);
   if (Array.isArray(schema.anyOf))
-    return schema.anyOf.some((item) => matches(item, value, root));
+    return schema.anyOf.some((item) =>
+      matches(item, value, root, componentMatch),
+    );
   if (schema.type === "array") return Array.isArray(value);
   if (schema.type === "null") return value === null;
   if (schema.type === "object") {
@@ -40,7 +52,12 @@ function matches(source: unknown, value: unknown, root: unknown): boolean {
       return false;
     const properties = recipeObject(schema.properties) ? schema.properties : {};
     return Object.entries(value).every(([key, item]) =>
-      matches(properties[key] ?? schema.additionalProperties, item, root),
+      matches(
+        properties[key] ?? schema.additionalProperties,
+        item,
+        root,
+        componentMatch,
+      ),
     );
   }
   if (typeof schema.type === "string") return typeof value === schema.type;
@@ -51,16 +68,24 @@ export function recipeSchemaBranch(
   source: Readonly<Record<string, unknown>>,
   value: unknown,
   root: unknown = source,
+  componentMatch?: RecipeComponentMatch,
 ): Readonly<Record<string, unknown>> {
   const found = dereference(source, root);
   const schema = recipeObject(found) ? found : source;
   const branches = schema.anyOf ?? schema.oneOf;
   if (!Array.isArray(branches)) return schema;
-  const branch: unknown = branches.find((candidate) =>
-    matches(candidate, value, root),
-  );
+  const branch: unknown =
+    branches.find((candidate) =>
+      matches(candidate, value, root, componentMatch),
+    ) ??
+    (recipeObject(value) && typeof value.$ref === "string"
+      ? branches.find((candidate) => {
+          const shape = dereference(candidate, root);
+          return recipeObject(shape) && typeof shape.component === "string";
+        })
+      : undefined);
   return recipeObject(branch)
-    ? recipeSchemaBranch(branch, value, root)
+    ? recipeSchemaBranch(branch, value, root, componentMatch)
     : schema;
 }
 
@@ -70,9 +95,10 @@ export function mapRecipeSchema(
   visitor: RecipeSchemaVisitor,
   path = "",
   root: unknown = schema,
+  componentMatch?: RecipeComponentMatch,
 ): unknown {
   if (!recipeObject(schema)) return value;
-  const selected = recipeSchemaBranch(schema, value, root);
+  const selected = recipeSchemaBranch(schema, value, root, componentMatch);
   if (
     selected.component ||
     selected.secret ||
@@ -84,12 +110,13 @@ export function mapRecipeSchema(
     return value.map((item, index) =>
       mapRecipeSchema(
         Array.isArray(selected.prefixItems)
-          ? selected.prefixItems[index]
+          ? (selected.prefixItems[index] ?? selected.items)
           : selected.items,
         item,
         visitor,
         `${path}.${index}`,
         root,
+        componentMatch,
       ),
     );
   if (recipeObject(value)) {
@@ -105,6 +132,7 @@ export function mapRecipeSchema(
           visitor,
           `${path}.${key}`,
           root,
+          componentMatch,
         ),
       ]),
     );

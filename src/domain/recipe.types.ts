@@ -2,6 +2,7 @@ import type { Command } from "./command.types.ts";
 import type { Retry } from "./workflow.types.ts";
 
 export interface RecipeStep {
+  readonly dispatch?: Readonly<Record<string, unknown>>;
   readonly key: string;
   readonly after: readonly string[];
   readonly timeoutMs?: number;

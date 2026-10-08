@@ -1,6 +1,92 @@
 export const nativeRecipeFactories: Readonly<
   Record<string, () => Promise<unknown>>
 > = {
+  "steering.controller": async () =>
+    (await import("../../domain/steering.ts")).createSteering,
+  "harness.outpost": async () =>
+    (await import("../../domain/harness.ts")).createHarness,
+  "modelProvider.openai": async () =>
+    (await import("../../adapters/models/openai-model-provider.ts"))
+      .createOpenAIModelProvider,
+  "modelProvider.anthropic": async () =>
+    (await import("../../adapters/models/anthropic-model-provider.ts"))
+      .createAnthropicModelProvider,
+  "decisionProvider.system-one": async () =>
+    (await import("../../adapters/decisions/system-one-provider.ts"))
+      .createSystemOneDecisionProvider,
+  "tool.custom": async () =>
+    (await import("../../domain/tool.ts")).defineHarnessTool,
+  "tool.subagent": async () =>
+    (await import("../../domain/subagent.ts")).defineHarnessSubagent,
+  "toolset.custom": async () =>
+    (await import("../../domain/tool.ts")).defineHarnessToolset,
+  "toolset.files": async () =>
+    (await import("../../adapters/tools/file-tools.ts")).createHarnessFileTools,
+  "toolset.edit": async () =>
+    (await import("../../adapters/tools/edit-tools.ts")).createHarnessEditTools,
+  "toolset.git": async () =>
+    (await import("../../adapters/tools/git-tools.ts")).createHarnessGitTools,
+  "toolset.search": async () =>
+    (await import("../../adapters/tools/search-tools.ts"))
+      .createHarnessSearchTools,
+  "toolset.shell": async () =>
+    (await import("../../adapters/tools/shell-tools.ts"))
+      .createHarnessShellTools,
+  "permissions.rules": async () =>
+    (await import("../../domain/permissions.ts")).defineHarnessPermissions,
+  "hook.custom": async () =>
+    (await import("../../domain/hook.ts")).defineHarnessHook,
+  "skill.custom": async () =>
+    (await import("../../domain/skill.ts")).defineHarnessSkill,
+  "context.custom": async () =>
+    (await import("../../domain/context.ts")).defineHarnessContextStrategy,
+  "context.truncate": async () =>
+    (await import("../../domain/context.ts")).truncateToolResults,
+  "context.summarize": async () =>
+    (await import("../../domain/context.ts")).summarizeHistory,
+  "instructions.source": async () =>
+    (await import("../../application/recipes/agent-components.ts"))
+      .defineRecipeInstructions,
+  "instructions.mcp": async () =>
+    (await import("../../domain/mcp-prompt.ts")).defineMcpPrompt,
+  "agent.fallback": async () =>
+    (await import("../../application/recipes/agent-components.ts"))
+      .defineRecipeFallback,
+  "agent.replay": async () =>
+    (await import("../../domain/replay.ts")).createReplayAgent,
+  "response.json": async () =>
+    (await import("../../application/recipes/agent-components.ts"))
+      .defineRecipeJsonResponse,
+  "response.text": async () =>
+    (await import("../../domain/response.ts")).defineTextResponse,
+  "decision.questions": async () =>
+    (await import("../../domain/decision.ts")).defineDecision,
+  "routing.decision": async () =>
+    (await import("../../domain/harness-routing.ts")).defineHarnessModelRouting,
+  "conversations.transport": async () =>
+    (await import("../../application/recipes/agent-components.ts"))
+      .createRecipeConversations,
+  "conversations.harness": async () =>
+    (await import("../../infrastructure/conversations/harness-store.ts"))
+      .createHarnessConversations,
+  "conversations.claude": async () =>
+    (await import("../../adapters/agents/claude/claude-conversations.ts"))
+      .createClaudeConversations,
+  "conversations.codex": async () =>
+    (await import("../../adapters/agents/codex/codex-conversations.ts"))
+      .createCodexConversations,
+  "conversations.copilot": async () =>
+    (await import("../../adapters/agents/copilot/copilot-conversations.ts"))
+      .createCopilotConversations,
+  "conversations.kimi": async () =>
+    (await import("../../adapters/agents/kimi/kimi-conversations.ts"))
+      .createKimiConversations,
+  "conversations.transcript": async () =>
+    (await import("../../infrastructure/conversations/transcript-store.ts"))
+      .createTranscriptConversations,
+  "conversations.bundle": async () =>
+    (await import("../../infrastructure/conversations/session-bundle.ts"))
+      .createSessionBundleConversations,
   "sandboxProvider.docker": async () =>
     (await import("../../providers/docker.ts")).createDockerSandboxProvider,
   "sandboxProvider.podman": async () =>

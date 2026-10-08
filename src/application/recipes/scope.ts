@@ -62,6 +62,11 @@ export function createRecipeComponentScope(
           directory,
           signal,
           resolve: scope.resolve,
+          kindOf(name: string) {
+            const node = graph.nodes.get(name);
+            if (!node) throw new Error(`Unknown recipe component: ${name}`);
+            return node.kind;
+          },
           environment(variable: string) {
             if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(variable))
               throw new Error("Invalid environment variable reference");

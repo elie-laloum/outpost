@@ -111,6 +111,7 @@ test("YAML observation spans workflow and sandbox cleanup while the CLI is silen
         },
         dispose() {
           disposed = true;
+          throw new Error("Fixture observer cleanup failed");
         },
       }),
     ],
@@ -123,7 +124,12 @@ test("YAML observation spans workflow and sandbox cleanup while the CLI is silen
     }),
   );
   await using runtime = await createRecipeRuntime({ file, config, registry });
-  assert.equal((await runtime.run()).status, "done");
+  const observed = await runtime.run();
+  assert.equal(observed.status, "done");
+  assert.equal(
+    observed.observerErrors?.[0]?.message,
+    "Fixture observer cleanup failed",
+  );
   assert.equal(disposed, true);
   assert.ok(
     events.some(

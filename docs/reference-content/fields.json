@@ -8797,5 +8797,9 @@
   "RecipeReport.observerErrors": [
     "Failures while closing owned observer components, reported without changing the execution status. Secret values selected by this runtime are redacted.",
     "Échecs de fermeture des composants d’observation possédés, rapportés sans modifier le statut d’exécution. Les valeurs des secrets sélectionnés par ce runtime sont masquées."
+  ],
+  "RecipeComponentContext.kindOf": [
+    "Returns the declared category of a named component without constructing it; unknown references fail.",
+    "Retourne la catégorie déclarée d’un composant nommé sans le construire ; une référence absente échoue."
   ]
 }

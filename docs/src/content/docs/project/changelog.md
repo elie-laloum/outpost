@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Compose the Outpost harness, model and decision providers, tools, skills, hooks, permissions, context strategies, routing, fallback agents and conversation stores from YAML. Format-3 agent steps accept dispatch options and structured response references. Callback extensions declare a static slot contract; schemas distinguish data schemas from component references. Compare delegated YAML and TypeScript runs offline, and exercise the compiled CLI against a local streaming model fixture.
+
 - Extend YAML configuration with named providers, native sandbox and workspace options, portable profiles, CLI harness settings, MCP declarations, local transports and host-side secret selections. Generate option schemas from TypeScript contracts, reject dependency cycles before imports, resolve installed ESM-only extensions, and redact selected values from observation and reports. Cover local lifecycle execution and YAML/TypeScript request equivalence; cloud and paid agent calls remain unvalidated.
 
 - Begin YAML composition parity with configuration format 2, recipe format 3, the `/recipes` registry/runtime API, explicit observation and final reports, static extension validation and a versioned public-contract inventory. Recipe execution is silent unless outputs or `--json` are requested; failures still print diagnostics.

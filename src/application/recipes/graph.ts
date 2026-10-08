@@ -1,6 +1,8 @@
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
+import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import {
+  recipeObject,
   recipeRecord,
   recipeReference,
   recipeString,
@@ -21,11 +23,22 @@ export function recipeComponentGraph(
   configuration: Readonly<Record<string, unknown>>,
   registry: RecipeRegistry,
   directory: string,
+  document?: RecipeDocument,
 ): RecipeComponentGraph {
   const nodes = new Map<string, RecipeComponentNode>();
   const expected = new Map<string, string>();
   const declarations = new Map<string, unknown>();
   const extensions = new Map<string, RecipeExtensionDeclaration>();
+  for (const step of document?.tasks ?? []) {
+    if (!step.dispatch) continue;
+    if (configuration.version !== 2)
+      throw new Error(
+        "Recipe dispatch options require configuration version 2",
+      );
+    const key = `tasks.${step.key}.dispatch`;
+    declarations.set(key, { ...step.dispatch, type: "options" });
+    expected.set(key, "dispatchOptions");
+  }
   if (configuration.version === 2) {
     const workspace = recipeRecord(configuration.workspace ?? {}, "workspace");
     for (const key of [
@@ -108,10 +121,36 @@ export function recipeComponentGraph(
         (shape, value, path) => {
           if (typeof shape.component !== "string") return value;
           const target = component(value, shape.component, path);
+          if (typeof shape.contract === "string") {
+            let node = nodes.get(target);
+            while (node && !node.extension && !node.definition)
+              node = nodes.get(recipeReference(node.options)!);
+            if (node?.extension && node.extension.contract !== shape.contract)
+              throw new Error(
+                `${path} requires callback contract ${shape.contract}`,
+              );
+          }
           dependencies.push(target);
           return { $ref: target };
         },
         name,
+        schema,
+        (kind, value) => {
+          if (!recipeObject(value)) return false;
+          if (
+            typeof value.$ref === "string" &&
+            Object.keys(value).length === 1
+          ) {
+            const actual =
+              expected.get(value.$ref) ?? nodes.get(value.$ref)?.kind;
+            return actual === undefined || actual === kind;
+          }
+          return registry.components.some(
+            (definition) =>
+              definition.kind === kind &&
+              definition.name === `${kind}.${value.type}`,
+          );
+        },
       ),
       name,
     );

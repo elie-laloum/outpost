@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox:
+  provider: local
+branch:
+  mode: current
+models:
+  fixture:
+    type: openai
+    api: chat-completions
+    baseUrl: http://127.0.0.1:9999/v1
+    apiKey: false
+harnesses:
+  reviewer:
+    type: outpost
+    modelProvider: { $ref: models.fixture }
+    instructions: Inspect only; do not edit files.
+    tools:
+      - type: files
+    permissions:
+      type: rules
+      default: deny
+      rules:
+        - effect: allow
+          tools: [read_file, list_files]
+agents:
+  reviewer:
+    harness: { $ref: harnesses.reviewer }
+    model: fixture
+responses:
+  verdict:
+    type: json
+    tag: verdict
+    jsonSchema:
+      type: object
+      properties:
+        approved: { type: boolean }
+      required: [approved]
+      additionalProperties: false
+reports:
+  - type: json

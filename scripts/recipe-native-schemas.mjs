@@ -13,7 +13,10 @@ import {
 const root = fileURLToPath(new URL("../", import.meta.url));
 const source = (file) => resolve(root, "src", file);
 const program = ts.createProgram(
-  nativeRecipeTypes.map(([, , file]) => source(file)),
+  nativeRecipeTypes.flatMap(([, , file, , factoryFile]) => [
+    source(file),
+    ...(factoryFile ? [source(factoryFile)] : []),
+  ]),
   {
     module: ts.ModuleKind.NodeNext,
     moduleResolution: ts.ModuleResolutionKind.NodeNext,
@@ -39,7 +42,14 @@ const environment = {
 };
 function schema(type, component, path = "", ancestors = new Set()) {
   if (type.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Never)) return false;
-  if (nativeRecipeSecrets[component]?.includes(path)) return environment;
+  if (nativeRecipeSecrets[component]?.includes(path))
+    return type.isUnion() &&
+      type.types.some(
+        (t) =>
+          t.flags & ts.TypeFlags.BooleanLiteral && t.intrinsicName === "false",
+      )
+      ? { anyOf: [environment, { const: false }] }
+      : environment;
   if (path.endsWith(".client") || path === "client") return reference("object");
   const name = type.aliasSymbol?.name ?? type.symbol?.name;
   if (
@@ -64,7 +74,8 @@ function schema(type, component, path = "", ancestors = new Set()) {
       ],
     };
   if (nativeRecipeKinds[name]) return reference(nativeRecipeKinds[name]);
-  if (type.getCallSignatures().length) return reference("callback");
+  if (type.getCallSignatures().length)
+    return { ...reference("callback"), contract: `${component}.${path}` };
   if (type.isUnion()) {
     const choices = type.types
       .filter((t) => !(t.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Never)))
@@ -86,14 +97,26 @@ function schema(type, component, path = "", ancestors = new Set()) {
     };
   if (type.flags & ts.TypeFlags.Number) return { type: "number" };
   if (type.flags & ts.TypeFlags.Boolean) return { type: "boolean" };
-  if (
-    type.flags &
-    (ts.TypeFlags.Unknown | ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)
-  )
-    return {};
+  if (type.flags & ts.TypeFlags.TypeParameter) {
+    const constraint = checker.getBaseConstraintOfType(type);
+    return constraint ? schema(constraint, component, path, ancestors) : {};
+  }
+  if (type.flags & (ts.TypeFlags.Unknown | ts.TypeFlags.Any)) return {};
   if (checker.isArrayType(type) || checker.isTupleType(type)) {
     const args = checker.getTypeArguments(type);
-    if (checker.isTupleType(type))
+    if (checker.isTupleType(type)) {
+      const rest = type.target.elementFlags.findIndex(
+        (flag) => flag & ts.ElementFlags.Rest,
+      );
+      if (rest >= 0)
+        return {
+          type: "array",
+          prefixItems: args
+            .slice(0, rest)
+            .map((t) => schema(t, component, `${path}.*`, ancestors)),
+          minItems: rest,
+          items: schema(args[rest], component, `${path}.*`, ancestors),
+        };
       return {
         type: "array",
         prefixItems: args.map((t) =>
@@ -103,6 +126,7 @@ function schema(type, component, path = "", ancestors = new Set()) {
         maxItems: args.length,
         items: false,
       };
+    }
     return {
       type: "array",
       items: schema(args[0], component, `${path}.*`, ancestors),
@@ -148,6 +172,7 @@ function schema(type, component, path = "", ancestors = new Set()) {
   };
 }
 const contracts = {};
+const factoryParameters = {};
 function compactSchema(value) {
   const counts = new Map();
   function count(item) {
@@ -182,7 +207,7 @@ function compactSchema(value) {
     );
   return result;
 }
-for (const [name, typeName, file] of nativeRecipeTypes) {
+for (const [name, typeName, file, factory, factoryFile] of nativeRecipeTypes) {
   const module = checker.getSymbolAtLocation(
     program.getSourceFile(source(file)),
   );
@@ -190,9 +215,36 @@ for (const [name, typeName, file] of nativeRecipeTypes) {
     .getExportsOfModule(module)
     .find((s) => s.name === typeName);
   assert.ok(symbol, `Missing native type ${file}:${typeName}`);
-  contracts[name] = compactSchema(
-    schema(checker.getDeclaredTypeOfSymbol(symbol), name),
-  );
+  const shape = schema(checker.getDeclaredTypeOfSymbol(symbol), name);
+  if (factory && factoryFile) {
+    const module = checker.getSymbolAtLocation(
+      program.getSourceFile(source(factoryFile)),
+    );
+    const value = checker
+      .getExportsOfModule(module)
+      .find((s) => s.name === factory);
+    assert.ok(value, `Missing native factory ${factory}`);
+    const declaration = value.valueDeclaration ?? value.declarations[0];
+    const parameters = checker
+      .getTypeOfSymbolAtLocation(value, declaration)
+      .getCallSignatures()[0]
+      .parameters.slice(1);
+    factoryParameters[name] = parameters.map((parameter) => parameter.name);
+    for (const parameter of parameters) {
+      const declaration =
+        parameter.valueDeclaration ?? parameter.declarations[0];
+      assert.ok(
+        shape.properties && !Object.hasOwn(shape.properties, parameter.name),
+        `Conflicting factory parameter ${name}.${parameter.name}`,
+      );
+      shape.properties[parameter.name] = schema(
+        checker.getTypeOfSymbolAtLocation(parameter, declaration),
+        name,
+        parameter.name,
+      );
+    }
+  }
+  contracts[name] = compactSchema(shape);
 }
 const factories = nativeRecipeTypes
   .filter(([, , , factory]) => factory)
@@ -204,7 +256,7 @@ const factories = nativeRecipeTypes
 for (const [file, code] of [
   [
     "src/application/recipes/native-schemas.constants.ts",
-    `export const nativeRecipeSchemas: Readonly<Record<string, Readonly<Record<string, unknown>>>> = ${JSON.stringify(contracts, null, 2)};\n`,
+    `export const nativeRecipeSchemas: Readonly<Record<string, Readonly<Record<string, unknown>>>> = ${JSON.stringify(contracts, null, 2)};\nexport const nativeRecipeFactoryParameters: Readonly<Record<string, readonly string[]>> = ${JSON.stringify(factoryParameters, null, 2)};\n`,
   ],
   [
     "src/application/recipes/native-factories.ts",

@@ -7,7 +7,10 @@ import {
 } from "../../domain/recipes/values.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
 import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
-import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
+import {
+  nativeRecipeSchemas,
+  nativeRecipeFactoryParameters,
+} from "./native-schemas.constants.ts";
 import { nativeRecipeFactories } from "./native-factories.ts";
 import type {
   RecipeComponentDefinition,
@@ -21,6 +24,30 @@ export function recipeMethods(
   return (
     recipeObject(value) &&
     methods.every((key) => typeof value[key] === "function")
+  );
+}
+
+function isAgent(value: unknown): boolean {
+  if (!recipeObject(value)) return false;
+  if (value.kind === "fallback")
+    return (
+      Array.isArray(value.agents) &&
+      value.agents.every(isAgent) &&
+      Array.isArray(value.on)
+    );
+  if (value.kind === "replay")
+    return recipeMethods(value, ["nextTurn", "pendingSteering"]);
+  if (value.kind === "cli") return recipeMethods(value, ["request", "events"]);
+  return value.kind === "custom" && nativeRecipeGuards.harness!(value.harness);
+}
+
+function taggedComponent(
+  value: unknown,
+  kind: string,
+  methods: readonly string[] = [],
+): boolean {
+  return (
+    recipeObject(value) && value.kind === kind && recipeMethods(value, methods)
   );
 }
 
@@ -48,11 +75,27 @@ export const nativeRecipeGuards: Readonly<
     ((value.kind === "cli" && typeof value.bind === "function") ||
       (value.kind === "custom" &&
         recipeMethods(value.modelProvider, ["request"]))),
-  agent: (value) =>
+  agent: isAgent,
+  modelProvider: (value) => recipeMethods(value, ["request"]),
+  decisionProvider: (value) => recipeMethods(value, ["request"]),
+  tool: (value) =>
+    taggedComponent(value, "tool", ["execute", "resources", "validate"]),
+  toolset: (value) =>
+    taggedComponent(value, "toolset") &&
     recipeObject(value) &&
-    (value.kind === "cli"
-      ? recipeMethods(value, ["request", "events"])
-      : value.kind === "custom" && nativeRecipeGuards.harness!(value.harness)),
+    Array.isArray(value.tools),
+  permissions: (value) => taggedComponent(value, "permissions", ["evaluate"]),
+  hook: (value) => taggedComponent(value, "hook", ["run"]),
+  skill: (value) => taggedComponent(value, "skill"),
+  context: (value) => taggedComponent(value, "context", ["compact"]),
+  instructions: (value) => taggedComponent(value, "instructions", ["resolve"]),
+  response: (value) => recipeMethods(value, ["read"]),
+  decision: (value) => taggedComponent(value, "decision"),
+  routing: (value) => taggedComponent(value, "model-routing"),
+  validator: (value) =>
+    recipeObject(value) && recipeMethods(value["~standard"], ["validate"]),
+  steering: (value) => recipeMethods(value, ["send"]),
+  telemetry: recipeObject,
   transport: (value) =>
     recipeMethods(value, ["read", "write", "remove", "list"]),
   conversations: (value) => recipeMethods(value, ["capture", "restore"]),
@@ -66,31 +109,42 @@ export async function resolveRecipeOptions(
   validateRecipeSchema(schema, value, "component options");
   const pending: Promise<unknown>[] = [];
   const slots = new Map<unknown, number>();
-  const mapped = mapRecipeSchema(schema, value, (shape, item) => {
-    if (typeof shape.component === "string") {
-      const reference = recipeReference(item);
-      if (!reference)
-        throw new Error("Expected a normalized component reference");
-      const slot = {};
-      slots.set(slot, pending.length);
-      pending.push(context.resolve(reference, shape.component));
-      return slot;
-    }
-    if (shape.secret)
-      return context.environment(
-        recipeString(recipeRecord(item, "secret").env, "secret.env"),
-      );
-    if (shape.hostPath)
-      return resolve(context.directory, recipeString(item, "host path"));
-    if (shape.regexp) {
-      const pattern = recipeRecord(item, "pattern");
-      return new RegExp(
-        recipeString(pattern.pattern, "pattern"),
-        typeof pattern.flags === "string" ? pattern.flags : "",
-      );
-    }
-    return item;
-  });
+  const mapped = mapRecipeSchema(
+    schema,
+    value,
+    (shape, item) => {
+      if (typeof shape.component === "string") {
+        const reference = recipeReference(item);
+        if (!reference)
+          throw new Error("Expected a normalized component reference");
+        const slot = {};
+        slots.set(slot, pending.length);
+        pending.push(context.resolve(reference, shape.component));
+        return slot;
+      }
+      if (shape.secret)
+        return context.environment(
+          recipeString(recipeRecord(item, "secret").env, "secret.env"),
+        );
+      if (shape.hostPath)
+        return resolve(context.directory, recipeString(item, "host path"));
+      if (shape.regexp) {
+        const pattern = recipeRecord(item, "pattern");
+        return new RegExp(
+          recipeString(pattern.pattern, "pattern"),
+          typeof pattern.flags === "string" ? pattern.flags : "",
+        );
+      }
+      return item;
+    },
+    "",
+    schema,
+    (kind, value) =>
+      recipeObject(value) &&
+      typeof value.$ref === "string" &&
+      Object.keys(value).length === 1 &&
+      context.kindOf(value.$ref) === kind,
+  );
   const resolved = await Promise.all(pending);
   function replace(item: unknown): unknown {
     const slot = slots.get(item);
@@ -122,7 +176,13 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
         const factory = await load();
         if (typeof factory !== "function")
           throw new Error(`Invalid native component factory: ${name}`);
-        return factory(value);
+        const parameters = nativeRecipeFactoryParameters[name] ?? [];
+        return factory(
+          Object.fromEntries(
+            Object.entries(value).filter(([key]) => !parameters.includes(key)),
+          ),
+          ...parameters.map((key) => value[key]),
+        );
       },
     };
   });
@@ -131,6 +191,16 @@ export const sandboxOptionsComponent: RecipeComponentDefinition = {
   name: "sandboxOptions.options",
   kind: "sandboxOptions",
   schema: nativeRecipeSchemas["sandbox.options"]!,
+  accepts: recipeObject,
+  create(options, context) {
+    return resolveRecipeOptions(this.schema, options, context);
+  },
+};
+
+export const dispatchOptionsComponent: RecipeComponentDefinition = {
+  name: "dispatchOptions.options",
+  kind: "dispatchOptions",
+  schema: nativeRecipeSchemas["dispatch.options"]!,
   accepts: recipeObject,
   create(options, context) {
     return resolveRecipeOptions(this.schema, options, context);

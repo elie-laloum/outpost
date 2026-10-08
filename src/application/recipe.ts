@@ -9,6 +9,7 @@ import type { RecipeDocument } from "../domain/recipe.types.ts";
 import { parseRecipe } from "../infrastructure/recipe.ts";
 import { defineAgentTask, defineCommandTask } from "./tasks.ts";
 import type { RecipeBindings } from "./recipe.types.ts";
+import type { RecipeDispatchSettings } from "./recipes/agent-components.types.ts";
 import { resolveRecipeInputs, recipeValue } from "../domain/recipe-inputs.ts";
 import {
   renderRecipeText,
@@ -25,11 +26,21 @@ export function defineRecipe(
 export function bindRecipe(
   document: RecipeDocument,
   bindings: RecipeBindings,
+  requests: Readonly<Record<string, RecipeDispatchSettings>> = {},
 ): Workflow {
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const tasks = new Map<string, Task>();
   for (const step of document.tasks) {
-    const { command, agent: name, brief, after, ...common } = step;
+    const {
+      command,
+      agent: name,
+      brief,
+      after,
+      dispatch: settings,
+      ...common
+    } = step;
+    if (settings && !requests[step.key])
+      throw new Error("Recipe dispatch components require createRecipeRuntime");
     const render = (text: string, context: TaskContext) => {
       if (document.version === 1) return text;
       return renderRecipeText(text, (reference) => {
@@ -77,6 +88,7 @@ export function bindRecipe(
         after: dependencies,
         sandbox: bindings.sandbox,
         request: (context) => ({
+          ...requests[step.key],
           agent,
           brief: { text: render(brief, context) },
         }),

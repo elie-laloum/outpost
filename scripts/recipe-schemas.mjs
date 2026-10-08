@@ -47,7 +47,14 @@ function clean(value, prefix = "") {
     Object.entries(value)
       .filter(
         ([key]) =>
-          !["component", "hostPath", "secret", "regexp", "$defs"].includes(key),
+          ![
+            "component",
+            "hostPath",
+            "secret",
+            "regexp",
+            "contract",
+            "$defs",
+          ].includes(key),
       )
       .map(([key, item]) => [
         key,
@@ -154,6 +161,20 @@ const version2 = structuredClone(
   recipe.oneOf.find((shape) => shape.properties.version.const === 2),
 );
 version2.properties.version = { const: 3 };
+const dispatch = shapeOf(
+  nativeRecipeSchemas["dispatch.options"],
+  "dispatch.options",
+);
+recipe.$defs = {
+  ...recipe.$defs,
+  ...definitions,
+  taskV3: structuredClone(recipe.$defs.task),
+};
+recipe.$defs.taskV3.properties.dispatch = dispatch;
+recipe.$defs.taskV3.allOf = [
+  { if: { required: ["command"] }, then: { not: { required: ["dispatch"] } } },
+];
+version2.properties.tasks.items = { $ref: "#/$defs/taskV3" };
 recipe.oneOf.push(version2);
 for (const [file, value] of [
   ["recipe-configuration.schema.json", configSchema],

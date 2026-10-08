@@ -6,6 +6,7 @@ export const extensionSchema = recipeSchema(
     module: schema.text,
     export: schema.text,
     kind: schema.text,
+    contract: schema.text,
     version: schema.text,
     factory: schema.boolean,
     schema: schema.object,

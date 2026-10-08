@@ -15,6 +15,7 @@ import type { RecipeComponentContext } from "@elie-laloum/outpost/recipes";
 
 | Nom           | Type                                               | Présence | Rôle                                                                                                        |
 | ------------- | -------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `kindOf`      | `(name: string) => string`                         | Requis   | Retourne la catégorie déclarée d’un composant nommé sans le construire ; une référence absente échoue.      |
 | `directory`   | `string`                                           | Requis   | Dossier absolu du YAML d’exécution local ; les chemins d’extensions locales s’y résolvent.                  |
 | `signal`      | `AbortSignal`                                      | Requis   | Annulation partagée avec l’invocation active de la recette.                                                 |
 | `resolve`     | `(name: string, kind: string) => Promise<unknown>` | Requis   | Résout un composant nommé en exigeant sa catégorie déclarée ; les demandes répétées partagent son instance. |
@@ -24,6 +25,7 @@ import type { RecipeComponentContext } from "@elie-laloum/outpost/recipes";
 
 ```ts
 export interface RecipeComponentContext {
+  kindOf(name: string): string;
   readonly directory: string;
   readonly signal: AbortSignal;
   resolve(name: string, kind: string): Promise<unknown>;

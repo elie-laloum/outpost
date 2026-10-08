@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: structured-review
+tasks:
+  - key: review
+    agent: reviewer
+    brief: Review the repository and return a concise verdict.
+    dispatch:
+      response:
+        $ref: responses.verdict

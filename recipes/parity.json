@@ -398,10 +398,10 @@
       "timeoutMs": "number | undefined",
       "maxResponseBytes": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:AntigravitySettings": {
     "signatures": [],
@@ -1046,9 +1046,9 @@
     "signatures": ["(options: AnthropicModelProviderOptions): ModelProvider"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createAntigravityHarness": {
     "signatures": ["(settings?: AntigravitySettings): CliHarness"],
@@ -1070,9 +1070,9 @@
     "signatures": ["(): NativeConversationStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createClaudeHarness": {
     "signatures": ["(settings?: ClaudeSettings): CliHarness"],
@@ -1086,9 +1086,9 @@
     "signatures": ["(): NativeConversationStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createCodexHarness": {
     "signatures": ["(settings?: CodexSettings): CliHarness"],
@@ -1102,9 +1102,9 @@
     "signatures": ["(): NativeConversationStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createCopilotHarness": {
     "signatures": ["(settings?: CopilotSettings): CliHarness"],
@@ -1148,9 +1148,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createGithubWebhook": {
     "signatures": ["(options: GithubWebhookOptions): TriggerSource"],
@@ -1172,57 +1172,57 @@
     "signatures": ["(options: HarnessOptions): Harness"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessConversations": {
     "signatures": ["(): ConversationStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessEditTools": {
     "signatures": ["(): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessFileTools": {
     "signatures": ["(): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessGitTools": {
     "signatures": ["(): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessSearchTools": {
     "signatures": ["(): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHarnessShellTools": {
     "signatures": ["(options?: ShellToolsOptions): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createHttpTaskQueue": {
     "signatures": ["(options: QueueClientOptions): TaskQueue"],
@@ -1236,9 +1236,9 @@
     "signatures": ["(): NativeConversationStore"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createKimiHarness": {
     "signatures": ["(settings?: KimiSettings): CliHarness"],
@@ -1276,9 +1276,9 @@
     "signatures": ["(options: OpenAIModelProviderOptions): ModelProvider"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createRemoteSandboxProvider": {
     "signatures": ["(definition: ProviderDefinition): SandboxProvider"],
@@ -1292,9 +1292,9 @@
     "signatures": ["(options: ReplayAgentOptions): ReplayAgent"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createReporter": {
     "signatures": [
@@ -1328,9 +1328,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createSlackSource": {
     "signatures": ["(options: SlackRequestOptions): TriggerSource"],
@@ -1360,9 +1360,9 @@
     "signatures": ["(): Steering"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createSystemOneDecisionProvider": {
     "signatures": [
@@ -1370,9 +1370,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createTaskCacheStore": {
     "signatures": ["(options: TaskCacheStoreOptions): TaskCacheStore"],
@@ -1388,9 +1388,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createTransportConversations": {
     "signatures": [
@@ -1398,9 +1398,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:createWorkflowCheckpointStore": {
     "signatures": ["(options: TransportStoreOptions): WorkflowCheckpointStore"],
@@ -1555,10 +1555,10 @@
     "options": {
       "questions": "Q"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:DecisionProvider": {
     "signatures": [],
@@ -1726,9 +1726,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineDecisionTask": {
     "signatures": [
@@ -1746,9 +1746,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessHook": {
     "signatures": [
@@ -1756,17 +1756,17 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessInstructions": {
     "signatures": ["(source: HarnessInstructionSource): HarnessInstructions"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessModelRouting": {
     "signatures": [
@@ -1774,33 +1774,33 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessPermissions": {
     "signatures": ["(options: HarnessPermissionsOptions): HarnessPermissions"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessSkill": {
     "signatures": ["(options: HarnessSkillOptions): HarnessSkill"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessSubagent": {
     "signatures": ["(options: HarnessSubagentOptions): HarnessSubagent"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessTool": {
     "signatures": [
@@ -1808,17 +1808,17 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineHarnessToolset": {
     "signatures": ["(options: HarnessToolsetOptions): HarnessToolset"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineInteractiveAgentTask": {
     "signatures": [
@@ -1852,9 +1852,9 @@
     "signatures": ["<T>(options: JsonResponseOptions<T>): ResponseSpec<T>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineLoopTask": {
     "signatures": ["<T>(options: LoopTaskOptions<T>): Task<T>"],
@@ -1868,9 +1868,9 @@
     "signatures": ["(options: McpPromptOptions): HarnessInstructions"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:definePauseTask": {
     "signatures": [
@@ -1910,9 +1910,9 @@
     "signatures": ["(options: TextResponseOptions): ResponseSpec<string>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:defineWorkflow": {
     "signatures": ["(name: string, tasks: readonly Task[]): Workflow"],
@@ -2429,10 +2429,10 @@
       "name": "string",
       "compact": "(input: HarnessContextInput) => HarnessContextResult | Promise<HarnessContextResult>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessHook": {
     "signatures": [],
@@ -2510,10 +2510,10 @@
       "name": "string | undefined",
       "run": "(input: HarnessHookInput<Phase>) => HarnessHookResult<Phase> | Promise<HarnessHookResult<Phase>>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessHookPhase": {
     "signatures": [],
@@ -2667,10 +2667,10 @@
       "mcpServers": "McpServers | undefined",
       "profile": "AgentProfile | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessPermissionRule": {
     "signatures": [],
@@ -2705,10 +2705,10 @@
       "rules": "readonly HarnessPermissionRule[]",
       "default": "PermissionEffect | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessSkill": {
     "signatures": [],
@@ -2732,10 +2732,10 @@
       "instructions": "HarnessInstructionSource",
       "tools": "readonly (HarnessTool<unknown> | HarnessToolset)[] | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessSubagent": {
     "signatures": [],
@@ -2772,10 +2772,10 @@
       "description": "string",
       "agent": "CustomAgent"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessTool": {
     "signatures": [],
@@ -2846,10 +2846,10 @@
       "resources": "((input: Input) => ToolResources) | undefined",
       "execute": "(input: Input, context: HarnessToolContext) => ToolOutput | Promise<ToolOutput>"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HarnessToolResultView": {
     "signatures": [],
@@ -2880,10 +2880,10 @@
       "name": "string",
       "tools": "readonly (HarnessTool<unknown> | HarnessToolset)[]"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:HostConfiguration": {
     "signatures": [],
@@ -3186,10 +3186,10 @@
       "name": "string",
       "arguments": "Readonly<Record<string, string>> | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:McpServer": {
     "signatures": [],
@@ -3696,10 +3696,10 @@
       "timeoutMs": "number | undefined",
       "maxResponseBytes": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:openWorkspace": {
     "signatures": ["(options?: WorkspaceOptions): Promise<Workspace>"],
@@ -4470,10 +4470,10 @@
       "journal": "readonly unknown[]",
       "divergence": "ReplayDivergencePolicy | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:ReplayDecisionEvent": {
     "signatures": [],
@@ -4815,7 +4815,7 @@
     "options": {
       "errors": "readonly unknown[]",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9328": "() => Promise<void>",
+      "__@asyncDispose@9330": "() => Promise<void>",
       "observe": "(observation: Observation) => void | Promise<void>",
       "flush": "(() => void | Promise<void>) | undefined"
     },
@@ -5018,7 +5018,7 @@
       "attach": "(options?: AttachOptions) => Promise<AttachResult>",
       "command": "(command: Command) => Promise<CommandResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
-      "__@asyncDispose@9328": "() => Promise<void>"
+      "__@asyncDispose@9330": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -5239,10 +5239,10 @@
       "bucket": "((cwd: string, helpers: SessionBundleHelpers) => string) | undefined",
       "relocate": "((path: string, text: string, relocation: SessionBundleRelocation) => string) | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:SessionBundleRelocation": {
     "signatures": [],
@@ -5262,10 +5262,10 @@
     "options": {
       "deadlineMs": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:signWorkflowDecision": {
     "signatures": [
@@ -5565,7 +5565,7 @@
       "repository": "string",
       "reserveBytes": "number",
       "release": "() => Promise<void>",
-      "__@asyncDispose@9328": "() => Promise<void>"
+      "__@asyncDispose@9330": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -5618,9 +5618,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:SummarizeHistoryOptions": {
     "signatures": [],
@@ -5628,10 +5628,10 @@
       "triggerCharacters": "number | undefined",
       "keepRecentMessages": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:SystemOneDecisionProviderOptions": {
     "signatures": [],
@@ -5641,10 +5641,10 @@
       "timeoutMs": "number | undefined",
       "maxResponseBytes": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:Task": {
     "signatures": [],
@@ -5909,10 +5909,10 @@
       "capturePath": "(id: string, repository: string, home: string, original: string) => string",
       "remotePath": "(id: string, lease: SandboxLease, original: string) => string"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:TransferOptions": {
     "signatures": [],
@@ -6220,9 +6220,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:TruncateToolResultsOptions": {
     "signatures": [],
@@ -6230,10 +6230,10 @@
       "keepRecent": "number | undefined",
       "maxCharacters": "number | undefined"
     },
-    "category": "contract",
-    "lot": 7,
+    "category": "native",
+    "lot": 3,
     "status": "implemented",
-    "test": null
+    "test": "test/functional/recipe-harness.test.ts"
   },
   ".:Turn": {
     "signatures": [],
@@ -6935,7 +6935,7 @@
       "attach": "(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & AttachOptions & { readonly agent: Agent; }) => Promise<AttachResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
       "integrate": "{ (): Promise<void>; (options: IntegrationOptions): Promise<ConflictResolution | void>; }",
-      "__@asyncDispose@9328": "() => Promise<void>",
+      "__@asyncDispose@9330": "() => Promise<void>",
       "repository": "string",
       "directory": "string",
       "branch": "string",
@@ -7357,6 +7357,7 @@
   "./recipes:RecipeComponentContext": {
     "signatures": [],
     "options": {
+      "kindOf": "(name: string) => string",
       "directory": "string",
       "signal": "AbortSignal",
       "resolve": "(name: string, kind: string) => Promise<unknown>",
@@ -7448,7 +7449,7 @@
     "options": {
       "run": "(options?: RecipeRunOptions) => Promise<RecipeReport>",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9328": "() => Promise<void>"
+      "__@asyncDispose@9330": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 1,

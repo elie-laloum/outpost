@@ -49,9 +49,13 @@ function integer(value: unknown, path: string, minimum = 1): number {
   return value;
 }
 
-function step(value: unknown, index: number): RecipeStep {
+function step(value: unknown, index: number, version: unknown): RecipeStep {
   const path = `tasks[${index}]`;
-  const item = fields(value, path, recipeKeys.task);
+  const item = fields(
+    value,
+    path,
+    version === 3 ? recipeKeys.taskV3 : recipeKeys.task,
+  );
   const key = text(item.key, `${path}.key`);
   const after =
     item.after === undefined ? [] : strings(item.after, `${path}.after`);
@@ -84,7 +88,11 @@ function step(value: unknown, index: number): RecipeStep {
   };
   defineTask({ ...common, after: [], perform() {} });
   if (item.command !== undefined) {
-    if (item.agent !== undefined || item.brief !== undefined)
+    if (
+      item.agent !== undefined ||
+      item.brief !== undefined ||
+      item.dispatch !== undefined
+    )
       throw new Error(`${path} must select either command or agent with brief`);
     const command = fields(item.command, `${path}.command`, recipeKeys.command);
     const variables =
@@ -139,6 +147,9 @@ function step(value: unknown, index: number): RecipeStep {
     ...common,
     agent: text(item.agent, `${path}.agent`),
     brief: text(item.brief, `${path}.brief`),
+    ...(item.dispatch === undefined
+      ? {}
+      : { dispatch: object(item.dispatch, `${path}.dispatch`) }),
   };
 }
 
@@ -158,7 +169,9 @@ export function validateRecipe(value: unknown): RecipeDocument {
     record.tasks.length > recipeLimits.tasks
   )
     throw new Error("Recipe tasks must contain between 1 and 1000 entries");
-  const tasks = record.tasks.map(step);
+  const tasks = record.tasks.map((value, index) =>
+    step(value, index, record.version),
+  );
   const keys = new Set(tasks.map((task) => task.key));
   if (keys.size !== tasks.length)
     throw new Error("Recipe contains duplicate task keys");
