@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Ajout du moteur local de recettes YAML `defineRecipe()` et de `outpost recipe run --file --config [--json]`. Les étapes de commande et d’agent nommé deviennent des tâches de workflow séquentielles avec dépendances, retries et délais ; le YAML et le graphe sont validés avant l’exécution. La CLI possède et ferme la sandbox de la fabrique, conserve les workspaces échoués ou annulés et gère SIGINT/SIGTERM. Documentation Guide/API bilingue et test exécutable hors ligne `examples/64-yaml-recipes/` ; le catalogue de recettes et la découverte distante restent non implémentés, les agents payants et le cloud non validés.
+- Ajout de recettes YAML réutilisables avec paramètres typés, valeurs par défaut et enum, références aux résultats des dépendances et schémas pour l’éditeur. Exécution avec deux fichiers YAML séparés pour la recette et sa configuration : fournisseurs de sandbox, agents CLI, choix de modèle et références explicites aux identifiants ; maintien du format 1 littéral et des configurations TypeScript. Ajout de `recipe init`, `validate` sans allocation, `list` et `fetch` avec vérification d’intégrité, des options `--input` répétées, de trois recettes dans le catalogue Git inclus et des catalogues tiers HTTPS. Correction de l’intégration Git, des sorties et diagnostics bornés et du rapport final après nettoyage. Tests Git locaux et de réutilisation entre dépôts ; téléchargements HTTP simulés et exécutions réelles agents/cloud non validées.
 
 ## 11.0.1
 

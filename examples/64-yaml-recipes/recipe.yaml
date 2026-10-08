@@ -1,5 +1,12 @@
-version: 1
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 2
 name: parser-recipe
+description: Fix a requested parser defect, check it and review the result.
+recipeVersion: "1.0.0"
+inputs:
+  goal:
+    type: string
+    description: The parser defect to fix.
 tasks:
   - key: verify
     after: [fix]
@@ -8,6 +15,10 @@ tasks:
       arguments: [test]
   - key: fix
     agent: coder
-    brief: Fix the parser and commit the change.
+    brief: "Fix this parser defect and commit the change: {{ inputs.goal }}"
     retry:
       attempts: 2
+  - key: review
+    after: [fix, verify]
+    agent: reviewer
+    brief: "Review the committed change. Implementation summary: {{ steps.fix.text }}"

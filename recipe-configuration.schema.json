@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Outpost recipe execution configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "repository", "sandbox"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "version": {
+      "const": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "sandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider"],
+      "properties": {
+        "provider": {
+          "enum": ["docker", "podman", "local", "vercel", "daytona"]
+        },
+        "image": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "cpus": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "memoryMb": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["current", "named", "integrate"]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "from": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["harness", "authentication"],
+        "properties": {
+          "harness": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "model": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "\\S"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  },
+                  "reasoning": {
+                    "enum": [
+                      "none",
+                      "minimal",
+                      "low",
+                      "medium",
+                      "high",
+                      "xhigh",
+                      "max"
+                    ]
+                  },
+                  "maxOutputTokens": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            ]
+          },
+          "authentication": {
+            "oneOf": [
+              {
+                "enum": ["account", "usage"]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["account"],
+                "properties": {
+                  "account": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["file"],
+                        "properties": {
+                          "file": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["variable"],
+                        "properties": {
+                          "variable": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["usage"],
+                "properties": {
+                  "usage": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["variable"],
+                    "properties": {
+                      "variable": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      }
+    }
+  }
+}

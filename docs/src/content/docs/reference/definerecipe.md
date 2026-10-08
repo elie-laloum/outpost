@@ -13,16 +13,16 @@ import { defineRecipe } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Parse and validate a version-1 local YAML recipe, bind its command and named-agent steps to the supplied sandbox, and return a Workflow without executing it. Dependencies may refer forward; unknown fields, duplicate keys, unsupported YAML constructs, missing agents and invalid graphs throw before execution. The caller owns the sandbox. start() requires concurrency 1 and uses the existing workflow retries, cancellation, results and usage accounting.
+Parse and validate a local YAML recipe, bind commands and named agents to a caller-owned sandbox, and return a sequential Workflow. Version 1 keeps strings literal; version 2 resolves typed inputs and explicit references to direct dependency outputs. Never allocate, integrate or close the sandbox; the caller owns those actions. Workflow retries, cancellation and usage accounting remain available.
 
 [Complete example and detailed rules](../../guide/yaml-recipes/).
 
 ## Parameters and properties
 
-| Name       | Type             | Presence | Meaning                                                                                                                                                                                                                                                                     |
-| ---------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source`   | `string`         | Required | Literal YAML 1.2 text containing version: 1, name and a nonempty tasks list, bounded to 1 MiB and 1,000 tasks; aliases and custom tags are refused. Each task selects command or agent with brief, with optional after, retry and timeoutMs. Values are never interpolated. |
-| `bindings` | `RecipeBindings` | Required | Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.                                                                                                                   |
+| Name       | Type             | Presence | Meaning                                                                                                                                                                                                                             |
+| ---------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   | `string`         | Required | YAML 1.2 text in recipe format 1 (literal) or 2 (typed inputs and explicit references), bounded to 1 MiB and 1,000 tasks. Unknown fields, unsupported YAML constructs, invalid graphs and references are rejected before execution. |
+| `bindings` | `RecipeBindings` | Required | Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.                                                                           |
 
 ## Returns
 

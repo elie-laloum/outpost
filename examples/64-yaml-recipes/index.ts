@@ -1,4 +1,4 @@
-// Run a YAML recipe through the CLI with scripted commits, retries and dependencies.
+// Run a reusable YAML recipe with typed inputs, step outputs, scripted commits and retries.
 // Build Outpost, then run with Node.js 24+ and Git; no account or network is required.
 
 import assert from "node:assert/strict";
@@ -30,6 +30,8 @@ test("YAML recipe CLI commits the fix after one retry and runs its check", async
       join(import.meta.dirname, "recipe.yaml"),
       "--config",
       join(import.meta.dirname, "outpost.recipe.ts"),
+      "--input",
+      "goal=Handle empty parser input",
       "--json",
     ],
     {
@@ -50,8 +52,10 @@ test("YAML recipe CLI commits the fix after one retry and runs its check", async
     [
       ["fix", "done", 2],
       ["verify", "done", 1],
+      ["review", "done", 1],
     ],
   );
+  assert.equal(report.outputs.review.text, "Review complete");
   assert.equal(report.usage.tokens.input, 10);
   assert.equal(report.usage.tokens.output, 5);
   assert.equal(

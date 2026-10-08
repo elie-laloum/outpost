@@ -18,10 +18,14 @@ const experimental = JSON.parse(
 const manifest = JSON.parse(
   await readFile(resolve(root, "../package.json"), "utf8"),
 );
-const entries = Object.entries(manifest.exports).map(([entry, value]) => ({
-  entry,
-  file: resolve(root, "..", value.types),
-}));
+const entries = Object.entries(manifest.exports)
+  .filter(
+    ([, value]) => typeof value === "object" && typeof value.types === "string",
+  )
+  .map(([entry, value]) => ({
+    entry,
+    file: resolve(root, "..", value.types),
+  }));
 const program = ts.createProgram(
   entries.map(({ file }) => file),
   {

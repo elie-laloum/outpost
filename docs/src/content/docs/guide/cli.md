@@ -39,19 +39,53 @@ In a project that depends on `@elie-laloum/outpost`, run `npx outpost <command>`
 
 ## `outpost recipe run`
 
-Execute a [local YAML recipe](../yaml-recipes/) with a TypeScript configuration supplying the sandbox and agents. The CLI validates YAML before loading the factory, then closes the sandbox after execution.
+Run a [local YAML recipe](../yaml-recipes/) with a separate YAML configuration (required), a TypeScript module or a legacy bindings factory. Inputs are checked before configuration loads; declarative configurations also check required agents before allocating a sandbox.
 
 ```sh
-outpost recipe run --file recipe.yaml --config outpost.recipe.ts [--json]
+outpost recipe run --file recipe.yaml --config outpost.yaml \
+  --input 'goal=Fix the parser' [--json]
 ```
 
-| Flag       | Default  | Effect                                                                                                            |
-| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `--file`   | Required | Local YAML recipe, limited to 1 MiB.                                                                              |
-| `--config` | Required | TypeScript or JavaScript module with a default factory receiving an `AbortSignal` and returning `RecipeBindings`. |
-| `--json`   | Off      | Final report containing `name`, `executionId`, `status`, `tasks` and `usage`.                                     |
+| Flag       | Default  | Effect                                                                                                                  |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `--file`   | Required | Local YAML recipe, limited to 1 MiB.                                                                                    |
+| `--config` | Required | Local YAML execution configuration; TypeScript/JavaScript `RecipeConfiguration` modules and factories remain supported. |
+| `--input`  | None     | Repeat `name=value` for declared version-2 inputs. Numbers and booleans use JSON scalar syntax.                         |
+| `--json`   | Off      | Final report with overall `status`, `workflowStatus`, tasks, bounded `outputs`, `errors`, usage and workspace location. |
 
-Paths are relative to the current directory. Without `--json`, output is `name: status`. Loading or execution failures exit 1, with errors on stderr. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Failed or cancelled workspaces are preserved. Keep the configuration's stdout quiet for parseable JSON output.
+Paths are relative to the current directory. Without `--json`, the CLI prints the final status, task outputs, diagnostics and any retained workspace. Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr. Successful runs integrate according to the branch policy; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved. Loading, execution or finalization failures exit 1. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Keep configuration stdout quiet for parseable JSON output.
+
+## `outpost recipe init`
+
+Create a version-2 starter with a required goal, a named agent and a test command. The editor schema comment points to the installed package. Existing files are never overwritten; the parent directory must exist.
+
+```sh
+outpost recipe init --file recipe.yaml [--config outpost.yaml] [--json]
+```
+
+`--file` is required. `--config` also creates a separate YAML execution configuration. `--json` reports created paths and the schema path. Customize the tools and agent roles before sharing the YAML.
+
+## `outpost recipe validate`
+
+Validate YAML, dependencies and references without importing configuration, resolving input values or allocating a sandbox. Use this in contribution checks and before running a downloaded recipe.
+
+```sh
+outpost recipe validate --file recipe.yaml [--config outpost.yaml] [--json]
+```
+
+`--file` is required. Optional `--config` validates a YAML configuration and required agent roles without allocating resources or reading declared secret values; executable configuration modules are refused by this command. `--json` reports the recipe name, format version, metadata, declared input definitions, required agent names and ordered task keys. Validation does not execute tools or verify their installation.
+
+## `outpost recipe list` and `outpost recipe fetch`
+
+List the bundled Git catalogue or select a local JSON file / HTTPS catalogue with `--catalog`. Fetch one named recipe into a new local file, verify its SHA-256 and declared identity, and validate its YAML before writing. Existing files are never overwritten; downloading does not execute the recipe.
+
+```sh
+outpost recipe list [--catalog https://example.org/catalog.json] [--json]
+outpost recipe fetch --recipe review --file review.yaml \
+  [--catalog https://example.org/catalog.json] [--json]
+```
+
+`--recipe` selects the catalogue entry and `--file` is the destination. Fetch JSON reports include name, recipe revision, SHA-256 and the saved path. Remote sources and redirects require HTTPS without URL credentials; each resource is limited to 1 MiB and 15 seconds. The catalogue supplies the expected digest, so trust its publisher. See [sharing recipes](../yaml-recipes/#contribute-and-test-a-recipe) for the contribution format.
 
 ## `outpost doctor`
 

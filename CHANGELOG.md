@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add the local YAML recipe engine `defineRecipe()` and `outpost recipe run --file --config [--json]`. Compile literal command and named-agent steps into existing sequential workflow tasks with dependencies, retries and timeouts; validate YAML and dependency graphs before execution. The CLI owns and closes the factory's sandbox, preserves failed or cancelled workspaces and handles SIGINT/SIGTERM. Add bilingual Guide/API documentation and the offline executable test `examples/64-yaml-recipes/`; a recipe catalogue and remote discovery remain unimplemented, and paid agent/cloud runs remain unvalidated.
+- Add reusable YAML recipes with typed inputs, defaults and enums, dependency result references and editor schemas. Run with separate recipe and execution YAML files covering sandbox providers, CLI agents, model selection and explicit credential references; retain literal format 1 and TypeScript configuration compatibility. Add `recipe init`, allocation-free `validate`, `list` and integrity-checked `fetch`, repeated `--input` flags, three bundled Git catalogue recipes and third-party HTTPS catalogues. Fix CLI Git integration, bounded outputs and diagnostics, and final reporting after cleanup. Cover real local Git execution and cross-repository reuse; HTTP downloads are tested with simulated responses and paid agent/cloud runs remain unvalidated.
 
 ## 11.0.1
 

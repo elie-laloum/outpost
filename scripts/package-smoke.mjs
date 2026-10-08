@@ -566,7 +566,7 @@ import {execFileSync} from 'node:child_process';
 import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {dispatch, createSandbox, defineRecipe, type RecipeBindings} from '@elie-laloum/outpost';
+import {dispatch, createSandbox, defineRecipe, type RecipeBindings, type RecipeConfiguration} from '@elie-laloum/outpost';
 import {scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
 const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
 try {
@@ -586,6 +586,17 @@ try {
   assert.equal(result.text,'Done');
   assert.equal(result.commits.length,1);
   await using sandbox = await createSandbox({repository,sandboxProvider:createMemorySandboxProvider(memory),logging:false});
+  const schema = JSON.parse(await import('node:fs/promises').then(fs => fs.readFile(new URL(import.meta.resolve('@elie-laloum/outpost/recipe.schema.json')), 'utf8')));
+  assert.equal(schema.title, 'Outpost recipe');
+  const configSchema = JSON.parse(await import('node:fs/promises').then(fs => fs.readFile(new URL(import.meta.resolve('@elie-laloum/outpost/recipe-configuration.schema.json')), 'utf8')));
+  assert.equal(configSchema.title, 'Outpost recipe execution configuration');
+  const executionConfiguration: RecipeConfiguration = {sandbox:{repository}};
+  assert.equal(executionConfiguration.sandbox.repository,repository);
+  const cli = (await import('node:url')).fileURLToPath(new URL('./cli/main.js',import.meta.resolve('@elie-laloum/outpost')));
+  const catalog = JSON.parse(execFileSync(process.execPath,[cli,'recipe','list','--json'],{encoding:'utf8'}));
+  assert.ok(catalog.recipes.some((recipe: {name:string}) => recipe.name === 'review'));
+  execFileSync(process.execPath,[cli,'recipe','fetch','--recipe','review','--file',join(repository,'review.yaml')]);
+
   const bindings: RecipeBindings = {sandbox};
   const recipe = defineRecipe(JSON.stringify({version:1,name:'consumer',tasks:[{key:'verify',command:{executable:'verify'}}]}),bindings);
   const run = await recipe.start();

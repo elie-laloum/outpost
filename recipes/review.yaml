@@ -1,0 +1,13 @@
+version: 2
+name: review
+description: Review a selected area of the repository and return actionable findings.
+recipeVersion: "1.0.0"
+inputs:
+  focus:
+    type: string
+    description: Files, behavior or risk to review.
+    default: Correctness and missing regression tests.
+tasks:
+  - key: review
+    agent: reviewer
+    brief: "Review the repository without modifying it. Focus: {{ inputs.focus }}. Return prioritized findings with file references."

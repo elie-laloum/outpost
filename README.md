@@ -95,7 +95,7 @@ const result = await dispatch({
 | Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/harness/)                           |
 | Read execution state by ID                          | [Execution state](https://elie-laloum.github.io/outpost/guide/run-state/)                        |
 | Test workflows without accounts or model calls      | [Workflow testing](https://elie-laloum.github.io/outpost/guide/testing-workflows/)               |
-| Run local YAML recipes from the terminal            | [YAML recipes](https://elie-laloum.github.io/outpost/guide/yaml-recipes/)                        |
+| Create, share and run YAML recipes                  | [YAML recipes](https://elie-laloum.github.io/outpost/guide/yaml-recipes/)                        |
 | Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/recovery/)                        |
 
 The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.

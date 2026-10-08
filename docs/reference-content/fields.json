@@ -8575,8 +8575,8 @@
     "Client ou configuration de connexion sur l’hôte et sélection explicite des secrets pour l’adapter Infisical."
   ],
   "defineRecipe.source": [
-    "Literal YAML 1.2 text containing version: 1, name and a nonempty tasks list, bounded to 1 MiB and 1,000 tasks; aliases and custom tags are refused. Each task selects command or agent with brief, with optional after, retry and timeoutMs. Values are never interpolated.",
-    "Texte YAML 1.2 littéral contenant version: 1, name et une liste tasks non vide, limité à 1 Mio et 1 000 tâches ; les alias et tags personnalisés sont refusés. Chaque tâche choisit command ou agent avec brief, avec after, retry et timeoutMs optionnels. Les valeurs ne sont jamais interpolées."
+    "YAML 1.2 text in recipe format 1 (literal) or 2 (typed inputs and explicit references), bounded to 1 MiB and 1,000 tasks. Unknown fields, unsupported YAML constructs, invalid graphs and references are rejected before execution.",
+    "Texte YAML 1.2 au format de recette 1 (littéral) ou 2 (paramètres typés et références explicites), limité à 1 Mio et 1 000 tâches. Les champs inconnus, constructions YAML non prises en charge, graphes et références invalides sont refusés avant exécution."
   ],
   "defineRecipe.bindings": [
     "Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.",
@@ -8589,5 +8589,17 @@
   "RecipeBindings.agents": [
     "Composed Outpost agents keyed by the exact names used in YAML agent fields. Missing names are rejected at declaration; command-only recipes may omit this registry. Authentication and model choices stay in the composed agents.",
     "Agents Outpost composés, indexés par les noms exacts des champs agent du YAML. Les noms absents sont refusés à la déclaration ; les recettes de commandes seules peuvent omettre ce registre. L’authentification et les modèles restent dans les agents composés."
+  ],
+  "RecipeBindings.inputs": [
+    "Explicit scalar values for version-2 parameters, keyed by their declared names. Defaults apply to omitted inputs; missing required values, unknown names, type mismatches and enum violations fail before execution. Substitution is single-pass and never evaluates code.",
+    "Valeurs scalaires explicites des paramètres de version 2, indexées par leurs noms déclarés. Les valeurs par défaut complètent les paramètres omis ; valeurs obligatoires absentes, noms inconnus, types incorrects et violations des enum échouent avant exécution. La substitution passe une seule fois et n’évalue aucun code."
+  ],
+  "RecipeConfiguration.sandbox": [
+    "Sandbox creation options reused by the recipe CLI. Required inputs and agent names are checked before allocation; the CLI supplies cancellation, owns the created sandbox, integrates successful work according to its branch policy and preserves failed work.",
+    "Options de création de sandbox réutilisées par la CLI des recettes. Les paramètres et agents requis sont vérifiés avant allocation ; la CLI fournit l’annulation, possède la sandbox créée, intègre le travail réussi selon sa politique de branche et préserve le travail en échec."
+  ],
+  "RecipeConfiguration.agents": [
+    "Locally composed agents keyed by the roles referenced in recipe tasks. The CLI rejects missing roles before opening a sandbox. Keep models, credentials and provider-specific choices in this trusted local configuration.",
+    "Agents composés localement, indexés par les rôles référencés dans les tâches. La CLI refuse les rôles absents avant d’ouvrir une sandbox. Gardez modèles, identifiants et choix propres aux fournisseurs dans cette configuration locale de confiance."
   ]
 }

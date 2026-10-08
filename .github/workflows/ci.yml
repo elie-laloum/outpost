@@ -27,10 +27,12 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
+      - run: node scripts/recipe-catalog.mjs
       - run: bun run architecture
       - run: bun run typecheck
       - run: bun run coverage
       - run: bun run build
+      - run: node --test examples/64-yaml-recipes/index.ts
       - run: bun run format:check
       - run: bun run test:package
       # braces <=3.0.3 (via @daytona/sdk) has no patched release yet; drop the ignore once one ships.

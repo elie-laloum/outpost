@@ -1,0 +1,22 @@
+version: 2
+name: fix-and-check
+description: Implement a requested change, commit it and run the project tests.
+recipeVersion: "1.0.0"
+inputs:
+  goal:
+    type: string
+    description: The change to implement.
+  runner:
+    type: string
+    description: Package manager used to run the tests.
+    default: npm
+    enum: [npm, bun, pnpm, yarn]
+tasks:
+  - key: fix
+    agent: coder
+    brief: "Implement this change and commit it: {{ inputs.goal }}"
+  - key: verify
+    after: [fix]
+    command:
+      executable: "{{ inputs.runner }}"
+      arguments: [test]

@@ -99,6 +99,11 @@ test("CLI scopes help and rejects options belonging to another command", async (
   assert.equal(help.status, 0);
   assert.match(help.stdout, /--destination/);
   assert.doesNotMatch(help.stdout, /--agent/);
+  const imageHelp = await run(["image", "build", "--help"]);
+  assert.match(imageHelp.stdout, /Container recipe path/);
+  assert.doesNotMatch(imageHelp.stdout, /YAML/);
+  const recipeHelp = await run(["recipe", "run", "--help"]);
+  assert.match(recipeHelp.stdout, /Recipe YAML path/);
   for (const args of [
     ["doctor", "--install"],
     ["image", "build", "unexpected"],

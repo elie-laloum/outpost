@@ -11,6 +11,11 @@
         "slug": "reference/recipebindings",
         "label": "RecipeBindings",
         "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recipeconfiguration",
+        "label": "RecipeConfiguration",
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

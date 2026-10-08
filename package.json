@@ -80,14 +80,19 @@
     "./secrets/infisical": {
       "types": "./dist/adapters/secrets/infisical.d.ts",
       "import": "./dist/adapters/secrets/infisical.js"
-    }
+    },
+    "./recipe.schema.json": "./recipe.schema.json",
+    "./recipe-configuration.schema.json": "./recipe-configuration.schema.json"
   },
   "files": [
     "dist",
     "README.md",
     "CHANGELOG.md",
     "SECURITY.md",
-    "LICENSE"
+    "LICENSE",
+    "recipe.schema.json",
+    "recipe-configuration.schema.json",
+    "recipes"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

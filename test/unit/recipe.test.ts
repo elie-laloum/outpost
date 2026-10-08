@@ -124,3 +124,109 @@ test("recipe refuses duplicate keys, missing dependencies and cycles", () => {
     /cycle/,
   );
 });
+
+test("recipe v2 validates typed defaults and explicit dependency references", () => {
+  const document = {
+    version: 2,
+    name: "portable",
+    description: "A reusable recipe",
+    recipeVersion: "1.0.0",
+    inputs: {
+      goal: { type: "string", description: "Requested change" },
+      count: { type: "number", description: "Count", default: 2, enum: [1, 2] },
+      check: { type: "boolean", description: "Check", default: false },
+    },
+    tasks: [
+      {
+        key: "analyze.first",
+        agent: "reviewer",
+        brief: "Analyze {{ inputs.goal }}",
+      },
+      {
+        key: "fix",
+        agent: "coder",
+        after: ["analyze.first"],
+        brief: "{{ steps.analyze.first.text }}",
+      },
+    ],
+  };
+  assert.equal(parseRecipe(JSON.stringify(document)).inputs.count?.default, 2);
+  const invalid = [
+    { ...document, inputs: [] },
+    {
+      ...document,
+      inputs: { "bad key": { type: "string", description: "Bad" } },
+    },
+    { ...document, inputs: { goal: { type: "array", description: "Bad" } } },
+    { ...document, inputs: { goal: { type: "string" } } },
+    {
+      ...document,
+      inputs: { goal: { type: "string", description: "Goal", typo: true } },
+    },
+    {
+      ...document,
+      inputs: { goal: { type: "string", description: "Goal", default: 2 } },
+    },
+    {
+      ...document,
+      inputs: { goal: { type: "string", description: "Goal", enum: [] } },
+    },
+    {
+      ...document,
+      inputs: { goal: { type: "string", description: "Goal", enum: [2] } },
+    },
+    {
+      ...document,
+      inputs: {
+        goal: {
+          type: "string",
+          description: "Goal",
+          enum: ["one"],
+          default: "two",
+        },
+      },
+    },
+    {
+      ...document,
+      tasks: [{ key: "one", agent: "coder", brief: "{{ inputs.missing }}" }],
+    },
+    {
+      ...document,
+      tasks: [{ key: "one", agent: "coder", brief: "{{ inputs.goal.text }}" }],
+    },
+    {
+      ...document,
+      tasks: [{ key: "one", agent: "coder", brief: "{{ arbitrary.code() }}" }],
+    },
+    {
+      ...document,
+      tasks: [
+        document.tasks[0],
+        { key: "fix", agent: "coder", brief: "{{ steps.analyze.first.text }}" },
+      ],
+    },
+    {
+      ...document,
+      tasks: [
+        document.tasks[0],
+        {
+          key: "fix",
+          agent: "coder",
+          after: ["analyze.first"],
+          brief: "{{ steps.analyze.first.stdout }}",
+        },
+      ],
+    },
+  ];
+  for (const value of invalid)
+    assert.throws(
+      () => parseRecipe(JSON.stringify(value)),
+      JSON.stringify(value),
+    );
+  const legacy = parseRecipe(
+    recipe([
+      { key: "literal", agent: "coder", brief: "{{ arbitrary.code() }}" },
+    ]),
+  );
+  assert.equal(legacy.tasks[0]?.brief, "{{ arbitrary.code() }}");
+});

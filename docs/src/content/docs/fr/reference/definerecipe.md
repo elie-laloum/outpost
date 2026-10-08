@@ -13,16 +13,16 @@ import { defineRecipe } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Analyse et valide une recette YAML locale de version 1, lie ses étapes de commande et d’agent nommé à la sandbox fournie et renvoie un Workflow sans l’exécuter. Les dépendances peuvent référencer des tâches déclarées plus loin ; champs inconnus, clés dupliquées, constructions YAML non prises en charge, agents absents et graphes invalides lèvent une erreur avant exécution. L’appelant possède la sandbox. start() exige une concurrence de 1 et utilise les retries, l’annulation, les résultats et le suivi d’usage du workflow existant.
+Analyse et valide une recette YAML locale, lie commandes et agents nommés à la sandbox de l’appelant et renvoie un Workflow séquentiel. La version 1 garde les chaînes littérales ; la version 2 résout les paramètres typés et les références explicites aux sorties des dépendances directes. N’alloue, n’intègre et ne ferme jamais la sandbox ; l’appelant possède ces actions. Les retries, l’annulation et le suivi de consommation des workflows restent disponibles.
 
 [Exemple complet et règles détaillées](../../guide/yaml-recipes/).
 
 ## Paramètres et propriétés
 
-| Nom        | Type             | Présence | Rôle                                                                                                                                                                                                                                                                                                |
-| ---------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source`   | `string`         | Requis   | Texte YAML 1.2 littéral contenant version: 1, name et une liste tasks non vide, limité à 1 Mio et 1 000 tâches ; les alias et tags personnalisés sont refusés. Chaque tâche choisit command ou agent avec brief, avec after, retry et timeoutMs optionnels. Les valeurs ne sont jamais interpolées. |
-| `bindings` | `RecipeBindings` | Requis   | Sandbox ouverte et registre d’agents optionnel empruntés par chaque tâche de la recette. defineRecipe() n’alloue ni ne ferme de ressource ; l’appelant en conserve la propriété.                                                                                                                    |
+| Nom        | Type             | Présence | Rôle                                                                                                                                                                                                                                                           |
+| ---------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   | `string`         | Requis   | Texte YAML 1.2 au format de recette 1 (littéral) ou 2 (paramètres typés et références explicites), limité à 1 Mio et 1 000 tâches. Les champs inconnus, constructions YAML non prises en charge, graphes et références invalides sont refusés avant exécution. |
+| `bindings` | `RecipeBindings` | Requis   | Sandbox ouverte et registre d’agents optionnel empruntés par chaque tâche de la recette. defineRecipe() n’alloue ni ne ferme de ressource ; l’appelant en conserve la propriété.                                                                               |
 
 ## Retour
 

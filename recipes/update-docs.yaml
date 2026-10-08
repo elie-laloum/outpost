@@ -1,0 +1,16 @@
+version: 2
+name: update-docs
+description: Update documentation for a requested change and review the result.
+recipeVersion: "1.0.0"
+inputs:
+  change:
+    type: string
+    description: Behavior that must be documented.
+tasks:
+  - key: write
+    agent: writer
+    brief: "Update the existing documentation and commit your changes. Describe: {{ inputs.change }}. Follow the repository conventions."
+  - key: review
+    after: [write]
+    agent: reviewer
+    brief: "Review documentation accuracy without modifying files. Implementation summary: {{ steps.write.text }}"

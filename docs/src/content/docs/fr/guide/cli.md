@@ -39,19 +39,53 @@ Dans un projet qui dépend de `@elie-laloum/outpost`, lancez `npx outpost <comma
 
 ## `outpost recipe run`
 
-Exécutez une [recette YAML locale](../yaml-recipes/) avec une configuration TypeScript qui fournit la sandbox et les agents. La CLI valide le YAML avant de charger la fabrique, puis ferme la sandbox après l’exécution.
+Exécutez une [recette YAML locale](../yaml-recipes/) avec une configuration YAML séparée (obligatoire), un module TypeScript ou une factory existante. Les paramètres sont vérifiés avant le chargement de la configuration ; les configurations déclaratives vérifient aussi les agents requis avant l’allocation.
 
 ```sh
-outpost recipe run --file recipe.yaml --config outpost.recipe.ts [--json]
+outpost recipe run --file recipe.yaml --config outpost.yaml \
+  --input 'goal=Fix the parser' [--json]
 ```
 
-| Option     | Défaut      | Effet                                                                                                                 |
-| ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
-| `--file`   | Obligatoire | Recette YAML locale, limitée à 1 Mio.                                                                                 |
-| `--config` | Obligatoire | Module TypeScript ou JavaScript avec une fabrique par défaut recevant un `AbortSignal` et renvoyant `RecipeBindings`. |
-| `--json`   | Désactivé   | Rapport final avec `name`, `executionId`, `status`, `tasks` et `usage`.                                               |
+| Option     | Défaut      | Effet                                                                                                                               |
+| ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `--file`   | Obligatoire | Recette YAML locale, limitée à 1 Mio.                                                                                               |
+| `--config` | Obligatoire | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                  |
+| `--input`  | Aucun       | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.             |
+| `--json`   | Désactivé   | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace. |
 
-Les chemins sont relatifs au répertoire courant. Sans `--json`, la sortie est `nom: statut`. Un échec de chargement ou d’exécution sort avec le code 1 ; les erreurs vont sur stderr. SIGINT/SIGTERM annulent le run, attendent la fermeture et sortent avec 130/143. Les workspaces échoués ou annulés sont conservés. La configuration doit rester silencieuse sur stdout pour une sortie JSON exploitable.
+Les chemins sont relatifs au dossier courant. Sans `--json`, la CLI affiche le statut final, les sorties des tâches, les diagnostics et le workspace conservé. Les champs textuels sont limités à 16 384 caractères avec un marqueur de troncature. Les diagnostics de commandes comprennent leur code de sortie d’origine, stdout et stderr. Les exécutions réussies intègrent selon la politique de branche ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés. Les échecs de chargement, d’exécution ou de finalisation sortent avec le code 1. SIGINT/SIGTERM annulent le run, attendent le nettoyage et sortent avec 130/143. Gardez stdout silencieux dans la configuration pour un JSON exploitable.
+
+## `outpost recipe init`
+
+Créez un modèle de version 2 avec un objectif obligatoire, un agent nommé et une commande de test. Le commentaire du schéma pour l’éditeur pointe vers le paquet installé. Les fichiers existants ne sont jamais écrasés ; le dossier parent doit exister.
+
+```sh
+outpost recipe init --file recipe.yaml [--config outpost.yaml] [--json]
+```
+
+`--file` est obligatoire. `--config` crée aussi une configuration YAML séparée. `--json` rapporte les chemins créés et le chemin du schéma. Adaptez les outils et rôles d’agents avant de partager le YAML.
+
+## `outpost recipe validate`
+
+Validez le YAML, les dépendances et les références sans importer la configuration, résoudre les valeurs des paramètres ni allouer de sandbox. Utilisez cette commande pour vérifier les contributions et avant d’exécuter une recette téléchargée.
+
+```sh
+outpost recipe validate --file recipe.yaml [--config outpost.yaml] [--json]
+```
+
+`--file` est obligatoire. L’option `--config` valide une configuration YAML et les rôles d’agents requis sans allouer de ressource ni lire les valeurs des secrets déclarés ; cette commande refuse les modules de configuration exécutables. `--json` rapporte le nom de la recette, la version du format, les métadonnées, les définitions de paramètres, les noms d’agents requis et les clés de tâches ordonnées. La validation n’exécute aucun outil et ne vérifie pas leur installation.
+
+## `outpost recipe list` et `outpost recipe fetch`
+
+Listez le catalogue Git inclus ou choisissez un fichier JSON local / catalogue HTTPS avec `--catalog`. Téléchargez une recette nommée dans un nouveau fichier local, vérifiez son SHA-256 et son identité déclarée, puis validez son YAML avant d’écrire. Les fichiers existants ne sont jamais écrasés ; télécharger n’exécute pas la recette.
+
+```sh
+outpost recipe list [--catalog https://example.org/catalog.json] [--json]
+outpost recipe fetch --recipe review --file review.yaml \
+  [--catalog https://example.org/catalog.json] [--json]
+```
+
+`--recipe` sélectionne l’entrée du catalogue et `--file` la destination. Le rapport JSON comprend nom, révision de recette, SHA-256 et chemin enregistré. Les sources et redirections distantes exigent HTTPS sans identifiants dans l’URL ; chaque ressource est limitée à 1 Mio et 15 secondes. Le catalogue fournit l’empreinte attendue : faites confiance à son éditeur. Consultez [la contribution de recettes](../yaml-recipes/#contribuer-et-tester-une-recette) pour le format.
 
 ## `outpost doctor`
 

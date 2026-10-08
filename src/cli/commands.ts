@@ -34,12 +34,18 @@ export async function runCli(
     for (const key of definition.options) {
       const configuration = cliOptions[key];
       const short = "short" in configuration ? `-${configuration.short}, ` : "";
-      command.addOption(
-        new Option(
-          `${short}--${key === "sandboxProvider" ? "sandbox-provider" : key}${configuration.type === "string" ? " <value>" : ""}`,
-          configuration.description,
-        ),
+      const option = new Option(
+        `${short}--${key === "sandboxProvider" ? "sandbox-provider" : key}${configuration.type !== "boolean" ? " <value>" : ""}`,
+        key === "file" && name === "image build"
+          ? "Container recipe path"
+          : configuration.description,
       );
+      if (configuration.type === "strings")
+        option.argParser((value: string, previous: string[] = []) => [
+          ...previous,
+          value,
+        ]);
+      command.addOption(option);
     }
     if (name === "init")
       command.addOption(
@@ -49,11 +55,16 @@ export async function runCli(
         ).default(undefined),
       );
     command.action(async () => {
-      const values: Record<string, string | boolean> = {};
+      const values: Record<string, string | boolean | string[]> = {};
       const parsed = command.opts<Record<string, unknown>>();
       for (const option of command.options) {
         const value = parsed[option.attributeName()];
-        if (typeof value === "string" || typeof value === "boolean")
+        if (
+          typeof value === "string" ||
+          typeof value === "boolean" ||
+          (Array.isArray(value) &&
+            value.every((item) => typeof item === "string"))
+        )
           values[
             option.long === "--sandbox-provider"
               ? "sandboxProvider"

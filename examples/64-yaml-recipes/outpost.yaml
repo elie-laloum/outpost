@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 1
+repository: ../..
+sandbox:
+  provider: docker
+  image: outpost:latest
+branch:
+  mode: integrate
+agents:
+  coder:
+    harness: codex
+    authentication: account
+  reviewer:
+    harness: codex
+    authentication: account

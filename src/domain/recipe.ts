@@ -1,6 +1,9 @@
 import { defineTask } from "./workflow.ts";
 import type { RecipeDocument, RecipeStep } from "./recipe.types.ts";
 import { recipeKeys, recipeLimits } from "./recipe.constants.ts";
+import { recipeInputs } from "./recipe-inputs.ts";
+import { validateRecipeReferences } from "./recipe-templates.ts";
+import { SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
 
 function object(value: unknown, path: string): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -93,10 +96,7 @@ function step(value: unknown, index: number): RecipeStep {
         ? undefined
         : Object.fromEntries(
             Object.entries(variables).map(([name, value]) => {
-              if (
-                !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ||
-                typeof value !== "string"
-              )
+              if (!SECRET_VARIABLE_NAME.test(name) || typeof value !== "string")
                 throw new Error(
                   `${path}.command.variables requires variable names and string values`,
                 );
@@ -143,8 +143,14 @@ function step(value: unknown, index: number): RecipeStep {
 }
 
 export function validateRecipe(value: unknown): RecipeDocument {
-  const record = fields(value, "recipe", recipeKeys.document);
-  if (record.version !== 1) throw new Error("Recipe version must be 1");
+  const mapping = object(value, "recipe");
+  const record = fields(
+    mapping,
+    "recipe",
+    mapping.version === 2 ? recipeKeys.documentV2 : recipeKeys.document,
+  );
+  if (record.version !== 1 && record.version !== 2)
+    throw new Error("Recipe version must be 1 or 2");
   const name = text(record.name, "recipe.name");
   if (
     !Array.isArray(record.tasks) ||
@@ -174,5 +180,19 @@ export function validateRecipe(value: unknown): RecipeDocument {
     if (size === remaining.size)
       throw new Error("Recipe dependencies contain a cycle");
   }
-  return { name, tasks: ordered };
+  if (record.$schema !== undefined) text(record.$schema, "recipe.$schema");
+  const document: RecipeDocument = {
+    version: record.version,
+    name,
+    tasks: ordered,
+    inputs: recipeInputs(record.inputs),
+    ...(record.description === undefined
+      ? {}
+      : { description: text(record.description, "recipe.description") }),
+    ...(record.recipeVersion === undefined
+      ? {}
+      : { recipeVersion: text(record.recipeVersion, "recipe.recipeVersion") }),
+  };
+  validateRecipeReferences(document);
+  return document;
 }

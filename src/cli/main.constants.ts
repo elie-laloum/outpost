@@ -1,8 +1,21 @@
 import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
+  catalog: {
+    type: "string",
+    description: "Local catalogue JSON or HTTPS catalogue URL",
+  },
+  recipe: {
+    type: "string",
+    description: "Recipe name in the selected catalogue",
+  },
+  input: {
+    type: "strings",
+    description: "Recipe input name=value; repeat for each parameter",
+  },
   config: {
     type: "string",
-    description: "TypeScript or JavaScript recipe bindings module",
+    description:
+      "Local YAML recipe configuration or TypeScript/JavaScript bindings module",
   },
   "base-url": {
     type: "string",
@@ -65,16 +78,35 @@ export const cliOptions = {
   destination: { type: "string", description: "New restoration directory" },
   side: { type: "string", description: "Transfer side: previous or incoming" },
   engine: { type: "string", description: "Container engine: docker or podman" },
-  file: { type: "string", description: "YAML or container recipe path" },
+  file: { type: "string", description: "Recipe YAML path" },
   image: { type: "string", description: "Container image name" },
   uid: { type: "string", description: "Container user ID" },
   gid: { type: "string", description: "Container group ID" },
 } as const;
 
 export const commandOptions = {
+  "recipe list": {
+    description: "List the bundled or selected recipe catalogue",
+    options: ["catalog", "json"],
+  },
+  "recipe fetch": {
+    description:
+      "Download and validate a catalogue recipe without executing it",
+    options: ["catalog", "recipe", "file", "json"],
+  },
+  "recipe init": {
+    description:
+      "Create a recipe starter with editor schema support; never overwrite an existing file",
+    options: ["file", "config", "json"],
+  },
   "recipe run": {
     description:
       "Run a local YAML recipe with explicit sandbox and agent bindings",
+    options: ["file", "config", "input", "json"],
+  },
+  "recipe validate": {
+    description:
+      "Validate a recipe and optional YAML configuration without allocating a sandbox",
     options: ["file", "config", "json"],
   },
   init: {

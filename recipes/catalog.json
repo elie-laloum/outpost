@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "recipes": [
+    {
+      "name": "fix-and-check",
+      "version": "1.0.0",
+      "description": "Implement a requested change, commit it and run the project tests.",
+      "source": "./fix-and-check.yaml",
+      "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
+    },
+    {
+      "name": "review",
+      "version": "1.0.0",
+      "description": "Review a selected area of the repository and return actionable findings.",
+      "source": "./review.yaml",
+      "sha256": "6459316af5c65a40d9bc9a39ca0819cac0ea05e6d2befac6ec9d69cf44b48275"
+    },
+    {
+      "name": "update-docs",
+      "version": "1.0.0",
+      "description": "Update documentation for a requested change and review the result.",
+      "source": "./update-docs.yaml",
+      "sha256": "7d3cd943be95316aac98efc052965de9baede67624d35a2d1120f5cd7ea8bdee"
+    }
+  ]
+}
