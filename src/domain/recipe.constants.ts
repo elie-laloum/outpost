@@ -13,6 +13,7 @@ export const recipeKeys = {
   input: ["type", "description", "default", "enum"],
   task: ["key", "after", "command", "agent", "brief", "timeoutMs", "retry"],
   taskV3: [
+    "speculation",
     "queued",
     "key",
     "after",

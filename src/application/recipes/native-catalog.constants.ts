@@ -1,5 +1,77 @@
 export const nativeRecipeTypes = [
   [
+    "observation.hub",
+    "ObservationHubOptions",
+    "domain/observation.types.ts",
+    null,
+    null,
+    1,
+  ],
+  [
+    "sandboxProvider.mounted",
+    "ProviderDefinition",
+    "providers/factories.types.ts",
+    "createMountedSandboxProvider",
+    "providers/factories.ts",
+    7,
+  ],
+  [
+    "sandboxProvider.remote",
+    "ProviderDefinition",
+    "providers/factories.types.ts",
+    "createRemoteSandboxProvider",
+    "providers/factories.ts",
+    7,
+  ],
+  [
+    "resolver.agent",
+    "RecipeConflictResolverOptions",
+    "application/recipes/advanced-components.types.ts",
+    "createRecipeConflictResolver",
+    "application/recipes/advanced-components.ts",
+    7,
+  ],
+  [
+    "sink.reporter",
+    "ReporterOptions",
+    "infrastructure/reporter.types.ts",
+    "createRecipeReporter",
+    "application/recipes/advanced-components.ts",
+    7,
+  ],
+  [
+    "sink.custom",
+    "RecipeCustomReporterOptions",
+    "application/recipes/advanced-components.types.ts",
+    "createRecipeCustomReporter",
+    "application/recipes/advanced-components.ts",
+    7,
+  ],
+  [
+    "sink.opentelemetry",
+    "OpenTelemetryOptions",
+    "infrastructure/opentelemetry.types.ts",
+    "createRecipeOpenTelemetry",
+    "application/recipes/advanced-components.ts",
+    7,
+  ],
+  [
+    "speculation.options",
+    "RecipeSpeculationSettings",
+    "application/recipes/advanced-components.types.ts",
+    null,
+    null,
+    7,
+  ],
+  [
+    "integration.options",
+    "RecipeIntegrationSettings",
+    "application/recipes/advanced-components.types.ts",
+    null,
+    null,
+    7,
+  ],
+  [
     "queued.options",
     "RecipeQueuedSettings",
     "application/recipes/service-components.types.ts",
@@ -732,6 +804,9 @@ export const nativeRecipeTypes = [
 ] as const;
 
 export const nativeRecipeKinds: Readonly<Record<string, string>> = {
+  ConflictResolver: "resolver",
+  Tracer: "object",
+  Meter: "object",
   TaskQueue: "queue",
   QueueHandler: "job",
   CronSchedule: "cron",
@@ -784,6 +859,11 @@ export const nativeRecipeKinds: Readonly<Record<string, string>> = {
 };
 
 export const nativeRecipePaths: Readonly<Record<string, readonly string[]>> = {
+  "speculation.options": [
+    "repository",
+    "sandbox.conversationHome",
+    "candidates.*.request.brief.file",
+  ],
   "queue.sqlite": ["file"],
   "job.recipe": ["file", "config"],
   "interactive.options": ["repository", "conversationHome"],

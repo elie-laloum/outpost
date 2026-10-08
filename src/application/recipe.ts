@@ -29,13 +29,18 @@ export function bindRecipe(
   bindings: RecipeBindings,
   requests: Readonly<Record<string, RecipeDispatchSettings>> = {},
 ): Workflow {
-  if (document.version === 3)
+  if (document.version === 3) {
+    if (document.workflow || document.tasks.some((step) => step.options))
+      throw new Error(
+        "Recipe workflow and task options require createRecipeRuntime",
+      );
     return bindRecipeWorkflow(document, bindings, {
       workflow: {},
       steps: Object.fromEntries(
         Object.entries(requests).map(([key, dispatch]) => [key, { dispatch }]),
       ),
     });
+  }
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const tasks = new Map<string, Task>();
   for (const step of document.tasks) {

@@ -8,17 +8,20 @@ import type {
   RecipeDurableResources,
   RecipeDurableWorkspace,
 } from "./durable-resources.types.ts";
-import type { RecipeConfiguration } from "../recipe.types.ts";
+import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
 
 export function createRecipeDurableResources(
   session: RecipeCheckpointSession,
-  configuration: RecipeConfiguration,
+  configuration: RecipeRuntimeConfiguration,
   signal: AbortSignal,
   observation?: ObservationHub,
 ): RecipeDurableResources {
   const open = new Map<string, RecipeDurableWorkspace>();
   let shared: Promise<Sandbox> | undefined;
   let sharedSandbox: Sandbox | undefined;
+  let integration =
+    session.resource("shared")?.integration ??
+    session.previous?.recipe.report?.integration;
   let disposedShared = false;
   const observed = observation ? { observation } : {};
   async function workspace(
@@ -167,17 +170,23 @@ export function createRecipeDurableResources(
         }
         if (key === "shared" && saved.state !== "integrated") {
           signal.throwIfAborted();
-          await resource.workspace.integrate({ signal });
+          integration =
+            (await resource.workspace.integrate({
+              ...configuration.integration,
+              signal,
+            })) ?? undefined;
         }
         await session.saveResource(key, {
           state: "integrated",
           record: saved.record,
+          ...(key === "shared" && integration ? { integration } : {}),
         });
         const disposal = await resource.workspace.close();
         open.delete(key);
         await session.saveResource(key, {
           state: disposal.retainedDirectory ? "integrated" : "closed",
           record: saved.record,
+          ...(key === "shared" && integration ? { integration } : {}),
         });
       }
     },
@@ -199,6 +208,7 @@ export function createRecipeDurableResources(
       if (errors.length)
         throw new AggregateError(errors, "Recipe workspace cleanup failed");
     },
+    integration: () => integration,
     workspace() {
       const saved = session.resource("shared");
       if (!saved?.record) return undefined;

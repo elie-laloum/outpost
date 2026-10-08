@@ -122,6 +122,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
   Object.assign(common, additions);
   if (version === 3) {
     const actions = [
+      "speculation",
       "queued",
       "command",
       "agent",
@@ -137,6 +138,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
     if (actions.length !== 1)
       throw new Error(`${path} requires exactly one task action`);
     for (const field of [
+      "speculation",
       "queued",
       "call",
       "loop",
@@ -313,6 +315,23 @@ export function validateRecipe(value: unknown): RecipeDocument {
         "text" in step.isolated.brief
       )
         validateRecipeExpression(step.isolated.brief.text, context);
+      if (Array.isArray(step.speculation?.candidates))
+        for (const candidate of step.speculation.candidates) {
+          const request =
+            typeof candidate === "object" &&
+            candidate !== null &&
+            "request" in candidate
+              ? candidate.request
+              : undefined;
+          const brief =
+            typeof request === "object" &&
+            request !== null &&
+            "brief" in request
+              ? request.brief
+              : undefined;
+          if (typeof brief === "object" && brief !== null && "text" in brief)
+            validateRecipeExpression(brief.text, context);
+        }
       if (step.when !== undefined) validateRecipeCondition(step.when, context);
       for (const field of ["value", "arguments", "state", "data"] as const)
         if (step[field] !== undefined)

@@ -18,6 +18,7 @@ export interface RecipeResumeOptions extends RecipeRunOptions {
 }
 
 export interface RecipeWorkspaceCheckpoint {
+  readonly integration?: RecipeReport["integration"];
   readonly state: "allocating" | "ready" | "integrated" | "closed";
   readonly record?: WorkspaceRecord;
 }

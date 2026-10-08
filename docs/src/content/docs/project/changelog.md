@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Complete the seven YAML composition lots with explicit experimental speculation, cumulative durable usage receipts, conflict resolvers, native reporters and OpenTelemetry. Keep machine settings in named local components, synchronize and close execution sandboxes before integration, and report resolver usage separately. Generate component documentation and enforce per-export/per-option parity classifications in CI. Add an offline community recipe and example; paid/cloud/remote-SDK validation remains absent.
+
 - Compose YAML SQLite/HTTP/BullMQ queues, recipe and native workflow jobs, queued tasks, cron schedules and authenticated webhook services. Add explicit recipe enqueue/serve commands with native ownership, cancellation, token rotation and job identities. Verify local service composition and real Redis 7 without paid calls.
 
 - Add durable YAML checkpoints with exact Git workspace restoration, artifacts, caches, signed gates, dialogues, quota pauses and cumulative budgets. Add recipe status/resume/answer/decide; require explicit replay and revision-fenced recovery after interruption. Exercise separate processes, preserved uncommitted files and original diff guards offline; live cloud restoration remains unvalidated.

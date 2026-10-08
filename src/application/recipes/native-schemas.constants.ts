@@ -1,6 +1,2145 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "observation.hub": {
+    type: "object",
+    properties: {
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      sinks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "sink",
+        },
+      },
+      scope: {
+        type: "object",
+        properties: {
+          executionId: {
+            type: "string",
+          },
+          taskKey: {
+            type: "string",
+          },
+          attempt: {
+            type: "number",
+          },
+          dispatchId: {
+            type: "string",
+          },
+          pass: {
+            type: "number",
+          },
+          subagentId: {
+            type: "string",
+          },
+          candidate: {
+            type: "string",
+          },
+        },
+        additionalProperties: false,
+      },
+      capacity: {
+        type: "number",
+      },
+      deliveryTimeoutMs: {
+        type: "number",
+      },
+      verbose: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+    },
+    additionalProperties: false,
+  },
+  "sandboxProvider.mounted": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      variables: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "variables",
+          },
+          {
+            type: "object",
+            additionalProperties: {
+              anyOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "object",
+                  properties: {
+                    env: {
+                      type: "string",
+                      pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                    },
+                  },
+                  required: ["env"],
+                  additionalProperties: false,
+                  secret: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      acquire: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sandboxProvider.mounted.acquire",
+      },
+    },
+    required: ["name", "acquire"],
+    additionalProperties: false,
+  },
+  "sandboxProvider.remote": {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+      },
+      variables: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "variables",
+          },
+          {
+            type: "object",
+            additionalProperties: {
+              anyOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "object",
+                  properties: {
+                    env: {
+                      type: "string",
+                      pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                    },
+                  },
+                  required: ["env"],
+                  additionalProperties: false,
+                  secret: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      acquire: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sandboxProvider.remote.acquire",
+      },
+    },
+    required: ["name", "acquire"],
+    additionalProperties: false,
+  },
+  "resolver.agent": {
+    type: "object",
+    properties: {
+      agent: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "agent",
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
+      },
+      verify: {
+        type: "object",
+        properties: {
+          executable: {
+            type: "string",
+          },
+          arguments: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          stdin: {
+            type: "string",
+          },
+          input: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          directory: {
+            type: "string",
+          },
+          variables: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "variables",
+              },
+              {
+                type: "object",
+                additionalProperties: {
+                  anyOf: [
+                    {
+                      type: "string",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        env: {
+                          type: "string",
+                          pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                        },
+                      },
+                      required: ["env"],
+                      additionalProperties: false,
+                      secret: true,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          deadlineMs: {
+            type: "number",
+          },
+          interactive: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          terminal: {
+            type: "object",
+            properties: {
+              input: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              output: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+              error: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "object",
+              },
+            },
+            additionalProperties: false,
+          },
+          elevated: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          retain: {
+            type: "number",
+          },
+          observe: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "resolver.agent.verify.observe",
+          },
+        },
+        required: ["executable"],
+        additionalProperties: false,
+      },
+      instructions: {
+        type: "string",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "resolver.agent.observe",
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+    },
+    required: ["agent", "sandboxProvider", "verify"],
+    additionalProperties: false,
+  },
+  "sink.reporter": {
+    type: "object",
+    properties: {
+      label: {
+        type: "string",
+      },
+      verbose: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      quiet: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      write: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sink.reporter.write",
+      },
+    },
+    additionalProperties: false,
+  },
+  "sink.custom": {
+    type: "object",
+    properties: {
+      handlers: {
+        type: "object",
+        properties: {
+          "model-route": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.model-route",
+          },
+          subagent: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.subagent",
+          },
+          "message-usage": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.message-usage",
+          },
+          stderr: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.stderr",
+          },
+          stopped: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.stopped",
+          },
+          steer: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.steer",
+          },
+          reasoning: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.reasoning",
+          },
+          "file-change": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.file-change",
+          },
+          "model-request": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.model-request",
+          },
+          "model-response": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.model-response",
+          },
+          "model-retry": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.model-retry",
+          },
+          "model-error": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.model-error",
+          },
+          hook: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.hook",
+          },
+          "instructions-loaded": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.instructions-loaded",
+          },
+          "skills-loaded": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.skills-loaded",
+          },
+          "tool-output": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.tool-output",
+          },
+          phase: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.phase",
+          },
+          summary: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.summary",
+          },
+          warning: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.warning",
+          },
+          text: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.text",
+          },
+          "text-delta": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.text-delta",
+          },
+          result: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.result",
+          },
+          prompt: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.prompt",
+          },
+          tool: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.tool",
+          },
+          "tool-result": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.tool-result",
+          },
+          step: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.step",
+          },
+          "tool-denied": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.tool-denied",
+          },
+          "stop-prevented": {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.stop-prevented",
+          },
+          compaction: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.compaction",
+          },
+          conversation: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.conversation",
+          },
+          usage: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.usage",
+          },
+          failure: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.failure",
+          },
+          quota: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.quota",
+          },
+          fallback: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.fallback",
+          },
+          finished: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.finished",
+          },
+          raw: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.raw",
+          },
+          stuck: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "sink.custom.handlers.stuck",
+          },
+        },
+        additionalProperties: false,
+      },
+      capacity: {
+        type: "number",
+      },
+      deliveryTimeoutMs: {
+        type: "number",
+      },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sink.custom.onError",
+      },
+    },
+    required: ["handlers"],
+    additionalProperties: false,
+  },
+  "sink.opentelemetry": {
+    type: "object",
+    properties: {
+      tracer: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "object",
+      },
+      meter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "object",
+      },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "sink.opentelemetry.onError",
+      },
+    },
+    required: ["tracer", "meter"],
+    additionalProperties: false,
+  },
+  "speculation.options": {
+    type: "object",
+    properties: {
+      durability: {
+        type: "object",
+        properties: {
+          transporter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "transport",
+          },
+          runId: {
+            type: "string",
+          },
+          version: {
+            type: "string",
+          },
+          resume: {
+            const: "retry-incomplete",
+          },
+        },
+        required: ["transporter", "runId", "version"],
+        additionalProperties: false,
+      },
+      cleanupMs: {
+        type: "number",
+      },
+      repository: {
+        type: "string",
+        hostPath: true,
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
+      },
+      candidates: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            key: {
+              type: "string",
+            },
+            agent: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "agent",
+            },
+            request: {
+              type: "object",
+              properties: {
+                observation: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "observation",
+                },
+                watchdog: {
+                  type: "object",
+                  properties: {
+                    repetition: {
+                      type: "object",
+                      properties: {
+                        window: {
+                          type: "number",
+                        },
+                        maxRepeats: {
+                          type: "number",
+                        },
+                      },
+                      required: ["window", "maxRepeats"],
+                      additionalProperties: false,
+                    },
+                    onStuck: {
+                      anyOf: [
+                        {
+                          const: "warn",
+                        },
+                        {
+                          const: "stop",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            instruction: {
+                              type: "string",
+                            },
+                            maxInterventions: {
+                              type: "number",
+                            },
+                          },
+                          required: ["instruction"],
+                          additionalProperties: false,
+                        },
+                      ],
+                    },
+                  },
+                  required: ["repetition", "onStuck"],
+                  additionalProperties: false,
+                },
+                prices: {
+                  $ref: "#/$defs/option0",
+                },
+                redact: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      pattern: {
+                        type: "string",
+                      },
+                      flags: {
+                        type: "string",
+                      },
+                    },
+                    required: ["pattern"],
+                    additionalProperties: false,
+                    regexp: true,
+                  },
+                },
+                logging: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: "stdout",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        transporter: {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "transport",
+                        },
+                        verbose: {
+                          anyOf: [
+                            {
+                              const: false,
+                            },
+                            {
+                              const: true,
+                            },
+                          ],
+                        },
+                        replayable: {
+                          anyOf: [
+                            {
+                              const: false,
+                            },
+                            {
+                              const: true,
+                            },
+                          ],
+                        },
+                      },
+                      additionalProperties: false,
+                    },
+                  ],
+                },
+                label: {
+                  type: "string",
+                },
+                brief: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        text: {
+                          type: "string",
+                        },
+                        file: false,
+                        values: false,
+                      },
+                      required: ["text"],
+                      additionalProperties: false,
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        file: {
+                          type: "string",
+                          hostPath: true,
+                        },
+                        text: false,
+                        values: {
+                          type: "object",
+                          properties: {},
+                          additionalProperties: {
+                            anyOf: [
+                              {
+                                type: "string",
+                              },
+                              {
+                                type: "number",
+                              },
+                              {
+                                const: false,
+                              },
+                              {
+                                const: true,
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      required: ["file"],
+                      additionalProperties: false,
+                    },
+                  ],
+                },
+                passes: {
+                  type: "number",
+                },
+                until: {
+                  anyOf: [
+                    {
+                      type: "string",
+                    },
+                    {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  ],
+                },
+                idleMs: {
+                  type: "number",
+                },
+                idleWarningMs: {
+                  type: "number",
+                },
+                settleMs: {
+                  type: "number",
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                expansionMs: {
+                  type: "number",
+                },
+                steering: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "steering",
+                },
+                response: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "response",
+                },
+                telemetry: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "telemetry",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "speculation.options.candidates.*.request.observe",
+                },
+                warn: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "speculation.options.candidates.*.request.warn",
+                },
+                diagnostic: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract:
+                    "speculation.options.candidates.*.request.diagnostic",
+                },
+              },
+              required: ["brief"],
+              additionalProperties: false,
+            },
+          },
+          required: ["key", "agent", "request"],
+          additionalProperties: false,
+        },
+      },
+      concurrency: {
+        type: "number",
+      },
+      select: {
+        anyOf: [
+          {
+            const: "first",
+          },
+          {
+            const: "best",
+          },
+        ],
+      },
+      score: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "speculation.options.score",
+      },
+      budget: {
+        type: "object",
+        properties: {
+          prices: {
+            $ref: "#/$defs/option0",
+          },
+          cost: {
+            type: "object",
+            properties: {
+              currency: {
+                anyOf: [
+                  {
+                    const: "EUR",
+                  },
+                  {
+                    const: "USD",
+                  },
+                ],
+              },
+              limit: {
+                type: "number",
+              },
+            },
+            required: ["currency", "limit"],
+            additionalProperties: false,
+          },
+          attempts: {
+            type: "number",
+          },
+          usage: {
+            type: "object",
+            properties: {
+              input: {
+                type: "number",
+              },
+              cached: {
+                type: "number",
+              },
+              cacheCreated: {
+                type: "number",
+              },
+              output: {
+                type: "number",
+              },
+            },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+      },
+      sandbox: {
+        type: "object",
+        properties: {
+          logging: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: "stdout",
+              },
+              {
+                type: "object",
+                properties: {
+                  transporter: {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "transport",
+                  },
+                  verbose: {
+                    anyOf: [
+                      {
+                        const: false,
+                      },
+                      {
+                        const: true,
+                      },
+                    ],
+                  },
+                  replayable: {
+                    anyOf: [
+                      {
+                        const: false,
+                      },
+                      {
+                        const: true,
+                      },
+                    ],
+                  },
+                },
+                additionalProperties: false,
+              },
+            ],
+          },
+          hooks: {
+            type: "object",
+            properties: {
+              workspaceReady: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    when: {
+                      type: "object",
+                      properties: {
+                        kind: {
+                          const: "changed",
+                        },
+                        files: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                        },
+                      },
+                      required: ["kind", "files"],
+                      additionalProperties: false,
+                    },
+                    executable: {
+                      type: "string",
+                    },
+                    arguments: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    stdin: {
+                      type: "string",
+                    },
+                    input: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "object",
+                    },
+                    directory: {
+                      type: "string",
+                    },
+                    variables: {
+                      anyOf: [
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "variables",
+                        },
+                        {
+                          type: "object",
+                          additionalProperties: {
+                            anyOf: [
+                              {
+                                type: "string",
+                              },
+                              {
+                                type: "object",
+                                properties: {
+                                  env: {
+                                    type: "string",
+                                    pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                                  },
+                                },
+                                required: ["env"],
+                                additionalProperties: false,
+                                secret: true,
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                    deadlineMs: {
+                      type: "number",
+                    },
+                    interactive: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    terminal: {
+                      $ref: "#/$defs/option1",
+                    },
+                    elevated: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    retain: {
+                      type: "number",
+                    },
+                    observe: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "callback",
+                      contract:
+                        "speculation.options.sandbox.hooks.workspaceReady.*.observe",
+                    },
+                  },
+                  required: ["executable"],
+                  additionalProperties: false,
+                },
+              },
+              hostReady: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    when: {
+                      type: "object",
+                      properties: {
+                        kind: {
+                          const: "changed",
+                        },
+                        files: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                        },
+                      },
+                      required: ["kind", "files"],
+                      additionalProperties: false,
+                    },
+                    executable: {
+                      type: "string",
+                    },
+                    arguments: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    stdin: {
+                      type: "string",
+                    },
+                    input: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "object",
+                    },
+                    directory: {
+                      type: "string",
+                    },
+                    variables: {
+                      anyOf: [
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "variables",
+                        },
+                        {
+                          type: "object",
+                          additionalProperties: {
+                            anyOf: [
+                              {
+                                type: "string",
+                              },
+                              {
+                                type: "object",
+                                properties: {
+                                  env: {
+                                    type: "string",
+                                    pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                                  },
+                                },
+                                required: ["env"],
+                                additionalProperties: false,
+                                secret: true,
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                    deadlineMs: {
+                      type: "number",
+                    },
+                    interactive: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    terminal: {
+                      $ref: "#/$defs/option1",
+                    },
+                    elevated: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    retain: {
+                      type: "number",
+                    },
+                    observe: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "callback",
+                      contract:
+                        "speculation.options.sandbox.hooks.hostReady.*.observe",
+                    },
+                  },
+                  required: ["executable"],
+                  additionalProperties: false,
+                },
+              },
+              sandboxReady: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    when: {
+                      type: "object",
+                      properties: {
+                        kind: {
+                          const: "changed",
+                        },
+                        files: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                        },
+                      },
+                      required: ["kind", "files"],
+                      additionalProperties: false,
+                    },
+                    executable: {
+                      type: "string",
+                    },
+                    arguments: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    stdin: {
+                      type: "string",
+                    },
+                    input: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "object",
+                    },
+                    directory: {
+                      type: "string",
+                    },
+                    variables: {
+                      anyOf: [
+                        {
+                          type: "object",
+                          properties: {
+                            $ref: {
+                              type: "string",
+                              minLength: 1,
+                            },
+                          },
+                          required: ["$ref"],
+                          additionalProperties: false,
+                          component: "variables",
+                        },
+                        {
+                          type: "object",
+                          additionalProperties: {
+                            anyOf: [
+                              {
+                                type: "string",
+                              },
+                              {
+                                type: "object",
+                                properties: {
+                                  env: {
+                                    type: "string",
+                                    pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                                  },
+                                },
+                                required: ["env"],
+                                additionalProperties: false,
+                                secret: true,
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                    deadlineMs: {
+                      type: "number",
+                    },
+                    interactive: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    terminal: {
+                      $ref: "#/$defs/option1",
+                    },
+                    elevated: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                    retain: {
+                      type: "number",
+                    },
+                    observe: {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "callback",
+                      contract:
+                        "speculation.options.sandbox.hooks.sandboxReady.*.observe",
+                    },
+                  },
+                  required: ["executable"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            additionalProperties: false,
+          },
+          bootstrap: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          limits: {
+            type: "object",
+            properties: {
+              copyMs: {
+                type: "number",
+              },
+              gitMs: {
+                type: "number",
+              },
+              collectMs: {
+                type: "number",
+              },
+              mergeMs: {
+                type: "number",
+              },
+            },
+            additionalProperties: false,
+          },
+          storageQuota: {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              maxBytes: {
+                type: "number",
+              },
+              reserveBytes: {
+                type: "number",
+              },
+              maxEntries: {
+                type: "number",
+              },
+            },
+            required: ["maxBytes", "reserveBytes"],
+            additionalProperties: false,
+          },
+          conversationHome: {
+            type: "string",
+            hostPath: true,
+          },
+        },
+        additionalProperties: false,
+      },
+      validate: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "speculation.options.validate",
+      },
+    },
+    required: [
+      "repository",
+      "sandboxProvider",
+      "candidates",
+      "budget",
+      "validate",
+    ],
+    additionalProperties: false,
+    $defs: {
+      option0: {
+        type: "object",
+        properties: {
+          currency: {
+            anyOf: [
+              {
+                const: "EUR",
+              },
+              {
+                const: "USD",
+              },
+            ],
+          },
+          models: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                input: {
+                  type: "number",
+                },
+                output: {
+                  type: "number",
+                },
+                cached: {
+                  type: "number",
+                },
+                cacheCreated: {
+                  type: "number",
+                },
+              },
+              required: ["input", "output"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["currency", "models"],
+        additionalProperties: false,
+      },
+      option1: {
+        type: "object",
+        properties: {
+          input: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          output: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          error: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+  },
+  "integration.options": {
+    type: "object",
+    properties: {
+      deadlineMs: {
+        type: "number",
+      },
+      onConflict: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "resolver",
+      },
+    },
+    additionalProperties: false,
+  },
   "queued.options": {
     type: "object",
     properties: {
@@ -788,6 +2927,12 @@ export const nativeRecipeSchemas: Readonly<
               ALPNProtocols: {
                 anyOf: [
                   {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  {
                     type: "object",
                     properties: {
                       $ref: {
@@ -798,12 +2943,6 @@ export const nativeRecipeSchemas: Readonly<
                     required: ["$ref"],
                     additionalProperties: false,
                     component: "object",
-                  },
-                  {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
                   },
                   {
                     $ref: "#/$defs/option4",
@@ -2214,6 +4353,12 @@ export const nativeRecipeSchemas: Readonly<
               ALPNProtocols: {
                 anyOf: [
                   {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  {
                     type: "object",
                     properties: {
                       $ref: {
@@ -2224,12 +4369,6 @@ export const nativeRecipeSchemas: Readonly<
                     required: ["$ref"],
                     additionalProperties: false,
                     component: "object",
-                  },
-                  {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
                   },
                   {
                     $ref: "#/$defs/option9",
@@ -5716,6 +7855,9 @@ export const nativeRecipeSchemas: Readonly<
   "service.triggers": {
     type: "object",
     properties: {
+      maxBytes: {
+        type: "number",
+      },
       queue: {
         type: "object",
         properties: {
@@ -5733,9 +7875,6 @@ export const nativeRecipeSchemas: Readonly<
       },
       host: {
         type: "string",
-      },
-      maxBytes: {
-        type: "number",
       },
       onError: {
         type: "object",
@@ -5885,39 +8024,6 @@ export const nativeRecipeSchemas: Readonly<
       start: {
         type: "object",
         properties: {
-          timeoutMs: {
-            type: "number",
-          },
-          redact: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                pattern: {
-                  type: "string",
-                },
-                flags: {
-                  type: "string",
-                },
-              },
-              required: ["pattern"],
-              additionalProperties: false,
-              regexp: true,
-            },
-          },
-          onQuota: {
-            type: "object",
-            properties: {
-              action: {
-                const: "pause",
-              },
-              maxWaitMs: {
-                type: "number",
-              },
-            },
-            required: ["action"],
-            additionalProperties: false,
-          },
           observation: {
             type: "object",
             properties: {
@@ -5929,18 +8035,6 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "observation",
-          },
-          decisionVerifier: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "verifier",
           },
           concurrency: {
             type: "number",
@@ -6032,15 +8126,22 @@ export const nativeRecipeSchemas: Readonly<
             },
             additionalProperties: false,
           },
-          stopOnError: {
-            anyOf: [
-              {
-                const: false,
+          redact: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                pattern: {
+                  type: "string",
+                },
+                flags: {
+                  type: "string",
+                },
               },
-              {
-                const: true,
-              },
-            ],
+              required: ["pattern"],
+              additionalProperties: false,
+              regexp: true,
+            },
           },
           telemetry: {
             type: "object",
@@ -6074,6 +8175,44 @@ export const nativeRecipeSchemas: Readonly<
             additionalProperties: false,
             component: "callback",
             contract: "job.workflow.start.observe",
+          },
+          timeoutMs: {
+            type: "number",
+          },
+          onQuota: {
+            type: "object",
+            properties: {
+              action: {
+                const: "pause",
+              },
+              maxWaitMs: {
+                type: "number",
+              },
+            },
+            required: ["action"],
+            additionalProperties: false,
+          },
+          decisionVerifier: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "verifier",
+          },
+          stopOnError: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
           },
         },
         additionalProperties: false,
@@ -6677,12 +8816,21 @@ export const nativeRecipeSchemas: Readonly<
   "interactive.options": {
     type: "object",
     properties: {
-      timeoutMs: {
-        type: "number",
-      },
       repository: {
         type: "string",
         hostPath: true,
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
       },
       agent: {
         type: "object",
@@ -6699,24 +8847,6 @@ export const nativeRecipeSchemas: Readonly<
       brief: {
         type: "string",
       },
-      actors: {
-        type: "array",
-        items: {
-          type: "string",
-        },
-      },
-      sandboxProvider: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "sandboxProvider",
-      },
       bootstrap: {
         anyOf: [
           {
@@ -6730,6 +8860,15 @@ export const nativeRecipeSchemas: Readonly<
       conversationHome: {
         type: "string",
         hostPath: true,
+      },
+      timeoutMs: {
+        type: "number",
+      },
+      actors: {
+        type: "array",
+        items: {
+          type: "string",
+        },
       },
       maxTurns: {
         type: "number",
@@ -6991,6 +9130,146 @@ export const nativeRecipeSchemas: Readonly<
   "workflow.options": {
     type: "object",
     properties: {
+      concurrency: {
+        type: "number",
+      },
+      budget: {
+        type: "object",
+        properties: {
+          prices: {
+            type: "object",
+            properties: {
+              currency: {
+                anyOf: [
+                  {
+                    const: "EUR",
+                  },
+                  {
+                    const: "USD",
+                  },
+                ],
+              },
+              models: {
+                type: "object",
+                properties: {},
+                additionalProperties: {
+                  type: "object",
+                  properties: {
+                    input: {
+                      type: "number",
+                    },
+                    output: {
+                      type: "number",
+                    },
+                    cached: {
+                      type: "number",
+                    },
+                    cacheCreated: {
+                      type: "number",
+                    },
+                  },
+                  required: ["input", "output"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["currency", "models"],
+            additionalProperties: false,
+          },
+          cost: {
+            type: "object",
+            properties: {
+              currency: {
+                anyOf: [
+                  {
+                    const: "EUR",
+                  },
+                  {
+                    const: "USD",
+                  },
+                ],
+              },
+              limit: {
+                type: "number",
+              },
+            },
+            required: ["currency", "limit"],
+            additionalProperties: false,
+          },
+          attempts: {
+            type: "number",
+          },
+          usage: {
+            type: "object",
+            properties: {
+              input: {
+                type: "number",
+              },
+              cached: {
+                type: "number",
+              },
+              cacheCreated: {
+                type: "number",
+              },
+              output: {
+                type: "number",
+              },
+            },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          observe: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "workflow.options.telemetry.observe",
+          },
+        },
+        required: ["observe"],
+        additionalProperties: false,
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "workflow.options.observe",
+      },
       timeoutMs: {
         type: "number",
       },
@@ -7108,23 +9387,6 @@ export const nativeRecipeSchemas: Readonly<
           additionalProperties: false,
         },
       },
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
       onQuota: {
         type: "object",
         properties: {
@@ -7150,96 +9412,6 @@ export const nativeRecipeSchemas: Readonly<
         additionalProperties: false,
         component: "verifier",
       },
-      concurrency: {
-        type: "number",
-      },
-      budget: {
-        type: "object",
-        properties: {
-          prices: {
-            type: "object",
-            properties: {
-              currency: {
-                anyOf: [
-                  {
-                    const: "EUR",
-                  },
-                  {
-                    const: "USD",
-                  },
-                ],
-              },
-              models: {
-                type: "object",
-                properties: {},
-                additionalProperties: {
-                  type: "object",
-                  properties: {
-                    input: {
-                      type: "number",
-                    },
-                    output: {
-                      type: "number",
-                    },
-                    cached: {
-                      type: "number",
-                    },
-                    cacheCreated: {
-                      type: "number",
-                    },
-                  },
-                  required: ["input", "output"],
-                  additionalProperties: false,
-                },
-              },
-            },
-            required: ["currency", "models"],
-            additionalProperties: false,
-          },
-          cost: {
-            type: "object",
-            properties: {
-              currency: {
-                anyOf: [
-                  {
-                    const: "EUR",
-                  },
-                  {
-                    const: "USD",
-                  },
-                ],
-              },
-              limit: {
-                type: "number",
-              },
-            },
-            required: ["currency", "limit"],
-            additionalProperties: false,
-          },
-          attempts: {
-            type: "number",
-          },
-          usage: {
-            type: "object",
-            properties: {
-              input: {
-                type: "number",
-              },
-              cached: {
-                type: "number",
-              },
-              cacheCreated: {
-                type: "number",
-              },
-              output: {
-                type: "number",
-              },
-            },
-            additionalProperties: false,
-          },
-        },
-        additionalProperties: false,
-      },
       stopOnError: {
         anyOf: [
           {
@@ -7249,39 +9421,6 @@ export const nativeRecipeSchemas: Readonly<
             const: true,
           },
         ],
-      },
-      telemetry: {
-        type: "object",
-        properties: {
-          observe: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "callback",
-            contract: "workflow.options.telemetry.observe",
-          },
-        },
-        required: ["observe"],
-        additionalProperties: false,
-      },
-      observe: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "workflow.options.observe",
       },
     },
     additionalProperties: false,
@@ -7369,51 +9508,21 @@ export const nativeRecipeSchemas: Readonly<
   "isolated.options": {
     type: "object",
     properties: {
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      telemetry: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "telemetry",
-      },
-      observe: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "isolated.options.observe",
-      },
       repository: {
         type: "string",
         hostPath: true,
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
       },
       agent: {
         anyOf: [
@@ -7576,10 +9685,10 @@ export const nativeRecipeSchemas: Readonly<
                               status: {
                                 anyOf: [
                                   {
-                                    const: "started",
+                                    const: "finished",
                                   },
                                   {
-                                    const: "finished",
+                                    const: "started",
                                   },
                                   {
                                     const: "failed",
@@ -7659,6 +9768,9 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
+                                    const: "stuck",
+                                  },
+                                  {
                                     const: "deadline",
                                   },
                                   {
@@ -7675,9 +9787,6 @@ export const nativeRecipeSchemas: Readonly<
                                   },
                                   {
                                     const: "steered",
-                                  },
-                                  {
-                                    const: "stuck",
                                   },
                                 ],
                               },
@@ -8324,10 +10433,10 @@ export const nativeRecipeSchemas: Readonly<
                               action: {
                                 anyOf: [
                                   {
-                                    const: "warn",
+                                    const: "steer",
                                   },
                                   {
-                                    const: "steer",
+                                    const: "warn",
                                   },
                                   {
                                     const: "stop",
@@ -8369,10 +10478,10 @@ export const nativeRecipeSchemas: Readonly<
                                   status: {
                                     anyOf: [
                                       {
-                                        const: "started",
+                                        const: "finished",
                                       },
                                       {
-                                        const: "finished",
+                                        const: "started",
                                       },
                                       {
                                         const: "failed",
@@ -8460,6 +10569,21 @@ export const nativeRecipeSchemas: Readonly<
                         code: {
                           anyOf: [
                             {
+                              const: "prompt",
+                            },
+                            {
+                              const: "quota",
+                            },
+                            {
+                              const: "stuck",
+                            },
+                            {
+                              const: "steering",
+                            },
+                            {
+                              const: "response",
+                            },
+                            {
                               const: "provider",
                             },
                             {
@@ -8469,25 +10593,10 @@ export const nativeRecipeSchemas: Readonly<
                               const: "guard",
                             },
                             {
-                              const: "steering",
-                            },
-                            {
-                              const: "response",
-                            },
-                            {
                               const: "replay",
                             },
                             {
                               const: "aborted",
-                            },
-                            {
-                              const: "stuck",
-                            },
-                            {
-                              const: "prompt",
-                            },
-                            {
-                              const: "quota",
                             },
                             {
                               const: "rejected",
@@ -8857,10 +10966,10 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   anyOf: [
                     {
-                      const: "unavailable",
+                      const: "quota",
                     },
                     {
-                      const: "quota",
+                      const: "unavailable",
                     },
                   ],
                 },
@@ -8931,6 +11040,177 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
+      continuation: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+          },
+          fork: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+        },
+        required: ["id"],
+        additionalProperties: false,
+      },
+      watchdog: {
+        type: "object",
+        properties: {
+          repetition: {
+            type: "object",
+            properties: {
+              window: {
+                type: "number",
+              },
+              maxRepeats: {
+                type: "number",
+              },
+            },
+            required: ["window", "maxRepeats"],
+            additionalProperties: false,
+          },
+          onStuck: {
+            anyOf: [
+              {
+                const: "warn",
+              },
+              {
+                const: "stop",
+              },
+              {
+                type: "object",
+                properties: {
+                  instruction: {
+                    type: "string",
+                  },
+                  maxInterventions: {
+                    type: "number",
+                  },
+                },
+                required: ["instruction"],
+                additionalProperties: false,
+              },
+            ],
+          },
+        },
+        required: ["repetition", "onStuck"],
+        additionalProperties: false,
+      },
+      prices: {
+        type: "object",
+        properties: {
+          currency: {
+            anyOf: [
+              {
+                const: "EUR",
+              },
+              {
+                const: "USD",
+              },
+            ],
+          },
+          models: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                input: {
+                  type: "number",
+                },
+                output: {
+                  type: "number",
+                },
+                cached: {
+                  type: "number",
+                },
+                cacheCreated: {
+                  type: "number",
+                },
+              },
+              required: ["input", "output"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["currency", "models"],
+        additionalProperties: false,
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      label: {
+        type: "string",
+      },
       brief: {
         anyOf: [
           {
@@ -8979,7 +11259,38 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
-      sandboxProvider: {
+      passes: {
+        type: "number",
+      },
+      until: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+        ],
+      },
+      idleMs: {
+        type: "number",
+      },
+      idleWarningMs: {
+        type: "number",
+      },
+      settleMs: {
+        type: "number",
+      },
+      deadlineMs: {
+        type: "number",
+      },
+      expansionMs: {
+        type: "number",
+      },
+      steering: {
         type: "object",
         properties: {
           $ref: {
@@ -8989,33 +11300,9 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["$ref"],
         additionalProperties: false,
-        component: "sandboxProvider",
+        component: "steering",
       },
-      bootstrap: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: true,
-          },
-        ],
-      },
-      conversationHome: {
-        type: "string",
-        hostPath: true,
-      },
-      includeUncommitted: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: true,
-          },
-        ],
-      },
-      workspace: {
+      response: {
         type: "object",
         properties: {
           $ref: {
@@ -9025,7 +11312,58 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["$ref"],
         additionalProperties: false,
-        component: "workspace",
+        component: "response",
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.observe",
+      },
+      warn: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.warn",
+      },
+      diagnostic: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.diagnostic",
       },
       hooks: {
         type: "object",
@@ -9432,53 +11770,87 @@ export const nativeRecipeSchemas: Readonly<
         },
         additionalProperties: false,
       },
-      logging: {
+      bootstrap: {
         anyOf: [
           {
             const: false,
           },
           {
-            const: "stdout",
-          },
-          {
-            type: "object",
-            properties: {
-              transporter: {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "transport",
-              },
-              verbose: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-              replayable: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-            },
-            additionalProperties: false,
+            const: true,
           },
         ],
+      },
+      limits: {
+        type: "object",
+        properties: {
+          copyMs: {
+            type: "number",
+          },
+          gitMs: {
+            type: "number",
+          },
+          collectMs: {
+            type: "number",
+          },
+          mergeMs: {
+            type: "number",
+          },
+        },
+        additionalProperties: false,
+      },
+      storageQuota: {
+        type: "object",
+        properties: {
+          transporter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "transport",
+          },
+          maxBytes: {
+            type: "number",
+          },
+          reserveBytes: {
+            type: "number",
+          },
+          maxEntries: {
+            type: "number",
+          },
+        },
+        required: ["maxBytes", "reserveBytes"],
+        additionalProperties: false,
+      },
+      conversationHome: {
+        type: "string",
+        hostPath: true,
+      },
+      includeUncommitted: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      workspace: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "workspace",
       },
       recoveryTransport: {
         type: "object",
@@ -9517,34 +11889,6 @@ export const nativeRecipeSchemas: Readonly<
             type: "number",
           },
         },
-        additionalProperties: false,
-      },
-      storageQuota: {
-        type: "object",
-        properties: {
-          maxBytes: {
-            type: "number",
-          },
-          transporter: {
-            type: "object",
-            properties: {
-              $ref: {
-                type: "string",
-                minLength: 1,
-              },
-            },
-            required: ["$ref"],
-            additionalProperties: false,
-            component: "transport",
-          },
-          reserveBytes: {
-            type: "number",
-          },
-          maxEntries: {
-            type: "number",
-          },
-        },
-        required: ["maxBytes", "reserveBytes"],
         additionalProperties: false,
       },
       branch: {
@@ -9596,211 +11940,6 @@ export const nativeRecipeSchemas: Readonly<
           type: "string",
         },
       },
-      limits: {
-        type: "object",
-        properties: {
-          copyMs: {
-            type: "number",
-          },
-          gitMs: {
-            type: "number",
-          },
-          collectMs: {
-            type: "number",
-          },
-          mergeMs: {
-            type: "number",
-          },
-        },
-        additionalProperties: false,
-      },
-      label: {
-        type: "string",
-      },
-      watchdog: {
-        type: "object",
-        properties: {
-          repetition: {
-            type: "object",
-            properties: {
-              window: {
-                type: "number",
-              },
-              maxRepeats: {
-                type: "number",
-              },
-            },
-            required: ["window", "maxRepeats"],
-            additionalProperties: false,
-          },
-          onStuck: {
-            anyOf: [
-              {
-                const: "warn",
-              },
-              {
-                const: "stop",
-              },
-              {
-                type: "object",
-                properties: {
-                  instruction: {
-                    type: "string",
-                  },
-                  maxInterventions: {
-                    type: "number",
-                  },
-                },
-                required: ["instruction"],
-                additionalProperties: false,
-              },
-            ],
-          },
-        },
-        required: ["repetition", "onStuck"],
-        additionalProperties: false,
-      },
-      prices: {
-        type: "object",
-        properties: {
-          currency: {
-            anyOf: [
-              {
-                const: "EUR",
-              },
-              {
-                const: "USD",
-              },
-            ],
-          },
-          models: {
-            type: "object",
-            properties: {},
-            additionalProperties: {
-              type: "object",
-              properties: {
-                input: {
-                  type: "number",
-                },
-                output: {
-                  type: "number",
-                },
-                cached: {
-                  type: "number",
-                },
-                cacheCreated: {
-                  type: "number",
-                },
-              },
-              required: ["input", "output"],
-              additionalProperties: false,
-            },
-          },
-        },
-        required: ["currency", "models"],
-        additionalProperties: false,
-      },
-      passes: {
-        type: "number",
-      },
-      until: {
-        anyOf: [
-          {
-            type: "string",
-          },
-          {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-        ],
-      },
-      idleMs: {
-        type: "number",
-      },
-      idleWarningMs: {
-        type: "number",
-      },
-      settleMs: {
-        type: "number",
-      },
-      deadlineMs: {
-        type: "number",
-      },
-      expansionMs: {
-        type: "number",
-      },
-      steering: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "steering",
-      },
-      continuation: {
-        type: "object",
-        properties: {
-          id: {
-            type: "string",
-          },
-          fork: {
-            anyOf: [
-              {
-                const: false,
-              },
-              {
-                const: true,
-              },
-            ],
-          },
-        },
-        required: ["id"],
-        additionalProperties: false,
-      },
-      response: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "response",
-      },
-      warn: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "isolated.options.warn",
-      },
-      diagnostic: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "isolated.options.diagnostic",
-      },
     },
     required: ["agent", "brief"],
     additionalProperties: false,
@@ -9824,9 +11963,6 @@ export const nativeRecipeSchemas: Readonly<
                     },
                   ],
                 },
-                input: {
-                  type: "number",
-                },
                 complete: {
                   anyOf: [
                     {
@@ -9836,6 +11972,9 @@ export const nativeRecipeSchemas: Readonly<
                       const: true,
                     },
                   ],
+                },
+                input: {
+                  type: "number",
                 },
                 cached: {
                   type: "number",
@@ -9918,10 +12057,10 @@ export const nativeRecipeSchemas: Readonly<
           failure: {
             anyOf: [
               {
-                const: "unavailable",
+                const: "quota",
               },
               {
-                const: "quota",
+                const: "unavailable",
               },
             ],
           },
@@ -10979,10 +13118,10 @@ export const nativeRecipeSchemas: Readonly<
         items: {
           anyOf: [
             {
-              const: "unavailable",
+              const: "quota",
             },
             {
-              const: "quota",
+              const: "unavailable",
             },
           ],
         },
@@ -11585,98 +13724,25 @@ export const nativeRecipeSchemas: Readonly<
   "dispatch.options": {
     type: "object",
     properties: {
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      telemetry: {
+      continuation: {
         type: "object",
         properties: {
-          $ref: {
+          id: {
             type: "string",
-            minLength: 1,
+          },
+          fork: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
           },
         },
-        required: ["$ref"],
+        required: ["id"],
         additionalProperties: false,
-        component: "telemetry",
-      },
-      observe: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "dispatch.options.observe",
-      },
-      logging: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: "stdout",
-          },
-          {
-            type: "object",
-            properties: {
-              transporter: {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "transport",
-              },
-              verbose: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-              replayable: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-            },
-            additionalProperties: false,
-          },
-        ],
-      },
-      label: {
-        type: "string",
       },
       watchdog: {
         type: "object",
@@ -11761,6 +13827,74 @@ export const nativeRecipeSchemas: Readonly<
         required: ["currency", "models"],
         additionalProperties: false,
       },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      label: {
+        type: "string",
+      },
       passes: {
         type: "number",
       },
@@ -11804,26 +13938,6 @@ export const nativeRecipeSchemas: Readonly<
         additionalProperties: false,
         component: "steering",
       },
-      continuation: {
-        type: "object",
-        properties: {
-          id: {
-            type: "string",
-          },
-          fork: {
-            anyOf: [
-              {
-                const: false,
-              },
-              {
-                const: true,
-              },
-            ],
-          },
-        },
-        required: ["id"],
-        additionalProperties: false,
-      },
       response: {
         type: "object",
         properties: {
@@ -11835,6 +13949,31 @@ export const nativeRecipeSchemas: Readonly<
         required: ["$ref"],
         additionalProperties: false,
         component: "response",
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "dispatch.options.observe",
       },
       warn: {
         type: "object",
@@ -18111,10 +20250,10 @@ export const nativeRecipeSchemas: Readonly<
                               status: {
                                 anyOf: [
                                   {
-                                    const: "started",
+                                    const: "finished",
                                   },
                                   {
-                                    const: "finished",
+                                    const: "started",
                                   },
                                   {
                                     const: "failed",
@@ -18194,6 +20333,9 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
+                                    const: "stuck",
+                                  },
+                                  {
                                     const: "deadline",
                                   },
                                   {
@@ -18210,9 +20352,6 @@ export const nativeRecipeSchemas: Readonly<
                                   },
                                   {
                                     const: "steered",
-                                  },
-                                  {
-                                    const: "stuck",
                                   },
                                 ],
                               },
@@ -18859,10 +20998,10 @@ export const nativeRecipeSchemas: Readonly<
                               action: {
                                 anyOf: [
                                   {
-                                    const: "warn",
+                                    const: "steer",
                                   },
                                   {
-                                    const: "steer",
+                                    const: "warn",
                                   },
                                   {
                                     const: "stop",
@@ -18904,10 +21043,10 @@ export const nativeRecipeSchemas: Readonly<
                                   status: {
                                     anyOf: [
                                       {
-                                        const: "started",
+                                        const: "finished",
                                       },
                                       {
-                                        const: "finished",
+                                        const: "started",
                                       },
                                       {
                                         const: "failed",
@@ -18995,6 +21134,21 @@ export const nativeRecipeSchemas: Readonly<
                         code: {
                           anyOf: [
                             {
+                              const: "prompt",
+                            },
+                            {
+                              const: "quota",
+                            },
+                            {
+                              const: "stuck",
+                            },
+                            {
+                              const: "steering",
+                            },
+                            {
+                              const: "response",
+                            },
+                            {
                               const: "provider",
                             },
                             {
@@ -19004,25 +21158,10 @@ export const nativeRecipeSchemas: Readonly<
                               const: "guard",
                             },
                             {
-                              const: "steering",
-                            },
-                            {
-                              const: "response",
-                            },
-                            {
                               const: "replay",
                             },
                             {
                               const: "aborted",
-                            },
-                            {
-                              const: "stuck",
-                            },
-                            {
-                              const: "prompt",
-                            },
-                            {
-                              const: "quota",
                             },
                             {
                               const: "rejected",
@@ -19392,10 +21531,10 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   anyOf: [
                     {
-                      const: "unavailable",
+                      const: "quota",
                     },
                     {
-                      const: "quota",
+                      const: "unavailable",
                     },
                   ],
                 },
@@ -19951,9 +22090,6 @@ export const nativeRecipeSchemas: Readonly<
       storageQuota: {
         type: "object",
         properties: {
-          maxBytes: {
-            type: "number",
-          },
           transporter: {
             type: "object",
             properties: {
@@ -19965,6 +22101,9 @@ export const nativeRecipeSchemas: Readonly<
             required: ["$ref"],
             additionalProperties: false,
             component: "transport",
+          },
+          maxBytes: {
+            type: "number",
           },
           reserveBytes: {
             type: "number",
@@ -20072,9 +22211,6 @@ export const nativeRecipeSchemas: Readonly<
                     },
                   ],
                 },
-                input: {
-                  type: "number",
-                },
                 complete: {
                   anyOf: [
                     {
@@ -20084,6 +22220,9 @@ export const nativeRecipeSchemas: Readonly<
                       const: true,
                     },
                   ],
+                },
+                input: {
+                  type: "number",
                 },
                 cached: {
                   type: "number",
@@ -20166,10 +22305,10 @@ export const nativeRecipeSchemas: Readonly<
           failure: {
             anyOf: [
               {
-                const: "unavailable",
+                const: "quota",
               },
               {
-                const: "quota",
+                const: "unavailable",
               },
             ],
           },
@@ -21937,6 +24076,12 @@ export const nativeRecipeSchemas: Readonly<
 export const nativeRecipeFactoryParameters: Readonly<
   Record<string, readonly string[]>
 > = {
+  "sandboxProvider.mounted": [],
+  "sandboxProvider.remote": [],
+  "resolver.agent": [],
+  "sink.reporter": [],
+  "sink.custom": [],
+  "sink.opentelemetry": [],
   "queue.sqlite": [],
   "queue.http": [],
   "queue.bullmq": [],

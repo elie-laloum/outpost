@@ -159,8 +159,15 @@ function schema(type, component, path = "", ancestors = new Set()) {
   const properties = {};
   const required = [];
   for (const property of checker.getPropertiesOfType(type)) {
-    const declaration = property.valueDeclaration ?? property.declarations?.[0];
-    if (!declaration) continue;
+    const declaration =
+      property.valueDeclaration ??
+      property.declarations?.[0] ??
+      type.aliasSymbol?.declarations?.[0] ??
+      type.symbol?.declarations?.[0];
+    if (!declaration)
+      throw new Error(
+        `Cannot describe native option: ${component}.${path}.${property.name}`,
+      );
     const key = property.name;
     if (key.startsWith("__@")) continue;
     if (key === "signal") continue;

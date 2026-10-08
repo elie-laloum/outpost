@@ -3,7 +3,10 @@ import { readRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import type { RecipeProject } from "./project.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
-import type { RecipeConfiguration } from "../recipe.types.ts";
+import type {
+  RecipeRuntimeConfiguration,
+  RecipeIntegrationSettings,
+} from "./advanced-components.types.ts";
 import type { SandboxProvider } from "../../domain/sandbox.types.ts";
 import type { SandboxOptions } from "../outpost.types.ts";
 import { nativeRecipeGuards } from "./native.ts";
@@ -21,10 +24,14 @@ function isAgent(value: unknown): value is DispatchAgent {
   return nativeRecipeGuards.agent!(value);
 }
 
+function isIntegration(value: unknown): value is RecipeIntegrationSettings {
+  return typeof value === "object" && value !== null;
+}
+
 export async function recipeExecutionConfiguration(
   project: RecipeProject,
   scope: RecipeComponentScope,
-): Promise<RecipeConfiguration> {
+): Promise<RecipeRuntimeConfiguration> {
   const source = JSON.stringify({
     ...Object.fromEntries(
       Object.entries(project.configuration).filter(([key]) =>
@@ -44,6 +51,9 @@ export async function recipeExecutionConfiguration(
   ]);
   if (!isProvider(provider) || !isSandboxOptions(options))
     throw new Error("Invalid sandbox configuration");
+  const integration = await scope.resolve("integration", "integrationOptions");
+  if (!isIntegration(integration))
+    throw new Error("Invalid integration options");
   const environment = legacy.sandbox.sandboxProvider?.variables ?? {};
   scope.protect(Object.values(environment));
   const agents: Record<string, DispatchAgent> = {};
@@ -92,5 +102,6 @@ export async function recipeExecutionConfiguration(
       },
     },
     agents,
+    integration,
   };
 }

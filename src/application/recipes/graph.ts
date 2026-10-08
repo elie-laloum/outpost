@@ -37,6 +37,7 @@ export function recipeComponentGraph(
   }
   for (const step of document?.tasks ?? []) {
     for (const [field, kind] of Object.entries({
+      speculation: "speculation",
       queued: "queued",
       gate: "gate",
       interactive: "interactive",
@@ -51,14 +52,26 @@ export function recipeComponentGraph(
       if (!Object.hasOwn(step, field)) continue;
       const key = `tasks.${step.key}.${field}`;
       const source = new Map(Object.entries(step)).get(field);
-      declarations.set(key, {
-        ...(field === "call" ? { perform: source } : recipeRecord(source, key)),
-        type: "options",
-      });
+      declarations.set(
+        key,
+        field !== "call" && recipeReference(source)
+          ? source
+          : {
+              ...(field === "call"
+                ? { perform: source }
+                : recipeRecord(source, key)),
+              type: "options",
+            },
+      );
       expected.set(key, `${kind}Options`);
     }
   }
   if (configuration.version === 2) {
+    declarations.set("integration", {
+      ...recipeRecord(configuration.integration ?? {}, "integration"),
+      type: "options",
+    });
+    expected.set("integration", "integrationOptions");
     const workspace = recipeRecord(configuration.workspace ?? {}, "workspace");
     for (const key of [
       "repository",
@@ -165,6 +178,7 @@ export function recipeComponentGraph(
               expected.get(value.$ref) ?? nodes.get(value.$ref)?.kind;
             return (
               actual === kind ||
+              (kind === "*" && actual !== undefined) ||
               (actual === undefined &&
                 ["extensions", ...Object.keys(recipeFamilies)].some((family) =>
                   reference.startsWith(`${family}.`),
@@ -194,7 +208,10 @@ export function recipeComponentGraph(
       return reference;
     }
     const record = recipeRecord(source, name);
-    const type = record.type ?? (kind === "observation" ? "hub" : undefined);
+    const type =
+      record.type ??
+      (kind === "observation" ? "hub" : undefined) ??
+      (kind.endsWith("Options") ? "options" : undefined);
     const definition = registry.get(
       `${kind}.${recipeString(type, `${name}.type`)}`,
     );

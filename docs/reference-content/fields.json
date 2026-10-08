@@ -8945,5 +8945,13 @@
   "RecipeEnqueueOptions.signal": [
     "Cancel queue preparation before publication; the native enqueue operation has no cancellation parameter.",
     "Annule la préparation avant publication ; l’opération native enqueue n’accepte pas de paramètre d’annulation."
+  ],
+  "RecipeReport.integration": [
+    "Conflict resolution commit, verification and agent usage, reported separately from workflow usage when integration invokes a resolver.",
+    "Commit de résolution, vérification et consommation de l’agent, rapportés séparément de la consommation du workflow lorsqu’une résolution est nécessaire."
+  ],
+  "RecipeWorkspaceCheckpoint.integration": [
+    "Persisted conflict resolution result, including separate resolver usage, retained with the original workspace after integration.",
+    "Résultat de résolution de conflit persisté avec le workspace d’origine après intégration, dont la consommation distincte du résolveur."
   ]
 }

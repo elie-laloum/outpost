@@ -1,3 +1,4 @@
+import type { RecipeSpeculationSettings } from "./advanced-components.types.ts";
 import type { RecipeQueuedSettings } from "./service-components.types.ts";
 import type {
   RecipeGateSettings,
@@ -14,7 +15,7 @@ import type { DecideOptions } from "../../domain/decision.types.ts";
 import type { IsolatedTaskRequest } from "../tasks.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeDispatchSettings } from "./agent-components.types.ts";
-import type { Sandbox } from "../outpost.types.ts";
+import type { Sandbox, SandboxOptions } from "../outpost.types.ts";
 import type { RecipeBindings } from "../recipe.types.ts";
 
 export type RecipeTaskSettings = Omit<
@@ -44,6 +45,7 @@ export interface RecipeCallSettings {
   ) => unknown | Promise<unknown>;
 }
 export interface RecipeWorkflowStepComponents {
+  readonly speculation?: RecipeSpeculationSettings;
   readonly queued?: RecipeQueuedSettings;
   readonly gate?: RecipeGateSettings;
   readonly interactive?: RecipeInteractiveSettings;
@@ -56,6 +58,9 @@ export interface RecipeWorkflowStepComponents {
   readonly call?: RecipeCallSettings;
 }
 export interface RecipeWorkflowComponents {
+  readonly identity?: string;
+  readonly retryIncomplete?: boolean;
+  readonly sharedSandbox?: SandboxOptions;
   readonly workflow: RecipeWorkflowSettings;
   readonly steps: Readonly<Record<string, RecipeWorkflowStepComponents>>;
 }

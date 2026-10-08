@@ -3,6 +3,7 @@ import type { Command } from "./command.types.ts";
 import type { Retry } from "./workflow.types.ts";
 
 export interface RecipeStep {
+  readonly speculation?: Readonly<Record<string, unknown>>;
   readonly queued?: Readonly<Record<string, unknown>>;
   readonly gate?: Readonly<Record<string, unknown>>;
   readonly interactive?: Readonly<Record<string, unknown>>;

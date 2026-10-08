@@ -25,6 +25,7 @@ export interface RecipeComponentGraph {
 export interface RecipeComponentScope {
   readonly observerErrors: readonly unknown[];
   readonly redactions: readonly RegExp[];
+  recordObserverErrors(errors: readonly unknown[]): void;
   protect(values: readonly string[]): void;
   redact<T>(value: T): T;
   resolve(name: string, kind: string): Promise<unknown>;
@@ -44,7 +45,10 @@ export interface ConsoleSinkOptions {
 
 export interface ObservationComponentOptions {
   readonly sinks?: readonly { readonly $ref: string }[];
-  readonly redact?: readonly string[];
+  readonly redact?: readonly (
+    string | { readonly pattern: string; readonly flags?: string }
+  )[];
+  readonly scope?: import("../../domain/observation.types.ts").ObservationScope;
   readonly capacity?: number;
   readonly deliveryTimeoutMs?: number;
   readonly verbose?: boolean;

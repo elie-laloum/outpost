@@ -9,6 +9,7 @@ sidebar:
 
 | Name             | Type                                                                                                         | Presence | Meaning                                                                                                                                                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integration`    | `ConflictResolution \| undefined`                                                                            | Optional | Conflict resolution commit, verification and agent usage, reported separately from workflow usage when integration invokes a resolver.                                                                                                                           |
 | `runId`          | `string \| undefined`                                                                                        | Optional | Checkpoint run ID for a durable recipe invocation.                                                                                                                                                                                                               |
 | `inputRequests`  | `readonly WorkflowInputRequest[] \| undefined`                                                               | Optional | Persisted dialogue questions awaiting an authorized answer.                                                                                                                                                                                                      |
 | `observerErrors` | `readonly RecipeDiagnostic[] \| undefined`                                                                   | Optional | Failures while closing owned observer components, reported without changing the execution status. Secret values selected by this runtime are redacted.                                                                                                           |
@@ -26,6 +27,7 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly integration?: ConflictResolution;
   readonly runId?: string;
   readonly inputRequests?: WorkflowResult["inputRequests"];
   readonly observerErrors?: readonly RecipeDiagnostic[];

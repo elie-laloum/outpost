@@ -1,6 +1,6 @@
+import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
 import { createObservationHub } from "../../domain/observation.ts";
 import { recipeObject, recipeSchema } from "../../domain/recipes/values.ts";
-import { recipeScalarSchemas as schemas } from "../../domain/recipes/schema.constants.ts";
 import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
 import type { RecipeComponentDefinition } from "../../domain/recipes/component.types.ts";
 import type { ObservationSink } from "../../domain/observation.types.ts";
@@ -53,16 +53,31 @@ export const observationComponents: readonly RecipeComponentDefinition[] = [
   {
     name: "observation.hub",
     kind: "observation",
-    schema: recipeSchema({
-      sinks: {
-        type: "array",
-        items: { ...schemas.reference, component: "sink" },
+    schema: {
+      ...nativeRecipeSchemas["observation.hub"]!,
+      properties: {
+        ...(recipeObject(nativeRecipeSchemas["observation.hub"]!.properties)
+          ? nativeRecipeSchemas["observation.hub"]!.properties
+          : {}),
+        redact: {
+          type: "array",
+          items: {
+            anyOf: [
+              { type: "string" },
+              {
+                type: "object",
+                required: ["pattern"],
+                additionalProperties: false,
+                properties: {
+                  pattern: { type: "string" },
+                  flags: { type: "string" },
+                },
+              },
+            ],
+          },
+        },
       },
-      redact: schemas.strings,
-      capacity: schemas.integer,
-      deliveryTimeoutMs: schemas.integer,
-      verbose: schemas.boolean,
-    }),
+    },
     async create(value, context) {
       const options = validateRecipeSchema<ObservationComponentOptions>(
         this.schema,
@@ -81,7 +96,13 @@ export const observationComponents: readonly RecipeComponentDefinition[] = [
         ...limits,
         sinks,
         ...(redact
-          ? { redact: redact.map((pattern) => new RegExp(pattern, "g")) }
+          ? {
+              redact: redact.map((pattern) =>
+                typeof pattern === "string"
+                  ? new RegExp(pattern, "g")
+                  : new RegExp(pattern.pattern, pattern.flags),
+              ),
+            }
           : {}),
       });
     },

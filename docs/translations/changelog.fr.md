@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Termine les sept lots de composition YAML avec spéculation expérimentale explicite, reçus de consommation durable, résolveurs de conflits, reporters natifs et OpenTelemetry. Garde les réglages machine dans des composants locaux nommés, synchronise et ferme la sandbox avant intégration et rapporte séparément la consommation du résolveur. Génère la documentation des composants et contrôle les classifications par export et option en CI. Ajoute une recette communautaire et un exemple hors ligne ; validations payantes, cloud et SDK distants restent absentes.
+
 - Composition YAML des files SQLite/HTTP/BullMQ, jobs de recettes et workflows natifs, tâches en file, cron et services webhook authentifiés. Ajout explicite de recipe enqueue/serve avec propriété, annulation, rotation des tokens et identités natives. Validation locale et Redis 7 réel sans appels payants.
 
 - Ajout des checkpoints YAML durables avec restauration exacte des workspaces Git, artefacts, caches, gates signées, dialogues, pauses quota et budgets cumulés. Ajout de recipe status/resume/answer/decide ; rejeu explicite et récupération protégée par révision après interruption. Tests entre processus, conservation des fichiers non commités et guards d’origine hors ligne ; restauration cloud réelle non validée.

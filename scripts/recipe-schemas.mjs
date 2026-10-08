@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
+import { workflowOptionComponents } from "../src/application/recipes/workflow-components.ts";
 import { observationComponents } from "../src/application/recipes/observation.ts";
 import { nativeRecipeComponents } from "../src/application/recipes/native.ts";
 import { nativeRecipeSchemas } from "../src/application/recipes/native-schemas.constants.ts";
@@ -27,6 +28,7 @@ const recipe = JSON.parse(
 );
 const components = [
   ...observationComponents,
+  ...workflowOptionComponents,
   ...nativeRecipeComponents,
   secretSelectionComponent,
 ];
@@ -88,7 +90,8 @@ for (const component of components) {
     shapeOf(component.schema, component.name),
     component.name.slice(component.kind.length + 1),
     "type",
-    !["observation", "agent"].includes(component.kind),
+    !["observation", "agent"].includes(component.kind) &&
+      !component.kind.endsWith("Options"),
   );
   (definitions[component.kind] ??= { anyOf: [] }).anyOf.push(shape);
 }
@@ -105,6 +108,10 @@ current.properties.extensions = {
   additionalProperties: extensionSchema,
 };
 current.properties.experimental = { type: "boolean" };
+current.properties.integration = shapeOf(
+  nativeRecipeSchemas["integration.options"],
+  "integration.options",
+);
 for (const [family, kind] of Object.entries(recipeFamilies))
   current.properties[family] = {
     type: "object",
@@ -251,6 +258,7 @@ const expressions = {
   },
 };
 for (const [field, kind] of Object.entries({
+  speculation: "speculation",
   queued: "queued",
   gate: "gate",
   interactive: "interactive",
@@ -261,10 +269,12 @@ for (const [field, kind] of Object.entries({
   decision: "decisionTask",
   isolated: "isolated",
 }))
-  taskV3.properties[field] = shapeOf(
-    nativeRecipeSchemas[`${kind}.options`],
-    `${kind}.options`,
-  );
+  taskV3.properties[field] = {
+    anyOf: [
+      recipeScalarSchemas.reference,
+      shapeOf(nativeRecipeSchemas[`${kind}.options`], `${kind}.options`),
+    ],
+  };
 taskV3.properties.call = clean(
   nativeRecipeSchemas["call.options"].properties.perform,
 );
@@ -273,6 +283,7 @@ for (const field of ["value", "state", "arguments", "data"])
 taskV3.properties.quotaResume = { enum: ["continue", "restart"] };
 taskV3.properties.when = { $ref: "#/$defs/condition" };
 const actions = [
+  "speculation",
   "queued",
   "gate",
   "interactive",

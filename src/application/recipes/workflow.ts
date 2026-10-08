@@ -6,7 +6,8 @@ import {
 } from "../../domain/workflow/gates.ts";
 import { defineArtifactTask } from "../artifact-tasks.ts";
 import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
-import { dispatchFields } from "./workflow.constants.ts";
+import { recipeDispatchProjection } from "./projection.ts";
+import { runRecipeSpeculation } from "./speculation.ts";
 import { defineTask, defineWorkflow } from "../../domain/workflow.ts";
 import { defineLoopTask } from "../../domain/workflow/loop-task.ts";
 import {
@@ -22,7 +23,6 @@ import {
   recipeJson,
 } from "../../domain/recipes/expressions.ts";
 import { renderRecipeCommand } from "../../domain/recipe-templates.ts";
-import { recipeObject } from "../../domain/recipes/values.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type {
   Task,
@@ -35,17 +35,6 @@ import type {
   RecipeExecutionBindings,
   RecipeWorkflowComponents,
 } from "./workflow-components.types.ts";
-
-export function recipeDispatchProjection(
-  value: unknown,
-): Readonly<Record<string, WorkflowJson>> {
-  if (!recipeObject(value)) throw new Error("Expected a dispatch result");
-  return Object.fromEntries(
-    dispatchFields.flatMap((key) =>
-      value[key] === undefined ? [] : [[key, recipeJson(value[key])]],
-    ),
-  );
-}
 
 export function recipeHasSharedSandbox(document: RecipeDocument): boolean {
   return document.tasks.some((step) => step.command || step.agent);
@@ -134,6 +123,53 @@ export function bindRecipeWorkflow(
           }),
     };
     const save = (task: Task) => tasks.set(step.key, task);
+    if (step.speculation) {
+      if (!configuration.speculation)
+        throw new Error("Recipe speculation requires createRecipeRuntime");
+      const options = configuration.speculation;
+      save(
+        defineTask({
+          ...common,
+          async perform(context) {
+            const candidates = options.candidates.map((candidate) => ({
+              ...candidate,
+              request: {
+                ...candidate.request,
+                brief:
+                  candidate.request.brief.text === undefined
+                    ? candidate.request.brief
+                    : { text: text(candidate.request.brief.text, context) },
+              },
+            }));
+            const durability = options.durability
+              ? {
+                  ...options.durability,
+                  runId: JSON.stringify([
+                    components.workflow.checkpoint?.runId,
+                    step.key,
+                    options.durability.runId,
+                  ]),
+                  version: `${options.durability.version}#recipe:${components.identity}`,
+                  ...(components.retryIncomplete
+                    ? { resume: "retry-incomplete" as const }
+                    : {}),
+                }
+              : undefined;
+            return {
+              value: await runRecipeSpeculation(
+                {
+                  ...options,
+                  candidates,
+                  ...(durability ? { durability } : {}),
+                },
+                context,
+              ),
+            };
+          },
+        }),
+      );
+      continue;
+    }
     if (step.queued) {
       if (!configuration.queued)
         throw new Error("Recipe queued tasks require createRecipeRuntime");

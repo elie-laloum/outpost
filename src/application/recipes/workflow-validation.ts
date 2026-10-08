@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+import type { SandboxOptions } from "../outpost.types.ts";
 import { positive } from "../../domain/workflow/validation.ts";
 import { maxTimerMs } from "../../domain/workflow/retry.constants.ts";
 import { workflowAccounting } from "../../domain/workflow/budget.ts";
@@ -54,25 +56,57 @@ export function validateRecipeWorkflowSettings(
         step.after.flatMap((key) => [key, ...(ancestors.get(key) ?? [])]),
       ),
     );
-  if ((settings.concurrency ?? 1) === 1) return;
+  const shared = document.tasks.some((task) => task.command || task.agent);
+  for (const step of document.tasks) {
+    const isolated = components.steps[step.key]?.isolated;
+    if (
+      shared &&
+      isolated &&
+      components.sharedSandbox &&
+      sameWorkspace(isolated, components.sharedSandbox)
+    )
+      throw new Error(
+        `Isolated task ${step.key} uses the shared recipe workspace`,
+      );
+  }
+  if ((settings.concurrency ?? (shared ? 1 : document.tasks.length)) === 1)
+    return;
   for (const [index, left] of document.tasks.entries()) {
     const first = components.steps[left.key]?.isolated;
     if (!first) continue;
     for (const right of document.tasks.slice(index + 1)) {
       const second = components.steps[right.key]?.isolated;
       if (!second || ancestors.get(right.key)?.has(left.key)) continue;
-      if (
-        (first.workspace && first.workspace === second.workspace) ||
-        (first.repository === second.repository &&
-          ((first.branch?.mode === "current" &&
-            second.branch?.mode === "current") ||
-            (first.branch?.mode === "named" &&
-              second.branch?.mode === "named" &&
-              first.branch.name === second.branch.name)))
-      )
+      if (sameWorkspace(first, second))
         throw new Error(
           `Concurrent isolated tasks ${left.key} and ${right.key} use the same workspace`,
         );
     }
   }
+}
+
+function sameWorkspace(left: SandboxOptions, right: SandboxOptions): boolean {
+  if (left.workspace && right.workspace)
+    return left.workspace.directory === right.workspace.directory;
+  const repository = (options: SandboxOptions) =>
+    resolve(
+      options.repository ?? options.workspace?.repository ?? process.cwd(),
+    );
+  if (repository(left) !== repository(right)) return false;
+  const first = left.workspace?.policy ??
+    left.branch ?? {
+      mode:
+        left.sandboxProvider?.placement === "remote" ? "integrate" : "current",
+    };
+  const second = right.workspace?.policy ??
+    right.branch ?? {
+      mode:
+        right.sandboxProvider?.placement === "remote" ? "integrate" : "current",
+    };
+  return (
+    (first?.mode === "current" && second?.mode === "current") ||
+    (first?.mode === "named" &&
+      second?.mode === "named" &&
+      first.name === second.name)
+  );
 }

@@ -21,5 +21,6 @@ export interface RecipeDurableResources {
   releaseIsolated(key: string): Promise<void>;
   settle(result: WorkflowResult): Promise<void>;
   close(): Promise<void>;
+  integration(): RecipeReport["integration"];
   workspace(): RecipeReport["workspace"];
 }

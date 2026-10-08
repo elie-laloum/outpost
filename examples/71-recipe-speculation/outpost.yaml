@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+experimental: true
+repository: .
+sandbox: { provider: local }
+extensions:
+  memory:
+    module: ./components.ts
+    export: memory
+    kind: sandboxProvider
+    version: "1"
+  agent:
+    module: ./components.ts
+    export: agent
+    kind: agent
+    version: "1"
+  validate:
+    module: ./components.ts
+    export: validate
+    kind: callback
+    contract: speculation.options.validate
+    version: "1"
+speculations:
+  offline:
+    repository: .
+    sandboxProvider: { $ref: extensions.memory }
+    budget: { attempts: 1 }
+    sandbox: { logging: false }
+    candidates:
+      - key: solution
+        agent: { $ref: extensions.agent }
+        request:
+          brief: { text: Produce a candidate without changing the host branch. }
+          logging: false
+    validate: { $ref: extensions.validate }

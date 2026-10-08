@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=../recipe.schema.json
+version: 3
+name: compare-candidates
+recipeVersion: "1.0.0"
+description: Run locally configured candidates, retain their results and leave integration explicit.
+inputs:
+  goal:
+    type: string
+    description: Goal referenced by candidate briefs in the local configuration.
+tasks:
+  - key: compare
+    speculation: { $ref: speculations.compare }

@@ -1,6 +1,22 @@
 export const nativeRecipeFactories: Readonly<
   Record<string, () => Promise<unknown>>
 > = {
+  "sandboxProvider.mounted": async () =>
+    (await import("../../providers/factories.ts")).createMountedSandboxProvider,
+  "sandboxProvider.remote": async () =>
+    (await import("../../providers/factories.ts")).createRemoteSandboxProvider,
+  "resolver.agent": async () =>
+    (await import("../../application/recipes/advanced-components.ts"))
+      .createRecipeConflictResolver,
+  "sink.reporter": async () =>
+    (await import("../../application/recipes/advanced-components.ts"))
+      .createRecipeReporter,
+  "sink.custom": async () =>
+    (await import("../../application/recipes/advanced-components.ts"))
+      .createRecipeCustomReporter,
+  "sink.opentelemetry": async () =>
+    (await import("../../application/recipes/advanced-components.ts"))
+      .createRecipeOpenTelemetry,
   "queue.sqlite": async () =>
     (await import("../../application/recipes/service-components.ts"))
       .createRecipeSqliteQueue,

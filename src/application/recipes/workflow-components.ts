@@ -1,3 +1,5 @@
+import { validateRecipeExpression } from "../../domain/recipes/expressions.ts";
+import { validateSpeculationOptions } from "../speculation-validation.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
@@ -11,6 +13,8 @@ import type {
 } from "./workflow-components.types.ts";
 
 export const workflowOptionComponents: readonly RecipeComponentDefinition[] = [
+  "speculation",
+  "integration",
   "queued",
   "gate",
   "interactive",
@@ -23,6 +27,7 @@ export const workflowOptionComponents: readonly RecipeComponentDefinition[] = [
   "call",
 ].map((type) => ({
   name: `${type}Options.options`,
+  ...(type === "speculation" ? { experimental: true } : {}),
   kind: `${type}Options`,
   schema: nativeRecipeSchemas[`${type}.options`]!,
   accepts: recipeObject,
@@ -55,6 +60,7 @@ export async function prepareRecipeWorkflow(
   for (const step of document.tasks) {
     const values: Record<string, unknown> = {};
     for (const [field, kind] of Object.entries({
+      speculation: "speculation",
       queued: "queued",
       gate: "gate",
       interactive: "interactive",
@@ -75,6 +81,11 @@ export async function prepareRecipeWorkflow(
     if (!stepOptions(values))
       throw new Error(`Invalid recipe task: ${step.key}`);
     const prepared: RecipeWorkflowStepComponents = values;
+    if (prepared.isolated?.brief.text !== undefined)
+      validateRecipeExpression(prepared.isolated.brief.text, {
+        document,
+        step,
+      });
     if (prepared.isolated)
       await preflightRecipeAgent(
         prepared.isolated.agent,
@@ -84,6 +95,30 @@ export async function prepareRecipeWorkflow(
         prepared.isolated.sandboxProvider?.variables ?? {},
         scope,
       );
+    if (prepared.speculation) {
+      validateSpeculationOptions(prepared.speculation);
+      if (prepared.speculation.durability?.resume)
+        throw new Error(
+          "Speculation replay requires resume --retry-incomplete",
+        );
+      if (prepared.speculation.durability && !workflow.checkpoint)
+        throw new Error(
+          "Durable recipe speculation requires a workflow checkpoint",
+        );
+      for (const candidate of prepared.speculation.candidates) {
+        if (candidate.request.brief.text !== undefined)
+          validateRecipeExpression(candidate.request.brief.text, {
+            document,
+            step,
+          });
+        await preflightRecipeAgent(
+          candidate.agent,
+          prepared.speculation.repository,
+          prepared.speculation.sandboxProvider.variables ?? {},
+          scope,
+        );
+      }
+    }
     if (prepared.interactive)
       await preflightRecipeAgent(
         prepared.interactive.agent,

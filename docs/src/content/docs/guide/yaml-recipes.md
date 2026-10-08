@@ -186,7 +186,7 @@ reports:
     stream: stdout
 ```
 
-The console sink writes events to stderr by default. The final report is published after sandbox and component cleanup. Omit `reports` to receive events without a final rendering; omit `observation` to request only the final report. Recipe formats 1 and 2 remain supported; format 3 starts with the same command and agent task contracts and is extended as native component families become available.
+The console sink writes events to stderr by default. The final report is published after sandbox and component cleanup. Omit `reports` to receive events without a final rendering; omit `observation` to request only the final report. Recipe formats 1 and 2 retain their semantics. Format 3 also composes workflows, durable runs, services and experimental candidates through native engines.
 
 ## Reuse local observer objects
 
@@ -208,7 +208,7 @@ The exported `sink` implements `ObservationSink`. A borrowed object is never clo
 
 The `/recipes` package entry exposes `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` and `createRecipeRuntime`. Runtime construction validates without allocating; `run()` allocates and cleans each invocation, and `close()` cancels an active invocation and prevents further runs. `examples/65-recipe-observation/` exercises declared observation and reporting without model calls.
 
-The parity inventory in `recipes/parity.json` classifies public contracts and tracks deliveries. Native workflow durability, service commands and the remaining component families are tracked there; the registry foundation alone does not establish full YAML/TypeScript parity.
+The parity inventory in `recipes/parity.json` classifies public exports and options across all seven delivery lots. [Available components](../yaml-components/) is generated from the registry; [advanced composition](../recipe-advanced/) explains experiments, integration and remaining live-validation limits. Callable extensions and immediate utilities retain their TypeScript contracts.
 
 ## Compose native configuration components
 

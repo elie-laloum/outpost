@@ -1,3 +1,4 @@
+import type { RecipeIntegrationSettings } from "./recipes/advanced-components.types.ts";
 import { bindRecipe } from "./recipe.ts";
 import type { RecipeBindings } from "./recipe.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
@@ -14,11 +15,14 @@ export async function runRecipe(
   signal: AbortSignal,
   observation?: ObservationHub,
   requests?: Readonly<Record<string, RecipeDispatchSettings>>,
+  integration?: RecipeIntegrationSettings,
+  ownedWorkspace?: import("./outpost.types.ts").Workspace,
 ): Promise<RecipeReport> {
   const { sandbox } = bindings;
   let result: WorkflowResult | undefined;
   let workflow: Workflow | undefined;
   let completed = false;
+  let resolution: RecipeReport["integration"];
   let disposal: Disposal = {};
   const errors: unknown[] = [];
   try {
@@ -28,9 +32,13 @@ export async function runRecipe(
       ...(observation ? { observation } : {}),
     });
     errors.push(...result.errors);
+    if (ownedWorkspace || integration?.onConflict)
+      await sandbox.close({ preserve: true });
     if (result.status === "done") {
       signal.throwIfAborted();
-      await sandbox.workspace.integrate({ signal });
+      resolution =
+        (await sandbox.workspace.integrate({ ...integration, signal })) ??
+        undefined;
       completed = true;
     }
   } catch (error) {
@@ -40,6 +48,10 @@ export async function runRecipe(
       disposal = await sandbox.close({
         preserve: !completed || signal.aborted,
       });
+      if (ownedWorkspace)
+        disposal = await ownedWorkspace.close({
+          preserve: !completed || signal.aborted,
+        });
     } catch (error) {
       errors.push(error);
     }
@@ -59,6 +71,7 @@ export async function runRecipe(
   if (signal.aborted) status = "cancelled";
   return {
     name: document.name,
+    ...(resolution ? { integration: resolution } : {}),
     ...(result
       ? {
           executionId: result.executionId,

@@ -1,3 +1,5 @@
+import { recipeRuntimeError } from "./errors.ts";
+import { recipeProjectIdentity } from "./durable-session.ts";
 import { serveRecipeProject, enqueueRecipeProject } from "./services.ts";
 import { runDurableRecipe } from "./durable-run.ts";
 import { inspectRecipeRun } from "./status.ts";
@@ -6,7 +8,7 @@ import type { RecipeRunOptions } from "./project.types.ts";
 import { prepareRecipeWorkflow } from "./workflow-components.ts";
 import { runRecipeWorkflow } from "./workflow-run.ts";
 import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
-import { createSandbox } from "../sandbox.ts";
+import { openRecipeSandbox } from "./sandbox.ts";
 import { recipeExecutionConfiguration } from "./configuration.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import { runRecipe } from "../recipe-run.ts";
@@ -55,6 +57,8 @@ export async function createRecipeRuntime(
       signal,
     );
     const execution = (async () => {
+      let failure: unknown;
+      const observerErrors: unknown[] = [];
       let securedObservation: ObservationHub | undefined;
       try {
         await scope.prepare();
@@ -73,10 +77,11 @@ export async function createRecipeRuntime(
           scope,
         );
         if (project.document.version === 3) {
-          const components = await prepareRecipeWorkflow(
-            project.document,
-            scope,
-          );
+          const components = {
+            ...(await prepareRecipeWorkflow(project.document, scope)),
+            identity: recipeProjectIdentity(project, inputs ?? {}),
+            sharedSandbox: configuration.sandbox,
+          };
           securedObservation = observation?.child({}, [], scope.redactions);
           signal.throwIfAborted();
           if (components.workflow.checkpoint)
@@ -119,11 +124,11 @@ export async function createRecipeRuntime(
         securedObservation = observation?.child({}, [], scope.redactions);
         observation = securedObservation;
         signal.throwIfAborted();
-        const sandbox = await createSandbox({
-          ...configuration.sandbox,
+        const { sandbox, ownedWorkspace } = await openRecipeSandbox(
+          configuration.sandbox,
           signal,
-          ...(observation ? { observation } : {}),
-        });
+          observation,
+        );
         return scope.redact(
           await runRecipe(
             project.document,
@@ -135,15 +140,31 @@ export async function createRecipeRuntime(
             signal,
             observation,
             requests,
+            configuration.integration,
+            ownedWorkspace,
           ),
         );
       } catch (error) {
-        if (error instanceof Error && scope.redactions.length)
-          throw new Error(scope.redact(error.message));
-        throw error;
+        failure = recipeRuntimeError(error, scope);
+        throw failure;
       } finally {
-        await securedObservation?.close();
-        await scope.close();
+        try {
+          await securedObservation?.close();
+        } catch (error) {
+          observerErrors.push(error);
+        }
+        try {
+          await scope.close();
+        } catch (cleanup) {
+          if (failure !== undefined)
+            throw new AggregateError(
+              [failure, recipeRuntimeError(cleanup, scope)],
+              "Recipe execution and cleanup failed",
+              { cause: failure },
+            );
+          throw recipeRuntimeError(cleanup, scope);
+        }
+        scope.recordObserverErrors(observerErrors);
       }
     })();
     active = execution;

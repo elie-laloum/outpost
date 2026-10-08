@@ -1,3 +1,4 @@
+import { validateRecipeProjectExpressions } from "./project-expressions.ts";
 import { validateRecipeConcurrency } from "./workflow.ts";
 import { workflowOptionComponents } from "./workflow-components.ts";
 import { recipeFileError } from "../../infrastructure/recipes/diagnostic.ts";
@@ -65,11 +66,17 @@ export async function readRecipeProject(
     );
     if (configuration.version !== 1 && configuration.version !== 2)
       throw new Error(`${config}: configuration version must be 1 or 2`);
+    if (
+      configuration.experimental !== undefined &&
+      typeof configuration.experimental !== "boolean"
+    )
+      throw new Error("experimental must be a boolean");
     const extra = new Set([
       "observation",
       "reports",
       "extensions",
       "experimental",
+      "integration",
       "workspace",
       ...Object.keys(recipeFamilies),
     ]);
@@ -123,6 +130,7 @@ export async function readRecipeProject(
         directory,
         document,
       );
+      validateRecipeProjectExpressions(document, graph);
     } catch (error) {
       if (
         error instanceof Error &&

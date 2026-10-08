@@ -1,3 +1,4 @@
+import { createRecipeRuntime } from "../src/recipes.ts";
 import { createAgent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
@@ -1575,3 +1576,63 @@ test(
     assert.equal((await box.command(read)).stdout, "xx");
   },
 );
+
+for (const repositoryMode of ["mounted", "isolated"] as const) {
+  test(
+    `YAML recipe synchronizes container work before integration (${repositoryMode})`,
+    { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+    async (t) => {
+      const root = await repository(t);
+      const directory = join(root, ".outpost", "yaml");
+      await mkdir(directory, { recursive: true });
+      const file = join(directory, "recipe.yaml"),
+        config = join(directory, "outpost.yaml");
+      await writeFile(
+        config,
+        JSON.stringify({
+          version: 2,
+          repository: root,
+          sandbox: {
+            provider: process.env.OUTPOST_CONTAINER_ENGINE,
+            image: containerImage,
+            networks: "none",
+            repositoryMode,
+          },
+          branch: { mode: "integrate" },
+          workspace: { logging: false },
+        }),
+      );
+      await writeFile(
+        file,
+        JSON.stringify({
+          version: 3,
+          name: "container-recipe",
+          tasks: [
+            {
+              key: "commit",
+              command: {
+                executable: "sh",
+                arguments: [
+                  "-c",
+                  "printf 'yaml change\\n' > base.txt && git add base.txt && git commit -m 'YAML change'",
+                ],
+              },
+            },
+          ],
+        }),
+      );
+      await using runtime = await createRecipeRuntime({ file, config });
+      const report = await runtime.run();
+      assert.equal(report.status, "done", JSON.stringify(report.errors));
+      assert.equal(
+        await readFile(join(root, "base.txt"), "utf8"),
+        "yaml change\n",
+      );
+      assert.equal(
+        (await git(root, ["log", "-1", "--format=%s"])).trim(),
+        "YAML change",
+      );
+      assert.equal(report.workspace?.retainedDirectory, undefined);
+    },
+  );
+}

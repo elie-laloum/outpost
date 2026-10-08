@@ -65,6 +65,9 @@ export function createRecipeComponentScope(
   const scope: RecipeComponentScope = {
     observerErrors,
     redactions,
+    recordObserverErrors(errors) {
+      observerErrors.push(...errors);
+    },
     protect(items) {
       for (const value of items) {
         if (!value || secrets.has(value)) continue;

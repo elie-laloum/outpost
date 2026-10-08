@@ -16,6 +16,8 @@ export const recipeScalarSchemas = {
 
 export const recipeFamilies: Readonly<Record<string, string>> = {
   agents: "agent",
+  speculations: "speculationOptions",
+  isolatedTasks: "isolatedOptions",
   sandboxProviders: "sandboxProvider",
   observations: "observation",
   sinks: "sink",
@@ -47,6 +49,7 @@ export const recipeFamilies: Readonly<Record<string, string>> = {
   schedules: "schedule",
   triggers: "triggerSource",
   routes: "triggerMapper",
+  resolvers: "resolver",
   verifiers: "verifier",
   guards: "guard",
   artifacts: "artifact",

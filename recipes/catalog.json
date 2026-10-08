@@ -2,6 +2,13 @@
   "version": 1,
   "recipes": [
     {
+      "name": "compare-candidates",
+      "version": "1.0.0",
+      "description": "Run locally configured candidates, retain their results and leave integration explicit.",
+      "source": "./compare-candidates.yaml",
+      "sha256": "d0c8cbea4a3ebd3d60ffa916a38d56f814271158217b9223257d2e73cbee3f32"
+    },
+    {
       "name": "fix-and-check",
       "version": "1.0.0",
       "description": "Implement a requested change, commit it and run the project tests.",

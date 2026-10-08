@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: choose-a-candidate
+tasks:
+  - key: choose
+    speculation: { $ref: speculations.offline }

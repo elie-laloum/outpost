@@ -54,6 +54,7 @@ function taggedComponent(
 export const nativeRecipeGuards: Readonly<
   Record<string, (value: unknown) => boolean>
 > = {
+  resolver: (value) => typeof value === "function",
   queue: (value) =>
     recipeMethods(value, [
       "enqueue",
@@ -195,7 +196,13 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
       kind,
       schema,
       accepts,
-      ...(["sink.run", "queue.sqlite", "queue.bullmq"].includes(name)
+      ...([
+        "sink.run",
+        "sink.custom",
+        "sink.opentelemetry",
+        "queue.sqlite",
+        "queue.bullmq",
+      ].includes(name)
         ? {
             async dispose(value: unknown) {
               if (recipeObject(value) && typeof value.close === "function")

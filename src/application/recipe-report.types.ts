@@ -11,6 +11,7 @@ export interface RecipeDiagnostic {
 }
 
 export interface RecipeReport {
+  readonly integration?: import("./conflict-resolution.types.ts").ConflictResolution;
   readonly runId?: string;
   readonly inputRequests?: WorkflowResult["inputRequests"];
   readonly observerErrors?: readonly RecipeDiagnostic[];

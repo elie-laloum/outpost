@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
@@ -92,20 +92,26 @@ if (process.argv.includes("--write")) {
     a.localeCompare(b),
   )) {
     const existing = previous[key];
-    const callable = contract.signatures.length > 0;
-    const foundational =
-      key.startsWith("./recipes:") ||
-      /:(defineRecipe|createObservationHub)$/.test(key);
     result[key] = {
       ...contract,
-      category: existing?.category ?? (callable ? "native" : "contract"),
-      lot: existing?.lot ?? (foundational ? 1 : 7),
+      category: existing?.category ?? "unclassified",
+      lot: existing?.lot ?? null,
       status:
-        existing?.status ??
-        (foundational || !callable ? "implemented" : "planned"),
-      test:
-        existing?.test ??
-        (foundational ? "test/functional/recipe-runtime.test.ts" : null),
+        existing &&
+        JSON.stringify(existing.signatures) ===
+          JSON.stringify(contract.signatures)
+          ? existing.status
+          : "unclassified",
+      test: existing?.test ?? null,
+      reason: existing?.reason ?? null,
+      optionCoverage: Object.fromEntries(
+        Object.entries(contract.options).map(([name, type]) => [
+          name,
+          existing?.options[name] === type
+            ? (existing?.optionCoverage?.[name] ?? "unclassified")
+            : "unclassified",
+        ]),
+      ),
     };
   }
   await writeFile(path, JSON.stringify(result, null, 2) + "\n");
@@ -133,11 +139,28 @@ if (process.argv.includes("--write")) {
         previous[key].lot <= 7,
       `Missing delivery lot: ${key}`,
     );
-    if (
-      previous[key].category !== "contract" &&
-      previous[key].status === "implemented"
-    )
+    assert.equal(
+      previous[key].status,
+      "implemented",
+      `Unfinished parity entry: ${key}`,
+    );
+    assert.ok(previous[key].reason, `Missing classification rationale: ${key}`);
+    assert.deepEqual(
+      Object.keys(previous[key].optionCoverage ?? {}).sort(),
+      Object.keys(contract.options).sort(),
+      `Classify every option: ${key}`,
+    );
+    for (const [name, category] of Object.entries(
+      previous[key].optionCoverage ?? {},
+    ))
+      assert.ok(
+        ["native", "extension", "contract", "experimental"].includes(category),
+        `Unclassified option: ${key}.${name}`,
+      );
+    if (previous[key].category !== "contract") {
       assert.ok(previous[key].test, `Missing parity test: ${key}`);
+      await access(resolve(root, previous[key].test));
+    }
   }
 }
 console.log(

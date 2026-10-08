@@ -186,7 +186,7 @@ reports:
     stream: stdout
 ```
 
-Le sink console écrit les événements sur stderr par défaut. Le rapport final paraît après nettoyage de la sandbox et des composants. Omettez `reports` pour recevoir les événements sans rendu final ; omettez `observation` pour demander seulement le rapport final. Les formats de recette 1 et 2 restent pris en charge ; le format 3 démarre avec les mêmes contrats de tâches commande et agent, puis s’étend avec les familles natives disponibles.
+Le sink console écrit les événements sur stderr par défaut. Le rapport final paraît après nettoyage de la sandbox et des composants. Omettez `reports` pour recevoir les événements sans rendu final ; omettez `observation` pour demander seulement le rapport final. Les formats de recette 1 et 2 gardent leurs sémantiques. Le format 3 compose aussi workflows, exécutions durables, services et candidats expérimentaux avec les moteurs natifs.
 
 ## Réutiliser des objets observateurs locaux
 
@@ -208,7 +208,7 @@ L’export `sink` implémente `ObservationSink`. Le runtime ne ferme jamais un o
 
 Le point d’entrée `/recipes` expose `defineRecipeComponent`, `createRecipeRegistry`, `validateRecipeProject` et `createRecipeRuntime`. La construction du runtime valide sans allouer ; `run()` alloue et nettoie chaque invocation, et `close()` annule une invocation active et empêche les suivantes. `examples/65-recipe-observation/` vérifie observation et rapports déclarés sans appel de modèle.
 
-L’inventaire `recipes/parity.json` classe les contrats publics et suit les livraisons. La durabilité native des workflows, les commandes de services et les autres familles y sont suivies ; le registre seul ne constitue pas la parité complète YAML/TypeScript.
+L’inventaire `recipes/parity.json` classe exports et options publics des sept lots. Les [composants disponibles](../yaml-components/) sont générés depuis le registre ; la [composition avancée](../recipe-advanced/) explique expérimentation, intégration et limites des validations live. Fonctions d’extension et utilitaires immédiats conservent leurs contrats TypeScript.
 
 ## Composer les composants natifs de configuration
 

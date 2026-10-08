@@ -40,6 +40,23 @@ export const recipeMetadataSchema = {
         additionalProperties: false,
         required: ["state"],
         properties: {
+          integration: {
+            type: "object",
+            required: [
+              "commit",
+              "branch",
+              "directory",
+              "usage",
+              "verification",
+            ],
+            properties: {
+              commit: { type: "string" },
+              branch: { type: "string" },
+              directory: { type: "string" },
+              usage: { type: "object" },
+              verification: { type: "object" },
+            },
+          },
           state: { enum: ["allocating", "ready", "integrated", "closed"] },
           record: {
             type: "object",

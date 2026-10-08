@@ -2,10 +2,13 @@ import { inspectRecipeWorkspace } from "../../infrastructure/recipes/workspace.t
 import { bindRecipeWorkflow } from "./workflow.ts";
 import { recipeWorkflowReport } from "./workflow-report.ts";
 import { createRecipeDurableResources } from "./durable-resources.ts";
-import { openRecipeCheckpoint } from "./durable-session.ts";
+import {
+  openRecipeCheckpoint,
+  recipeProjectIdentity,
+} from "./durable-session.ts";
 import type { RecipeProject, RecipeRunOptions } from "./project.types.ts";
 import type { RecipeResumeOptions } from "./durable.types.ts";
-import type { RecipeConfiguration } from "../recipe.types.ts";
+import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
 import type { RecipeWorkflowComponents } from "./workflow-components.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
@@ -13,7 +16,7 @@ import type { WorkflowResult } from "../../domain/workflow.types.ts";
 
 export async function runDurableRecipe(
   project: RecipeProject,
-  configuration: RecipeConfiguration,
+  configuration: RecipeRuntimeConfiguration,
   components: RecipeWorkflowComponents,
   scope: RecipeComponentScope,
   settings: RecipeRunOptions | RecipeResumeOptions,
@@ -61,6 +64,11 @@ export async function runDurableRecipe(
       },
       {
         ...components,
+        identity: recipeProjectIdentity(project, session.inputs),
+        retryIncomplete:
+          resume &&
+          "retryIncomplete" in settings &&
+          settings.retryIncomplete === true,
         workflow: { ...components.workflow, checkpoint: session.options },
       },
     );
@@ -88,6 +96,7 @@ export async function runDurableRecipe(
         errors.push(error);
       }
     }
+    const integration = resources.integration();
     const report = scope.redact({
       ...recipeWorkflowReport(
         workflow,
@@ -97,6 +106,7 @@ export async function runDurableRecipe(
         resources.workspace(),
       ),
       runId: session.options.runId,
+      ...(integration ? { integration } : {}),
     });
     if (result) await session.saveReport(report);
     return report;
