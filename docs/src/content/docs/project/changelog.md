@@ -10,7 +10,7 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## 11.0.0
+## 11.0.1
 
 This major release adds workspace integration safeguards, portable agent profiles, execution reports and state tracking, monetary budgets, incremental preparation, cloud dependency caches, offline workflow testing and optional secret sources. Update exhaustive consumers for `FaultCode` (`guard`, `stuck`), `AgentEvent` and `ObservationEvent` (`stuck`), stopped reasons (`stuck`), `StorageCategoryName` (`runs`) and `WorkflowBudgetExceeded.dimension` (`cost`). Implementations and test doubles of `DispatchResult` and `WarmDispatchResult` must provide `report()`; custom `ObservationHub` implementations must provide `redacting` and `redact()`. Existing entry points remain available. Best-of-N speculation remains experimental, and the live-validation limits below still apply.
 
@@ -27,6 +27,11 @@ This major release adds workspace integration safeguards, portable agent profile
 - Add experimental best-of-N speculation with `select: "best"` and a required finite `score`. Let admitted candidates finish, choose the highest score with declaration-order ties, preserve cancellation, budgets and cleanup ownership, and persist scores for durable recovery. Keep first-valid selection as the default. Deterministic local-agent and crash-recovery tests cover the behavior; live judge-agent and cloud validation remains pending.
 - Add opt-in agent conflict resolution through `workspace.integrate({ onConflict: createAgentConflictResolver(...) })`. Resolve in a separate branch and sandbox, require verification, recheck final diff guards and frozen input commits, and preserve both workspaces on failure. Return resolution usage and verification output separately. Deterministic tests use real temporary Git repositories, a simulated remote provider and real Docker in mounted and isolated modes; live agent and cloud validation remains pending.
 - Add workspace diff guards (`guard.protectedPaths`, `guard.maxChangedLines`) for named and integration branches, independently of the agent. Check the final committed diff after synchronization and again before merging the inspected commit; reject protected paths, oversized text changes, uncountable binaries with a line limit and incomplete inspection with code `guard`. Retain rejected branches and worktrees; refuse `current` before execution. Deterministic tests use real temporary Git repositories, local agents and a simulated remote provider; no paid model calls are required.
+
+- Make the simulated Daytona dependency-cache sandbox provide its own Linux `setsid --wait` wrapper so its host-process fixtures also run on macOS. Production sandbox process supervision is unchanged.
+- Freeze the queue clock in the scheduler deduplication fixture so slow Windows runners cannot expire the first claim between assertions. Queue lease expiry remains covered separately.
+
+The v11.0.0 release was blocked by the macOS dependency-cache fixture and a timing-sensitive Windows scheduler fixture and was not published.
 
 ## 10.0.1
 

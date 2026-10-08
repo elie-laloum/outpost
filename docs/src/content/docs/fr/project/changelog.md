@@ -10,7 +10,7 @@ next: false
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
-## 11.0.0
+## 11.0.1
 
 Cette version majeure ajoute les garde-fous d’intégration des workspaces, les profils d’agents portables, les rapports et le suivi d’état des exécutions, les budgets monétaires, la préparation incrémentale, les caches de dépendances cloud, les tests de workflows hors ligne et les sources de secrets optionnelles. Adaptez les traitements exhaustifs de `FaultCode` (`guard`, `stuck`), d’`AgentEvent` et d’`ObservationEvent` (`stuck`), des raisons d’arrêt (`stuck`), de `StorageCategoryName` (`runs`) et de `WorkflowBudgetExceeded.dimension` (`cost`). Les implémentations et doublures de test de `DispatchResult` et `WarmDispatchResult` doivent fournir `report()` ; les implémentations personnalisées d’`ObservationHub` doivent fournir `redacting` et `redact()`. Les points d’entrée existants restent disponibles. La spéculation meilleur des N reste expérimentale et les limites de validation réelle ci-dessous restent applicables.
 
@@ -27,6 +27,11 @@ Cette version majeure ajoute les garde-fous d’intégration des workspaces, les
 - Ajoute la spéculation expérimentale meilleur des N avec `select: "best"` et un `score` fini obligatoire. Laisse finir les candidats admis, choisit le score le plus élevé avec les égalités départagées par l’ordre de déclaration, préserve annulation, budgets et propriété du nettoyage, et conserve les scores pour la récupération durable. La sélection du premier candidat valide reste le défaut. Des tests déterministes avec agents locaux et récupération après arrêt brutal couvrent le comportement ; la validation réelle des agents juges et du cloud reste à effectuer.
 - Ajoute la résolution explicite des conflits par agent via `workspace.integrate({ onConflict: createAgentConflictResolver(...) })`. Résout dans une branche et une sandbox séparées, impose la vérification, revérifie les garde-fous du diff final et les commits d’entrée figés, et conserve les deux workspaces en cas d’échec. Renvoie séparément l’usage et la sortie de vérification de la résolution. Les tests déterministes utilisent de vrais dépôts Git temporaires, un provider distant simulé et Docker réel en modes monté et isolé ; la validation réelle des agents et du cloud reste à effectuer.
 - Ajoute les garde-fous de diff des workspaces (`guard.protectedPaths`, `guard.maxChangedLines`) pour les branches named et integrate, indépendamment de l’agent. Vérifie le diff commité final après synchronisation puis avant de fusionner le commit inspecté ; refuse les chemins protégés, les changements textuels trop volumineux, les binaires non dénombrables avec un seuil de lignes et les inspections incomplètes avec le code `guard`. Conserve les branches et worktrees refusés ; refuse `current` avant exécution. Les tests déterministes utilisent de vrais dépôts Git temporaires, des agents locaux et un fournisseur distant simulé ; aucun appel payant à un modèle n’est nécessaire.
+
+- Fournit au sandbox Daytona simulé des caches de dépendances son propre wrapper Linux `setsid --wait`, pour que ses fixtures de processus hôtes fonctionnent aussi sur macOS. La supervision des processus des sandboxes de production reste inchangée.
+- Fige l’horloge de la file dans la fixture de déduplication des planificateurs, pour que les runners Windows lents ne fassent pas expirer la première réservation entre deux assertions. L’expiration des réservations reste couverte séparément.
+
+La release v11.0.0 a été bloquée par la fixture macOS des caches de dépendances et une fixture Windows de planification sensible au timing, et n’a pas été publiée.
 
 ## 10.0.1
 

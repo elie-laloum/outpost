@@ -26,6 +26,11 @@ export async function cloudCacheSandbox(
   await writeFile(join(bin, "sudo"), '#!/bin/sh\nshift 2\nexec "$@"\n', {
     mode: 0o700,
   });
+  await writeFile(
+    join(bin, "setsid"),
+    '#!/bin/sh\n[ "$1" = "--wait" ] || exit 64\nshift\nexec "$@"\n',
+    { mode: 0o700 },
+  );
   const path = (value: string) =>
     value.replaceAll("/outpost/cache", join(directory, "cache"));
   const execute = async (

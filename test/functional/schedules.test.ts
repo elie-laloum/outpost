@@ -148,6 +148,8 @@ test("schedules publish one trigger job per slot with derived identities", async
 });
 
 test("concurrent schedulers converge on the same queue job", async (t) => {
+  const now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const queue = await sqliteQueue(t);
   const schedules = [
     {
