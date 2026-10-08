@@ -1,3 +1,5 @@
+import { validateRecipeConcurrency } from "./workflow.ts";
+import { workflowOptionComponents } from "./workflow-components.ts";
 import { recipeFileError } from "../../infrastructure/recipes/diagnostic.ts";
 import { dirname, resolve } from "node:path";
 import { parseRecipe, parseRecipeYaml } from "../../infrastructure/recipe.ts";
@@ -5,7 +7,10 @@ import { readRecipeFile } from "../../infrastructure/recipes/read.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
 import { createRecipeRegistry } from "../../domain/recipes/component.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import {
+  validateRecipeSchema,
+  recipeJsonValidator,
+} from "../../infrastructure/recipes/schema.ts";
 import { readRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
@@ -38,6 +43,18 @@ export async function readRecipeProject(
   let document;
   try {
     document = parseRecipe(source);
+    for (const [name, input] of Object.entries(document.inputs)) {
+      if (!input.schema) continue;
+      recipeJsonValidator(input.schema);
+      if (Object.hasOwn(input, "default"))
+        validateRecipeSchema(
+          input.schema,
+          input.default,
+          `inputs.${name}.default`,
+        );
+    }
+    if (typeof document.workflow?.concurrency === "number")
+      validateRecipeConcurrency(document, document.workflow.concurrency);
   } catch (error) {
     throw recipeFileError(file, source, error);
   }
@@ -90,6 +107,7 @@ export async function readRecipeProject(
       components: [
         ...observationComponents,
         ...nativeRecipeComponents,
+        ...workflowOptionComponents,
         sandboxOptionsComponent,
         dispatchOptionsComponent,
         secretSelectionComponent,
@@ -97,12 +115,22 @@ export async function readRecipeProject(
       ],
     });
     const directory = dirname(config);
-    const graph = recipeComponentGraph(
-      configuration,
-      registry,
-      directory,
-      document,
-    );
+    let graph;
+    try {
+      graph = recipeComponentGraph(
+        configuration,
+        registry,
+        directory,
+        document,
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        /(?:tasks\.[\w.-]+|workflow)(?:\.|:)/.test(error.message)
+      )
+        throw recipeFileError(file, source, error);
+      throw error;
+    }
     const reports = configuration.reports ?? [];
     if (!Array.isArray(reports)) throw new Error("reports must be a list");
     return {
@@ -122,6 +150,8 @@ export async function readRecipeProject(
       ),
     };
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith(`${file}:`))
+      throw error;
     throw recipeFileError(config, configurationSource, error);
   }
 }

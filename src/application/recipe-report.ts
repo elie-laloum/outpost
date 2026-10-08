@@ -64,8 +64,8 @@ export function printRecipeReport(report: RecipeReport, json: boolean): void {
     if (error.stdout) process.stderr.write(`${error.stdout}\n`);
     if (error.stderr) process.stderr.write(`${error.stderr}\n`);
   }
-  if (report.workspace.retainedDirectory)
+  if (report.workspace?.retainedDirectory)
     process.stdout.write(
-      `Workspace retained: ${report.workspace.retainedDirectory}\n`,
+      `Workspace retained: ${report.workspace?.retainedDirectory}\n`,
     );
 }

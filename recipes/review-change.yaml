@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../recipe.schema.json
+version: 3
+name: review-change
+recipeVersion: "1.0.0"
+description: Review a structured change request when its file list is nonempty.
+inputs:
+  change:
+    type: object
+    description: Change summary and affected repository-relative files.
+    schema:
+      type: object
+      properties:
+        summary: { type: string, minLength: 1 }
+        files: { type: array, items: { type: string } }
+      required: [summary, files]
+      additionalProperties: false
+tasks:
+  - key: context
+    value: { $input: change }
+  - key: review
+    after: [context]
+    when: { ne: [{ $step: context, path: [value, files] }, []] }
+    agent: reviewer
+    brief: "Review the committed change and report actionable findings: {{ steps.context.value.summary }}"

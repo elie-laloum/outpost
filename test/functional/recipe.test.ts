@@ -297,7 +297,7 @@ export default async signal => {
   const failure = JSON.parse(failed.stdout);
   assert.equal(failure.errors[0].status, 7);
   assert.match(failure.errors[0].stderr, /Exact diagnostic/);
-  assert.ok(failure.workspace.retainedDirectory);
+  assert.ok(failure.workspace?.retainedDirectory);
   await writeFile(file, yaml([command("ok", "console.log('done')")]));
   for (const [variable, message] of [
     ["RECIPE_CONFLICT", "Integration refused"],
@@ -310,7 +310,7 @@ export default async signal => {
     assert.equal(report.workflowStatus, "done");
     assert.equal(report.errors[0].message, message);
     if (variable === "RECIPE_CONFLICT")
-      assert.ok(report.workspace.retainedDirectory);
+      assert.ok(report.workspace?.retainedDirectory);
   }
   for (const [signal, status] of [
     ["SIGINT", 130],

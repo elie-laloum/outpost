@@ -9,6 +9,13 @@
       "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
     },
     {
+      "name": "review-change",
+      "version": "1.0.0",
+      "description": "Review a structured change request when its file list is nonempty.",
+      "source": "./review-change.yaml",
+      "sha256": "b628c13883540ea70e265828b2ecd213de92038fa4402d85ee36f483fd97e9da"
+    },
+    {
       "name": "review",
       "version": "1.0.0",
       "description": "Review a selected area of the repository and return actionable findings.",

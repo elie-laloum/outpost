@@ -1,3 +1,4 @@
+import { realpath } from "node:fs/promises";
 import { readRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import type { RecipeProject } from "./project.types.ts";
@@ -8,8 +9,7 @@ import type { SandboxOptions } from "../outpost.types.ts";
 import { nativeRecipeGuards } from "./native.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
-import { dispatchCandidates } from "../../domain/fallback-agent.ts";
-import { resolveVariables } from "../../infrastructure/settings.ts";
+import { preflightRecipeAgent } from "./agent-preflight.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -57,22 +57,34 @@ export async function recipeExecutionConfiguration(
   for (const role of new Set(
     project.document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
   )) {
-    for (const candidate of dispatchCandidates(agents[role]!)) {
-      if (candidate.kind !== "cli") continue;
-      const variables = await resolveVariables(
-        legacy.sandbox.repository!,
-        candidate.variables,
-        { ...provider.variables, ...environment },
+    await preflightRecipeAgent(
+      agents[role]!,
+      legacy.sandbox.repository!,
+      { ...provider.variables, ...environment },
+      scope,
+    );
+  }
+
+  const { repository, branch, ...borrowedSettings } = legacy.sandbox;
+  if (options.workspace) {
+    if (project.configuration.branch !== undefined)
+      throw new Error(
+        "A borrowed workspace owns its branch policy; omit configuration.branch",
       );
-      scope.protect(Object.values(variables));
-      const credentials = candidate.credentials?.(variables);
-      if (credentials) scope.protect(Object.values(credentials.variables));
-      candidate.configuration?.({ ...variables, ...credentials?.variables });
-    }
+    for (const key of ["guard", "copies", "storageQuota"] as const)
+      if (options[key] !== undefined)
+        throw new Error(`A borrowed workspace cannot declare workspace.${key}`);
+    if (
+      (await realpath(options.workspace.repository)) !==
+      (await realpath(repository!))
+    )
+      throw new Error(
+        "Borrowed workspace repository does not match configuration.repository",
+      );
   }
   return {
     sandbox: {
-      ...legacy.sandbox,
+      ...(options.workspace ? borrowedSettings : legacy.sandbox),
       ...options,
       sandboxProvider: {
         ...provider,

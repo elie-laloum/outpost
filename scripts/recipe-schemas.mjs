@@ -157,25 +157,168 @@ const configSchema = {
   $defs: definitions,
   oneOf: [old, current],
 };
-const version2 = structuredClone(
+const version3 = structuredClone(
   recipe.oneOf.find((shape) => shape.properties.version.const === 2),
 );
-version2.properties.version = { const: 3 };
-const dispatch = shapeOf(
-  nativeRecipeSchemas["dispatch.options"],
-  "dispatch.options",
+version3.properties.version = { const: 3 };
+const taskV3 = structuredClone(recipe.$defs.task);
+const expressions = {
+  expression: {
+    anyOf: [
+      { type: ["null", "boolean", "number", "string"] },
+      { type: "array", items: { $ref: "#/$defs/expression" } },
+      ...["$input", "$step"].map((key) => ({
+        type: "object",
+        additionalProperties: false,
+        required: [key],
+        properties: {
+          [key]: recipeScalarSchemas.text,
+          path: { $ref: "#/$defs/propertyPath" },
+        },
+      })),
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["$literal"],
+        properties: { $literal: {} },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["$select"],
+        properties: {
+          $select: {
+            type: "object",
+            additionalProperties: false,
+            required: ["from", "path"],
+            properties: {
+              from: { $ref: "#/$defs/expression" },
+              path: { $ref: "#/$defs/propertyPath" },
+            },
+          },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: { $ref: "#/$defs/expression" },
+        not: {
+          anyOf: ["$input", "$step", "$literal", "$select"].map((key) => ({
+            required: [key],
+          })),
+        },
+      },
+    ],
+  },
+  propertyPath: {
+    type: "array",
+    items: { anyOf: [{ type: "string" }, { type: "integer", minimum: 0 }] },
+  },
+  condition: {
+    anyOf: [
+      { type: "boolean" },
+      ...[
+        "all",
+        "any",
+        "not",
+        "exists",
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "in",
+      ].map((key) => ({
+        type: "object",
+        additionalProperties: false,
+        required: [key],
+        properties: {
+          [key]: ["all", "any"].includes(key)
+            ? { type: "array", items: { $ref: "#/$defs/condition" } }
+            : key === "not"
+              ? { $ref: "#/$defs/condition" }
+              : key === "exists"
+                ? { $ref: "#/$defs/expression" }
+                : {
+                    type: "array",
+                    minItems: 2,
+                    maxItems: 2,
+                    items: { $ref: "#/$defs/expression" },
+                  },
+        },
+      })),
+    ],
+  },
+};
+for (const [field, kind] of Object.entries({
+  dispatch: "dispatch",
+  options: "task",
+  loop: "loop",
+  decision: "decisionTask",
+  isolated: "isolated",
+}))
+  taskV3.properties[field] = shapeOf(
+    nativeRecipeSchemas[`${kind}.options`],
+    `${kind}.options`,
+  );
+taskV3.properties.call = clean(
+  nativeRecipeSchemas["call.options"].properties.perform,
 );
+for (const field of ["value", "state", "arguments"])
+  taskV3.properties[field] = { $ref: "#/$defs/expression" };
+taskV3.properties.when = { $ref: "#/$defs/condition" };
+const actions = [
+  "command",
+  "agent",
+  "value",
+  "call",
+  "loop",
+  "decision",
+  "isolated",
+];
+taskV3.oneOf = actions.map((action) => ({
+  required: action === "agent" ? ["agent", "brief"] : [action],
+  not: {
+    anyOf: actions
+      .filter((other) => other !== action)
+      .map((other) => ({ required: [other] })),
+  },
+}));
+taskV3.allOf = [
+  {
+    if: { not: { required: ["agent"] } },
+    then: {
+      not: { anyOf: [{ required: ["brief"] }, { required: ["dispatch"] }] },
+    },
+  },
+  {
+    if: { not: { required: ["call"] } },
+    then: { not: { required: ["arguments"] } },
+  },
+  {
+    if: { not: { required: ["decision"] } },
+    then: { not: { required: ["state"] } },
+  },
+];
+const inputV3 = structuredClone(recipe.$defs.input);
+inputV3.properties.type.enum.push("object", "array", "null");
+inputV3.properties.default = {};
+inputV3.properties.enum.items = {};
+inputV3.properties.schema = { type: "object" };
+version3.properties.workflow = shapeOf(
+  nativeRecipeSchemas["workflow.options"],
+  "workflow.options",
+);
+version3.properties.tasks.items = { $ref: "#/$defs/taskV3" };
+version3.properties.inputs.additionalProperties = { $ref: "#/$defs/inputV3" };
 recipe.$defs = {
   ...recipe.$defs,
   ...definitions,
-  taskV3: structuredClone(recipe.$defs.task),
+  ...expressions,
+  taskV3,
+  inputV3,
 };
-recipe.$defs.taskV3.properties.dispatch = dispatch;
-recipe.$defs.taskV3.allOf = [
-  { if: { required: ["command"] }, then: { not: { required: ["dispatch"] } } },
-];
-version2.properties.tasks.items = { $ref: "#/$defs/taskV3" };
-recipe.oneOf.push(version2);
+recipe.oneOf.push(version3);
 for (const [file, value] of [
   ["recipe-configuration.schema.json", configSchema],
   ["recipe.schema.json", recipe],

@@ -347,3 +347,5 @@ hooks:
 ```
 
 Attachez le hook au harness avec `hooks: [{ $ref: hooks.before }]`. Appliquez le même modèle à l’exécution d’outils, au contexte personnalisé, aux instructions et à l’état du routage ; les erreurs indiquent le contrat attendu. Les factories peuvent aussi recevoir des références typées par les annotations de leur schéma. Les composants possédés sont fermés dans l’ordre des dépendances ; les erreurs de fermeture des observateurs figurent dans `observerErrors` sans modifier la réussite des tâches.
+
+Composez valeurs JSON, conditions, boucles, décisions et tâches isolées avec les [workflows de format 3](../recipe-workflows/). Une recette de données seule n’alloue aucune sandbox.

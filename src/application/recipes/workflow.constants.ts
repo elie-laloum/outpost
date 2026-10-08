@@ -1,0 +1,17 @@
+export const dispatchFields = [
+  "text",
+  "turns",
+  "usage",
+  "conversation",
+  "value",
+  "completed",
+  "completion",
+  "branch",
+  "directory",
+  "commits",
+  "transcript",
+  "transcriptReference",
+  "logReference",
+  "retainedDirectory",
+  "fallback",
+] as const;

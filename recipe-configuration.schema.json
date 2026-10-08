@@ -272,10 +272,10 @@
                 "onError": {
                   "anyOf": [
                     {
-                      "const": "return-to-model"
+                      "const": "fail"
                     },
                     {
-                      "const": "fail"
+                      "const": "return-to-model"
                     }
                   ]
                 }
@@ -2645,6 +2645,9 @@
             "on": {
               "anyOf": [
                 {
+                  "const": "stop"
+                },
+                {
                   "const": "session-start"
                 },
                 {
@@ -2658,9 +2661,6 @@
                 },
                 {
                   "const": "after-tool"
-                },
-                {
-                  "const": "stop"
                 }
               ]
             },
@@ -2969,10 +2969,10 @@
               "items": {
                 "anyOf": [
                   {
-                    "const": "quota"
+                    "const": "unavailable"
                   },
                   {
-                    "const": "unavailable"
+                    "const": "quota"
                   }
                 ]
               }
@@ -2994,10 +2994,10 @@
             "divergence": {
               "anyOf": [
                 {
-                  "const": "fail"
+                  "const": "warn"
                 },
                 {
-                  "const": "warn"
+                  "const": "fail"
                 }
               ]
             },
@@ -3338,10 +3338,10 @@
                 "onError": {
                   "anyOf": [
                     {
-                      "const": "return-to-model"
+                      "const": "fail"
                     },
                     {
-                      "const": "fail"
+                      "const": "return-to-model"
                     }
                   ]
                 }
@@ -5767,6 +5767,21 @@
             "fallback": {
               "type": "string"
             },
+            "state": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "provider": {
               "anyOf": [
                 {
@@ -5812,25 +5827,10 @@
             "onError": {
               "anyOf": [
                 {
-                  "const": "fail"
+                  "const": "fallback"
                 },
                 {
-                  "const": "fallback"
-                }
-              ]
-            },
-            "state": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "required": ["$ref"],
-                  "properties": {
-                    "$ref": {
-                      "type": "string",
-                      "pattern": "\\S"
-                    }
-                  },
-                  "additionalProperties": false
+                  "const": "fail"
                 }
               ]
             },
@@ -7167,6 +7167,9 @@
                 {
                   "type": "object",
                   "properties": {
+                    "timeout": {
+                      "type": "number"
+                    },
                     "name": {
                       "type": "string"
                     },
@@ -7175,9 +7178,6 @@
                       "items": {
                         "type": "number"
                       }
-                    },
-                    "timeout": {
-                      "type": "number"
                     },
                     "resources": {
                       "type": "object",
@@ -7713,6 +7713,9 @@
                 {
                   "type": "object",
                   "properties": {
+                    "timeout": {
+                      "type": "number"
+                    },
                     "name": {
                       "type": "string"
                     },
@@ -7721,9 +7724,6 @@
                       "items": {
                         "type": "number"
                       }
-                    },
-                    "timeout": {
-                      "type": "number"
                     },
                     "resources": {
                       "type": "object",
@@ -12993,10 +12993,10 @@
         "failure": {
           "anyOf": [
             {
-              "const": "quota"
+              "const": "unavailable"
             },
             {
-              "const": "unavailable"
+              "const": "quota"
             }
           ]
         },
@@ -13014,6 +13014,190 @@
       "additionalProperties": false
     },
     "sandbox.options.option2": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["$ref"],
+              "properties": {
+                "$ref": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "output": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["$ref"],
+              "properties": {
+                "$ref": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["$ref"],
+              "properties": {
+                "$ref": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "isolated.options.option0": {
+      "type": "object",
+      "properties": {
+        "models": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "inputIncludesCache": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "const": true
+                  }
+                ]
+              },
+              "complete": {
+                "anyOf": [
+                  {
+                    "const": false
+                  },
+                  {
+                    "const": true
+                  }
+                ]
+              },
+              "input": {
+                "type": "number"
+              },
+              "cached": {
+                "type": "number"
+              },
+              "cacheCreated": {
+                "type": "number"
+              },
+              "output": {
+                "type": "number"
+              }
+            },
+            "required": ["input", "cached", "output"],
+            "additionalProperties": false
+          }
+        },
+        "complete": {
+          "anyOf": [
+            {
+              "const": false
+            },
+            {
+              "const": true
+            }
+          ]
+        },
+        "input": {
+          "type": "number"
+        },
+        "cached": {
+          "type": "number"
+        },
+        "cacheCreated": {
+          "type": "number"
+        },
+        "output": {
+          "type": "number"
+        }
+      },
+      "required": ["input", "cached", "output"],
+      "additionalProperties": false
+    },
+    "isolated.options.option1": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fallback"
+        },
+        "from": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            }
+          },
+          "required": ["index", "name"],
+          "additionalProperties": false
+        },
+        "to": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            }
+          },
+          "required": ["index", "name"],
+          "additionalProperties": false
+        },
+        "failure": {
+          "anyOf": [
+            {
+              "const": "unavailable"
+            },
+            {
+              "const": "quota"
+            }
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "resetAt": {
+          "type": "string"
+        },
+        "subagentId": {
+          "type": "string"
+        }
+      },
+      "required": ["kind", "from", "to", "failure", "message"],
+      "additionalProperties": false
+    },
+    "isolated.options.option2": {
       "type": "object",
       "properties": {
         "input": {
@@ -14204,6 +14388,9 @@
                     {
                       "type": "object",
                       "properties": {
+                        "timeout": {
+                          "type": "number"
+                        },
                         "name": {
                           "type": "string"
                         },
@@ -14212,9 +14399,6 @@
                           "items": {
                             "type": "number"
                           }
-                        },
-                        "timeout": {
-                          "type": "number"
                         },
                         "resources": {
                           "type": "object",
@@ -14750,6 +14934,9 @@
                     {
                       "type": "object",
                       "properties": {
+                        "timeout": {
+                          "type": "number"
+                        },
                         "name": {
                           "type": "string"
                         },
@@ -14758,9 +14945,6 @@
                           "items": {
                             "type": "number"
                           }
-                        },
-                        "timeout": {
-                          "type": "number"
                         },
                         "resources": {
                           "type": "object",
@@ -16557,10 +16741,10 @@
                     "divergence": {
                       "anyOf": [
                         {
-                          "const": "fail"
+                          "const": "warn"
                         },
                         {
-                          "const": "warn"
+                          "const": "fail"
                         }
                       ]
                     },
@@ -16629,13 +16813,13 @@
                                     "reason": {
                                       "anyOf": [
                                         {
-                                          "const": "unavailable"
-                                        },
-                                        {
                                           "const": "selected"
                                         },
                                         {
                                           "const": "confidence"
+                                        },
+                                        {
+                                          "const": "unavailable"
                                         }
                                       ]
                                     },
@@ -17431,13 +17615,13 @@
                                     "action": {
                                       "anyOf": [
                                         {
-                                          "const": "stop"
-                                        },
-                                        {
                                           "const": "warn"
                                         },
                                         {
                                           "const": "steer"
+                                        },
+                                        {
+                                          "const": "stop"
                                         }
                                       ]
                                     },
@@ -17567,19 +17751,19 @@
                               "code": {
                                 "anyOf": [
                                   {
-                                    "const": "quota"
+                                    "const": "provider"
                                   },
                                   {
-                                    "const": "provider"
+                                    "const": "workspace"
+                                  },
+                                  {
+                                    "const": "guard"
                                   },
                                   {
                                     "const": "steering"
                                   },
                                   {
                                     "const": "response"
-                                  },
-                                  {
-                                    "const": "timeout"
                                   },
                                   {
                                     "const": "replay"
@@ -17594,7 +17778,7 @@
                                     "const": "prompt"
                                   },
                                   {
-                                    "const": "guard"
+                                    "const": "quota"
                                   },
                                   {
                                     "const": "rejected"
@@ -17606,7 +17790,7 @@
                                     "const": "process"
                                   },
                                   {
-                                    "const": "workspace"
+                                    "const": "timeout"
                                   },
                                   {
                                     "const": "conflict"
@@ -17987,10 +18171,10 @@
                       "items": {
                         "anyOf": [
                           {
-                            "const": "quota"
+                            "const": "unavailable"
                           },
                           {
-                            "const": "unavailable"
+                            "const": "quota"
                           }
                         ]
                       }

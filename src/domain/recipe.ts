@@ -1,8 +1,16 @@
+import {
+  recipeJson,
+  validateRecipeCondition,
+  validateRecipeExpression,
+} from "./recipes/expressions.ts";
 import { defineTask } from "./workflow.ts";
 import type { RecipeDocument, RecipeStep } from "./recipe.types.ts";
 import { recipeKeys, recipeLimits } from "./recipe.constants.ts";
 import { recipeInputs } from "./recipe-inputs.ts";
-import { validateRecipeReferences } from "./recipe-templates.ts";
+import {
+  validateRecipeReferences,
+  recipeCommandStrings,
+} from "./recipe-templates.ts";
 import { SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
 
 function object(value: unknown, path: string): Record<string, unknown> {
@@ -87,6 +95,54 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
         }),
   };
   defineTask({ ...common, after: [], perform() {} });
+  const additions =
+    version === 3
+      ? {
+          ...(item.when === undefined ? {} : { when: recipeJson(item.when) }),
+          ...(item.options === undefined
+            ? {}
+            : { options: object(item.options, `${path}.options`) }),
+        }
+      : {};
+  Object.assign(common, additions);
+  if (version === 3) {
+    const actions = [
+      "command",
+      "agent",
+      "value",
+      "call",
+      "loop",
+      "decision",
+      "isolated",
+    ].filter((key) => Object.hasOwn(item, key));
+    if (actions.length !== 1)
+      throw new Error(`${path} requires exactly one task action`);
+    for (const field of ["call", "loop", "decision", "isolated"]) {
+      if (item[field] === undefined) continue;
+      if (item.brief !== undefined || item.dispatch !== undefined)
+        throw new Error(`${path}: brief and dispatch require an agent task`);
+      if (item.arguments !== undefined && field !== "call")
+        throw new Error(`${path}: arguments require call`);
+      if (item.state !== undefined && field !== "decision")
+        throw new Error(`${path}: state requires decision`);
+      return {
+        ...common,
+        ...additions,
+        [field]: object(item[field], `${path}.${field}`),
+        ...(item.arguments === undefined
+          ? {}
+          : { arguments: recipeJson(item.arguments) }),
+        ...(item.state === undefined ? {} : { state: recipeJson(item.state) }),
+      };
+    }
+    if (item.arguments !== undefined || item.state !== undefined)
+      throw new Error(`${path}: arguments/state require call/decision`);
+    if (Object.hasOwn(item, "value")) {
+      if (item.brief !== undefined || item.dispatch !== undefined)
+        throw new Error(`${path}: value cannot include brief or dispatch`);
+      return { ...common, ...additions, value: recipeJson(item.value) };
+    }
+  }
   if (item.command !== undefined) {
     if (
       item.agent !== undefined ||
@@ -158,7 +214,11 @@ export function validateRecipe(value: unknown): RecipeDocument {
   const record = fields(
     mapping,
     "recipe",
-    mapping.version !== 1 ? recipeKeys.documentV2 : recipeKeys.document,
+    mapping.version === 3
+      ? [...recipeKeys.documentV2, "workflow"]
+      : mapping.version === 2
+        ? recipeKeys.documentV2
+        : recipeKeys.document,
   );
   if (record.version !== 1 && record.version !== 2 && record.version !== 3)
     throw new Error("Recipe version must be 1, 2 or 3");
@@ -198,7 +258,10 @@ export function validateRecipe(value: unknown): RecipeDocument {
     version: record.version,
     name,
     tasks: ordered,
-    inputs: recipeInputs(record.inputs),
+    inputs: recipeInputs(record.inputs, record.version),
+    ...(record.workflow === undefined
+      ? {}
+      : { workflow: object(record.workflow, "recipe.workflow") }),
     ...(record.description === undefined
       ? {}
       : { description: text(record.description, "recipe.description") }),
@@ -207,5 +270,37 @@ export function validateRecipe(value: unknown): RecipeDocument {
       : { recipeVersion: text(record.recipeVersion, "recipe.recipeVersion") }),
   };
   validateRecipeReferences(document);
+  if (document.version === 3)
+    for (const step of document.tasks) {
+      const context = { document, step };
+      for (const value of [
+        ...(step.command ? recipeCommandStrings(step.command) : []),
+        ...(step.brief === undefined ? [] : [step.brief]),
+      ])
+        validateRecipeExpression(value, context);
+      if (
+        step.isolated &&
+        typeof step.isolated.brief === "object" &&
+        step.isolated.brief !== null &&
+        "text" in step.isolated.brief
+      )
+        validateRecipeExpression(step.isolated.brief.text, context);
+      if (step.when !== undefined) validateRecipeCondition(step.when, context);
+      for (const field of ["value", "arguments", "state"] as const)
+        if (step[field] !== undefined)
+          validateRecipeExpression(step[field], context);
+      if (step.when !== undefined && step.options?.condition !== undefined)
+        throw new Error(`${step.key}: use either when or options.condition`);
+      if (
+        step.loop &&
+        (step.retry ||
+          step.options?.retry ||
+          step.options?.gate ||
+          step.options?.interaction)
+      )
+        throw new Error(
+          `${step.key}: loop tasks do not accept retry, gate or interaction`,
+        );
+    }
   return document;
 }

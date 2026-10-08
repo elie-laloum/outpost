@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Composez des workflows de format 3 avec paramètres JSON structurés, références typées de résultats, conditions, transformations, callbacks locaux, boucles et décisions natives, et dispatch isolés sur plusieurs dépôts. Conservez l’ordonnancement et la consommation natifs, refusez les workspaces partagés simultanés et projetez les résultats en JSON. Ajoutez un exemple hors ligne et des tests d’équivalence YAML/TypeScript sur de vrais dépôts Git.
+
 - Composition YAML du harness Outpost, des fournisseurs de modèles et décisions, outils, skills, hooks, permissions, stratégies de contexte, routage, agents de secours et conversations. Les étapes agent du format 3 acceptent les options de dispatch et les références de réponses structurées. Les extensions callback déclarent un contrat statique ; les schémas distinguent schémas de données et références de composants. Comparaison hors ligne d’exécutions YAML et TypeScript avec délégation, et test de la CLI compilée contre un modèle HTTP local en streaming.
 
 - Extension de la configuration YAML avec providers nommés, options natives de sandbox et workspace, profils portables, réglages des harness CLI, déclarations MCP, transports locaux et sélection de secrets sur l’hôte. Génération des schémas depuis les contrats TypeScript, refus des cycles avant import, résolution des extensions ESM installées et masquage des valeurs sélectionnées dans l’observation et les rapports. Tests du lifecycle local et d’équivalence des requêtes YAML/TypeScript ; appels cloud et agents payants non validés.

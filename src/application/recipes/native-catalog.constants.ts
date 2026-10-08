@@ -1,5 +1,54 @@
 export const nativeRecipeTypes = [
   [
+    "task.options",
+    "RecipeTaskSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+  [
+    "workflow.options",
+    "RecipeWorkflowSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+  [
+    "loop.options",
+    "RecipeLoopSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+  [
+    "decisionTask.options",
+    "RecipeDecisionSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+  [
+    "isolated.options",
+    "RecipeIsolatedSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+  [
+    "call.options",
+    "RecipeCallSettings",
+    "application/recipes/workflow-components.types.ts",
+    null,
+    null,
+    4,
+  ],
+
+  [
     "steering.controller",
     "RecipeEmptyOptions",
     "application/recipes/agent-components.types.ts",
@@ -459,6 +508,9 @@ export const nativeRecipeTypes = [
 
 export const nativeRecipeKinds: Readonly<Record<string, string>> = {
   Agent: "agent",
+  WorkflowCheckpointStore: "checkpointStore",
+  TaskCache: "taskCache",
+  WorkflowDecisionVerifier: "verifier",
   CliAgent: "agent",
   CustomAgent: "agent",
   DispatchAgent: "agent",
@@ -496,6 +548,7 @@ export const nativeRecipeKinds: Readonly<Record<string, string>> = {
 };
 
 export const nativeRecipePaths: Readonly<Record<string, readonly string[]>> = {
+  "isolated.options": ["repository", "conversationHome", "brief.file"],
   "sandbox.options": ["repository", "conversationHome"],
   "sandboxProvider.docker": ["volumes.*.source"],
   "sandboxProvider.podman": ["volumes.*.source"],

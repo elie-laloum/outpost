@@ -92,6 +92,7 @@ export const chapters = [
     [
       "guide/typed-workflows",
       "guide/yaml-recipes",
+      "guide/recipe-workflows",
       "guide/task-dependencies",
       "guide/concurrency-and-retries",
       "guide/verification-loops",

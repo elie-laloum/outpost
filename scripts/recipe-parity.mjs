@@ -65,7 +65,11 @@ for (const [entry, file] of entries) {
           !location.getSourceFile().fileName.startsWith(resolve(root, "src"))
         )
           continue;
-        options[property.name] = checker.typeToString(
+        const name = property.name.replace(
+          /^__@([A-Za-z]+)@\d+$/,
+          "[Symbol.$1]",
+        );
+        options[name] = checker.typeToString(
           checker.getTypeOfSymbolAtLocation(property, location),
           location,
           ts.TypeFormatFlags.NoTruncation,

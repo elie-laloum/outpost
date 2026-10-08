@@ -1,3 +1,4 @@
+import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { WorkflowResult } from "../domain/workflow.types.ts";
 
 export interface RecipeDiagnostic {
@@ -18,10 +19,10 @@ export interface RecipeReport {
   readonly tasks: WorkflowResult["tasks"];
   readonly usage?: WorkflowResult["usage"];
   readonly outputs: Readonly<
-    Record<string, Readonly<Record<string, string | number>>>
+    Record<string, Readonly<Record<string, WorkflowJson>>>
   >;
   readonly errors: readonly RecipeDiagnostic[];
-  readonly workspace: {
+  readonly workspace?: {
     readonly branch: string;
     readonly directory: string;
     readonly retainedDirectory?: string;

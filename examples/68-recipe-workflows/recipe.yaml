@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: structured-workflow
+inputs:
+  changes:
+    type: object
+    description: Changes to inspect.
+    default: { files: [src/index.ts], approved: true }
+tasks:
+  - key: selection
+    value:
+      files: { $input: changes, path: [files] }
+      approved: { $input: changes, path: [approved] }
+  - key: summarize
+    after: [selection]
+    when: { eq: [{ $step: selection, path: [value, approved] }, true] }
+    call: { $ref: functions.summary }
+    arguments: { $step: selection, path: [value, files] }
+  - key: verify
+    after: [summarize]
+    loop:
+      maxRounds: 2
+      attempt: { $ref: functions.attempt }
+      check: { $ref: functions.check }

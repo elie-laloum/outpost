@@ -22,8 +22,8 @@ export function publishRecipeReport(
                 )
                 .map(([field, value]) => `[${key}] ${field}: ${value}`),
             ),
-            ...(report.workspace.retainedDirectory
-              ? [`Workspace retained: ${report.workspace.retainedDirectory}`]
+            ...(report.workspace?.retainedDirectory
+              ? [`Workspace retained: ${report.workspace?.retainedDirectory}`]
               : []),
           ].join("\n");
     process[declaration.stream ?? "stdout"].write(`${output}\n`);

@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox: { provider: local }
+extensions:
+  summary:
+    module: ./steps.ts
+    export: summary
+    kind: callback
+    contract: call.options.perform
+    version: "1"
+  attempt:
+    module: ./steps.ts
+    export: attempt
+    kind: callback
+    contract: loop.options.attempt
+    version: "1"
+  check:
+    module: ./steps.ts
+    export: check
+    kind: callback
+    contract: loop.options.check
+    version: "1"
+functions:
+  summary: { $ref: extensions.summary }
+  attempt: { $ref: extensions.attempt }
+  check: { $ref: extensions.check }

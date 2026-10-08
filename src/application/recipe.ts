@@ -1,3 +1,4 @@
+import { bindRecipeWorkflow } from "./recipes/workflow.ts";
 import { defineWorkflow } from "../domain/workflow.ts";
 import type {
   Task,
@@ -28,6 +29,13 @@ export function bindRecipe(
   bindings: RecipeBindings,
   requests: Readonly<Record<string, RecipeDispatchSettings>> = {},
 ): Workflow {
+  if (document.version === 3)
+    return bindRecipeWorkflow(document, bindings, {
+      workflow: {},
+      steps: Object.fromEntries(
+        Object.entries(requests).map(([key, dispatch]) => [key, { dispatch }]),
+      ),
+    });
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const tasks = new Map<string, Task>();
   for (const step of document.tasks) {

@@ -1,3 +1,4 @@
+import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeConfiguration } from "../recipe.types.ts";
@@ -36,7 +37,7 @@ export interface RecipeReportDeclaration {
 }
 
 export interface RecipeRunOptions {
-  readonly inputs?: Readonly<Record<string, string | number | boolean>>;
+  readonly inputs?: Readonly<Record<string, WorkflowJson>>;
   readonly signal?: AbortSignal;
   readonly report?: "json";
 }

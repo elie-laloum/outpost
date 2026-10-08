@@ -8591,8 +8591,8 @@
     "Agents Outpost composés, indexés par les noms exacts des champs agent du YAML. Les noms absents sont refusés à la déclaration ; les recettes de commandes seules peuvent omettre ce registre. L’authentification et les modèles restent dans les agents composés."
   ],
   "RecipeBindings.inputs": [
-    "Explicit scalar values for version-2 parameters, keyed by their declared names. Defaults apply to omitted inputs; missing required values, unknown names, type mismatches and enum violations fail before execution. Substitution is single-pass and never evaluates code.",
-    "Valeurs scalaires explicites des paramètres de version 2, indexées par leurs noms déclarés. Les valeurs par défaut complètent les paramètres omis ; valeurs obligatoires absentes, noms inconnus, types incorrects et violations des enum échouent avant exécution. La substitution passe une seule fois et n’évalue aucun code."
+    "Declared recipe input values; format 3 also accepts lossless JSON objects, arrays and null. Inputs are validated before tasks run.",
+    "Valeurs des paramètres déclarés ; le format 3 accepte aussi objets, tableaux et null JSON sans perte. Les paramètres sont validés avant les tâches."
   ],
   "RecipeConfiguration.sandbox": [
     "Sandbox creation options reused by the recipe CLI. Required inputs and agent names are checked before allocation; the CLI supplies cancellation, owns the created sandbox, integrates successful work according to its branch policy and preserves failed work.",
@@ -8711,8 +8711,8 @@
     "Noms des extensions dont les métadonnées ont été validées sans importer leurs modules."
   ],
   "RecipeRunOptions.inputs": [
-    "Explicit recipe parameters; required values and defaults are checked before extension imports.",
-    "Paramètres explicites de recette ; valeurs obligatoires et défauts sont vérifiés avant les imports d’extensions."
+    "Declared recipe input values; format 3 also accepts lossless JSON objects, arrays and null. Inputs are validated before tasks run.",
+    "Valeurs des paramètres déclarés ; le format 3 accepte aussi objets, tableaux et null JSON sans perte. Les paramètres sont validés avant les tâches."
   ],
   "RecipeRunOptions.signal": [
     "Cancel this invocation while awaiting owned-resource cleanup.",
@@ -8759,16 +8759,16 @@
     "Consommation agrégée du workflow lorsqu’un résultat est disponible."
   ],
   "RecipeReport.outputs": [
-    "Bounded scalar outputs of completed recipe tasks, keyed by task name.",
-    "Sorties scalaires bornées des tâches terminées, indexées par leur nom."
+    "Completed task outputs: bounded text fields for legacy recipes, explicit JSON projections for format 3. Value, callback, loop and decision tasks expose their result under value; dispatch results retain conversation and workspace references without methods.",
+    "Sorties des tâches terminées : textes bornés pour les anciens formats, projections JSON explicites pour le format 3. Les tâches de valeur, callback, boucle et décision exposent leur résultat dans value ; les dispatch conservent leurs références de conversation et de workspace sans méthodes."
   ],
   "RecipeReport.errors": [
     "Bounded diagnostics for task, integration and cleanup failures.",
     "Diagnostics bornés des échecs de tâches, intégration et nettoyage."
   ],
   "RecipeReport.workspace": [
-    "Workspace branch and directory, including retainedDirectory when work was preserved.",
-    "Branche et dossier du workspace, avec retainedDirectory lorsque le travail est conservé."
+    "Shared workspace and retained-directory information when this execution allocated a shared sandbox. Absent for data-only and exclusively isolated workflows.",
+    "Workspace partagé et répertoire conservé lorsque cette exécution a alloué une sandbox partagée. Absent des workflows de données et de tâches exclusivement isolées."
   ],
   "RecipeDiagnostic.message": [
     "Bounded error message.",

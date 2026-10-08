@@ -29,15 +29,30 @@ export function recipeComponentGraph(
   const expected = new Map<string, string>();
   const declarations = new Map<string, unknown>();
   const extensions = new Map<string, RecipeExtensionDeclaration>();
-  for (const step of document?.tasks ?? []) {
-    if (!step.dispatch) continue;
+  if (document?.version === 3) {
     if (configuration.version !== 2)
-      throw new Error(
-        "Recipe dispatch options require configuration version 2",
-      );
-    const key = `tasks.${step.key}.dispatch`;
-    declarations.set(key, { ...step.dispatch, type: "options" });
-    expected.set(key, "dispatchOptions");
+      throw new Error("Recipe format 3 requires configuration version 2");
+    declarations.set("workflow", { ...document.workflow, type: "options" });
+    expected.set("workflow", "workflowOptions");
+  }
+  for (const step of document?.tasks ?? []) {
+    for (const [field, kind] of Object.entries({
+      options: "task",
+      dispatch: "dispatch",
+      loop: "loop",
+      decision: "decisionTask",
+      isolated: "isolated",
+      call: "call",
+    })) {
+      if (!Object.hasOwn(step, field)) continue;
+      const key = `tasks.${step.key}.${field}`;
+      const source = new Map(Object.entries(step)).get(field);
+      declarations.set(key, {
+        ...(field === "call" ? { perform: source } : recipeRecord(source, key)),
+        type: "options",
+      });
+      expected.set(key, `${kind}Options`);
+    }
   }
   if (configuration.version === 2) {
     const workspace = recipeRecord(configuration.workspace ?? {}, "workspace");

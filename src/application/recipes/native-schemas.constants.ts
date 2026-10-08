@@ -1,6 +1,3205 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "task.options": {
+    type: "object",
+    properties: {
+      interaction: {
+        type: "object",
+        properties: {
+          actors: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          identity: {
+            type: "string",
+          },
+        },
+        required: ["actors", "identity"],
+        additionalProperties: false,
+      },
+      gate: {
+        type: "object",
+        properties: {
+          authentication: {
+            const: "signed",
+          },
+          kind: {
+            anyOf: [
+              {
+                const: "approval",
+              },
+              {
+                const: "pause",
+              },
+            ],
+          },
+          prompt: {
+            type: "string",
+          },
+          actors: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+        },
+        required: ["kind", "prompt", "actors"],
+        additionalProperties: false,
+      },
+      condition: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "task.options.condition",
+      },
+      retry: {
+        type: "object",
+        properties: {
+          attempts: {
+            type: "number",
+          },
+          delayMs: {
+            type: "number",
+          },
+          backoff: {
+            anyOf: [
+              {
+                const: "fixed",
+              },
+              {
+                const: "exponential",
+              },
+            ],
+          },
+          maxDelayMs: {
+            type: "number",
+          },
+          jitter: {
+            anyOf: [
+              {
+                const: "none",
+              },
+              {
+                const: "full",
+              },
+            ],
+          },
+          accepts: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "task.options.retry.accepts",
+          },
+        },
+        required: ["attempts"],
+        additionalProperties: false,
+      },
+      timeoutMs: {
+        type: "number",
+      },
+      cache: {
+        type: "object",
+        properties: {
+          store: {
+            type: "object",
+            properties: {
+              read: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "task.options.cache.store.read",
+              },
+              write: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "task.options.cache.store.write",
+              },
+            },
+            required: ["read", "write"],
+            additionalProperties: false,
+          },
+          version: {
+            type: "string",
+          },
+          key: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "task.options.cache.key",
+          },
+          maxAgeMs: {
+            type: "number",
+          },
+          mode: {
+            anyOf: [
+              {
+                const: "reuse",
+              },
+              {
+                const: "refresh",
+              },
+            ],
+          },
+        },
+        required: ["store", "version", "key"],
+        additionalProperties: false,
+      },
+    },
+    additionalProperties: false,
+  },
+  "workflow.options": {
+    type: "object",
+    properties: {
+      timeoutMs: {
+        type: "number",
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      onQuota: {
+        type: "object",
+        properties: {
+          action: {
+            const: "pause",
+          },
+          maxWaitMs: {
+            type: "number",
+          },
+        },
+        required: ["action"],
+        additionalProperties: false,
+      },
+      answers: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            executionId: {
+              type: "string",
+            },
+            key: {
+              type: "string",
+            },
+            requestId: {
+              type: "string",
+            },
+            actor: {
+              type: "string",
+            },
+            value: {
+              type: "string",
+            },
+          },
+          required: ["executionId", "key", "requestId", "actor", "value"],
+          additionalProperties: false,
+        },
+      },
+      decisionVerifier: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "verifier",
+      },
+      decisions: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            proof: {
+              type: "object",
+              properties: {
+                keyId: {
+                  type: "string",
+                },
+                expiresAt: {
+                  type: "string",
+                },
+                signature: {
+                  type: "string",
+                },
+              },
+              required: ["keyId", "expiresAt", "signature"],
+              additionalProperties: false,
+            },
+            executionId: {
+              type: "string",
+            },
+            key: {
+              type: "string",
+            },
+            requestId: {
+              type: "string",
+            },
+            action: {
+              anyOf: [
+                {
+                  const: "approve",
+                },
+                {
+                  const: "resume",
+                },
+                {
+                  const: "reject",
+                },
+              ],
+            },
+            actor: {
+              type: "string",
+            },
+            reason: {
+              type: "string",
+            },
+          },
+          required: [
+            "executionId",
+            "key",
+            "requestId",
+            "action",
+            "actor",
+            "reason",
+          ],
+          additionalProperties: false,
+        },
+      },
+      checkpoint: {
+        type: "object",
+        properties: {
+          store: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "checkpointStore",
+          },
+          runId: {
+            type: "string",
+          },
+          version: {
+            type: "string",
+          },
+          resume: {
+            const: "retry-incomplete",
+          },
+        },
+        required: ["store", "runId", "version"],
+        additionalProperties: false,
+      },
+      concurrency: {
+        type: "number",
+      },
+      budget: {
+        type: "object",
+        properties: {
+          prices: {
+            type: "object",
+            properties: {
+              currency: {
+                anyOf: [
+                  {
+                    const: "EUR",
+                  },
+                  {
+                    const: "USD",
+                  },
+                ],
+              },
+              models: {
+                type: "object",
+                properties: {},
+                additionalProperties: {
+                  type: "object",
+                  properties: {
+                    input: {
+                      type: "number",
+                    },
+                    output: {
+                      type: "number",
+                    },
+                    cached: {
+                      type: "number",
+                    },
+                    cacheCreated: {
+                      type: "number",
+                    },
+                  },
+                  required: ["input", "output"],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["currency", "models"],
+            additionalProperties: false,
+          },
+          cost: {
+            type: "object",
+            properties: {
+              currency: {
+                anyOf: [
+                  {
+                    const: "EUR",
+                  },
+                  {
+                    const: "USD",
+                  },
+                ],
+              },
+              limit: {
+                type: "number",
+              },
+            },
+            required: ["currency", "limit"],
+            additionalProperties: false,
+          },
+          attempts: {
+            type: "number",
+          },
+          usage: {
+            type: "object",
+            properties: {
+              input: {
+                type: "number",
+              },
+              cached: {
+                type: "number",
+              },
+              cacheCreated: {
+                type: "number",
+              },
+              output: {
+                type: "number",
+              },
+            },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+      },
+      stopOnError: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          observe: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "workflow.options.telemetry.observe",
+          },
+        },
+        required: ["observe"],
+        additionalProperties: false,
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "workflow.options.observe",
+      },
+    },
+    additionalProperties: false,
+  },
+  "loop.options": {
+    type: "object",
+    properties: {
+      maxRounds: {
+        type: "number",
+      },
+      attempt: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "loop.options.attempt",
+      },
+      check: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "loop.options.check",
+      },
+    },
+    required: ["maxRounds", "attempt", "check"],
+    additionalProperties: false,
+  },
+  "decisionTask.options": {
+    type: "object",
+    properties: {
+      provider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "decisionProvider",
+      },
+      model: {
+        type: "string",
+      },
+      decision: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "decision",
+      },
+      allowTruncated: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+    },
+    required: ["provider", "model", "decision"],
+    additionalProperties: false,
+  },
+  "isolated.options": {
+    type: "object",
+    properties: {
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.observe",
+      },
+      includeUncommitted: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      agent: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "agent",
+          },
+          {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "agent",
+          },
+          {
+            type: "object",
+            properties: {
+              kind: {
+                const: "replay",
+              },
+              source: {
+                anyOf: [
+                  {
+                    const: "agent",
+                  },
+                  {
+                    const: "harness",
+                  },
+                ],
+              },
+              divergence: {
+                anyOf: [
+                  {
+                    const: "warn",
+                  },
+                  {
+                    const: "fail",
+                  },
+                ],
+              },
+              turns: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    prompt: {
+                      type: "string",
+                    },
+                    events: {
+                      type: "array",
+                      items: {
+                        anyOf: [
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "model-route",
+                              },
+                              step: {
+                                type: "number",
+                              },
+                              choice: {
+                                type: "string",
+                              },
+                              model: {
+                                type: "object",
+                                properties: {
+                                  name: {
+                                    type: "string",
+                                  },
+                                  reasoning: {
+                                    anyOf: [
+                                      {
+                                        const: "none",
+                                      },
+                                      {
+                                        const: "minimal",
+                                      },
+                                      {
+                                        const: "low",
+                                      },
+                                      {
+                                        const: "medium",
+                                      },
+                                      {
+                                        const: "high",
+                                      },
+                                      {
+                                        const: "xhigh",
+                                      },
+                                      {
+                                        const: "max",
+                                      },
+                                    ],
+                                  },
+                                  maxOutputTokens: {
+                                    type: "number",
+                                  },
+                                },
+                                required: ["name"],
+                                additionalProperties: false,
+                              },
+                              reason: {
+                                anyOf: [
+                                  {
+                                    const: "selected",
+                                  },
+                                  {
+                                    const: "confidence",
+                                  },
+                                  {
+                                    const: "unavailable",
+                                  },
+                                ],
+                              },
+                              confidence: {
+                                type: "number",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: [
+                              "kind",
+                              "step",
+                              "choice",
+                              "model",
+                              "reason",
+                            ],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "subagent",
+                              },
+                              id: {
+                                type: "string",
+                              },
+                              callId: {
+                                type: "string",
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              status: {
+                                anyOf: [
+                                  {
+                                    const: "started",
+                                  },
+                                  {
+                                    const: "finished",
+                                  },
+                                  {
+                                    const: "failed",
+                                  },
+                                ],
+                              },
+                              conversation: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: [
+                              "kind",
+                              "id",
+                              "callId",
+                              "name",
+                              "status",
+                            ],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "message-usage",
+                              },
+                              tokens: {
+                                $ref: "#/$defs/option0",
+                              },
+                              messageId: {
+                                type: "string",
+                              },
+                              parentCallId: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "tokens"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "stderr",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              truncated: {
+                                anyOf: [
+                                  {
+                                    const: false,
+                                  },
+                                  {
+                                    const: true,
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "stopped",
+                              },
+                              reason: {
+                                anyOf: [
+                                  {
+                                    const: "completion",
+                                  },
+                                  {
+                                    const: "idle-timeout",
+                                  },
+                                  {
+                                    const: "deadline",
+                                  },
+                                  {
+                                    const: "aborted",
+                                  },
+                                  {
+                                    const: "oversized-event",
+                                  },
+                                  {
+                                    const: "steered",
+                                  },
+                                  {
+                                    const: "stuck",
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "reason"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "steer",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              mode: {
+                                anyOf: [
+                                  {
+                                    const: "injected",
+                                  },
+                                  {
+                                    const: "resumed",
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text", "mode"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "reasoning",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              parentCallId: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "file-change",
+                              },
+                              changes: {},
+                              callId: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "changes"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "model-request",
+                              },
+                              request: {},
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "request"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "model-response",
+                              },
+                              response: {},
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "response"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "model-retry",
+                              },
+                              attempt: {
+                                type: "number",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "attempt"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "model-error",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "message"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "hook",
+                              },
+                              phase: {
+                                type: "string",
+                              },
+                              changed: {
+                                anyOf: [
+                                  {
+                                    const: false,
+                                  },
+                                  {
+                                    const: true,
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "phase", "changed"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "instructions-loaded",
+                              },
+                              count: {
+                                type: "number",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "count"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "skills-loaded",
+                              },
+                              names: {
+                                type: "array",
+                                items: {
+                                  type: "string",
+                                },
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "names"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "tool-output",
+                              },
+                              callId: {
+                                type: "string",
+                              },
+                              channel: {
+                                anyOf: [
+                                  {
+                                    const: "stdout",
+                                  },
+                                  {
+                                    const: "stderr",
+                                  },
+                                ],
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "callId", "channel", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "phase",
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              agent: {
+                                type: "string",
+                              },
+                              branch: {
+                                type: "string",
+                              },
+                              directory: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "name"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "summary",
+                              },
+                              durationMs: {
+                                type: "number",
+                              },
+                              status: {
+                                type: "number",
+                              },
+                              tokens: {
+                                $ref: "#/$defs/option0",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: [
+                              "kind",
+                              "durationMs",
+                              "status",
+                              "tokens",
+                            ],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "warning",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "message"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "text",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "text-delta",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "result",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "prompt",
+                              },
+                              text: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "text"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "tool",
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              input: {},
+                              callId: {
+                                type: "string",
+                              },
+                              parentCallId: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "name", "input"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "tool-result",
+                              },
+                              callId: {
+                                type: "string",
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              isError: {
+                                anyOf: [
+                                  {
+                                    const: false,
+                                  },
+                                  {
+                                    const: true,
+                                  },
+                                ],
+                              },
+                              preview: {
+                                type: "string",
+                              },
+                              characters: {
+                                type: "number",
+                              },
+                              parentCallId: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: [
+                              "kind",
+                              "callId",
+                              "name",
+                              "isError",
+                              "preview",
+                              "characters",
+                            ],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "step",
+                              },
+                              index: {
+                                type: "number",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "index"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "tool-denied",
+                              },
+                              callId: {
+                                type: "string",
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              reason: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "callId", "name", "reason"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "stop-prevented",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "message"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "compaction",
+                              },
+                              strategy: {
+                                type: "string",
+                              },
+                              messages: {
+                                type: "number",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "strategy", "messages"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "conversation",
+                              },
+                              id: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "id"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "usage",
+                              },
+                              tokens: {
+                                $ref: "#/$defs/option0",
+                              },
+                              cumulative: {
+                                anyOf: [
+                                  {
+                                    const: false,
+                                  },
+                                  {
+                                    const: true,
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "tokens"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "failure",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "message"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "quota",
+                              },
+                              message: {
+                                type: "string",
+                              },
+                              resetAt: {
+                                type: "string",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "message"],
+                            additionalProperties: false,
+                          },
+                          {
+                            $ref: "#/$defs/option1",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "finished",
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "raw",
+                              },
+                              value: {},
+                              bytes: {
+                                type: "number",
+                              },
+                              truncated: {
+                                anyOf: [
+                                  {
+                                    const: false,
+                                  },
+                                  {
+                                    const: true,
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: ["kind", "value"],
+                            additionalProperties: false,
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              kind: {
+                                const: "stuck",
+                              },
+                              activity: {
+                                anyOf: [
+                                  {
+                                    const: "file-change",
+                                  },
+                                  {
+                                    const: "tool",
+                                  },
+                                ],
+                              },
+                              name: {
+                                type: "string",
+                              },
+                              repeats: {
+                                type: "number",
+                              },
+                              window: {
+                                type: "number",
+                              },
+                              action: {
+                                anyOf: [
+                                  {
+                                    const: "warn",
+                                  },
+                                  {
+                                    const: "steer",
+                                  },
+                                  {
+                                    const: "stop",
+                                  },
+                                ],
+                              },
+                              subagentId: {
+                                type: "string",
+                              },
+                            },
+                            required: [
+                              "kind",
+                              "activity",
+                              "repeats",
+                              "window",
+                              "action",
+                            ],
+                            additionalProperties: false,
+                          },
+                        ],
+                      },
+                    },
+                    decisionEvents: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          before: {
+                            type: "number",
+                          },
+                          event: {
+                            anyOf: [
+                              {
+                                type: "object",
+                                properties: {
+                                  kind: {
+                                    const: "decision",
+                                  },
+                                  status: {
+                                    anyOf: [
+                                      {
+                                        const: "started",
+                                      },
+                                      {
+                                        const: "finished",
+                                      },
+                                      {
+                                        const: "failed",
+                                      },
+                                    ],
+                                  },
+                                  provider: {
+                                    type: "string",
+                                  },
+                                  model: {
+                                    type: "string",
+                                  },
+                                  durationMs: {
+                                    type: "number",
+                                  },
+                                  usage: {
+                                    $ref: "#/$defs/option0",
+                                  },
+                                  truncated: {
+                                    anyOf: [
+                                      {
+                                        const: false,
+                                      },
+                                      {
+                                        const: true,
+                                      },
+                                    ],
+                                  },
+                                  code: {
+                                    type: "string",
+                                  },
+                                },
+                                required: [
+                                  "kind",
+                                  "status",
+                                  "provider",
+                                  "model",
+                                ],
+                                additionalProperties: false,
+                              },
+                              {
+                                type: "object",
+                                properties: {
+                                  kind: {
+                                    const: "decision-request",
+                                  },
+                                  request: {},
+                                },
+                                required: ["kind", "request"],
+                                additionalProperties: false,
+                              },
+                              {
+                                type: "object",
+                                properties: {
+                                  kind: {
+                                    const: "decision-response",
+                                  },
+                                  response: {},
+                                },
+                                required: ["kind", "response"],
+                                additionalProperties: false,
+                              },
+                            ],
+                          },
+                          subagentId: {
+                            type: "string",
+                          },
+                        },
+                        required: ["before", "event"],
+                        additionalProperties: false,
+                      },
+                    },
+                    text: {
+                      type: "string",
+                    },
+                    usage: {
+                      $ref: "#/$defs/option0",
+                    },
+                    conversation: {
+                      type: "string",
+                    },
+                    failure: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          anyOf: [
+                            {
+                              const: "provider",
+                            },
+                            {
+                              const: "workspace",
+                            },
+                            {
+                              const: "guard",
+                            },
+                            {
+                              const: "steering",
+                            },
+                            {
+                              const: "response",
+                            },
+                            {
+                              const: "replay",
+                            },
+                            {
+                              const: "aborted",
+                            },
+                            {
+                              const: "stuck",
+                            },
+                            {
+                              const: "prompt",
+                            },
+                            {
+                              const: "quota",
+                            },
+                            {
+                              const: "rejected",
+                            },
+                            {
+                              const: "configuration",
+                            },
+                            {
+                              const: "process",
+                            },
+                            {
+                              const: "timeout",
+                            },
+                            {
+                              const: "conflict",
+                            },
+                            {
+                              const: "session",
+                            },
+                            {
+                              const: "limit",
+                            },
+                          ],
+                        },
+                        message: {
+                          type: "string",
+                        },
+                      },
+                      required: ["code", "message"],
+                      additionalProperties: false,
+                    },
+                    handover: {
+                      $ref: "#/$defs/option1",
+                    },
+                    changes: {
+                      anyOf: [
+                        {
+                          type: "object",
+                          properties: {
+                            kind: {
+                              const: "workspace-commits",
+                            },
+                            baseline: {
+                              type: "object",
+                              properties: {
+                                commit: {
+                                  type: "string",
+                                },
+                                tree: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["commit", "tree"],
+                              additionalProperties: false,
+                            },
+                            commits: {
+                              type: "array",
+                              items: {
+                                type: "object",
+                                properties: {
+                                  oid: {
+                                    type: "string",
+                                  },
+                                  tree: {
+                                    type: "string",
+                                  },
+                                  author: {
+                                    type: "object",
+                                    properties: {
+                                      name: {
+                                        type: "string",
+                                      },
+                                      email: {
+                                        type: "string",
+                                      },
+                                      date: {
+                                        type: "string",
+                                      },
+                                    },
+                                    required: ["name", "email", "date"],
+                                    additionalProperties: false,
+                                  },
+                                  committer: {
+                                    type: "object",
+                                    properties: {
+                                      name: {
+                                        type: "string",
+                                      },
+                                      email: {
+                                        type: "string",
+                                      },
+                                      date: {
+                                        type: "string",
+                                      },
+                                    },
+                                    required: ["name", "email", "date"],
+                                    additionalProperties: false,
+                                  },
+                                  message: {
+                                    type: "string",
+                                  },
+                                  patch: {
+                                    type: "string",
+                                  },
+                                },
+                                required: [
+                                  "oid",
+                                  "tree",
+                                  "author",
+                                  "committer",
+                                  "message",
+                                  "patch",
+                                ],
+                                additionalProperties: false,
+                              },
+                            },
+                          },
+                          required: ["kind", "baseline", "commits"],
+                          additionalProperties: false,
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            kind: {
+                              const: "workspace-commits",
+                            },
+                            baseline: {
+                              type: "object",
+                              properties: {
+                                commit: {
+                                  type: "string",
+                                },
+                                tree: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["commit", "tree"],
+                              additionalProperties: false,
+                            },
+                            unavailable: {
+                              type: "string",
+                            },
+                          },
+                          required: ["kind", "unavailable"],
+                          additionalProperties: false,
+                        },
+                      ],
+                    },
+                    resumedBy: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                    interrupted: {
+                      anyOf: [
+                        {
+                          const: false,
+                        },
+                        {
+                          const: true,
+                        },
+                      ],
+                    },
+                  },
+                  required: ["prompt", "events", "text", "usage"],
+                  additionalProperties: false,
+                },
+              },
+              remainingTurns: {
+                type: "number",
+              },
+              nextTurn: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "isolated.options.agent.nextTurn",
+              },
+              pendingSteering: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "isolated.options.agent.pendingSteering",
+              },
+              usageInput: {
+                anyOf: [
+                  {
+                    const: "inclusive",
+                  },
+                  {
+                    const: "uncached",
+                  },
+                ],
+              },
+              name: {
+                type: "string",
+              },
+              bootstrap: {
+                type: "string",
+              },
+              requiresFinishedEvent: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              usage: {
+                anyOf: [
+                  {
+                    const: "unavailable",
+                  },
+                  {
+                    const: "session",
+                  },
+                  {
+                    const: "events",
+                  },
+                ],
+              },
+              variables: {
+                anyOf: [
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "variables",
+                  },
+                  {
+                    type: "object",
+                    additionalProperties: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            env: {
+                              type: "string",
+                              pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                            },
+                          },
+                          required: ["env"],
+                          additionalProperties: false,
+                          secret: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              storage: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "conversations",
+              },
+              capture: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              resumable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              forkable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              transcriptUsage: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "callback",
+                contract: "isolated.options.agent.transcriptUsage",
+              },
+            },
+            required: [
+              "kind",
+              "source",
+              "divergence",
+              "turns",
+              "remainingTurns",
+              "nextTurn",
+              "pendingSteering",
+              "name",
+            ],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {
+              kind: {
+                const: "fallback",
+              },
+              agents: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "agent",
+                },
+              },
+              on: {
+                type: "array",
+                items: {
+                  anyOf: [
+                    {
+                      const: "unavailable",
+                    },
+                    {
+                      const: "quota",
+                    },
+                  ],
+                },
+              },
+            },
+            required: ["kind", "agents", "on"],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {},
+            additionalProperties: false,
+          },
+        ],
+      },
+      sandboxProvider: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "sandboxProvider",
+      },
+      workspace: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "workspace",
+      },
+      hooks: {
+        type: "object",
+        properties: {
+          workspaceReady: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "isolated.options.hooks.workspaceReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+          },
+          hostReady: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "isolated.options.hooks.hostReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+          },
+          sandboxReady: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                when: {
+                  type: "object",
+                  properties: {
+                    kind: {
+                      const: "changed",
+                    },
+                    files: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  required: ["kind", "files"],
+                  additionalProperties: false,
+                },
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                stdin: {
+                  type: "string",
+                },
+                input: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "object",
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                deadlineMs: {
+                  type: "number",
+                },
+                interactive: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                terminal: {
+                  $ref: "#/$defs/option2",
+                },
+                elevated: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                retain: {
+                  type: "number",
+                },
+                observe: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "isolated.options.hooks.sandboxReady.*.observe",
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+          },
+        },
+        additionalProperties: false,
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      bootstrap: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+      conversationHome: {
+        type: "string",
+        hostPath: true,
+      },
+      recoveryTransport: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+      activityTransport: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+      guard: {
+        type: "object",
+        properties: {
+          protectedPaths: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          maxChangedLines: {
+            type: "number",
+          },
+        },
+        additionalProperties: false,
+      },
+      storageQuota: {
+        type: "object",
+        properties: {
+          transporter: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "transport",
+          },
+          maxBytes: {
+            type: "number",
+          },
+          reserveBytes: {
+            type: "number",
+          },
+          maxEntries: {
+            type: "number",
+          },
+        },
+        required: ["maxBytes", "reserveBytes"],
+        additionalProperties: false,
+      },
+      repository: {
+        type: "string",
+        hostPath: true,
+      },
+      branch: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              mode: {
+                const: "current",
+              },
+            },
+            required: ["mode"],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {
+              mode: {
+                const: "named",
+              },
+              name: {
+                type: "string",
+              },
+              from: {
+                type: "string",
+              },
+            },
+            required: ["mode", "name"],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {
+              mode: {
+                const: "integrate",
+              },
+              from: {
+                type: "string",
+              },
+            },
+            required: ["mode"],
+            additionalProperties: false,
+          },
+        ],
+      },
+      copies: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+      },
+      limits: {
+        type: "object",
+        properties: {
+          copyMs: {
+            type: "number",
+          },
+          gitMs: {
+            type: "number",
+          },
+          collectMs: {
+            type: "number",
+          },
+          mergeMs: {
+            type: "number",
+          },
+        },
+        additionalProperties: false,
+      },
+      label: {
+        type: "string",
+      },
+      watchdog: {
+        type: "object",
+        properties: {
+          repetition: {
+            type: "object",
+            properties: {
+              window: {
+                type: "number",
+              },
+              maxRepeats: {
+                type: "number",
+              },
+            },
+            required: ["window", "maxRepeats"],
+            additionalProperties: false,
+          },
+          onStuck: {
+            anyOf: [
+              {
+                const: "warn",
+              },
+              {
+                const: "stop",
+              },
+              {
+                type: "object",
+                properties: {
+                  instruction: {
+                    type: "string",
+                  },
+                  maxInterventions: {
+                    type: "number",
+                  },
+                },
+                required: ["instruction"],
+                additionalProperties: false,
+              },
+            ],
+          },
+        },
+        required: ["repetition", "onStuck"],
+        additionalProperties: false,
+      },
+      prices: {
+        type: "object",
+        properties: {
+          currency: {
+            anyOf: [
+              {
+                const: "EUR",
+              },
+              {
+                const: "USD",
+              },
+            ],
+          },
+          models: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                input: {
+                  type: "number",
+                },
+                output: {
+                  type: "number",
+                },
+                cached: {
+                  type: "number",
+                },
+                cacheCreated: {
+                  type: "number",
+                },
+              },
+              required: ["input", "output"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["currency", "models"],
+        additionalProperties: false,
+      },
+      brief: {
+        anyOf: [
+          {
+            type: "object",
+            properties: {
+              text: {
+                type: "string",
+              },
+              file: false,
+              values: false,
+            },
+            required: ["text"],
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            properties: {
+              file: {
+                type: "string",
+                hostPath: true,
+              },
+              text: false,
+              values: {
+                type: "object",
+                properties: {},
+                additionalProperties: {
+                  anyOf: [
+                    {
+                      type: "string",
+                    },
+                    {
+                      type: "number",
+                    },
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+              },
+            },
+            required: ["file"],
+            additionalProperties: false,
+          },
+        ],
+      },
+      passes: {
+        type: "number",
+      },
+      until: {
+        anyOf: [
+          {
+            type: "string",
+          },
+          {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+        ],
+      },
+      idleMs: {
+        type: "number",
+      },
+      idleWarningMs: {
+        type: "number",
+      },
+      settleMs: {
+        type: "number",
+      },
+      deadlineMs: {
+        type: "number",
+      },
+      expansionMs: {
+        type: "number",
+      },
+      steering: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "steering",
+      },
+      continuation: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+          },
+          fork: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+        },
+        required: ["id"],
+        additionalProperties: false,
+      },
+      response: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "response",
+      },
+      warn: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.warn",
+      },
+      diagnostic: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "isolated.options.diagnostic",
+      },
+    },
+    required: ["agent", "brief"],
+    additionalProperties: false,
+    $defs: {
+      option0: {
+        type: "object",
+        properties: {
+          models: {
+            type: "object",
+            properties: {},
+            additionalProperties: {
+              type: "object",
+              properties: {
+                inputIncludesCache: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                complete: {
+                  anyOf: [
+                    {
+                      const: false,
+                    },
+                    {
+                      const: true,
+                    },
+                  ],
+                },
+                input: {
+                  type: "number",
+                },
+                cached: {
+                  type: "number",
+                },
+                cacheCreated: {
+                  type: "number",
+                },
+                output: {
+                  type: "number",
+                },
+              },
+              required: ["input", "cached", "output"],
+              additionalProperties: false,
+            },
+          },
+          complete: {
+            anyOf: [
+              {
+                const: false,
+              },
+              {
+                const: true,
+              },
+            ],
+          },
+          input: {
+            type: "number",
+          },
+          cached: {
+            type: "number",
+          },
+          cacheCreated: {
+            type: "number",
+          },
+          output: {
+            type: "number",
+          },
+        },
+        required: ["input", "cached", "output"],
+        additionalProperties: false,
+      },
+      option1: {
+        type: "object",
+        properties: {
+          kind: {
+            const: "fallback",
+          },
+          from: {
+            type: "object",
+            properties: {
+              index: {
+                type: "number",
+              },
+              name: {
+                type: "string",
+              },
+              model: {
+                type: "string",
+              },
+            },
+            required: ["index", "name"],
+            additionalProperties: false,
+          },
+          to: {
+            type: "object",
+            properties: {
+              index: {
+                type: "number",
+              },
+              name: {
+                type: "string",
+              },
+              model: {
+                type: "string",
+              },
+            },
+            required: ["index", "name"],
+            additionalProperties: false,
+          },
+          failure: {
+            anyOf: [
+              {
+                const: "unavailable",
+              },
+              {
+                const: "quota",
+              },
+            ],
+          },
+          message: {
+            type: "string",
+          },
+          resetAt: {
+            type: "string",
+          },
+          subagentId: {
+            type: "string",
+          },
+        },
+        required: ["kind", "from", "to", "failure", "message"],
+        additionalProperties: false,
+      },
+      option2: {
+        type: "object",
+        properties: {
+          input: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          output: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+          error: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "object",
+          },
+        },
+        additionalProperties: false,
+      },
+    },
+  },
+  "call.options": {
+    type: "object",
+    properties: {
+      perform: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "call.options.perform",
+      },
+    },
+    required: ["perform"],
+    additionalProperties: false,
+  },
   "steering.controller": {
     type: "object",
     properties: {},
@@ -150,10 +3349,10 @@ export const nativeRecipeSchemas: Readonly<
           onError: {
             anyOf: [
               {
-                const: "return-to-model",
+                const: "fail",
               },
               {
-                const: "fail",
+                const: "return-to-model",
               },
             ],
           },
@@ -731,6 +3930,9 @@ export const nativeRecipeSchemas: Readonly<
       on: {
         anyOf: [
           {
+            const: "stop",
+          },
+          {
             const: "session-start",
           },
           {
@@ -744,9 +3946,6 @@ export const nativeRecipeSchemas: Readonly<
           },
           {
             const: "after-tool",
-          },
-          {
-            const: "stop",
           },
         ],
       },
@@ -978,10 +4177,10 @@ export const nativeRecipeSchemas: Readonly<
         items: {
           anyOf: [
             {
-              const: "quota",
+              const: "unavailable",
             },
             {
-              const: "unavailable",
+              const: "quota",
             },
           ],
         },
@@ -1000,10 +4199,10 @@ export const nativeRecipeSchemas: Readonly<
       divergence: {
         anyOf: [
           {
-            const: "fail",
+            const: "warn",
           },
           {
-            const: "warn",
+            const: "fail",
           },
         ],
       },
@@ -1209,6 +4408,19 @@ export const nativeRecipeSchemas: Readonly<
       fallback: {
         type: "string",
       },
+      state: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "routing.decision.state",
+      },
       provider: {
         type: "object",
         properties: {
@@ -1242,25 +4454,12 @@ export const nativeRecipeSchemas: Readonly<
       onError: {
         anyOf: [
           {
-            const: "fail",
-          },
-          {
             const: "fallback",
           },
-        ],
-      },
-      state: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
+          {
+            const: "fail",
           },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "routing.decision.state",
+        ],
       },
     },
     required: [
@@ -1584,7 +4783,36 @@ export const nativeRecipeSchemas: Readonly<
   "dispatch.options": {
     type: "object",
     properties: {
-      warn: {
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      telemetry: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "telemetry",
+      },
+      observe: {
         type: "object",
         properties: {
           $ref: {
@@ -1595,7 +4823,58 @@ export const nativeRecipeSchemas: Readonly<
         required: ["$ref"],
         additionalProperties: false,
         component: "callback",
-        contract: "dispatch.options.warn",
+        contract: "dispatch.options.observe",
+      },
+      logging: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: "stdout",
+          },
+          {
+            type: "object",
+            properties: {
+              transporter: {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "transport",
+              },
+              verbose: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+              replayable: {
+                anyOf: [
+                  {
+                    const: false,
+                  },
+                  {
+                    const: true,
+                  },
+                ],
+              },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+      label: {
+        type: "string",
       },
       watchdog: {
         type: "object",
@@ -1616,10 +4895,10 @@ export const nativeRecipeSchemas: Readonly<
           onStuck: {
             anyOf: [
               {
-                const: "stop",
+                const: "warn",
               },
               {
-                const: "warn",
+                const: "stop",
               },
               {
                 type: "object",
@@ -1679,74 +4958,6 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["currency", "models"],
         additionalProperties: false,
-      },
-      redact: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            pattern: {
-              type: "string",
-            },
-            flags: {
-              type: "string",
-            },
-          },
-          required: ["pattern"],
-          additionalProperties: false,
-          regexp: true,
-        },
-      },
-      logging: {
-        anyOf: [
-          {
-            const: false,
-          },
-          {
-            const: "stdout",
-          },
-          {
-            type: "object",
-            properties: {
-              transporter: {
-                type: "object",
-                properties: {
-                  $ref: {
-                    type: "string",
-                    minLength: 1,
-                  },
-                },
-                required: ["$ref"],
-                additionalProperties: false,
-                component: "transport",
-              },
-              verbose: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-              replayable: {
-                anyOf: [
-                  {
-                    const: false,
-                  },
-                  {
-                    const: true,
-                  },
-                ],
-              },
-            },
-            additionalProperties: false,
-          },
-        ],
-      },
-      label: {
-        type: "string",
       },
       passes: {
         type: "number",
@@ -1823,19 +5034,7 @@ export const nativeRecipeSchemas: Readonly<
         additionalProperties: false,
         component: "response",
       },
-      telemetry: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "telemetry",
-      },
-      observe: {
+      warn: {
         type: "object",
         properties: {
           $ref: {
@@ -1846,7 +5045,7 @@ export const nativeRecipeSchemas: Readonly<
         required: ["$ref"],
         additionalProperties: false,
         component: "callback",
-        contract: "dispatch.options.observe",
+        contract: "dispatch.options.warn",
       },
       diagnostic: {
         type: "object",
@@ -2747,6 +5946,9 @@ export const nativeRecipeSchemas: Readonly<
           {
             type: "object",
             properties: {
+              timeout: {
+                type: "number",
+              },
               name: {
                 type: "string",
               },
@@ -2755,9 +5957,6 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   type: "number",
                 },
-              },
-              timeout: {
-                type: "number",
               },
               resources: {
                 type: "object",
@@ -3274,6 +6473,9 @@ export const nativeRecipeSchemas: Readonly<
           {
             type: "object",
             properties: {
+              timeout: {
+                type: "number",
+              },
               name: {
                 type: "string",
               },
@@ -3282,9 +6484,6 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   type: "number",
                 },
-              },
-              timeout: {
-                type: "number",
               },
               resources: {
                 type: "object",
@@ -7994,10 +11193,10 @@ export const nativeRecipeSchemas: Readonly<
               divergence: {
                 anyOf: [
                   {
-                    const: "fail",
+                    const: "warn",
                   },
                   {
-                    const: "warn",
+                    const: "fail",
                   },
                 ],
               },
@@ -8066,13 +11265,13 @@ export const nativeRecipeSchemas: Readonly<
                               reason: {
                                 anyOf: [
                                   {
-                                    const: "unavailable",
-                                  },
-                                  {
                                     const: "selected",
                                   },
                                   {
                                     const: "confidence",
+                                  },
+                                  {
+                                    const: "unavailable",
                                   },
                                 ],
                               },
@@ -8858,13 +12057,13 @@ export const nativeRecipeSchemas: Readonly<
                               action: {
                                 anyOf: [
                                   {
-                                    const: "stop",
-                                  },
-                                  {
                                     const: "warn",
                                   },
                                   {
                                     const: "steer",
+                                  },
+                                  {
+                                    const: "stop",
                                   },
                                 ],
                               },
@@ -8994,19 +12193,19 @@ export const nativeRecipeSchemas: Readonly<
                         code: {
                           anyOf: [
                             {
-                              const: "quota",
+                              const: "provider",
                             },
                             {
-                              const: "provider",
+                              const: "workspace",
+                            },
+                            {
+                              const: "guard",
                             },
                             {
                               const: "steering",
                             },
                             {
                               const: "response",
-                            },
-                            {
-                              const: "timeout",
                             },
                             {
                               const: "replay",
@@ -9021,7 +12220,7 @@ export const nativeRecipeSchemas: Readonly<
                               const: "prompt",
                             },
                             {
-                              const: "guard",
+                              const: "quota",
                             },
                             {
                               const: "rejected",
@@ -9033,7 +12232,7 @@ export const nativeRecipeSchemas: Readonly<
                               const: "process",
                             },
                             {
-                              const: "workspace",
+                              const: "timeout",
                             },
                             {
                               const: "conflict",
@@ -9391,10 +12590,10 @@ export const nativeRecipeSchemas: Readonly<
                 items: {
                   anyOf: [
                     {
-                      const: "quota",
+                      const: "unavailable",
                     },
                     {
-                      const: "unavailable",
+                      const: "quota",
                     },
                   ],
                 },
@@ -10165,10 +13364,10 @@ export const nativeRecipeSchemas: Readonly<
           failure: {
             anyOf: [
               {
-                const: "quota",
+                const: "unavailable",
               },
               {
-                const: "unavailable",
+                const: "quota",
               },
             ],
           },

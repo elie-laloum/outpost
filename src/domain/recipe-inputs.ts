@@ -1,3 +1,7 @@
+import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { canonicalJson } from "./workflow/canonical-json.ts";
+import { recipeObject } from "./recipes/values.ts";
+
 import {
   recipeInputTypes,
   recipeKeys,
@@ -5,7 +9,9 @@ import {
 } from "./recipe.constants.ts";
 import type { RecipeInput, RecipeValue } from "./recipe.types.ts";
 
-export function recipeValue(value: unknown): value is RecipeValue {
+export function recipeValue(
+  value: unknown,
+): value is string | number | boolean {
   return (
     typeof value === "string" ||
     typeof value === "boolean" ||
@@ -15,6 +21,7 @@ export function recipeValue(value: unknown): value is RecipeValue {
 
 export function recipeInputs(
   value: unknown,
+  version = 2,
 ): Readonly<Record<string, RecipeInput>> {
   if (value === undefined) return {};
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -27,10 +34,21 @@ export function recipeInputs(
         throw new Error(`inputs.${name} must be a mapping`);
       const fields = new Map(Object.entries(item));
       for (const key of fields.keys())
-        if (!recipeKeys.input.some((allowed) => allowed === key))
+        if (
+          !recipeKeys.input.some((allowed) => allowed === key) &&
+          !(version === 3 && key === "schema")
+        )
           throw new Error(`Unknown recipe field: inputs.${name}.${key}`);
       const type = fields.get("type");
-      if (type !== "string" && type !== "number" && type !== "boolean")
+      if (
+        type !== "string" &&
+        type !== "number" &&
+        type !== "boolean" &&
+        !(
+          version === 3 &&
+          (type === "object" || type === "array" || type === "null")
+        )
+      )
         throw new Error(
           `inputs.${name}.type must be ${recipeInputTypes.join(", ")}`,
         );
@@ -42,9 +60,7 @@ export function recipeInputs(
         choices !== undefined &&
         (!Array.isArray(choices) ||
           !choices.length ||
-          !choices.every(
-            (value) => recipeValue(value) && typeof value === type,
-          ))
+          !choices.every((value) => matchesRecipeInput(value, type)))
       )
         throw new Error(
           `inputs.${name}.enum must contain values of type ${type}`,
@@ -52,9 +68,8 @@ export function recipeInputs(
       const defaultValue = fields.get("default");
       if (
         fields.has("default") &&
-        (!recipeValue(defaultValue) ||
-          typeof defaultValue !== type ||
-          (choices && !choices.includes(defaultValue)))
+        (!matchesRecipeInput(defaultValue, type) ||
+          (choices && !choices.some((value) => sameValue(value, defaultValue))))
       )
         throw new Error(`inputs.${name}.default must match its type and enum`);
       return [
@@ -62,7 +77,12 @@ export function recipeInputs(
         {
           type,
           description,
-          ...(recipeValue(defaultValue) ? { default: defaultValue } : {}),
+          ...(fields.has("default")
+            ? { default: jsonInput(defaultValue) }
+            : {}),
+          ...(fields.has("schema")
+            ? { schema: inputSchema(fields.get("schema")) }
+            : {}),
           ...(choices ? { enum: choices } : {}),
         },
       ];
@@ -84,14 +104,41 @@ export function resolveRecipeInputs(
         : definition.default;
       if (value === undefined) throw new Error(`Missing recipe input: ${name}`);
       if (
-        !recipeValue(value) ||
-        typeof value !== definition.type ||
-        (definition.enum && !definition.enum.includes(value))
+        !matchesRecipeInput(value, definition.type) ||
+        (definition.enum &&
+          !definition.enum.some((choice) => sameValue(choice, value)))
       )
         throw new Error(
           `Invalid recipe input ${name}: expected ${definition.type}${definition.enum ? ` from ${JSON.stringify(definition.enum)}` : ""}`,
         );
-      return [name, value];
+      return [name, jsonInput(value)];
     }),
   );
+}
+
+function jsonInput(value: unknown): RecipeValue {
+  if (recipeValue(value)) return value;
+  const result = checkpointValue(value);
+  if (result.kind !== "json")
+    throw new Error("Recipe inputs require JSON values");
+  return result.value;
+}
+function sameValue(left: unknown, right: unknown): boolean {
+  return canonicalJson(jsonInput(left)) === canonicalJson(jsonInput(right));
+}
+function inputSchema(value: unknown): Readonly<Record<string, unknown>> {
+  if (!recipeObject(value))
+    throw new Error("Recipe input schema must be an object");
+  return value;
+}
+export function matchesRecipeInput(value: unknown, type: string): boolean {
+  try {
+    jsonInput(value);
+  } catch {
+    return false;
+  }
+  if (type === "null") return value === null;
+  if (type === "array") return Array.isArray(value);
+  if (type === "object") return recipeObject(value);
+  return typeof value === type;
 }

@@ -39,6 +39,7 @@ jobs:
       - run: node --test examples/65-recipe-observation/index.ts
       - run: node --test examples/66-recipe-components/index.ts
       - run: node --test examples/67-recipe-harness/index.ts
+      - run: node --test examples/68-recipe-workflows/index.ts
       - run: bun run format:check
       - run: bun run test:package
       # braces <=3.0.3 (via @daytona/sdk) has no patched release yet; drop the ignore once one ships.

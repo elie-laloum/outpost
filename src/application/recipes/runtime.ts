@@ -1,3 +1,6 @@
+import { prepareRecipeWorkflow } from "./workflow-components.ts";
+import { runRecipeWorkflow } from "./workflow-run.ts";
+import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
 import { createSandbox } from "../sandbox.ts";
 import { recipeExecutionConfiguration } from "./configuration.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
@@ -31,6 +34,13 @@ export async function createRecipeRuntime(
         project.document.inputs,
         settings.inputs,
       );
+      for (const [name, definition] of Object.entries(project.document.inputs))
+        if (definition.schema)
+          validateRecipeSchema(
+            definition.schema,
+            inputs[name],
+            `inputs.${name}`,
+          );
       const signal = settings.signal
         ? AbortSignal.any([settings.signal, stop.signal])
         : stop.signal;
@@ -58,6 +68,24 @@ export async function createRecipeRuntime(
             project,
             scope,
           );
+          if (project.document.version === 3) {
+            const components = await prepareRecipeWorkflow(
+              project.document,
+              scope,
+            );
+            securedObservation = observation?.child({}, [], scope.redactions);
+            signal.throwIfAborted();
+            return scope.redact(
+              await runRecipeWorkflow(
+                project.document,
+                configuration,
+                inputs,
+                components,
+                signal,
+                securedObservation,
+              ),
+            );
+          }
           const requests: Record<string, RecipeDispatchSettings> = {};
           for (const step of project.document.tasks) {
             if (!step.dispatch) continue;
@@ -108,9 +136,14 @@ export async function createRecipeRuntime(
           ...result,
           ...(scope.observerErrors.length
             ? {
-                observerErrors: scope.redact(
-                  scope.observerErrors.map((error) => recipeDiagnostic(error)),
-                ),
+                observerErrors: [
+                  ...(result.observerErrors ?? []),
+                  ...scope.redact(
+                    scope.observerErrors.map((error) =>
+                      recipeDiagnostic(error),
+                    ),
+                  ),
+                ],
               }
             : {}),
         };

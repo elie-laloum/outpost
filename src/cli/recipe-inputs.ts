@@ -1,4 +1,8 @@
-import { recipeValue, resolveRecipeInputs } from "../domain/recipe-inputs.ts";
+import { recipeJson } from "../domain/recipes/expressions.ts";
+import {
+  matchesRecipeInput,
+  resolveRecipeInputs,
+} from "../domain/recipe-inputs.ts";
 import type { RecipeDocument, RecipeValue } from "../domain/recipe.types.ts";
 
 export function readRecipeInputs(
@@ -25,8 +29,9 @@ export function readRecipeInputs(
         );
       }
     }
-    if (!recipeValue(value)) throw new Error(`Invalid recipe input: ${name}`);
-    values.set(name, value);
+    if (!matchesRecipeInput(value, definition.type))
+      throw new Error(`Invalid recipe input: ${name}`);
+    values.set(name, recipeJson(value));
   }
   return resolveRecipeInputs(document.inputs, Object.fromEntries(values));
 }

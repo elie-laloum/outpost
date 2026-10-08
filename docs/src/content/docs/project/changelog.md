@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Compose format-3 workflows with structured JSON inputs, typed result references, conditions, transformations, local task callbacks, native loop and decision tasks, and isolated multi-repository dispatch. Preserve native scheduling and usage accounting, refuse overlapping shared workspaces, and project execution results to JSON. Add an offline example and YAML/TypeScript equivalence tests using real Git repositories.
+
 - Compose the Outpost harness, model and decision providers, tools, skills, hooks, permissions, context strategies, routing, fallback agents and conversation stores from YAML. Format-3 agent steps accept dispatch options and structured response references. Callback extensions declare a static slot contract; schemas distinguish data schemas from component references. Compare delegated YAML and TypeScript runs offline, and exercise the compiled CLI against a local streaming model fixture.
 
 - Extend YAML configuration with named providers, native sandbox and workspace options, portable profiles, CLI harness settings, MCP declarations, local transports and host-side secret selections. Generate option schemas from TypeScript contracts, reject dependency cycles before imports, resolve installed ESM-only extensions, and redact selected values from observation and reports. Cover local lifecycle execution and YAML/TypeScript request equivalence; cloud and paid agent calls remain unvalidated.

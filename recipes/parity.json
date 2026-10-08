@@ -1676,9 +1676,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineApprovalTask": {
     "signatures": [
@@ -1716,9 +1716,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineDecision": {
     "signatures": [
@@ -1736,9 +1736,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineHarnessContextStrategy": {
     "signatures": [
@@ -1836,9 +1836,9 @@
     ],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineJsonArtifact": {
     "signatures": ["<T>(options: JsonArtifactOptions<T>): ArtifactContract<T>"],
@@ -1860,9 +1860,9 @@
     "signatures": ["<T>(options: LoopTaskOptions<T>): Task<T>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineMcpPrompt": {
     "signatures": ["(options: McpPromptOptions): HarnessInstructions"],
@@ -1902,9 +1902,9 @@
     "signatures": ["<T>(options: TaskOptions<T>): Task<T>"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineTextResponse": {
     "signatures": ["(options: TextResponseOptions): ResponseSpec<string>"],
@@ -1918,9 +1918,9 @@
     "signatures": ["(name: string, tasks: readonly Task[]): Workflow"],
     "options": {},
     "category": "native",
-    "lot": 7,
-    "status": "planned",
-    "test": null
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/recipe-workflow.test.ts"
   },
   ".:defineWorkflowJob": {
     "signatures": ["(options: WorkflowJobOptions): QueueHandler"],
@@ -4102,7 +4102,7 @@
     "options": {
       "sandbox": "Sandbox",
       "agents": "Readonly<Record<string, DispatchAgent>> | undefined",
-      "inputs": "Readonly<Record<string, string | number | boolean>> | undefined"
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -4815,7 +4815,7 @@
     "options": {
       "errors": "readonly unknown[]",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9330": "() => Promise<void>",
+      "[Symbol.asyncDispose]": "() => Promise<void>",
       "observe": "(observation: Observation) => void | Promise<void>",
       "flush": "(() => void | Promise<void>) | undefined"
     },
@@ -5018,7 +5018,7 @@
       "attach": "(options?: AttachOptions) => Promise<AttachResult>",
       "command": "(command: Command) => Promise<CommandResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
-      "__@asyncDispose@9330": "() => Promise<void>"
+      "[Symbol.asyncDispose]": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -5565,7 +5565,7 @@
       "repository": "string",
       "reserveBytes": "number",
       "release": "() => Promise<void>",
-      "__@asyncDispose@9330": "() => Promise<void>"
+      "[Symbol.asyncDispose]": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 7,
@@ -6935,7 +6935,7 @@
       "attach": "(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & AttachOptions & { readonly agent: Agent; }) => Promise<AttachResult>",
       "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
       "integrate": "{ (): Promise<void>; (options: IntegrationOptions): Promise<ConflictResolution | void>; }",
-      "__@asyncDispose@9330": "() => Promise<void>",
+      "[Symbol.asyncDispose]": "() => Promise<void>",
       "repository": "string",
       "directory": "string",
       "branch": "string",
@@ -7435,7 +7435,7 @@
   "./recipes:RecipeRunOptions": {
     "signatures": [],
     "options": {
-      "inputs": "Readonly<Record<string, string | number | boolean>> | undefined",
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
       "signal": "AbortSignal | undefined",
       "report": "\"json\" | undefined"
     },
@@ -7449,7 +7449,7 @@
     "options": {
       "run": "(options?: RecipeRunOptions) => Promise<RecipeReport>",
       "close": "() => Promise<void>",
-      "__@asyncDispose@9330": "() => Promise<void>"
+      "[Symbol.asyncDispose]": "() => Promise<void>"
     },
     "category": "contract",
     "lot": 1,
