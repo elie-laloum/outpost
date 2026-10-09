@@ -105,7 +105,7 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".docs-navigation summary h2")).toHaveCount(12);
+    await expect(page.locator(".docs-navigation summary h2")).toHaveCount(13);
     await expect(page.locator(".docs-navigation details[open]")).toHaveCount(1);
     const spacing = await page
       .locator(".docs-navigation")

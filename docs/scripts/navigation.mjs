@@ -87,16 +87,22 @@ export const chapters = [
     ],
   ],
   [
-    "Workflows",
-    "Workflows",
+    "Recipes",
+    "Recettes",
     [
-      "guide/typed-workflows",
       "guide/yaml-recipes",
       "guide/recipe-workflows",
       "guide/recipe-durability",
       "guide/recipe-services",
       "guide/recipe-advanced",
       "guide/yaml-components",
+    ],
+  ],
+  [
+    "Workflows",
+    "Workflows",
+    [
+      "guide/typed-workflows",
       "guide/task-dependencies",
       "guide/concurrency-and-retries",
       "guide/verification-loops",
