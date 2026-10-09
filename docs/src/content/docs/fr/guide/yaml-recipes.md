@@ -14,6 +14,26 @@ npx outpost recipe validate --file recipe.yaml --json
 
 Le modèle référence le fichier installé `@elie-laloum/outpost/recipe.schema.json` pour la complétion dans l’éditeur. `validate` vérifie le format, le graphe et les références sans importer la configuration ni allouer de sandbox. Son rapport liste les paramètres et les noms d’agents nécessaires ; il n’exécute aucune commande et ne vérifie pas les outils installés. Les erreurs de validation indiquent une position dans le fichier lorsqu’elle est disponible.
 
+## Activer les suggestions de l’éditeur
+
+La documentation sert [recipe.schema.json](https://elie-laloum.github.io/outpost/schemas/recipe.schema.json) et [recipe-configuration.schema.json](https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json) en JSON, communs aux deux langues. Ajoutez la directive du serveur de langage YAML en tête de votre recette pour utiliser le schéma hébergé. Le format 3 expose les options avancées des tâches et les paramètres structurés :
+
+```yaml title="recipe.yaml — schéma de l’éditeur"
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe.schema.json
+version: 3
+```
+
+La configuration d’exécution possède son propre schéma et sa propre version de format. Utilisez cet en-tête dans `outpost.yaml` pour obtenir les suggestions de sandbox, agents, observation et composants nommés :
+
+```yaml title="outpost.yaml — schéma de l’éditeur"
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json
+version: 2
+```
+
+Les URLs courantes suivent la dernière release stable éligible de la documentation. Pour figer les suggestions sur une version du CLI, utilisez `/outpost/schemas/<version-outpost>/recipe.schema.json` ou `/outpost/schemas/<version-outpost>/recipe-configuration.schema.json`, en remplaçant le paramètre par la version du paquet sans `v`. Chaque déploiement conserve les schémas commités dans les tags stables antérieurs de son historique qui contiennent les deux fichiers. Les versions précédant ces fichiers n’ont pas d’archive. La version dans l’URL désigne Outpost, indépendamment du champ `version` du format YAML.
+
+Les URLs hébergées deviennent disponibles à la release de ce changement, après le déploiement GitHub Pages. Pour les changements non publiés ou l’édition hors ligne, utilisez le schéma du paquet installé ou un chemin du dépôt local ; `recipe init` continue d’utiliser le schéma installé. Les suggestions nécessitent un serveur de langage YAML, et la directive est un commentaire plutôt qu’un champ `$schema` du document.
+
 ## Déclarer les paramètres et les étapes
 
 Cette recette de version 2 reçoit une demande de modification. Les paramètres sans valeur par défaut sont obligatoires. Les nombres et booléens gardent leur type pendant la validation, puis deviennent du texte dans un brief ou un argument de commande. Un `enum` optionnel restreint les valeurs acceptées. `recipeVersion` identifie la révision de votre recette ; `version` sélectionne le format de recette Outpost.

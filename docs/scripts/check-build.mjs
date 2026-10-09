@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "cheerio";
+import { recipeSchemaAssets } from "./recipe-schema-assets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../dist");
 const base = (process.env.DOCS_BASE ?? "/outpost").replace(/\/$/, "");
@@ -13,6 +14,12 @@ const inventory = new Set(
   ),
 );
 const files = [...inventory].filter((file) => file.endsWith(".html"));
+for (const { path, body } of await recipeSchemaAssets())
+  assert.equal(
+    await readFile(resolve(root, "schemas", path), "utf8"),
+    body,
+    `Published schema differs from its source: ${path}`,
+  );
 for (const locale of ["", "fr/"])
   assert.ok(
     !inventory.has(`${locale}project/roadmap/index.html`),

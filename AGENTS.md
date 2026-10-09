@@ -171,6 +171,7 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 - When API is updated and docs is updated as well always update docs/references with changes.
 - Every guide card includes a decorative SVG icon, including informational cards and diagram branches. Page navigation actions divide the available width equally, without empty cells for missing links.
 - Documentation checks validate language parity, links, generated references, rendered output, search, card icons and examples. Documentation builds and dev starts force content regeneration so Markdown renderer changes cannot reuse stale HTML. Browser tests cover the home in both development and built-preview modes. Do not treat a successful Astro build alone as complete validation.
+- Recipe editor schemas are served as JSON under `/schemas/`, with version archives reconstructed from stable ancestor Git tags containing both schemas and a matching package version. Documentation CI must fetch full history and tags so subsequent deployments preserve earlier URLs. Current URLs follow the deployed release; local editing and `recipe init` use installed schemas.
 
 ## Git, CI and releases
 

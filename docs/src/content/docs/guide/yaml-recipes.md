@@ -14,6 +14,26 @@ npx outpost recipe validate --file recipe.yaml --json
 
 The starter links the installed `@elie-laloum/outpost/recipe.schema.json` for editor completion. `validate` checks the format, graph and references without importing configuration or allocating a sandbox. Its report lists parameters and required agent names; it does not run commands or check installed tools. Validation errors include a source location when available.
 
+## Enable editor completion
+
+The documentation serves [recipe.schema.json](https://elie-laloum.github.io/outpost/schemas/recipe.schema.json) and [recipe-configuration.schema.json](https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json) as JSON, shared by both languages. Add the YAML language server directive at the top of your recipe to use the hosted schema. Format 3 exposes advanced task options and structured inputs:
+
+```yaml title="recipe.yaml — editor schema"
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe.schema.json
+version: 3
+```
+
+The execution configuration has its own schema and format version. Use this header in `outpost.yaml` to get completion for sandbox, agents, observation and named components:
+
+```yaml title="outpost.yaml — editor schema"
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json
+version: 2
+```
+
+The current URLs follow the latest eligible stable release of the documentation. To pin editor completion to a CLI version, use `/outpost/schemas/<version-outpost>/recipe.schema.json` or `/outpost/schemas/<version-outpost>/recipe-configuration.schema.json`, replacing the placeholder with the package version without `v`. Each deployment preserves the schemas committed in earlier stable ancestor tags that contain both files. Versions predating those files have no archive. The version in the URL identifies Outpost, independently of the YAML format’s `version` field.
+
+Hosted URLs become available when this change is released and GitHub Pages deploys. For unreleased changes or offline editing, use the installed package schema or a local checkout path; `recipe init` keeps using the installed schema. Editor completion requires YAML language server support, and the directive is a comment rather than a `$schema` document field.
+
 ## Declare parameters and steps
 
 This version-2 recipe accepts a change request. Inputs without defaults are required. Numbers and booleans retain their types during validation, then become text when inserted into a brief or command argument. An optional `enum` restricts accepted values. `recipeVersion` identifies your recipe revision; `version` selects the Outpost recipe format.
