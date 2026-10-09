@@ -29,3 +29,38 @@ agents:
     harness: codex
     authentication: account
 `;
+
+export const starterFileRecipe = `version: 3
+name: process-files
+tasks:
+  - key: process
+    command:
+      executable: node
+      arguments: ["-e", "require('node:fs').writeFileSync('result.json', '{}')"]
+`;
+
+export const starterFileConfigurations = {
+  ephemeral: `version: 3
+workspace: { kind: ephemeral }
+sandbox:
+  provider: docker
+  image: outpost:dev
+outputs:
+  - paths: ["**/*.json"]
+    destination: ./results
+    policy: create
+`,
+  directory: `version: 3
+workspace:
+  kind: directory
+  directory: ./documents
+  access: copy
+sandbox:
+  provider: docker
+  image: outpost:dev
+outputs:
+  - paths: ["**/*.json"]
+    destination: ./documents
+    policy: update
+`,
+} as const;

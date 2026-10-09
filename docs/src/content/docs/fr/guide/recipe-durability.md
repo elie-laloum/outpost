@@ -111,3 +111,7 @@ Une action `artifact` sélectionne un magasin et un contrat nommés ; `data` con
 `options.cache` utilise le contrat natif de cache et un callback déclaré pour sa clé. Un cache hit ne consomme ni tentative ni jetons et ne rejoue pas d’effets. Les budgets et `onQuota: { action: pause }` gardent la comptabilité cumulée native. Les tâches agent et isolées peuvent déclarer `quotaResume: continue` ou `restart` ; continuer exige une conversation capturée et une restauration prise en charge.
 
 Un sink d’observation `run` persiste la projection du hub partagé. Déclarez `transporter`, `id` et `kind: workflow` ; activez `resume: true` uniquement pour reprendre une projection ayant terminé son invocation précédente. Après récupération explicite d’un coordinateur interrompu, utilisez un nouvel ID d’observation. Le checkpoint reste l’autorité d’exécution ; les erreurs de sink ne changent pas le résultat. Les tests couvrent Git local, interruption de processus, décisions signées, dialogues, caches et artefacts sans appels payants. La restauration cloud/S3 réelle reste non validée.
+
+## Workspaces de fichiers
+
+Les checkpoints de configuration 3 enregistrent des descriptions versionnées de workspaces de fichiers avec la progression. Synchronisation et conservation vérifiée précèdent un checkpoint settled ; la comptabilité ne copie pas des fichiers actifs. Une source montée doit rester disponible lors d’une restauration portable. Voir [les workspaces de fichiers](../workspaces/).

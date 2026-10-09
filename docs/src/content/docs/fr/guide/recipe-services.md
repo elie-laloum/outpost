@@ -111,3 +111,7 @@ Une tâche `queued` utilise [defineQueuedTask](../../reference/definequeuedtask/
 ```
 
 Les tests locaux couvrent publication silencieuse, démarrage explicite, annulation, rotation des tokens, webhooks signés, publication cron et jobs natifs. Les tests Redis 7 réels couvrent leases BullMQ, écritures obsolètes, effets interrompus et workers YAML. Aucun modèle payant ni endpoint public n’est utilisé ; TLS de production, Redis hébergé et livraisons réelles des émetteurs restent non validés.
+
+## Workspaces de fichiers
+
+Pour exécuter un service sans Git, utiliser la configuration 3 avec une source de fichiers explicite pour les tâches de sandbox, ou omettre workspace et sandbox pour les tâches sans fichiers. Files, schedules, webhooks et jobs nommés gardent leurs contrats existants. Voir [les workspaces de fichiers](../workspaces/).

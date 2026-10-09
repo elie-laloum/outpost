@@ -13,21 +13,23 @@ import type { HarnessTool } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                                                                               | Presence | Meaning                                                                             |
-| ------------- | ---------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `kind`        | `"tool"`                                                                           | Required | Definition discriminator: tool.                                                     |
-| `name`        | `string`                                                                           | Required | Unique tool name shown to the model.                                                |
-| `description` | `string`                                                                           | Required | Explanation sent to the model with the tool.                                        |
-| `readOnly`    | `boolean`                                                                          | Required | Whether the tool may run concurrently with other read-only calls.                   |
-| `inputSchema` | `Readonly<Record<string, unknown>>`                                                | Required | Frozen JSON Schema sent to the model, converted from a Standard Schema when needed. |
-| `validate`    | `(value: unknown) => Promise<ToolValidation<Input>>`                               | Required | Check raw model arguments and return the typed value or a readable issue list.      |
-| `resources`   | `(input: Input) => ToolResources`                                                  | Required | Paths and command of a validated input; empty when the tool declares none.          |
-| `execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Required | Run the call with validated input and its context.                                  |
+| Name          | Type                                                                               | Presence | Meaning                                                                                 |
+| ------------- | ---------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `workspace`   | `"git" \| undefined`                                                               | Optional | Declares a required Git workspace; file execution refuses this tool before acquisition. |
+| `kind`        | `"tool"`                                                                           | Required | Definition discriminator: tool.                                                         |
+| `name`        | `string`                                                                           | Required | Unique tool name shown to the model.                                                    |
+| `description` | `string`                                                                           | Required | Explanation sent to the model with the tool.                                            |
+| `readOnly`    | `boolean`                                                                          | Required | Whether the tool may run concurrently with other read-only calls.                       |
+| `inputSchema` | `Readonly<Record<string, unknown>>`                                                | Required | Frozen JSON Schema sent to the model, converted from a Standard Schema when needed.     |
+| `validate`    | `(value: unknown) => Promise<ToolValidation<Input>>`                               | Required | Check raw model arguments and return the typed value or a readable issue list.          |
+| `resources`   | `(input: Input) => ToolResources`                                                  | Required | Paths and command of a validated input; empty when the tool declares none.              |
+| `execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Required | Run the call with validated input and its context.                                      |
 
 ## Signature
 
 ```ts
 export interface HarnessTool<Input = unknown> {
+  readonly workspace?: "git";
   readonly kind: "tool";
   readonly name: string;
   readonly description: string;

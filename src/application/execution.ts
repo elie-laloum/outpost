@@ -6,13 +6,17 @@ import type { Agent, Usage } from "../domain/agent.types.ts";
 import { ResponseError } from "../domain/response.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { addUsage } from "../domain/usage.ts";
-import type { WorkspaceRecord } from "../domain/workspace.types.ts";
 import { turn } from "./agent-turn.ts";
 import { steeringTurns } from "./steering-turns.ts";
 import { renderBrief } from "./brief-renderer.ts";
 import { validateDispatch } from "./dispatch-validation.ts";
 import { executionDefaults } from "./execution.constants.ts";
-import type { DispatchOptions, Execution, Turn } from "./execution.types.ts";
+import type {
+  DispatchOptions,
+  Execution,
+  ExecutionWorkspace,
+  Turn,
+} from "./execution.types.ts";
 import { notify } from "./observation.ts";
 
 export { renderBrief } from "./brief-renderer.ts";
@@ -21,7 +25,7 @@ export type { DispatchOptions, Execution, Turn } from "./execution.types.ts";
 export { notify } from "./observation.ts";
 
 export async function execute<T>(
-  workspace: WorkspaceRecord,
+  workspace: ExecutionWorkspace,
   lease: SandboxLease,
   agent: Agent,
   host: boolean,
@@ -56,7 +60,7 @@ export async function execute<T>(
 }
 
 async function executeTurns<T>(
-  workspace: WorkspaceRecord,
+  workspace: ExecutionWorkspace,
   lease: SandboxLease,
   agent: Agent,
   host: boolean,
@@ -84,7 +88,7 @@ async function executeTurns<T>(
       kind: "phase",
       name: "preparing prompt",
       agent: agent.name,
-      branch: workspace.branch,
+      ...("branch" in workspace ? { branch: workspace.branch } : {}),
       directory: workspace.directory,
       pass: index + 1,
       at: new Date().toISOString(),
@@ -103,7 +107,7 @@ async function executeTurns<T>(
           kind: "phase",
           name: "running",
           agent: agent.name,
-          branch: workspace.branch,
+          ...("branch" in workspace ? { branch: workspace.branch } : {}),
           pass: index + 1,
           at: new Date().toISOString(),
         });
@@ -116,7 +120,13 @@ async function executeTurns<T>(
           markers,
           index + 1,
           {
-            repository: workspace.repository,
+            repository:
+              "repository" in workspace
+                ? workspace.repository
+                : workspace.projectDirectory,
+            ...("runtimeDirectory" in workspace && workspace.runtimeDirectory
+              ? { runtimeDirectory: workspace.runtimeDirectory }
+              : {}),
             repair: repair !== undefined,
             repetition,
           },
@@ -148,7 +158,7 @@ async function executeTurns<T>(
         if (!(error instanceof ResponseError)) throw error;
         error.recovery = {
           conversation: current.conversation,
-          branch: workspace.branch,
+          ...("branch" in workspace ? { branch: workspace.branch } : {}),
           directory: workspace.directory,
           turns,
         };

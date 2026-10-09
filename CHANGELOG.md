@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add explicit directory-copy, read-only/writable source-mount and ephemeral file workspaces without host Git, configuration version 3, provider workspace capabilities and file dispatch/report contracts. Preserve legacy Git APIs and configuration defaults. Journal protected output publication with conditional rollback and explicit recovery; conserve settled files and conversations for local or explicit Transport-backed portable resume. Cover independent commands, cross-process dialogue, interrupted publication and an installed CLI running with Node, Docker and tar on a host without Git. Native CLI file variants and live cloud/Firecracker validation remain unvalidated; no publication or deployment is performed.
+
 - Add a runnable Linear development recipe with a separate TypeScript application, validated private API-key caching, issue selection, plan approval, implementation, enforced tests and formatted observation. Extend terminal recipe interaction to unsigned gates with saved evidence and explicit decisions; signed gates retain external proof submission. Test the flow offline with real Git and simulated services; live Linear/Codex remains unvalidated.
 
 - Handle durable recipe questions directly in the CLI: automatic terminal prompts, actor selection, saved answers and continuation without a custom runner. Add interactive/headless flags, keep JSON reporting final-only, and preserve pending questions on cancellation. Cover offline cross-process resume and real terminal input; no paid agent calls.

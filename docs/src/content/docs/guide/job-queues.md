@@ -275,3 +275,7 @@ The BullMQ backend has its own setup: see [Redis and BullMQ](../redis-workers/).
 - An HTTP token grants every queue operation. Serve it behind TLS on a private network, and keep tokens out of URLs and logs.
 
 API: [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
+
+## File workspaces
+
+Workers also execute configuration-3 file recipes through the same recipe runtime. Each owned job gets a distinct materialization; shared publication destinations still coordinate through host-wide locks. See [independent file jobs](../workspaces/#run-independent-jobs).

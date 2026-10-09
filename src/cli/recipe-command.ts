@@ -11,9 +11,12 @@ import { validateRecipeProject } from "../application/recipes/project.ts";
 import type {
   RecipeBindings,
   RecipeConfiguration,
+  FileRecipeConfiguration,
+  MixedRecipeBindings,
 } from "../application/recipe.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
 import { createSandbox } from "../application/sandbox.ts";
+import { isFileSandboxOptions } from "../application/file-sandbox.ts";
 import { readRecipeInputs } from "./recipe-inputs.ts";
 import { initializeRecipe } from "./recipe-init.ts";
 import { recipeCatalogCommand } from "./recipe-catalog.ts";
@@ -22,7 +25,7 @@ import { recipeLimits } from "../domain/recipe.constants.ts";
 import { fallbackAgentKinds } from "../domain/fallback-agent.constants.ts";
 import type { CliInvocation } from "./main.types.ts";
 
-function assertBindings(value: unknown): asserts value is RecipeBindings {
+function assertBindings(value: unknown): asserts value is MixedRecipeBindings {
   if (!value || typeof value !== "object" || !("sandbox" in value))
     throw new Error("Recipe configuration must return { sandbox, agents? }");
   const sandbox = value.sandbox;
@@ -38,8 +41,8 @@ function assertBindings(value: unknown): asserts value is RecipeBindings {
     !("workspace" in sandbox) ||
     !sandbox.workspace ||
     typeof sandbox.workspace !== "object" ||
-    !("integrate" in sandbox.workspace) ||
-    typeof sandbox.workspace.integrate !== "function"
+    !("close" in sandbox.workspace) ||
+    typeof sandbox.workspace.close !== "function"
   )
     throw new Error("Recipe configuration must return an open Sandbox");
 }
@@ -64,7 +67,7 @@ function validateAgents(agents: unknown): void {
 
 function assertConfiguration(
   value: unknown,
-): asserts value is RecipeConfiguration {
+): asserts value is RecipeConfiguration | FileRecipeConfiguration {
   if (
     !value ||
     typeof value !== "object" ||
@@ -193,11 +196,11 @@ export async function recipeCommand({
     } else {
       assertConfiguration(module.default);
       requireAgents(document, module.default.agents);
+      const settings = { ...module.default.sandbox, signal: controller.signal };
       bindings = {
-        sandbox: await createSandbox({
-          ...module.default.sandbox,
-          signal: controller.signal,
-        }),
+        sandbox: isFileSandboxOptions(settings)
+          ? await createSandbox(settings)
+          : await createSandbox(settings),
         agents: module.default.agents,
       };
     }

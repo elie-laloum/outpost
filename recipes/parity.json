@@ -33,6 +33,7 @@
       "usageCommand": "((conversation: string) => Command | undefined) | undefined",
       "usageResult": "((text: string) => Usage | undefined) | undefined",
       "liveInput": "AgentLiveInput | undefined",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -70,6 +71,7 @@
       "usageCommand": "contract",
       "usageResult": "contract",
       "liveInput": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -102,6 +104,7 @@
       "usageCommand": "((conversation: string) => Command | undefined) | undefined",
       "usageResult": "((text: string) => Usage | undefined) | undefined",
       "liveInput": "AgentLiveInput | undefined",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -130,6 +133,7 @@
       "usageCommand": "contract",
       "usageResult": "contract",
       "liveInput": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -895,6 +899,8 @@
   },
   ".:attach": {
     "signatures": [
+      "(options: FileSandboxOptions & AttachOptions & RequiredAgent): Promise<FileAttachResult>",
+      "(options: GitWorkspaceSandboxOptions & AttachOptions & RequiredAgent): Promise<AttachResult>",
       "(options: SandboxOptions & AttachOptions & RequiredAgent): Promise<AttachResult>"
     ],
     "options": {},
@@ -1149,6 +1155,7 @@
       "usageCommand": "((conversation: string) => Command | undefined) | undefined",
       "usageResult": "((text: string) => Usage | undefined) | undefined",
       "liveInput": "AgentLiveInput | undefined",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -1180,6 +1187,7 @@
       "usageCommand": "contract",
       "usageResult": "contract",
       "liveInput": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -1441,14 +1449,14 @@
       "diagnostic": "((message: string) => void) | undefined",
       "guard": "DiffGuard | undefined",
       "workspace": "Workspace | undefined",
+      "hooks": "LifecycleHooks | undefined",
+      "storageQuota": "Omit<StorageReservationOptions, \"signal\"> | undefined",
       "includeUncommitted": "boolean | undefined",
       "sandboxProvider": "SandboxProvider | undefined",
-      "hooks": "LifecycleHooks | undefined",
       "bootstrap": "boolean | undefined",
       "conversationHome": "string | undefined",
       "recoveryTransport": "Transport | undefined",
       "activityTransport": "Transport | undefined",
-      "storageQuota": "Omit<StorageReservationOptions, \"signal\"> | undefined",
       "repository": "string | undefined",
       "branch": "BranchPolicy | undefined",
       "copies": "readonly string[] | undefined",
@@ -1485,14 +1493,14 @@
       "diagnostic": "contract",
       "guard": "contract",
       "workspace": "contract",
+      "hooks": "contract",
+      "storageQuota": "contract",
       "includeUncommitted": "contract",
       "sandboxProvider": "contract",
-      "hooks": "contract",
       "bootstrap": "contract",
       "conversationHome": "contract",
       "recoveryTransport": "contract",
       "activityTransport": "contract",
-      "storageQuota": "contract",
       "repository": "contract",
       "branch": "contract",
       "copies": "contract",
@@ -1502,6 +1510,7 @@
   ".:ConversationContext": {
     "signatures": [],
     "options": {
+      "runtimeDirectory": "string | undefined",
       "observation": "ObservationHub | undefined",
       "repository": "string",
       "sandbox": "SandboxLease",
@@ -1516,6 +1525,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runtimeDirectory": "contract",
       "observation": "contract",
       "repository": "contract",
       "sandbox": "contract",
@@ -1598,7 +1608,7 @@
     "options": {
       "name": "string",
       "format": "string | undefined",
-      "locate": "(id: string, repository: string, home?: string) => Promise<ConversationRecord>",
+      "locate": "(id: string, repository: string, home?: string, runtimeDirectory?: string) => Promise<ConversationRecord>",
       "capture": "(id: string, context: ConversationContext) => Promise<ConversationRecord>",
       "restore": "(record: ConversationRecord, context: ConversationContext) => Promise<void>"
     },
@@ -1775,6 +1785,56 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:CreatedWorkspace": {
+    "signatures": [],
+    "options": {
+      "kind": "\"directory\" | \"ephemeral\"",
+      "git": "Workspace",
+      "dispatch": "<T = undefined>(options: import(\"./file-sandbox.types.ts\").FileSandboxSettings & import(\"./execution.types.ts\").DispatchOptions<T> & { readonly agent: import(\"../domain/fallback-agent.types.ts\").DispatchAgent; }) => Promise<import(\"./file-sandbox.types.ts\").FileDispatchResult<T>>",
+      "sandbox": "(options: import(\"./file-sandbox.types.ts\").FileSandboxSettings) => Promise<import(\"./file-sandbox.types.ts\").FileSandbox>",
+      "attach": "(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & AttachOptions & { readonly agent: Agent; }) => Promise<AttachResult>",
+      "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
+      "integrate": "{ (): Promise<void>; (options: IntegrationOptions): Promise<ConflictResolution | void>; }",
+      "[Symbol.asyncDispose]": "() => Promise<void>",
+      "repository": "string",
+      "directory": "string",
+      "branch": "string",
+      "baseBranch": "string",
+      "baseline": "string",
+      "gitDirectories": "readonly string[]",
+      "policy": "BranchPolicy",
+      "id": "string",
+      "runtime": "WorkspaceRuntime",
+      "source": "FileWorkspaceSource",
+      "checkpoint": "() => Promise<FileWorkspaceRecord>"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "git": "contract",
+      "dispatch": "contract",
+      "sandbox": "contract",
+      "attach": "contract",
+      "close": "contract",
+      "integrate": "contract",
+      "[Symbol.asyncDispose]": "contract",
+      "repository": "contract",
+      "directory": "contract",
+      "branch": "contract",
+      "baseBranch": "contract",
+      "baseline": "contract",
+      "gitDirectories": "contract",
+      "policy": "contract",
+      "id": "contract",
+      "runtime": "contract",
+      "source": "contract",
+      "checkpoint": "contract"
+    }
+  },
   ".:createEd25519DecisionVerifier": {
     "signatures": [
       "(options: WorkflowDecisionVerifierOptions): WorkflowDecisionVerifier"
@@ -1850,7 +1910,7 @@
     "optionCoverage": {}
   },
   ".:createHarnessFileTools": {
-    "signatures": ["(): HarnessToolset"],
+    "signatures": ["(options?: FileSelectionOptions): HarnessToolset"],
     "options": {},
     "category": "native",
     "lot": 3,
@@ -1870,7 +1930,7 @@
     "optionCoverage": {}
   },
   ".:createHarnessSearchTools": {
-    "signatures": ["(): HarnessToolset"],
+    "signatures": ["(options?: FileSelectionOptions): HarnessToolset"],
     "options": {},
     "category": "native",
     "lot": 3,
@@ -2002,7 +2062,11 @@
     "optionCoverage": {}
   },
   ".:createSandbox": {
-    "signatures": ["(options?: SandboxOptions): Promise<Sandbox>"],
+    "signatures": [
+      "(options: FileSandboxOptions): Promise<FileSandbox>",
+      "(options: GitWorkspaceSandboxOptions): Promise<Sandbox>",
+      "(options?: SandboxOptions): Promise<Sandbox>"
+    ],
     "options": {},
     "category": "native",
     "lot": 7,
@@ -2119,6 +2183,19 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:createWorkspace": {
+    "signatures": [
+      "(options: GitWorkspaceOptions): Promise<GitWorkspace>",
+      "(options: FileWorkspaceOptions): Promise<FileWorkspace>"
+    ],
+    "options": {},
+    "category": "native",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Configuration 3 declares owned file workspace resources through the same application coordinator as TypeScript.",
+    "optionCoverage": {}
+  },
   ".:CronOptions": {
     "signatures": [],
     "options": {
@@ -2161,6 +2238,7 @@
       "kind": "\"custom\"",
       "harness": "Harness",
       "model": "AgentModel",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -2182,6 +2260,7 @@
       "kind": "contract",
       "harness": "contract",
       "model": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -2513,7 +2592,9 @@
   },
   ".:defineAgentTask": {
     "signatures": [
-      "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & AgentTaskOptions<T>): Task<DispatchResult<T>>"
+      "<T>(options: Omit<TaskOptions<FileDispatchResult<T>>, \"perform\" | \"cache\"> & FileAgentTaskOptions<T>): Task<FileDispatchResult<T>>",
+      "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & AgentTaskOptions<T>): Task<DispatchResult<T>>",
+      "<T>(options: Omit<TaskOptions<DispatchResult<T> | FileDispatchResult<T>>, \"perform\" | \"cache\"> & MixedAgentTaskOptions<T>): Task<DispatchResult<T> | FileDispatchResult<T>>"
     ],
     "options": {},
     "category": "native",
@@ -2695,7 +2776,8 @@
   },
   ".:defineInteractiveAgentTask": {
     "signatures": [
-      "(options: InteractiveAgentTaskOptions): Task<InteractiveAgentResult>"
+      "(options: InteractiveAgentTaskOptions): Task<InteractiveAgentResult>",
+      "(options: FileInteractiveAgentTaskOptions): Task<FileInteractiveAgentResult>"
     ],
     "options": {},
     "category": "native",
@@ -2705,9 +2787,23 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:defineIsolatedCommandTask": {
+    "signatures": [
+      "(options: Omit<TaskOptions<CommandResult>, \"perform\"> & IsolatedCommandTaskOptions): Task<CommandResult>"
+    ],
+    "options": {},
+    "category": "native",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "The isolated command component declares a per-task file resource without requiring an agent.",
+    "optionCoverage": {}
+  },
   ".:defineIsolatedTask": {
     "signatures": [
-      "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & IsolatedTaskOptions<T>): Task<DispatchResult<T>>"
+      "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & IsolatedTaskOptions<T>): Task<DispatchResult<T>>",
+      "<T>(options: Omit<TaskOptions<FileDispatchResult<T>>, \"perform\" | \"cache\"> & FileIsolatedTaskOptions<T>): Task<FileDispatchResult<T>>",
+      "<T>(options: Omit<TaskOptions<DispatchResult<T> | FileDispatchResult<T>>, \"perform\" | \"cache\"> & MixedIsolatedTaskOptions<T>): Task<DispatchResult<T> | FileDispatchResult<T>>"
     ],
     "options": {},
     "category": "native",
@@ -2780,7 +2876,7 @@
     "optionCoverage": {}
   },
   ".:defineRecipe": {
-    "signatures": ["(source: string, bindings: RecipeBindings): Workflow"],
+    "signatures": ["(source: string, bindings: MixedRecipeBindings): Workflow"],
     "options": {},
     "category": "native",
     "lot": 1,
@@ -2919,6 +3015,8 @@
   },
   ".:dispatch": {
     "signatures": [
+      "<T = undefined>(options: FileDispatchRequest<T>): Promise<FileDispatchResult<T>>",
+      "<T = undefined>(options: GitDispatchRequest<T>): Promise<DispatchResult<T>>",
       "<T = undefined>(options: DispatchRequest<T>): Promise<DispatchResult<T>>"
     ],
     "options": {},
@@ -2945,6 +3043,7 @@
       "usageCommand": "((conversation: string) => Command | undefined) | undefined",
       "usageResult": "((text: string) => Usage | undefined) | undefined",
       "liveInput": "AgentLiveInput | undefined",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -2984,6 +3083,7 @@
       "usageCommand": "contract",
       "usageResult": "contract",
       "liveInput": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -3365,6 +3465,318 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {}
   },
+  ".:FileAgentTaskOptions": {
+    "signatures": [],
+    "options": {
+      "quotaResume": "QuotaResumePolicy | undefined",
+      "sandbox": "FileSandbox",
+      "request": "(context: TaskContext) => DispatchOptions<T>"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "quotaResume": "contract",
+      "sandbox": "contract",
+      "request": "contract"
+    }
+  },
+  ".:FileAttachResult": {
+    "signatures": [],
+    "options": {
+      "workspaceInfo": "FileWorkspaceRecord",
+      "directory": "string",
+      "status": "number",
+      "stdout": "string",
+      "stderr": "string"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "workspaceInfo": "contract",
+      "directory": "contract",
+      "status": "contract",
+      "stdout": "contract",
+      "stderr": "contract"
+    }
+  },
+  ".:FileDispatchRequest": {
+    "signatures": [],
+    "options": {
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "limits": "Pick<import(\"../domain/workspace.types.ts\").StageLimits, \"copyMs\" | \"collectMs\"> | undefined",
+      "observation": "import(\"../domain/observation.types.ts\").ObservationHub | undefined",
+      "logging": "import(\"../infrastructure/journal.types.ts\").Logging | undefined",
+      "activityTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "recoveryTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "sandboxProvider": "SandboxProvider",
+      "agent": "import(\"../index.js\").CliAgent | import(\"../index.js\").CustomAgent | import(\"../index.js\").ReplayAgent | import(\"../domain/fallback-agent.types.ts\").FallbackAgent",
+      "signal": "AbortSignal | undefined",
+      "variables": "Readonly<Record<string, string>> | undefined",
+      "workspace": "undefined",
+      "workspaceSource": "FileWorkspaceSource",
+      "watchdog": "WatchdogOptions | undefined",
+      "prices": "ModelPriceTable | undefined",
+      "redact": "readonly RegExp[] | undefined",
+      "label": "string | undefined",
+      "brief": "Brief",
+      "passes": "number | undefined",
+      "until": "string | readonly string[] | undefined",
+      "idleMs": "number | undefined",
+      "idleWarningMs": "number | undefined",
+      "settleMs": "number | undefined",
+      "deadlineMs": "number | undefined",
+      "expansionMs": "number | undefined",
+      "steering": "Steering | undefined",
+      "continuation": "{ readonly id: string; readonly fork?: boolean; } | undefined",
+      "response": "ResponseSpec<T> | undefined",
+      "telemetry": "DispatchTelemetry | undefined",
+      "observe": "((event: AgentObservation) => void) | undefined",
+      "warn": "((message: string) => void) | undefined",
+      "diagnostic": "((message: string) => void) | undefined",
+      "outputs": "readonly WorkspaceOutputOptions[] | undefined",
+      "storageQuota": "Omit<import(\"../infrastructure/storage-reservations.types.ts\").StorageReservationOptions, \"signal\"> | undefined",
+      "recovery": "FileWorkspaceRecoveryAuthorization | undefined",
+      "inputs": "readonly WorkspaceInput[] | undefined",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "paths": "readonly string[] | undefined",
+      "retention": "WorkspaceRetention | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "hooks": "native",
+      "limits": "native",
+      "observation": "native",
+      "logging": "native",
+      "activityTransport": "contract",
+      "recoveryTransport": "contract",
+      "sandboxProvider": "native",
+      "agent": "native",
+      "signal": "contract",
+      "variables": "native",
+      "workspace": "contract",
+      "workspaceSource": "native",
+      "watchdog": "contract",
+      "prices": "contract",
+      "redact": "contract",
+      "label": "contract",
+      "brief": "native",
+      "passes": "contract",
+      "until": "contract",
+      "idleMs": "contract",
+      "idleWarningMs": "contract",
+      "settleMs": "contract",
+      "deadlineMs": "contract",
+      "expansionMs": "contract",
+      "steering": "contract",
+      "continuation": "contract",
+      "response": "contract",
+      "telemetry": "contract",
+      "observe": "contract",
+      "warn": "contract",
+      "diagnostic": "contract",
+      "outputs": "native",
+      "storageQuota": "contract",
+      "recovery": "contract",
+      "inputs": "native",
+      "runtime": "native",
+      "paths": "native",
+      "retention": "native"
+    }
+  },
+  ".:FileDispatchResult": {
+    "signatures": [],
+    "options": {
+      "logReference": "import(\"../domain/transport.types.ts\").TransportReference | undefined",
+      "observerErrors": "readonly unknown[] | undefined",
+      "transcript": "string | undefined",
+      "transcriptReference": "import(\"../domain/transport.types.ts\").TransportReference | undefined",
+      "fallback": "import(\"../domain/fallback-agent.types.ts\").FallbackRecord | undefined",
+      "workspaceInfo": "FileWorkspaceRecord",
+      "directory": "string",
+      "fileOutputs": "readonly WorkspacePublication[]",
+      "report": "(options?: import(\"../domain/run-report.types.ts\").RunReportOptions) => string",
+      "resume": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
+      "fork": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
+      "text": "string",
+      "turns": "readonly Turn[]",
+      "usage": "Usage",
+      "conversation": "string | undefined",
+      "value": "T",
+      "completed": "boolean",
+      "completion": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "logReference": "contract",
+      "observerErrors": "contract",
+      "transcript": "contract",
+      "transcriptReference": "contract",
+      "fallback": "contract",
+      "workspaceInfo": "contract",
+      "directory": "contract",
+      "fileOutputs": "contract",
+      "report": "contract",
+      "resume": "contract",
+      "fork": "contract",
+      "text": "contract",
+      "turns": "contract",
+      "usage": "contract",
+      "conversation": "contract",
+      "value": "contract",
+      "completed": "contract",
+      "completion": "contract"
+    }
+  },
+  ".:FileInteractiveAgentResult": {
+    "signatures": [],
+    "options": {
+      "output": "WorkflowJson",
+      "conversation": "string",
+      "directory": "string",
+      "turns": "number",
+      "workspaceInfo": "FileWorkspaceRecord"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "output": "contract",
+      "conversation": "contract",
+      "directory": "contract",
+      "turns": "contract",
+      "workspaceInfo": "contract"
+    }
+  },
+  ".:FileInteractiveAgentTaskOptions": {
+    "signatures": [],
+    "options": {
+      "workspaceSource": "FileWorkspaceSource",
+      "sandboxProvider": "SandboxProvider",
+      "agent": "Agent",
+      "after": "readonly Task<unknown>[] | undefined",
+      "key": "string",
+      "timeoutMs": "number | undefined",
+      "brief": "string",
+      "actors": "readonly string[]",
+      "maxTurns": "number | undefined",
+      "signal": "AbortSignal | undefined",
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "storageQuota": "Omit<import(\"../infrastructure/storage-reservations.types.ts\").StorageReservationOptions, \"signal\"> | undefined",
+      "recovery": "FileWorkspaceRecoveryAuthorization | undefined",
+      "inputs": "readonly WorkspaceInput[] | undefined",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "paths": "readonly string[] | undefined",
+      "retention": "WorkspaceRetention | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "workspaceSource": "native",
+      "sandboxProvider": "native",
+      "agent": "native",
+      "after": "native",
+      "key": "native",
+      "timeoutMs": "native",
+      "brief": "native",
+      "actors": "native",
+      "maxTurns": "native",
+      "signal": "contract",
+      "hooks": "native",
+      "storageQuota": "contract",
+      "recovery": "contract",
+      "inputs": "native",
+      "runtime": "native",
+      "paths": "native",
+      "retention": "native"
+    }
+  },
+  ".:FileIsolatedCommandRequest": {
+    "signatures": [],
+    "options": {
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "limits": "Pick<import(\"../domain/workspace.types.ts\").StageLimits, \"copyMs\" | \"collectMs\"> | undefined",
+      "observation": "import(\"../domain/observation.types.ts\").ObservationHub | undefined",
+      "logging": "import(\"../infrastructure/journal.types.ts\").Logging | undefined",
+      "activityTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "recoveryTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "sandboxProvider": "SandboxProvider",
+      "agent": "DispatchAgent | undefined",
+      "signal": "AbortSignal | undefined",
+      "variables": "Readonly<Record<string, string>> | undefined",
+      "workspace": "undefined",
+      "workspaceSource": "FileWorkspaceSource",
+      "command": "Command",
+      "outputs": "readonly WorkspaceOutputOptions[] | undefined",
+      "storageQuota": "Omit<import(\"../infrastructure/storage-reservations.types.ts\").StorageReservationOptions, \"signal\"> | undefined",
+      "recovery": "FileWorkspaceRecoveryAuthorization | undefined",
+      "inputs": "readonly WorkspaceInput[] | undefined",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "paths": "readonly string[] | undefined",
+      "retention": "WorkspaceRetention | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "hooks": "contract",
+      "limits": "contract",
+      "observation": "contract",
+      "logging": "contract",
+      "activityTransport": "contract",
+      "recoveryTransport": "contract",
+      "sandboxProvider": "contract",
+      "agent": "contract",
+      "signal": "contract",
+      "variables": "contract",
+      "workspace": "contract",
+      "workspaceSource": "contract",
+      "command": "contract",
+      "outputs": "contract",
+      "storageQuota": "contract",
+      "recovery": "contract",
+      "inputs": "contract",
+      "runtime": "contract",
+      "paths": "contract",
+      "retention": "contract"
+    }
+  },
+  ".:FileIsolatedTaskOptions": {
+    "signatures": [],
+    "options": {
+      "request": "(context: TaskContext) => FileDispatchRequest<T> | Promise<FileDispatchRequest<T>>",
+      "quotaResume": "QuotaResumePolicy | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "request": "contract",
+      "quotaResume": "contract"
+    }
+  },
   ".:FileManifestEntry": {
     "signatures": [],
     "options": {
@@ -3387,6 +3799,222 @@
       "sha256": "contract"
     }
   },
+  ".:FileRecipeBindings": {
+    "signatures": [],
+    "options": {
+      "sandbox": "FileSandbox",
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
+      "agents": "Readonly<Record<string, DispatchAgent>> | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "sandbox": "contract",
+      "inputs": "contract",
+      "agents": "contract"
+    }
+  },
+  ".:FileRecipeConfiguration": {
+    "signatures": [],
+    "options": {
+      "sandbox": "import(\"./file-sandbox.types.ts\").FileSandboxOptions",
+      "agents": "Readonly<Record<string, DispatchAgent>> | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "sandbox": "contract",
+      "agents": "contract"
+    }
+  },
+  ".:FileRunReport": {
+    "signatures": [],
+    "options": {
+      "version": "2",
+      "workspaceInfo": "import(\"./file-workspace.types.ts\").FileWorkspaceRecord",
+      "fileOutputs": "readonly import(\"./file-workspace.types.ts\").WorkspacePublication[]",
+      "usage": "Usage",
+      "text": "string",
+      "completed": "boolean",
+      "cost": "UsageCost | null",
+      "durationMs": "number",
+      "failedTools": "readonly RunReportFailure[]",
+      "omittedFailures": "number",
+      "warnings": "readonly string[]"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "version": "contract",
+      "workspaceInfo": "contract",
+      "fileOutputs": "contract",
+      "usage": "contract",
+      "text": "contract",
+      "completed": "contract",
+      "cost": "contract",
+      "durationMs": "contract",
+      "failedTools": "contract",
+      "omittedFailures": "contract",
+      "warnings": "contract"
+    }
+  },
+  ".:FileSandbox": {
+    "signatures": [],
+    "options": {
+      "diagnose": "(options?: import(\"./doctor-sandbox.types.ts\").SandboxDiagnosticOptions) => Promise<import(\"./doctor-sandbox.types.ts\").SandboxDiagnosticReport>",
+      "workspace": "FileWorkspace",
+      "root": "string",
+      "command": "(command: Command) => Promise<CommandResult>",
+      "dispatch": "<T = undefined>(options: DispatchOptions<T>) => Promise<FileDispatchResult<T>>",
+      "resume": "<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<FileDispatchResult<T>>",
+      "fork": "<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<FileDispatchResult<T>>",
+      "attach": "(options?: AttachOptions) => Promise<FileAttachResult>",
+      "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
+      "[Symbol.asyncDispose]": "() => Promise<void>"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "diagnose": "contract",
+      "workspace": "contract",
+      "root": "contract",
+      "command": "contract",
+      "dispatch": "contract",
+      "resume": "contract",
+      "fork": "contract",
+      "attach": "contract",
+      "close": "contract",
+      "[Symbol.asyncDispose]": "contract"
+    }
+  },
+  ".:FileSandboxContext": {
+    "signatures": [],
+    "options": {
+      "workspace": "FileWorkspaceRecord",
+      "runtime": "WorkspaceRuntime",
+      "variables": "Readonly<Record<string, string>>",
+      "signal": "AbortSignal | undefined",
+      "registerRecovery": "((resourceId: string) => Promise<void>) | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "workspace": "contract",
+      "runtime": "contract",
+      "variables": "contract",
+      "signal": "contract",
+      "registerRecovery": "contract"
+    }
+  },
+  ".:FileSandboxOptions": {
+    "signatures": [],
+    "options": {
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "limits": "Pick<import(\"../domain/workspace.types.ts\").StageLimits, \"copyMs\" | \"collectMs\"> | undefined",
+      "observation": "import(\"../domain/observation.types.ts\").ObservationHub | undefined",
+      "logging": "import(\"../infrastructure/journal.types.ts\").Logging | undefined",
+      "activityTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "recoveryTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "sandboxProvider": "SandboxProvider",
+      "agent": "DispatchAgent | undefined",
+      "signal": "AbortSignal | undefined",
+      "variables": "Readonly<Record<string, string>> | undefined",
+      "workspace": "undefined",
+      "workspaceSource": "FileWorkspaceSource",
+      "storageQuota": "Omit<import(\"../infrastructure/storage-reservations.types.ts\").StorageReservationOptions, \"signal\"> | undefined",
+      "recovery": "FileWorkspaceRecoveryAuthorization | undefined",
+      "inputs": "readonly WorkspaceInput[] | undefined",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "paths": "readonly string[] | undefined",
+      "retention": "WorkspaceRetention | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "hooks": "native",
+      "limits": "native",
+      "observation": "native",
+      "logging": "native",
+      "activityTransport": "contract",
+      "recoveryTransport": "contract",
+      "sandboxProvider": "native",
+      "agent": "native",
+      "signal": "contract",
+      "variables": "native",
+      "workspace": "contract",
+      "workspaceSource": "native",
+      "storageQuota": "contract",
+      "recovery": "contract",
+      "inputs": "native",
+      "runtime": "native",
+      "paths": "native",
+      "retention": "native"
+    }
+  },
+  ".:FileSandboxSettings": {
+    "signatures": [],
+    "options": {
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "limits": "Pick<import(\"../domain/workspace.types.ts\").StageLimits, \"copyMs\" | \"collectMs\"> | undefined",
+      "observation": "import(\"../domain/observation.types.ts\").ObservationHub | undefined",
+      "logging": "import(\"../infrastructure/journal.types.ts\").Logging | undefined",
+      "activityTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "recoveryTransport": "import(\"../domain/transport.types.ts\").Transport | undefined",
+      "sandboxProvider": "SandboxProvider",
+      "agent": "DispatchAgent | undefined",
+      "signal": "AbortSignal | undefined",
+      "variables": "Readonly<Record<string, string>> | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "hooks": "contract",
+      "limits": "contract",
+      "observation": "contract",
+      "logging": "contract",
+      "activityTransport": "contract",
+      "recoveryTransport": "contract",
+      "sandboxProvider": "contract",
+      "agent": "contract",
+      "signal": "contract",
+      "variables": "contract"
+    }
+  },
+  ".:FileSelectionOptions": {
+    "signatures": [],
+    "options": {
+      "selection": "\"git\" | \"filesystem\" | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "selection": "native"
+    }
+  },
   ".:FileTransfers": {
     "signatures": [],
     "options": {
@@ -3403,6 +4031,222 @@
       "uploadBatch": "contract",
       "manifest": "contract",
       "downloadBatch": "contract"
+    }
+  },
+  ".:FileWorkspace": {
+    "signatures": [],
+    "options": {
+      "kind": "\"directory\" | \"ephemeral\"",
+      "source": "FileWorkspaceSource",
+      "checkpoint": "() => Promise<FileWorkspaceRecord>",
+      "sandbox": "(options: import(\"./file-sandbox.types.ts\").FileSandboxSettings) => Promise<import(\"./file-sandbox.types.ts\").FileSandbox>",
+      "dispatch": "<T = undefined>(options: import(\"./file-sandbox.types.ts\").FileSandboxSettings & import(\"./execution.types.ts\").DispatchOptions<T> & { readonly agent: import(\"../domain/fallback-agent.types.ts\").DispatchAgent; }) => Promise<import(\"./file-sandbox.types.ts\").FileDispatchResult<T>>",
+      "id": "string",
+      "directory": "string",
+      "runtime": "WorkspaceRuntime",
+      "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
+      "[Symbol.asyncDispose]": "() => Promise<void>"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "source": "contract",
+      "checkpoint": "contract",
+      "sandbox": "contract",
+      "dispatch": "contract",
+      "id": "contract",
+      "directory": "contract",
+      "runtime": "contract",
+      "close": "contract",
+      "[Symbol.asyncDispose]": "contract"
+    }
+  },
+  ".:FileWorkspaceInspection": {
+    "signatures": [],
+    "options": {
+      "record": "FileWorkspaceRecord",
+      "reference": "TransportReference"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "record": "contract",
+      "reference": "contract"
+    }
+  },
+  ".:FileWorkspaceInspectionOptions": {
+    "signatures": [],
+    "options": {
+      "runtime": "WorkspaceRuntime",
+      "id": "string",
+      "transporter": "Transport | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "runtime": "contract",
+      "id": "contract",
+      "transporter": "contract"
+    }
+  },
+  ".:FileWorkspaceOptions": {
+    "signatures": [],
+    "options": {
+      "hooks": "import(\"../domain/workspace.types.ts\").LifecycleHooks | undefined",
+      "storageQuota": "Omit<import(\"../infrastructure/storage-reservations.types.ts\").StorageReservationOptions, \"signal\"> | undefined",
+      "recovery": "FileWorkspaceRecoveryAuthorization | undefined",
+      "inputs": "readonly WorkspaceInput[] | undefined",
+      "source": "FileWorkspaceSource",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "paths": "readonly string[] | undefined",
+      "retention": "WorkspaceRetention | undefined",
+      "signal": "AbortSignal | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "hooks": "native",
+      "storageQuota": "contract",
+      "recovery": "contract",
+      "inputs": "native",
+      "source": "native",
+      "runtime": "native",
+      "paths": "native",
+      "retention": "native",
+      "signal": "contract"
+    }
+  },
+  ".:FileWorkspaceRecord": {
+    "signatures": [],
+    "options": {
+      "format": "1",
+      "id": "string",
+      "kind": "\"directory\" | \"ephemeral\"",
+      "source": "FileWorkspaceSource",
+      "ownership": "\"owned\"",
+      "owner": "{ readonly nonce: string; readonly state: \"open\" | \"released\" | \"recovering\"; }",
+      "locks": "{ readonly materialization: string; readonly source?: string; }",
+      "materialization": "{ readonly device: number; readonly inode: number; }",
+      "directory": "string",
+      "runtime": "WorkspaceRuntime",
+      "inputFingerprint": "string",
+      "preparation": "\"failed\" | \"ready\" | \"preparing\" | undefined",
+      "inputs": "readonly WorkspaceFileEntry[] | undefined",
+      "publicationBaselines": "readonly { readonly options: WorkspaceOutputOptions; readonly expected: readonly WorkspaceFileEntry[]; }[] | undefined",
+      "publications": "readonly { readonly id: string; readonly state: \"applying\" | WorkspacePublication[\"state\"]; readonly reference: TransportReference; }[] | undefined",
+      "mountedFingerprint": "string | undefined",
+      "generation": "number",
+      "fingerprint": "string",
+      "snapshot": "TransportReference | undefined",
+      "conversations": "readonly WorkspaceConversationArchive[] | undefined",
+      "allocation": "WorkspaceAllocationRecord | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "format": "contract",
+      "id": "contract",
+      "kind": "contract",
+      "source": "contract",
+      "ownership": "contract",
+      "owner": "contract",
+      "locks": "contract",
+      "materialization": "contract",
+      "directory": "contract",
+      "runtime": "contract",
+      "inputFingerprint": "contract",
+      "preparation": "contract",
+      "inputs": "contract",
+      "publicationBaselines": "contract",
+      "publications": "contract",
+      "mountedFingerprint": "contract",
+      "generation": "contract",
+      "fingerprint": "contract",
+      "snapshot": "contract",
+      "conversations": "contract",
+      "allocation": "contract"
+    }
+  },
+  ".:FileWorkspaceRecoveryAuthorization": {
+    "signatures": [],
+    "options": {
+      "expectedRevision": "string",
+      "processesStopped": "true",
+      "allocationReleased": "true | undefined",
+      "adoptInterruptedFiles": "boolean | undefined",
+      "adoptMountedSource": "boolean | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "expectedRevision": "contract",
+      "processesStopped": "contract",
+      "allocationReleased": "contract",
+      "adoptInterruptedFiles": "contract",
+      "adoptMountedSource": "contract"
+    }
+  },
+  ".:FileWorkspaceRecoveryOptions": {
+    "signatures": [],
+    "options": {
+      "expectedRevision": "string",
+      "processesStopped": "true",
+      "sandboxProvider": "SandboxProvider | undefined",
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "retention": "WorkspaceRetention | undefined",
+      "portable": "boolean | undefined",
+      "recover": "{ readonly processesStopped: true; readonly expectedRevision?: string; readonly allocationReleased?: true; readonly adoptInterruptedFiles?: boolean; readonly adoptMountedSource?: boolean; } | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "expectedRevision": "contract",
+      "processesStopped": "contract",
+      "sandboxProvider": "contract",
+      "runtime": "contract",
+      "retention": "contract",
+      "portable": "contract",
+      "recover": "contract"
+    }
+  },
+  ".:FileWorkspaceSource": {
+    "signatures": [],
+    "options": {
+      "kind": "\"ephemeral\"",
+      "directory": "string",
+      "access": "{ readonly mode: \"copy\"; } | { readonly mode: \"mount\"; readonly target: string; readonly readOnly: boolean; }"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "directory": "contract",
+      "access": "contract"
     }
   },
   ".:fromSecrets": {
@@ -3431,6 +4275,94 @@
     "optionCoverage": {
       "timeoutMs": "contract",
       "signal": "contract"
+    }
+  },
+  ".:GitDispatchRequest": {
+    "signatures": [],
+    "options": {
+      "workspaceSource": "GitWorkspaceSource",
+      "workspace": "undefined",
+      "repository": "undefined",
+      "branch": "undefined",
+      "copies": "undefined",
+      "guard": "undefined",
+      "signal": "AbortSignal | undefined",
+      "agent": "import(\"../domain/agent.types.ts\").CliAgent | import(\"../domain/agent.types.ts\").CustomAgent | import(\"../index.js\").ReplayAgent | import(\"../domain/fallback-agent.types.ts\").FallbackAgent",
+      "hooks": "LifecycleHooks | undefined",
+      "storageQuota": "Omit<StorageReservationOptions, \"signal\"> | undefined",
+      "includeUncommitted": "boolean | undefined",
+      "sandboxProvider": "SandboxProvider | undefined",
+      "logging": "Logging | undefined",
+      "bootstrap": "boolean | undefined",
+      "conversationHome": "string | undefined",
+      "recoveryTransport": "Transport | undefined",
+      "activityTransport": "Transport | undefined",
+      "observation": "ObservationHub | undefined",
+      "limits": "StageLimits | undefined",
+      "label": "string | undefined",
+      "watchdog": "WatchdogOptions | undefined",
+      "prices": "ModelPriceTable | undefined",
+      "redact": "readonly RegExp[] | undefined",
+      "brief": "Brief",
+      "passes": "number | undefined",
+      "until": "string | readonly string[] | undefined",
+      "idleMs": "number | undefined",
+      "idleWarningMs": "number | undefined",
+      "settleMs": "number | undefined",
+      "deadlineMs": "number | undefined",
+      "expansionMs": "number | undefined",
+      "steering": "Steering | undefined",
+      "continuation": "{ readonly id: string; readonly fork?: boolean; } | undefined",
+      "response": "ResponseSpec<T> | undefined",
+      "telemetry": "DispatchTelemetry | undefined",
+      "observe": "((event: AgentObservation) => void) | undefined",
+      "warn": "((message: string) => void) | undefined",
+      "diagnostic": "((message: string) => void) | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "workspaceSource": "contract",
+      "workspace": "contract",
+      "repository": "contract",
+      "branch": "contract",
+      "copies": "contract",
+      "guard": "contract",
+      "signal": "contract",
+      "agent": "contract",
+      "hooks": "contract",
+      "storageQuota": "contract",
+      "includeUncommitted": "contract",
+      "sandboxProvider": "contract",
+      "logging": "contract",
+      "bootstrap": "contract",
+      "conversationHome": "contract",
+      "recoveryTransport": "contract",
+      "activityTransport": "contract",
+      "observation": "contract",
+      "limits": "contract",
+      "label": "contract",
+      "watchdog": "contract",
+      "prices": "contract",
+      "redact": "contract",
+      "brief": "contract",
+      "passes": "contract",
+      "until": "contract",
+      "idleMs": "contract",
+      "idleWarningMs": "contract",
+      "settleMs": "contract",
+      "deadlineMs": "contract",
+      "expansionMs": "contract",
+      "steering": "contract",
+      "continuation": "contract",
+      "response": "contract",
+      "telemetry": "contract",
+      "observe": "contract",
+      "warn": "contract",
+      "diagnostic": "contract"
     }
   },
   ".:GithubWebhookOptions": {
@@ -3493,6 +4425,152 @@
       "signingToken": "contract",
       "toleranceMs": "contract",
       "token": "contract"
+    }
+  },
+  ".:GitWorkspace": {
+    "signatures": [],
+    "options": {
+      "kind": "\"git\"",
+      "git": "Workspace",
+      "dispatch": "<T = undefined>(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & DispatchOptions<T> & { readonly agent: DispatchAgent; }) => Promise<DispatchResult<T>>",
+      "sandbox": "(options?: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\">) => Promise<Sandbox>",
+      "attach": "(options: Omit<SandboxOptions, Exclude<keyof WorkspaceOptions, \"hooks\" | \"label\"> | \"workspace\"> & AttachOptions & { readonly agent: Agent; }) => Promise<AttachResult>",
+      "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
+      "integrate": "{ (): Promise<void>; (options: IntegrationOptions): Promise<ConflictResolution | void>; }",
+      "[Symbol.asyncDispose]": "() => Promise<void>",
+      "repository": "string",
+      "directory": "string",
+      "branch": "string",
+      "baseBranch": "string",
+      "baseline": "string",
+      "gitDirectories": "readonly string[]",
+      "policy": "BranchPolicy",
+      "id": "string",
+      "runtime": "WorkspaceRuntime"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "git": "contract",
+      "dispatch": "contract",
+      "sandbox": "contract",
+      "attach": "contract",
+      "close": "contract",
+      "integrate": "contract",
+      "[Symbol.asyncDispose]": "contract",
+      "repository": "contract",
+      "directory": "contract",
+      "branch": "contract",
+      "baseBranch": "contract",
+      "baseline": "contract",
+      "gitDirectories": "contract",
+      "policy": "contract",
+      "id": "contract",
+      "runtime": "contract"
+    }
+  },
+  ".:GitWorkspaceOptions": {
+    "signatures": [],
+    "options": {
+      "source": "GitWorkspaceSource",
+      "signal": "AbortSignal | undefined",
+      "hooks": "LifecycleHooks | undefined",
+      "storageQuota": "Omit<StorageReservationOptions, \"signal\"> | undefined",
+      "observation": "ObservationHub | undefined",
+      "limits": "StageLimits | undefined",
+      "label": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "source": "native",
+      "signal": "contract",
+      "hooks": "native",
+      "storageQuota": "contract",
+      "observation": "native",
+      "limits": "native",
+      "label": "contract"
+    }
+  },
+  ".:GitWorkspaceSandboxOptions": {
+    "signatures": [],
+    "options": {
+      "workspaceSource": "GitWorkspaceSource",
+      "workspace": "undefined",
+      "repository": "undefined",
+      "branch": "undefined",
+      "copies": "undefined",
+      "guard": "undefined",
+      "signal": "AbortSignal | undefined",
+      "agent": "DispatchAgent | undefined",
+      "hooks": "LifecycleHooks | undefined",
+      "storageQuota": "Omit<StorageReservationOptions, \"signal\"> | undefined",
+      "includeUncommitted": "boolean | undefined",
+      "sandboxProvider": "SandboxProvider | undefined",
+      "logging": "Logging | undefined",
+      "bootstrap": "boolean | undefined",
+      "conversationHome": "string | undefined",
+      "recoveryTransport": "Transport | undefined",
+      "activityTransport": "Transport | undefined",
+      "observation": "ObservationHub | undefined",
+      "limits": "StageLimits | undefined",
+      "label": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "workspaceSource": "contract",
+      "workspace": "contract",
+      "repository": "contract",
+      "branch": "contract",
+      "copies": "contract",
+      "guard": "contract",
+      "signal": "contract",
+      "agent": "contract",
+      "hooks": "contract",
+      "storageQuota": "contract",
+      "includeUncommitted": "contract",
+      "sandboxProvider": "contract",
+      "logging": "contract",
+      "bootstrap": "contract",
+      "conversationHome": "contract",
+      "recoveryTransport": "contract",
+      "activityTransport": "contract",
+      "observation": "contract",
+      "limits": "contract",
+      "label": "contract"
+    }
+  },
+  ".:GitWorkspaceSource": {
+    "signatures": [],
+    "options": {
+      "kind": "\"git\"",
+      "repository": "string | undefined",
+      "branch": "BranchPolicy | undefined",
+      "copies": "readonly string[] | undefined",
+      "guard": "DiffGuard | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "repository": "native",
+      "branch": "native",
+      "copies": "native",
+      "guard": "native"
     }
   },
   ".:Harness": {
@@ -4075,6 +5153,7 @@
     "signatures": [],
     "options": {
       "subagent": "CustomAgent",
+      "workspace": "\"git\" | undefined",
       "kind": "\"tool\"",
       "name": "string",
       "description": "string",
@@ -4091,6 +5170,7 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "subagent": "contract",
+      "workspace": "contract",
       "kind": "contract",
       "name": "contract",
       "description": "contract",
@@ -4136,6 +5216,7 @@
   ".:HarnessTool": {
     "signatures": [],
     "options": {
+      "workspace": "\"git\" | undefined",
       "kind": "\"tool\"",
       "name": "string",
       "description": "string",
@@ -4151,6 +5232,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspace": "contract",
       "kind": "contract",
       "name": "contract",
       "description": "contract",
@@ -4230,6 +5312,7 @@
   ".:HarnessToolOptions": {
     "signatures": [],
     "options": {
+      "workspace": "\"git\" | undefined",
       "name": "string",
       "description": "string",
       "input": "Readonly<Record<string, unknown>> | StandardJsonSchema<Input>",
@@ -4243,6 +5326,7 @@
     "test": "test/functional/recipe-harness.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "workspace": "native",
       "name": "native",
       "description": "native",
       "input": "native",
@@ -4325,6 +5409,18 @@
       "select": "contract"
     }
   },
+  ".:inspectFileWorkspace": {
+    "signatures": [
+      "(options: FileWorkspaceInspectionOptions): Promise<FileWorkspaceInspection>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
   ".:inspectRecovery": {
     "signatures": [
       "(options?: RecoveryInspectionOptions): Promise<RecoveryInspection>"
@@ -4335,6 +5431,28 @@
     "status": "implemented",
     "test": null,
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  ".:inspectWorkspacePathLocks": {
+    "signatures": ["(): Promise<readonly WorkspacePathLock[]>"],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
+  ".:inspectWorkspacePublication": {
+    "signatures": [
+      "(transporter: Transport, reference: TransportReference): Promise<PublicationJournal>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
     "optionCoverage": {}
   },
   ".:IntegrationOptions": {
@@ -4409,6 +5527,20 @@
       "conversationHome": "contract",
       "maxTurns": "contract",
       "timeoutMs": "contract"
+    }
+  },
+  ".:IsolatedCommandTaskOptions": {
+    "signatures": [],
+    "options": {
+      "request": "(context: TaskContext) => FileIsolatedCommandRequest | Promise<FileIsolatedCommandRequest>"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "request": "contract"
     }
   },
   ".:JsonArtifactOptions": {
@@ -4616,6 +5748,7 @@
     "options": {
       "round": "number",
       "phase": "\"attempt\" | \"check\"",
+      "workspaceCheckpoint": "import(\"./workflow/checkpoint.types.ts\").TaskWorkspaceCheckpoint | undefined",
       "prices": "ModelPriceTable | undefined",
       "quota": "WorkflowQuotaPause | undefined",
       "interaction": "TaskInteractionContext | undefined",
@@ -4637,6 +5770,7 @@
     "optionCoverage": {
       "round": "contract",
       "phase": "contract",
+      "workspaceCheckpoint": "contract",
       "prices": "contract",
       "quota": "contract",
       "interaction": "contract",
@@ -4849,6 +5983,58 @@
     "optionCoverage": {
       "include": "contract",
       "exclude": "contract"
+    }
+  },
+  ".:MixedAgentTaskOptions": {
+    "signatures": [],
+    "options": {
+      "sandbox": "FileSandbox | Sandbox",
+      "request": "(context: TaskContext) => DispatchOptions<T>",
+      "quotaResume": "QuotaResumePolicy | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "sandbox": "contract",
+      "request": "contract",
+      "quotaResume": "contract"
+    }
+  },
+  ".:MixedIsolatedTaskOptions": {
+    "signatures": [],
+    "options": {
+      "request": "(context: TaskContext) => IsolatedTaskRequest<T> | FileDispatchRequest<T> | Promise<IsolatedTaskRequest<T> | FileDispatchRequest<T>>",
+      "quotaResume": "QuotaResumePolicy | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "request": "contract",
+      "quotaResume": "contract"
+    }
+  },
+  ".:MixedRecipeBindings": {
+    "signatures": [],
+    "options": {
+      "sandbox": "FileSandbox | Sandbox",
+      "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
+      "agents": "Readonly<Record<string, DispatchAgent>> | undefined"
+    },
+    "category": "contract",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "sandbox": "contract",
+      "inputs": "contract",
+      "agents": "contract"
     }
   },
   ".:ModelContentBlock": {
@@ -5250,7 +6436,7 @@
       "directory": "(repository: string, home?: string) => string",
       "destination": "(id: string, sandbox: SandboxLease, original: string) => string",
       "name": "string",
-      "locate": "(id: string, repository: string, home?: string) => Promise<ConversationRecord>",
+      "locate": "(id: string, repository: string, home?: string, runtimeDirectory?: string) => Promise<ConversationRecord>",
       "capture": "(id: string, context: ConversationContext) => Promise<ConversationRecord>",
       "restore": "(record: ConversationRecord, context: ConversationContext) => Promise<void>"
     },
@@ -5685,6 +6871,18 @@
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
     "optionCoverage": {}
   },
+  ".:prepareWorkspaceOutputs": {
+    "signatures": [
+      "(workspace: FileWorkspace, outputs: readonly WorkspaceOutputOptions[]): Promise<void>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
   ".:PromptVariables": {
     "signatures": [],
     "options": {},
@@ -5706,6 +6904,98 @@
     "test": null,
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
     "optionCoverage": {}
+  },
+  ".:PublicationDirectory": {
+    "signatures": [],
+    "options": {
+      "path": "string",
+      "mode": "number",
+      "identity": "{ readonly device: number; readonly inode: number; } | undefined",
+      "createdMode": "number | undefined",
+      "phase": "\"pending\" | \"restored\" | \"create-intent\" | \"created\" | \"settled\""
+    },
+    "category": "contract",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "path": "contract",
+      "mode": "contract",
+      "identity": "contract",
+      "createdMode": "contract",
+      "phase": "contract"
+    }
+  },
+  ".:PublicationJournal": {
+    "signatures": [],
+    "options": {
+      "format": "1",
+      "id": "string",
+      "workspaceId": "string",
+      "options": "WorkspaceOutputOptions",
+      "staging": "string",
+      "backup": "string",
+      "operations": "PublicationOperation[]",
+      "directories": "PublicationDirectory[] | undefined",
+      "outputs": "readonly WorkspaceFileEntry[] | undefined",
+      "lock": "{ readonly id: string; readonly directory: string; } | undefined",
+      "state": "\"complete\" | \"applying\" | \"rolled-back\" | \"recovery-required\""
+    },
+    "category": "contract",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "format": "contract",
+      "id": "contract",
+      "workspaceId": "contract",
+      "options": "contract",
+      "staging": "contract",
+      "backup": "contract",
+      "operations": "contract",
+      "directories": "contract",
+      "outputs": "contract",
+      "lock": "contract",
+      "state": "contract"
+    }
+  },
+  ".:PublicationOperation": {
+    "signatures": [],
+    "options": {
+      "path": "string",
+      "previous": "WorkspaceFileEntry | undefined",
+      "incoming": "WorkspaceFileEntry | undefined",
+      "rollbackDisplaced": "string | undefined",
+      "phase": "\"pending\" | \"quarantine-intent\" | \"quarantined\" | \"install-intent\" | \"installed\" | \"restored\""
+    },
+    "category": "contract",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "path": "contract",
+      "previous": "contract",
+      "incoming": "contract",
+      "rollbackDisplaced": "contract",
+      "phase": "contract"
+    }
+  },
+  ".:PublicationRecoveryOptions": {
+    "signatures": [],
+    "options": {
+      "processesStopped": "true | undefined"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "processesStopped": "contract"
+    }
   },
   ".:publishArtifact": {
     "signatures": [
@@ -5736,6 +7026,18 @@
       "parents": "contract",
       "signal": "contract"
     }
+  },
+  ".:publishWorkspaceOutputs": {
+    "signatures": [
+      "(workspace: FileWorkspace, declaration: WorkspaceOutputOptions, transporter?: Transport): Promise<WorkspacePublication>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
   },
   ".:QueueClaim": {
     "signatures": [],
@@ -6247,6 +7549,18 @@
       "tree": "contract"
     }
   },
+  ".:recoverFileWorkspace": {
+    "signatures": [
+      "(record: FileWorkspaceRecord, options: FileWorkspaceRecoveryOptions): Promise<FileWorkspace>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
   ".:recoverSpeculation": {
     "signatures": ["(options: SpeculationRecoveryOptions): Promise<void>"],
     "options": {},
@@ -6265,6 +7579,30 @@
     "status": "implemented",
     "test": null,
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  ".:recoverWorkspacePathLock": {
+    "signatures": [
+      "(id: string, expectedDirectory: string, options: WorkspacePathRecoveryOptions): Promise<void>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
+  ".:recoverWorkspacePublication": {
+    "signatures": [
+      "(transporter: Transport, reference: TransportReference, action: \"finish\" | \"rollback\", options?: PublicationRecoveryOptions): Promise<TransportReference>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
     "optionCoverage": {}
   },
   ".:RecoveryArchiveOptions": {
@@ -6693,6 +8031,7 @@
       "remainingTurns": "number",
       "nextTurn": "() => ReplayTurn | undefined",
       "pendingSteering": "() => readonly string[] | undefined",
+      "fileWorkspaces": "{ readonly dispatch: boolean; readonly interactive?: boolean; readonly liveInput?: boolean; readonly continuation?: boolean; readonly repairs?: boolean; } | undefined",
       "usageInput": "\"inclusive\" | \"uncached\" | undefined",
       "name": "string",
       "bootstrap": "string | undefined",
@@ -6718,6 +8057,7 @@
       "remainingTurns": "contract",
       "nextTurn": "contract",
       "pendingSteering": "contract",
+      "fileWorkspaces": "contract",
       "usageInput": "contract",
       "name": "contract",
       "bootstrap": "contract",
@@ -7119,6 +8459,38 @@
       "read": "contract"
     }
   },
+  ".:restoreFileWorkspace": {
+    "signatures": [
+      "(record: FileWorkspaceRecord, options?: RestoreFileWorkspaceOptions): Promise<FileWorkspace>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
+  ".:RestoreFileWorkspaceOptions": {
+    "signatures": [],
+    "options": {
+      "runtime": "WorkspaceRuntimeOptions | undefined",
+      "retention": "WorkspaceRetention | undefined",
+      "portable": "boolean | undefined",
+      "recover": "{ readonly processesStopped: true; readonly expectedRevision?: string; readonly allocationReleased?: true; readonly adoptInterruptedFiles?: boolean; readonly adoptMountedSource?: boolean; } | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "runtime": "contract",
+      "retention": "contract",
+      "portable": "contract",
+      "recover": "contract"
+    }
+  },
   ".:restoreRecoveryTransfer": {
     "signatures": [
       "(plan: RecoveryRestorePlan, observation?: ObservationHub): Promise<RecoveryRestoreResult>"
@@ -7129,6 +8501,18 @@
     "status": "implemented",
     "test": null,
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  ".:restoreWorkspaceFiles": {
+    "signatures": [
+      "(transporter: Transport, reference: TransportReference, destination: string): Promise<void>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
     "optionCoverage": {}
   },
   ".:Retry": {
@@ -7594,6 +8978,7 @@
   ".:SandboxContext": {
     "signatures": [],
     "options": {
+      "workspaceIdentity": "string | undefined",
       "registerRecovery": "((resourceId: string) => Promise<void>) | undefined",
       "repository": "string",
       "directory": "string",
@@ -7607,6 +8992,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaceIdentity": "contract",
       "registerRecovery": "contract",
       "repository": "contract",
       "directory": "contract",
@@ -7618,6 +9004,7 @@
   ".:SandboxDiagnosticOptions": {
     "signatures": [],
     "options": {
+      "workspaceKind": "\"git\" | \"directory\" | \"ephemeral\" | undefined",
       "agent": "import(\"../adapters/agents/catalog.types.js\").BuiltInAgentName | undefined",
       "deadlineMs": "number | undefined",
       "signal": "AbortSignal | undefined",
@@ -7630,6 +9017,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaceKind": "contract",
       "agent": "contract",
       "deadlineMs": "contract",
       "signal": "contract",
@@ -7744,6 +9132,7 @@
   ".:SandboxProvider": {
     "signatures": [],
     "options": {
+      "workspaces": "SandboxWorkspaces | undefined",
       "recover": "((resourceId: string, options?: TransferOptions) => Promise<void>) | undefined",
       "name": "string",
       "placement": "\"mounted\" | \"remote\" | \"host\"",
@@ -7756,10 +9145,27 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaces": "contract",
       "recover": "contract",
       "name": "contract",
       "placement": "contract",
       "variables": "contract",
+      "acquire": "contract"
+    }
+  },
+  ".:SandboxWorkspaces": {
+    "signatures": [],
+    "options": {
+      "bindings": "readonly (\"ephemeral\" | \"copy\" | \"mount-readonly\" | \"mount-write\")[]",
+      "acquire": "(context: FileSandboxContext) => Promise<SandboxLease>"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "bindings": "contract",
       "acquire": "contract"
     }
   },
@@ -7995,6 +9401,18 @@
       "toleranceMs": "contract"
     }
   },
+  ".:snapshotWorkspaceFiles": {
+    "signatures": [
+      "(transporter: Transport, root: string, prefix: string): Promise<TransportReference>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
   ".:speculate": {
     "signatures": [
       "<T = undefined>(options: SpeculationOptions<T>): Promise<SpeculationResult<T>>"
@@ -8063,7 +9481,7 @@
       "score": "((candidate: SpeculativeValidation<T>) => number | Promise<number>) | undefined",
       "budget": "WorkflowBudget",
       "signal": "AbortSignal | undefined",
-      "sandbox": "Pick<SandboxOptions, \"hooks\" | \"logging\" | \"bootstrap\" | \"conversationHome\" | \"storageQuota\" | \"limits\"> | undefined",
+      "sandbox": "Pick<SandboxOptions, \"hooks\" | \"storageQuota\" | \"logging\" | \"bootstrap\" | \"conversationHome\" | \"limits\"> | undefined",
       "validate": "(candidate: SpeculativeValidation<T>) => boolean | Promise<boolean>"
     },
     "category": "contract",
@@ -8692,6 +10110,7 @@
   ".:TaskContext": {
     "signatures": [],
     "options": {
+      "workspaceCheckpoint": "import(\"./workflow/checkpoint.types.ts\").TaskWorkspaceCheckpoint | undefined",
       "prices": "ModelPriceTable | undefined",
       "quota": "WorkflowQuotaPause | undefined",
       "interaction": "TaskInteractionContext | undefined",
@@ -8711,6 +10130,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaceCheckpoint": "contract",
       "prices": "contract",
       "quota": "contract",
       "interaction": "contract",
@@ -8880,6 +10300,22 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {}
+  },
+  ".:TaskWorkspaceCheckpoint": {
+    "signatures": [],
+    "options": {
+      "read": "(key: string) => WorkflowJson | undefined",
+      "write": "(key: string, description: WorkflowJson) => Promise<void>"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "read": "contract",
+      "write": "contract"
+    }
   },
   ".:ToolOutput": {
     "signatures": [],
@@ -9824,6 +11260,7 @@
   ".:WorkflowCheckpoint": {
     "signatures": [],
     "options": {
+      "workspaces": "WorkspaceCheckpointMetadata | undefined",
       "format": "1",
       "identity": "string",
       "executionId": "string",
@@ -9837,6 +11274,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaces": "contract",
       "format": "contract",
       "identity": "contract",
       "executionId": "contract",
@@ -9866,6 +11304,7 @@
   ".:WorkflowCheckpointOptions": {
     "signatures": [],
     "options": {
+      "workspaces": "true | undefined",
       "store": "WorkflowCheckpointStore",
       "runId": "string",
       "version": "string",
@@ -9877,6 +11316,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaces": "contract",
       "store": "contract",
       "runId": "contract",
       "version": "contract",
@@ -10539,6 +11979,42 @@
       "policy": "contract"
     }
   },
+  ".:WorkspaceAllocationRecord": {
+    "signatures": [],
+    "options": {
+      "provider": "string",
+      "state": "\"active\" | \"allocating\" | \"released\" | \"uncertain\"",
+      "resourceId": "string | undefined",
+      "reference": "TransportReference"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "provider": "contract",
+      "state": "contract",
+      "resourceId": "contract",
+      "reference": "contract"
+    }
+  },
+  ".:WorkspaceCheckpointMetadata": {
+    "signatures": [],
+    "options": {
+      "format": "1",
+      "resources": "Readonly<Record<string, WorkflowJson>>"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "format": "contract",
+      "resources": "contract"
+    }
+  },
   ".:WorkspaceCommitsEvent": {
     "signatures": [],
     "options": {
@@ -10557,6 +12033,82 @@
       "baseline": "contract",
       "commits": "contract",
       "unavailable": "contract"
+    }
+  },
+  ".:WorkspaceConversationArchive": {
+    "signatures": [],
+    "options": {
+      "id": "string",
+      "format": "string",
+      "path": "string",
+      "archive": "TransportReference"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "id": "contract",
+      "format": "contract",
+      "path": "contract",
+      "archive": "contract"
+    }
+  },
+  ".:WorkspaceFileEntry": {
+    "signatures": [],
+    "options": {
+      "path": "string",
+      "kind": "\"directory\" | \"file\" | \"link\"",
+      "mode": "number",
+      "size": "number",
+      "sha256": "string",
+      "target": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "path": "contract",
+      "kind": "contract",
+      "mode": "contract",
+      "size": "contract",
+      "sha256": "contract",
+      "target": "contract"
+    }
+  },
+  ".:workspaceFingerprint": {
+    "signatures": [
+      "(workspace: FileWorkspace | string, paths?: readonly string[]): Promise<string>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 5,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Explicit host operation composed through TypeScript or CLI recovery; it is not a declarative YAML factory.",
+    "optionCoverage": {}
+  },
+  ".:WorkspaceInput": {
+    "signatures": [],
+    "options": {
+      "directory": "string",
+      "paths": "readonly string[] | undefined",
+      "snapshot": "TransportReference",
+      "transporter": "Transport"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "directory": "native",
+      "paths": "native",
+      "snapshot": "native",
+      "transporter": "native"
     }
   },
   ".:WorkspaceOptions": {
@@ -10591,6 +12143,106 @@
       "hooks": "contract"
     }
   },
+  ".:WorkspaceOutputBaseline": {
+    "signatures": [],
+    "options": {
+      "options": "WorkspaceOutputOptions",
+      "expected": "readonly WorkspaceFileEntry[]"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "options": "contract",
+      "expected": "contract"
+    }
+  },
+  ".:WorkspaceOutputOptions": {
+    "signatures": [],
+    "options": {
+      "paths": "readonly string[]",
+      "destination": "string",
+      "policy": "\"create\" | \"update\"",
+      "deleteMissing": "boolean | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "paths": "native",
+      "destination": "native",
+      "policy": "native",
+      "deleteMissing": "native"
+    }
+  },
+  ".:WorkspacePathLock": {
+    "signatures": [],
+    "options": {
+      "id": "string",
+      "directory": "string",
+      "writable": "boolean",
+      "identity": "WorkspacePathGate | undefined",
+      "ancestors": "readonly WorkspacePathGate[] | undefined",
+      "excludedDirectories": "readonly string[] | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "id": "contract",
+      "directory": "contract",
+      "writable": "contract",
+      "identity": "contract",
+      "ancestors": "contract",
+      "excludedDirectories": "contract"
+    }
+  },
+  ".:WorkspacePathRecoveryOptions": {
+    "signatures": [],
+    "options": {
+      "processesStopped": "true"
+    },
+    "category": "contract",
+    "lot": 6,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "processesStopped": "contract"
+    }
+  },
+  ".:WorkspacePublication": {
+    "signatures": [],
+    "options": {
+      "id": "string",
+      "destination": "string",
+      "state": "\"complete\" | \"rolled-back\" | \"recovery-required\"",
+      "created": "readonly string[]",
+      "replaced": "readonly string[]",
+      "deleted": "readonly string[]",
+      "reference": "TransportReference"
+    },
+    "category": "contract",
+    "lot": 4,
+    "status": "implemented",
+    "test": "test/functional/file-workspace-recovery.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "id": "contract",
+      "destination": "contract",
+      "state": "contract",
+      "created": "contract",
+      "replaced": "contract",
+      "deleted": "contract",
+      "reference": "contract"
+    }
+  },
   ".:WorkspaceRecord": {
     "signatures": [],
     "options": {
@@ -10615,6 +12267,104 @@
       "baseline": "contract",
       "gitDirectories": "contract",
       "policy": "contract"
+    }
+  },
+  ".:WorkspaceRetention": {
+    "signatures": [],
+    "options": {
+      "policy": "\"portable\"",
+      "transporter": "Transport"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "policy": "native",
+      "transporter": "native"
+    }
+  },
+  ".:WorkspaceRuntime": {
+    "signatures": [],
+    "options": {
+      "directory": "string",
+      "namespace": "string"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "directory": "contract",
+      "namespace": "contract"
+    }
+  },
+  ".:WorkspaceRuntimeOptions": {
+    "signatures": [],
+    "options": {
+      "directory": "string | undefined",
+      "namespace": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "directory": "native",
+      "namespace": "native"
+    }
+  },
+  ".:WorkspaceSession": {
+    "signatures": [],
+    "options": {
+      "id": "string",
+      "kind": "\"git\" | \"directory\" | \"ephemeral\"",
+      "directory": "string",
+      "runtime": "WorkspaceRuntime",
+      "close": "(options?: { readonly preserve?: boolean; }) => Promise<Disposal>",
+      "[Symbol.asyncDispose]": "() => Promise<void>"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "id": "contract",
+      "kind": "contract",
+      "directory": "contract",
+      "runtime": "contract",
+      "close": "contract",
+      "[Symbol.asyncDispose]": "contract"
+    }
+  },
+  ".:WorkspaceSource": {
+    "signatures": [],
+    "options": {
+      "kind": "\"git\"",
+      "directory": "string",
+      "access": "{ readonly mode: \"copy\"; } | { readonly mode: \"mount\"; readonly target: string; readonly readOnly: boolean; }",
+      "repository": "string | undefined",
+      "branch": "BranchPolicy | undefined",
+      "copies": "readonly string[] | undefined",
+      "guard": "DiffGuard | undefined"
+    },
+    "category": "contract",
+    "lot": 3,
+    "status": "implemented",
+    "test": "test/functional/file-workspaces.test.ts",
+    "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
+    "optionCoverage": {
+      "kind": "contract",
+      "directory": "contract",
+      "access": "contract",
+      "repository": "contract",
+      "branch": "contract",
+      "copies": "contract",
+      "guard": "contract"
     }
   },
   "./opentelemetry:createOpenTelemetryObserver": {
@@ -11302,6 +13052,7 @@
   "./recipes:RecipeResumeOptions": {
     "signatures": [],
     "options": {
+      "workspaceRecovery": "Readonly<Record<string, import(\"../file-workspace.types.ts\").FileWorkspaceRecoveryAuthorization>> | undefined",
       "runId": "string",
       "retryIncomplete": "boolean | undefined",
       "answers": "readonly WorkflowAnswer[] | undefined",
@@ -11317,6 +13068,7 @@
     "test": "test/functional/recipe-durable.test.ts",
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "workspaceRecovery": "contract",
       "runId": "contract",
       "retryIncomplete": "contract",
       "answers": "contract",

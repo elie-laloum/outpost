@@ -1,9 +1,11 @@
+import { fileWorkspaceRecordSchema } from "../../domain/file-workspace.constants.ts";
+
 export const recipeMetadataSchema = {
   type: "object",
   additionalProperties: false,
   required: ["format", "identity", "inputs", "resources"],
   properties: {
-    format: { const: 1 },
+    format: { enum: [1, 2] },
     identity: { type: "string", pattern: "^[a-f0-9]{64}$" },
     inputs: { type: "object" },
     report: {
@@ -40,6 +42,7 @@ export const recipeMetadataSchema = {
         additionalProperties: false,
         required: ["state"],
         properties: {
+          fileRecord: fileWorkspaceRecordSchema,
           integration: {
             type: "object",
             required: [

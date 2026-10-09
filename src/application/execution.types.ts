@@ -11,6 +11,15 @@ import type { Brief } from "../domain/prompts.types.ts";
 import type { ResponseSpec } from "../domain/response.types.ts";
 import type { Logging } from "../infrastructure/journal.types.ts";
 import type { Steering } from "../domain/steering.types.ts";
+import type { WorkspaceRecord } from "../domain/workspace.types.ts";
+
+export type ExecutionWorkspace =
+  | Pick<WorkspaceRecord, "directory" | "repository" | "branch" | "baseBranch">
+  | {
+      readonly directory: string;
+      readonly projectDirectory: string;
+      readonly runtimeDirectory?: string;
+    };
 
 export interface DispatchOptions<T = undefined> {
   readonly watchdog?: WatchdogOptions;
@@ -40,6 +49,7 @@ export interface DispatchOptions<T = undefined> {
 }
 
 export interface TurnContext {
+  readonly runtimeDirectory?: string;
   readonly repetition?: RepetitionWatchdog;
   readonly repository: string;
   readonly repair: boolean;

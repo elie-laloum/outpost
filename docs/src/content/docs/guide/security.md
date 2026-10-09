@@ -44,7 +44,7 @@ The sandbox confines the agent’s commands, not your own code. These parts run 
 - [Harness hooks](../harness-permissions/): Run in the Outpost process at each step of the built-in loop.
 - [Workflow callbacks](../task-dependencies/): Tasks, loop checks and gate verifiers are your code, run by the workflow engine.
 - [Preparation hooks](../environment-setup/): `workspaceReady` and `hostReady` commands run on the host, in the worktree.
-- [Returned code](../repository-and-branch/): The agent’s commits land in your repository: review them before you build or test on the host.
+- [Returned code](../workspaces/): The agent’s commits land in your repository: review them before you build or test on the host.
 - [Git metadata](../containers/): A mounted agent can write hooks and configuration in `.git` that your own Git commands then run.
 
 ## What Outpost does not authenticate

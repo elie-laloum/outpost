@@ -26,7 +26,11 @@ async function project(t: TestContext, prompt = false) {
   await cp(
     resolve("test-recipe-linear-development/repo"),
     join(directory, "repo"),
-    { recursive: true },
+    {
+      recursive: true,
+      filter: (source) =>
+        source !== resolve("test-recipe-linear-development/repo/.git"),
+    },
   );
   const file = resolve("test-recipe-linear-development/recipe.yaml");
   const config = join(directory, "outpost.yaml");

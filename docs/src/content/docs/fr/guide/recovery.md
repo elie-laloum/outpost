@@ -222,3 +222,7 @@ Ne supprimez jamais `.outpost` ni ses dossiers à la main : ils peuvent contenir
 - Une archive contient les fichiers de récupération, pas le dépôt : la restauration exige toujours le dépôt source.
 
 API : [recoveryDetails](../../reference/recoverydetails/) · [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [archiveRecovery](../../reference/archiverecovery/) · [materializeRecoveryArchive](../../reference/materializerecoveryarchive/).
+
+## Workspaces de fichiers
+
+Pour les ressources de dossier et éphémères, utiliser `recovery inspect --runtime-directory PATH`. Les actions de publication `inspect`, `finish` et `rollback` utilisent leur journal sans rejouer les tâches. Les effets d’un montage inscriptible sont immédiats et n’ont pas de rollback de publication. Voir [la récupération de fichiers](../workspaces/#vérifier-les-capacités-et-récupérer-une-publication).

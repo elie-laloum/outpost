@@ -7,6 +7,7 @@ import {
 } from "../../domain/transcript.ts";
 import type { TranscriptRecord } from "../../domain/transcript.types.ts";
 import { lock } from "../git/lock.ts";
+import { lockWorkspacePath } from "../workspace-lock.ts";
 import { harnessTranscriptPath } from "./harness-store.ts";
 import type {
   TranscriptHandle,
@@ -21,11 +22,22 @@ export async function openTranscript(
     lines(options.observation?.redact(records) ?? records);
   const id =
     continuation && !continuation.fork ? continuation.id : randomUUID();
-  const file = harnessTranscriptPath(options.repository, id);
-  const release = await lock(options.repository, `harness-conversation:${id}`);
+  const file = harnessTranscriptPath(
+    options.repository,
+    id,
+    options.runtimeDirectory,
+  );
+  const release = options.runtimeDirectory
+    ? await lockWorkspacePath(file, true)
+    : await lock(options.repository, `harness-conversation:${id}`);
   try {
     const source = continuation
-      ? await options.store.locate(continuation.id, options.repository)
+      ? await options.store.locate(
+          continuation.id,
+          options.repository,
+          undefined,
+          options.runtimeDirectory,
+        )
       : undefined;
     const text = source ? await readFile(source.file, "utf8") : undefined;
     const records = text ? parseTranscript(text) : [];

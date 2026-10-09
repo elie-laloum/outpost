@@ -1,5 +1,360 @@
 [
   {
+    "title": ["File workspaces", "Workspaces de fichiers"],
+    "items": [
+      {
+        "slug": "reference/createworkspace",
+        "label": "createWorkspace",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/restorefileworkspace",
+        "label": "restoreFileWorkspace",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workspacefingerprint",
+        "label": "workspaceFingerprint",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/snapshotworkspacefiles",
+        "label": "snapshotWorkspaceFiles",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/restoreworkspacefiles",
+        "label": "restoreWorkspaceFiles",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/prepareworkspaceoutputs",
+        "label": "prepareWorkspaceOutputs",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/publishworkspaceoutputs",
+        "label": "publishWorkspaceOutputs",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/inspectworkspacepublication",
+        "label": "inspectWorkspacePublication",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverworkspacepublication",
+        "label": "recoverWorkspacePublication",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/inspectfileworkspace",
+        "label": "inspectFileWorkspace",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverfileworkspace",
+        "label": "recoverFileWorkspace",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineisolatedcommandtask",
+        "label": "defineIsolatedCommandTask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/inspectworkspacepathlocks",
+        "label": "inspectWorkspacePathLocks",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverworkspacepathlock",
+        "label": "recoverWorkspacePathLock",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workspacesource",
+        "label": "WorkspaceSource",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/fileworkspacesource",
+        "label": "FileWorkspaceSource",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workspaceretention",
+        "label": "WorkspaceRetention",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workspaceinput",
+        "label": "WorkspaceInput",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/gitdispatchrequest",
+        "label": "GitDispatchRequest",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/createdworkspace",
+        "label": "CreatedWorkspace",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/filesandboxoptions",
+        "label": "FileSandboxOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/filedispatchrequest",
+        "label": "FileDispatchRequest",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/fileisolatedcommandrequest",
+        "label": "FileIsolatedCommandRequest",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/gitworkspacesource",
+        "label": "GitWorkspaceSource",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacesession",
+        "label": "WorkspaceSession",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceruntime",
+        "label": "WorkspaceRuntime",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceruntimeoptions",
+        "label": "WorkspaceRuntimeOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacefileentry",
+        "label": "WorkspaceFileEntry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspacerecord",
+        "label": "FileWorkspaceRecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceallocationrecord",
+        "label": "WorkspaceAllocationRecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceconversationarchive",
+        "label": "WorkspaceConversationArchive",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceoutputoptions",
+        "label": "WorkspaceOutputOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceoutputbaseline",
+        "label": "WorkspaceOutputBaseline",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacepublication",
+        "label": "WorkspacePublication",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspace",
+        "label": "FileWorkspace",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspaceoptions",
+        "label": "FileWorkspaceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gitworkspace",
+        "label": "GitWorkspace",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gitworkspaceoptions",
+        "label": "GitWorkspaceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gitworkspacesandboxoptions",
+        "label": "GitWorkspaceSandboxOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspacerecoveryauthorization",
+        "label": "FileWorkspaceRecoveryAuthorization",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/restorefileworkspaceoptions",
+        "label": "RestoreFileWorkspaceOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspaceinspection",
+        "label": "FileWorkspaceInspection",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspaceinspectionoptions",
+        "label": "FileWorkspaceInspectionOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileworkspacerecoveryoptions",
+        "label": "FileWorkspaceRecoveryOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filesandbox",
+        "label": "FileSandbox",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filesandboxsettings",
+        "label": "FileSandboxSettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filedispatchresult",
+        "label": "FileDispatchResult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileattachresult",
+        "label": "FileAttachResult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filerunreport",
+        "label": "FileRunReport",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileagenttaskoptions",
+        "label": "FileAgentTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileisolatedtaskoptions",
+        "label": "FileIsolatedTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mixedisolatedtaskoptions",
+        "label": "MixedIsolatedTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mixedagenttaskoptions",
+        "label": "MixedAgentTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/isolatedcommandtaskoptions",
+        "label": "IsolatedCommandTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filerecipebindings",
+        "label": "FileRecipeBindings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mixedrecipebindings",
+        "label": "MixedRecipeBindings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filerecipeconfiguration",
+        "label": "FileRecipeConfiguration",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileinteractiveagenttaskoptions",
+        "label": "FileInteractiveAgentTaskOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileinteractiveagentresult",
+        "label": "FileInteractiveAgentResult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileselectionoptions",
+        "label": "FileSelectionOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/publicationjournal",
+        "label": "PublicationJournal",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/publicationoperation",
+        "label": "PublicationOperation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/publicationdirectory",
+        "label": "PublicationDirectory",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/publicationrecoveryoptions",
+        "label": "PublicationRecoveryOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacecheckpointmetadata",
+        "label": "WorkspaceCheckpointMetadata",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskworkspacecheckpoint",
+        "label": "TaskWorkspaceCheckpoint",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filesandboxcontext",
+        "label": "FileSandboxContext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxworkspaces",
+        "label": "SandboxWorkspaces",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacepathlock",
+        "label": "WorkspacePathLock",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacepathrecoveryoptions",
+        "label": "WorkspacePathRecoveryOptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["YAML recipes", "Recettes YAML"],
     "items": [
       {

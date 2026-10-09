@@ -40,7 +40,7 @@ export function recipeProjectIdentity(
   project: RecipeProject,
   inputs: RecipeRunOptions["inputs"],
 ): string {
-  const configuration = Object.fromEntries(
+  let configuration = Object.fromEntries(
     Object.entries(project.configuration).filter(
       ([key]) =>
         ![
@@ -52,6 +52,14 @@ export function recipeProjectIdentity(
         ].includes(key),
     ),
   );
+  if (
+    project.files?.retention?.policy === "portable" &&
+    recipeObject(configuration.runtime)
+  ) {
+    const { directory: _physicalDirectory, ...logicalRuntime } =
+      configuration.runtime;
+    configuration = { ...configuration, runtime: logicalRuntime };
+  }
   const document = {
     ...project.document,
     workflow: Object.fromEntries(
@@ -66,7 +74,9 @@ export function recipeProjectIdentity(
         recipeJson({
           document,
           configuration,
-          directory: project.directory,
+          ...(project.files?.retention?.policy === "portable"
+            ? { namespace: project.files.runtime.namespace }
+            : { directory: project.directory }),
           inputs,
         }),
       ),
@@ -111,7 +121,7 @@ export async function openRecipeCheckpoint(
         "Recipe, inputs, configuration or extension versions changed; resume identity does not match",
       );
     let metadata: RecipeCheckpointMetadata = previousMetadata ?? {
-      format: 1,
+      format: project.files ? 2 : 1,
       identity,
       inputs,
       resources: {},
@@ -177,6 +187,7 @@ export async function openRecipeCheckpoint(
       inputs,
       previous,
       options: {
+        ...(project.files ? { workspaces: true } : {}),
         runId,
         version: `${configured.version}#recipe:${identity}`,
         ...("retryIncomplete" in settings && settings.retryIncomplete

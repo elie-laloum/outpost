@@ -369,3 +369,7 @@ hooks:
 Attach the hook through `hooks: [{ $ref: hooks.before }]` on a harness. Apply the same pattern to tool execution, custom context, instructions and routing state; errors identify the required contract. Factories can also receive typed component references through schema annotations. Owned components close in dependency order; observer cleanup errors appear in `observerErrors` without changing a successful task outcome.
 
 Compose JSON values, conditions, loops, decisions and isolated tasks with [format-3 workflows](../recipe-workflows/). Data-only recipes allocate no sandbox.
+
+## File workspaces
+
+Configuration version 3 adds explicit directory and ephemeral sources. See [Workspaces](../workspaces/) for file sources, output publication and explicit mounts. Versions 1 and 2 retain their Git contracts.

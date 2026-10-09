@@ -6,6 +6,8 @@ This file applies to the entire repository. It is the durable project brief for 
 
 Outpost is a TypeScript library and CLI for running coding agents in sandboxes, managing their Git workspaces, preserving conversations and composing typed workflows.
 
+Explicit file workspaces (`directory` copy or mounted source, and `ephemeral`) run without Git through `createWorkspace()` and `workspaceSource`; legacy `Workspace` and Git configuration defaults remain intact. Configuration version 3 declares these sources and `runtime.directory`/`runtime.namespace`. Owned file roots, mounted sources, settled snapshots and protected output publication have separate ownership and recovery contracts. Keep file-mode paths free of Git probes and implicit data-directory environment loading. Writable mounts act immediately; publication rollback never reverses their effects. Native CLI file variants require demonstrated capabilities, and undemonstrated variants are refused.
+
 - Prioritize reliable, directly usable behavior and an excellent developer experience.
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.

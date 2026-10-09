@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import {
   starterRecipe,
   starterRecipeConfiguration,
+  starterFileRecipe,
+  starterFileConfigurations,
 } from "./recipe-init.constants.ts";
 import type { CliInvocation } from "./main.types.ts";
 
@@ -12,6 +14,9 @@ export async function initializeRecipe({
 }: CliInvocation): Promise<void> {
   if (!values.file) throw new Error("Recipe init requires --file recipe.yaml");
   const file = resolve(values.file);
+  const kind = values["workspace-kind"] ?? "git";
+  if (kind !== "git" && kind !== "directory" && kind !== "ephemeral")
+    throw new Error("Unsupported workspace kind");
   const configuration = values.config ? resolve(values.config) : undefined;
   if (configuration === file)
     throw new Error("Recipe and configuration require separate files");
@@ -36,7 +41,7 @@ export async function initializeRecipe({
   ).replaceAll("\\", "/");
   await writeFile(
     file,
-    `# yaml-language-server: $schema=${schema}\n${starterRecipe}`,
+    `# yaml-language-server: $schema=${schema}\n${kind === "git" ? starterRecipe : starterFileRecipe}`,
     { flag: "wx" },
   );
   if (configuration) {
@@ -48,7 +53,7 @@ export async function initializeRecipe({
     ).replaceAll("\\", "/");
     await writeFile(
       configuration,
-      `# yaml-language-server: $schema=${schema}\n${starterRecipeConfiguration}`,
+      `# yaml-language-server: $schema=${schema}\n${kind === "git" ? starterRecipeConfiguration : starterFileConfigurations[kind]}`,
       { flag: "wx" },
     );
   }

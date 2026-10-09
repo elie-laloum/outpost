@@ -47,7 +47,7 @@ Outpost copies the branch history into the container and the agent works on that
 | [Durable speculation](../speculation/) | Supported                                                      | Rejected: the provider cannot recover abandoned containers                 |
 | Interactive terminal                   | Supported                                                      | Supported; changes come back when you quit                                 |
 
-`copies` and `includeUncommitted` select extra inputs as on [cloud sandboxes](../cloud-sandboxes/). Branch policies: [Repository and branch](../repository-and-branch/).
+`copies` and `includeUncommitted` select extra inputs as on [cloud sandboxes](../cloud-sandboxes/). Branch policies: [Repository and branch](../workspaces/).
 
 ## Synchronize changes to the host
 

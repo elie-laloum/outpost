@@ -18,7 +18,7 @@ Cet exemple permet d’essayer plusieurs corrections pour un même bug. Chaque c
 - [Claude Code](../claude-code/): Connectez-vous sur l’hôte ; l’image de l’installation contient déjà sa CLI.
 - [Sessions de sandbox](../sandbox-sessions/): Lancez les tests dans la sandbox encore ouverte du candidat.
 - [Budgets](../budgets/): Un seul budget borne les tentatives et les tokens de tous les candidats.
-- [Dépôt et branche](../repository-and-branch/): Chaque candidat committe sur une branche nommée, dans son propre worktree.
+- [Dépôt et branche](../workspaces/): Chaque candidat committe sur une branche nommée, dans son propre worktree.
 
 ## Écrire le script
 

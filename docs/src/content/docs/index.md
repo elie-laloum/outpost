@@ -22,7 +22,7 @@ landing:
         text: "A repository, a brief and a branch for the task."
         role: "You"
         icon: "branch"
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
       - title: "Run your agent"
         text: "Codex, Claude Code or another agent in your chosen sandbox."
         role: "Agent"
@@ -37,12 +37,12 @@ landing:
         text: "You decide which changes to integrate."
         role: "You"
         icon: "branch"
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
     result:
       label: "A branch for your review"
       branch: "outpost/fix-tests"
       text: "The fix and its commits, ready for review."
-      href: "guide/repository-and-branch/"
+      href: "guide/workspaces/"
     link: { label: "Build this workflow", href: "guide/development-workflow/" }
   overview:
     - title: "Less setup around every task"
@@ -74,7 +74,7 @@ landing:
         href: "guide/choose-an-agent/"
       - title: "Git workspaces"
         text: "Give each task its own worktree, retain named branches and choose when to integrate the commits."
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
       - title: "Typed workflows"
         text: "Connect task outputs with dependencies. Run independent tasks in parallel and pass typed values between steps."
         href: "guide/task-dependencies/"
@@ -194,7 +194,7 @@ A ticket asks for a CSV export of the orders list. A planning agent identifies t
   - Maintainer
   - → **Prepare the branch**: approved
   - → **Stop the run**: rejected
-- [**Prepare the branch**](guide/repository-and-branch/): Commit the accepted work on outpost/csv-export for integration.
+- [**Prepare the branch**](guide/workspaces/): Commit the accepted work on outpost/csv-export for integration.
   - Checks
 - [**Stop the run**](guide/recovery/): Keep the workspace and findings available for investigation.
   - Checks

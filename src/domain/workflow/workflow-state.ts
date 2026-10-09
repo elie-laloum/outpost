@@ -1,4 +1,5 @@
 import { interactionContext, immutableInput } from "./input.ts";
+import { checkpointValue } from "./checkpoint-value.ts";
 import { taskIdempotencyKey } from "./idempotency.ts";
 import { createObservationHub } from "../observation.ts";
 import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
@@ -233,6 +234,25 @@ export function workflowState(
       executionId,
       idempotencyKey: taskIdempotencyKey(executionId, item.key),
       checkpoint: () => runtime.persist(),
+      ...(checkpoint?.workspaceResources
+        ? {
+            workspaceCheckpoint: {
+              read: (key: string) => checkpoint.workspaceResources?.get(key),
+              async write(
+                key: string,
+                description: import("./checkpoint.types.ts").WorkflowJson,
+              ) {
+                if (!key.trim())
+                  throw new Error(
+                    "Workspace checkpoint resource key must not be empty",
+                  );
+                checkpointValue(description);
+                checkpoint.workspaceResources?.set(key, description);
+                await runtime.persist();
+              },
+            },
+          }
+        : {}),
       reportUsage: (usage) => report(usage),
       reportUsageOnce: (receipt, usage) => {
         validateUsageReceipt(receipt);

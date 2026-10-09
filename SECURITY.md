@@ -2,6 +2,10 @@
 
 Outpost runs coding agents that execute arbitrary project commands. Use it with repositories and credentials appropriate for that task.
 
+File workspaces can run without Git. Directory copies exclude Git and Outpost control metadata; ordinary source files remain data, including any credential files the caller selected. New copies, snapshots and publications reject outgoing links and special files; link checks expand captured aliases before parent traversal and refuse missing targets or excluded aliases. Explicit source mounts expose the complete source; writable mounts change it immediately and cleanup never rolls those effects back. Owned working roots and runtime control storage remain separate. The local provider remains unisolated.
+
+Protected publication uses destination manifests, host-user overlap locks, same-filesystem quarantine, exclusive installation and conditional reverse rollback. These locks coordinate Outpost writers without preventing external edits. Publication is recoverable across operations, not an atomic transaction over an entire tree. Concurrent changes can leave backups and journal operations requiring explicit recovery. File snapshots establish file integrity, not disposal of unknown cloud resources or authorization to recover owners and replay interrupted work.
+
 By default, Docker/Podman expose the selected checkout, Git metadata and explicit volumes. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
 
 Shared Git metadata is writable by the agent. A mounted sandbox is not an adversarial boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but a malicious repository can contain other executable configuration or project tooling. Do not run untrusted repositories with valuable host credentials. Host `local()` provides no isolation.

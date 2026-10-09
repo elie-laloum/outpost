@@ -3,6 +3,8 @@ import { isAbsolute, posix, relative } from "node:path";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import type { SandboxContext, Volume } from "../domain/sandbox.types.ts";
 import { expandPath } from "../infrastructure/files.ts";
+import { inside } from "../infrastructure/files.ts";
+import { canonicalWorkspacePath } from "../infrastructure/workspace-lock.ts";
 import { validateIsolatedMount } from "./container-isolation.ts";
 import type { ContainerMounts, ContainerOptions } from "./container.types.ts";
 
@@ -16,9 +18,13 @@ export async function containerMounts(
   const env: Record<string, string> = {
     ...context.variables,
     HOME: home,
-    GIT_CONFIG_COUNT: "1",
-    GIT_CONFIG_KEY_0: "safe.directory",
-    GIT_CONFIG_VALUE_0: "*",
+    ...(context.workspaceIdentity === undefined
+      ? {
+          GIT_CONFIG_COUNT: "1",
+          GIT_CONFIG_KEY_0: "safe.directory",
+          GIT_CONFIG_VALUE_0: "*",
+        }
+      : {}),
   };
   const internal: Volume[] =
     config.repositoryMode === "isolated"
@@ -64,6 +70,18 @@ export async function containerMounts(
         : destination.startsWith("~/")
           ? posix.resolve(home, destination.slice(2))
           : posix.resolve(root, destination);
+    if (context.workspaceIdentity !== undefined && !internal.includes(volume)) {
+      const canonicalSource = await canonicalWorkspacePath(source);
+      const control = await canonicalWorkspacePath(context.repository);
+      invariant(
+        !inside(canonicalSource, control) && !inside(control, canonicalSource),
+        "File workspace mounts cannot expose runtime control storage",
+      );
+      invariant(
+        target !== root && !root.startsWith(`${target}/`),
+        "Custom mounts cannot replace the owned workspace root",
+      );
+    }
     if (config.repositoryMode === "isolated")
       await validateIsolatedMount(context, source, target);
     if (info.isFile() && !internal.includes(volume)) {

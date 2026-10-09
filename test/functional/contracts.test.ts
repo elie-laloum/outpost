@@ -221,7 +221,10 @@ test("already cancelled operations preserve the exact reason without touching a 
   };
   const reason = new Error("stop before setup"),
     signal = AbortSignal.abort(reason);
-  for (const operation of [dispatch, attach])
+  const operations: readonly ((
+    options: Parameters<typeof attach>[0] & Parameters<typeof dispatch>[0],
+  ) => Promise<unknown>)[] = [dispatch, attach];
+  for (const operation of operations)
     await assert.rejects(
       operation({
         repository: "nonexistent-audit-path",

@@ -61,6 +61,11 @@ export function scriptedAgent(options: ScriptedAgentOptions): CliAgent {
   const adapter: CliAgent = {
     kind: "cli",
     harness,
+    fileWorkspaces: {
+      dispatch: !options.turns.some((turn) => turn.commit),
+      continuation: true,
+      repairs: true,
+    },
     name: options.name ?? "scripted",
     usage: "events",
     capture: false,

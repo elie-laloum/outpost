@@ -3,6 +3,10 @@ import type { UsageCost } from "../domain/pricing.types.ts";
 import { calculateUsageCost } from "../domain/pricing.ts";
 import { createRunReportEvents } from "./run-report-events.ts";
 import { createRunReport, runReportSnapshot } from "./run-report.ts";
+import {
+  createFileRunReport,
+  fileRunReportSnapshot,
+} from "./file-run-report.ts";
 import { accountTaskUsage, deliverTaskUsage } from "./task-usage.ts";
 import { access } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -160,6 +164,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
     }
     await finish();
     const snapshot = result.report && runReportSnapshot(result.report);
+    const fileSnapshot = result.report && fileRunReportSnapshot(result.report);
     const warnings = [...(snapshot?.warnings ?? []), ...reportEvents.warnings];
     if (observation.dropped > initialDropped)
       warnings.push(
@@ -192,7 +197,21 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
               }),
             ),
           }
-        : {}),
+        : fileSnapshot
+          ? {
+              report: createFileRunReport(
+                observation.redact({
+                  ...fileSnapshot,
+                  usage: result.usage,
+                  cost,
+                  durationMs: performance.now() - started,
+                  failedTools: reportEvents.failures,
+                  omittedFailures: reportEvents.omittedFailures,
+                  warnings,
+                }),
+              ),
+            }
+          : {}),
       ...(log?.reference ? { logReference: log.reference } : {}),
       observerErrors: [...failures, ...observation.errors],
     };

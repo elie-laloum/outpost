@@ -16,7 +16,7 @@ export type {
 export function prepareBrief(
   source: string,
   values: PromptVariables = {},
-  builtins: PromptBuiltins,
+  builtins: PromptBuiltins | Readonly<Record<string, never>>,
 ): PreparedBrief {
   for (const key of Object.keys(builtins))
     invariant(!(key in values), `Reserved prompt variable: ${key}`);

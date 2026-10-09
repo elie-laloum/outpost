@@ -8,7 +8,7 @@ description: "Laissez un agent corriger le code et réessayer jusqu’à ce que 
 <!-- features -->
 
 - [Sessions de sandbox](../sandbox-sessions/): Une sandbox à chaud garde les dépendances entre les tours de l’agent et les tests.
-- [Dépôt et branche](../repository-and-branch/): La correction arrive sur une branche nommée, jamais sur votre checkout.
+- [Dépôt et branche](../workspaces/): La correction arrive sur une branche nommée, jamais sur votre checkout.
 - [Préparer l’environnement](../environment-setup/): Les dépendances s’installent une fois, avant le premier tour.
 - [Boucles de vérification](../verification-loops/): Tenter, vérifier, renvoyer l’échec, recommencer.
 - [Budgets](../budgets/): Plafonner les tentatives et les tokens de toute l’exécution.

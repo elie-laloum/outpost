@@ -14,6 +14,7 @@ import {
   defineAgentTask,
   defineCommandTask,
   defineIsolatedTask,
+  defineIsolatedCommandTask,
 } from "../tasks.ts";
 import { defineDecisionTask } from "../decision-task.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
@@ -215,10 +216,16 @@ export function bindRecipeWorkflow(
     if (step.interactive) {
       if (!configuration.interactive)
         throw new Error("Recipe dialogues require createRecipeRuntime");
-      const interactive = defineInteractiveAgentTask({
-        ...common,
-        ...configuration.interactive,
-      });
+      const interactive =
+        "workspaceSource" in configuration.interactive
+          ? defineInteractiveAgentTask({
+              ...common,
+              ...configuration.interactive,
+            })
+          : defineInteractiveAgentTask({
+              ...common,
+              ...configuration.interactive,
+            });
       save(
         defineTask({
           ...interactive,
@@ -288,6 +295,26 @@ export function bindRecipeWorkflow(
           "Recipe isolated components require createRecipeRuntime",
         );
       const request = configuration.isolated;
+      if ("command" in request) {
+        const isolated = defineIsolatedCommandTask({
+          ...common,
+          request: (context) => ({
+            ...request,
+            command: renderRecipeCommand(request.command, (value) =>
+              text(value, context),
+            ),
+          }),
+        });
+        save(
+          defineTask({
+            ...isolated,
+            async perform(context) {
+              return { value: recipeJson(await isolated.perform(context)) };
+            },
+          }),
+        );
+        continue;
+      }
       const isolated = defineIsolatedTask({
         ...common,
         ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
@@ -299,9 +326,14 @@ export function bindRecipeWorkflow(
                 ? request.brief
                 : { text: text(request.brief.text, context) },
           };
-          return bindings.prepareIsolated
-            ? bindings.prepareIsolated(step.key, rendered, context)
+          const prepared = bindings.prepareIsolated
+            ? await bindings.prepareIsolated(step.key, rendered, context)
             : rendered;
+          if ("command" in prepared)
+            throw new Error(
+              "An isolated agent declaration cannot become a command",
+            );
+          return prepared;
         },
       });
       save(
@@ -375,15 +407,17 @@ export function bindRecipeWorkflow(
       defineTask({
         ...common,
         async perform(context) {
+          const request = {
+            ...configuration.dispatch,
+            agent,
+            brief: { text: text(brief, context) },
+          };
+          await bindings.validateDispatch?.(request);
           const task = defineAgentTask({
             ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
             key: step.key,
             sandbox: await sandbox(context),
-            request: () => ({
-              ...configuration.dispatch,
-              agent,
-              brief: { text: text(brief, context) },
-            }),
+            request: () => request,
           });
           return recipeDispatchProjection(await task.perform(context));
         },

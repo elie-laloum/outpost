@@ -60,7 +60,7 @@ integration:
   deadlineMs: 600000
 ```
 
-The [native conflict-resolution contract](../repository-and-branch/) still verifies the combined commit, rechecks diff guards and fences changed host/source commits. Verification failure retains recovery workspaces. A recipe cannot replace that verification with an agent's unverified assertion.
+The [native conflict-resolution contract](../workspaces/) still verifies the combined commit, rechecks diff guards and fences changed host/source commits. Verification failure retains recovery workspaces. A recipe cannot replace that verification with an agent's unverified assertion.
 
 ## Declare reporters and telemetry
 

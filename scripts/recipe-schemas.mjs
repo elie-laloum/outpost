@@ -158,11 +158,157 @@ for (const component of components.filter((c) => c.kind === "harness")) {
 const old = structuredClone(configuration);
 delete old.$schema;
 delete old.title;
+const config3 = structuredClone(current);
+config3.properties.version = { const: 3 };
+delete config3.properties.repository;
+delete config3.properties.branch;
+config3.required = ["version"];
+config3.properties.runtime = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    directory: { type: "string" },
+    namespace: {
+      type: "string",
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+    },
+  },
+};
+config3.properties.workspace = {
+  oneOf: [
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["kind"],
+      properties: { kind: { const: "ephemeral" } },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["kind", "directory"],
+      properties: {
+        kind: { const: "directory" },
+        directory: { type: "string", minLength: 1 },
+        paths: { type: "array", minItems: 1, items: { type: "string" } },
+        access: {
+          anyOf: [
+            { const: "copy" },
+            {
+              type: "object",
+              additionalProperties: false,
+              required: ["mode"],
+              properties: { mode: { const: "copy" } },
+            },
+            {
+              type: "object",
+              additionalProperties: false,
+              required: ["mode", "target", "readOnly"],
+              properties: {
+                mode: { const: "mount" },
+                target: { type: "string", minLength: 1 },
+                readOnly: { type: "boolean" },
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["kind", "repository"],
+      properties: {
+        ...workspace.properties,
+        kind: { const: "git" },
+        repository: configuration.properties.repository,
+        branch: configuration.properties.branch,
+      },
+    },
+  ],
+};
+const fileRetention = {
+  anyOf: [
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["policy"],
+      properties: { policy: { enum: ["run", "local"] } },
+    },
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["policy", "transporter"],
+      properties: {
+        policy: { const: "portable" },
+        transporter: recipeScalarSchemas.reference,
+      },
+    },
+  ],
+};
+const workspaceInputs = {
+  type: "array",
+  items: {
+    anyOf: [
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["directory"],
+        properties: {
+          directory: { type: "string", minLength: 1 },
+          paths: {
+            type: "array",
+            minItems: 1,
+            items: { type: "string", minLength: 1 },
+          },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["snapshot", "transporter"],
+        properties: {
+          snapshot: {
+            type: "object",
+            additionalProperties: false,
+            required: ["key", "revision"],
+            properties: {
+              key: { type: "string", minLength: 1 },
+              revision: { type: "string", minLength: 1 },
+            },
+          },
+          transporter: recipeScalarSchemas.reference,
+        },
+      },
+    ],
+  },
+};
+for (const variant of config3.properties.workspace.oneOf.slice(0, 2)) {
+  variant.properties.retention = fileRetention;
+  variant.properties.inputs = workspaceInputs;
+}
+config3.properties.outputs = {
+  type: "array",
+  items: {
+    type: "object",
+    additionalProperties: false,
+    required: ["paths", "destination", "policy"],
+    properties: {
+      paths: {
+        type: "array",
+        minItems: 1,
+        items: { type: "string", minLength: 1 },
+      },
+      destination: { type: "string", minLength: 1 },
+      policy: { enum: ["create", "update"] },
+      deleteMissing: { type: "boolean" },
+    },
+  },
+};
 const configSchema = {
   $schema: configuration.$schema,
   title: configuration.title,
   $defs: definitions,
-  oneOf: [old, current],
+  oneOf: [old, current, config3],
 };
 const version3 = structuredClone(
   recipe.oneOf.find((shape) => shape.properties.version.const === 2),

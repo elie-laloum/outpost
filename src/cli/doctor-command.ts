@@ -31,12 +31,21 @@ export async function doctorCommand(
   );
   for (const key of Object.keys(values))
     invariant(
-      ["sandboxProvider", "agent", "image", "json"].includes(key),
+      ["sandboxProvider", "agent", "image", "workspace-kind", "json"].includes(
+        key,
+      ),
       `Unsupported doctor option: --${key}`,
     );
   const sandboxProvider =
     values.sandboxProvider ?? doctorDefaults.sandboxProvider;
   const agent = values.agent ?? doctorDefaults.agent;
+  const workspaceKind = values["workspace-kind"] ?? "git";
+  invariant(
+    workspaceKind === "git" ||
+      workspaceKind === "directory" ||
+      workspaceKind === "ephemeral",
+    "Unsupported workspace kind",
+  );
   invariant(
     isProvider(sandboxProvider),
     "Unknown provider. Choose docker, podman, local, vercel or daytona.",
@@ -49,6 +58,7 @@ export async function doctorCommand(
     {
       sandboxProvider,
       agent,
+      workspaceKind,
       ...(values.image !== undefined ? { image: values.image } : {}),
     },
     execute,

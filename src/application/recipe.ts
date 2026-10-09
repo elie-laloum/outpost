@@ -9,7 +9,7 @@ import type {
 import type { RecipeDocument } from "../domain/recipe.types.ts";
 import { parseRecipe } from "../infrastructure/recipe.ts";
 import { defineAgentTask, defineCommandTask } from "./tasks.ts";
-import type { RecipeBindings } from "./recipe.types.ts";
+import type { MixedRecipeBindings } from "./recipe.types.ts";
 import type { RecipeDispatchSettings } from "./recipes/agent-components.types.ts";
 import { resolveRecipeInputs, recipeValue } from "../domain/recipe-inputs.ts";
 import {
@@ -19,14 +19,14 @@ import {
 
 export function defineRecipe(
   source: string,
-  bindings: RecipeBindings,
+  bindings: MixedRecipeBindings,
 ): Workflow {
   return bindRecipe(parseRecipe(source), bindings);
 }
 
 export function bindRecipe(
   document: RecipeDocument,
-  bindings: RecipeBindings,
+  bindings: MixedRecipeBindings,
   requests: Readonly<Record<string, RecipeDispatchSettings>> = {},
 ): Workflow {
   if (document.version === 3) {

@@ -13,12 +13,23 @@ export type WorkflowCheckpointValue =
   | { readonly kind: "json"; readonly value: WorkflowJson };
 
 export interface WorkflowCheckpoint {
+  readonly workspaces?: WorkspaceCheckpointMetadata;
   readonly format: 1;
   readonly identity: string;
   readonly executionId: string;
   readonly records: readonly Readonly<TaskRecord>[];
   readonly values: Readonly<Record<string, WorkflowCheckpointValue>>;
   readonly usage: WorkflowUsage;
+}
+
+export interface WorkspaceCheckpointMetadata {
+  readonly format: 1;
+  readonly resources: Readonly<Record<string, WorkflowJson>>;
+}
+
+export interface TaskWorkspaceCheckpoint {
+  read(key: string): WorkflowJson | undefined;
+  write(key: string, description: WorkflowJson): Promise<void>;
 }
 
 export interface WorkflowCheckpointLease {
@@ -32,6 +43,7 @@ export interface WorkflowCheckpointStore {
 }
 
 export interface WorkflowCheckpointOptions {
+  readonly workspaces?: true;
   readonly store: WorkflowCheckpointStore;
   readonly runId: string;
   /** Change when task implementations or workflow inputs change. */
@@ -41,6 +53,7 @@ export interface WorkflowCheckpointOptions {
 }
 
 export interface WorkflowCheckpointSession {
+  readonly workspaceResources?: Map<string, WorkflowJson>;
   readonly initial: WorkflowCheckpoint | undefined;
   save(state: WorkflowExecutionState): Promise<void>;
   release(): Promise<void>;

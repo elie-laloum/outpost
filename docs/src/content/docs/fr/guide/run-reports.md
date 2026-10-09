@@ -41,3 +41,7 @@ La liste d’échecs conserve au plus 100 entrées et compte les échecs supplé
 Le [masquage](../security/) hérité s’applique à toutes les chaînes du rapport, dont réponses, chemins et commandes. Le Markdown échappe le balisage intégré. Relisez avant de partager : des secrets non déclarés peuvent subsister dans la réponse, les sujets de commits ou les aperçus d’outils. Si le dispatch lève une erreur, aucun résultat n’est disponible ; utilisez la [récupération d’erreurs](../error-handling/) et le journal.
 
 Consultez [`DispatchResult.report`](../../reference/dispatchresult/), [`RunReport`](../../reference/runreport/) et [`RunReportOptions`](../../reference/runreportoptions/) pour les contrats exacts. L’[exemple hors ligne](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/56-run-reports) du dépôt exerce une commande locale réellement échouée et un commit sans compte ni appel payant à un modèle.
+
+## Workspaces de fichiers
+
+Les rapports de dispatch de fichiers utilisent la version 2 avec `workspaceInfo` discriminé et `fileOutputs`. Ils conservent consommation, échecs d’outils observés, masquage et rendu JSON/Markdown, sans branches ni commits artificiels. Les rapports Git version 1 restent inchangés. Voir [les résultats de fichiers](../workspaces/).

@@ -7,11 +7,11 @@ description: "Comprenez le rôle de l’agent, de la sandbox et du workspace, ai
 
 Votre code TypeScript fournit à Outpost un agent, un fournisseur de sandbox et un dépôt. L’agent reçoit vos consignes, le fournisseur démarre son environnement d’exécution et Outpost prépare la copie Git sur laquelle il travaille.
 
-| Votre choix            | Ce qu’il détermine                                                         | Pour en savoir plus                                         |
-| ---------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Agent                  | L’outil en ligne de commande ou la boucle de modèle qui réalise le travail | [Choisir un agent](../choose-an-agent/)                     |
-| Fournisseur de sandbox | L’environnement qui exécute les commandes, par exemple un conteneur Docker | [Choisir une sandbox](../choose-a-sandbox/)                 |
-| Branche                | La copie du dépôt qui sera modifiée et l’emplacement des commits           | [Choisir le dépôt et la branche](../repository-and-branch/) |
+| Votre choix            | Ce qu’il détermine                                                         | Pour en savoir plus                              |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------ |
+| Agent                  | L’outil en ligne de commande ou la boucle de modèle qui réalise le travail | [Choisir un agent](../choose-an-agent/)          |
+| Fournisseur de sandbox | L’environnement qui exécute les commandes, par exemple un conteneur Docker | [Choisir une sandbox](../choose-a-sandbox/)      |
+| Branche                | La copie du dépôt qui sera modifiée et l’emplacement des commits           | [Choisir le dépôt et la branche](../workspaces/) |
 
 Vous pouvez changer d’agent en conservant le même fournisseur de sandbox. Vous pouvez aussi exécuter le même agent dans un autre environnement pris en charge.
 
@@ -70,7 +70,7 @@ Le workspace gère la branche et la copie du dépôt. La sandbox gère l’envir
 
 Fermez la sandbox courante avant d’en ouvrir une autre sur le même workspace. Quand vous ouvrez ces ressources vous-même, fermez chaque sandbox, puis le workspace. Vous pouvez appeler `close()` plusieurs fois sans risque.
 
-La page [Choisir le dépôt et la branche](../repository-and-branch/) explique comment réutiliser un workspace et intégrer ses commits.
+La page [Choisir le dépôt et la branche](../workspaces/) explique comment réutiliser un workspace et intégrer ses commits.
 
 ## Retrouver les fichiers après une exécution
 

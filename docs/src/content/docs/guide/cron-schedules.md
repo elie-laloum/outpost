@@ -156,3 +156,7 @@ Without a long-running process, a scheduled CI job, such as a GitHub Actions `sc
 - A schedule `name` is unique and uses letters, digits, `.`, `_` and `-` (128 characters at most). A `runId` has at most 256 characters.
 
 API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+
+## File workspaces
+
+A file recipe uses the same schedule-to-queue contract: a timer only publishes its deterministic job, and the worker allocates the workspace. See [file workspaces](../workspaces/) and [recipe services](../recipe-services/).

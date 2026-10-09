@@ -31,6 +31,7 @@ export type ToolOutput =
   string | { readonly content: string; readonly isError?: boolean };
 
 export interface HarnessToolOptions<Input> {
+  readonly workspace?: "git";
   readonly name: string;
   readonly description: string;
   readonly input: StandardJsonSchema<Input> | JsonSchema;
@@ -46,6 +47,7 @@ export type ToolValidation<Input> =
   { readonly value: Input } | { readonly issues: string };
 
 export interface HarnessTool<Input = unknown> {
+  readonly workspace?: "git";
   readonly kind: "tool";
   readonly name: string;
   readonly description: string;

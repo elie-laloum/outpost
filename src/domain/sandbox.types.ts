@@ -1,4 +1,23 @@
 import type { Command, CommandResult, Variables } from "./command.types.ts";
+import type {
+  FileWorkspaceRecord,
+  WorkspaceRuntime,
+} from "./file-workspace.types.ts";
+
+export interface FileSandboxContext {
+  readonly workspace: FileWorkspaceRecord;
+  readonly runtime: WorkspaceRuntime;
+  readonly variables: Variables;
+  readonly signal?: AbortSignal;
+  readonly registerRecovery?: (resourceId: string) => Promise<void>;
+}
+
+export interface SandboxWorkspaces {
+  readonly bindings: readonly (
+    "copy" | "ephemeral" | "mount-readonly" | "mount-write"
+  )[];
+  acquire(context: FileSandboxContext): Promise<SandboxLease>;
+}
 
 export interface Volume {
   readonly source: string;
@@ -7,6 +26,7 @@ export interface Volume {
 }
 
 export interface SandboxContext {
+  readonly workspaceIdentity?: string;
   readonly registerRecovery?: (resourceId: string) => Promise<void>;
   readonly repository: string;
   readonly directory: string;
@@ -69,6 +89,7 @@ export interface SandboxLease {
 }
 
 export interface SandboxProvider {
+  readonly workspaces?: SandboxWorkspaces;
   readonly recover?: (
     resourceId: string,
     options?: TransferOptions,

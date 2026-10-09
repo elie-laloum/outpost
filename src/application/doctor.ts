@@ -64,18 +64,19 @@ async function inspect(
       message: `Outpost requires Node.js ${doctorDefaults.minimumNodeMajor}+.`,
     },
   ];
-  checks.push(
-    await diagnosticProbe(
-      {
-        id: "host.git",
-        command: { executable: "git", arguments: ["--version"] },
-        failureStatus: "fail",
-        remedy: "Install Git and make it available on PATH.",
-        readVersion: true,
-      },
-      probe,
-    ),
-  );
+  if ((options.workspaceKind ?? "git") === "git")
+    checks.push(
+      await diagnosticProbe(
+        {
+          id: "host.git",
+          command: { executable: "git", arguments: ["--version"] },
+          failureStatus: "fail",
+          remedy: "Install Git and make it available on PATH.",
+          readVersion: true,
+        },
+        probe,
+      ),
+    );
   if (capabilities.placement === "mounted") {
     const engine = await diagnosticProbe(
       {
@@ -144,7 +145,17 @@ async function inspect(
     );
     if (connected)
       checks.push(
-        ...(await diagnoseImage({ sandboxProvider, agent, image }, execute)),
+        ...(await diagnoseImage(
+          {
+            sandboxProvider,
+            agent,
+            image,
+            ...(options.workspaceKind
+              ? { workspaceKind: options.workspaceKind }
+              : {}),
+          },
+          execute,
+        )),
       );
     else
       checks.push({

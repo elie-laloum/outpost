@@ -27,7 +27,7 @@ export const chapters = [
     "Exécuter des tâches",
     [
       "guide/briefs",
-      "guide/repository-and-branch",
+      "guide/workspaces",
       "guide/typed-responses",
       "guide/sandbox-sessions",
       "guide/environment-setup",

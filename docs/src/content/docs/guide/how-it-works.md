@@ -7,11 +7,11 @@ description: "Understand the agent, sandbox and workspace, and what happens when
 
 Your TypeScript code gives Outpost an agent, a sandbox provider and a repository. The agent receives your instructions; the provider starts its execution environment; Outpost prepares the Git checkout where the agent works.
 
-| You choose       | What it controls                                  | Learn more                                                    |
-| ---------------- | ------------------------------------------------- | ------------------------------------------------------------- |
-| Agent            | The CLI or model loop that does the work          | [Choose an agent](../choose-an-agent/)                        |
-| Sandbox provider | Where commands run, such as a Docker container    | [Choose a sandbox](../choose-a-sandbox/)                      |
-| Branch           | Which checkout is edited and where commits remain | [Choose the repository and branch](../repository-and-branch/) |
+| You choose       | What it controls                                  | Learn more                                         |
+| ---------------- | ------------------------------------------------- | -------------------------------------------------- |
+| Agent            | The CLI or model loop that does the work          | [Choose an agent](../choose-an-agent/)             |
+| Sandbox provider | Where commands run, such as a Docker container    | [Choose a sandbox](../choose-a-sandbox/)           |
+| Branch           | Which checkout is edited and where commits remain | [Choose the repository and branch](../workspaces/) |
 
 You can change the agent without changing the sandbox provider. You can also run the same agent in another supported environment.
 
@@ -70,7 +70,7 @@ The workspace owns the branch and checkout. The sandbox owns the execution envir
 
 Close the current sandbox before opening another on the same workspace. When you open these resources yourself, close each sandbox first, then the workspace. Repeated `close()` calls are safe.
 
-See [Choose the repository and branch](../repository-and-branch/) for workspace reuse and branch integration.
+See [Choose the repository and branch](../workspaces/) for workspace reuse and branch integration.
 
 ## Find the files after a run
 

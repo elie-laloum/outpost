@@ -1,5 +1,7 @@
 import { resolve } from "node:path";
 import type { SandboxOptions } from "../outpost.types.ts";
+import type { FileSandboxOptions } from "../file-sandbox.types.ts";
+import { isFileSandboxOptions } from "../file-sandbox.ts";
 import { positive } from "../../domain/workflow/validation.ts";
 import { maxTimerMs } from "../../domain/workflow/retry.constants.ts";
 import { workflowAccounting } from "../../domain/workflow/budget.ts";
@@ -85,9 +87,13 @@ export function validateRecipeWorkflowSettings(
   }
 }
 
-function sameWorkspace(left: SandboxOptions, right: SandboxOptions): boolean {
+function sameWorkspace(
+  left: SandboxOptions | FileSandboxOptions,
+  right: SandboxOptions | FileSandboxOptions,
+): boolean {
   if (left.workspace && right.workspace)
     return left.workspace.directory === right.workspace.directory;
+  if (isFileSandboxOptions(left) || isFileSandboxOptions(right)) return false;
   const repository = (options: SandboxOptions) =>
     resolve(
       options.repository ?? options.workspace?.repository ?? process.cwd(),

@@ -39,7 +39,14 @@ export async function openCheckpoint(
       return a.key < b.key ? -1 : 1;
     });
   const identity = createHash("sha256")
-    .update(JSON.stringify({ name, version: options.version, graph }))
+    .update(
+      JSON.stringify({
+        name,
+        version: options.version,
+        graph,
+        ...(options.workspaces ? { workspaceFormat: 1 } : {}),
+      }),
+    )
     .digest("hex");
   const lease = await options.store.acquire(options.runId);
   try {
@@ -48,6 +55,20 @@ export async function openCheckpoint(
     if (saved !== undefined) {
       validateCheckpoint(saved, identity, tasks);
       initial = saved;
+      if (options.workspaces && !saved.workspaces)
+        throw new Error(
+          "Workflow store did not preserve workspace checkpoint metadata",
+        );
+      if (saved.workspaces) {
+        if (
+          !options.workspaces ||
+          saved.workspaces.format !== 1 ||
+          !saved.workspaces.resources ||
+          typeof saved.workspaces.resources !== "object"
+        )
+          throw new Error("Unsupported workflow workspace checkpoint metadata");
+        checkpointValue(saved.workspaces.resources);
+      }
       const settledGate = saved.records.some((record) =>
         ["paused", "rejected", "waiting-input"].includes(record.status),
       );
@@ -74,8 +95,12 @@ export async function openCheckpoint(
         );
     }
     let writes = Promise.resolve();
+    const workspaceResources = options.workspaces
+      ? new Map(Object.entries(initial?.workspaces?.resources ?? {}))
+      : undefined;
     return {
       initial,
+      ...(workspaceResources ? { workspaceResources } : {}),
       save(state: WorkflowExecutionState) {
         const snapshot: WorkflowCheckpoint = {
           format: 1,
@@ -89,6 +114,14 @@ export async function openCheckpoint(
             ]),
           ),
           usage: state.accounting.snapshot(),
+          ...(workspaceResources
+            ? {
+                workspaces: {
+                  format: 1 as const,
+                  resources: Object.fromEntries(workspaceResources),
+                },
+              }
+            : {}),
         };
         writes = writes.then(() => lease.write(snapshot));
         return writes;

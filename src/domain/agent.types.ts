@@ -188,6 +188,13 @@ export interface AgentInput {
 }
 
 export interface AgentFeatures {
+  readonly fileWorkspaces?: {
+    readonly dispatch: boolean;
+    readonly interactive?: boolean;
+    readonly liveInput?: boolean;
+    readonly continuation?: boolean;
+    readonly repairs?: boolean;
+  };
   readonly usageInput?: "inclusive" | "uncached";
   readonly name: string;
   readonly bootstrap?: string;

@@ -1,6 +1,8 @@
 import { validateRecipeExpression } from "../../domain/recipes/expressions.ts";
 import { validateSpeculationOptions } from "../speculation-validation.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
+import { validateFileAgent, isFileSandboxOptions } from "../file-sandbox.ts";
+import { dispatchCandidates } from "../../domain/fallback-agent.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
 import { resolveRecipeOptions } from "./native.ts";
@@ -81,12 +83,23 @@ export async function prepareRecipeWorkflow(
     if (!stepOptions(values))
       throw new Error(`Invalid recipe task: ${step.key}`);
     const prepared: RecipeWorkflowStepComponents = values;
-    if (prepared.isolated?.brief.text !== undefined)
+    if (
+      prepared.isolated &&
+      "brief" in prepared.isolated &&
+      prepared.isolated.brief.text !== undefined
+    )
       validateRecipeExpression(prepared.isolated.brief.text, {
         document,
         step,
       });
-    if (prepared.isolated)
+    if (
+      prepared.isolated &&
+      isFileSandboxOptions(prepared.isolated) &&
+      "brief" in prepared.isolated
+    )
+      for (const agent of dispatchCandidates(prepared.isolated.agent))
+        await validateFileAgent(agent, prepared.isolated);
+    if (prepared.isolated && !isFileSandboxOptions(prepared.isolated))
       await preflightRecipeAgent(
         prepared.isolated.agent,
         prepared.isolated.repository ??
@@ -119,7 +132,9 @@ export async function prepareRecipeWorkflow(
         );
       }
     }
-    if (prepared.interactive)
+    if (prepared.interactive && "workspaceSource" in prepared.interactive)
+      await validateFileAgent(prepared.interactive.agent);
+    if (prepared.interactive && "repository" in prepared.interactive)
       await preflightRecipeAgent(
         prepared.interactive.agent,
         prepared.interactive.repository,

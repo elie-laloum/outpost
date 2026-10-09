@@ -1,4 +1,6 @@
 export const dispatchFields = [
+  "workspaceInfo",
+  "fileOutputs",
   "text",
   "turns",
   "usage",

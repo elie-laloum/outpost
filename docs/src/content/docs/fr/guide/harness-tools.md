@@ -178,3 +178,7 @@ Pour exposer les outils d’un serveur existant, déclarez-le avec `createHarnes
 - Un résultat de plus de 100 000 caractères est tronqué avant d’atteindre le modèle.
 
 API : [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/) · [ToolOutput](../../reference/tooloutput/) · [ToolResources](../../reference/toolresources/) · [createHarnessFileTools](../../reference/createharnessfiletools/) · [createHarnessSearchTools](../../reference/createharnesssearchtools/) · [createHarnessGitTools](../../reference/createharnessgittools/) · [createHarnessEditTools](../../reference/createharnessedittools/) · [createHarnessShellTools](../../reference/createharnessshelltools/).
+
+## Workspaces de fichiers
+
+Listing et recherche sélectionnent Git par défaut pour les appels existants. Choisir explicitement `filesystem` dans un workspace de fichiers ; ces opérations s’exécutent dans la sandbox empruntée, gardent permissions et limites, ne suivent pas les liens et n’appliquent pas `.gitignore`. Voir [les workspaces de fichiers](../workspaces/).

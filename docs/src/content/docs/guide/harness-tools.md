@@ -178,3 +178,7 @@ To expose an existing server’s tools, declare it with `createHarness({ mcpServ
 - A result longer than 100,000 characters is truncated before it reaches the model.
 
 API: [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/) · [ToolOutput](../../reference/tooloutput/) · [ToolResources](../../reference/toolresources/) · [createHarnessFileTools](../../reference/createharnessfiletools/) · [createHarnessSearchTools](../../reference/createharnesssearchtools/) · [createHarnessGitTools](../../reference/createharnessgittools/) · [createHarnessEditTools](../../reference/createharnessedittools/) · [createHarnessShellTools](../../reference/createharnessshelltools/).
+
+## File workspaces
+
+Listing and search default to Git selection for existing calls. Select `filesystem` explicitly for file workspaces; these operations run inside the borrowed sandbox, keep permission declarations and bounds, and do not follow links or apply `.gitignore`. See [file workspaces](../workspaces/).

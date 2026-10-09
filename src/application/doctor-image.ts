@@ -31,7 +31,7 @@ export async function diagnoseImage(
 }
 
 async function inspectImage(
-  { sandboxProvider, agent, image }: DoctorImageOptions,
+  { sandboxProvider, agent, image, workspaceKind = "git" }: DoctorImageOptions,
   execute: Executor,
   signal: AbortSignal,
 ): Promise<readonly DiagnosticCheck[]> {
@@ -69,7 +69,9 @@ async function inspectImage(
     const sandbox = lease;
     const invoke: Executor = (command) =>
       sandbox.invoke({ ...command, signal });
-    for (const executable of ["node", "git"]) {
+    for (const executable of workspaceKind === "git"
+      ? ["node", "git"]
+      : ["node"]) {
       checks.push(
         await diagnosticProbe(
           {

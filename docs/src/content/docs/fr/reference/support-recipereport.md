@@ -9,6 +9,8 @@ sidebar:
 
 | Nom              | Type                                                                                                         | Présence  | Rôle                                                                                                                                                                                                                                                                                                |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaceInfo`  | `FileWorkspaceRecord \| undefined`                                                                           | Optionnel | Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération.                                                                                                                                                                               |
+| `fileOutputs`    | `readonly WorkspacePublication[] \| undefined`                                                               | Optionnel | Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche.                                                                                                                                                                                                          |
 | `integration`    | `ConflictResolution \| undefined`                                                                            | Optionnel | Commit de résolution, vérification et consommation de l’agent, rapportés séparément de la consommation du workflow lorsqu’une résolution est nécessaire.                                                                                                                                            |
 | `runId`          | `string \| undefined`                                                                                        | Optionnel | Run ID du checkpoint pour une invocation de recette durable.                                                                                                                                                                                                                                        |
 | `inputRequests`  | `readonly WorkflowInputRequest[] \| undefined`                                                               | Optionnel | Questions de dialogue persistées attendant une réponse autorisée.                                                                                                                                                                                                                                   |
@@ -27,6 +29,8 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly workspaceInfo?: FileWorkspaceRecord;
+  readonly fileOutputs?: readonly WorkspacePublication[];
   readonly integration?: ConflictResolution;
   readonly runId?: string;
   readonly inputRequests?: WorkflowResult["inputRequests"];

@@ -10,6 +10,7 @@ import {
   validateFirecracker,
 } from "./firecracker-machine.ts";
 import type { FirecrackerOptions } from "./firecracker.types.ts";
+import { withTransferredWorkspaces } from "./workspace-context.ts";
 
 export type { FirecrackerOptions } from "./firecracker.types.ts";
 
@@ -18,7 +19,7 @@ export function createFirecrackerSandboxProvider(
 ): SandboxProvider {
   validateFirecracker(options);
   let allocated = false;
-  return {
+  return withTransferredWorkspaces({
     name: "firecracker",
     placement: "remote",
     variables: { ...options.variables },
@@ -75,7 +76,7 @@ export function createFirecrackerSandboxProvider(
           const result = await executeProcess({
             ...firecrackerSsh(
               options,
-              `test "$HOME" = ${quote(options.home)} && node -e 'if(Number(process.versions.node.split(".")[0])<24)process.exit(1)' && command -v git setsid tar >/dev/null && mkdir -p ${quote(root)}`,
+              `test "$HOME" = ${quote(options.home)} && node -e 'if(Number(process.versions.node.split(".")[0])<24)process.exit(1)' && command -v ${context.workspaceIdentity ? "setsid tar" : "git setsid tar"} >/dev/null && mkdir -p ${quote(root)}`,
             ),
             deadlineMs: Math.max(
               1,
@@ -152,5 +153,5 @@ export function createFirecrackerSandboxProvider(
         release,
       };
     },
-  };
+  });
 }

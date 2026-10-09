@@ -27,7 +27,7 @@ export function createMemorySandboxProvider(
     );
   }
   let next = 0;
-  return {
+  const provider: SandboxProvider = {
     name: "memory",
     placement: "mounted",
     async acquire(context) {
@@ -160,6 +160,21 @@ export function createMemorySandboxProvider(
           await Promise.allSettled(active);
         },
       };
+    },
+  };
+  return {
+    ...provider,
+    workspaces: {
+      bindings: ["copy", "ephemeral"],
+      acquire(context) {
+        return provider.acquire({
+          directory: context.workspace.directory,
+          repository: context.runtime.directory,
+          gitDirectories: [],
+          variables: context.variables,
+          ...(context.signal ? { signal: context.signal } : {}),
+        });
+      },
     },
   };
 }

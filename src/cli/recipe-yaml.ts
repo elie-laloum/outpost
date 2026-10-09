@@ -12,6 +12,8 @@ import {
 import { nativeRecipeSchemas } from "../application/recipes/native-schemas.constants.ts";
 import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import { readRecipeFile } from "../infrastructure/recipes/read.ts";
+import { workspaceRecoverySchema } from "../domain/file-workspace.constants.ts";
+import type { RecipeResumeOptions } from "../application/recipes/durable.types.ts";
 import type { WorkflowOptions } from "../domain/workflow.types.ts";
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { CliInvocation } from "./main.types.ts";
@@ -104,6 +106,15 @@ export async function recipeYamlCommand(
       signal: controller.signal,
       ...(values.json ? { report: "json" as const } : {}),
     };
+    const workspaceRecovery = values["workspace-recovery"]
+      ? validateRecipeSchema<
+          NonNullable<RecipeResumeOptions["workspaceRecovery"]>
+        >(
+          workspaceRecoverySchema,
+          JSON.parse(await readRecipeFile(values["workspace-recovery"])),
+          "workspace recovery",
+        )
+      : undefined;
     let report =
       action === "run"
         ? await runtime.run({ ...settings, ...(runId ? { runId } : {}) })
@@ -111,6 +122,7 @@ export async function recipeYamlCommand(
             ...settings,
             runId: runId!,
             ...intervention,
+            ...(workspaceRecovery ? { workspaceRecovery } : {}),
             ...(values["retry-incomplete"] ? { retryIncomplete: true } : {}),
             ...(values["recover-revision"]
               ? { recoverRevision: values["recover-revision"] }

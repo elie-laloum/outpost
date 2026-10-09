@@ -216,6 +216,7 @@ export {
   defineAgentTask,
   defineCommandTask,
   defineIsolatedTask,
+  defineIsolatedCommandTask,
 } from "./application/tasks.ts";
 export type { QuotaResumePolicy } from "./application/quota-resume.types.ts";
 export { defineRecipe } from "./application/recipe.ts";
@@ -418,6 +419,8 @@ export type {
   WorkflowCheckpointStore,
   WorkflowCheckpointLease,
   WorkflowCheckpointValue,
+  WorkspaceCheckpointMetadata,
+  TaskWorkspaceCheckpoint,
   WorkflowJson,
 } from "./domain/workflow/checkpoint.types.ts";
 
@@ -625,6 +628,8 @@ export { defineInteractiveAgentTask } from "./application/interactive-task.ts";
 export type {
   InteractiveAgentTaskOptions,
   InteractiveAgentResult,
+  FileInteractiveAgentTaskOptions,
+  FileInteractiveAgentResult,
 } from "./application/interactive-task.types.ts";
 export type {
   WorkflowInputQuestion,
@@ -742,3 +747,98 @@ export type {
   ChangedCondition,
   LifecycleCommand,
 } from "./domain/lifecycle.types.ts";
+export {
+  createWorkspace,
+  restoreFileWorkspace,
+  workspaceFingerprint,
+} from "./application/file-workspace.ts";
+export { prepareWorkspaceOutputs } from "./application/workspace-output-baseline.ts";
+export {
+  publishWorkspaceOutputs,
+  inspectWorkspacePublication,
+  recoverWorkspacePublication,
+} from "./application/workspace-publication.ts";
+export {
+  snapshotWorkspaceFiles,
+  restoreWorkspaceFiles,
+} from "./infrastructure/workspace-snapshot.ts";
+export type {
+  FileWorkspace,
+  FileWorkspaceOptions,
+  GitWorkspace,
+  GitWorkspaceOptions,
+  CreatedWorkspace,
+  FileWorkspaceRecoveryAuthorization,
+} from "./application/file-workspace.types.ts";
+export type {
+  FileSandbox,
+  FileSandboxOptions,
+  FileSandboxSettings,
+  FileDispatchRequest,
+  FileDispatchResult,
+  FileAttachResult,
+} from "./application/file-sandbox.types.ts";
+export type {
+  WorkspaceSource,
+  FileWorkspaceSource,
+  GitWorkspaceSource,
+  WorkspaceSession,
+  FileWorkspaceRecord,
+  WorkspaceRuntime,
+  WorkspaceRuntimeOptions,
+  WorkspaceRetention,
+  WorkspaceInput,
+  WorkspaceOutputOptions,
+  WorkspacePublication,
+  WorkspaceFileEntry,
+  WorkspaceAllocationRecord,
+  WorkspaceConversationArchive,
+  WorkspaceOutputBaseline,
+} from "./domain/file-workspace.types.ts";
+export type {
+  FileSandboxContext,
+  SandboxWorkspaces,
+} from "./domain/sandbox.types.ts";
+export {
+  inspectWorkspacePathLocks,
+  recoverWorkspacePathLock,
+} from "./infrastructure/workspace-lock.ts";
+export type { RestoreFileWorkspaceOptions } from "./application/file-workspace.types.ts";
+export type {
+  WorkspacePathLock,
+  WorkspacePathRecoveryOptions,
+} from "./infrastructure/workspace-lock.types.ts";
+export type {
+  PublicationJournal,
+  PublicationOperation,
+  PublicationDirectory,
+  PublicationRecoveryOptions,
+} from "./application/workspace-publication.types.ts";
+export type {
+  FileAgentTaskOptions,
+  FileIsolatedTaskOptions,
+  MixedIsolatedTaskOptions,
+  MixedAgentTaskOptions,
+  IsolatedCommandTaskOptions,
+  FileIsolatedCommandRequest,
+} from "./application/tasks.types.ts";
+export type { FileSelectionOptions } from "./adapters/tools/tools.types.ts";
+export type {
+  FileRecipeBindings,
+  MixedRecipeBindings,
+  FileRecipeConfiguration,
+} from "./application/recipe.types.ts";
+export type {
+  GitWorkspaceSandboxOptions,
+  GitDispatchRequest,
+} from "./application/file-workspace.types.ts";
+export type { FileRunReport } from "./domain/run-report.types.ts";
+export {
+  inspectFileWorkspace,
+  recoverFileWorkspace,
+} from "./application/file-workspace-recovery.ts";
+export type {
+  FileWorkspaceInspection,
+  FileWorkspaceInspectionOptions,
+  FileWorkspaceRecoveryOptions,
+} from "./application/file-workspace-recovery.types.ts";

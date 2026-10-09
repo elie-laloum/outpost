@@ -9,12 +9,26 @@ import {
   withStaging,
 } from "./sandbox-files.ts";
 import { TOOL_LIMITS } from "./tools.constants.ts";
-import type { ListFilesInput, ReadFileInput } from "./tools.types.ts";
+import type {
+  FileSelectionOptions,
+  ListFilesInput,
+  ReadFileInput,
+} from "./tools.types.ts";
+import { filesystemSelectionScript } from "./filesystem-selection.constants.ts";
+import { invariant } from "../../domain/errors.ts";
 
-export function createHarnessFileTools(): HarnessToolset {
+export function createHarnessFileTools(
+  options: FileSelectionOptions = {},
+): HarnessToolset {
+  invariant(
+    options.selection === undefined ||
+      options.selection === "git" ||
+      options.selection === "filesystem",
+    "File selection must be git or filesystem",
+  );
   return defineHarnessToolset({
     name: "files",
-    tools: [readFileTool(), listFilesTool()],
+    tools: [readFileTool(), listFilesTool(options.selection ?? "git")],
   });
 }
 
@@ -66,11 +80,14 @@ function readFileTool() {
   });
 }
 
-function listFilesTool() {
+function listFilesTool(selection: "git" | "filesystem") {
   return defineHarnessTool({
+    ...(selection === "git" ? { workspace: "git" as const } : {}),
     name: "list_files",
     description:
-      "List files in the repository that are tracked or not ignored by Git, optionally under a directory and filtered by a glob such as src/**/*.ts; a glob without a slash matches file names at any depth.",
+      selection === "git"
+        ? "List files tracked or not ignored by Git, optionally under a directory and filtered by a glob."
+        : "List ordinary workspace files without following links or applying Git ignore rules, optionally under a directory and filtered by a glob.",
     readOnly: true,
     input: {
       type: "object",
@@ -83,23 +100,38 @@ function listFilesTool() {
     resources: (input: ListFilesInput) => ({ paths: [input.path ?? "."] }),
     async execute(input: ListFilesInput, context) {
       const scope = repositoryPath(input.path ?? ".") || ".";
+      const invocation =
+        selection === "filesystem"
+          ? {
+              executable: "node",
+              arguments: [
+                "-e",
+                `(function(){${filesystemSelectionScript}})()`,
+                "list",
+                scope,
+                "{}",
+              ],
+            }
+          : {
+              executable: "git",
+              arguments: [
+                "ls-files",
+                "-z",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "--",
+                scope,
+              ],
+            };
       const result = await context.sandbox.invoke({
-        executable: "git",
-        arguments: [
-          "ls-files",
-          "-z",
-          "--cached",
-          "--others",
-          "--exclude-standard",
-          "--",
-          scope,
-        ],
+        ...invocation,
         retain: TOOL_LIMITS.commandCharacters * 10,
         signal: context.signal,
       });
       if (result.status !== 0)
         return {
-          content: result.stderr || "git ls-files failed",
+          content: result.stderr || "File listing failed",
           isError: true,
         };
       const matcher = input.pattern

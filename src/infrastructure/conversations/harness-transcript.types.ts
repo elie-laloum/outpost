@@ -4,6 +4,7 @@ import type { ModelMessage } from "../../domain/model.types.ts";
 import type { TranscriptRecord } from "../../domain/transcript.types.ts";
 
 export interface TranscriptOptions {
+  readonly runtimeDirectory?: string;
   readonly observation?: ObservationHub;
   readonly routed?: boolean;
   readonly repository: string;

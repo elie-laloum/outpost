@@ -1,6 +1,6 @@
 import type { RecipeIntegrationSettings } from "./recipes/advanced-components.types.ts";
 import { bindRecipe } from "./recipe.ts";
-import type { RecipeBindings } from "./recipe.types.ts";
+import type { MixedRecipeBindings } from "./recipe.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
 import type { Workflow, WorkflowResult } from "../domain/workflow.types.ts";
 import type { Disposal } from "../domain/workspace.types.ts";
@@ -8,10 +8,11 @@ import { recipeDiagnostic, recipeOutput } from "./recipe-report.ts";
 import type { RecipeReport } from "./recipe-report.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { RecipeDispatchSettings } from "./recipes/agent-components.types.ts";
+import { fileWorkspaces } from "./file-workspace-registry.ts";
 
 export async function runRecipe(
   document: RecipeDocument,
-  bindings: RecipeBindings,
+  bindings: MixedRecipeBindings,
   signal: AbortSignal,
   observation?: ObservationHub,
   requests?: Readonly<Record<string, RecipeDispatchSettings>>,
@@ -37,8 +38,9 @@ export async function runRecipe(
     if (result.status === "done") {
       signal.throwIfAborted();
       resolution =
-        (await sandbox.workspace.integrate({ ...integration, signal })) ??
-        undefined;
+        ("integrate" in sandbox.workspace
+          ? await sandbox.workspace.integrate({ ...integration, signal })
+          : undefined) ?? undefined;
       completed = true;
     }
   } catch (error) {
@@ -83,13 +85,17 @@ export async function runRecipe(
     tasks: result?.tasks ?? [],
     outputs,
     errors: errors.map((error) => recipeDiagnostic(error)),
-    workspace: {
-      branch: sandbox.workspace.branch,
-      directory: sandbox.workspace.directory,
-      ...disposal,
-      ...(!completed && sandbox.workspace.policy.mode !== "current"
-        ? { retainedDirectory: sandbox.workspace.directory }
-        : {}),
-    },
+    ...("branch" in sandbox.workspace
+      ? {
+          workspace: {
+            branch: sandbox.workspace.branch,
+            directory: sandbox.workspace.directory,
+            ...disposal,
+            ...(!completed && sandbox.workspace.policy.mode !== "current"
+              ? { retainedDirectory: sandbox.workspace.directory }
+              : {}),
+          },
+        }
+      : { workspaceInfo: fileWorkspaces.get(sandbox.workspace)!.record }),
   };
 }

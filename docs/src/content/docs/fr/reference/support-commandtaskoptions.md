@@ -9,14 +9,14 @@ sidebar:
 
 | Nom       | Type                                             | Présence | Rôle                                                                                              |
 | --------- | ------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------- |
-| `sandbox` | `Sandbox`                                        | Requis   | Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas. |
+| `sandbox` | `Pick<Sandbox, "command">`                       | Requis   | Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas. |
 | `command` | `Command \| ((context: TaskContext) => Command)` | Requis   | Commande à exécuter, ou fabrique la construisant depuis les valeurs des dépendances.              |
 
 ## Signature
 
 ```ts
 export type CommandTaskOptions = {
-  sandbox: Sandbox;
+  sandbox: Pick<Sandbox, "command">;
   command: Command | ((context: TaskContext) => Command);
 };
 ```

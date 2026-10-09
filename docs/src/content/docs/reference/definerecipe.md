@@ -19,10 +19,10 @@ Parse and validate a local YAML recipe, bind commands and named agents to a call
 
 ## Parameters and properties
 
-| Name       | Type             | Presence | Meaning                                                                                                                                                                                                                             |
-| ---------- | ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source`   | `string`         | Required | YAML 1.2 text in recipe format 1 (literal) or 2 (typed inputs and explicit references), bounded to 1 MiB and 1,000 tasks. Unknown fields, unsupported YAML constructs, invalid graphs and references are rejected before execution. |
-| `bindings` | `RecipeBindings` | Required | Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.                                                                           |
+| Name       | Type                  | Presence | Meaning                                                                                                                                                                                                                             |
+| ---------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   | `string`              | Required | YAML 1.2 text in recipe format 1 (literal) or 2 (typed inputs and explicit references), bounded to 1 MiB and 1,000 tasks. Unknown fields, unsupported YAML constructs, invalid graphs and references are rejected before execution. |
+| `bindings` | `MixedRecipeBindings` | Required | Open sandbox and optional agent registry borrowed by every recipe task. No resource is allocated or closed by defineRecipe(); the caller keeps ownership.                                                                           |
 
 ## Returns
 
@@ -33,11 +33,11 @@ Parse and validate a local YAML recipe, bind commands and named agents to a call
 ```ts
 export declare function defineRecipe(
   source: string,
-  bindings: RecipeBindings,
+  bindings: MixedRecipeBindings,
 ): Workflow;
 ```
 
 ## Related contracts
 
-- [RecipeBindings](../recipebindings/)
+- [MixedRecipeBindings](../mixedrecipebindings/)
 - [Workflow](../type-workflow/)

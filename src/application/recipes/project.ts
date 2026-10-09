@@ -23,6 +23,8 @@ import {
 import { secretSelectionComponent } from "./variables.ts";
 import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
+import { normalizeRecipeWorkspaceConfiguration } from "./file-configuration.ts";
+import { validateFileRecipeCapabilities } from "./file-validation.ts";
 import type {
   RecipeProject,
   RecipeProjectOptions,
@@ -64,8 +66,12 @@ export async function readRecipeProject(
       parseRecipeYaml(configurationSource).document.toJS({ maxAliasCount: 0 }),
       config,
     );
-    if (configuration.version !== 1 && configuration.version !== 2)
-      throw new Error(`${config}: configuration version must be 1 or 2`);
+    if (
+      configuration.version !== 1 &&
+      configuration.version !== 2 &&
+      configuration.version !== 3
+    )
+      throw new Error(`${config}: configuration version must be 1, 2 or 3`);
     if (
       configuration.experimental !== undefined &&
       typeof configuration.experimental !== "boolean"
@@ -78,31 +84,47 @@ export async function readRecipeProject(
       "experimental",
       "integration",
       "workspace",
+      "runtime",
+      "outputs",
       ...Object.keys(recipeFamilies),
     ]);
     for (const key of Object.keys(configuration)) {
       if (recipeConfigurationKeys.root.some((allowed) => allowed === key))
         continue;
-      if (configuration.version === 2 && extra.has(key)) continue;
+      if (
+        configuration.version === 2 &&
+        extra.has(key) &&
+        !["runtime", "outputs"].includes(key)
+      )
+        continue;
+      if (configuration.version === 3 && extra.has(key)) continue;
       throw new Error(`${config}: unknown configuration field ${key}`);
     }
+    const normalized = normalizeRecipeWorkspaceConfiguration(
+      configuration,
+      dirname(config),
+      document,
+    );
+    const normalizedConfiguration = normalized.configuration;
     const legacySource = JSON.stringify({
       ...Object.fromEntries(
-        Object.entries(configuration).filter(([key]) =>
+        Object.entries(normalizedConfiguration).filter(([key]) =>
           recipeConfigurationKeys.root.some((allowed) => allowed === key),
         ),
       ),
       version: 1,
-      ...(configuration.version === 2
+      ...(normalizedConfiguration.version === 2
         ? { sandbox: { provider: "local" }, agents: {} }
         : {}),
     });
-    const legacy = await readRecipeConfiguration(legacySource, config, false);
+    const legacy = normalized.files
+      ? { sandbox: {}, agents: {} }
+      : await readRecipeConfiguration(legacySource, config, false);
     for (const step of document.tasks) {
       if (
         step.agent &&
         !Object.hasOwn(
-          configuration.version === 2
+          normalizedConfiguration.version === 2
             ? recipeRecord(configuration.agents ?? {}, "agents")
             : (legacy.agents ?? {}),
           step.agent,
@@ -125,12 +147,29 @@ export async function readRecipeProject(
     let graph;
     try {
       graph = recipeComponentGraph(
-        configuration,
+        normalizedConfiguration,
         registry,
         directory,
         document,
       );
       validateRecipeProjectExpressions(document, graph);
+      if (normalized.files) validateFileRecipeCapabilities(document, graph);
+      if (
+        normalized.files?.retention?.policy === "portable" &&
+        graph.nodes.get(normalized.files.retention.transporter)?.kind !==
+          "transport"
+      )
+        throw new Error(
+          "Portable workspace retention references an unknown Transport",
+        );
+      for (const input of normalized.files?.inputs ?? [])
+        if (
+          "snapshot" in input &&
+          graph.nodes.get(input.transporter)?.kind !== "transport"
+        )
+          throw new Error(
+            "Workspace snapshot input references an unknown Transport",
+          );
     } catch (error) {
       if (
         error instanceof Error &&
@@ -146,7 +185,9 @@ export async function readRecipeProject(
       document,
       directory,
       configuration,
+      componentConfiguration: normalizedConfiguration,
       legacy,
+      ...(normalized.files ? { files: normalized.files } : {}),
       registry,
       graph,
       reports: reports.map((value, index) =>

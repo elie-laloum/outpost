@@ -44,7 +44,7 @@ La sandbox confine les commandes de l’agent, pas votre propre code. Ces élém
 - [Hooks du harness](../harness-permissions/): S’exécutent dans le processus Outpost à chaque étape de la boucle intégrée.
 - [Fonctions du workflow](../task-dependencies/): Tâches, vérifications de boucle et vérificateurs de décision sont votre code, exécuté par le moteur de workflow.
 - [Hooks de préparation](../environment-setup/): Les commandes `workspaceReady` et `hostReady` s’exécutent sur l’hôte, dans le worktree.
-- [Code rapporté](../repository-and-branch/): Les commits de l’agent arrivent dans votre dépôt : relisez-les avant de compiler ou de tester sur l’hôte.
+- [Code rapporté](../workspaces/): Les commits de l’agent arrivent dans votre dépôt : relisez-les avant de compiler ou de tester sur l’hôte.
 - [Métadonnées Git](../containers/): Un agent monté peut écrire dans `.git` des hooks et une configuration que vos propres commandes Git exécuteront.
 
 ## Ce qu’Outpost n’authentifie pas

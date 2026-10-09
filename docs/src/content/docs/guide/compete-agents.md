@@ -18,7 +18,7 @@ Use this example to try several fixes for the same bug. Each candidate works in 
 - [Claude Code](../claude-code/): Sign in on the host; the Setup image already contains its CLI.
 - [Sandbox sessions](../sandbox-sessions/): Run the tests in the candidate’s open sandbox.
 - [Budgets](../budgets/): One budget bounds the attempts and tokens of every candidate.
-- [Repository and branch](../repository-and-branch/): Each candidate commits on a named branch in its own worktree.
+- [Repository and branch](../workspaces/): Each candidate commits on a named branch in its own worktree.
 
 ## Write the script
 

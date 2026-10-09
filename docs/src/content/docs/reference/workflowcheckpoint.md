@@ -15,6 +15,7 @@ import type { WorkflowCheckpoint } from "@elie-laloum/outpost";
 
 | Name          | Type                                                | Presence | Meaning                                                                                                                                                                                           |
 | ------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaces`  | `WorkspaceCheckpointMetadata \| undefined`          | Optional | Opt-in versioned file resource capability; older providers and checkpoints preserve their Git contract.                                                                                           |
 | `format`      | `1`                                                 | Required | Serialization format version, always 1.                                                                                                                                                           |
 | `identity`    | `string`                                            | Required | SHA-256 of the workflow name, checkpoint version and task graph: keys, dependencies, timeout, retry, condition, gate, loop and interaction settings. A different identity rejects the checkpoint. |
 | `executionId` | `string`                                            | Required | Execution identity kept across resumes. context.idempotencyKey derives from it and the task key, so it stays the same for each task.                                                              |
@@ -26,6 +27,7 @@ import type { WorkflowCheckpoint } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowCheckpoint {
+  readonly workspaces?: WorkspaceCheckpointMetadata;
   readonly format: 1;
   readonly identity: string;
   readonly executionId: string;
@@ -40,3 +42,4 @@ export interface WorkflowCheckpoint {
 - [TaskRecord](../taskrecord/)
 - [WorkflowCheckpointValue](../workflowcheckpointvalue/)
 - [WorkflowUsage](../workflowusage/)
+- [WorkspaceCheckpointMetadata](../workspacecheckpointmetadata/)

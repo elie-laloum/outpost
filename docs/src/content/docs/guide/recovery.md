@@ -222,3 +222,7 @@ Never delete `.outpost` or its folders by hand: they can hold the only copy of t
 - An archive holds recovery files, not the repository: restoring still needs the source repository.
 
 API: [recoveryDetails](../../reference/recoverydetails/) · [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [archiveRecovery](../../reference/archiverecovery/) · [materializeRecoveryArchive](../../reference/materializerecoveryarchive/).
+
+## File workspaces
+
+For directory and ephemeral resources, inspect `recovery inspect --runtime-directory PATH`. Publication `inspect`, `finish` and `rollback` operate on their own journal without rerunning workflow tasks. Writable mount effects remain immediate and have no publication rollback. See [file recovery](../workspaces/#check-capabilities-and-recover-publication).

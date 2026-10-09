@@ -60,7 +60,7 @@ integration:
   deadlineMs: 600000
 ```
 
-Le [contrat natif de résolution](../repository-and-branch/) vérifie toujours le commit combiné, réapplique les guards de diff et refuse les changements concurrents des commits source ou hôte. Un échec de vérification conserve les workspaces de récupération. Une affirmation non vérifiée de l’agent ne remplace pas ces contrôles.
+Le [contrat natif de résolution](../workspaces/) vérifie toujours le commit combiné, réapplique les guards de diff et refuse les changements concurrents des commits source ou hôte. Un échec de vérification conserve les workspaces de récupération. Une affirmation non vérifiée de l’agent ne remplace pas ces contrôles.
 
 ## Déclarer les rapports et la télémétrie
 

@@ -57,18 +57,18 @@ Vercel and Daytona load their SDK when they allocate a sandbox. Install it next 
 
 ## Compare environments
 
-|                                                  | Docker, Podman   | Vercel                         | Daytona                 | Firecracker                        | Host                |
-| ------------------------------------------------ | ---------------- | ------------------------------ | ----------------------- | ---------------------------------- | ------------------- |
-| Repository access                                | Mounted worktree | Uploaded snapshot              | Uploaded snapshot       | Uploaded snapshot                  | Host filesystem     |
-| Isolation                                        | Container        | Hosted sandbox                 | Hosted sandbox          | MicroVM                            | None                |
-| Interactive [`attach()`](../sandbox-sessions/)   | Yes              | No                             | Yes                     | No                                 | Yes                 |
-| Live input for [steering](../steering/)          | Yes              | Yes                            | Yes                     | Yes                                | Yes                 |
-| [Dependency caches](../environment-setup/)       | Yes              | Yes, with a transport          | Yes, with a transport   | No                                 | No                  |
-| [Egress rules](../network-restrictions/)         | `deny-all` only  | Yes                            | Yes, with limits        | No                                 | No                  |
-| [Durable speculation](../speculation/) recovery  | Yes              | No                             | No                      | No                                 | No                  |
-| Installs a missing agent CLI                     | No               | Yes                            | Yes                     | Yes                                | No                  |
-| Default [branch mode](../repository-and-branch/) | `current`        | `integrate`                    | `integrate`             | `integrate`                        | `current`           |
-| Setup                                            | Engine and image | `@vercel/sandbox`, credentials | `@daytona/sdk`, API key | KVM host, kernel, rootfs, TAP, SSH | Agent CLI and tools |
+|                                                 | Docker, Podman   | Vercel                         | Daytona                 | Firecracker                        | Host                |
+| ----------------------------------------------- | ---------------- | ------------------------------ | ----------------------- | ---------------------------------- | ------------------- |
+| Repository access                               | Mounted worktree | Uploaded snapshot              | Uploaded snapshot       | Uploaded snapshot                  | Host filesystem     |
+| Isolation                                       | Container        | Hosted sandbox                 | Hosted sandbox          | MicroVM                            | None                |
+| Interactive [`attach()`](../sandbox-sessions/)  | Yes              | No                             | Yes                     | No                                 | Yes                 |
+| Live input for [steering](../steering/)         | Yes              | Yes                            | Yes                     | Yes                                | Yes                 |
+| [Dependency caches](../environment-setup/)      | Yes              | Yes, with a transport          | Yes, with a transport   | No                                 | No                  |
+| [Egress rules](../network-restrictions/)        | `deny-all` only  | Yes                            | Yes, with limits        | No                                 | No                  |
+| [Durable speculation](../speculation/) recovery | Yes              | No                             | No                      | No                                 | No                  |
+| Installs a missing agent CLI                    | No               | Yes                            | Yes                     | Yes                                | No                  |
+| Default [branch mode](../workspaces/)           | `current`        | `integrate`                    | `integrate`             | `integrate`                        | `current`           |
+| Setup                                           | Engine and image | `@vercel/sandbox`, credentials | `@daytona/sdk`, API key | KVM host, kernel, rootfs, TAP, SSH | Agent CLI and tools |
 
 Remote providers (Vercel, Daytona, Firecracker) work on a copy of the Git history. They install a missing supported CLI before the first turn unless you pass `bootstrap: false`, and they reject the `current` branch mode.
 
@@ -82,3 +82,7 @@ With `repositoryMode: "isolated"`, Docker and Podman behave like a remote provid
 - A Firecracker provider owns one TAP device and runs one VM at a time. Create one provider per concurrent VM.
 
 API: [SandboxProvider](../../reference/sandboxprovider/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/) · [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/) · [createFirecrackerSandboxProvider](../../reference/createfirecrackersandboxprovider/) · [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/).
+
+## File workspaces
+
+Directory and ephemeral sources do not require host Git. Mounted Docker/Podman can bind explicit read-only or writable sources; transfer providers refuse these bindings. Commands still require their chosen tools. See [the file capability matrix](../workspaces/).

@@ -14,7 +14,7 @@ Save the script next to the configuration from [Installation](../setup/) and run
 - [Durable runs](../durable-runs/): Save each task’s output under the job’s `runId`.
 - [Tasks and dependencies](../task-dependencies/): Fetch, review, then post.
 - [Typed responses](../typed-responses/): Validate the agent’s verdict.
-- [Repository and branch](../repository-and-branch/): Start the review branch at the pull request’s head commit.
+- [Repository and branch](../workspaces/): Start the review branch at the pull request’s head commit.
 
 ## Write the script
 

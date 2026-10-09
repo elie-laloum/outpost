@@ -12,11 +12,16 @@ import type {
 } from "../../domain/workflow.types.ts";
 import type { LoopTaskOptions } from "../../domain/workflow/loop-task.types.ts";
 import type { DecideOptions } from "../../domain/decision.types.ts";
-import type { IsolatedTaskRequest } from "../tasks.types.ts";
+import type {
+  IsolatedTaskRequest,
+  FileIsolatedCommandRequest,
+} from "../tasks.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeDispatchSettings } from "./agent-components.types.ts";
 import type { Sandbox, SandboxOptions } from "../outpost.types.ts";
 import type { RecipeBindings } from "../recipe.types.ts";
+import type { FileSandbox } from "../file-sandbox.types.ts";
+import type { FileDispatchRequest } from "../file-sandbox.types.ts";
 
 export type RecipeTaskSettings = Omit<
   TaskOptions<unknown>,
@@ -34,10 +39,15 @@ export type RecipeDecisionSettings = Omit<
   DecideOptions,
   "state" | "signal" | "observation"
 >;
-export type RecipeIsolatedSettings = Omit<
+export type RecipeGitIsolatedSettings = Omit<
   IsolatedTaskRequest<unknown>,
   "signal" | "observation"
 >;
+export type RecipeFileIsolatedSettings = FileDispatchRequest<unknown>;
+export type RecipeIsolatedSettings =
+  | RecipeGitIsolatedSettings
+  | RecipeFileIsolatedSettings
+  | FileIsolatedCommandRequest;
 export interface RecipeCallSettings {
   readonly perform: (
     arguments_: WorkflowJson,
@@ -65,8 +75,13 @@ export interface RecipeWorkflowComponents {
   readonly steps: Readonly<Record<string, RecipeWorkflowStepComponents>>;
 }
 export type RecipeExecutionBindings = Omit<RecipeBindings, "sandbox"> & {
-  readonly sandbox?: Sandbox | undefined;
-  acquireSandbox?(context: TaskContext): Promise<Sandbox>;
+  validateDispatch?(
+    request: import("../execution.types.ts").DispatchOptions<unknown> & {
+      readonly agent: import("../../domain/fallback-agent.types.ts").DispatchAgent;
+    },
+  ): Promise<void>;
+  readonly sandbox?: Sandbox | FileSandbox | undefined;
+  acquireSandbox?(context: TaskContext): Promise<Sandbox | FileSandbox>;
   prepareIsolated?(
     key: string,
     request: RecipeIsolatedSettings,

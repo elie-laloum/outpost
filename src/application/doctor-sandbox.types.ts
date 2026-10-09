@@ -2,6 +2,7 @@ import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
 
 export interface SandboxDiagnosticOptions {
+  readonly workspaceKind?: "git" | "directory" | "ephemeral";
   readonly agent?: DoctorAgent;
   readonly deadlineMs?: number;
   readonly signal?: AbortSignal;

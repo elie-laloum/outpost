@@ -45,3 +45,12 @@ export interface RunReport {
   readonly omittedFailures: number;
   readonly warnings: readonly string[];
 }
+
+export interface FileRunReport extends Omit<
+  RunReport,
+  "version" | "branch" | "commits" | "diff"
+> {
+  readonly version: 2;
+  readonly workspaceInfo: import("./file-workspace.types.ts").FileWorkspaceRecord;
+  readonly fileOutputs: readonly import("./file-workspace.types.ts").WorkspacePublication[];
+}

@@ -133,7 +133,7 @@ La sandbox travaille sur sa propre copie du dépôt. Outpost la maintient align�
 
 ## Choisir la branche
 
-Sans `branch`, une sandbox cloud utilise `integrate` : une nouvelle branche `outpost/job-…`, fusionnée dans votre branche courante à la fin. `named` garde le travail sur une branche que vous nommez. `current` est refusé, car la sandbox ne peut pas modifier votre checkout sur place. Voir [Dépôt et branche](../repository-and-branch/).
+Sans `branch`, une sandbox cloud utilise `integrate` : une nouvelle branche `outpost/job-…`, fusionnée dans votre branche courante à la fin. `named` garde le travail sur une branche que vous nommez. `current` est refusé, car la sandbox ne peut pas modifier votre checkout sur place. Voir [Dépôt et branche](../workspaces/).
 
 ## Envoyer des fichiers absents de Git
 
@@ -172,3 +172,7 @@ Outpost n’écrase jamais un travail qu’il ne peut pas sauvegarder. Il s’ar
 Implémenter un autre fournisseur distant : [Ajouter un fournisseur de sandbox](../custom-sandbox-providers/).
 
 API : [SandboxOptions](../../reference/sandboxoptions/) · [EgressPolicy](../../reference/egresspolicy/).
+
+## Workspaces de fichiers
+
+Les workspaces copiés et éphémères utilisent les ports de transfert streamé existants. Vercel et Daytona refusent les montages de source. Une fermeture normale settled peut précéder une restauration portable ; les snapshots n’attestent pas la destruction d’une allocation inconnue après arrêt brutal. La validation cloud live des modes de fichiers reste à réaliser. Voir [les capacités providers](../workspaces/).

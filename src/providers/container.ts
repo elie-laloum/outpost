@@ -25,6 +25,7 @@ import { containerPlan } from "./container-plan.ts";
 import { containerPreflight } from "./container-preflight.ts";
 import { containerDefaults } from "./container.constants.ts";
 import type { ContainerEngine, ContainerOptions } from "./container.types.ts";
+import { fileProviderContext } from "./workspace-context.ts";
 
 export type { ContainerOptions } from "./container.types.ts";
 
@@ -65,7 +66,7 @@ export function containerProvider(
         config.memoryMb >= containerDefaults.minimumMemoryMb,
       "memoryMb must be at least 64",
     );
-  return {
+  const provider: SandboxProvider = {
     name: engine,
     placement: config.repositoryMode === "isolated" ? "remote" : "mounted",
     variables: { ...config.variables },
@@ -118,6 +119,7 @@ export function containerProvider(
         context.repository,
         image,
         user,
+        context.workspaceIdentity,
       );
       for (const cache of caches)
         volumes.push("--volume", `${cache.volume}:${cache.target}:nocopy`);
@@ -271,6 +273,41 @@ export function containerProvider(
         }),
         release,
       };
+    },
+  };
+  return {
+    ...provider,
+    workspaces: {
+      bindings:
+        config.repositoryMode === "isolated"
+          ? ["copy", "ephemeral"]
+          : ["copy", "ephemeral", "mount-readonly", "mount-write"],
+      async acquire(context) {
+        invariant(
+          config.image,
+          "File workspaces require an explicit container image",
+        );
+        const source = context.workspace.source;
+        const volumes = [...(config.volumes ?? [])];
+        if (source.kind === "directory" && source.access.mode === "mount") {
+          invariant(
+            config.repositoryMode !== "isolated",
+            "Isolated containers cannot mount workspace sources",
+          );
+          volumes.push({
+            source: source.directory,
+            target: source.access.target,
+            readOnly: source.access.readOnly,
+          });
+        }
+        const selected = containerProvider(
+          engine,
+          { ...config, volumes },
+          executor,
+          platform,
+        );
+        return selected.acquire(fileProviderContext(context));
+      },
     },
   };
 }

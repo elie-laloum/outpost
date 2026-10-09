@@ -169,7 +169,7 @@ API reference: [InteractiveAgentResult](../../reference/interactiveagentresult/)
 
 Each turn opens a sandbox and closes it before the question is published. Files in the worktree carry over between turns, committed or not; the sandbox home and running processes do not.
 
-Outpost never integrates, pushes or deletes the worktree. Review `branch` and merge it yourself ([Repository and branch](../repository-and-branch/)), then prune it with [Retention and cleanup](../retention/).
+Outpost never integrates, pushes or deletes the worktree. Review `branch` and merge it yourself ([Repository and branch](../workspaces/)), then prune it with [Retention and cleanup](../retention/).
 
 The repository, the worktree and the conversation store must stay at the same paths for the next process. A moved worktree fails with `Interactive workspace moved; recover it explicitly`, and a switched branch with `Interactive workspace branch changed; recover it explicitly`.
 
@@ -215,3 +215,7 @@ const region = defineTask({
 A complete scenario with an approval, red tests and reviewed code: [Build a development workflow](../development-workflow/).
 
 API: [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)
+
+## File workspaces
+
+An owned file dialogue declares `workspaceSource` instead of a repository. Settled files and portable conversations are captured before the sandbox closes and the human question is published. Interrupted owner recovery remains separate from interrupted-turn replay. See [file dialogues](../workspaces/).

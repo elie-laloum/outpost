@@ -100,7 +100,7 @@ const pageIcons = {
   "multi-repository-change": "folder",
   "compete-agents": "split",
   briefs: "book",
-  "repository-and-branch": "branch",
+  workspaces: "folder",
   "typed-responses": "braces",
   "sandbox-sessions": "terminal",
   "environment-setup": "sliders",

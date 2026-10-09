@@ -15,7 +15,7 @@ import { openWorkspace } from "@elie-laloum/outpost";
 
 Open a workspace on a host Git checkout: take its lock, prepare the checkout or worktree the branch policy selects, copy copies, then run workspaceReady. It serves successive sandboxes, one at a time, until close(). A lock held by a live process fails with code conflict instead of waiting.
 
-[Complete example and detailed rules](../../guide/repository-and-branch/).
+[Complete example and detailed rules](../../guide/workspaces/).
 
 ## Parameters and properties
 

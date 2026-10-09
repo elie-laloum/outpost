@@ -89,3 +89,7 @@ The provider never launches arbitrary commands. Host hooks and prompt command ex
 Run the complete repository example with `node examples/62-workflow-testing/index.ts` from a built Outpost checkout. It creates and removes its own temporary repository, checks one retry and a real commit, and simulates verification without paid calls.
 
 API: [scriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
+
+## File workspaces
+
+File fixtures can use ephemeral workspaces and scripted agents without creating a Git repository. Memory still refuses unsupported transfers. Publication/recovery use real temporary directories; mounted filesystem guarantees require real Docker/Podman tests. See [file workspaces](../workspaces/).

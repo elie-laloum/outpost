@@ -54,9 +54,10 @@ export async function cacheMounts(
   repository: string,
   image: string,
   user: ContainerUser,
+  workspaceIdentity?: string,
 ): Promise<ContainerCacheMount[]> {
   if (!caches.length) return [];
-  const canonical = await realpath(repository);
+  const canonical = workspaceIdentity ?? (await realpath(repository));
   return caches.map(({ name, key }) => {
     const digest = createHash("sha256")
       .update(

@@ -96,7 +96,10 @@ function collect(symbol) {
     }
     ts.forEachChild(node, visit);
   };
-  visit(declaration);
+  for (const signature of ts.isFunctionDeclaration(declaration)
+    ? symbol.declarations
+    : [declaration])
+    visit(signature);
 }
 for (const symbol of publicNames.keys()) collect(symbol);
 const exportedSymbols = [...publicNames.keys()];
@@ -106,6 +109,9 @@ const exportedByName = new Map(
 function slug(symbol) {
   const preserved = {
     Agent: "type-agent",
+    AgentTaskOptions: "support-agenttaskoptions",
+    CommandTaskOptions: "support-commandtaskoptions",
+    IsolatedTaskOptions: "support-isolatedtaskoptions",
     AgentHarness: "harness",
     BullMQTaskQueue: "type-bullmqtaskqueue",
     FallbackAgent: "type-fallbackagent",

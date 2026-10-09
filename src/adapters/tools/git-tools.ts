@@ -13,6 +13,7 @@ export function createHarnessGitTools(): HarnessToolset {
     name: "git",
     tools: [
       defineHarnessTool({
+        workspace: "git",
         name: "git",
         description:
           "Run a read-only Git command (status, diff, log or show) in the repository with extra arguments, for example log with -n 5 --oneline.",

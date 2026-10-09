@@ -10,6 +10,7 @@ export interface ConversationRecord {
 }
 
 export interface ConversationContext {
+  readonly runtimeDirectory?: string;
   readonly observation?: ObservationHub;
   readonly repository: string;
   readonly sandbox: SandboxLease;
@@ -26,6 +27,7 @@ export interface ConversationStore {
     id: string,
     repository: string,
     home?: string,
+    runtimeDirectory?: string,
   ): Promise<ConversationRecord>;
   capture(
     id: string,

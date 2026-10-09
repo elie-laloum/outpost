@@ -24,6 +24,8 @@
 
 Outpost is a TypeScript library and CLI for running coding agents in sandboxes and composing their work. Give an agent a task, choose its execution environment, and collect its answer, commits and usage. Start with one request; add parallel tasks, verification loops and human decisions as your workflow grows.
 
+Implemented but unreleased: directory and ephemeral workspaces run commands and compatible harnesses without host Git. Configuration version 3 declares file sources, runtime storage and protected output publication; existing Git defaults stay unchanged. See the [English guide](docs/src/content/docs/guide/workspaces.md) or [French guide](docs/src/content/docs/fr/guide/workspaces.md).
+
 ## Why Outpost?
 
 - **Choose your agent and sandbox independently.** Run Claude Code, Codex, Antigravity, GitHub Copilot CLI or Kimi Code with Docker, Podman, Vercel or Daytona.

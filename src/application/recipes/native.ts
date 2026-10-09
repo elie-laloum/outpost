@@ -89,7 +89,7 @@ export const nativeRecipeGuards: Readonly<
     recipeMethods(value, ["resolve"]) &&
     recipeObject(value) &&
     typeof value.name === "string",
-  workspace: (value) => recipeMethods(value, ["sandbox", "integrate", "close"]),
+  workspace: (value) => recipeMethods(value, ["sandbox", "close"]),
   sandbox: (value) => recipeMethods(value, ["command", "dispatch", "close"]),
   object: recipeObject,
   variables: (value) =>

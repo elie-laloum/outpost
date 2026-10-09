@@ -47,7 +47,7 @@ Outpost copie l’historique de la branche dans le conteneur, et l’agent trava
 | [Spéculation durable](../speculation/) | Prise en charge                                                      | Refusée : le fournisseur ne sait pas récupérer un conteneur abandonné                     |
 | Terminal interactif                    | Pris en charge                                                       | Pris en charge ; les changements reviennent quand vous quittez                            |
 
-`copies` et `includeUncommitted` ajoutent des entrées comme sur les [sandboxes cloud](../cloud-sandboxes/). Politiques de branche : [Dépôt et branche](../repository-and-branch/).
+`copies` et `includeUncommitted` ajoutent des entrées comme sur les [sandboxes cloud](../cloud-sandboxes/). Politiques de branche : [Dépôt et branche](../workspaces/).
 
 ## Synchroniser les modifications avec l’hôte
 

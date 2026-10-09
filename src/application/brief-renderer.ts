@@ -4,15 +4,14 @@ import { OutpostError } from "../domain/errors.ts";
 import { prepareBrief } from "../domain/prompts.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
-import type { WorkspaceRecord } from "../domain/workspace.types.ts";
 import { shell } from "../infrastructure/process.ts";
 import { executionDefaults } from "./execution.constants.ts";
-import type { DispatchOptions } from "./execution.types.ts";
+import type { DispatchOptions, ExecutionWorkspace } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 
 export async function renderBrief(
   brief: Brief,
-  workspace: WorkspaceRecord,
+  workspace: ExecutionWorkspace,
   lease: SandboxLease,
   host: boolean,
   options: Pick<
@@ -22,10 +21,16 @@ export async function renderBrief(
 ): Promise<string> {
   if (brief.text !== undefined) return brief.text;
   const source = await readFile(resolve(brief.file), "utf8");
-  const prepared = prepareBrief(source, brief.values, {
-    WORK_BRANCH: workspace.branch,
-    BASE_BRANCH: workspace.baseBranch,
-  });
+  const prepared = prepareBrief(
+    source,
+    brief.values,
+    "branch" in workspace
+      ? {
+          WORK_BRANCH: workspace.branch,
+          BASE_BRANCH: workspace.baseBranch,
+        }
+      : {},
+  );
   if (prepared.unused.length)
     notify(
       options.warn,

@@ -27,6 +27,12 @@ export function recipeOutput(value: unknown): Record<string, string | number> {
 export function recipeDiagnostic(error: unknown, depth = 0): RecipeDiagnostic {
   const details = error instanceof OutpostError ? error.details : {};
   return {
+    ...(typeof details.publicationId === "string"
+      ? { publicationId: details.publicationId }
+      : {}),
+    ...(typeof details.state === "string"
+      ? { publicationState: details.state }
+      : {}),
     message: bounded(error instanceof Error ? error.message : String(error)),
     ...(error instanceof OutpostError ? { code: error.code } : {}),
     ...(typeof details.status === "number" ? { status: details.status } : {}),

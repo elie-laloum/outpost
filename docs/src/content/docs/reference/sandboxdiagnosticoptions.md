@@ -15,6 +15,7 @@ import type { SandboxDiagnosticOptions } from "@elie-laloum/outpost";
 
 | Name              | Type                                                        | Presence | Meaning                                                                                                                                                                                                                    |
 | ----------------- | ----------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaceKind`   | `"git" \| "ephemeral" \| "directory" \| undefined`          | Optional | Selected workspace mode controlling whether Git-specific diagnostic probes are applicable.                                                                                                                                 |
 | `agent`           | `BuiltInAgentName \| undefined`                             | Optional | Built-in agent whose CLI is checked in the sandbox: its version (agent.sandbox), then its help for each mode Outpost uses (agent.cli.&lt;mode>). Without it, no agent check runs.                                          |
 | `deadlineMs`      | `number \| undefined`                                       | Optional | Deadline of each probe command and transfer in milliseconds, default 5000. Must be an integer from 1 to 60000, otherwise the call rejects with code configuration.                                                         |
 | `signal`          | `AbortSignal \| undefined`                                  | Optional | Cancels the diagnosis. Already aborted, the call rejects with the abort reason; aborted during the run, the remaining probes are reported as fail.                                                                         |
@@ -25,6 +26,7 @@ import type { SandboxDiagnosticOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface SandboxDiagnosticOptions {
+  readonly workspaceKind?: "git" | "directory" | "ephemeral";
   readonly agent?: DoctorAgent;
   readonly deadlineMs?: number;
   readonly signal?: AbortSignal;

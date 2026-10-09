@@ -27,6 +27,7 @@ export const JSON_SCHEMA_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 export const HARNESS_TOOL_FIELDS: ReadonlySet<string> = new Set([
+  "workspace",
   "name",
   "description",
   "input",

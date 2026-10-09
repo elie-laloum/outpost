@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ajout explicite de workspaces de fichiers copiés, montés en lecture seule/écriture ou éphémères sans Git hôte, de la configuration 3, des capacités providers et des contrats de dispatch/rapports de fichiers. Maintien des API Git et defaults legacy. Restitution protégée journalisée avec rollback conditionnel et récupération explicite ; conservation des fichiers et conversations settled pour reprise locale ou portable avec Transport explicite. Tests de commandes indépendantes, dialogue entre processus, publication interrompue et CLI installée sur un hôte Node, Docker et tar sans Git. Variantes CLI natives de fichiers et validations live cloud/Firecracker restent non validées ; aucune publication ni aucun déploiement.
+
 - Ajoute une recette de développement Linear avec une application TypeScript indépendante, cache privé de clés API validées, choix du ticket, approbation du plan, implémentation, tests obligatoires et observation formatée. Étend la saisie CLI aux gates non signées avec résultats sauvegardés et décisions explicites ; les gates signées conservent la soumission externe de preuves. Parcours testé hors ligne avec Git réel et services simulés ; Linear/Codex réel reste non validé.
 
 - Gère les questions des recettes durables directement dans la CLI : saisie automatique en terminal, sélection d’acteur, réponses persistées et poursuite sans script personnalisé. Ajoute les modes interactif et automatisé, conserve un unique rapport JSON final et préserve les questions après annulation. Couvre les reprises entre processus hors ligne et la saisie sur terminal réel, sans appel payant.

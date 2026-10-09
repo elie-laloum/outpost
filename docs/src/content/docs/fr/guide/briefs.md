@@ -49,11 +49,11 @@ reportValue(result.text);
 
 Un `file` relatif se résout depuis le répertoire de travail du processus. Construisez le chemin à partir de `import.meta.url` pour lancer le script depuis n’importe où.
 
-| Emplacement       | Rempli avec                                                                                     |
-| ----------------- | ----------------------------------------------------------------------------------------------- |
-| `{{FEATURE}}`     | `values.FEATURE` : une chaîne, un nombre fini ou un booléen.                                    |
-| `{{WORK_BRANCH}}` | La branche sur laquelle travaille l’agent (voir [Dépôt et branche](../repository-and-branch/)). |
-| `{{BASE_BRANCH}}` | La branche active dans votre dépôt au démarrage de la tâche.                                    |
+| Emplacement       | Rempli avec                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `{{FEATURE}}`     | `values.FEATURE` : une chaîne, un nombre fini ou un booléen.                         |
+| `{{WORK_BRANCH}}` | La branche sur laquelle travaille l’agent (voir [Dépôt et branche](../workspaces/)). |
+| `{{BASE_BRANCH}}` | La branche active dans votre dépôt au démarrage de la tâche.                         |
 
 Un emplacement sans valeur fait échouer la tâche avec le code d’erreur `prompt` avant le lancement de l’agent. Les valeurs que le fichier n’utilise pas sont signalées à votre fonction de rappel `warn`.
 

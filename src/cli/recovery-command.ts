@@ -4,11 +4,59 @@ import { recoveryVerifyCommand } from "./recovery-verify-command.ts";
 import { inspectRecovery } from "../application/recovery-inspection.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import type { CliInvocation } from "./main.types.ts";
+import { recoveryPublicationCommand } from "./recovery-publication-command.ts";
+import { recoveryWorkspaceCommand } from "./recovery-workspace-command.ts";
+import {
+  inspectWorkspacePathLocks,
+  inspectWorkspaceRegistryGate,
+  recoverWorkspaceRegistryGate,
+} from "../infrastructure/workspace-lock.ts";
+import { createLocalTransport } from "../infrastructure/local-transport.ts";
+import { join, resolve } from "node:path";
 
 export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "registry") {
+    const action = positionals[2];
+    invariant(
+      positionals.length === 3 &&
+        (action === "inspect" || action === "recover"),
+      "Usage: outpost recovery registry inspect|recover [--revision DEVICE:INODE --processes-stopped]",
+    );
+    let gate = await inspectWorkspaceRegistryGate();
+    if (action === "recover") {
+      invariant(
+        values["processes-stopped"] &&
+          values.revision &&
+          /^\d+:\d+$/.test(values.revision),
+        "Registry recovery requires --processes-stopped and the inspected --revision DEVICE:INODE",
+      );
+      const [device, inode] = values.revision.split(":").map(Number);
+      invariant(
+        Number.isSafeInteger(device) && Number.isSafeInteger(inode),
+        "Invalid registry revision",
+      );
+      await recoverWorkspaceRegistryGate(
+        { device: device!, inode: inode! },
+        { processesStopped: true },
+      );
+      gate = await inspectWorkspaceRegistryGate();
+    }
+    process.stdout.write(
+      values.json
+        ? `${JSON.stringify(gate ?? null)}\n`
+        : gate
+          ? `Registry revision: ${gate.device}:${gate.inode}\n`
+          : "Registry gate is clear\n",
+    );
+    return;
+  }
+  if (positionals[1] === "publication")
+    return recoveryPublicationCommand({ values, positionals });
+  if (positionals[1] === "workspace")
+    return recoveryWorkspaceCommand({ values, positionals });
   if (positionals[1] === "restore")
     return recoveryRestoreCommand({ values, positionals });
   if (positionals[1] === "prune")
@@ -23,6 +71,7 @@ export async function recoveryCommand({
     invariant(
       [
         "repository",
+        "runtime-directory",
         "max-entries",
         "git",
         "locks",
@@ -35,6 +84,36 @@ export async function recoveryCommand({
     values["max-entries"] === undefined
       ? undefined
       : positive(Number(values["max-entries"]), "max-entries");
+  if (values["runtime-directory"]) {
+    invariant(
+      !values.repository && !values.git,
+      "Runtime inspection cannot request repository or Git state",
+    );
+    const runtimeDirectory = resolve(values["runtime-directory"]);
+    const transport = createLocalTransport({
+      directory: join(runtimeDirectory, "storage"),
+    });
+    const entries = [];
+    for await (const entry of transport.list()) {
+      if (entries.length >= (maxEntries ?? 1000)) break;
+      entries.push(entry);
+    }
+    const registryGate = await inspectWorkspaceRegistryGate();
+    const report = {
+      runtimeDirectory,
+      entries,
+      ...(registryGate ? { registryGate } : {}),
+      ...(values.locks && !registryGate
+        ? { locks: await inspectWorkspacePathLocks() }
+        : {}),
+    };
+    process.stdout.write(
+      values.json
+        ? `${JSON.stringify(report)}\n`
+        : `Runtime: ${runtimeDirectory}\n${entries.length} stored objects\n`,
+    );
+    return;
+  }
   const report = await inspectRecovery({
     ...(values.repository !== undefined
       ? { repository: values.repository }

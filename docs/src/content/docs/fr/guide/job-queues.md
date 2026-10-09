@@ -275,3 +275,7 @@ Le système de stockage BullMQ a sa propre configuration : voir [Redis et BullMQ
 - Un jeton HTTP autorise toutes les opérations de la file. Servez-la derrière TLS sur un réseau privé, et gardez les jetons hors des URL et des logs.
 
 API : [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
+
+## Workspaces de fichiers
+
+Les workers exécutent aussi les recettes de fichiers de configuration 3 via le même runtime. Chaque job possédé reçoit une matérialisation distincte ; les destinations partagées se coordonnent par des verrous communs à l’hôte. Voir [les jobs de fichiers indépendants](../workspaces/#exécuter-des-jobs-indépendants).

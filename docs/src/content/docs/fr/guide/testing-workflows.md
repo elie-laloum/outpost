@@ -89,3 +89,7 @@ Le fournisseur ne lance jamais de commandes arbitraires. Les hooks hôte et les 
 Lancez l’exemple complet du dépôt avec `node examples/62-workflow-testing/index.ts` depuis un checkout Outpost compilé. Il crée et supprime son propre dépôt temporaire, vérifie un retry et un commit réel, et simule la vérification sans appel payant.
 
 API : [scriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
+
+## Workspaces de fichiers
+
+Les fixtures de fichiers utilisent des workspaces éphémères et des agents scriptés sans créer de dépôt Git. Memory refuse toujours les transferts non pris en charge. Publication et récupération utilisent de vrais dossiers temporaires ; les garanties de montage nécessitent des tests Docker/Podman réels. Voir [les workspaces de fichiers](../workspaces/).

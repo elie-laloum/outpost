@@ -25,6 +25,7 @@ import type {
 } from "./project.types.ts";
 import type { RecipeDispatchSettings } from "./agent-components.types.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
+import { runFileRecipe } from "./file-run.ts";
 
 function isDispatchSettings(value: unknown): value is RecipeDispatchSettings {
   return recipeObject(value);
@@ -82,6 +83,15 @@ export function createRecipeProjectRuntime(
             throw new Error("Invalid recipe observation hub");
           observation = value;
         }
+        if (project.files)
+          return await runFileRecipe(
+            project,
+            scope,
+            settings,
+            resume,
+            signal,
+            observation,
+          );
         const configuration = await recipeExecutionConfiguration(
           project,
           scope,

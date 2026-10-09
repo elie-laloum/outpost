@@ -17,6 +17,7 @@ import {
 import { daytonaCommand } from "./daytona-command.ts";
 import { daytonaFiles } from "./daytona-files.ts";
 import type { DaytonaOptions } from "./daytona.types.ts";
+import { withTransferredWorkspaces } from "./workspace-context.ts";
 
 export type { CloudDependencyCache } from "./cloud-cache.types.ts";
 
@@ -38,7 +39,7 @@ export function createDaytonaSandboxProvider(
   validateCloudCaches(caches);
   const networkPolicy = daytonaNetworkPolicy(options);
   const create = { ...options.create, ...networkPolicy };
-  return {
+  return withTransferredWorkspaces({
     name: "daytona",
     placement: "remote",
     variables: { ...options.variables },
@@ -122,7 +123,7 @@ export function createDaytonaSandboxProvider(
       }
       return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
-  };
+  });
 }
 
 export type { EgressPolicy } from "../domain/egress.types.ts";

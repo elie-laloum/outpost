@@ -57,18 +57,18 @@ Vercel et Daytona chargent leur SDK au moment d’allouer une sandbox. Installez
 
 ## Comparer les environnements
 
-|                                                         | Docker, Podman       | Vercel                          | Daytona                   | Firecracker                       | Hôte                     |
-| ------------------------------------------------------- | -------------------- | ------------------------------- | ------------------------- | --------------------------------- | ------------------------ |
-| Accès au dépôt                                          | Worktree monté       | Snapshot téléversé              | Snapshot téléversé        | Snapshot téléversé                | Système de fichiers hôte |
-| Isolation                                               | Conteneur            | Sandbox hébergée                | Sandbox hébergée          | MicroVM                           | Aucune                   |
-| [`attach()`](../sandbox-sessions/) interactif           | Oui                  | Non                             | Oui                       | Non                               | Oui                      |
-| Entrée en direct pour la [réorientation](../steering/)  | Oui                  | Oui                             | Oui                       | Oui                               | Oui                      |
-| [Caches de dépendances](../environment-setup/)          | Oui                  | Oui, avec un transport          | Oui, avec un transport    | Non                               | Non                      |
-| [Règles de sortie](../network-restrictions/)            | `deny-all` seulement | Oui                             | Oui, avec des limites     | Non                               | Non                      |
-| Reprise de la [spéculation durable](../speculation/)    | Oui                  | Non                             | Non                       | Non                               | Non                      |
-| Installe un CLI d’agent manquant                        | Non                  | Oui                             | Oui                       | Oui                               | Non                      |
-| [Mode de branche](../repository-and-branch/) par défaut | `current`            | `integrate`                     | `integrate`               | `integrate`                       | `current`                |
-| Préparation                                             | Moteur et image      | `@vercel/sandbox`, identifiants | `@daytona/sdk`, clé d’API | Hôte KVM, noyau, rootfs, TAP, SSH | CLI d’agent et outils    |
+|                                                        | Docker, Podman       | Vercel                          | Daytona                   | Firecracker                       | Hôte                     |
+| ------------------------------------------------------ | -------------------- | ------------------------------- | ------------------------- | --------------------------------- | ------------------------ |
+| Accès au dépôt                                         | Worktree monté       | Snapshot téléversé              | Snapshot téléversé        | Snapshot téléversé                | Système de fichiers hôte |
+| Isolation                                              | Conteneur            | Sandbox hébergée                | Sandbox hébergée          | MicroVM                           | Aucune                   |
+| [`attach()`](../sandbox-sessions/) interactif          | Oui                  | Non                             | Oui                       | Non                               | Oui                      |
+| Entrée en direct pour la [réorientation](../steering/) | Oui                  | Oui                             | Oui                       | Oui                               | Oui                      |
+| [Caches de dépendances](../environment-setup/)         | Oui                  | Oui, avec un transport          | Oui, avec un transport    | Non                               | Non                      |
+| [Règles de sortie](../network-restrictions/)           | `deny-all` seulement | Oui                             | Oui, avec des limites     | Non                               | Non                      |
+| Reprise de la [spéculation durable](../speculation/)   | Oui                  | Non                             | Non                       | Non                               | Non                      |
+| Installe un CLI d’agent manquant                       | Non                  | Oui                             | Oui                       | Oui                               | Non                      |
+| [Mode de branche](../workspaces/) par défaut           | `current`            | `integrate`                     | `integrate`               | `integrate`                       | `current`                |
+| Préparation                                            | Moteur et image      | `@vercel/sandbox`, identifiants | `@daytona/sdk`, clé d’API | Hôte KVM, noyau, rootfs, TAP, SSH | CLI d’agent et outils    |
 
 Les fournisseurs distants (Vercel, Daytona, Firecracker) travaillent sur une copie de l’historique Git. Si un CLI pris en charge manque, ils l’installent avant le premier tour, sauf si vous passez `bootstrap: false`. Ils refusent le mode de branche `current`.
 
@@ -82,3 +82,7 @@ Avec `repositoryMode: "isolated"`, Docker et Podman se comportent comme un fourn
 - Un fournisseur Firecracker possède un périphérique TAP et exécute une seule VM à la fois. Créez un fournisseur par VM simultanée.
 
 API : [SandboxProvider](../../reference/sandboxprovider/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/) · [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/) · [createFirecrackerSandboxProvider](../../reference/createfirecrackersandboxprovider/) · [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/).
+
+## Workspaces de fichiers
+
+Les sources de dossier et éphémères ne nécessitent pas Git sur l’hôte. Docker/Podman montés acceptent des sources explicites en lecture seule ou écriture ; les providers de transfert refusent ces bindings. Les commandes nécessitent toujours leurs propres outils. Voir [la matrice fichiers](../workspaces/).

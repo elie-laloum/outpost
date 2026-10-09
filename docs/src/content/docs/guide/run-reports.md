@@ -41,3 +41,7 @@ The failure list retains at most 100 entries and counts additional failures. Des
 Inherited [redaction](../security/) masks all report strings, including answers, paths and commands. Markdown escapes embedded markup. Review the report before sharing: undeclared secrets can still occur in the answer, commit subjects or tool previews. If dispatch throws, there is no result to call; use [error recovery](../error-handling/) and the journal instead.
 
 See [`DispatchResult.report`](../../reference/dispatchresult/), [`RunReport`](../../reference/runreport/) and [`RunReportOptions`](../../reference/runreportoptions/) for the exact contracts. The repository’s [offline example](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/56-run-reports) exercises a real local command failure and commit without an account or paid model call.
+
+## File workspaces
+
+File dispatch reports use version 2 with discriminated `workspaceInfo` and `fileOutputs`. They preserve usage, observed tool failures, redaction and JSON/Markdown rendering, without synthetic branches or commits. Git report version 1 stays unchanged. See [file results](../workspaces/).

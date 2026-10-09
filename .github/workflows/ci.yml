@@ -112,6 +112,11 @@ jobs:
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
       - run: bun run build
+      - name: Validate installed file recipes on a host without Git
+        if: matrix.engine == 'docker'
+        run: bun run test:package
+        env:
+          OUTPOST_PACKAGE_CONTAINER_ENGINE: docker
       - name: Validate documentation container examples
         run: |
           ${{ matrix.engine }} tag outpost-ci:latest outpost:docs-demo

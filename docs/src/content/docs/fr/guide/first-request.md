@@ -85,6 +85,6 @@ Outpost a ouvert un worktree sous `.outpost/workspaces/`, exécuté l’agent da
 1. [D’une tâche à un workflow](../first-workflow/) : Enchaîner des tâches avec des dépendances.
 2. [Réponses typées](../typed-responses/) : Recevoir des données validées plutôt que du texte libre.
 3. [Sessions de sandbox](../sandbox-sessions/) : Lancer vos tests avant de fusionner.
-4. [Dépôt et branche](../repository-and-branch/) : Travailler dans votre checkout ou fusionner automatiquement.
+4. [Dépôt et branche](../workspaces/) : Travailler dans votre checkout ou fusionner automatiquement.
 
 API : [dispatch](../../reference/dispatch/) · [DispatchResult](../../reference/dispatchresult/).

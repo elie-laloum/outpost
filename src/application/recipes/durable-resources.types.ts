@@ -4,7 +4,7 @@ import type {
   TaskContext,
   WorkflowResult,
 } from "../../domain/workflow.types.ts";
-import type { RecipeIsolatedSettings } from "./workflow-components.types.ts";
+import type { RecipeGitIsolatedSettings } from "./workflow-components.types.ts";
 
 export interface RecipeDurableWorkspace {
   readonly workspace: Workspace;
@@ -15,9 +15,9 @@ export interface RecipeDurableResources {
   shared(context: TaskContext): Promise<Sandbox>;
   isolated(
     key: string,
-    request: RecipeIsolatedSettings,
+    request: RecipeGitIsolatedSettings,
     context: TaskContext,
-  ): Promise<RecipeIsolatedSettings>;
+  ): Promise<RecipeGitIsolatedSettings>;
   releaseIsolated(key: string): Promise<void>;
   settle(result: WorkflowResult): Promise<void>;
   close(): Promise<void>;

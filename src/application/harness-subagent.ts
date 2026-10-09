@@ -52,6 +52,9 @@ export async function runSubagent(
     transcript = store
       ? await openTranscript({
           repository: runtime.repository,
+          ...(runtime.runtimeDirectory
+            ? { runtimeDirectory: runtime.runtimeDirectory }
+            : {}),
           ...(runtime.observation ? { observation: runtime.observation } : {}),
           store,
           model: agent.model.name,
@@ -121,10 +124,12 @@ export async function runSubagent(
     if (transcript && store)
       await store.capture(transcript.id, {
         repository: runtime.repository,
+        ...(runtime.runtimeDirectory
+          ? { runtimeDirectory: runtime.runtimeDirectory }
+          : {}),
         sandbox: context.sandbox,
         staging: join(
-          runtime.repository,
-          ".outpost",
+          runtime.runtimeDirectory ?? join(runtime.repository, ".outpost"),
           "conversations",
           "harness",
         ),

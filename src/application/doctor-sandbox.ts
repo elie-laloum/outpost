@@ -38,7 +38,9 @@ export async function diagnoseSandbox(
     });
   };
   const checks: DiagnosticCheck[] = [];
-  for (const executable of ["node", "git"]) {
+  for (const executable of (options.workspaceKind ?? "git") === "git"
+    ? ["node", "git"]
+    : ["node"]) {
     checks.push(
       await diagnosticProbe(
         {

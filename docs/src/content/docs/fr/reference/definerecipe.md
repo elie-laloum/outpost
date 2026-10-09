@@ -19,10 +19,10 @@ Analyse et valide une recette YAML locale, lie commandes et agents nommés à la
 
 ## Paramètres et propriétés
 
-| Nom        | Type             | Présence | Rôle                                                                                                                                                                                                                                                           |
-| ---------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source`   | `string`         | Requis   | Texte YAML 1.2 au format de recette 1 (littéral) ou 2 (paramètres typés et références explicites), limité à 1 Mio et 1 000 tâches. Les champs inconnus, constructions YAML non prises en charge, graphes et références invalides sont refusés avant exécution. |
-| `bindings` | `RecipeBindings` | Requis   | Sandbox ouverte et registre d’agents optionnel empruntés par chaque tâche de la recette. defineRecipe() n’alloue ni ne ferme de ressource ; l’appelant en conserve la propriété.                                                                               |
+| Nom        | Type                  | Présence | Rôle                                                                                                                                                                                                                                                           |
+| ---------- | --------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   | `string`              | Requis   | Texte YAML 1.2 au format de recette 1 (littéral) ou 2 (paramètres typés et références explicites), limité à 1 Mio et 1 000 tâches. Les champs inconnus, constructions YAML non prises en charge, graphes et références invalides sont refusés avant exécution. |
+| `bindings` | `MixedRecipeBindings` | Requis   | Sandbox ouverte et registre d’agents optionnel empruntés par chaque tâche de la recette. defineRecipe() n’alloue ni ne ferme de ressource ; l’appelant en conserve la propriété.                                                                               |
 
 ## Retour
 
@@ -33,11 +33,11 @@ Analyse et valide une recette YAML locale, lie commandes et agents nommés à la
 ```ts
 export declare function defineRecipe(
   source: string,
-  bindings: RecipeBindings,
+  bindings: MixedRecipeBindings,
 ): Workflow;
 ```
 
 ## Contrats associés
 
-- [RecipeBindings](../recipebindings/)
+- [MixedRecipeBindings](../mixedrecipebindings/)
 - [Workflow](../type-workflow/)

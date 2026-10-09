@@ -9,6 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import assert from "node:assert/strict";
+import { smokeFileWorkspaces } from "./package-smoke-file-workspaces.mjs";
 
 const root = process.cwd();
 const runBun = (args, cwd = root) =>
@@ -542,6 +543,7 @@ void [legacy,extended];
       { cwd: temporary, stdio: "inherit" },
     );
   checkTypes(consumer);
+  smokeFileWorkspaces(temporary, checkTypes);
   checkTypes(guardConsumer);
   checkTypes(conflictConsumer);
   const secretsConsumer = join(temporary, "secrets.ts");

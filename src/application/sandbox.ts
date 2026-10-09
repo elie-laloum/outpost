@@ -15,10 +15,28 @@ import { observeDispatch } from "./dispatch-observation.ts";
 import { dispatchInSandbox } from "./sandbox-dispatch.ts";
 import { provisionSandbox } from "./sandbox-provision.ts";
 import { steeringScope } from "./steering-scope.ts";
+import { createFileSandbox, isFileSandboxOptions } from "./file-sandbox.ts";
+import type { FileSandboxOptions, FileSandbox } from "./file-sandbox.types.ts";
+import type { GitWorkspaceSandboxOptions } from "./file-workspace.types.ts";
+import {
+  isGitWorkspaceSandboxOptions,
+  gitWorkspaceSandboxOptions,
+} from "./workspace-source.ts";
 
+export function createSandbox(
+  options: FileSandboxOptions,
+): Promise<FileSandbox>;
+export function createSandbox(
+  options: GitWorkspaceSandboxOptions,
+): Promise<Sandbox>;
+export function createSandbox(options?: SandboxOptions): Promise<Sandbox>;
 export async function createSandbox(
-  options: SandboxOptions = {},
-): Promise<Sandbox> {
+  options:
+    SandboxOptions | FileSandboxOptions | GitWorkspaceSandboxOptions = {},
+): Promise<Sandbox | FileSandbox> {
+  if (isGitWorkspaceSandboxOptions(options))
+    return createPreparedSandbox(gitWorkspaceSandboxOptions(options));
+  if (isFileSandboxOptions(options)) return createFileSandbox(options);
   return createPreparedSandbox(options);
 }
 

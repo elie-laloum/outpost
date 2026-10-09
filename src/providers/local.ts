@@ -17,7 +17,7 @@ export function createLocalSandboxProvider(
     !("egress" in options) || options.egress === undefined,
     "Local execution cannot enforce egress policies",
   );
-  return {
+  const provider: SandboxProvider = {
     name: "local",
     placement: "host",
     variables: { ...options.variables },
@@ -79,6 +79,21 @@ export function createLocalSandboxProvider(
           await Promise.allSettled(active);
         },
       };
+    },
+  };
+  return {
+    ...provider,
+    workspaces: {
+      bindings: ["copy", "ephemeral"],
+      acquire(context) {
+        return provider.acquire({
+          directory: context.workspace.directory,
+          repository: context.runtime.directory,
+          gitDirectories: [],
+          variables: context.variables,
+          ...(context.signal ? { signal: context.signal } : {}),
+        });
+      },
     },
   };
 }

@@ -14,6 +14,7 @@ import { vercelNetworkPolicy } from "./vercel-network.ts";
 import { vercelDirectory } from "./vercel-directory.ts";
 import { vercelFiles } from "./vercel-files.ts";
 import type { VercelOptions } from "./vercel.types.ts";
+import { withTransferredWorkspaces } from "./workspace-context.ts";
 
 export type { CloudDependencyCache } from "./cloud-cache.types.ts";
 
@@ -34,7 +35,7 @@ export function createVercelSandboxProvider(
   validateCloudCaches(caches);
   const networkPolicy = vercelNetworkPolicy(options);
   const create: NonNullable<VercelOptions["create"]> = { ...options.create };
-  return {
+  return withTransferredWorkspaces({
     name: "vercel",
     placement: "remote",
     variables: { ...options.variables },
@@ -117,7 +118,7 @@ export function createVercelSandboxProvider(
       }
       return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
-  };
+  });
 }
 
 export type { EgressPolicy } from "../domain/egress.types.ts";

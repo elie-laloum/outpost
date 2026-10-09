@@ -402,5 +402,9 @@
   "/guide/command-line/": "/guide/cli/",
   "/fr/guide/command-line/": "/fr/guide/cli/",
   "/guide/specify-with-a-human/": "/guide/development-workflow/",
-  "/fr/guide/specify-with-a-human/": "/fr/guide/development-workflow/"
+  "/fr/guide/specify-with-a-human/": "/fr/guide/development-workflow/",
+  "/guide/repository-and-branch/": "/guide/workspaces/",
+  "/guide/file-workspaces/": "/guide/workspaces/",
+  "/fr/guide/repository-and-branch/": "/fr/guide/workspaces/",
+  "/fr/guide/file-workspaces/": "/fr/guide/workspaces/"
 }

@@ -13,20 +13,22 @@ import type { ConversationContext } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                                       | Presence | Meaning                                                                                                                                                                                                          |
-| ------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `observation` | `ObservationHub \| undefined`              | Optional | Observation scope carrying the inherited redaction policy for captured JSONL transcripts, sidecars and decoded session bundles before transport archival.                                                        |
-| `repository`  | `string`                                   | Required | Host repository of the task; capture rewrites recorded cwd values to this path.                                                                                                                                  |
-| `sandbox`     | `SandboxLease`                             | Required | Execution lease used to transfer transcripts into or out of the agent home.                                                                                                                                      |
-| `staging`     | `string`                                   | Required | Host scratch directory for files in transit; temporary copies are removed after each transfer.                                                                                                                   |
-| `home`        | `string \| undefined`                      | Optional | Host root of captured conversations, from the conversationHome option. Transcript stores default to the user’s home directory and session bundle stores to the repository.                                       |
-| `local`       | `boolean \| undefined`                     | Optional | True when the sandbox runs on the host. Transcript stores then read the transcript from disk instead of running find, and skip a restore into the original checkout unless the record has a transport reference. |
-| `warn`        | `((message: string) => void) \| undefined` | Optional | Receives nonfatal warnings, such as a child transcript that could not be captured.                                                                                                                               |
+| Name               | Type                                       | Presence | Meaning                                                                                                                                                                                                          |
+| ------------------ | ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runtimeDirectory` | `string \| undefined`                      | Optional | File conversation control root independent of repository discovery, preserving native formats and relocation.                                                                                                    |
+| `observation`      | `ObservationHub \| undefined`              | Optional | Observation scope carrying the inherited redaction policy for captured JSONL transcripts, sidecars and decoded session bundles before transport archival.                                                        |
+| `repository`       | `string`                                   | Required | Host repository of the task; capture rewrites recorded cwd values to this path.                                                                                                                                  |
+| `sandbox`          | `SandboxLease`                             | Required | Execution lease used to transfer transcripts into or out of the agent home.                                                                                                                                      |
+| `staging`          | `string`                                   | Required | Host scratch directory for files in transit; temporary copies are removed after each transfer.                                                                                                                   |
+| `home`             | `string \| undefined`                      | Optional | Host root of captured conversations, from the conversationHome option. Transcript stores default to the user’s home directory and session bundle stores to the repository.                                       |
+| `local`            | `boolean \| undefined`                     | Optional | True when the sandbox runs on the host. Transcript stores then read the transcript from disk instead of running find, and skip a restore into the original checkout unless the record has a transport reference. |
+| `warn`             | `((message: string) => void) \| undefined` | Optional | Receives nonfatal warnings, such as a child transcript that could not be captured.                                                                                                                               |
 
 ## Signature
 
 ```ts
 export interface ConversationContext {
+  readonly runtimeDirectory?: string;
   readonly observation?: ObservationHub;
   readonly repository: string;
   readonly sandbox: SandboxLease;

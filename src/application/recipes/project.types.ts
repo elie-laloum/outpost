@@ -27,6 +27,8 @@ export interface RecipeProjectValidation {
 }
 
 export interface RecipeProject {
+  readonly componentConfiguration?: Readonly<Record<string, unknown>>;
+  readonly files?: import("./file-configuration.types.ts").RecipeFileConfiguration;
   readonly options: RecipeProjectOptions;
   readonly directory: string;
   readonly document: RecipeDocument;

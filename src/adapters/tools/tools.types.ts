@@ -1,5 +1,9 @@
 import type { GIT_READ_COMMANDS } from "./tools.constants.ts";
 
+export interface FileSelectionOptions {
+  readonly selection?: "git" | "filesystem";
+}
+
 export interface ReadFileInput {
   readonly path: string;
   readonly offset?: number;

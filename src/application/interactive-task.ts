@@ -1,4 +1,5 @@
 import { executeInteractiveTurn } from "./interactive-task-execution.ts";
+import { defineFileInteractiveAgentTask } from "./file-interactive-task.ts";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { invariant } from "../domain/errors.ts";
@@ -13,11 +14,21 @@ import { interactiveState } from "./interactive-task-protocol.ts";
 import type {
   InteractiveAgentTaskOptions,
   InteractiveAgentResult,
+  FileInteractiveAgentTaskOptions,
+  FileInteractiveAgentResult,
 } from "./interactive-task.types.ts";
 
 export function defineInteractiveAgentTask(
   options: InteractiveAgentTaskOptions,
-): Task<InteractiveAgentResult> {
+): Task<InteractiveAgentResult>;
+export function defineInteractiveAgentTask(
+  options: FileInteractiveAgentTaskOptions,
+): Task<FileInteractiveAgentResult>;
+export function defineInteractiveAgentTask(
+  options: InteractiveAgentTaskOptions | FileInteractiveAgentTaskOptions,
+): Task<InteractiveAgentResult> | Task<FileInteractiveAgentResult> {
+  if ("workspaceSource" in options)
+    return defineFileInteractiveAgentTask(options);
   invariant(
     typeof options.repository === "string" && !!options.repository.trim(),
     "Interactive tasks require a repository",

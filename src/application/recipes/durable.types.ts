@@ -10,6 +10,12 @@ import type { WorkflowAnswer } from "../../domain/workflow/input.types.ts";
 import type { WorkflowDecision } from "../../domain/workflow/gates.types.ts";
 
 export interface RecipeResumeOptions extends RecipeRunOptions {
+  readonly workspaceRecovery?: Readonly<
+    Record<
+      string,
+      import("../file-workspace.types.ts").FileWorkspaceRecoveryAuthorization
+    >
+  >;
   readonly runId: string;
   readonly retryIncomplete?: boolean;
   readonly answers?: readonly WorkflowAnswer[];
@@ -18,13 +24,14 @@ export interface RecipeResumeOptions extends RecipeRunOptions {
 }
 
 export interface RecipeWorkspaceCheckpoint {
+  readonly fileRecord?: import("../../domain/file-workspace.types.ts").FileWorkspaceRecord;
   readonly integration?: RecipeReport["integration"];
   readonly state: "allocating" | "ready" | "integrated" | "closed";
   readonly record?: WorkspaceRecord;
 }
 
 export interface RecipeCheckpointMetadata {
-  readonly format: 1;
+  readonly format: 1 | 2;
   readonly identity: string;
   readonly inputs: Readonly<Record<string, WorkflowJson>>;
   readonly resources: Readonly<Record<string, RecipeWorkspaceCheckpoint>>;

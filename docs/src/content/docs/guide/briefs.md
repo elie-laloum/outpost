@@ -49,11 +49,11 @@ reportValue(result.text);
 
 A relative `file` resolves from the process working directory. Build the path from `import.meta.url` so the script runs from anywhere.
 
-| Placeholder       | Filled with                                                                             |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| `{{FEATURE}}`     | `values.FEATURE`: a string, a finite number or a boolean.                               |
-| `{{WORK_BRANCH}}` | The branch the agent works on (see [Repository and branch](../repository-and-branch/)). |
-| `{{BASE_BRANCH}}` | The branch checked out in your repository when the task started.                        |
+| Placeholder       | Filled with                                                                  |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `{{FEATURE}}`     | `values.FEATURE`: a string, a finite number or a boolean.                    |
+| `{{WORK_BRANCH}}` | The branch the agent works on (see [Repository and branch](../workspaces/)). |
+| `{{BASE_BRANCH}}` | The branch checked out in your repository when the task started.             |
 
 If a placeholder has no value, the task fails with code `prompt` before the agent starts. If you provide a value that the file does not use, Outpost reports it through `warn`.
 

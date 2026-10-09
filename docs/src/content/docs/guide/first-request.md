@@ -85,6 +85,6 @@ Outpost opened a worktree under `.outpost/workspaces/`, ran the agent in a sandb
 1. [From a task to a workflow](../first-workflow/): Chain tasks with dependencies.
 2. [Typed responses](../typed-responses/): Receive validated data instead of free text.
 3. [Sandbox sessions](../sandbox-sessions/): Run your tests before you merge.
-4. [Repository and branch](../repository-and-branch/): Work in your checkout or merge automatically.
+4. [Repository and branch](../workspaces/): Work in your checkout or merge automatically.
 
 API: [dispatch](../../reference/dispatch/) · [DispatchResult](../../reference/dispatchresult/).

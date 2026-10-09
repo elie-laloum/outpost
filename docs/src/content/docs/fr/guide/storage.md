@@ -115,7 +115,7 @@ Un transport distant permet de conserver les objets sur un autre service. Les é
 
 <!-- features -->
 
-- [Worktrees et verrous](../repository-and-branch/): Les branches sont extraites sous `.outpost/workspaces` et verrouillées sous `.outpost/locks`.
+- [Worktrees et verrous](../workspaces/): Les branches sont extraites sous `.outpost/workspaces` et verrouillées sous `.outpost/locks`.
   - Git
 - [Conversations natives](../conversations/): L’agent lit son propre stockage ; une copie archivée est restaurée sur disque avant la reprise.
   - Claude Code
@@ -161,3 +161,7 @@ Le script affiche `stale: notes/today`. Les stockages appliquent la même barri�
 - Les clés sont des segments séparés par `/`, faits de lettres, chiffres, `.`, `_` et `-`, sans point initial, de 512 caractères au plus.
 
 API : [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/) · [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [createArtifactStore](../../reference/createartifactstore/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [createTransportConversations](../../reference/createtransportconversations/) · [SandboxOptions](../../reference/sandboxoptions/) · [createS3Transport](../../reference/creates3transport/).
+
+## Workspaces de fichiers
+
+Les modes de fichiers placent le stockage de contrôle sous `runtime.directory`, sans résolution de dépôt Git. Les fichiers portables exigent un Transport et un namespace explicites ; un checkpoint seul ne reconstruit pas une matérialisation perdue. Voir [la conservation des fichiers](../workspaces/#conserver-et-reprendre-les-fichiers).

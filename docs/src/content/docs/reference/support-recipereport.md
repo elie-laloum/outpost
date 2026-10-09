@@ -9,6 +9,8 @@ sidebar:
 
 | Name             | Type                                                                                                         | Presence | Meaning                                                                                                                                                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspaceInfo`  | `FileWorkspaceRecord \| undefined`                                                                           | Optional | Versioned workspace description retaining ownership, settled generation and recovery references.                                                                                                                                                                 |
+| `fileOutputs`    | `readonly WorkspacePublication[] \| undefined`                                                               | Optional | Verified publication results, separate from Git commits and branch integration.                                                                                                                                                                                  |
 | `integration`    | `ConflictResolution \| undefined`                                                                            | Optional | Conflict resolution commit, verification and agent usage, reported separately from workflow usage when integration invokes a resolver.                                                                                                                           |
 | `runId`          | `string \| undefined`                                                                                        | Optional | Checkpoint run ID for a durable recipe invocation.                                                                                                                                                                                                               |
 | `inputRequests`  | `readonly WorkflowInputRequest[] \| undefined`                                                               | Optional | Persisted dialogue questions awaiting an authorized answer.                                                                                                                                                                                                      |
@@ -27,6 +29,8 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly workspaceInfo?: FileWorkspaceRecord;
+  readonly fileOutputs?: readonly WorkspacePublication[];
   readonly integration?: ConflictResolution;
   readonly runId?: string;
   readonly inputRequests?: WorkflowResult["inputRequests"];

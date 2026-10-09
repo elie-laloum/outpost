@@ -17,6 +17,13 @@ Create the files toolset. read_file returns up to 2000 numbered lines of a UTF-8
 
 [Complete example and detailed rules](../../guide/harness-tools/).
 
+## Parameters and properties
+
+| Name                | Type                                 | Presence | Meaning                                                                                                              |
+| ------------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `FileSelectionOptions \| undefined`  | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.             |
+| `options.selection` | `"git" \| "filesystem" \| undefined` | Optional | Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering. |
+
 ## Returns
 
 `HarnessToolset`
@@ -24,9 +31,12 @@ Create the files toolset. read_file returns up to 2000 numbered lines of a UTF-8
 ## Signature
 
 ```ts
-export declare function createHarnessFileTools(): HarnessToolset;
+export declare function createHarnessFileTools(
+  options?: FileSelectionOptions,
+): HarnessToolset;
 ```
 
 ## Related contracts
 
+- [FileSelectionOptions](../fileselectionoptions/)
 - [HarnessToolset](../harnesstoolset/)

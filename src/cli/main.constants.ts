@@ -37,6 +37,11 @@ export const cliOptions = {
     type: "boolean",
     description: "Explicitly authorize replay of interrupted tasks",
   },
+  "workspace-recovery": {
+    type: "string",
+    description:
+      "JSON file mapping shared or task names to inspected workspace recovery revisions and stopped-process authorization",
+  },
   "recover-revision": {
     type: "string",
     description:
@@ -108,6 +113,43 @@ export const cliOptions = {
   checksums: { type: "boolean", description: "Verify retained file checksums" },
   "max-bytes": { type: "string", description: "Maximum bytes to inspect" },
   "max-entries": { type: "string", description: "Maximum inventory entries" },
+  "runtime-directory": {
+    type: "string",
+    description: "Runtime control directory without repository discovery",
+  },
+  namespace: { type: "string", description: "Runtime namespace" },
+  "workspace-id": { type: "string", description: "File workspace identity" },
+  revision: {
+    type: "string",
+    description: "Inspected resource revision to recover explicitly",
+  },
+  "processes-stopped": {
+    type: "boolean",
+    description: "Confirm the workspace processes have been stopped",
+  },
+  "allocation-released": {
+    type: "boolean",
+    description:
+      "Confirm an unknown sandbox allocation was released externally",
+  },
+  "adopt-files": {
+    type: "boolean",
+    description: "Explicitly adopt files from an interrupted attempt",
+  },
+  "adopt-source": {
+    type: "boolean",
+    description: "Explicitly adopt a changed mounted source",
+  },
+  "publication-id": { type: "string", description: "Publication identifier" },
+  portable: {
+    type: "boolean",
+    description:
+      "Explicitly restore a verified portable file snapshot into a new owned root",
+  },
+  "workspace-kind": {
+    type: "string",
+    description: "Workspace mode: git, directory or ephemeral",
+  },
   agent: {
     type: "string",
     description: `Agent: ${builtInAgentList()}`,
@@ -167,7 +209,7 @@ export const commandOptions = {
   "recipe init": {
     description:
       "Create a recipe starter with editor schema support; never overwrite an existing file",
-    options: ["file", "config", "json"],
+    options: ["file", "config", "workspace-kind", "json"],
   },
   "recipe run": {
     description:
@@ -195,6 +237,7 @@ export const commandOptions = {
       "input",
       "retry-incomplete",
       "recover-revision",
+      "workspace-recovery",
       "interactive",
       "actor",
       "json",
@@ -249,7 +292,7 @@ export const commandOptions = {
   },
   doctor: {
     description: "Diagnose host and sandbox prerequisites",
-    options: ["sandboxProvider", "agent", "image", "json"],
+    options: ["sandboxProvider", "agent", "image", "workspace-kind", "json"],
   },
   "image build": {
     description: "Build a container image",
@@ -261,7 +304,90 @@ export const commandOptions = {
   },
   "recovery inspect": {
     description: "Inspect recovery inventory",
-    options: ["repository", "max-entries", "git", "locks", "resources", "json"],
+    options: [
+      "repository",
+      "runtime-directory",
+      "max-entries",
+      "git",
+      "locks",
+      "resources",
+      "json",
+    ],
+  },
+  "recovery publication inspect": {
+    description: "Inspect a workspace publication",
+    options: [
+      "runtime-directory",
+      "namespace",
+      "publication-id",
+      "file",
+      "config",
+      "json",
+    ],
+  },
+  "recovery publication finish": {
+    description: "Finish an interrupted publication without replaying tasks",
+    options: [
+      "runtime-directory",
+      "namespace",
+      "publication-id",
+      "processes-stopped",
+      "file",
+      "config",
+      "run-id",
+      "json",
+    ],
+  },
+  "recovery publication rollback": {
+    description: "Conditionally roll back a workspace publication",
+    options: [
+      "runtime-directory",
+      "namespace",
+      "publication-id",
+      "processes-stopped",
+      "file",
+      "config",
+      "run-id",
+      "json",
+    ],
+  },
+  "recovery workspace inspect": {
+    description: "Inspect a file workspace record and snapshot",
+    options: [
+      "runtime-directory",
+      "namespace",
+      "workspace-id",
+      "file",
+      "config",
+      "json",
+    ],
+  },
+  "recovery registry inspect": {
+    description: "Inspect local path registry coordination without Git",
+    options: ["json"],
+  },
+  "recovery registry recover": {
+    description:
+      "Release an inspected registry gate after all coordinating processes are stopped",
+    options: ["revision", "processes-stopped", "json"],
+  },
+  "recovery workspace recover": {
+    description:
+      "Recover stopped workspace ownership without replaying its workflow",
+    options: [
+      "runtime-directory",
+      "namespace",
+      "workspace-id",
+      "revision",
+      "processes-stopped",
+      "allocation-released",
+      "adopt-files",
+      "adopt-source",
+      "portable",
+      "file",
+      "config",
+      "json",
+    ],
   },
   "recovery verify": {
     description: "Verify a retained transfer",

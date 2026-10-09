@@ -1,4 +1,5 @@
 import { createRecipeRuntime } from "../src/recipes.ts";
+import "./container-file-workspaces.test.ts";
 import { createAgent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
 import { once } from "node:events";

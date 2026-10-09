@@ -21,10 +21,32 @@ import type {
 import { observeDispatch } from "./dispatch-observation.ts";
 import { createSandbox } from "./sandbox.ts";
 import { steeringScope } from "./steering-scope.ts";
+import { dispatchFiles, isFileSandboxOptions } from "./file-sandbox.ts";
+import type {
+  FileDispatchRequest,
+  FileDispatchResult,
+} from "./file-sandbox.types.ts";
+import type { GitDispatchRequest } from "./file-workspace.types.ts";
+import {
+  isGitWorkspaceSandboxOptions,
+  gitWorkspaceSandboxOptions,
+} from "./workspace-source.ts";
 
-export async function dispatch<T = undefined>(
+export function dispatch<T = undefined>(
+  options: FileDispatchRequest<T>,
+): Promise<FileDispatchResult<T>>;
+export function dispatch<T = undefined>(
+  options: GitDispatchRequest<T>,
+): Promise<DispatchResult<T>>;
+export function dispatch<T = undefined>(
   options: DispatchRequest<T>,
-): Promise<DispatchResult<T>> {
+): Promise<DispatchResult<T>>;
+export async function dispatch<T = undefined>(
+  options: DispatchRequest<T> | FileDispatchRequest<T> | GitDispatchRequest<T>,
+): Promise<DispatchResult<T> | FileDispatchResult<T>> {
+  if (isGitWorkspaceSandboxOptions(options))
+    return dispatch(gitWorkspaceSandboxOptions(options));
+  if (isFileDispatchRequest(options)) return dispatchFiles(options);
   const { telemetry: _telemetry, ...configuration } = options;
   return steeringScope(options.steering, () =>
     observeDispatch(
@@ -34,6 +56,12 @@ export async function dispatch<T = undefined>(
       options.workspace?.repository ?? options.repository ?? process.cwd(),
     ),
   );
+}
+
+function isFileDispatchRequest<T>(
+  options: DispatchRequest<T> | FileDispatchRequest<T>,
+): options is FileDispatchRequest<T> {
+  return isFileSandboxOptions(options);
 }
 
 async function dispatchOperation<T>(

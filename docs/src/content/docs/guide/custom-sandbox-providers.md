@@ -160,7 +160,7 @@ Both helpers take `name`, optional `variables` and `acquire`, check the name and
 | Your `acquire()`  | Mounts `context.directory` at `root` and `context.gitDirectories` so `git` works | Starts an empty environment                                                                        |
 | Repository        | The agent edits the host worktree directly                                       | Outpost runs `git init` in `root`, uploads the history, then downloads and applies the new commits |
 | Agent CLI         | Comes from your image                                                            | Installed in `home` when missing, unless `bootstrap: false`                                        |
-| Branch            | Any [branch mode](../repository-and-branch/)                                     | `named` or `integrate`, `integrate` by default                                                     |
+| Branch            | Any [branch mode](../workspaces/)                                                | `named` or `integrate`, `integrate` by default                                                     |
 | Built-in examples | Docker and Podman ([Docker and Podman](../containers/))                          | Vercel, Daytona, Firecracker ([Cloud sandboxes](../cloud-sandboxes/))                              |
 
 ## Meet the obligations
@@ -282,3 +282,7 @@ Mock tests prove the protocol, not the environment. Test mounts, terminals and n
 - **Partial transfer probe**: `transfers: true` checks one binary file. Symlinks, modes, directories and batch transfers stay unverified.
 
 API: [SandboxProvider](../../reference/sandboxprovider/) · [SandboxLease](../../reference/sandboxlease/) · [SandboxContext](../../reference/sandboxcontext/) · [FileTransfers](../../reference/filetransfers/) · [createMountedSandboxProvider](../../reference/createmountedsandboxprovider/) · [createRemoteSandboxProvider](../../reference/createremotesandboxprovider/) · [diagnoseSandbox](../../reference/diagnosesandbox/).
+
+## File workspaces
+
+The optional `SandboxProvider.workspaces` capability declares supported file bindings and acquires from `FileSandboxContext`. Legacy providers keep `acquire(SandboxContext)` for Git. Missing file capabilities are refused before allocation. See [file workspaces](../workspaces/).

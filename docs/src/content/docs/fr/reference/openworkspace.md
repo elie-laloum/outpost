@@ -15,7 +15,7 @@ import { openWorkspace } from "@elie-laloum/outpost";
 
 Ouvre un workspace sur un checkout Git hôte : prend son verrou, prépare le checkout ou le worktree choisi par la politique de branche, copie copies, puis exécute workspaceReady. Il sert des sandboxes successives, une à la fois, jusqu’à close(). Un verrou détenu par un processus actif échoue avec le code conflict au lieu d’attendre.
 
-[Exemple complet et règles détaillées](../../guide/repository-and-branch/).
+[Exemple complet et règles détaillées](../../guide/workspaces/).
 
 ## Paramètres et propriétés
 

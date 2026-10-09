@@ -14,7 +14,7 @@ Enregistrez le script à côté de la configuration de la page [Installation](..
 - [Exécutions durables](../durable-runs/): Enregistrer la sortie de chaque tâche sous le `runId` du job.
 - [Tâches et dépendances](../task-dependencies/): Récupérer, relire, puis publier.
 - [Réponses typées](../typed-responses/): Valider le verdict de l’agent.
-- [Dépôt et branche](../repository-and-branch/): Faire partir la branche de revue du commit de tête de la pull request.
+- [Dépôt et branche](../workspaces/): Faire partir la branche de revue du commit de tête de la pull request.
 
 ## Écrire le script
 

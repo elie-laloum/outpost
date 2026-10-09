@@ -153,3 +153,7 @@ Avec les autres modes de branche, `integrate()` ne fait rien. Un conflit de fusi
 - La sortie est capturée sous forme de texte. Déplacez les fichiers binaires avec les méthodes de transfert du fournisseur ([Sandboxes cloud](../cloud-sandboxes/)).
 
 API : [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
+
+## Workspaces de fichiers
+
+Les sandboxes de fichiers empruntent un `FileWorkspace` ouvert ou possèdent un `workspaceSource` explicite. Fermer une sandbox empruntée laisse son workspace ouvert. [Les workspaces de fichiers](../workspaces/) détaillent les bindings providers, la restitution et la conservation.

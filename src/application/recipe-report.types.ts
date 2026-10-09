@@ -2,6 +2,8 @@ import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { WorkflowResult } from "../domain/workflow.types.ts";
 
 export interface RecipeDiagnostic {
+  readonly publicationId?: string;
+  readonly publicationState?: string;
   readonly message: string;
   readonly code?: string;
   readonly status?: number;
@@ -11,6 +13,8 @@ export interface RecipeDiagnostic {
 }
 
 export interface RecipeReport {
+  readonly workspaceInfo?: import("../domain/file-workspace.types.ts").FileWorkspaceRecord;
+  readonly fileOutputs?: readonly import("../domain/file-workspace.types.ts").WorkspacePublication[];
   readonly integration?: import("./conflict-resolution.types.ts").ConflictResolution;
   readonly runId?: string;
   readonly inputRequests?: WorkflowResult["inputRequests"];

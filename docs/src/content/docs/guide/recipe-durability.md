@@ -111,3 +111,7 @@ An `artifact` action selects a named artifact store and contract; `data` builds 
 Task `options.cache` uses the native cache contract and a declared key callback. Cache hits consume no attempt or usage and cannot replay effects. Workflow budgets and `onQuota: { action: pause }` retain cumulative native accounting. Agent and isolated tasks can declare `quotaResume: continue` or `restart`; continuation requires a captured conversation and supported restoration.
 
 A `run` observation sink persists the shared hub's execution projection. Declare its `transporter`, `id` and `kind: workflow`; set `resume: true` only for a settled projection being resumed. Use a new observation ID after explicit recovery of an unsettled coordinator. The checkpoint remains the execution authority; sink errors do not change outcomes. Tests cover local Git, process interruption, signed decisions, dialogues, caches and artifacts without paid calls. Live cloud/S3 restoration remains unvalidated.
+
+## File workspaces
+
+Configuration 3 checkpoints record versioned file workspace descriptions alongside progress. Synchronization and verified snapshot conservation precede a settled checkpoint; usage writes do not copy active files. Mounted source availability is still required during portable restoration. See [file workspaces](../workspaces/).

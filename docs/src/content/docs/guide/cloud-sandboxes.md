@@ -133,7 +133,7 @@ The sandbox works on its own copy of the repository. Outpost keeps it in step wi
 
 ## Choose the branch
 
-Without `branch`, a cloud sandbox uses `integrate`: a new `outpost/job-…` branch, merged into your current branch at the end. `named` keeps the work on a branch you name. `current` is rejected, because the sandbox cannot edit your checkout in place. See [Repository and branch](../repository-and-branch/).
+Without `branch`, a cloud sandbox uses `integrate`: a new `outpost/job-…` branch, merged into your current branch at the end. `named` keeps the work on a branch you name. `current` is rejected, because the sandbox cannot edit your checkout in place. See [Repository and branch](../workspaces/).
 
 ## Send files Git does not have
 
@@ -172,3 +172,7 @@ Outpost never overwrites work it cannot back up. It stops with an error of code 
 Implementing another remote provider: [Add a sandbox provider](../custom-sandbox-providers/).
 
 API: [SandboxOptions](../../reference/sandboxoptions/) · [EgressPolicy](../../reference/egresspolicy/).
+
+## File workspaces
+
+Copy and ephemeral file workspaces use the existing streamed transfer ports. Vercel and Daytona refuse source mounts. Normal settled disposal can precede portable restoration; snapshots do not establish disposal of an unknown allocation after a crash. File-mode cloud live validation remains pending. See [file provider capabilities](../workspaces/).

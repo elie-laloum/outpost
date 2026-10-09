@@ -8953,5 +8953,1061 @@
   "RecipeWorkspaceCheckpoint.integration": [
     "Persisted conflict resolution result, including separate resolver usage, retained with the original workspace after integration.",
     "Résultat de résolution de conflit persisté avec le workspace d’origine après intégration, dont la consommation distincte du résolveur."
+  ],
+  "AgentFeatures.fileWorkspaces": [
+    "Explicitly demonstrated adapter capabilities for dispatch, terminal, live input, continuation and repairs outside Git.",
+    "Capacités d’adapter explicitement démontrées pour dispatch, terminal, live input, continuation et réparations hors Git."
+  ],
+  "ConversationContext.runtimeDirectory": [
+    "File conversation control root independent of repository discovery, preserving native formats and relocation.",
+    "Racine de contrôle des conversations de fichiers indépendante de la recherche de dépôt, conservant formats natifs et relocalisation."
+  ],
+  "HarnessTool.workspace": [
+    "Declares a required Git workspace; file execution refuses this tool before acquisition.",
+    "Déclare un workspace Git requis ; l’exécution de fichiers refuse cet outil avant acquisition."
+  ],
+  "HarnessToolOptions.workspace": [
+    "Declares a required Git workspace; file execution refuses this tool before acquisition.",
+    "Déclare un workspace Git requis ; l’exécution de fichiers refuse cet outil avant acquisition."
+  ],
+  "createHarnessFileTools.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "FileSelectionOptions.selection": [
+    "Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering.",
+    "git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore."
+  ],
+  "createHarnessSearchTools.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "WorkflowCheckpoint.workspaces": [
+    "Opt-in versioned file resource capability; older providers and checkpoints preserve their Git contract.",
+    "Capacité versionnée de ressources de fichiers activée explicitement ; les anciens providers et checkpoints conservent leur contrat Git."
+  ],
+  "WorkspaceCheckpointMetadata.format": [
+    "Version of the persisted envelope; unsupported versions are refused.",
+    "Version de l’enveloppe persistée ; les versions inconnues sont refusées."
+  ],
+  "WorkspaceCheckpointMetadata.resources": [
+    "Resource descriptions keyed by logical task identity; accounting writes do not snapshot active files.",
+    "Descriptions de ressources indexées par identité logique de tâche ; les écritures de comptabilité ne copient pas les fichiers actifs."
+  ],
+  "FileSandboxSettings.hooks": [
+    "Declared workspaceReady, hostReady and sandboxReady preparation commands.",
+    "Commandes de préparation déclarées workspaceReady, hostReady et sandboxReady."
+  ],
+  "FileSandboxSettings.limits": [
+    "Copy and collection deadlines for file execution; Git preparation and integration limits are refused.",
+    "Délais de copie et de collecte pour l’exécution de fichiers ; les délais de préparation Git et d’intégration sont refusés."
+  ],
+  "FileSandboxSettings.observation": [
+    "Explicit observation hub preserving scoped delivery and synchronous usage accounting.",
+    "Hub d’observation explicite conservant la livraison contextualisée et la comptabilité synchrone d’usage."
+  ],
+  "FileSandboxSettings.logging": [
+    "Declared execution journal; replayable file effects are refused when reproduction is unsupported.",
+    "Journal d’exécution déclaré ; les effets de fichiers replayables sont refusés lorsque leur reproduction n’est pas prise en charge."
+  ],
+  "FileSandboxSettings.activityTransport": [
+    "Transport for bounded resource activity observations; liveness does not authorize recovery.",
+    "Transport des observations bornées d’activité de ressource ; la vivacité n’autorise pas la récupération."
+  ],
+  "FileSandboxSettings.recoveryTransport": [
+    "Explicit Transport retaining sandbox recovery evidence independently of file snapshots.",
+    "Transport explicite conservant les preuves de récupération de sandbox indépendamment des snapshots de fichiers."
+  ],
+  "FileSandboxSettings.sandboxProvider": [
+    "Execution provider with the required file binding capability; legacy providers remain usable for Git.",
+    "Provider d’exécution disposant de la capacité de liaison de fichiers requise ; les providers legacy restent utilisables pour Git."
+  ],
+  "FileSandboxSettings.agent": [
+    "Explicitly composed agent compatible with the selected file execution and conversation capabilities.",
+    "Agent explicitement composé compatible avec les capacités d’exécution de fichiers et de conversation sélectionnées."
+  ],
+  "FileSandboxSettings.signal": [
+    "Cancellation signal propagated to the operation and its process group; reusable sandboxes remain usable.",
+    "Signal d’annulation transmis à l’opération et à son groupe de processus ; les sandboxes réutilisables restent utilisables."
+  ],
+  "FileSandboxSettings.variables": [
+    "Only explicitly declared environment variables reach the sandbox; no implicit .env loading.",
+    "Seules les variables d’environnement explicitement déclarées atteignent la sandbox ; aucun chargement implicite de .env."
+  ],
+  "FileSandboxOptions.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "FileSandboxOptions.workspaceSource": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "FileWorkspaceOptions.recovery": [
+    "Explicit stopped-process recovery authorization; interrupted replay remains a separate workflow decision.",
+    "Autorisation explicite de récupération après arrêt des processus ; le replay interrompu reste une décision distincte du workflow."
+  ],
+  "FileWorkspaceOptions.storageQuota": [
+    "Admission reservation through Transport; coordinates cooperating writers without enforcing a physical disk quota.",
+    "Réservation d’admission via Transport ; coordonne les writers coopérants sans imposer de quota physique de disque."
+  ],
+  "FileWorkspaceOptions.inputs": [
+    "Explicit file inputs; JSON workflow parameters are never implicitly written to disk.",
+    "Entrées de fichiers explicites ; les paramètres JSON du workflow ne sont jamais écrits implicitement sur disque."
+  ],
+  "FileWorkspaceOptions.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "FileWorkspaceOptions.paths": [
+    "Explicit relative path selection; copy selection does not implicitly apply .gitignore.",
+    "Sélection explicite de chemins relatifs ; la sélection de copie n’applique pas implicitement .gitignore."
+  ],
+  "FileWorkspaceOptions.retention": [
+    "run cleans successful owned work, local retains it, portable additionally requires an explicit Transport and namespace.",
+    "run nettoie le travail possédé réussi, local le conserve, portable exige en plus un Transport et un namespace explicites."
+  ],
+  "GitWorkspaceSandboxOptions.repository": [
+    "Forbidden with workspaceSource; declare Git settings inside the single source instead.",
+    "Interdit avec workspaceSource ; déclarez les paramètres Git dans la source unique."
+  ],
+  "GitWorkspaceSandboxOptions.branch": [
+    "Forbidden with workspaceSource; declare Git settings inside the single source instead.",
+    "Interdit avec workspaceSource ; déclarez les paramètres Git dans la source unique."
+  ],
+  "GitWorkspaceSandboxOptions.copies": [
+    "Forbidden with workspaceSource; declare Git settings inside the single source instead.",
+    "Interdit avec workspaceSource ; déclarez les paramètres Git dans la source unique."
+  ],
+  "GitWorkspaceSandboxOptions.guard": [
+    "Forbidden with workspaceSource; declare Git settings inside the single source instead.",
+    "Interdit avec workspaceSource ; déclarez les paramètres Git dans la source unique."
+  ],
+  "SandboxProvider.workspaces": [
+    "Opt-in versioned file resource capability; older providers and checkpoints preserve their Git contract.",
+    "Capacité versionnée de ressources de fichiers activée explicitement ; les anciens providers et checkpoints conservent leur contrat Git."
+  ],
+  "SandboxWorkspaces.bindings": [
+    "Explicit supported copy, ephemeral, read-only mount and writable mount bindings.",
+    "Liaisons de copie, éphémère, montage en lecture seule et montage inscriptible explicitement prises en charge."
+  ],
+  "SandboxWorkspaces.acquire": [
+    "Acquire from a file context without repository discovery; unsupported bindings fail before allocation.",
+    "Acquiert depuis un contexte de fichiers sans recherche de dépôt ; les liaisons incompatibles échouent avant allocation."
+  ],
+  "FileSandboxContext.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "FileSandboxContext.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "FileSandboxContext.variables": [
+    "Only explicitly declared environment variables reach the sandbox; no implicit .env loading.",
+    "Seules les variables d’environnement explicitement déclarées atteignent la sandbox ; aucun chargement implicite de .env."
+  ],
+  "FileSandboxContext.signal": [
+    "Cancellation signal propagated to the operation and its process group; reusable sandboxes remain usable.",
+    "Signal d’annulation transmis à l’opération et à son groupe de processus ; les sandboxes réutilisables restent utilisables."
+  ],
+  "FileSandboxContext.registerRecovery": [
+    "Register the provider resource identity before acquisition finishes, so interrupted allocation remains inspectable.",
+    "Enregistre l’identité de ressource du provider avant la fin de l’acquisition pour conserver l’inspectabilité d’une allocation interrompue."
+  ],
+  "FileWorkspaceRecord.format": [
+    "Version of the persisted envelope; unsupported versions are refused.",
+    "Version de l’enveloppe persistée ; les versions inconnues sont refusées."
+  ],
+  "FileWorkspaceRecord.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "FileWorkspaceRecord.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "FileWorkspaceRecord.source": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "FileWorkspaceRecord.ownership": [
+    "Owned materializations may be cleaned up; borrowed mounted sources are never deleted.",
+    "Les matérialisations possédées peuvent être nettoyées ; les sources montées empruntées ne sont jamais supprimées."
+  ],
+  "FileWorkspaceRecord.owner": [
+    "Owner nonce and lifecycle state used to fence resume and explicit recovery.",
+    "Nonce du propriétaire et état de lifecycle utilisés pour protéger reprise et récupération explicite."
+  ],
+  "FileWorkspaceRecord.locks": [
+    "Exact host lock identifiers for materialization and mounted source; recovery releases only these locks.",
+    "Identifiants exacts des verrous hôte de matérialisation et de source montée ; la récupération libère uniquement ces verrous."
+  ],
+  "FileWorkspaceRecord.materialization": [
+    "Device and inode identity used to detect replacement and known filesystem aliases.",
+    "Identité device/inode utilisée pour détecter les remplacements et les aliases connus du filesystem."
+  ],
+  "FileWorkspaceRecord.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "FileWorkspaceRecord.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "FileWorkspaceRecord.inputFingerprint": [
+    "Canonical fingerprint of initial inputs and their declared selection, independent of later work.",
+    "Empreinte canonique des entrées initiales et de leur sélection déclarée, indépendante du travail ultérieur."
+  ],
+  "FileWorkspaceRecord.inputs": [
+    "Verified initial manifest retained to detect input identity and protect publication back to the copied source.",
+    "Manifest initial vérifié conservé pour identifier les entrées et protéger la publication vers la source copiée."
+  ],
+  "FileWorkspaceRecord.publicationBaselines": [
+    "Declared destinations and their expected pre-execution manifests, retained across resume.",
+    "Destinations déclarées et manifests attendus avant exécution, conservés entre les reprises."
+  ],
+  "FileWorkspaceRecord.mountedFingerprint": [
+    "Fingerprint of the exposed mounted source; a changed or unavailable source refuses resume.",
+    "Empreinte de la source montée exposée ; une source modifiée ou indisponible fait refuser la reprise."
+  ],
+  "FileWorkspaceRecord.generation": [
+    "Monotonically increasing number recorded only after a settled file generation is verified.",
+    "Numéro croissant enregistré seulement après vérification d’une génération de fichiers settled."
+  ],
+  "FileWorkspaceRecord.fingerprint": [
+    "Canonical digest of the last verified settled file generation.",
+    "Digest canonique de la dernière génération de fichiers settled vérifiée."
+  ],
+  "FileWorkspaceRecord.snapshot": [
+    "Transport reference to a verified file snapshot; restoration does not imply sandbox disposal.",
+    "Référence Transport d’un snapshot de fichiers vérifié ; sa restauration n’atteste pas la fermeture d’une sandbox."
+  ],
+  "FileWorkspaceRecord.conversations": [
+    "Archived native conversation references relocated with the restored owned workspace.",
+    "Références de conversations natives archivées, relocalisées avec le workspace possédé restauré."
+  ],
+  "FileWorkspaceRecord.allocation": [
+    "Sandbox allocation state, including uncertain allocations that require explicit release evidence.",
+    "État d’allocation de sandbox, incluant les allocations incertaines exigeant une preuve explicite de fermeture."
+  ],
+  "FileWorkspaceSource.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "FileWorkspaceSource.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "FileWorkspaceSource.access": [
+    "Copy isolates source changes; mount exposes the full source at target with an explicit readOnly flag.",
+    "La copie isole les changements de source ; le montage expose toute la source sous target avec un readOnly explicite."
+  ],
+  "WorkspaceRuntime.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "WorkspaceRuntime.namespace": [
+    "Logical project namespace; an explicit value is required for portable conservation.",
+    "Namespace logique du projet ; une valeur explicite est exigée pour la conservation portable."
+  ],
+  "WorkspaceFileEntry.path": [
+    "Validated relative path preserving its prefix; traversal and control paths are refused.",
+    "Chemin relatif validé conservant son préfixe ; traversées et chemins de contrôle sont refusés."
+  ],
+  "WorkspaceFileEntry.kind": [
+    "Validated regular file, relative internal symbolic link or directory; special files are refused.",
+    "Fichier ordinaire, lien symbolique relatif interne ou répertoire validés ; les fichiers spéciaux sont refusés."
+  ],
+  "WorkspaceFileEntry.mode": [
+    "Portable permission bits retained for regular files and directories.",
+    "Bits de permissions portables conservés pour les fichiers ordinaires et les répertoires."
+  ],
+  "WorkspaceFileEntry.size": [
+    "Size in bytes of the validated file content or link target.",
+    "Taille en octets du contenu de fichier ou de la cible de lien validés."
+  ],
+  "WorkspaceFileEntry.sha256": [
+    "SHA-256 content digest for integrity and concurrency checks, without publisher authentication.",
+    "Digest SHA-256 du contenu pour les contrôles d’intégrité et de concurrence, sans authentifier le publisher."
+  ],
+  "WorkspaceFileEntry.target": [
+    "Relative symbolic link target that must remain inside the declared selection.",
+    "Cible relative de lien symbolique qui doit rester dans la sélection déclarée."
+  ],
+  "WorkspaceOutputOptions.paths": [
+    "Explicit relative path selection; copy selection does not implicitly apply .gitignore.",
+    "Sélection explicite de chemins relatifs ; la sélection de copie n’applique pas implicitement .gitignore."
+  ],
+  "WorkspaceOutputOptions.destination": [
+    "Host destination preserving selected relative paths; overlap with an active writable source is refused.",
+    "Destination hôte conservant les chemins relatifs sélectionnés ; le chevauchement d’une source inscriptible active est refusé."
+  ],
+  "WorkspaceOutputOptions.policy": [
+    "create requires a new destination; update uses a captured expected state before any replacement.",
+    "create exige une nouvelle destination ; update utilise un état attendu capturé avant tout remplacement."
+  ],
+  "WorkspaceOutputOptions.deleteMissing": [
+    "Defaults to false; deletes only initially selected destination files missing from corresponding outputs.",
+    "false par défaut ; supprime seulement les fichiers de destination initialement sélectionnés absents des sorties correspondantes."
+  ],
+  "WorkspaceConversationArchive.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "WorkspaceConversationArchive.format": [
+    "Version of the persisted envelope; unsupported versions are refused.",
+    "Version de l’enveloppe persistée ; les versions inconnues sont refusées."
+  ],
+  "WorkspaceConversationArchive.path": [
+    "Validated relative path preserving its prefix; traversal and control paths are refused.",
+    "Chemin relatif validé conservant son préfixe ; traversées et chemins de contrôle sont refusés."
+  ],
+  "WorkspaceConversationArchive.archive": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "WorkspaceAllocationRecord.provider": [
+    "Execution provider identity retained for recovery, without storing credentials.",
+    "Identité du provider d’exécution conservée pour la récupération, sans stocker de credentials."
+  ],
+  "WorkspaceAllocationRecord.state": [
+    "Persisted lifecycle state; uncertain or recovery-required resources are never silently reconstructed.",
+    "État de lifecycle persisté ; les ressources incertaines ou nécessitant une récupération ne sont jamais reconstruites silencieusement."
+  ],
+  "WorkspaceAllocationRecord.resourceId": [
+    "Provider resource identifier registered before acquisition completes when supported.",
+    "Identifiant de ressource du provider enregistré avant la fin de l’acquisition lorsque celle-ci le permet."
+  ],
+  "WorkspaceAllocationRecord.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "SandboxContext.workspaceIdentity": [
+    "Logical namespace and source identity for file cache sharing; Git contexts retain repository identity.",
+    "Namespace logique et identité de source pour partager les caches de fichiers ; les contextes Git conservent l’identité du dépôt."
+  ],
+  "FileWorkspace.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "FileWorkspace.source": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "FileWorkspace.checkpoint": [
+    "Synchronizes and verifies a settled generation before returning its durable description; refuses active operations.",
+    "Synchronise et vérifie une génération settled avant de renvoyer sa description durable ; refuse les opérations actives."
+  ],
+  "FileWorkspace.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "FileWorkspace.dispatch": [
+    "Runs an agent against the current files, preserving the workspace across repairs and steering passes.",
+    "Exécute un agent sur les fichiers actuels, en conservant le workspace entre réparations et passes de steering."
+  ],
+  "WorkspaceSession.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "WorkspaceSession.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "WorkspaceSession.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "WorkspaceSession.close": [
+    "Idempotent closure; preserves recoverable work and never removes a borrowed source.",
+    "Fermeture idempotente ; conserve le travail récupérable et ne supprime jamais une source empruntée."
+  ],
+  "WorkspaceSession.[Symbol.asyncDispose]": [
+    "Idempotent closure; preserves recoverable work and never removes a borrowed source.",
+    "Fermeture idempotente ; conserve le travail récupérable et ne supprime jamais une source empruntée."
+  ],
+  "WorkspaceSession.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "FileWorkspaceOptions.hooks": [
+    "Declared workspaceReady, hostReady and sandboxReady preparation commands.",
+    "Commandes de préparation déclarées workspaceReady, hostReady et sandboxReady."
+  ],
+  "FileWorkspaceOptions.source": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "FileWorkspaceOptions.signal": [
+    "Cancellation signal propagated to the operation and its process group; reusable sandboxes remain usable.",
+    "Signal d’annulation transmis à l’opération et à son groupe de processus ; les sandboxes réutilisables restent utilisables."
+  ],
+  "FileWorkspaceRecoveryAuthorization.expectedRevision": [
+    "Revision obtained by inspection; recovery refuses a changed persisted record.",
+    "Révision obtenue par inspection ; la récupération refuse un enregistrement persisté modifié."
+  ],
+  "FileWorkspaceRecoveryAuthorization.processesStopped": [
+    "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
+    "Attestation explicite d’arrêt du précédent propriétaire et de ses processus ; jamais déduite d’une expiration de heartbeat."
+  ],
+  "FileWorkspaceRecoveryAuthorization.allocationReleased": [
+    "Explicit evidence that an uncertain allocation has been released when the provider cannot recover it.",
+    "Preuve explicite qu’une allocation incertaine a été fermée lorsque le provider ne peut pas la récupérer."
+  ],
+  "FileWorkspaceRecoveryAuthorization.adoptInterruptedFiles": [
+    "Explicitly adopt retained files from an interrupted attempt after stopping its processes.",
+    "Adopte explicitement les fichiers conservés d’une tentative interrompue après arrêt de ses processus."
+  ],
+  "FileWorkspaceRecoveryAuthorization.adoptMountedSource": [
+    "Explicitly adopt a changed mounted source after inspection; never converts the mount into a copy.",
+    "Adopte explicitement une source montée modifiée après inspection ; ne convertit jamais le montage en copie."
+  ],
+  "WorkspaceInput.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "WorkspaceInput.paths": [
+    "Explicit relative path selection; copy selection does not implicitly apply .gitignore.",
+    "Sélection explicite de chemins relatifs ; la sélection de copie n’applique pas implicitement .gitignore."
+  ],
+  "WorkspaceInput.snapshot": [
+    "Transport reference to a verified file snapshot; restoration does not imply sandbox disposal.",
+    "Référence Transport d’un snapshot de fichiers vérifié ; sa restauration n’atteste pas la fermeture d’une sandbox."
+  ],
+  "WorkspaceInput.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "WorkspaceRuntimeOptions.directory": [
+    "Control root; defaults to .outpost in the current directory for TypeScript, beside configuration for YAML 3.",
+    "Racine de contrôle ; .outpost dans le répertoire courant par défaut en TypeScript, à côté de la configuration en YAML 3."
+  ],
+  "WorkspaceRuntimeOptions.namespace": [
+    "Logical project namespace; an explicit value is required for portable conservation.",
+    "Namespace logique du projet ; une valeur explicite est exigée pour la conservation portable."
+  ],
+  "WorkspaceRetention.policy": [
+    "run cleans successful owned work, local retains it, portable additionally requires an explicit Transport and namespace.",
+    "run nettoie le travail possédé réussi, local le conserve, portable exige en plus un Transport et un namespace explicites."
+  ],
+  "WorkspaceRetention.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "FileAttachResult.workspaceInfo": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "FileAttachResult.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "FileSandbox.diagnose": [
+    "Inspect the selected execution mode; Git probes run only for Git workspaces.",
+    "Inspecte le mode d’exécution sélectionné ; les probes Git s’exécutent seulement pour les workspaces Git."
+  ],
+  "FileSandbox.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "FileSandbox.root": [
+    "Execution root inside the borrowed sandbox, distinct from its host control directory.",
+    "Racine d’exécution dans la sandbox empruntée, distincte de son répertoire de contrôle hôte."
+  ],
+  "FileSandbox.command": [
+    "Execute the declared command and preserve its actual exit status, cancellation and settled files.",
+    "Exécute la commande déclarée et conserve son véritable statut de sortie, son annulation et ses fichiers settled."
+  ],
+  "FileSandbox.dispatch": [
+    "Runs an agent against the current files, preserving the workspace across repairs and steering passes.",
+    "Exécute un agent sur les fichiers actuels, en conservant le workspace entre réparations et passes de steering."
+  ],
+  "FileSandbox.resume": [
+    "Continue a captured conversation in the same retained file workspace without recopying initial inputs.",
+    "Continue une conversation capturée dans le même workspace de fichiers conservé sans recopier les entrées initiales."
+  ],
+  "FileSandbox.fork": [
+    "Fork a captured conversation when supported while retaining the current workspace files.",
+    "Bifurque une conversation capturée lorsque cela est pris en charge, en conservant les fichiers actuels du workspace."
+  ],
+  "FileSandbox.attach": [
+    "Open an interactive terminal only when the adapter explicitly supports this file-workspace variant.",
+    "Ouvre un terminal interactif seulement lorsque l’adapter prend explicitement en charge cette variante de workspace de fichiers."
+  ],
+  "FileSandbox.close": [
+    "Idempotent closure; preserves recoverable work and never removes a borrowed source.",
+    "Fermeture idempotente ; conserve le travail récupérable et ne supprime jamais une source empruntée."
+  ],
+  "FileSandbox.[Symbol.asyncDispose]": [
+    "Idempotent closure; preserves recoverable work and never removes a borrowed source.",
+    "Fermeture idempotente ; conserve le travail récupérable et ne supprime jamais une source empruntée."
+  ],
+  "FileDispatchResult.logReference": [
+    "Transport journal reference for this execution; file replay effects are refused when they cannot be reproduced.",
+    "Référence du journal Transport de cette exécution ; les effets de replay de fichiers sont refusés lorsqu’ils ne peuvent pas être reproduits."
+  ],
+  "FileDispatchResult.observerErrors": [
+    "Observer failures collected separately without changing execution outcomes.",
+    "Échecs d’observer recueillis séparément sans modifier les résultats d’exécution."
+  ],
+  "FileDispatchResult.transcript": [
+    "Captured conversation content or its Transport reference, independent of agent authentication.",
+    "Contenu de conversation capturé ou sa référence Transport, indépendant de l’authentification de l’agent."
+  ],
+  "FileDispatchResult.transcriptReference": [
+    "Captured conversation content or its Transport reference, independent of agent authentication.",
+    "Contenu de conversation capturé ou sa référence Transport, indépendant de l’authentification de l’agent."
+  ],
+  "FileDispatchResult.fallback": [
+    "Explicit fallback attempts and their usage, retaining each captured conversation.",
+    "Tentatives de fallback explicites et leur usage, en conservant chaque conversation capturée."
+  ],
+  "FileDispatchResult.workspaceInfo": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "FileDispatchResult.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "FileDispatchResult.fileOutputs": [
+    "Verified publication results, separate from Git commits and branch integration.",
+    "Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche."
+  ],
+  "FileDispatchResult.report": [
+    "Version-2 file execution report; legacy Git reports keep version 1.",
+    "Rapport d’exécution de fichiers version 2 ; les rapports Git legacy conservent la version 1."
+  ],
+  "FileDispatchResult.resume": [
+    "Continue a captured conversation in the same retained file workspace without recopying initial inputs.",
+    "Continue une conversation capturée dans le même workspace de fichiers conservé sans recopier les entrées initiales."
+  ],
+  "FileDispatchResult.fork": [
+    "Fork a captured conversation when supported while retaining the current workspace files.",
+    "Bifurque une conversation capturée lorsque cela est pris en charge, en conservant les fichiers actuels du workspace."
+  ],
+  "WorkspacePublication.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "WorkspacePublication.destination": [
+    "Host destination preserving selected relative paths; overlap with an active writable source is refused.",
+    "Destination hôte conservant les chemins relatifs sélectionnés ; le chevauchement d’une source inscriptible active est refusé."
+  ],
+  "WorkspacePublication.state": [
+    "Persisted lifecycle state; uncertain or recovery-required resources are never silently reconstructed.",
+    "État de lifecycle persisté ; les ressources incertaines ou nécessitant une récupération ne sont jamais reconstruites silencieusement."
+  ],
+  "WorkspacePublication.created": [
+    "Relative paths of the corresponding verified publication operations.",
+    "Chemins relatifs des opérations de publication correspondantes vérifiées."
+  ],
+  "WorkspacePublication.replaced": [
+    "Relative paths of the corresponding verified publication operations.",
+    "Chemins relatifs des opérations de publication correspondantes vérifiées."
+  ],
+  "WorkspacePublication.deleted": [
+    "Relative paths of the corresponding verified publication operations.",
+    "Chemins relatifs des opérations de publication correspondantes vérifiées."
+  ],
+  "WorkspacePublication.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "FileDispatchRequest.outputs": [
+    "Declared protected publications performed only after successful work and sandbox closure.",
+    "Publications protégées déclarées, exécutées seulement après réussite du travail et fermeture de la sandbox."
+  ],
+  "SandboxDiagnosticOptions.workspaceKind": [
+    "Selected workspace mode controlling whether Git-specific diagnostic probes are applicable.",
+    "Mode de workspace sélectionné contrôlant l’applicabilité des probes diagnostiques spécifiques à Git."
+  ],
+  "TaskContext.workspaceCheckpoint": [
+    "Optional domain access to JSON workspace descriptions; file allocation and snapshots remain application responsibilities.",
+    "Accès domaine optionnel aux descriptions JSON de workspaces ; allocation et snapshots de fichiers restent des responsabilités applicatives."
+  ],
+  "WorkflowCheckpointOptions.workspaces": [
+    "Opt-in versioned file resource capability; older providers and checkpoints preserve their Git contract.",
+    "Capacité versionnée de ressources de fichiers activée explicitement ; les anciens providers et checkpoints conservent leur contrat Git."
+  ],
+  "FileAgentTaskOptions.quotaResume": [
+    "Opt-in native conversation continuation after quota pause, without consuming a task retry.",
+    "Continuation de conversation native après pause de quota, sur option explicite, sans consommer de retry de tâche."
+  ],
+  "FileAgentTaskOptions.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "FileAgentTaskOptions.request": [
+    "Build the declared command or agent request from the current task context before acquisition.",
+    "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
+  ],
+  "defineIsolatedCommandTask.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "IsolatedCommandTaskOptions.request": [
+    "Build the declared command or agent request from the current task context before acquisition.",
+    "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
+  ],
+  "FileIsolatedCommandRequest.command": [
+    "Execute the declared command and preserve its actual exit status, cancellation and settled files.",
+    "Exécute la commande déclarée et conserve son véritable statut de sortie, son annulation et ses fichiers settled."
+  ],
+  "FileIsolatedCommandRequest.outputs": [
+    "Declared protected publications performed only after successful work and sandbox closure.",
+    "Publications protégées déclarées, exécutées seulement après réussite du travail et fermeture de la sandbox."
+  ],
+  "MixedRecipeBindings.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "TaskWorkspaceCheckpoint.read": [
+    "Read the persisted JSON resource description for a logical workspace key.",
+    "Lit la description JSON persistée de ressource pour une clé logique de workspace."
+  ],
+  "TaskWorkspaceCheckpoint.write": [
+    "Persist a settled JSON resource description without allocating or copying files in the domain.",
+    "Persiste une description JSON de ressource settled sans allouer ni copier de fichiers dans le domaine."
+  ],
+  "FileInteractiveAgentTaskOptions.workspaceSource": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "FileInteractiveAgentTaskOptions.sandboxProvider": [
+    "Execution provider with the required file binding capability; legacy providers remain usable for Git.",
+    "Provider d’exécution disposant de la capacité de liaison de fichiers requise ; les providers legacy restent utilisables pour Git."
+  ],
+  "FileInteractiveAgentResult.output": [
+    "Validated final response from the completed interactive dialogue.",
+    "Réponse finale validée du dialogue interactif terminé."
+  ],
+  "FileInteractiveAgentResult.conversation": [
+    "Captured native conversation identifier used for continuation.",
+    "Identifiant de conversation native capturée utilisé pour la continuation."
+  ],
+  "FileInteractiveAgentResult.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "FileInteractiveAgentResult.turns": [
+    "Completed dialogue turns retained without replay during ordinary answer submission.",
+    "Tours de dialogue terminés conservés sans replay lors d’une soumission ordinaire de réponse."
+  ],
+  "FileInteractiveAgentResult.workspaceInfo": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "createWorkspace.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "GitWorkspaceOptions.source": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "GitWorkspaceSource.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "GitWorkspaceSource.repository": [
+    "Git repository location; file modes refuse this option before allocation.",
+    "Emplacement du dépôt Git ; les modes de fichiers refusent cette option avant allocation."
+  ],
+  "GitWorkspaceSource.branch": [
+    "Git branch policy retained only for Git sources; file results contain no synthetic branch.",
+    "Politique de branche Git conservée seulement pour les sources Git ; les résultats de fichiers n’ont aucune branche artificielle."
+  ],
+  "GitWorkspaceSource.copies": [
+    "Legacy Git worktree copies; use declared file inputs or selection for file workspaces.",
+    "Copies legacy de worktree Git ; utilisez les entrées de fichiers ou la sélection déclarées pour les workspaces de fichiers."
+  ],
+  "GitWorkspaceSource.guard": [
+    "Committed Git diff guard; unavailable for directory and ephemeral workspaces.",
+    "Guard de diff Git commité ; indisponible pour les workspaces dossier et éphémères."
+  ],
+  "GitWorkspace.kind": [
+    "Discriminant selecting Git, a directory source or an initially empty workspace.",
+    "Discriminant sélectionnant Git, une source dossier ou un workspace initialement vide."
+  ],
+  "GitWorkspace.git": [
+    "Dedicated legacy Git capability, exposing branches, commits, guards and integration.",
+    "Capacité Git legacy dédiée, exposant branches, commits, guards et intégration."
+  ],
+  "restoreFileWorkspace.record": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "restoreFileWorkspace.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "RestoreFileWorkspaceOptions.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "RestoreFileWorkspaceOptions.retention": [
+    "run cleans successful owned work, local retains it, portable additionally requires an explicit Transport and namespace.",
+    "run nettoie le travail possédé réussi, local le conserve, portable exige en plus un Transport et un namespace explicites."
+  ],
+  "RestoreFileWorkspaceOptions.portable": [
+    "Restore a verified snapshot into a new owned materialization; mounted sources must remain accessible and unchanged.",
+    "Restaure un snapshot vérifié dans une nouvelle matérialisation possédée ; les sources montées doivent rester accessibles et inchangées."
+  ],
+  "RestoreFileWorkspaceOptions.recover": [
+    "Explicit stopped-process recovery authorization; interrupted replay remains a separate workflow decision.",
+    "Autorisation explicite de récupération après arrêt des processus ; le replay interrompu reste une décision distincte du workflow."
+  ],
+  "workspaceFingerprint.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "workspaceFingerprint.paths": [
+    "Explicit relative path selection; copy selection does not implicitly apply .gitignore.",
+    "Sélection explicite de chemins relatifs ; la sélection de copie n’applique pas implicitement .gitignore."
+  ],
+  "prepareWorkspaceOutputs.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "prepareWorkspaceOutputs.outputs": [
+    "Declared protected publications performed only after successful work and sandbox closure.",
+    "Publications protégées déclarées, exécutées seulement après réussite du travail et fermeture de la sandbox."
+  ],
+  "publishWorkspaceOutputs.workspace": [
+    "Open workspace borrowed for this operation; its caller remains responsible for closing it.",
+    "Workspace ouvert emprunté pour cette opération ; son caller reste responsable de sa fermeture."
+  ],
+  "publishWorkspaceOutputs.declaration": [
+    "Relative output selection, destination and explicit create/update/deletion policy.",
+    "Sélection relative des sorties, destination et politique explicite de création/mise à jour/suppression."
+  ],
+  "publishWorkspaceOutputs.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "inspectWorkspacePublication.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "inspectWorkspacePublication.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "PublicationJournal.format": [
+    "Version of the persisted envelope; unsupported versions are refused.",
+    "Version de l’enveloppe persistée ; les versions inconnues sont refusées."
+  ],
+  "PublicationJournal.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "PublicationJournal.workspaceId": [
+    "Stable workspace identity to which this publication journal belongs.",
+    "Identité stable du workspace auquel appartient ce journal de publication."
+  ],
+  "PublicationJournal.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "PublicationJournal.staging": [
+    "Exclusive validated incoming directory on the destination filesystem, retained for explicit recovery.",
+    "Répertoire exclusif d’entrées validées sur le filesystem de destination, conservé pour récupération explicite."
+  ],
+  "PublicationJournal.backup": [
+    "Exclusive quarantine preserving displaced originals and rollback evidence.",
+    "Quarantaine exclusive conservant les originaux déplacés et les preuves de rollback."
+  ],
+  "PublicationJournal.operations": [
+    "Ordered creation, replacement and deletion plan, with intent and result journal phases.",
+    "Plan ordonné de création, remplacement et suppression, avec phases de journal d’intention et de résultat."
+  ],
+  "PublicationJournal.directories": [
+    "Owned directory creation plan with recorded filesystem identities and conditional cleanup.",
+    "Plan de création de répertoires possédés avec identités filesystem enregistrées et nettoyage conditionnel."
+  ],
+  "PublicationJournal.outputs": [
+    "Declared protected publications performed only after successful work and sandbox closure.",
+    "Publications protégées déclarées, exécutées seulement après réussite du travail et fermeture de la sandbox."
+  ],
+  "PublicationJournal.lock": [
+    "Exact destination lock identity; interrupted ownership requires explicit stopped-process recovery.",
+    "Identité exacte du verrou de destination ; une propriété interrompue exige une récupération explicite après arrêt des processus."
+  ],
+  "PublicationJournal.state": [
+    "Persisted lifecycle state; uncertain or recovery-required resources are never silently reconstructed.",
+    "État de lifecycle persisté ; les ressources incertaines ou nécessitant une récupération ne sont jamais reconstruites silencieusement."
+  ],
+  "PublicationOperation.path": [
+    "Validated relative path preserving its prefix; traversal and control paths are refused.",
+    "Chemin relatif validé conservant son préfixe ; traversées et chemins de contrôle sont refusés."
+  ],
+  "PublicationOperation.previous": [
+    "Expected entry before publication, conserved in quarantine for conditional rollback.",
+    "Entrée attendue avant publication, conservée en quarantaine pour rollback conditionnel."
+  ],
+  "PublicationOperation.incoming": [
+    "Validated incoming entry; absence represents an explicitly selected deletion.",
+    "Entrée entrante validée ; son absence représente une suppression explicitement sélectionnée."
+  ],
+  "PublicationOperation.rollbackDisplaced": [
+    "Exclusive backup-relative path retaining the installed entry displaced during rollback.",
+    "Chemin exclusif relatif à la sauvegarde conservant l’entrée installée déplacée pendant le rollback."
+  ],
+  "PublicationOperation.phase": [
+    "Durable intent/result phase allowing finish or rollback without rerunning workflow tasks.",
+    "Phase durable d’intention/résultat permettant finish ou rollback sans réexécuter les tâches du workflow."
+  ],
+  "PublicationDirectory.path": [
+    "Validated relative path preserving its prefix; traversal and control paths are refused.",
+    "Chemin relatif validé conservant son préfixe ; traversées et chemins de contrôle sont refusés."
+  ],
+  "PublicationDirectory.mode": [
+    "Portable permission bits retained for regular files and directories.",
+    "Bits de permissions portables conservés pour les fichiers ordinaires et les répertoires."
+  ],
+  "PublicationDirectory.identity": [
+    "Device and inode identity used to detect replacement and known filesystem aliases.",
+    "Identité device/inode utilisée pour détecter les remplacements et les aliases connus du filesystem."
+  ],
+  "PublicationDirectory.createdMode": [
+    "Initial owned directory permissions, retained to distinguish publication changes from external edits.",
+    "Permissions initiales du répertoire possédé, conservées pour distinguer changements de publication et modifications externes."
+  ],
+  "PublicationDirectory.phase": [
+    "Durable intent/result phase allowing finish or rollback without rerunning workflow tasks.",
+    "Phase durable d’intention/résultat permettant finish ou rollback sans réexécuter les tâches du workflow."
+  ],
+  "recoverWorkspacePublication.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "recoverWorkspacePublication.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "recoverWorkspacePublication.action": [
+    "Explicit finish or rollback request; both verify current preconditions and never execute workflow tasks.",
+    "Demande explicite finish ou rollback ; toutes deux vérifient les préconditions actuelles et n’exécutent jamais les tâches du workflow."
+  ],
+  "recoverWorkspacePublication.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "PublicationRecoveryOptions.processesStopped": [
+    "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
+    "Attestation explicite d’arrêt du précédent propriétaire et de ses processus ; jamais déduite d’une expiration de heartbeat."
+  ],
+  "snapshotWorkspaceFiles.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "snapshotWorkspaceFiles.root": [
+    "Execution root inside the borrowed sandbox, distinct from its host control directory.",
+    "Racine d’exécution dans la sandbox empruntée, distincte de son répertoire de contrôle hôte."
+  ],
+  "snapshotWorkspaceFiles.prefix": [
+    "Transport key prefix under which immutable archive generations are written.",
+    "Préfixe de clé Transport sous lequel sont écrites les générations d’archives immuables."
+  ],
+  "restoreWorkspaceFiles.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "restoreWorkspaceFiles.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "restoreWorkspaceFiles.destination": [
+    "Host destination preserving selected relative paths; overlap with an active writable source is refused.",
+    "Destination hôte conservant les chemins relatifs sélectionnés ; le chevauchement d’une source inscriptible active est refusé."
+  ],
+  "WorkspaceOutputBaseline.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "WorkspaceOutputBaseline.expected": [
+    "Destination manifest captured before execution and used to detect concurrent edits.",
+    "Manifest de destination capturé avant exécution et utilisé pour détecter les modifications concurrentes."
+  ],
+  "WorkspacePathLock.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "WorkspacePathLock.directory": [
+    "Absolute local materialization or source directory; it is not a portable resource identity.",
+    "Répertoire local absolu de matérialisation ou de source ; ce chemin n’est pas une identité portable."
+  ],
+  "WorkspacePathLock.writable": [
+    "Writer intent; overlapping paths are refused when either owner can write.",
+    "Intention d’écriture ; les chemins qui se chevauchent sont refusés lorsqu’un propriétaire peut écrire."
+  ],
+  "WorkspacePathLock.identity": [
+    "Device and inode identity used to detect replacement and known filesystem aliases.",
+    "Identité device/inode utilisée pour détecter les remplacements et les aliases connus du filesystem."
+  ],
+  "WorkspacePathLock.ancestors": [
+    "Filesystem identities of existing ancestors used to detect overlapping aliases.",
+    "Identités filesystem des ancêtres existants utilisées pour détecter les aliases qui se chevauchent."
+  ],
+  "WorkspacePathGate.device": [
+    "Filesystem identity component captured with lstat, without following the selected entry.",
+    "Composante d’identité filesystem capturée avec lstat, sans suivre l’entrée sélectionnée."
+  ],
+  "WorkspacePathGate.inode": [
+    "Filesystem identity component captured with lstat, without following the selected entry.",
+    "Composante d’identité filesystem capturée avec lstat, sans suivre l’entrée sélectionnée."
+  ],
+  "recoverWorkspacePathLock.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "recoverWorkspacePathLock.expectedDirectory": [
+    "Inspected canonical directory that must match the exact abandoned lock.",
+    "Répertoire canonique inspecté qui doit correspondre au verrou abandonné exact."
+  ],
+  "recoverWorkspacePathLock.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "WorkspacePathRecoveryOptions.processesStopped": [
+    "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
+    "Attestation explicite d’arrêt du précédent propriétaire et de ses processus ; jamais déduite d’une expiration de heartbeat."
+  ],
+  "FileIsolatedTaskOptions.request": [
+    "Build the declared command or agent request from the current task context before acquisition.",
+    "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
+  ],
+  "FileIsolatedTaskOptions.quotaResume": [
+    "Opt-in native conversation continuation after quota pause, without consuming a task retry.",
+    "Continuation de conversation native après pause de quota, sur option explicite, sans consommer de retry de tâche."
+  ],
+  "MixedIsolatedTaskOptions.request": [
+    "Build the declared command or agent request from the current task context before acquisition.",
+    "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
+  ],
+  "MixedIsolatedTaskOptions.quotaResume": [
+    "Opt-in native conversation continuation after quota pause, without consuming a task retry.",
+    "Continuation de conversation native après pause de quota, sur option explicite, sans consommer de retry de tâche."
+  ],
+  "MixedAgentTaskOptions.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "MixedAgentTaskOptions.request": [
+    "Build the declared command or agent request from the current task context before acquisition.",
+    "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
+  ],
+  "MixedAgentTaskOptions.quotaResume": [
+    "Opt-in native conversation continuation after quota pause, without consuming a task retry.",
+    "Continuation de conversation native après pause de quota, sur option explicite, sans consommer de retry de tâche."
+  ],
+  "FileRecipeBindings.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "FileRecipeConfiguration.sandbox": [
+    "Sandbox bound to this workspace; closing it leaves a borrowed workspace open.",
+    "Sandbox liée à ce workspace ; sa fermeture laisse ouvert un workspace emprunté."
+  ],
+  "GitWorkspaceSandboxOptions.workspaceSource": [
+    "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
+    "Source déclarée pour une ressource possédée ; exclusive de l’emprunt d’un workspace ouvert."
+  ],
+  "GitWorkspaceSandboxOptions.workspace": [
+    "Forbidden with workspaceSource; declare Git settings inside the single source instead.",
+    "Interdit avec workspaceSource ; déclarez les paramètres Git dans la source unique."
+  ],
+  "FileRunReport.version": [
+    "File execution report format version 2, distinct from legacy Git report version 1.",
+    "Version 2 du format de rapport d’exécution de fichiers, distincte de la version 1 des rapports Git legacy."
+  ],
+  "FileRunReport.workspaceInfo": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "FileRunReport.fileOutputs": [
+    "Verified publication results, separate from Git commits and branch integration.",
+    "Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche."
+  ],
+  "inspectFileWorkspace.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "FileWorkspaceInspectionOptions.runtime": [
+    "Control directory and logical namespace, separate from the workspace files.",
+    "Répertoire de contrôle et namespace logique, séparés des fichiers du workspace."
+  ],
+  "FileWorkspaceInspectionOptions.id": [
+    "Stable identifier of this resource, independent of its materialization path.",
+    "Identifiant stable de cette ressource, indépendant du chemin de matérialisation."
+  ],
+  "FileWorkspaceInspectionOptions.transporter": [
+    "Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.",
+    "Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials."
+  ],
+  "FileWorkspaceInspection.record": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "FileWorkspaceInspection.reference": [
+    "Transport key and revision identifying the conserved object; conditional revisions fence stale writers.",
+    "Clé et révision Transport identifiant l’objet conservé ; les révisions conditionnelles écartent les writers périmés."
+  ],
+  "recoverFileWorkspace.record": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "recoverFileWorkspace.options": [
+    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
+    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+  ],
+  "FileWorkspaceRecoveryOptions.expectedRevision": [
+    "Revision obtained by inspection; recovery refuses a changed persisted record.",
+    "Révision obtenue par inspection ; la récupération refuse un enregistrement persisté modifié."
+  ],
+  "FileWorkspaceRecoveryOptions.processesStopped": [
+    "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
+    "Attestation explicite d’arrêt du précédent propriétaire et de ses processus ; jamais déduite d’une expiration de heartbeat."
+  ],
+  "FileWorkspaceRecoveryOptions.sandboxProvider": [
+    "Execution provider with the required file binding capability; legacy providers remain usable for Git.",
+    "Provider d’exécution disposant de la capacité de liaison de fichiers requise ; les providers legacy restent utilisables pour Git."
+  ],
+  "RecipeReport.workspaceInfo": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "RecipeReport.fileOutputs": [
+    "Verified publication results, separate from Git commits and branch integration.",
+    "Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche."
+  ],
+  "RecipeDiagnostic.publicationId": [
+    "Identifier of the publication journal retained after failure; tasks retain their completed status.",
+    "Identifiant du journal de publication conservé après échec ; les tâches conservent leur statut terminé."
+  ],
+  "RecipeDiagnostic.publicationState": [
+    "Separate rollback or recovery state for failed publication, independent of task completion.",
+    "État distinct de rollback ou de récupération pour une publication échouée, indépendant de la fin des tâches."
+  ],
+  "RecipeResumeOptions.workspaceRecovery": [
+    "Explicit recovery authorizations keyed by shared workspace or task key; checkpoint replay authorization remains separate.",
+    "Autorisations explicites de récupération indexées par workspace shared ou clé de tâche ; l’autorisation de replay du checkpoint reste distincte."
+  ],
+  "RecipeWorkspaceCheckpoint.fileRecord": [
+    "Versioned workspace description retaining ownership, settled generation and recovery references.",
+    "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "FileWorkspaceRecord.publications": [
+    "Publication states and Transport journal references, retained independently of workflow task status.",
+    "États des publications et références de journaux Transport, conservés indépendamment du statut des tâches."
+  ],
+  "FileWorkspaceRecord.preparation": [
+    "Preparation state recorded before file copies and hooks. Incomplete or failed preparation retains files and requires explicit adoption during recovery; absent means a ready record from the earlier format.",
+    "État de préparation enregistré avant les copies et hooks. Une préparation interrompue ou échouée conserve ses fichiers et exige leur adoption explicite lors de la récupération ; un champ absent désigne un ancien enregistrement prêt."
+  ],
+  "WorkspacePathLock.excludedDirectories": [
+    "Canonical control subdirectories excluded from a copy-source read lock. Owned materializations can coexist there while overlapping data writers and full source mounts remain fenced. Older locks omit this field.",
+    "Sous-répertoires de contrôle canoniques exclus du verrou de lecture d’une source copiée. Les matérialisations possédées y coexistent ; les writers de données et les montages complets restent protégés. Les anciens verrous omettent ce champ."
   ]
 }

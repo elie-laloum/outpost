@@ -8,7 +8,7 @@ description: "Let an agent fix code and retry until your test command passes."
 <!-- features -->
 
 - [Sandbox sessions](../sandbox-sessions/): One warm sandbox keeps dependencies between agent turns and test runs.
-- [Repository and branch](../repository-and-branch/): The fix lands on a named branch, never on your checkout.
+- [Repository and branch](../workspaces/): The fix lands on a named branch, never on your checkout.
 - [Prepare the environment](../environment-setup/): Dependencies are installed once, before the first round.
 - [Verification loops](../verification-loops/): Attempt, check, feed the failure back, repeat.
 - [Budgets](../budgets/): Cap the attempts and tokens of the whole run.

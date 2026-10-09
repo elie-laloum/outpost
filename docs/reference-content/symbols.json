@@ -794,5 +794,61 @@
   "createRecipeRuntime": [
     "Validate a YAML project and create a caller-owned runtime. Each run imports declared extensions, creates its owned components and sandbox, executes the workflow, integrates according to branch policy and closes resources before publishing explicitly configured reports.",
     "Valide un projet YAML et crée un runtime appartenant à l’appelant. Chaque exécution importe les extensions déclarées, crée ses composants et sa sandbox, exécute le workflow, intègre selon la politique de branche puis ferme les ressources avant les rapports explicitement configurés."
+  ],
+  "defineIsolatedCommandTask": [
+    "Declares a command task with its own file workspace and sandbox, without requiring an agent. Borrowed resources remain caller-owned.",
+    "Déclare une tâche de commande avec son propre workspace de fichiers et sa sandbox, sans imposer d’agent. Les ressources empruntées restent possédées par le caller."
+  ],
+  "createWorkspace": [
+    "Creates an owned Git, copied-directory, mounted-directory or ephemeral workspace. File modes allocate no Git repository and publish nothing on closure.",
+    "Crée un workspace possédé Git, dossier copié, dossier monté ou éphémère. Les modes de fichiers n’allouent aucun dépôt Git et ne publient rien à leur fermeture."
+  ],
+  "restoreFileWorkspace": [
+    "Restores an inspected settled file resource locally, or a verified portable snapshot with an explicit Transport. Missing or replaced local work is refused.",
+    "Restaure une ressource de fichiers settled inspectée localement, ou un snapshot portable vérifié avec un Transport explicite. Le travail local perdu ou remplacé est refusé."
+  ],
+  "workspaceFingerprint": [
+    "Computes a canonical file manifest fingerprint without Git, retaining paths, content, types, modes, links and selection identity.",
+    "Calcule une empreinte canonique de manifest de fichiers sans Git, conservant chemins, contenus, types, modes, liens et identité de sélection."
+  ],
+  "prepareWorkspaceOutputs": [
+    "Captures expected destination manifests before execution for protected publication, without writing outputs.",
+    "Capture les manifests attendus de destination avant exécution pour la publication protégée, sans écrire les sorties."
+  ],
+  "publishWorkspaceOutputs": [
+    "Publishes selected settled files with exclusive creation or protected update. Failure attempts conditional rollback and preserves external edits and recovery evidence.",
+    "Publie les fichiers settled sélectionnés par création exclusive ou mise à jour protégée. Un échec tente un rollback conditionnel et conserve modifications externes et preuves de récupération."
+  ],
+  "inspectWorkspacePublication": [
+    "Reads and validates a versioned publication journal at its exact Transport revision without changing files.",
+    "Lit et valide un journal de publication versionné à sa révision Transport exacte sans modifier les fichiers."
+  ],
+  "recoverWorkspacePublication": [
+    "Explicitly finishes or rolls back an inspected publication, fencing stale writers and preserving concurrent changes. It never replays completed tasks.",
+    "Termine ou annule explicitement une publication inspectée, en écartant les writers périmés et en conservant les changements concurrents. Ne rejoue jamais les tâches terminées."
+  ],
+  "snapshotWorkspaceFiles": [
+    "Conserves a bounded verified generation through Transport with binary files, internal links, permissions and empty directories.",
+    "Conserve une génération bornée vérifiée via Transport avec fichiers binaires, liens internes, permissions et répertoires vides."
+  ],
+  "restoreWorkspaceFiles": [
+    "Materializes and verifies a conserved file snapshot in an exclusive destination; preserves existing archive read compatibility.",
+    "Matérialise et vérifie un snapshot de fichiers conservé dans une destination exclusive ; conserve la compatibilité de lecture des archives existantes."
+  ],
+  "inspectWorkspacePathLocks": [
+    "Lists host-user locks coordinating overlapping materializations, mounts and publication destinations across runtime directories.",
+    "Liste les verrous d’hôte/utilisateur coordonnant matérialisations, montages et destinations de publication qui se chevauchent entre répertoires de runtime."
+  ],
+  "recoverWorkspacePathLock": [
+    "Releases only an explicitly inspected lock after the caller confirms its owner processes have stopped. Never infers authorization from a PID.",
+    "Libère uniquement un verrou explicitement inspecté après confirmation par le caller de l’arrêt des processus propriétaires. Ne déduit jamais une autorisation d’un PID."
+  ],
+  "inspectFileWorkspace": [
+    "Reads the current versioned workspace record and revision without acquiring a sandbox or changing materialized files.",
+    "Lit l’enregistrement versionné courant du workspace et sa révision sans acquérir de sandbox ni modifier les fichiers matérialisés."
+  ],
+  "recoverFileWorkspace": [
+    "Claims an inspected abandoned file workspace after explicit stopped-process authorization and verified allocation release. File or mounted-source adoption is separate and explicit.",
+    "Revendique un workspace de fichiers abandonné inspecté après autorisation explicite d’arrêt des processus et vérification de fermeture de l’allocation. L’adoption de fichiers ou de source montée est distincte et explicite."
   ]
 }

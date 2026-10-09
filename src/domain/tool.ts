@@ -50,6 +50,10 @@ export function defineHarnessTool<Input>(
     options.resources === undefined || typeof options.resources === "function",
     "Tool resources must be a function",
   );
+  invariant(
+    options.workspace === undefined || options.workspace === "git",
+    "Unsupported tool workspace requirement",
+  );
   const standard = isStandardJsonSchema(options.input)
     ? (options.input as StandardJsonSchema<Input>)
     : undefined;
@@ -58,6 +62,7 @@ export function defineHarnessTool<Input>(
     ? standardInputSchema(standard)
     : Object.freeze(structuredClone(options.input as JsonSchema));
   return Object.freeze({
+    ...(options.workspace ? { workspace: options.workspace } : {}),
     kind: "tool",
     name: options.name,
     description: options.description,

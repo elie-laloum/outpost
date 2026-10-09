@@ -2,6 +2,7 @@ import { inspectRecipeWorkspace } from "../../infrastructure/recipes/workspace.t
 import { bindRecipeWorkflow } from "./workflow.ts";
 import { recipeWorkflowReport } from "./workflow-report.ts";
 import { createRecipeDurableResources } from "./durable-resources.ts";
+import { isFileSandboxOptions } from "../file-sandbox.ts";
 import {
   openRecipeCheckpoint,
   recipeProjectIdentity,
@@ -51,6 +52,8 @@ export async function runDurableRecipe(
           : components.steps[key.slice("isolated.".length)]?.isolated;
       if (!settings)
         throw new Error(`Unknown persisted recipe workspace: ${key}`);
+      if (isFileSandboxOptions(settings))
+        throw new Error("Git workspace record cannot restore a file task");
       await inspectRecipeWorkspace(saved.record, settings);
     }
     const workflow = bindRecipeWorkflow(
@@ -59,7 +62,10 @@ export async function runDurableRecipe(
         ...(configuration.agents ? { agents: configuration.agents } : {}),
         inputs: session.inputs,
         acquireSandbox: resources.shared,
-        prepareIsolated: resources.isolated,
+        prepareIsolated: (key, request, context) =>
+          isFileSandboxOptions(request)
+            ? Promise.resolve(request)
+            : resources.isolated(key, request, context),
         releaseIsolated: resources.releaseIsolated,
       },
       {

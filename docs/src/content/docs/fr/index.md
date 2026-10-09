@@ -22,7 +22,7 @@ landing:
         text: "Un dépôt, un brief et une branche pour la tâche."
         role: "Vous"
         icon: "branch"
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
       - title: "Lancer votre agent"
         text: "Codex, Claude Code ou un autre agent dans la sandbox choisie."
         role: "Agent"
@@ -37,12 +37,12 @@ landing:
         text: "Vous choisissez les changements à intégrer."
         role: "Vous"
         icon: "branch"
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
     result:
       label: "Une branche pour votre revue"
       branch: "outpost/fix-tests"
       text: "Le correctif et ses commits, prêts à être relus."
-      href: "guide/repository-and-branch/"
+      href: "guide/workspaces/"
     link:
       { label: "Construire ce workflow", href: "guide/development-workflow/" }
   overview:
@@ -75,7 +75,7 @@ landing:
         href: "guide/choose-an-agent/"
       - title: "Espaces de travail Git"
         text: "Donnez à chaque tâche son worktree, conservez les branches nommées et choisissez quand intégrer les commits."
-        href: "guide/repository-and-branch/"
+        href: "guide/workspaces/"
       - title: "Workflows typés"
         text: "Reliez les résultats par des dépendances. Exécutez les tâches indépendantes en parallèle et transmettez des valeurs typées entre les étapes."
         href: "guide/task-dependencies/"
@@ -195,7 +195,7 @@ Un ticket demande un export CSV de la liste des commandes. Un agent prépare le 
   - Mainteneur
   - → **Préparer la branche**: approuvé
   - → **Arrêter le run**: refusé
-- [**Préparer la branche**](guide/repository-and-branch/): Commiter le travail accepté sur outpost/csv-export pour l’intégration.
+- [**Préparer la branche**](guide/workspaces/): Commiter le travail accepté sur outpost/csv-export pour l’intégration.
   - Contrôles
 - [**Arrêter le run**](guide/recovery/): Conserver l’espace de travail et les retours pour examiner le problème.
   - Contrôles

@@ -90,10 +90,16 @@ export async function prepareCloudCaches(
     "Cloud sandbox returned an invalid cache user",
   );
   const [uid, gid] = ids.split(":").map(Number);
-  const mounts = await cacheMounts(caches, context.repository, image, {
-    uid: uid!,
-    gid: gid!,
-  });
+  const mounts = await cacheMounts(
+    caches,
+    context.repository,
+    image,
+    {
+      uid: uid!,
+      gid: gid!,
+    },
+    context.workspaceIdentity,
+  );
   const saves: (() => Promise<void>)[] = [];
   for (const [index, cache] of caches.entries()) {
     signal.throwIfAborted();

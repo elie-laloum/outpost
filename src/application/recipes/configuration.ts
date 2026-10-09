@@ -32,19 +32,20 @@ export async function recipeExecutionConfiguration(
   project: RecipeProject,
   scope: RecipeComponentScope,
 ): Promise<RecipeRuntimeConfiguration> {
+  const declared = project.componentConfiguration ?? project.configuration;
   const source = JSON.stringify({
     ...Object.fromEntries(
-      Object.entries(project.configuration).filter(([key]) =>
+      Object.entries(declared).filter(([key]) =>
         recipeConfigurationKeys.root.some((allowed) => allowed === key),
       ),
     ),
     version: 1,
-    ...(project.configuration.version === 2
+    ...(declared.version === 2
       ? { sandbox: { provider: "local" }, agents: {} }
       : {}),
   });
   const legacy = await readRecipeConfiguration(source, project.options.config);
-  if (project.configuration.version === 1) return legacy;
+  if (declared.version === 1) return legacy;
   const [provider, options] = await Promise.all([
     scope.resolve("sandbox", "sandboxProvider"),
     scope.resolve("workspace", "sandboxOptions"),
@@ -58,7 +59,7 @@ export async function recipeExecutionConfiguration(
   scope.protect(Object.values(environment));
   const agents: Record<string, DispatchAgent> = {};
   for (const role of Object.keys(
-    recipeRecord(project.configuration.agents ?? {}, "agents"),
+    recipeRecord(declared.agents ?? {}, "agents"),
   )) {
     const agent = await scope.resolve(`agents.${role}`, "agent");
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
@@ -77,7 +78,7 @@ export async function recipeExecutionConfiguration(
 
   const { repository, branch, ...borrowedSettings } = legacy.sandbox;
   if (options.workspace) {
-    if (project.configuration.branch !== undefined)
+    if (declared.branch !== undefined)
       throw new Error(
         "A borrowed workspace owns its branch policy; omit configuration.branch",
       );

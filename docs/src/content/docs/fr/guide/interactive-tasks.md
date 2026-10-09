@@ -169,7 +169,7 @@ Référence API : [InteractiveAgentResult](../../reference/interactiveagentresul
 
 Chaque tour ouvre une sandbox et la ferme avant la publication de la question. Les fichiers du worktree passent d’un tour à l’autre, commités ou non ; le répertoire personnel de la sandbox et les processus en cours, non.
 
-Outpost n’intègre, ne pousse ni ne supprime jamais le worktree. Relisez `branch` et fusionnez-la vous-même ([Dépôt et branche](../repository-and-branch/)), puis nettoyez-la avec [Rétention et nettoyage](../retention/).
+Outpost n’intègre, ne pousse ni ne supprime jamais le worktree. Relisez `branch` et fusionnez-la vous-même ([Dépôt et branche](../workspaces/)), puis nettoyez-la avec [Rétention et nettoyage](../retention/).
 
 Le dépôt, le worktree et le stockage des conversations doivent rester aux mêmes chemins pour le processus suivant. Un worktree déplacé échoue avec `Interactive workspace moved; recover it explicitly`, et une branche changée avec `Interactive workspace branch changed; recover it explicitly`.
 
@@ -215,3 +215,7 @@ const region = defineTask({
 Un scénario complet, avec une approbation, des tests rouges et du code relu : [Construire un workflow de développement](../development-workflow/).
 
 API : [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)
+
+## Workspaces de fichiers
+
+Un dialogue de fichiers possédé déclare `workspaceSource` à la place d’un dépôt. Fichiers settled et conversations portables sont capturés avant fermeture de la sandbox et publication de la question humaine. La récupération d’un propriétaire interrompu reste séparée du rejeu d’un tour interrompu. Voir [les dialogues de fichiers](../workspaces/).

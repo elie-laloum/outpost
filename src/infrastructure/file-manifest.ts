@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
-import { lstat, readlink } from "node:fs/promises";
+import { lstat, open, readlink } from "node:fs/promises";
 import { OutpostError } from "../domain/errors.ts";
 import type { FileManifestEntry } from "../domain/sandbox.types.ts";
 import { safeDestination } from "./files.ts";
+import { inspectionFileFlags } from "./inspection-file.constants.ts";
 
 export async function fileManifest(
   root: string,
@@ -24,8 +24,16 @@ export async function fileManifest(
     size = value.length;
     hash.update(value);
   } else {
-    for await (const chunk of createReadStream(target, { signal }))
-      hash.update(chunk);
+    const file = await open(target, inspectionFileFlags);
+    try {
+      for await (const chunk of file.createReadStream({
+        signal,
+        autoClose: false,
+      }))
+        hash.update(chunk);
+    } finally {
+      await file.close();
+    }
   }
   return {
     path,

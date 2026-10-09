@@ -15,7 +15,7 @@ import { createAgentConflictResolver } from "@elie-laloum/outpost";
 
 Create an opt-in conflict strategy that prepares a merge in the supplied resolution workspace, runs one agent dispatch, then executes mandatory verification in the same sandbox. It requires both a sandboxProvider and a noninteractive verification command, returns the verified commit, usage and check output, and closes its sandbox on every outcome. It rejects unresolved entries, missing ancestry, uncommitted nonignored changes and commits changed by verification. No model or sandbox runs during construction.
 
-[Complete example and detailed rules](../../guide/repository-and-branch/).
+[Complete example and detailed rules](../../guide/workspaces/).
 
 ## Parameters and properties
 

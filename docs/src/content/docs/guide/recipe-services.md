@@ -111,3 +111,7 @@ A `queued` task uses [defineQueuedTask](../../reference/definequeuedtask/) and i
 ```
 
 Local process tests cover silent publication, explicit startup, cancellation, token rotation, signed webhooks, schedule publication and native workflow jobs. Real Redis 7 tests cover BullMQ leases, stale writers, interrupted effects and YAML workers. No paid model calls or public webhook endpoint are used; production TLS, hosted Redis and live sender delivery remain unvalidated.
+
+## File workspaces
+
+To run a service without Git, use configuration version 3 with an explicit file source for sandbox tasks, or omit workspace and sandbox for fileless tasks. Named queues, schedules, webhooks and jobs retain their existing contracts. See [file workspaces](../workspaces/).

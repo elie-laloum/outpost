@@ -149,6 +149,9 @@ export async function customTurn(
     transcript = storage
       ? await openTranscript({
           repository: context.repository,
+          ...(context.runtimeDirectory
+            ? { runtimeDirectory: context.runtimeDirectory }
+            : {}),
           ...(options.observation ? { observation: options.observation } : {}),
           store: storage,
           model: agent.model.name,
@@ -168,6 +171,9 @@ export async function customTurn(
           agent,
           observation: options.observation?.child({ pass }),
           repository: context.repository,
+          ...(context.runtimeDirectory
+            ? { runtimeDirectory: context.runtimeDirectory }
+            : {}),
           ...(transcript ? { conversation: transcript.id } : {}),
           budget,
           modelScope,

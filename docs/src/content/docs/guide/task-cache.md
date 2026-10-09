@@ -181,3 +181,7 @@ Entries live under `task-cache/` in the transport until you remove them. Add the
 - Do not cache a `defineArtifactTask` read by a later task: a hit in a new run restores a reference to the earlier run, and `readArtifact()` fails with “Artifact dependency producer mismatch”.
 
 API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/) · [WorkflowEvent](../../reference/workflowevent/).
+
+## File workspaces
+
+A JSON cache hit never restores or replays file effects. File workspace identity, input fingerprints and settled generations are separate from cached task values. Dependency caches use the runtime namespace and logical source rather than a run UUID. See [file workspaces](../workspaces/).

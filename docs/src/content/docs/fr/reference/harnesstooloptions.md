@@ -15,6 +15,7 @@ import type { HarnessToolOptions } from "@elie-laloum/outpost";
 
 | Nom           | Type                                                                               | Présence  | Rôle                                                                                                                                                                                                                                                                                                                            |
 | ------------- | ---------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `workspace`   | `"git" \| undefined`                                                               | Optionnel | Déclare un workspace Git requis ; l’exécution de fichiers refuse cet outil avant acquisition.                                                                                                                                                                                                                                   |
 | `name`        | `string`                                                                           | Requis    | Nom d’outil unique de 1 à 64 lettres, chiffres, tirets bas ou tirets, présenté au modèle.                                                                                                                                                                                                                                       |
 | `description` | `string`                                                                           | Requis    | Explication non vide que le modèle lit pour décider quand et comment appeler l’outil.                                                                                                                                                                                                                                           |
 | `input`       | `Readonly<Record<string, unknown>> \| StandardJsonSchema<Input>`                   | Requis    | Schéma d’entrée : un objet JSON Schema contrôlé par le sous-ensemble intégré (type, properties, required, additionalProperties, items, enum, const et bornes de longueur, de valeur et de nombre d’éléments), ou un Standard Schema qui exporte du JSON Schema, comme Zod 4. Les autres mots-clés sont refusés à la définition. |
@@ -26,6 +27,7 @@ import type { HarnessToolOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface HarnessToolOptions<Input> {
+  readonly workspace?: "git";
   readonly name: string;
   readonly description: string;
   readonly input: StandardJsonSchema<Input> | JsonSchema;

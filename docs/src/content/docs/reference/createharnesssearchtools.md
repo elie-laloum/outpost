@@ -17,6 +17,13 @@ Create the search toolset: search runs git grep with an extended regular express
 
 [Complete example and detailed rules](../../guide/harness-tools/).
 
+## Parameters and properties
+
+| Name                | Type                                 | Presence | Meaning                                                                                                              |
+| ------------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `FileSelectionOptions \| undefined`  | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.             |
+| `options.selection` | `"git" \| "filesystem" \| undefined` | Optional | Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering. |
+
 ## Returns
 
 `HarnessToolset`
@@ -24,9 +31,12 @@ Create the search toolset: search runs git grep with an extended regular express
 ## Signature
 
 ```ts
-export declare function createHarnessSearchTools(): HarnessToolset;
+export declare function createHarnessSearchTools(
+  options?: FileSelectionOptions,
+): HarnessToolset;
 ```
 
 ## Related contracts
 
+- [FileSelectionOptions](../fileselectionoptions/)
 - [HarnessToolset](../harnesstoolset/)

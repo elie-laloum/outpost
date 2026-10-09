@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "file-workspaces",
+    title: ["File workspaces", "Workspaces de fichiers"],
+    guide: "guide/workspaces",
+    names:
+      "createWorkspace restoreFileWorkspace workspaceFingerprint snapshotWorkspaceFiles restoreWorkspaceFiles prepareWorkspaceOutputs publishWorkspaceOutputs inspectWorkspacePublication recoverWorkspacePublication inspectFileWorkspace recoverFileWorkspace defineIsolatedCommandTask WorkspaceSource GitWorkspaceSource FileWorkspaceSource WorkspaceSession WorkspaceRuntime WorkspaceRuntimeOptions WorkspaceRetention WorkspaceInput WorkspaceFileEntry FileWorkspaceRecord WorkspaceAllocationRecord WorkspaceConversationArchive WorkspaceOutputOptions WorkspaceOutputBaseline WorkspacePublication FileWorkspace FileWorkspaceOptions GitWorkspace GitWorkspaceOptions GitWorkspaceSandboxOptions GitDispatchRequest CreatedWorkspace FileWorkspaceRecoveryAuthorization RestoreFileWorkspaceOptions FileWorkspaceInspection FileWorkspaceInspectionOptions FileWorkspaceRecoveryOptions FileSandbox FileSandboxOptions FileSandboxSettings FileDispatchRequest FileDispatchResult FileAttachResult FileRunReport FileAgentTaskOptions FileIsolatedTaskOptions MixedIsolatedTaskOptions MixedAgentTaskOptions IsolatedCommandTaskOptions FileIsolatedCommandRequest FileRecipeBindings MixedRecipeBindings FileRecipeConfiguration FileInteractiveAgentTaskOptions FileInteractiveAgentResult FileSelectionOptions PublicationJournal PublicationOperation PublicationDirectory PublicationRecoveryOptions WorkspaceCheckpointMetadata TaskWorkspaceCheckpoint FileSandboxContext SandboxWorkspaces inspectWorkspacePathLocks recoverWorkspacePathLock WorkspacePathLock WorkspacePathRecoveryOptions",
+  },
+  {
     id: "recipes",
     title: ["YAML recipes", "Recettes YAML"],
     guide: "guide/yaml-recipes",
@@ -51,7 +58,7 @@ export const groups = [
   {
     id: "workspaces",
     title: ["Workspaces", "Workspaces"],
-    guide: "guide/repository-and-branch",
+    guide: "guide/workspaces",
     names:
       "openWorkspace createAgentConflictResolver Workspace WorkspaceOptions WorkspaceRecord BranchPolicy DiffGuard IntegrationOptions ConflictResolver ConflictContext ConflictResolution AgentConflictResolverOptions Commit Disposal StageLimits LifecycleHooks changed ChangedCondition LifecycleCommand",
   },

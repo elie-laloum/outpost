@@ -17,6 +17,13 @@ Crée le jeu d’outils files. read_file renvoie jusqu’à 2000 lignes numérot
 
 [Exemple complet et règles détaillées](../../guide/harness-tools/).
 
+## Paramètres et propriétés
+
+| Nom                 | Type                                 | Présence  | Rôle                                                                                                                             |
+| ------------------- | ------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `FileSelectionOptions \| undefined`  | Optionnel | Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération. |
+| `options.selection` | `"git" \| "filesystem" \| undefined` | Optionnel | git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore.   |
+
 ## Retour
 
 `HarnessToolset`
@@ -24,9 +31,12 @@ Crée le jeu d’outils files. read_file renvoie jusqu’à 2000 lignes numérot
 ## Signature
 
 ```ts
-export declare function createHarnessFileTools(): HarnessToolset;
+export declare function createHarnessFileTools(
+  options?: FileSelectionOptions,
+): HarnessToolset;
 ```
 
 ## Contrats associés
 
+- [FileSelectionOptions](../fileselectionoptions/)
 - [HarnessToolset](../harnesstoolset/)

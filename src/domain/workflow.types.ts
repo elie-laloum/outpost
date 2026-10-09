@@ -33,6 +33,7 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  readonly workspaceCheckpoint?: import("./workflow/checkpoint.types.ts").TaskWorkspaceCheckpoint;
   readonly prices?: ModelPriceTable;
   /** Quota pause resumed by this attempt; present only on the first attempt after it. */
   readonly quota?: WorkflowQuotaPause;

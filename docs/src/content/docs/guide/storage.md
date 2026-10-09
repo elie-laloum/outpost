@@ -115,7 +115,7 @@ A remote transport moves stored objects, not the runtime. These still need the h
 
 <!-- features -->
 
-- [Worktrees and locks](../repository-and-branch/): Branches are checked out under `.outpost/workspaces` and locked under `.outpost/locks`.
+- [Worktrees and locks](../workspaces/): Branches are checked out under `.outpost/workspaces` and locked under `.outpost/locks`.
   - Git
 - [Native conversations](../conversations/): The agent reads its own store; an archived copy is restored to disk before it resumes.
   - Claude Code
@@ -161,3 +161,7 @@ It prints `stale: notes/today`. Stores use the same fence: a workflow that lost 
 - Keys are `/`-separated segments of letters, digits, `.`, `_` and `-`, not starting with a dot, up to 512 characters.
 
 API: [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/) · [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [createArtifactStore](../../reference/createartifactstore/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [createTransportConversations](../../reference/createtransportconversations/) · [SandboxOptions](../../reference/sandboxoptions/) · [createS3Transport](../../reference/creates3transport/).
+
+## File workspaces
+
+File modes place control storage under `runtime.directory`, without resolving a Git repository. Portable files require an explicit Transport and namespace; a checkpoint alone cannot reconstruct lost materializations. See [file retention](../workspaces/#preserve-and-resume-files).

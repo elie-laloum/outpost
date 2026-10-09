@@ -153,3 +153,7 @@ With other branch modes, `integrate()` does nothing. A merge conflict, or a host
 - Output is captured as text. Move binary files with the provider’s transfer methods ([Cloud sandboxes](../cloud-sandboxes/)).
 
 API: [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
+
+## File workspaces
+
+File sandboxes borrow an open `FileWorkspace` or own an explicit `workspaceSource`. Closing a borrowed sandbox leaves its workspace open. [File workspaces](../workspaces/) explains provider bindings, output publication and retention.

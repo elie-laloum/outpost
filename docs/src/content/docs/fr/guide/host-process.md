@@ -49,7 +49,7 @@ L’agent lance votre CLI installée dans un worktree de `outpost/host-fix`. `va
 
 ## Accès au dépôt
 
-L’agent travaille dans le répertoire fixé par votre [politique de branche](../repository-and-branch/). Sans `branch`, c’est votre checkout tel quel ; avec `named` ou `integrate`, un worktree sous `.outpost/workspaces/`.
+L’agent travaille dans le répertoire fixé par votre [politique de branche](../workspaces/). Sans `branch`, c’est votre checkout tel quel ; avec `named` ou `integrate`, un worktree sous `.outpost/workspaces/`.
 
 Les workflows, les conversations et les [sessions de sandbox](../sandbox-sessions/) fonctionnent sans changement.
 

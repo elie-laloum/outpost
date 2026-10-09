@@ -156,3 +156,7 @@ Sans processus de longue durée, un job CI planifié, comme un workflow GitHub A
 - Le `name` d’une planification est unique et n’utilise que des lettres, des chiffres, `.`, `_` et `-` (128 caractères au plus). Un `runId` compte au plus 256 caractères.
 
 API : [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+
+## Workspaces de fichiers
+
+Une recette de fichiers utilise le même contrat schedule vers file : le timer publie uniquement son job déterministe et le worker alloue le workspace. Voir [les workspaces de fichiers](../workspaces/) et [les services de recettes](../recipe-services/).

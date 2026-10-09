@@ -39,5 +39,9 @@ export declare function createAgent(options: CliAgentOptions): CliAgent;
 
 ## Contrats associés
 
+- [Agent](../type-agent/)
+- [AgentOptions](../agentoptions/)
 - [CliAgent](../cliagent/)
 - [CliAgentOptions](../support-cliagentoptions/)
+- [CustomAgent](../customagent/)
+- [CustomAgentOptions](../support-customagentoptions/)

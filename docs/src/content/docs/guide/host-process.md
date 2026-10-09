@@ -49,7 +49,7 @@ The agent runs your installed CLI in a worktree of `outpost/host-fix`. `variable
 
 ## Repository access
 
-The agent works in the directory set by your [branch policy](../repository-and-branch/). Without `branch`, that is your checkout as it is; with `named` or `integrate`, a worktree under `.outpost/workspaces/`.
+The agent works in the directory set by your [branch policy](../workspaces/). Without `branch`, that is your checkout as it is; with `named` or `integrate`, a worktree under `.outpost/workspaces/`.
 
 Workflows, conversations and [sandbox sessions](../sandbox-sessions/) work unchanged.
 
