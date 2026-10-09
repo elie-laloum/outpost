@@ -1,4 +1,6 @@
 import { recipeObject } from "../domain/recipes/values.ts";
+import { selectRecipeActor } from "./recipe-actor.ts";
+import { recipeGateDecision } from "./recipe-gates.ts";
 import type { RecipeReport } from "../application/recipe-report.types.ts";
 import type { RecipeRuntime } from "../application/recipes/project.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
@@ -15,24 +17,6 @@ function actorsFor(document: RecipeDocument, key: string): readonly string[] {
     actors.every((actor) => typeof actor === "string")
     ? actors
     : [];
-}
-
-async function actorFor(
-  document: RecipeDocument,
-  key: string,
-  { actor, prompts, signal }: RecipeDialogueOptions,
-): Promise<string | undefined> {
-  const actors = actorsFor(document, key);
-  if (actor !== undefined) {
-    if (!actor.trim() || (actors.length && !actors.includes(actor)))
-      throw new Error(`Actor ${actor} is not authorized to answer task ${key}`);
-    return actor;
-  }
-  if (actors.length === 1) return actors[0];
-  if (!actors.length)
-    throw new Error(`Cannot infer an actor for task ${key}; pass --actor`);
-  const choice = await prompts.select(`Answer ${key} as`, actors, signal);
-  return choice === undefined ? undefined : actors[choice];
 }
 
 async function answerFor(
@@ -55,13 +39,30 @@ export async function continueRecipeDialogue(
   options: RecipeDialogueOptions,
 ): Promise<RecipeReport> {
   let report = initial;
-  while (report.status === "waiting-input" && !options.signal.aborted) {
+  while (
+    ["waiting-input", "paused"].includes(report.status) &&
+    !options.signal.aborted
+  ) {
+    if (report.status === "paused") {
+      const decision = await recipeGateDecision(report, document, options);
+      if (!decision) break;
+      report = await runtime.resume({
+        runId: report.runId!,
+        signal: options.signal,
+        decisions: [decision],
+      });
+      continue;
+    }
     const request = report.inputRequests?.[0];
     if (!request || !report.runId)
       throw new Error(
         "Interactive recipe requires a persisted question and run ID",
       );
-    const actor = await actorFor(document, request.key, options);
+    const actor = await selectRecipeActor(
+      actorsFor(document, request.key),
+      request.key,
+      options,
+    );
     const value =
       actor === undefined ? undefined : await answerFor(request, options);
     if (actor === undefined || value === undefined) {

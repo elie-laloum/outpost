@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Ajoute une recette de développement Linear avec une application TypeScript indépendante, cache privé de clés API validées, choix du ticket, approbation du plan, implémentation, tests obligatoires et observation formatée. Étend la saisie CLI aux gates non signées avec résultats sauvegardés et décisions explicites ; les gates signées conservent la soumission externe de preuves. Parcours testé hors ligne avec Git réel et services simulés ; Linear/Codex réel reste non validé.
+
 - Gère les questions des recettes durables directement dans la CLI : saisie automatique en terminal, sélection d’acteur, réponses persistées et poursuite sans script personnalisé. Ajoute les modes interactif et automatisé, conserve un unique rapport JSON final et préserve les questions après annulation. Couvre les reprises entre processus hors ligne et la saisie sur terminal réel, sans appel payant.
 
 - Expose les JSON Schemas des recettes et configurations sous `/schemas/` dans la documentation, avec des copies figées par version reconstruites depuis les tags Git stables. Conserve les archives entre déploiements GitHub Pages, vérifie le contenu JSON et les réponses HTTP et documente la configuration de l’éditeur en français et en anglais. Les URLs seront publiques après le prochain déploiement de release stable éligible.

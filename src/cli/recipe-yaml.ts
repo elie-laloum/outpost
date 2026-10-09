@@ -135,6 +135,14 @@ export async function recipeYamlCommand(
       process.stderr.write(
         `Recipe ${report.runId} is waiting for input. Use outpost recipe resume with the same --file, --config and --run-id.\n`,
       );
+    if (
+      report.status === "paused" &&
+      report.tasks.some((task) => task.pause) &&
+      !values.json
+    )
+      process.stderr.write(
+        `Recipe ${report.runId} is waiting for a gate decision. Resume interactively or use outpost recipe decide --decision decision.json; signed gates require a proof.\n`,
+      );
     if (report.status !== "done" && !process.exitCode) process.exitCode = 1;
   } finally {
     process.off("SIGINT", interrupt);

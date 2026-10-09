@@ -1,4 +1,5 @@
 export interface RecipeInputPrompts {
+  write?(text: string): void;
   text(message: string, signal: AbortSignal): Promise<string | undefined>;
   select(
     message: string,

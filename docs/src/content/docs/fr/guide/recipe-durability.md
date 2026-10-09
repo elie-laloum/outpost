@@ -88,11 +88,13 @@ outpost recipe resume --file recipe.yaml --config outpost.yaml \
   --run-id reviewed-change
 ```
 
-Ctrl+C conserve la question et libère la propriété du checkpoint. Resume la repose sans rejouer les tours terminés. Seules les réponses au dialogue sont recueillies automatiquement ; les gates d’approbation gardent leurs vérifications de décision et de signature.
+Ctrl+C conserve la question et libère la propriété du checkpoint. Resume la repose sans rejouer les tours terminés. Les gates non signées affichent aussi les résultats sauvegardés de leurs dépendances et recueillent une approbation, reprise ou un refus explicite avec motif. Le choix par défaut laisse la gate en attente. Les gates signées exigent la commande `decide` existante et leur preuve originale ; les contrôles natifs d’acteur et de signature restent appliqués.
 
 L’exemple hors ligne dans `examples/72-recipe-cli-dialogue/` demande un prénom et le transmet à l’étape suivante. Après compilation de la CLI locale, lancez ses fichiers YAML avec `outpost recipe run --file examples/72-recipe-cli-dialogue/recipe.yaml --config examples/72-recipe-cli-dialogue/outpost.yaml`.
 
 Pour une automatisation ou un client HTTP, utilisez `--no-interactive` ou `--json`, lisez `inputRequests` dans le rapport puis soumettez `recipe answer --answer answer.json`. L’application HTTP authentifie son appelant et fournit un acteur autorisé ; un nom d’acteur soumis seul ne constitue pas une authentification. `--interactive --json` combine explicitement les questions sur stderr avec un seul rapport JSON final sur stdout.
+
+La [recette de développement Linear](../recipe-linear-development/) combine saisie du token sur l’hôte, sélection du ticket, approbation du plan, implémentation, tests obligatoires et résumé formaté.
 
 ## Conserver artefacts, caches et consommation
 

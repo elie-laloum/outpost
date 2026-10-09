@@ -46,15 +46,15 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
   --input 'goal=Fix the parser' [--json]
 ```
 
-| Option             | Défaut                                     | Effet                                                                                                                                                           |
-| ------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--file`           | Obligatoire                                | Recette YAML locale, limitée à 1 Mio.                                                                                                                           |
-| `--config`         | Obligatoire                                | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                                              |
-| `--input`          | Aucun                                      | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.                                         |
-| `--json`           | Désactivé                                  | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace.                             |
-| `--interactive`    | Automatique dans un terminal sans `--json` | Recueille les réponses sur stdin, affiche les questions sur stderr et reprend le dialogue durable. Exige stdin et stderr en terminal et une configuration YAML. |
-| `--no-interactive` | Désactivé                                  | Laisse les questions en attente pour une prochaine invocation ou un client externe.                                                                             |
-| `--actor`          | Acteur déclaré unique, sinon sélection     | Acteur local de confiance soumettant les réponses ; le moteur vérifie son autorisation pour la tâche.                                                           |
+| Option             | Défaut                                     | Effet                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--file`           | Obligatoire                                | Recette YAML locale, limitée à 1 Mio.                                                                                                                                                 |
+| `--config`         | Obligatoire                                | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                                                                    |
+| `--input`          | Aucun                                      | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.                                                               |
+| `--json`           | Désactivé                                  | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace.                                                   |
+| `--interactive`    | Automatique dans un terminal sans `--json` | Recueille réponses et décisions explicites de gates non signées sur stdin, affiche leurs demandes sur stderr et reprend. Exige stdin et stderr en terminal et une configuration YAML. |
+| `--no-interactive` | Désactivé                                  | Laisse les questions en attente pour une prochaine invocation ou un client externe.                                                                                                   |
+| `--actor`          | Acteur déclaré unique, sinon sélection     | Acteur local de confiance soumettant les réponses ; le moteur vérifie son autorisation pour la tâche.                                                                                 |
 
 Avec stdin et stderr dans un terminal, run gère les questions interactives sans script TypeScript. Les choix utilisent un menu de sélection et les questions libres un champ de texte. Chaque réponse est persistée avant la question suivante. `--json` désactive la saisie automatique ; combinez explicitement `--interactive --json` pour conserver les questions sur stderr et recevoir un seul rapport JSON final sur stdout. Sans terminal, l’exécution laisse les demandes en attente.
 
@@ -73,7 +73,7 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 
 Answer et decide lisent une WorkflowAnswer ou WorkflowDecision native dans un fichier JSON borné ; une gate signée exige sa preuve originale. `resume --input` doit correspondre aux paramètres persistés ; omettez-le pour les recharger. Run accepte aussi `--run-id` pour créer un checkpoint. Run, resume, answer et decide n’affichent un rapport final que s’il est déclaré ou demandé via `--json` ; status affiche toujours son résultat demandé. Consultez les [recettes durables](../recipe-durability/) pour l’état, la propriété et la récupération.
 
-Resume, answer et decide acceptent les mêmes options `--interactive`, `--no-interactive` et `--actor`. Ctrl+C ou la fermeture de l’entrée pendant une question la laisse en attente et sort avec 130 ; resume la repose sans rejouer les tours terminés. La sélection d’acteur déclare une identité locale de confiance, sans authentification. Les gates d’approbation exigent toujours `decide` et leurs preuves existantes.
+Resume, answer et decide acceptent les mêmes options `--interactive`, `--no-interactive` et `--actor`. Ctrl+C ou la fermeture de l’entrée pendant une question la laisse en attente et sort avec 130 ; resume la repose sans rejouer les tours terminés. La sélection d’acteur déclare une identité locale de confiance, sans authentification. Les gates non signées affichent les résultats sauvegardés de leurs dépendances, puis proposent Leave pending, Approve/Resume ou Reject avec un motif obligatoire. Le choix par défaut laisse la gate en attente. Les gates signées exigent toujours `decide` avec leurs preuves existantes ; la saisie en terminal ne fournit ni ne contourne ces preuves.
 
 ## `outpost recipe enqueue` et `serve`
 

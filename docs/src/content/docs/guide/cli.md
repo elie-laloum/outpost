@@ -46,15 +46,15 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
   --input 'goal=Fix the parser' [--json]
 ```
 
-| Flag               | Default                                    | Effect                                                                                                                                          |
-| ------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--file`           | Required                                   | Local YAML recipe, limited to 1 MiB.                                                                                                            |
-| `--config`         | Required                                   | Local YAML execution configuration; TypeScript/JavaScript `RecipeConfiguration` modules and factories remain supported.                         |
-| `--input`          | None                                       | Repeat `name=value` for declared version-2 inputs. Numbers and booleans use JSON scalar syntax.                                                 |
-| `--json`           | Off                                        | Final report with overall `status`, `workflowStatus`, tasks, bounded `outputs`, `errors`, usage and workspace location.                         |
-| `--interactive`    | Automatic on a terminal without `--json`   | Collect durable dialogue answers on stdin, display questions on stderr and resume. Requires terminal stdin and stderr and a YAML configuration. |
-| `--no-interactive` | Off                                        | Leave questions pending for a later invocation or an external client.                                                                           |
-| `--actor`          | Sole declared actor, otherwise a selection | Trusted local actor submitting answers; the engine checks task authorization.                                                                   |
+| Flag               | Default                                    | Effect                                                                                                                                                                           |
+| ------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--file`           | Required                                   | Local YAML recipe, limited to 1 MiB.                                                                                                                                             |
+| `--config`         | Required                                   | Local YAML execution configuration; TypeScript/JavaScript `RecipeConfiguration` modules and factories remain supported.                                                          |
+| `--input`          | None                                       | Repeat `name=value` for declared version-2 inputs. Numbers and booleans use JSON scalar syntax.                                                                                  |
+| `--json`           | Off                                        | Final report with overall `status`, `workflowStatus`, tasks, bounded `outputs`, `errors`, usage and workspace location.                                                          |
+| `--interactive`    | Automatic on a terminal without `--json`   | Collect dialogue answers and explicit unsigned gate decisions on stdin, display their prompts on stderr and resume. Requires terminal stdin and stderr and a YAML configuration. |
+| `--no-interactive` | Off                                        | Leave questions pending for a later invocation or an external client.                                                                                                            |
+| `--actor`          | Sole declared actor, otherwise a selection | Trusted local actor submitting answers; the engine checks task authorization.                                                                                                    |
 
 With terminal stdin and stderr, run handles interactive questions without a TypeScript runner. Choices use a selection menu; free-text questions use a text prompt. Each answer is persisted before another question is displayed. `--json` disables automatic prompting; explicitly combine `--interactive --json` to keep prompts on stderr and receive one final JSON report on stdout. Without a terminal, execution leaves input requests pending.
 
@@ -73,7 +73,7 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 
 Answer and decide read one native WorkflowAnswer or WorkflowDecision from a bounded JSON file; signed gates require the original proof. `resume --input` must match the persisted inputs; omit it to reload them. Run also accepts `--run-id` for a new checkpoint. Run, resume, answer and decide print a final report only when declared or requested through `--json`; status always prints its requested result. See [durable recipes](../recipe-durability/) for state, ownership and recovery behavior.
 
-Resume, answer and decide accept the same `--interactive`, `--no-interactive` and `--actor` flags. Ctrl+C or closed terminal input while a question is displayed leaves it pending and exits 130; resume asks it again without replaying completed turns. Actor selection declares a trusted local identity, not a login. Approval gates still require `decide` and their existing proofs.
+Resume, answer and decide accept the same `--interactive`, `--no-interactive` and `--actor` flags. Ctrl+C or closed terminal input while a question is displayed leaves it pending and exits 130; resume asks it again without replaying completed turns. Actor selection declares a trusted local identity, not a login. Unsigned gates display their saved dependency outputs, then offer Leave pending, Approve/Resume or Reject and require a reason. Leaving pending is the default. Signed gates still require `decide` with their existing proofs; terminal input never supplies or bypasses those proofs.
 
 ## `outpost recipe enqueue` and `serve`
 

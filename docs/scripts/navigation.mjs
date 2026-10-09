@@ -93,6 +93,7 @@ export const chapters = [
       "guide/yaml-recipes",
       "guide/recipe-workflows",
       "guide/recipe-durability",
+      "guide/recipe-linear-development",
       "guide/recipe-services",
       "guide/recipe-advanced",
       "guide/yaml-components",

@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add a runnable Linear development recipe with a separate TypeScript application, validated private API-key caching, issue selection, plan approval, implementation, enforced tests and formatted observation. Extend terminal recipe interaction to unsigned gates with saved evidence and explicit decisions; signed gates retain external proof submission. Test the flow offline with real Git and simulated services; live Linear/Codex remains unvalidated.
+
 - Handle durable recipe questions directly in the CLI: automatic terminal prompts, actor selection, saved answers and continuation without a custom runner. Add interactive/headless flags, keep JSON reporting final-only, and preserve pending questions on cancellation. Cover offline cross-process resume and real terminal input; no paid agent calls.
 
 - Serve recipe and configuration JSON Schemas from documentation URLs under `/schemas/`, with immutable per-version copies reconstructed from stable Git tags. Preserve archives across GitHub Pages deployments, check JSON content and HTTP responses, and document editor setup in English and French. URLs become public with the next eligible stable release deployment.

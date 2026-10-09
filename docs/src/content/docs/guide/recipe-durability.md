@@ -88,11 +88,13 @@ outpost recipe resume --file recipe.yaml --config outpost.yaml \
   --run-id reviewed-change
 ```
 
-Ctrl+C leaves the question persisted and releases checkpoint ownership. Resume presents it again without replaying completed turns. Only dialogue answers are collected automatically; approval gates keep their existing decision and signature checks.
+Ctrl+C leaves the question persisted and releases checkpoint ownership. Resume presents it again without replaying completed turns. Unsigned gates also display their saved dependency outputs and collect an explicit approval, resumption or rejection with a reason. Leave pending is the default. Signed gates require the existing `decide` command and original proof; all native actor and signature checks remain enforced.
 
 The offline example in `examples/72-recipe-cli-dialogue/` asks for a name and passes it to the next step. Run its YAML files with `outpost recipe run --file examples/72-recipe-cli-dialogue/recipe.yaml --config examples/72-recipe-cli-dialogue/outpost.yaml` after building the local CLI.
 
 For automation or an HTTP client, use `--no-interactive` or `--json`, inspect `inputRequests` in the report and submit `recipe answer --answer answer.json`. The HTTP application authenticates its caller and supplies an authorized actor; a submitted actor name alone is not authentication. `--interactive --json` explicitly combines terminal questions on stderr with one final JSON report on stdout.
+
+The [Linear development recipe](../recipe-linear-development/) combines a host credential prompt, issue selection, plan approval, implementation, enforced tests and a formatted summary.
 
 ## Keep artifacts, caches and quota accounting
 

@@ -3,7 +3,7 @@ export const cliOptions = {
   interactive: {
     type: "boolean",
     description:
-      "Answer recipe dialogue questions in the terminal (automatic on a TTY without --json)",
+      "Answer recipe questions and review unsigned gates in the terminal (automatic on a TTY without --json)",
   },
   actor: {
     type: "string",

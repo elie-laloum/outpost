@@ -14,6 +14,9 @@ export function recipeInteractiveMode(
 
 export function createRecipeInputPrompts(): RecipeInputPrompts {
   return {
+    write(message) {
+      process.stderr.write(message);
+    },
     async text(message, signal) {
       const answer = await withRecipeInput(signal, (signal) =>
         text({
