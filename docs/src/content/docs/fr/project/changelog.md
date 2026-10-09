@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Gère les questions des recettes durables directement dans la CLI : saisie automatique en terminal, sélection d’acteur, réponses persistées et poursuite sans script personnalisé. Ajoute les modes interactif et automatisé, conserve un unique rapport JSON final et préserve les questions après annulation. Couvre les reprises entre processus hors ligne et la saisie sur terminal réel, sans appel payant.
+
 - Expose les JSON Schemas des recettes et configurations sous `/schemas/` dans la documentation, avec des copies figées par version reconstruites depuis les tags Git stables. Conserve les archives entre déploiements GitHub Pages, vérifie le contenu JSON et les réponses HTTP et documente la configuration de l’éditeur en français et en anglais. Les URLs seront publiques après le prochain déploiement de release stable éligible.
 
 - Termine les sept lots de composition YAML avec spéculation expérimentale explicite, reçus de consommation durable, résolveurs de conflits, reporters natifs et OpenTelemetry. Garde les réglages machine dans des composants locaux nommés, synchronise et ferme la sandbox avant intégration et rapporte séparément la consommation du résolveur. Génère la documentation des composants et contrôle les classifications par export et option en CI. Ajoute une recette communautaire et un exemple hors ligne ; validations payantes, cloud et SDK distants restent absentes.

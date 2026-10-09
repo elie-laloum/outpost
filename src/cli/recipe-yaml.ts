@@ -1,5 +1,14 @@
-import { createRecipeRuntime } from "../application/recipes/runtime.ts";
-import { printRecipeErrors } from "../application/recipes/reports.ts";
+import { createRecipeProjectRuntime } from "../application/recipes/runtime.ts";
+import { readRecipeProject } from "../application/recipes/project.ts";
+import {
+  printRecipeErrors,
+  publishRecipeReport,
+} from "../application/recipes/reports.ts";
+import { continueRecipeDialogue } from "./recipe-dialogue.ts";
+import {
+  createRecipeInputPrompts,
+  recipeInteractiveMode,
+} from "./recipe-terminal.ts";
 import { nativeRecipeSchemas } from "../application/recipes/native-schemas.constants.ts";
 import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import { readRecipeFile } from "../infrastructure/recipes/read.ts";
@@ -17,6 +26,7 @@ export async function recipeYamlCommand(
   const runId = values["run-id"];
   if (action !== "run" && action !== "serve" && !runId)
     throw new Error(`Recipe ${action} requires --run-id`);
+  const interactive = recipeInteractiveMode(values);
   const controller = new AbortController();
   const interrupt = () => {
     process.exitCode = 130;
@@ -29,10 +39,11 @@ export async function recipeYamlCommand(
   process.on("SIGINT", interrupt);
   process.on("SIGTERM", terminate);
   try {
-    await using runtime = await createRecipeRuntime({
+    const project = await readRecipeProject({
       file: values.file,
       config: values.config,
     });
+    await using runtime = createRecipeProjectRuntime(project, () => {});
     if (action === "serve") {
       if (!values.service) throw new Error("Recipe serve requires --service");
       await runtime.serve({
@@ -93,7 +104,7 @@ export async function recipeYamlCommand(
       signal: controller.signal,
       ...(values.json ? { report: "json" as const } : {}),
     };
-    const report =
+    let report =
       action === "run"
         ? await runtime.run({ ...settings, ...(runId ? { runId } : {}) })
         : await runtime.resume({
@@ -105,7 +116,25 @@ export async function recipeYamlCommand(
               ? { recoverRevision: values["recover-revision"] }
               : {}),
           });
+    if (interactive)
+      report = await continueRecipeDialogue(runtime, report, project.document, {
+        ...(values.actor !== undefined ? { actor: values.actor } : {}),
+        signal: controller.signal,
+        prompts: createRecipeInputPrompts(),
+        cancel() {
+          if (!controller.signal.aborted) interrupt();
+        },
+      });
+    publishRecipeReport(
+      report,
+      project.reports,
+      values.json ? "json" : undefined,
+    );
     printRecipeErrors(report);
+    if (report.status === "waiting-input" && !values.json)
+      process.stderr.write(
+        `Recipe ${report.runId} is waiting for input. Use outpost recipe resume with the same --file, --config and --run-id.\n`,
+      );
     if (report.status !== "done" && !process.exitCode) process.exitCode = 1;
   } finally {
     process.off("SIGINT", interrupt);

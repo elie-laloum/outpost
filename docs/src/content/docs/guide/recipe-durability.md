@@ -42,7 +42,7 @@ tasks:
 
 ## Inspect and resume
 
-A successful run or resume stays silent unless you declare reports or request `--json`. Status is an explicit consultation and always prints its result. A paused or waiting invocation returns a nonzero CLI exit status; inspect its final report to distinguish the state from a failure. Completed tasks are not replayed.
+Apart from terminal dialogue prompts, a successful run or resume stays silent unless you declare reports or request `--json`. Status is an explicit consultation and always prints its result. A paused or waiting invocation returns a nonzero CLI exit status; inspect its final report to distinguish the state from a failure. Completed tasks are not replayed.
 
 ```sh
 outpost recipe run --file recipe.yaml --config outpost.yaml --json
@@ -76,6 +76,23 @@ An `interactive` task accepts [InteractiveAgentTaskOptions](../../reference/inte
     brief: Clarify the requested change before implementing it.
     actors: [maintainer]
 ```
+
+## Answer directly in the terminal
+
+Run and resume display pending questions automatically when stdin and stderr are terminals. The CLI collects each answer and resumes the workflow using its saved request IDs, conversation and workspace. No custom runner or answer file is needed. A single declared actor is selected automatically; multiple actors offer a choice. See the [CLI flags](../cli/#outpost-recipe-run) to choose an actor explicitly.
+
+```sh
+outpost recipe run --file recipe.yaml --config outpost.yaml
+# After cancelling at a question:
+outpost recipe resume --file recipe.yaml --config outpost.yaml \
+  --run-id reviewed-change
+```
+
+Ctrl+C leaves the question persisted and releases checkpoint ownership. Resume presents it again without replaying completed turns. Only dialogue answers are collected automatically; approval gates keep their existing decision and signature checks.
+
+The offline example in `examples/72-recipe-cli-dialogue/` asks for a name and passes it to the next step. Run its YAML files with `outpost recipe run --file examples/72-recipe-cli-dialogue/recipe.yaml --config examples/72-recipe-cli-dialogue/outpost.yaml` after building the local CLI.
+
+For automation or an HTTP client, use `--no-interactive` or `--json`, inspect `inputRequests` in the report and submit `recipe answer --answer answer.json`. The HTTP application authenticates its caller and supplies an authorized actor; a submitted actor name alone is not authentication. `--interactive --json` explicitly combines terminal questions on stderr with one final JSON report on stdout.
 
 ## Keep artifacts, caches and quota accounting
 

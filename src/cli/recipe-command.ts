@@ -170,6 +170,8 @@ export async function recipeCommand({
     return recipeYamlCommand({ values, positionals }, inputs);
   if (positionals[1] !== "run" || values["run-id"])
     throw new Error("Durable recipe commands require YAML configuration");
+  if (values.interactive === true || values.actor !== undefined)
+    throw new Error("Interactive recipe commands require YAML configuration");
   const module: unknown = await import(pathToFileURL(configuration).href);
   if (!module || typeof module !== "object" || !("default" in module))
     throw new Error(

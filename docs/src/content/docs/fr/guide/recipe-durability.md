@@ -42,7 +42,7 @@ tasks:
 
 ## Inspecter et reprendre
 
-Une exécution ou reprise réussie reste silencieuse sans rapport déclaré ni `--json`. Status est une consultation explicite et affiche toujours son résultat. Une invocation en pause ou en attente retourne un code CLI non nul ; son rapport final distingue cet état d’un échec. Les tâches terminées ne sont pas rejouées.
+Hormis les questions affichées dans le terminal, une exécution ou reprise réussie reste silencieuse sans rapport déclaré ni `--json`. Status est une consultation explicite et affiche toujours son résultat. Une invocation en pause ou en attente retourne un code CLI non nul ; son rapport final distingue cet état d’un échec. Les tâches terminées ne sont pas rejouées.
 
 ```sh
 outpost recipe run --file recipe.yaml --config outpost.yaml --json
@@ -76,6 +76,23 @@ Une tâche `interactive` accepte [InteractiveAgentTaskOptions](../../reference/i
     brief: Clarify the requested change before implementing it.
     actors: [maintainer]
 ```
+
+## Répondre directement dans le terminal
+
+Run et resume affichent automatiquement les questions en attente lorsque stdin et stderr sont des terminaux. La CLI recueille chaque réponse et reprend le workflow avec ses identifiants de demande, sa conversation et son workspace persistés. Aucun script personnalisé ni fichier de réponse n’est nécessaire. Un acteur déclaré unique est sélectionné automatiquement ; plusieurs acteurs proposent un choix. Les [options CLI](../cli/#outpost-recipe-run) permettent de choisir explicitement l’acteur.
+
+```sh
+outpost recipe run --file recipe.yaml --config outpost.yaml
+# Après une annulation pendant une question :
+outpost recipe resume --file recipe.yaml --config outpost.yaml \
+  --run-id reviewed-change
+```
+
+Ctrl+C conserve la question et libère la propriété du checkpoint. Resume la repose sans rejouer les tours terminés. Seules les réponses au dialogue sont recueillies automatiquement ; les gates d’approbation gardent leurs vérifications de décision et de signature.
+
+L’exemple hors ligne dans `examples/72-recipe-cli-dialogue/` demande un prénom et le transmet à l’étape suivante. Après compilation de la CLI locale, lancez ses fichiers YAML avec `outpost recipe run --file examples/72-recipe-cli-dialogue/recipe.yaml --config examples/72-recipe-cli-dialogue/outpost.yaml`.
+
+Pour une automatisation ou un client HTTP, utilisez `--no-interactive` ou `--json`, lisez `inputRequests` dans le rapport puis soumettez `recipe answer --answer answer.json`. L’application HTTP authentifie son appelant et fournit un acteur autorisé ; un nom d’acteur soumis seul ne constitue pas une authentification. `--interactive --json` combine explicitement les questions sur stderr avec un seul rapport JSON final sur stdout.
 
 ## Conserver artefacts, caches et consommation
 

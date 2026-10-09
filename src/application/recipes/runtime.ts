@@ -18,7 +18,11 @@ import { observationGuards } from "./observation.ts";
 import { publishRecipeReport } from "./reports.ts";
 import { recipeDiagnostic } from "../recipe-report.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
-import type { RecipeRuntime, RecipeProjectOptions } from "./project.types.ts";
+import type {
+  RecipeRuntime,
+  RecipeProjectOptions,
+  RecipeProject,
+} from "./project.types.ts";
 import type { RecipeDispatchSettings } from "./agent-components.types.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 
@@ -29,7 +33,13 @@ function isDispatchSettings(value: unknown): value is RecipeDispatchSettings {
 export async function createRecipeRuntime(
   options: RecipeProjectOptions,
 ): Promise<RecipeRuntime> {
-  const project = await readRecipeProject(options);
+  return createRecipeProjectRuntime(await readRecipeProject(options));
+}
+
+export function createRecipeProjectRuntime(
+  project: RecipeProject,
+  publish: typeof publishRecipeReport = publishRecipeReport,
+): RecipeRuntime {
   const stop = new AbortController();
   let active: Promise<unknown> | undefined;
   let closed = false;
@@ -183,7 +193,7 @@ export async function createRecipeRuntime(
             }
           : {}),
       };
-      publishRecipeReport(report, project.reports, settings.report);
+      publish(report, project.reports, settings.report);
       return report;
     } finally {
       active = undefined;

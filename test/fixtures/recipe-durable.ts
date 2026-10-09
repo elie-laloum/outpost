@@ -9,7 +9,13 @@ export const interview: ModelProvider = {
     const history = JSON.stringify(request.messages);
     const turn = history.includes("medium")
       ? { kind: "completed", output: { size: "medium" } }
-      : { kind: "question", question: "Which size?" };
+      : {
+          kind: "question",
+          question: "Which size?",
+          ...(history.includes("Offer choices")
+            ? { choices: ["small", "medium"], allowFreeText: false }
+            : {}),
+        };
     const text = `<interaction>${JSON.stringify(turn)}</interaction>`;
     return {
       text,

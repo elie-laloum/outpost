@@ -46,14 +46,19 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
   --input 'goal=Fix the parser' [--json]
 ```
 
-| Option     | Défaut      | Effet                                                                                                                               |
-| ---------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `--file`   | Obligatoire | Recette YAML locale, limitée à 1 Mio.                                                                                               |
-| `--config` | Obligatoire | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                  |
-| `--input`  | Aucun       | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.             |
-| `--json`   | Désactivé   | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace. |
+| Option             | Défaut                                     | Effet                                                                                                                                                           |
+| ------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--file`           | Obligatoire                                | Recette YAML locale, limitée à 1 Mio.                                                                                                                           |
+| `--config`         | Obligatoire                                | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                                              |
+| `--input`          | Aucun                                      | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.                                         |
+| `--json`           | Désactivé                                  | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace.                             |
+| `--interactive`    | Automatique dans un terminal sans `--json` | Recueille les réponses sur stdin, affiche les questions sur stderr et reprend le dialogue durable. Exige stdin et stderr en terminal et une configuration YAML. |
+| `--no-interactive` | Désactivé                                  | Laisse les questions en attente pour une prochaine invocation ou un client externe.                                                                             |
+| `--actor`          | Acteur déclaré unique, sinon sélection     | Acteur local de confiance soumettant les réponses ; le moteur vérifie son autorisation pour la tâche.                                                           |
 
-Les chemins sont relatifs au dossier courant. Une exécution réussie est silencieuse sans observation ni rapports déclarés dans la configuration version 2. `--json` demande explicitement un seul rapport final JSON ; les échecs affichent toujours leurs diagnostics sur stderr. Les champs textuels sont limités à 16 384 caractères avec un marqueur de troncature. Les diagnostics de commandes comprennent leur code de sortie d’origine, stdout et stderr. Les exécutions réussies intègrent selon la politique de branche ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés. Les échecs de chargement, d’exécution ou de finalisation sortent avec le code 1. SIGINT/SIGTERM annulent le run, attendent le nettoyage et sortent avec 130/143. Gardez stdout silencieux dans la configuration pour un JSON exploitable.
+Avec stdin et stderr dans un terminal, run gère les questions interactives sans script TypeScript. Les choix utilisent un menu de sélection et les questions libres un champ de texte. Chaque réponse est persistée avant la question suivante. `--json` désactive la saisie automatique ; combinez explicitement `--interactive --json` pour conserver les questions sur stderr et recevoir un seul rapport JSON final sur stdout. Sans terminal, l’exécution laisse les demandes en attente.
+
+Les chemins sont relatifs au dossier courant. Hormis les questions du dialogue, une exécution réussie est silencieuse sans observation ni rapports déclarés dans la configuration version 2. `--json` demande explicitement un seul rapport final JSON ; les échecs affichent toujours leurs diagnostics sur stderr. Les champs textuels sont limités à 16 384 caractères avec un marqueur de troncature. Les diagnostics de commandes comprennent leur code de sortie d’origine, stdout et stderr. Les exécutions réussies intègrent selon la politique de branche ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés. Les échecs de chargement, d’exécution ou de finalisation sortent avec le code 1. SIGINT/SIGTERM annulent le run, attendent le nettoyage et sortent avec 130/143. Gardez stdout silencieux dans la configuration pour un JSON exploitable.
 
 ## `outpost recipe status`, `resume`, `answer` et `decide`
 
@@ -67,6 +72,8 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 ```
 
 Answer et decide lisent une WorkflowAnswer ou WorkflowDecision native dans un fichier JSON borné ; une gate signée exige sa preuve originale. `resume --input` doit correspondre aux paramètres persistés ; omettez-le pour les recharger. Run accepte aussi `--run-id` pour créer un checkpoint. Run, resume, answer et decide n’affichent un rapport final que s’il est déclaré ou demandé via `--json` ; status affiche toujours son résultat demandé. Consultez les [recettes durables](../recipe-durability/) pour l’état, la propriété et la récupération.
+
+Resume, answer et decide acceptent les mêmes options `--interactive`, `--no-interactive` et `--actor`. Ctrl+C ou la fermeture de l’entrée pendant une question la laisse en attente et sort avec 130 ; resume la repose sans rejouer les tours terminés. La sélection d’acteur déclare une identité locale de confiance, sans authentification. Les gates d’approbation exigent toujours `decide` et leurs preuves existantes.
 
 ## `outpost recipe enqueue` et `serve`
 

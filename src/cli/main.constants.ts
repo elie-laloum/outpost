@@ -1,5 +1,15 @@
 import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
+  interactive: {
+    type: "boolean",
+    description:
+      "Answer recipe dialogue questions in the terminal (automatic on a TTY without --json)",
+  },
+  actor: {
+    type: "string",
+    description:
+      "Trusted local actor submitting dialogue answers; defaults to the sole declared actor",
+  },
   service: { type: "string", description: "Named service to start explicitly" },
   queue: { type: "string", description: "Named queue receiving a recipe job" },
   handler: {
@@ -162,7 +172,15 @@ export const commandOptions = {
   "recipe run": {
     description:
       "Run a local YAML recipe with explicit sandbox and agent bindings",
-    options: ["file", "config", "input", "run-id", "json"],
+    options: [
+      "file",
+      "config",
+      "input",
+      "run-id",
+      "interactive",
+      "actor",
+      "json",
+    ],
   },
   "recipe status": {
     description: "Inspect a durable recipe without acquiring its checkpoint",
@@ -177,16 +195,34 @@ export const commandOptions = {
       "input",
       "retry-incomplete",
       "recover-revision",
+      "interactive",
+      "actor",
       "json",
     ],
   },
   "recipe answer": {
     description: "Submit a persisted dialogue answer and resume its recipe",
-    options: ["file", "config", "run-id", "answer", "json"],
+    options: [
+      "file",
+      "config",
+      "run-id",
+      "answer",
+      "interactive",
+      "actor",
+      "json",
+    ],
   },
   "recipe decide": {
     description: "Submit a gate decision and resume its recipe",
-    options: ["file", "config", "run-id", "decision", "json"],
+    options: [
+      "file",
+      "config",
+      "run-id",
+      "decision",
+      "interactive",
+      "actor",
+      "json",
+    ],
   },
   "recipe validate": {
     description:

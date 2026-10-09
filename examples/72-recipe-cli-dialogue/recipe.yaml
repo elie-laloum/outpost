@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../../recipe.schema.json
+version: 3
+name: cli-dialogue
+workflow:
+  checkpoint:
+    store: { $ref: stores.state }
+    runId: cli-dialogue
+    version: "1"
+tasks:
+  - key: identity
+    call: { $ref: functions.identity }
+    options:
+      interaction:
+        actors: [owner]
+        identity: ask-name-v1
+  - key: greeting
+    after: [identity]
+    value: "Hello {{ steps.identity.value.name }}!"

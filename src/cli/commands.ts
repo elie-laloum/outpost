@@ -54,6 +54,13 @@ export async function runCli(
           "Skip automatic container image build",
         ).default(undefined),
       );
+    if (command.options.some((option) => option.long === "--interactive"))
+      command.addOption(
+        new Option(
+          "--no-interactive",
+          "Leave dialogue questions pending without prompting",
+        ).default(undefined),
+      );
     command.action(async () => {
       const values: Record<string, string | boolean | string[]> = {};
       const parsed = command.opts<Record<string, unknown>>();

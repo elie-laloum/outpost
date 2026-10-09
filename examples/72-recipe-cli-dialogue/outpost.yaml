@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../../recipe-configuration.schema.json
+version: 2
+repository: ../..
+sandbox: { provider: local }
+transports:
+  state: { type: local, directory: ./.outpost/state }
+stores:
+  state:
+    type: transport
+    transporter: { $ref: transports.state }
+extensions:
+  identity:
+    module: ./steps.ts
+    export: identity
+    kind: callback
+    contract: call.options.perform
+    version: "1"
+functions:
+  identity: { $ref: extensions.identity }
+reports:
+  - type: json
