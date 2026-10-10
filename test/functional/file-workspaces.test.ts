@@ -291,7 +291,14 @@ test("relative link traversal expands selected aliases before processing parent 
     );
     assert.equal(await readFile(join(root, "value.json"), "utf8"), "external");
     await rm(join(source, "dir", "result.json"));
-    await symlink("alias/../value.json", join(source, "dir", "result.json"));
+    // Windows normalizes parent segments before following directory links.
+    const selectedTarget =
+      process.platform === "win32" ? "../value.json" : "alias/../value.json";
+    await symlink(selectedTarget, join(source, "dir", "result.json"));
+    assert.equal(
+      await readFile(join(source, "dir", "result.json"), "utf8"),
+      "selected",
+    );
     await symlink("cycle-two", join(source, "cycle-one"));
     await symlink("cycle-one", join(source, "cycle-two"));
     await using workspace = await createWorkspace({
