@@ -7,7 +7,7 @@ Cette version ajoute la composition de workflows YAML, les dialogues de recettes
 - Réorganise le Guide anglais et français autour des tâches, avec des pages ciblées, des URL et ancres conservées, une prise en main plus directe et neuf projets d’exemples téléchargeables. Rend les schémas lisibles sur mobile sans zoom et précise leurs conditions sur grand écran. Corrige les effets de bord de la lecture et du rejeu des journaux, les chemins Git et les procédures de récupération ; décrit le rapport local réellement produit par l’exemple de revue sur webhook.
 - Affiche chaque surcharge de l’API avec sa propre table de propriétés, identifie correctement les champs obligatoires des types mappés et relie les contrats aux guides pratiques.
 - Définit le signalement privé des vulnérabilités via GitHub Security et les correctifs de sécurité pour la dernière version majeure.
-- Rend la classification des contrats de recettes compatible avec les chemins Windows et POSIX.
+- Rend la classification des contrats de recettes compatible avec les chemins Windows et POSIX et résout les alias de répertoires temporaires dans le test de récupération macOS.
 - Génère les déclarations publiques avant de vérifier les types des exemples consommateurs pour permettre la validation d’un checkout neuf.
 - Prépare explicitement l’image Node sans Git pour les tests de conteneurs et documente le téléchargement préalable de l’image.
 - Crée le compte correspondant à l’UID hôte dans l’image de test du paquet sans Git et adapte les contrôles documentaires en conteneur à l’exemple d’installation simplifié.

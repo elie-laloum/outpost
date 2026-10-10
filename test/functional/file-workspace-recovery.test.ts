@@ -5,6 +5,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  realpath,
   rename,
   stat,
   rm,
@@ -614,7 +615,9 @@ test(
 );
 
 test("portable publication journals use the explicit conservation Transport and CLI inspection resolves it", async () => {
-  const root = await mkdtemp(join(tmpdir(), "outpost-portable-publication-"));
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "outpost-portable-publication-")),
+  );
   try {
     const transporter = createLocalTransport({
       directory: join(root, "conserved"),

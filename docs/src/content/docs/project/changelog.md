@@ -17,7 +17,7 @@ This release adds YAML workflow composition, terminal recipe dialogues and Git-f
 - Reorganize the English and French Guide around user tasks, with focused pages, preserved routes and section anchors, clearer setup paths and nine downloadable example projects. Make mobile diagrams readable without zoom and clarify desktop flow conditions. Correct journal/replay side effects, Git path handling and recovery instructions; document the local review report produced by the webhook example.
 - Show every public API overload and its own property table, correctly mark required fields from mapped types, and link reference contracts to their practical guides.
 - Define private vulnerability reporting through GitHub Security and security-fix support for the latest major version.
-- Make recipe contract classification portable across Windows and POSIX source paths.
+- Make recipe contract classification portable across Windows and POSIX source paths, and resolve temporary directory aliases in the macOS recovery test.
 - Build public declarations before checking consumer fixture types so validation works on a fresh checkout.
 - Prepare the Git-free Node image explicitly for container tests and document the required image pull.
 - Create the host UID's account in the Git-free package test image, and adapt container documentation checks to the simplified setup example.
