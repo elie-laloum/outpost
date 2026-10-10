@@ -9,6 +9,12 @@ Les variantes d’agents CLI doivent démontrer leur compatibilité avec le mode
 
 Installez Outpost dans un projet ESM avec Node.js 24+. L’exemple de commande utilise Docker et `node:24-slim`, sans connexion à un agent ni dépôt Git.
 
+Téléchargez l’image avant d’ouvrir la sandbox ; Outpost vérifie sa présence locale.
+
+```sh
+docker pull node:24-slim
+```
+
 Un workspace `ephemeral` commence vide. Une source `directory` copie par défaut les fichiers ordinaires, en excluant `.git`, `.outpost` et le répertoire de contrôle du run. La sélection de copie n'applique pas `.gitignore`. Les entrées JSON restent des paramètres ; les entrées de dossier ou de snapshot explicitement déclarées fournissent des fichiers.
 
 Les nouvelles copies, snapshots et publications préservent les contenus binaires, les permissions portables, les dossiers vides et les liens relatifs dont la cible reste dans la sélection. La validation développe les aliases capturés avant de traiter les segments parents ; les cibles absentes et les aliases exclus sont refusés. Le parcours ne suit pas les liens. Les liens sortants et les fichiers spéciaux sont refusés. Un montage expose toute sa source et ne peut pas déclarer une sélection de copie.

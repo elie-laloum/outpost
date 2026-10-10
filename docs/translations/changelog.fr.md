@@ -8,6 +8,8 @@ Cette version ajoute la composition de workflows YAML, les dialogues de recettes
 - Affiche chaque surcharge de l’API avec sa propre table de propriétés, identifie correctement les champs obligatoires des types mappés et relie les contrats aux guides pratiques.
 - Définit le signalement privé des vulnérabilités via GitHub Security et les correctifs de sécurité pour la dernière version majeure.
 - Rend la classification des contrats de recettes compatible avec les chemins Windows et POSIX.
+- Génère les déclarations publiques avant de vérifier les types des exemples consommateurs pour permettre la validation d’un checkout neuf.
+- Prépare explicitement l’image Node sans Git pour les tests de conteneurs et documente le téléchargement préalable de l’image.
 
 - Ajout explicite de workspaces de fichiers copiés, montés en lecture seule/écriture ou éphémères sans Git hôte, de la configuration 3, des capacités providers et des contrats de dispatch/rapports de fichiers. Maintien des API Git et defaults legacy. Restitution protégée journalisée avec rollback conditionnel et récupération explicite ; conservation des fichiers et conversations settled pour reprise locale ou portable avec Transport explicite. Tests de commandes indépendantes, dialogue entre processus, publication interrompue et CLI installée sur un hôte Node, Docker et tar sans Git. Variantes CLI natives de fichiers et validations live cloud/Firecracker restent non validées.
 

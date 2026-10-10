@@ -180,6 +180,7 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 - GitLab is the source repository; GitHub is its mirror and runs GitHub Actions. Avoid independent changes on GitHub that diverge from GitLab.
 - Main and pull requests are validated. There is one public documentation site, deployed after the latest eligible stable release; main does not deploy a separate preview site.
 - A release tag is `v<package version>`. Keep `package.json`, the lockfile and changelogs consistent. Use the release workflow, including its verification gates and latest-release guard.
+- Build before checking test types: the standalone Linear recipe fixture imports public package declarations from `dist/`. Keep `bun run check` and CI valid on a fresh checkout without prebuilt declarations.
 - For every release, update the version history in `CHANGELOG.md` and `docs/translations/changelog.fr.md`, and review remaining validation prerequisites in the guides and release notes. Do this before creating the release tag.
 - Reconcile release notes with the actual implementation: record shipped and removed capabilities, keep incomplete work and live-validation limits explicit, and avoid promising unimplemented features.
 - Regenerate the documentation changelogs with `bun run docs:sync`, inspect the generated changes, and run the required documentation checks. Include the changelog and validation-prerequisite updates in the release commit and verify the changelog’s English/French consistency before tagging.

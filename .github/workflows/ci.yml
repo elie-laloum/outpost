@@ -34,9 +34,9 @@ jobs:
       - run: node scripts/recipe-parity.mjs
       - run: node scripts/recipe-component-docs.mjs
       - run: bun run architecture
+      - run: bun run build
       - run: bun run typecheck
       - run: bun run coverage
-      - run: bun run build
       - run: node --test examples/64-yaml-recipes/index.ts
       - run: node --test examples/65-recipe-observation/index.ts
       - run: node --test examples/66-recipe-components/index.ts
@@ -101,9 +101,11 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: node src/cli/main.ts init --yes --sandbox-provider ${{ matrix.engine }} --image outpost-ci:latest --build
+      - run: ${{ matrix.engine }} pull docker.io/library/node:24-slim
       - run: node --test test/container.test.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
+          OUTPOST_FILE_CONTAINER_IMAGE: docker.io/library/node:24-slim
       - run: printf 'hello\n' | script -qec 'node test/fixtures/container-terminal.ts' /dev/null
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}

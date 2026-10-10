@@ -106,7 +106,7 @@
     "test:unit": "node --test 'test/unit/*.test.ts'",
     "test:functional": "node --test 'test/functional/*.test.ts'",
     "coverage": "c8 --all --include='src/**/*.ts' --exclude=src/cli/main.ts --exclude='src/**/*.types.ts' --reporter=text --reporter=lcov --check-coverage --lines=80 --functions=80 --branches=80 bun run test",
-    "check": "bun run architecture && bun run typecheck && bun run test && bun run build",
+    "check": "bun run architecture && bun run build && bun run typecheck && bun run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepack": "bun run build",

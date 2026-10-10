@@ -9,6 +9,12 @@ Native CLI agent variants require demonstrated file-mode capabilities and are ot
 
 Install Outpost in an ESM project with Node.js 24+. The command example uses Docker and `node:24-slim`; it needs no agent login or Git repository.
 
+Download the image before opening the sandbox; Outpost checks that it is available locally.
+
+```sh
+docker pull node:24-slim
+```
+
 An `ephemeral` workspace starts empty. A `directory` source copies ordinary files by default, excluding `.git`, `.outpost` and the run's control directory. Copy selection does not apply `.gitignore`. JSON inputs remain parameters; declared directory or snapshot inputs supply files.
 
 New copies, snapshots and publications preserve binary contents, portable permissions, empty directories and relative links whose targets remain inside the selection. Link validation expands captured aliases before processing parent segments; dangling targets and excluded aliases are refused. Traversal does not follow links. Outgoing links and special files are refused. Mounted sources expose their full contents and cannot declare copy selection.
