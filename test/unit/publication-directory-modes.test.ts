@@ -37,12 +37,12 @@ test("Windows publication verifies writable modes and identity without requiring
       /verification failed/,
     );
     owned.mode = 0o700;
-    owned.identity.inode++;
+    owned.identity.inode = info.ino === 0 ? 1 : 0;
     await assert.rejects(
       verifyPublicationDirectories(journal),
       /verification failed/,
     );
-    owned.identity.inode--;
+    owned.identity.inode = info.ino;
     Object.defineProperty(process, "platform", { value: "linux" });
     await assert.rejects(
       verifyPublicationDirectories(journal),

@@ -10,7 +10,7 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## 11.1.0
+## 11.1.1
 
 This release adds YAML workflow composition, terminal recipe dialogues and Git-free file workspaces while preserving existing Git APIs and defaults.
 
@@ -46,6 +46,10 @@ This release adds YAML workflow composition, terminal recipe dialogues and Git-f
 - Begin YAML composition parity with configuration format 2, recipe format 3, the `/recipes` registry/runtime API, explicit observation and final reports, static extension validation and a versioned public-contract inventory. Recipe execution is silent unless outputs or `--json` are requested; failures still print diagnostics.
 
 - Add reusable YAML recipes with typed inputs, defaults and enums, dependency result references and editor schemas. Run with separate recipe and execution YAML files covering sandbox providers, CLI agents, model selection and explicit credential references; retain literal format 1 and TypeScript configuration compatibility. Add `recipe init`, allocation-free `validate`, `list` and integrity-checked `fetch`, repeated `--input` flags, three bundled Git catalogue recipes and third-party HTTPS catalogues. Fix CLI Git integration, bounded outputs and diagnostics, and final reporting after cleanup. Cover real local Git execution and cross-repository reuse; HTTP downloads are tested with simulated responses and paid agent/cloud runs remain unvalidated.
+
+## 11.1.0
+
+Publication was blocked by a Windows regression test that incremented an inode beyond JavaScript's safe integer precision. No package or documentation deployment was published. Version 11.1.1 corrects the fixture and includes the intended changes above.
 
 ## 11.0.1
 
