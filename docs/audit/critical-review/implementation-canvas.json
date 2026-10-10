@@ -1,0 +1,962 @@
+[
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 6
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1715,
+        "overflow": true,
+        "nodeCount": 7
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "how-it-works",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1428,
+        "overflow": true,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 1440,
+    "page": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 6
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 7
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "how-it-works",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "en",
+    "width": 390,
+    "page": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 6
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1715,
+        "overflow": true,
+        "nodeCount": 7
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "how-it-works",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1428,
+        "overflow": true,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 1440,
+    "page": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 6
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 7
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "how-it-works",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 5
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 3
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  },
+  {
+    "language": "fr",
+    "width": 390,
+    "page": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 14,
+        "effectiveBodyFontPx": 14,
+        "viewportWidth": 390,
+        "worldWidth": 390,
+        "overflow": false,
+        "nodeCount": 4
+      }
+    ]
+  }
+]

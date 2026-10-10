@@ -3,6 +3,8 @@ title: "Route the model at each step"
 description: "Choose among models of one model provider using a System One decision."
 ---
 
+First connect a [model provider](../model-providers/) and a [decision service](../decisions/). Routing chooses among that model provider’s candidates at each step; it does not switch sandbox providers or authenticate additional CLI agents.
+
 ## Declare a route
 
 Attach `defineHarnessModelRouting()` to the built-in harness when each step should choose its own conversational model. The route names must exactly match the selected `choice` question; all candidates use the harness's existing `ModelProvider`. CLI harness presets keep their configured model.

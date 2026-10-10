@@ -15,7 +15,7 @@ import { defineHarnessHook } from "@elie-laloum/outpost";
 
 Define control code that runs at one point of the built-in harness loop: session-start, before-model, after-model, before-tool, after-tool or stop. Unlike observers, a hook can add instructions, deny or rewrite a tool call, replace its result or refuse to stop; an exception from a hook fails the turn.
 
-[Complete example and detailed rules](../../guide/harness-permissions/).
+[Complete example and detailed rules](../../guide/harness-hooks/).
 
 ## Parameters and properties
 

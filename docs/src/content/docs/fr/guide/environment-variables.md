@@ -3,6 +3,8 @@ title: "Transmettre des variables d’environnement"
 description: "Déclarez les variables transmises à la sandbox, à l’agent et aux commandes."
 ---
 
+Sélectionnez les variables pour le processus qui en a besoin. Les identifiants du fournisseur de modèle, du stockage et de l’allocation appartiennent généralement aux clients hôte ; ceux de l’agent et des outils peuvent devoir entrer dans la sandbox. Ne transmettez pas tout l’environnement hôte.
+
 ## Choisir où déclarer une variable
 
 Déclarez chaque variable là où elle est utile : sur le fournisseur de sandbox, sur le harness d’un agent ou sur une commande. Outpost transmet les noms déclarés ; choisissez le périmètre qui couvre les processus ayant besoin de la valeur.
@@ -37,15 +39,15 @@ Chargez les noms déclarés depuis un [gestionnaire de secrets](../secret-source
 
 ## Comprendre la priorité des valeurs
 
-Quand un nom apparaît à plusieurs endroits, la source la plus spécifique l’emporte :
-
-`.outpost/.env` → fournisseur de sandbox → harness → commande
+Pour une commande ordinaire, une variable déclarée sur la commande remplace celle du fournisseur ; celle du fournisseur remplace la valeur chargée depuis `.outpost/.env`. Les variables du harness visent les processus de l’agent : elles ne constituent pas un niveau de remplacement du fournisseur. Déclarez chaque nom à un seul de ces deux endroits.
 
 Outpost définit aussi `GIT_AUTHOR_*` et `GIT_COMMITTER_*` d’après la configuration Git du dépôt ; toute source déclarée les remplace.
 
 :::caution
 Un même nom ne peut pas être déclaré à la fois sur le harness et sur le fournisseur de sandbox. Le dispatch échoue avant le démarrage de l’agent avec `Agent and sandbox variables overlap: NAME` (code `configuration`).
 :::
+
+Les workspaces de fichiers (`directory` et `ephemeral`) ne chargent aucun `.env` implicitement. Passez leurs variables explicitement.
 
 ## Garder des valeurs dans `.outpost/.env`
 

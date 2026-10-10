@@ -3,6 +3,8 @@ title: "Évaluer une décision typée"
 description: "Utiliser Jev ou un serveur Laya compatible pour des choix, scores et probabilités oui/non typés."
 ---
 
+Utilisez une décision typée lorsque votre application doit choisir ou noter un état connu, sans demander à un agent de modifier des fichiers. L’exemple hors ligne permet de tester le traitement des résultats sans identifiants ; l’exemple distant nécessite votre point d’accès et votre clé.
+
 ## Déclarer les questions
 
 `defineDecision()` valide et fige les questions. `choice` sélectionne une option nommée, `score` évalue des niveaux ordonnés et `noul` renvoie la probabilité du oui. La déclaration conserve les clés des réponses et les valeurs littérales des choix dans TypeScript.
@@ -33,7 +35,7 @@ Des services comme Laya arrondissent les probabilités et les scores à quatre d
 
 ## Connecter Jev ou Laya
 
-Un seul provider implémente le protocole System One. Son URL de base inclut `/v1` ; Outpost ajoute `/systemone`. Votre processus Node.js utilise cette adresse et ces identifiants indépendamment de la sandbox.
+Un seul fournisseur implémente le protocole System One. Son URL de base inclut `/v1` ; Outpost ajoute `/systemone`. Votre processus Node.js utilise cette adresse et ces identifiants indépendamment de la sandbox.
 
 ```ts title="decision-provider.ts"
 import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
@@ -45,7 +47,7 @@ export const provider = createSystemOneDecisionProvider({
 });
 ```
 
-Configurez l’endpoint et une clé non vide pour un service authentifié. `apiKey: false` choisit explicitement un endpoint sans authentification, comme un serveur Laya local. Les providers ne lisent pas les identifiants automatiquement. Consultez l’[API Jev](https://docs.typesafe.ai/api) et le [serveur Laya](https://github.com/NandhaKishorM/laya/blob/main/laya/serve.py) pour installer le service.
+Configurez l’endpoint et une clé non vide pour un service authentifié. `apiKey: false` choisit explicitement un endpoint sans authentification, comme un serveur Laya local. Les fournisseurs ne lisent pas les identifiants automatiquement. Consultez l’[API Jev](https://docs.typesafe.ai/api) et le [serveur Laya](https://github.com/NandhaKishorM/laya/blob/main/laya/serve.py) pour installer le service.
 
 ## Évaluer l’état courant
 
@@ -55,7 +57,6 @@ Fournissez du texte, un objet ou un tableau contenant du JSON sans perte. Les cy
 import { decide } from "@elie-laloum/outpost";
 import { routing } from "./decision.ts";
 import { provider } from "./decision-provider.ts";
-import { reportValue } from "./reporter.ts";
 
 const result = await decide({
   provider,
@@ -64,10 +65,10 @@ const result = await decide({
   state: { goal: "Fix a parser", lastTool: "Two regression tests failed" },
 });
 const route: "fast" | "deep" = result.answers.route.choice;
-reportValue(route, result.answers.difficulty.score, result.answers.safe.noul);
+console.log(route, result.answers.difficulty.score, result.answers.safe.noul);
 ```
 
-Exécutez `node evaluate.ts` avec le service disponible. Le résultat contient le provider, le modèle réellement renvoyé, l’usage normalisé et les métadonnées disponibles. Le provider HTTP conserve la réponse JSON native dans `metadata`, dont le routage et les diagnostics d’entrée Laya. Les modèles de décision sont des noms ; les réglages de génération et de raisonnement appartiennent aux modèles conversationnels.
+Exécutez `node evaluate.ts` avec le service disponible. Le résultat contient le fournisseur, le modèle réellement renvoyé, l’usage normalisé et les métadonnées disponibles. Le fournisseur HTTP conserve la réponse JSON native dans `metadata`, dont le routage et les diagnostics d’entrée Laya. Les modèles de décision sont des noms ; les réglages de génération et de raisonnement appartiennent aux modèles conversationnels.
 
 ## Traiter les entrées incomplètes et les erreurs
 
@@ -105,7 +106,7 @@ L’usage des décisions entre dans les budgets du workflow de façon synchrone,
 
 ## Exercer le contrat hors ligne
 
-Ce provider de test explicite renvoie une réponse et un reçu d’usage fixes. Exécutez `node offline.ts` pour exercer déclaration, validation et lecture du résultat sans compte de modèle. Cet exemple vérifie le contrat Outpost ; il ne valide pas une inférence réelle Jev ou Laya.
+Ce fournisseur de test explicite renvoie une réponse et un reçu d’usage fixes. Exécutez `node offline.ts` pour exercer déclaration, validation et lecture du résultat sans compte de modèle. Cet exemple vérifie le contrat Outpost ; il ne valide pas une inférence réelle Jev ou Laya.
 
 <!-- tabs -->
 
@@ -136,7 +137,6 @@ export const fixture: DecisionProvider = {
 import { decide } from "@elie-laloum/outpost";
 import { readOnly } from "./offline-decision.ts";
 import { fixture } from "./fixture-provider.ts";
-import { reportValue } from "./reporter.ts";
 
 const result = await decide({
   provider: fixture,
@@ -144,7 +144,7 @@ const result = await decide({
   decision: readOnly,
   state: "Read the test report.",
 });
-reportValue(result.answers.safe.noul);
+console.log(result.answers.safe.noul);
 // Example output: 0.9
 ```
 

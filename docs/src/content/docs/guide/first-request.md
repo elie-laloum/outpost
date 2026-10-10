@@ -1,14 +1,21 @@
 ---
 title: "Your first task"
-description: "Write a TypeScript script, run an agent and review its answer and commits."
+description: "Run a README review and inspect the answer and branch."
 ---
 
-## Create the script
+<!-- Retained section anchors for existing bookmarks. -->
 
-Create `review.ts` next to the configuration from [Installation](../setup/). This first script asks the agent to read the README and report its findings. `dispatch()` opens a fresh sandbox, and the named branch gives the task its own checkout.
+<span id="create-the-script"></span>
+<span id="run-the-script"></span>
+<span id="ask-for-a-change"></span>
+<span id="understand-the-run"></span>
+<span id="next-steps"></span>
+
+## Ask for a README review
+
+Use the configuration from [Installation](../setup/). The target repository must have a committed README. Save `review.ts` beside `outpost.config.ts`; it asks the agent for findings on a separate branch.
 
 ```ts title="review.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -18,73 +25,47 @@ const result = await dispatch({
   agent: coder,
   branch: { mode: "named", name: "outpost/readme-review" },
   brief: {
-    text: "Review the README for incorrect setup instructions. Report findings without editing files.",
+    text: "Review the README setup instructions. Report problems or say none were found. Do not edit files.",
   },
 });
-reportValue(result.text);
-// Example output: The README setup command uses an outdated flag.
-reportValue(result.usage);
-// Example output: { input: 1200, cached: 0, output: 320 }
-reportValue(result.commits);
+console.log(result.text);
+console.log(result.commits);
 // Example output: []
 ```
 
-## Run the script
+## Run and inspect the result
 
-The script prints the agent’s findings when the task finishes. This request asks for a review without edits, so there should be no new commits.
+Run the script from its directory:
 
 ```sh
 node review.ts
 ```
 
-API reference: [DispatchResult](../../reference/dispatchresult/) and [Usage](../../reference/usage/).
+When the task finishes, it prints the agent’s findings, or an answer saying no problem was found, followed by the list of commits. The request asks for no edits, so an empty commit list is expected. Model responses vary; the example output is not a fixed test result.
 
-## Ask for a change
-
-To ask the agent to edit the repository, create `fix.ts` with another branch name and instructions to commit the correction. Keep `review.ts` if you want to reuse the read-only request in [CI](../ci-automation/).
-
-```ts title="fix.ts"
-import { reportValue } from "./reporter.ts";
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-const result = await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/readme-fix" },
-  brief: {
-    text: "Fix the README setup command, verify that it works and commit the correction.",
-  },
-});
-reportValue(result.text);
-// Example output: Corrected the README setup command and committed it.
-reportValue(result.commits);
-// Example output: [ { oid: '8f3a21c…', subject: 'Fix README setup command' } ]
-```
-
-Run `node fix.ts`, then inspect the commits and diff with the commands below. A new named branch starts from your `HEAD` and remains after the task. Use a fresh name for each independent task; an existing named branch is reused.
+The instruction does not enforce read-only access. Inspect the actual branch if that matters to your review:
 
 ```sh
-git log --oneline HEAD..outpost/readme-fix
-git diff HEAD...outpost/readme-fix
+git -C /absolute/path/to/your-repository diff HEAD...outpost/readme-review
+git -C /absolute/path/to/your-repository worktree list
 ```
 
-:::note
-The answer describes what the agent says it did. Review the diff and run the relevant checks before accepting the change.
-:::
+The diff above compares commits. If `worktree list` still shows a directory for `outpost/readme-review`, inspect its files too:
 
-## Understand the run
+```sh
+git -C /path/from/worktree-list status --short --untracked-files=all
+git -C /path/from/worktree-list diff HEAD
+```
 
-Outpost opened a worktree under `.outpost/workspaces/`, ran the agent in a sandbox, then closed the sandbox and kept the branch. [How it works](../how-it-works/) details the lifecycle.
+`status` reveals untracked files; the second diff shows staged and unstaged tracked changes. Read any untracked files before concluding that nothing changed.
 
-## Next steps
+Outpost closes the sandbox it opened and keeps the named branch. A new branch starts from the repository’s `HEAD`; an existing name reuses its earlier work. Choose a fresh name for an independent task. Dirty worktrees can remain for [inspection and recovery](../recovery/).
 
-<!-- path -->
+## Continue from this result
 
-1. [From a task to a workflow](../first-workflow/): Chain tasks with dependencies.
-2. [Typed responses](../typed-responses/): Receive validated data instead of free text.
-3. [Sandbox sessions](../sandbox-sessions/): Run your tests before you merge.
-4. [Repository and branch](../workspaces/): Work in your checkout or merge automatically.
+- [Ask for a change](../git-workspaces/): Keep edits on a branch for review.
+- [Run an independent check](../sandbox-sessions/): Test the agent’s work in the same sandbox.
+- [Connect two tasks](../first-workflow/): Pass the answer to your own code.
+- [Follow live progress](../progress/): Display activity while the model works.
 
-API: [dispatch](../../reference/dispatch/) · [DispatchResult](../../reference/dispatchresult/).
+The answer, commits and usage are described by [DispatchResult](../../reference/dispatchresult/). [How Outpost runs a task](../how-it-works/) explains which resources remain after this call.

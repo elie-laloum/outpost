@@ -1,0 +1,90 @@
+[
+  {
+    "lang": "en",
+    "width": 1440,
+    "route": "",
+    "heading": "Your agents.One TypeScript workflow.",
+    "canvases": [
+      {
+        "scale": 1,
+        "effectiveBodyFontPx": 12.25,
+        "overflow": false
+      }
+    ],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "route": "reference/dispatch/",
+    "heading": "dispatch",
+    "canvases": [],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "route": "",
+    "heading": "Your agents.One TypeScript workflow.",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "effectiveBodyFontPx": 6.125,
+        "overflow": true
+      }
+    ],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "route": "reference/dispatch/",
+    "heading": "dispatch",
+    "canvases": [],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "route": "",
+    "heading": "Vos agents.Un workflow TypeScript.",
+    "canvases": [
+      {
+        "scale": 1,
+        "effectiveBodyFontPx": 12.25,
+        "overflow": false
+      }
+    ],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "route": "reference/dispatch/",
+    "heading": "dispatch",
+    "canvases": [],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "route": "",
+    "heading": "Vos agents.Un workflow TypeScript.",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "effectiveBodyFontPx": 6.125,
+        "overflow": true
+      }
+    ],
+    "bodyOverflow": false
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "route": "reference/dispatch/",
+    "heading": "dispatch",
+    "canvases": [],
+    "bodyOverflow": false
+  }
+]

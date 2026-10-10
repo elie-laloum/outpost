@@ -3,6 +3,8 @@ title: "Use a fallback agent"
 description: "Hand work to another agent when a configured quota or availability error occurs."
 ---
 
+Configure and authenticate each candidate before composing the fallback. Include every candidate CLI in a mounted container image. On remote sandboxes, bootstrap prepares each candidate when selected, unless disabled. Inspect changes left by a failed candidate when deciding whether another should continue.
+
 ## Compose a fallback agent
 
 Create a fallback agent with an ordered list of candidates and the fault kinds in `on`. Outpost tries the next candidate only when the current one fails with a covered quota or availability fault.
@@ -29,7 +31,6 @@ export const agent = createFallbackAgent(
 ```
 
 ```ts title="run.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./fallback.ts";
@@ -40,7 +41,7 @@ export const result = await dispatch({
   agent,
   brief: { text: "Fix the failing tests." },
 });
-reportValue(result.fallback?.selected.name);
+console.log(result.fallback?.selected.name);
 // Example output: claude
 ```
 

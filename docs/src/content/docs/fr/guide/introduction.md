@@ -1,41 +1,46 @@
 ---
-title: "Commencer avec Outpost"
-description: "Lancez un agent de code depuis TypeScript, puis ajoutez des vérifications et des workflows selon vos besoins."
+title: Commencer avec Outpost
+description: Lancez une tâche, examinez son résultat et ajoutez un workflow lorsque plusieurs étapes deviennent nécessaires.
 ---
 
-## Ce que vous pouvez faire avec Outpost
+<!-- Retained section anchors for existing bookmarks. -->
 
-Outpost est une bibliothèque TypeScript qui permet de faire travailler des agents de code sur des dépôts Git. Votre code choisit l’agent, son environnement d’exécution et la branche qu’il modifie. Le résultat contient sa réponse, ses commits et la consommation de tokens qu’il a déclarée.
+<span id="ce-que-vous-pouvez-faire-avec-outpost"></span>
+<span id="lancer-votre-première-tâche"></span>
+<span id="comprendre-les-éléments-de-base"></span>
+<span id="continuer-selon-votre-besoin"></span>
 
-Commencez par une tâche. Si votre travail demande plusieurs étapes, un workflow les relie et transmet leurs résultats d’une tâche à la suivante.
+Outpost exécute des agents de code depuis votre programme TypeScript ou une recette YAML. Vous choisissez l’agent, son environnement et la destination de ses changements. Commencez par une tâche dont vous pouvez examiner la réponse et les fichiers.
 
-## Lancer votre première tâche
+## Obtenir un premier résultat
 
-Suivez ces trois pages dans l’ordre. Elles utilisent Docker et Codex pour vous donner un point de départ fonctionnel.
+Le parcours recommandé utilise Codex dans Docker sur un dépôt Git. Il vous faut Node.js 24+, Git, Docker et un accès à l’agent. Vous pourrez ensuite choisir d’autres agents et environnements.
 
 <!-- path -->
 
-1. [Installer Outpost](../setup/): Construisez l’image et créez votre configuration TypeScript.
-2. [Votre première tâche](../first-request/): Écrivez un script, lisez la réponse et examinez une modification sur sa branche.
-3. [Créer un workflow](../first-workflow/): Reliez deux tâches et récupérez leurs résultats.
+1. [Installer Outpost](../setup/) : Installer le paquet, construire l’image et enregistrer la configuration.
+2. [Lancer une première tâche](../first-request/) : Demander une revue du README et lire la réponse.
+3. [Relier deux tâches](../first-workflow/) : Transmettre le résultat de l’agent à votre propre code.
 
-## Comprendre les éléments de base
+Vous préférez un fichier déclaratif ? Après l’installation, suivez [Votre première recette YAML](../yaml-recipes/). La recette décrit le travail ; une configuration locale séparée choisit le dépôt, la sandbox et les identifiants.
 
-L’**agent** réalise le travail, la **sandbox** exécute ses commandes et le **workspace** est la copie du dépôt qu’il modifie. Vous les choisissez séparément. La page [Comment Outpost exécute une tâche](../how-it-works/) explique leur durée de vie et ce que deviennent les fichiers.
+## Choisir la suite
 
-Pour connaître les options et le type de retour exacts d’une fonction, consultez la [référence API](../../reference/). Le guide explique comment utiliser ces fonctions ensemble.
-
-## Continuer selon votre besoin
-
-Choisissez le sujet qui correspond à votre prochaine étape. Vous pourrez revenir aux autres guides au moment où vous en aurez besoin.
+Ces guides sont utilisables sans construire un workflow complet.
 
 <!-- features -->
 
-- [Rédiger les consignes de l’agent](../briefs/): Utilisez du texte ou un fichier Markdown réutilisable.
-- [Vérifier le travail et réessayer](../verification-loops/): Lancez les tests et renvoyez les échecs pour une nouvelle tentative.
-- [Choisir un agent](../choose-an-agent/): Configurez l’agent indépendamment de sa sandbox.
-- [Réutiliser une sandbox](../sandbox-sessions/): Exécutez des commandes et plusieurs échanges sur les mêmes fichiers.
-- [Attendre une approbation](../approvals/): Demandez un accord avant de lancer la tâche suivante.
-- [Exécuter depuis la CI](../ci-automation/): Lancez votre script dans un job automatisé.
+- [Tester les changements de l’agent](../sandbox-sessions/) : Exécuter l’agent et vos tests dans le même environnement.
+- [Recevoir des données validées](../typed-responses/) : Vérifier une réponse JSON avant de l’utiliser.
+- [Relire une branche](../git-workspaces/) : Garder les changements séparés et décider de leur intégration.
+- [Enregistrer un rapport](../run-reports/) : Préparer un document pour la relecture.
+- [Continuer une conversation](../conversations/) : Envoyer une nouvelle demande en conservant le contexte.
+- [Récupérer un travail interrompu](../recovery/) : Examiner ce qui reste avant de réessayer ou de nettoyer.
 
-Pour un exemple complet, essayez de [réparer une CI en échec](../fix-failing-ci/) ou de [créer un workflow de développement](../development-workflow/).
+## Comprendre ce que vous contrôlez
+
+L’**agent** interprète la tâche. La **sandbox** fournit son environnement d’exécution. Le **workspace** fournit les fichiers de travail. La page [Comment Outpost exécute une tâche](../how-it-works/) explique leurs durées de vie.
+
+Une consigne comme « lance les tests » guide l’agent. Pour exiger leur réussite avant d’accepter les changements, exécutez la vérification dans votre code avec une [boucle de vérification](../verification-loops/) ou une [intégration contrôlée](../integrating-changes/).
+
+Le Guide rassemble tutoriels, tâches pratiques et explications. L’[API](../../reference/) décrit précisément les signatures, options et résultats. Les [exemples complets](../fix-failing-ci/) montrent comment assembler ces éléments lorsque vous en avez besoin.

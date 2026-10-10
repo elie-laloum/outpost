@@ -3,6 +3,8 @@ title: "Rejouer une exécution enregistrée"
 description: "Rejouez un journal et ses commits enregistrés sans envoyer de requête au modèle."
 ---
 
+Conservez le commit Git de départ et un journal rejouable de la tâche initiale. Le rejeu peut reproduire les commits sans appel au modèle ; il ne recrée ni les modifications non commitées ni les effets externes arbitraires. Pour de nouveaux tests, pensez aussi au [kit hors ligne](../testing-workflows/).
+
 ## Enregistrer une exécution et la rejouer
 
 Enregistrez une tâche dans un [journal](../journals/), puis utilisez un agent de rejeu pour reproduire ses événements et ses commits enregistrés. Le rejeu n’envoie aucune requête au modèle ; ses champs de consommation reprennent les compteurs d’origine, sans nouvelle consommation.
@@ -19,6 +21,7 @@ export const brief = { text: "Fix the failing parser test." };
 ```
 
 ```ts title="record.ts"
+import { writeFile } from "node:fs/promises";
 import { dispatch, readJournal } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { brief, transporter } from "./record-settings.ts";
@@ -35,15 +38,16 @@ export const journal = await readJournal({
   transporter,
   reference: recorded.logReference!,
 });
+await writeFile("recorded-journal.json", JSON.stringify(journal));
 ```
 
 ```ts title="replay.ts"
-import { reportValue } from "./reporter.ts";
 import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
-import { journal } from "./record.ts";
+import { readFile } from "node:fs/promises";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { brief } from "./record-settings.ts";
 
+const journal = JSON.parse(await readFile("recorded-journal.json", "utf8"));
 export const replaying = createReplayAgent({ journal });
 export const replayed = await dispatch({
   repository,
@@ -52,9 +56,11 @@ export const replayed = await dispatch({
   brief,
   branch: { mode: "named", name: "replayed-fix" },
 });
-reportValue(replayed.commits, replaying.remainingTurns);
+console.log(replayed.commits, replaying.remainingTurns);
 // Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ] 0
 ```
+
+Exécutez `node record.ts` une seule fois. Ensuite, `node replay.ts` lit `recorded-journal.json` depuis le même répertoire sans importer le script d’enregistrement. Ne modifiez pas le commit de départ entre les deux commandes.
 
 Les deux branches partent du même commit : les commits rejoués ont donc les mêmes identifiants que les commits enregistrés. Depuis un autre commit qui a le même arbre, les arbres et les messages sont identiques mais les identifiants diffèrent.
 
@@ -79,30 +85,10 @@ Quand l’historique ne peut pas être enregistré, l’événement garde la bas
 
 Passez le journal à `createReplayAgent()` et utilisez le résultat comme `agent` d’un `dispatch()` avec le même brief. Le rejeu avance tour par tour, dans l’ordre de l’enregistrement.
 
-<!-- canvas -->
-
-- **Vérifier**: Avant chaque tour.
-  - Étapes
-  - **Comparer le prompt**: Le prompt rendu doit être identique au prompt enregistré.
-  - → **Réémettre**: puis
-- **Réémettre**: À la place d’un appel au modèle.
-  - Étapes
-  - **Rejouer les événements**: Les événements de l’agent ou du harness, puis le texte et l’usage enregistrés. Un journal `verbose` rejoue aussi les lignes brutes et les deltas.
-    - `observe`
-  - → **Reconstruire**: puis
-- **Reconstruire**: Au dernier tour du dispatch.
-  - Étapes
-  - **Vérifier la baseline**: L’arbre du workspace doit correspondre à la baseline enregistrée.
-    - sandbox
-  - **Appliquer chaque patch**: `git apply --index`, puis comparer l’arbre obtenu.
-    - sandbox
-  - **Recréer le commit**: Avec les identités, les dates et le message enregistrés.
-    - sandbox
-  - → **Terminer**: puis
-- **Terminer**: Comme le tour enregistré.
-  - Étapes
-  - **Relancer l’échec**: Un tour en échec à l’enregistrement lève son code et son message d’erreur.
-  - **Renvoyer le résultat**: Sinon, le dispatch renvoie le texte, l’usage et les commits enregistrés.
+1. Avant chaque tour, comparez le prompt rendu au prompt enregistré ; une différence empêche la relecture.
+2. Rejouez les événements, le texte et la consommation sans appeler de modèle. Un journal détaillé rejoue aussi les lignes brutes et les fragments.
+3. Au dernier tour, vérifiez l’état initial du workspace, appliquez et vérifiez chaque patch, puis recréez les commits avec leurs métadonnées enregistrées.
+4. Renvoyez le résultat enregistré ou son erreur avec le code et le message d’origine.
 
 Les commits sont reconstruits via la sandbox : le rejeu fonctionne donc aussi avec les sandboxes cloud. La sandbox a besoin de `git`.
 
@@ -119,7 +105,6 @@ Quand le rejeu s’écarte de son journal, il lève [`ReplayDivergence`](../../r
 Référence API : [ReplayDivergenceKind](../../reference/replaydivergencekind/).
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   dispatch,
   createReplayAgent,
@@ -136,7 +121,7 @@ try {
   });
 } catch (error) {
   if (!(error instanceof ReplayDivergence)) throw error;
-  reportValue(error.kind, error.turn, error.expected, error.actual);
+  console.log(error.kind, error.turn, error.expected, error.actual);
   // Example output: prompt 0 Expected brief Actual brief
 }
 ```

@@ -13,9 +13,9 @@ import { loadModelPrices } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Fetch a bounded, cancellable models.dev or OpenRouter catalog once and return a frozen price table for the explicitly selected model aliases. Catalog prices are USD; EUR requires a caller-supplied exchange rate. Normalize OpenRouter per-token rates to per-million rates. Refuse missing models, invalid prices and unsupported tier or extra charges; no refresh or network access occurs during workflow accounting.
+Fetch a bounded, cancellable models.dev or OpenRouter catalog once and return a frozen price table for the explicitly selected model aliases. Catalog prices are USD; EUR requires a caller-supplied exchange rate. Normalize OpenRouter per-token rates to per-million rates. Refuse missing models, invalid prices and unsupported tier or extra charges; no refresh or network access occurs during workflow accounting. The table estimates token charges only; taxes, discounts, tools, images and other billing dimensions are excluded.
 
-[Complete example and detailed rules](../../guide/budgets/).
+[Complete example and detailed rules](../../guide/estimating-costs/).
 
 ## Parameters and properties
 

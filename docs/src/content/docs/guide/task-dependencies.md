@@ -3,12 +3,19 @@ title: "Connect tasks and dependencies"
 description: "Define tasks, declare what they depend on and read their typed results."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="connect-the-steps"></span>
+<span id="check-a-tasks-result"></span>
+<span id="pick-a-task-type"></span>
+
+The first example runs entirely in Node.js: install Outpost in an ESM project, save it as `dependencies.ts` and run `node dependencies.ts`. No agent, account or sandbox is needed to learn the graph.
+
 ## Define tasks and a workflow
 
 Declare each step with a task constructor, then give the tasks to `defineWorkflow()`. Dependencies determine execution order and which earlier results a task may read.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
@@ -19,7 +26,7 @@ const report = defineTask({
 });
 const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();
-reportValue(result.value(report));
+console.log(result.value(report));
 // Example output: { reviewed: 1 }
 ```
 
@@ -49,7 +56,6 @@ List a task in `after`, then read its output with `context.value(task)`. The val
 `start()` resolves with a `WorkflowResult` once no task can run any more, even when tasks failed. It rejects when an option is invalid or a checkpoint cannot be saved.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const lint = defineTask({
@@ -60,10 +66,10 @@ const lint = defineTask({
 });
 const test = defineTask({ key: "test", perform: () => "ok" });
 const result = await defineWorkflow("checks", [lint, test]).start();
-reportValue(result.status);
+console.log(result.status);
 // Example output: failed
 for (const task of result.tasks)
-  reportValue(task.key, task.status, task.error ?? "");
+  console.log(task.key, task.status, task.error ?? "");
 // Example output: lint failed 2 lint errors
 ```
 
@@ -75,70 +81,22 @@ API reference: [WorkflowResult](../../reference/workflowresult/) and [TaskRecord
 
 ## Run tasks in parallel
 
-`start()` runs one task at a time by default, in list order. Pass `concurrency` to run independent tasks together.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
-
-const lint = defineTask({ key: "lint", perform: () => ({ warnings: 0 }) });
-const test = defineTask({ key: "test", perform: () => ({ failed: 0 }) });
-const report = defineTask({
-  key: "report",
-  after: [lint, test],
-  perform: (context) =>
-    context.value(lint).warnings + context.value(test).failed === 0,
-});
-const result = await defineWorkflow("checks", [lint, test, report]).start({
-  concurrency: 2,
-});
-result.unwrap();
-reportValue(result.value(report));
-// Example output: true
-```
-
-<!-- check:run -->
-
-`lint` and `test` run together, then `report` prints `true`. Retries, timeouts and what a failure stops are on [Concurrency, retries and timeouts](../concurrency-and-retries/).
+Independent tasks can run together when you increase `concurrency`. Start with the [parallelism and retries guide](../concurrency-and-retries/) for a working example. Tasks that share a sandbox must remain sequential; connect them with `after`.
 
 ## Skip a task
 
-`condition` runs before the task’s first attempt. When it returns `false`, the task ends as `skipped` without running.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
-
-const changes = defineTask({ key: "changes", perform: (): string[] => [] });
-const review = defineTask({
-  key: "review",
-  after: [changes],
-  condition: (context) => context.value(changes).length > 0,
-  perform: (context) => `Reviewed ${context.value(changes).length} files`,
-});
-const result = await defineWorkflow("review", [changes, review]).start();
-reportValue(
-  result.status,
-  result.tasks.map((task) => task.status),
-);
-// Example output: done [ 'done', 'skipped' ]
-```
-
-<!-- check:run -->
-
-It prints `done [ 'done', 'skipped' ]`. A skipped task does not fail the run, has no value, and skips every task that depends on it.
+Use `condition` when a task only makes sense for some inputs. A false condition skips the task and its dependents, and produces no value. See the [conditional task example](../concurrency-and-retries/#skip-a-task-with-a-condition) before reading such a result.
 
 ## Display the dependencies
 
 `diagram()` returns the graph as a Mermaid flowchart, for a README or a pull request.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const lint = defineTask({ key: "lint", perform: () => 0 });
 const report = defineTask({ key: "report", after: [lint], perform: () => 0 });
-reportValue(defineWorkflow("checks", [lint, report]).diagram());
+console.log(defineWorkflow("checks", [lint, report]).diagram());
 // Example output: flowchart LR
 ```
 
@@ -151,82 +109,25 @@ flowchart LR
   n0 --> n1
 ```
 
-## Share a sandbox between tasks
+<span id="share-a-sandbox-between-tasks"></span>
 
-`defineAgentTask()` and `defineCommandTask()` run in a sandbox you opened with [`createSandbox()`](../sandbox-sessions/). The tasks share its files; you close it.
-
-<!-- tabs -->
-
-```ts title="fix-dates.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
-
-export function defineFix(sandbox: Sandbox) {
-  return defineAgentTask({
-    key: "fix",
-    sandbox,
-    request: () => ({ brief: { text: "Fix the failing date tests." } }),
-  });
-}
-```
-
-```ts title="test-dates.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineFix } from "./fix-dates.ts";
-import { defineCommandTask } from "@elie-laloum/outpost";
-
-export function defineTests(
-  sandbox: Sandbox,
-  fix: ReturnType<typeof defineFix>,
-) {
-  return defineCommandTask({
-    key: "test",
-    after: [fix],
-    sandbox,
-    command: { executable: "npm", arguments: ["test"] },
-  });
-}
-```
-
-```ts title="run-dates.ts"
-import { createSandbox, defineWorkflow } from "@elie-laloum/outpost";
-import { repository, sandboxProvider, coder } from "./outpost.config.ts";
-import { defineFix } from "./fix-dates.ts";
-import { defineTests } from "./test-dates.ts";
-
-await using sandbox = await createSandbox({
-  repository,
-  sandboxProvider,
-  agent: coder,
-});
-export const fix = defineFix(sandbox);
-export const test = defineTests(sandbox, fix);
-export const result = await defineWorkflow("fix-dates", [fix, test]).start();
-result.unwrap();
-```
-
-`test` runs `npm test` on the agent’s edits. A nonzero exit status fails the task.
+To run tasks against the same files, follow [Share a sandbox](../sandbox-sessions/#share-a-sandbox-between-tasks).
 
 ## Choose the task type
 
-Each declaration returns a task that you list in `defineWorkflow()` and connect with `after`.
+Start with the declaration that matches who owns the work.
 
-| Declaration                                                                 | Use it for                                                        | Guide                                             |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------- |
-| [`defineTask`](../../reference/definetask/)                                 | Your own code returning a value.                                  | This page                                         |
-| [`defineIsolatedTask`](../../reference/defineisolatedtask/)                 | An agent task in its own sandbox, opened and closed by the task.  | [From a task to a workflow](../first-workflow/)   |
-| [`defineAgentTask`](../../reference/defineagenttask/)                       | An agent turn in a sandbox you keep open.                         | [Share a sandbox](#share-a-sandbox-between-tasks) |
-| [`defineCommandTask`](../../reference/definecommandtask/)                   | A command in a sandbox you keep open.                             | [Share a sandbox](#share-a-sandbox-between-tasks) |
-| [`defineLoopTask`](../../reference/definelooptask/)                         | Attempts checked in rounds, with the failed check as feedback.    | [Verification loops](../verification-loops/)      |
-| [`defineQueuedTask`](../../reference/definequeuedtask/)                     | Work handed to a worker through a job queue.                      | [Job queues and workers](../job-queues/)          |
-| [`defineApprovalTask`](../../reference/defineapprovaltask/)                 | A pause until a listed person approves or rejects.                | [Approvals](../approvals/)                        |
-| [`definePauseTask`](../../reference/definepausetask/)                       | A pause until a listed person resumes or rejects.                 | [Approvals](../approvals/)                        |
-| [`defineInteractiveAgentTask`](../../reference/defineinteractiveagenttask/) | An agent dialogue that waits for human answers between turns.     | [Interactive tasks](../interactive-tasks/)        |
-| [`defineArtifactTask`](../../reference/defineartifacttask/)                 | A value published as an artifact; dependents receive a reference. | [Artifacts](../artifacts/)                        |
-| [`defineWorkflowJob`](../../reference/defineworkflowjob/)                   | Not a task: runs a whole workflow as a queue job.                 | [Job queues and workers](../job-queues/)          |
+| Your step needs                        | Use                                                                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Your own function                      | [defineTask](../../reference/definetask/)                                                                      |
+| An agent with its own sandbox          | [defineIsolatedTask](../../reference/defineisolatedtask/)                                                      |
+| An agent or command in an open sandbox | [defineAgentTask](../../reference/defineagenttask/) or [defineCommandTask](../../reference/definecommandtask/) |
+| Another attempt after a failed check   | [A verification loop](../verification-loops/)                                                                  |
+
+Add [approvals](../approvals/), [human questions](../interactive-tasks/), [queued work](../job-queues/) or [artifacts](../artifacts/) when those steps become necessary.
 
 :::caution
-`defineIsolatedTask()` and `defineAgentTask()` return a dispatch result with methods, which a checkpoint cannot store. In a checkpointed run, call them from a `defineTask()` that returns JSON, as in [From a task to a workflow](../first-workflow/). See [Durable runs](../durable-runs/).
+Agent dispatch results contain methods and cannot be checkpointed directly. For a durable run, call the agent from a task that returns a JSON projection and reports its usage, as shown in [Save and resume a workflow](../durable-runs/).
 :::
 
 ## Limits

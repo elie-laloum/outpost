@@ -3,6 +3,8 @@ title: "Handle errors"
 description: "Read dispatch errors and workflow failures, then decide what can be retried."
 ---
 
+Decide separately how your application reports failure, retries work and recovers files. This page covers interpreting results and exceptions; [recovery](../recovery/) covers retained state, and [retries](../concurrency-and-retries/) cover starting another attempt.
+
 ## Understand failure results
 
 The error you receive depends on the operation. A dispatch rejects its promise when the agent fails; a workflow normally returns a result containing its failed tasks. Use the table below to choose how to handle each call.
@@ -36,7 +38,9 @@ try {
 } catch (error) {
   if (!(error instanceof OutpostError)) throw error;
   console.error(error.code, error.message);
-  console.error(recoveryDetails(error));
+  const saved = recoveryDetails(error);
+  console.error({ branch: saved?.branch, directory: saved?.directory });
+  throw error;
 }
 ```
 
@@ -49,6 +53,8 @@ API reference: [recoveryDetails](../../reference/recoverydetails/).
 [Recover work](../recovery/) shows how to use these locations.
 
 ## Fault codes
+
+Invalid configuration needs correction before another attempt. A conflict, guard refusal or synchronization failure needs inspection of retained work first. A recognized quota or outage can follow an explicit pause or fallback policy. Do not retry every error automatically.
 
 API reference: [FaultCode](../../reference/faultcode/).
 
@@ -94,7 +100,6 @@ export const deploy = defineTask({
 ```
 
 ```ts title="run-deploy.ts"
-import { reportValue } from "./reporter.ts";
 import {
   defineWorkflow,
   WorkflowFailure,
@@ -108,7 +113,7 @@ try {
 } catch (error) {
   if (!(error instanceof WorkflowFailure)) throw error;
   const [first] = error.result.errors;
-  if (first instanceof OutpostError) reportValue(error.code, first.details);
+  if (first instanceof OutpostError) console.log(error.code, first.details);
   // Example output: provider { status: 502 }
 }
 ```

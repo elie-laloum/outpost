@@ -3,6 +3,8 @@ title: "Charger les secrets depuis un service"
 description: "Résoudre les clés déclarées sur l’hôte avec Vault, OpenBao, 1Password, Infisical ou un gestionnaire cloud."
 ---
 
+Choisissez le service que vous utilisez déjà : [Vault/OpenBao](#utiliser-vault-ou-openbao), [1Password](#utiliser-1password), [Infisical](#utiliser-infisical), [AWS](#utiliser-aws-secrets-manager), [Google Cloud](#utiliser-google-cloud-secret-manager) ou [Azure](#utiliser-azure-key-vault). Suivez une seule procédure, puis transmettez les variables sélectionnées à votre agent.
+
 ## Résoudre avant d’allouer une sandbox
 
 Appelez `fromSecrets()` au démarrage du script, puis passez le résultat comme `variables` à un harness CLI ou à un fournisseur de sandbox. La fonction renvoie un objet gelé contenant uniquement les noms demandés. Outpost n’écrit pas ces valeurs dans un fichier d’environnement et ne modifie pas `process.env`.
@@ -171,7 +173,6 @@ Implémentez `SecretSource` avec une méthode `resolve()` nommée qui ne lit que
 
 ```ts
 import { fromSecrets, type SecretSource } from "@elie-laloum/outpost";
-import { reportValue } from "./reporter.ts";
 
 const source: SecretSource = {
   name: "fixture",
@@ -183,7 +184,7 @@ const source: SecretSource = {
 const variables = await fromSecrets(source, ["EXAMPLE_KEY"]);
 if (Object.keys(variables).length !== 1)
   throw new Error("Unexpected selection");
-reportValue(Object.keys(variables));
+console.log(Object.keys(variables));
 ```
 
 <!-- check:run -->
@@ -193,3 +194,28 @@ reportValue(Object.keys(variables));
 Les tests déterministes couvrent le protocole HTTP KV v2, les frontières des méthodes SDK natives, la sélection, l’annulation, les délais, les valeurs malformées et le filtrage des erreurs. Ils ne prouvent pas une authentification réussie auprès de comptes réels Vault, OpenBao, 1Password, Infisical, AWS, GCP ou Azure. Exercez le service utilisé avec une identité dédiée avant de vous appuyer sur cette configuration en production.
 
 API : [fromSecrets](../../reference/fromsecrets/) · [SecretSource](../../reference/secretsource/) · [FromSecretsOptions](../../reference/fromsecretsoptions/).
+
+## Sélectionner les secrets avant allocation
+
+Une valeur d’environnement peut utiliser `{ env: VARIABLE_NAME }`. Les composants de gestion de secrets reprennent leurs options publiques ; les clients SDK installés sont des extensions `object` empruntées. Le token Vault ci-dessous est ainsi lu sur l’hôte uniquement à l’exécution. Les sources natives sont déclarées sous `secrets` ; `variables.secrets` sélectionne des noms explicites avec `fromSecrets()`.
+
+```yaml title="outpost.yaml — source de secrets sur l’hôte"
+secrets:
+  build:
+    type: vault
+    address: https://vault.example.com
+    token: { env: VAULT_TOKEN }
+    mount: secret
+    path: build
+variables:
+  selected:
+    type: secrets
+    source: { $ref: secrets.build }
+    names: [BUILD_TOKEN]
+sandbox:
+  provider: docker
+  image: outpost:sandbox
+  variables: { $ref: variables.selected }
+```
+
+Seules les valeurs sélectionnées atteignent la sandbox. La validation n’importe aucun module utilisateur et ne lit aucune valeur de secret. Une valeur absente échoue avant allocation ; le runtime masque les valeurs sélectionnées dans les observations, les rapports retournés et les diagnostics d’exécution. Il ne modifie pas l’environnement hôte. Conservez les restrictions de votre service et les identifiants du gestionnaire sur l’hôte, comme décrit plus haut.

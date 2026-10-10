@@ -1,52 +1,43 @@
 ---
-title: "Installation"
-description: "Install Outpost, build an agent image and create your TypeScript configuration."
+title: "Install Outpost"
+description: "Prepare the package, agent image and configuration for your first task."
 ---
+
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="prepare-agent-access"></span>
+<span id="create-your-configuration-file"></span>
 
 ## Before you start
 
-You need Node.js 24 or later, Git, a repository with at least one commit and Docker running. This guide uses Codex; you can [choose another agent](../choose-an-agent/) later.
-
-Run the following commands from the directory where you want to keep your scripts. This can be your repository or a separate directory.
+This tutorial uses Codex in Docker to work on a Git repository. Prepare Node.js 24 or later, Git, a repository with at least one commit and a running Docker engine. Keep your scripts in that repository or in a separate directory.
 
 ## Install the package
 
-Your scripts import the library from this package. The second command sets `"type": "module"` in the directory’s `package.json`, so Node.js can run the `.ts` examples as ESM modules. If your repository uses CommonJS, keep these scripts in a separate directory with its own `package.json`.
+Run these commands in the directory that will hold your scripts. The second command makes it an ESM project so Node.js can run the TypeScript examples directly. For an existing CommonJS project, use a separate script directory with its own package manifest.
 
 ```sh
 npm install @elie-laloum/outpost
 npm pkg set type=module
 ```
 
-The `outpost` command helps you build images and check your environment.
-
 ## Build the agent image
 
-Generate and build the image in a dedicated directory:
+Build the tools once in a dedicated directory. The first build downloads the agent CLIs and can take several minutes.
 
 ```sh
 npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-The first build downloads the agent CLIs and may take a few minutes. Wait for it to finish before running a task.
+Wait for the image build to succeed. `init` also creates example workflow files in `.outpost-image`; this tutorial uses the script you write next. To add project tools or use Podman, see [Build an agent image](../agent-images/).
 
-Here, `init` prepares the image recipe and builds it. It also generates example workflow files in `.outpost-image`; the scripts in this guide are the ones you write yourself. You do not need to run the generated project.
+## Prepare access to the agent
 
-You can edit `.outpost-image/Dockerfile` to add project tools, then rebuild with `npx outpost image build --directory .outpost-image --image outpost:dev`. See [Build an agent image](../agent-images/) for Podman and image customization.
+This configuration uses a Codex account login saved on your machine. Follow [Configure Codex](../codex/#sign-in-with-your-account) before running a task. For API-key access, use [Authentication](../authentication/); account and API access have separate billing.
 
-## Prepare agent access
+## Save your configuration
 
-Before using the account-based configuration below, prepare a Codex login saved to a file on your machine. Follow [Configure Codex](../codex/#sign-in-with-your-account) for the login command and credential location.
-
-For API-key access, or another agent, follow [Authentication](../authentication/). Account access and API access have separate billing.
-
-## Create your configuration file
-
-Save this file next to your scripts. It declares the agent, the image and the repository; your scripts import these values explicitly.
-
-Also save `reporter.ts` beside your scripts. The examples import it to display results through `createReporter()`. `reportValue()` sends a text event to the reporter; `format()` keeps Node.js object formatting. To follow events during a task, pass `createReporter()` directly to `observe` ([follow progress](../progress/)). “Example output” comments illustrate a possible output; answers, identifiers and measurements vary between runs.
-
-<!-- tabs -->
+Save `outpost.config.ts` next to your scripts. Replace the repository path with the absolute path to your checkout. The scripts import these values explicitly; no configuration discovery is required.
 
 ```ts title="outpost.config.ts"
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -58,31 +49,17 @@ export const coder = createAgent({
 export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
 });
-export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
+export const repository = "/absolute/path/to/your-repository";
 ```
 
-```ts title="reporter.ts"
-import { format } from "node:util";
-import { createReporter } from "@elie-laloum/outpost";
-
-const reporter = createReporter();
-export function reportValue(...values: unknown[]) {
-  reporter({ kind: "text", text: `${format(...values)}\n` });
-}
-```
-
-`repository` uses the current directory unless you set `OUTPOST_REPOSITORY` to the absolute path of another checkout. If you keep your scripts outside the repository, set this variable before running them.
-
-All TypeScript files in the guides use the `.ts` extension, including in their imports. Node.js 24 runs them directly; you do not need to compile them before execution.
-
-The guides show longer examples as several files in tabs. Save each tab under its displayed filename, in the same directory as this configuration. The accompanying text names the script to run.
+Save each later code tab using its displayed filename, alongside this configuration unless the page says otherwise. Examples use `.ts` filenames and imports and run with Node.js 24+, without a compilation step.
 
 ## Check the image
 
-`doctor` checks the local tools and image. It does not send a model request or test your login. A failed check exits with status 1; [Troubleshoot your setup](../diagnostics/) explains the report.
+Run the local checks before sending a model request:
 
 ```sh
 npx outpost doctor --image outpost:dev
 ```
 
-You are ready to [run your first task](../first-request/).
+Fix any `FAIL` using [Troubleshoot your setup](../diagnostics/). `doctor` checks tools and the image, not your login or model access. You are ready to [run your first task](../first-request/) or [your first YAML recipe](../yaml-recipes/).

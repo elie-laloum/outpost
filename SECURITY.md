@@ -2,13 +2,19 @@
 
 Outpost runs coding agents that execute arbitrary project commands. Use it with repositories and credentials appropriate for that task.
 
+## File workspaces
+
 File workspaces can run without Git. Directory copies exclude Git and Outpost control metadata; ordinary source files remain data, including any credential files the caller selected. New copies, snapshots and publications reject outgoing links and special files; link checks expand captured aliases before parent traversal and refuse missing targets or excluded aliases. Explicit source mounts expose the complete source; writable mounts change it immediately and cleanup never rolls those effects back. Owned working roots and runtime control storage remain separate. The local provider remains unisolated.
 
 Protected publication uses destination manifests, host-user overlap locks, same-filesystem quarantine, exclusive installation and conditional reverse rollback. These locks coordinate Outpost writers without preventing external edits. Publication is recoverable across operations, not an atomic transaction over an entire tree. Concurrent changes can leave backups and journal operations requiring explicit recovery. File snapshots establish file integrity, not disposal of unknown cloud resources or authorization to recover owners and replay interrupted work.
 
+## Sandbox access
+
 By default, Docker/Podman expose the selected checkout, Git metadata and explicit volumes. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
 
-Shared Git metadata is writable by the agent. A mounted sandbox is not an adversarial boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but a malicious repository can contain other executable configuration or project tooling. Do not run untrusted repositories with valuable host credentials. Host `local()` provides no isolation.
+Shared Git metadata is writable by the agent. A mounted sandbox is not an adversarial boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but a malicious repository can contain other executable configuration or project tooling. Do not run untrusted repositories with valuable host credentials. Host `createLocalSandboxProvider()` provides no isolation.
+
+## Git and integration
 
 Workspace diff guards are integration checks, not filesystem permissions or an adversarial security boundary. They inspect only the final committed diff: an agent can modify files and restore them before the check, and uncommitted files are excluded. Use named or integration workspaces to retain refused work separately from the host checkout.
 
@@ -24,20 +30,36 @@ Portable agent profiles carry literal guidance and protocol tool restrictions, n
 
 MCP servers are programs or endpoints you choose; they receive the variables you name and act with the agent's authority. Outpost writes MCP configuration with variable references only, never secret values. Kimi and Antigravity configuration is merged into the agent home file, which is the user's own home with `createLocalSandboxProvider()`. Built-in harness servers and their HTTP bridge run inside the sandbox, so egress policies apply to them; CLI agents contact HTTP servers themselves from the sandbox. `oauth: "login"` copies the selected MCP OAuth tokens of Claude Code, Codex or Kimi from the host into the private sandbox home; a refresh there can rotate the refresh token and invalidate the host login. OAuth client secrets for the built-in harness stay in the sandbox environment.
 
+## Secrets in saved data
+
 Conversation transcripts, logs, bundles and patches may contain secrets. Optional `redact` expressions mask matching strings before Outpost observation receivers and supported conversation captures, including decoded text session bundles. They do not detect unknown secrets, join fragments across event boundaries, rewrite native sandbox files or temporary staging, sanitize checkpoints, returned values other than run reports or existing archives, or make arbitrary binary content safe. A masked transcript can lose data needed for native resume or signed reasoning replay. Runtime files are ignored by Git and sensitive files are created with restrictive permissions where supported. Keep API keys in environment variables or ignored `.env` files. Never embed tokens in tracked configuration, remote URLs or examples.
 
-Report vulnerabilities privately using the repository's security reporting channel when enabled, or contact the maintainer through the hosting profile. Do not include live credentials in reports. V1 receives fixes for reproducible security defects.
+## Reporting and supported versions
+
+Report vulnerabilities privately through [GitHub Security](https://github.com/elie-laloum/outpost/security/advisories/new). Do not include live credentials in reports. Only the latest major version receives security fixes; upgrade to that major before requesting a fix for an older release.
+
+## Shared storage and ownership
 
 Explicit storage transports can send artifacts, journals, transcripts, recovery payloads, execution snapshots, observation events and operational metadata to the configured object store. Run projections share the bounded delivery and redaction limits of other observation sinks; an expired heartbeat is suspected abandonment and never authorizes replay or resource recovery. The caller owns the S3 client and credentials; they are not forwarded to agents. Use a dedicated private bucket prefix and access policy. Object revisions fence cooperating writers but do not authenticate artifact producers or operators. Stop an abandoned runner independently before releasing its checkpoint ownership; a remote PID is not proof of inactivity.
 
+## Firecracker
+
 The optional Firecracker jailer mode requires a trusted root supervisor and root-owned boot assets, executables, SSH trust files, jail base and cgroup v2 parent. Outpost does not elevate privileges. The VMM drops to the explicitly selected non-root UID/GID, uses the jailer's mount namespace and receives CPU, memory, swap and process limits. The supervisor remains privileged and outside the VMM cgroup; its workflow code, configuration, dependencies and transfer destinations must be trusted. Guest file downloads currently buffer individual files in the supervisor, so the VMM memory limit is not a total host-resource budget. Kernel work outside that cgroup is likewise not charged to its CPU quota. Operators own TAP setup, network filtering, parent resources and crash recovery. Control-plane resource accounting and adversarial validation of this mode remain open.
+
+## Network policies
 
 Egress policies restrict sandbox outbound connections, not host model-provider or decision-provider calls, image downloads or cloud control-plane traffic. Vercel domain rules inspect TLS SNI rather than encrypted HTTP Host headers; allowed CIDRs grant independent IP access and denied CIDRs take precedence. A domain allowlist is not a general defense against exfiltration through allowed services or shared infrastructure. Mounted host sockets can expose separate network capabilities. Outpost copies network configuration at provider composition.
 
 Daytona egress is sent at creation and confirmed through its network-update API before Outpost prepares the workspace or exposes the lease. A rejected confirmation fails acquisition and triggers deletion. Tier 3/4 and WRITE_SANDBOXES are required; native creation options alone do not establish this guarantee. Autonomous image startup precedes confirmation and must be trusted, without embedded secrets or startup workloads. Unsupported combinations and wildcard patterns that would implicitly grant apex access are rejected. Docker/Podman allowlists remain unsupported; local and Firecracker execution reject Outpost egress policies. See the bilingual outbound-network guide for capabilities and live-validation limits.
 
+## Approvals and idempotency
+
 Signed workflow gates verify an Ed25519 key bound to an approver, not a human login. The signing service must authenticate the user and their intent. Keep private keys outside worker sandboxes; trust the configured verifier and public-key source. Gate authentication requirements participate in checkpoint identity, but signatures do not authenticate checkpoint storage. Revocation rejects new proofs and does not undo already persisted decisions. HTTP queue bearer tokens authorize all queue operations; dynamic token sources allow rotation, not tenant isolation. Use trusted TLS termination for remote connections. Idempotency keys only prevent duplicate external effects when the effect service atomically deduplicates them and retains receipts throughout the replay window.
 
+## Dependency caches
+
 Cloud dependency caches archive only the declared download directories through a host-side Transport. Storage credentials are not installed in the sandbox. Later runs trust the bytes written by previous agents and transport writers; keep credentials out of caches and use a private prefix. Immutable cache snapshots persist until explicitly removed, including superseded or unpublished snapshots. Compatibility hashes and chunk digests provide isolation and integrity, not producer authentication.
+
+## Secret managers
 
 Secret-source resolution runs on the host before sandbox allocation. Outpost reads only requested names and returns immutable variables without writing the values to disk or changing process.env. Vault/OpenBao KV v2 and AWS JSON fields require fetching an enclosing document; split unrelated secrets when they must not be fetched together. Injected SDK clients are caller-owned, and their authentication configuration and caching remain the caller’s responsibility. fromSecrets discards vendor exception messages and causes; never log the returned object. The selected values become readable by every process receiving those variables. Startup snapshots do not rotate inside a running sandbox.

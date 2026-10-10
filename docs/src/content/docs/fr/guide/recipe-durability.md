@@ -3,6 +3,8 @@ title: Recettes YAML durables
 description: Conserver le travail, demander une intervention et reprendre par run ID.
 ---
 
+Suivez ce guide après avoir [exécuté une recette YAML](../yaml-recipes/). Choisissez un stockage persistant et un ID stable avant de commencer ; les commandes de consultation, réponse et reprise doivent viser cette même exécution.
+
 Les recettes de format 3 utilisent le moteur de checkpoints existant. Déclarez le stockage dans la configuration locale obligatoire, puis sélectionnez-le depuis la recette partageable. Une pause libère la sandbox et conserve workspaces Git, sorties terminées, conversations et consommation cumulée. [Les workflows de recettes](../recipe-workflows/) présentent la composition des tâches.
 
 ## Configurer le stockage persistant
@@ -52,7 +54,7 @@ outpost recipe resume --file recipe.yaml --config outpost.yaml \
   --run-id reviewed-change --json
 ```
 
-Les sandboxes durables partagées et isolées utilisent des workspaces possédés par le runtime. Avant reprise, Outpost vérifie dépôt, répertoire, branche, métadonnées Git et base de comparaison d’origine. Un workspace absent ou modifié est refusé. Le provider doit pouvoir ouvrir une nouvelle sandbox sur ce workspace conservé sur l’hôte ; la synchronisation préserve les fichiers couverts par son contrat de transfert existant. Les workspaces prêtés ne sont pas restaurés automatiquement. Les dialogues conservent leurs exigences natives de workspace nommé et de conversation portable.
+Les sandboxes durables partagées et isolées utilisent des workspaces possédés par le runtime. Avant reprise, Outpost vérifie dépôt, répertoire, branche, métadonnées Git et base de comparaison d’origine. Un workspace absent ou modifié est refusé. Le fournisseur doit pouvoir ouvrir une nouvelle sandbox sur ce workspace conservé sur l’hôte ; la synchronisation préserve les fichiers couverts par son contrat de transfert existant. Les workspaces prêtés ne sont pas restaurés automatiquement. Les dialogues conservent leurs exigences natives de workspace nommé et de conversation portable.
 
 Les tâches interrompues nécessitent `resume --retry-incomplete`. Après un crash, arrêtez d’abord le coordinateur précédent et inspectez le checkpoint. `--recover-revision <revision>` libère explicitement sa propriété uniquement si la révision correspond encore ; cette option ne récupère pas les verrous Git et n’autorise pas le rejeu. Traitez les verrous conservés avec les [procédures de récupération](../recovery/). L’expiration d’un heartbeat n’autorise aucune de ces actions. Une allocation interrompue avant l’enregistrement du workspace exige une récupération explicite ; le runtime ne crée jamais de remplacement vide.
 
@@ -79,7 +81,7 @@ Une tâche `interactive` accepte [InteractiveAgentTaskOptions](../../reference/i
 
 ## Répondre directement dans le terminal
 
-Run et resume affichent automatiquement les questions en attente lorsque stdin et stderr sont des terminaux. La CLI recueille chaque réponse et reprend le workflow avec ses identifiants de demande, sa conversation et son workspace persistés. Aucun script personnalisé ni fichier de réponse n’est nécessaire. Un acteur déclaré unique est sélectionné automatiquement ; plusieurs acteurs proposent un choix. Les [options CLI](../cli/#outpost-recipe-run) permettent de choisir explicitement l’acteur.
+Run et resume affichent automatiquement les questions en attente lorsque stdin et stderr sont des terminaux. La CLI recueille chaque réponse et reprend le workflow avec ses identifiants de demande, sa conversation et son workspace persistés. Aucun script personnalisé ni fichier de réponse n’est nécessaire. Un acteur déclaré unique est sélectionné automatiquement ; plusieurs acteurs proposent un choix. Les [options CLI](../recipe-cli/#outpost-recipe-run) permettent de choisir explicitement l’acteur.
 
 ```sh
 outpost recipe run --file recipe.yaml --config outpost.yaml
@@ -110,7 +112,7 @@ Une action `artifact` sélectionne un magasin et un contrat nommés ; `data` con
 
 `options.cache` utilise le contrat natif de cache et un callback déclaré pour sa clé. Un cache hit ne consomme ni tentative ni jetons et ne rejoue pas d’effets. Les budgets et `onQuota: { action: pause }` gardent la comptabilité cumulée native. Les tâches agent et isolées peuvent déclarer `quotaResume: continue` ou `restart` ; continuer exige une conversation capturée et une restauration prise en charge.
 
-Un sink d’observation `run` persiste la projection du hub partagé. Déclarez `transporter`, `id` et `kind: workflow` ; activez `resume: true` uniquement pour reprendre une projection ayant terminé son invocation précédente. Après récupération explicite d’un coordinateur interrompu, utilisez un nouvel ID d’observation. Le checkpoint reste l’autorité d’exécution ; les erreurs de sink ne changent pas le résultat. Les tests couvrent Git local, interruption de processus, décisions signées, dialogues, caches et artefacts sans appels payants. La restauration cloud/S3 réelle reste non validée.
+Un récepteur d’observation `run` persiste la projection du hub partagé. Déclarez `transporter`, `id` et `kind: workflow` ; activez `resume: true` uniquement pour reprendre une projection ayant terminé son invocation précédente. Après récupération explicite d’un coordinateur interrompu, utilisez un nouvel ID d’observation. Le checkpoint reste l’autorité d’exécution ; les erreurs de récepteur ne changent pas le résultat. Les tests couvrent Git local, interruption de processus, décisions signées, dialogues, caches et artefacts sans appels payants. La restauration cloud/S3 réelle reste non validée.
 
 ## Workspaces de fichiers
 

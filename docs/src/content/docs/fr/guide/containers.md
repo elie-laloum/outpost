@@ -9,7 +9,7 @@ description: "Configurez les conteneurs locaux, les montages du dépôt et l’u
 
 - **Docker ou Podman** : Installé et démarré. Sur macOS, démarrez une machine Podman avec `podman machine start`.
 - [Une image d’agent](../agent-images/) : Contient les outils des agents que vous comptez utiliser.
-- **Un dépôt Git** : Le checkout que le conteneur monte.
+- [Des fichiers de travail](../working-with-files/) : Cette procédure monte un checkout Git ; les sources répertoire et éphémères fonctionnent aussi sans Git.
 
 Avant de lancer une tâche, vérifiez que le moteur de conteneurs répond et que l’image des agents est disponible :
 
@@ -72,7 +72,7 @@ Chaque montage, périphérique ou réseau ajouté élargit ce que l’agent peut
 
 Podman rootless associe votre utilisateur hôte au conteneur avec `--userns keep-id` : les fichiers écrits par l’agent restent à vous. Définissez `userns: false` pour laisser la correspondance à votre configuration Podman. Quand Podman tourne en root, définissez `userns: "keep-id"` pour la demander.
 
-Choisissez le marquage SELinux adapté à votre hôte plutôt que de réduire les protections du dépôt.
+Sur un hôte SELinux, gardez `label: "z"` si plusieurs conteneurs partagent les montages. Choisissez `"Z"` pour un montage privé à un seul conteneur, ou `false` si la politique de l’hôte gère déjà les labels. Ces réglages changent les labels du montage, pas les permissions du projet.
 
 Référence API : [ContainerOptions](../../reference/containeroptions/).
 

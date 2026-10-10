@@ -41,7 +41,6 @@ export function executionCount() {
 ```
 
 ```ts title="run-cache.ts"
-import { reportValue } from "./reporter.ts";
 import { summarize } from "./summarize.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -49,7 +48,7 @@ for (let run = 1; run <= 2; run++) {
   const summary = summarize();
   const result = await defineWorkflow("release-notes", [summary]).start();
   result.unwrap();
-  reportValue(result.value(summary), result.tasks[0]?.cacheHit ?? false);
+  console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
   // Example output (second run): { summary: '3 fixes', execution: 1 } true
 }
 ```
@@ -139,6 +138,10 @@ API reference: [TaskCacheOptions](../../reference/taskcacheoptions/), [TaskOptio
 
 ## Expire or refresh entries
 
+Set `maxAgeMs` in the cache policy to bound its lifetime. Change `version` when code, model or instructions change: entries from the previous version are no longer reused. Expiry causes a new execution on the next read; it does not immediately delete the stored object.
+
+To force a new calculation without changing the key, use `mode: "refresh"`.
+
 API reference: [TaskCacheOptions](../../reference/taskcacheoptions/).
 
 ## Watch cache events
@@ -146,7 +149,6 @@ API reference: [TaskCacheOptions](../../reference/taskcacheoptions/).
 Log cache outcomes from the workflow observer to see hits, misses and storage errors. A cache failure does not prevent the task from running or completing.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import type { Workflow } from "@elie-laloum/outpost";
 
 declare const workflow: Workflow;
@@ -154,7 +156,7 @@ declare const workflow: Workflow;
 await workflow.start({
   observe: (event) => {
     if (event.type === "cache")
-      reportValue(event.key, event.cache, event.error);
+      console.log(event.key, event.cache, event.error);
     // Example output: summary hit undefined
   },
 });
@@ -172,6 +174,10 @@ Entries are not authenticated: anyone who can write to the transport controls th
 
 Entries live under `task-cache/` in the transport until you remove them. Add the `task-cache` scope to a [retention policy](../retention/) to prune those older than `minAgeMs`.
 
+## File workspaces
+
+A JSON cache hit never restores or replays file effects. File workspace identity, input fingerprints and settled generations are separate from cached task values. Dependency caches use the runtime namespace and logical source rather than a run UUID. See [file workspaces](../workspaces/).
+
 ## Limits
 
 - Concurrent executions with the same fingerprint all run; the first entry written is kept.
@@ -181,7 +187,3 @@ Entries live under `task-cache/` in the transport until you remove them. Add the
 - Do not cache a `defineArtifactTask` read by a later task: a hit in a new run restores a reference to the earlier run, and `readArtifact()` fails with “Artifact dependency producer mismatch”.
 
 API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/) · [WorkflowEvent](../../reference/workflowevent/).
-
-## File workspaces
-
-A JSON cache hit never restores or replays file effects. File workspace identity, input fingerprints and settled generations are separate from cached task values. Dependency caches use the runtime namespace and logical source rather than a run UUID. See [file workspaces](../workspaces/).

@@ -44,7 +44,6 @@ export const sandboxProvider = createFirecrackerSandboxProvider({
 ```
 
 ```ts title="run.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, coder } from "./outpost.config.ts";
 import { sandboxProvider } from "./firecracker.ts";
@@ -56,7 +55,7 @@ export const result = await dispatch({
   branch: { mode: "named", name: "outpost/firecracker" },
   brief: { text: "Run the test suite and fix the first failure." },
 });
-reportValue(result.commits);
+console.log(result.commits);
 // Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ]
 ```
 

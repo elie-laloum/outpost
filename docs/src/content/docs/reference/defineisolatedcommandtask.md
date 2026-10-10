@@ -15,13 +15,13 @@ import { defineIsolatedCommandTask } from "@elie-laloum/outpost";
 
 Declares a command task with its own file workspace and sandbox, without requiring an agent. Borrowed resources remain caller-owned.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/working-with-files/).
 
 ## Parameters and properties
 
 | Name                  | Type                                                                                          | Presence | Meaning                                                                                                                                                                                                                      |
 | --------------------- | --------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `Omit<TaskOptions<CommandResult>, "perform"> & IsolatedCommandTaskOptions`                    | Required | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.                                                                                                                     |
+| `options`             | `Omit<TaskOptions<CommandResult>, "perform"> & IsolatedCommandTaskOptions`                    | Required | Declare the task key, dependencies and the command request whose sandbox the task owns.                                                                                                                                      |
 | `options.cache`       | `TaskCacheOptions \| undefined`                                                               | Optional | Result cache: a hit restores the stored lossless JSON value with no attempt, usage or side effects. On a miss, a result that is not lossless JSON fails the task. Rejected on gates, interactions and dispatch-result tasks. |
 | `options.retry`       | `Retry \| undefined`                                                                          | Optional | Retry policy for failed attempts; without it the task runs once. A retried attempt repeats its side effects.                                                                                                                 |
 | `options.gate`        | `WorkflowGate \| undefined`                                                                   | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                                                                                                     |

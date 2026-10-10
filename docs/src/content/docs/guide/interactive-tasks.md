@@ -3,6 +3,8 @@ title: "Let an agent ask questions"
 description: "Pause an agent task for a human answer and continue the saved conversation."
 ---
 
+Prepare a [checkpoint](../durable-runs/) and an agent that supports portable conversation capture and resume. A pending question releases its sandbox. Keep the workspace and conversation available until the next answer.
+
 ## Interactive task or approval gate?
 
 Use an interactive task when the agent needs to ask a person for information before continuing. Use an approval task when your workflow needs permission to proceed. These two pauses have different inputs and resume rules.
@@ -49,7 +51,6 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="start.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { clarify } from "./clarify.ts";
 import { store } from "./question-store.ts";
@@ -57,7 +58,7 @@ import { store } from "./question-store.ts";
 export const workflow = defineWorkflow("discovery", [clarify]);
 export const checkpoint = { store, runId: "discovery-42", version: "1" };
 export const result = await workflow.start({ checkpoint });
-reportValue(result.status, result.inputRequests[0]?.question);
+console.log(result.status, result.inputRequests[0]?.question);
 // Example output: waiting-input What should the new endpoint return?
 ```
 
@@ -71,27 +72,18 @@ Codex, Claude Code, Copilot CLI, Kimi Code and the [built-in harness](../harness
 
 <!-- canvas -->
 
-- **Turn**: The agent works in a fresh sandbox.
-  - Steps
-  - **Run**: It continues its conversation with the brief or the latest answer.
-    - sandbox
-  - **Close**: Outpost saves the conversation and closes the sandbox.
-    - host
-  - → **Question**: then
-- **Question**: The run stops with `waiting-input`.
-  - Steps
-  - **Save**: The checkpoint stores the question; dependent tasks wait.
-    - `inputRequests`
-  - → **Answer**: then
-- **Answer**: Your application submits it.
-  - Steps
-  - **Validate**: Outpost checks and saves the answer, then starts the next turn.
-    - `start({ answers })`
-  - → **Output**: then
-- **Output**: The agent completes with JSON instead of asking.
-  - Steps
-  - **Keep**: The checkpoint stores the output.
-    - `result.value()`
+- **Agent turn**: Work from the brief or latest answer; save the conversation and close the sandbox.
+  - Agent
+  - → **Question**: needs input
+  - → **Result**: work complete
+- **Question**: Save the question and return waiting-input.
+  - Workflow
+  - → **Answer**: person responds
+- **Answer**: Validate and save the answer.
+  - Your application
+  - → **Agent turn**: next turn
+- **Result**: Save the final JSON output.
+  - Workflow
 
 ## Show the questions
 
@@ -205,6 +197,10 @@ const region = defineTask({
 
 `perform` runs again from the start after each answer. Read `interaction.state` to skip finished work, and `save(state)` to record progress; both hold JSON only.
 
+## File workspaces
+
+An owned file dialogue declares `workspaceSource` instead of a repository. Settled files and portable conversations are captured before the sandbox closes and the human question is published. Interrupted owner recovery remains separate from interrupted-turn replay. See [file dialogues](../workspaces/).
+
 ## Limits
 
 - A question on the last of `maxTurns` fails the task instead of waiting.
@@ -215,7 +211,3 @@ const region = defineTask({
 A complete scenario with an approval, red tests and reviewed code: [Build a development workflow](../development-workflow/).
 
 API: [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)
-
-## File workspaces
-
-An owned file dialogue declares `workspaceSource` instead of a repository. Settled files and portable conversations are captured before the sandbox closes and the human question is published. Interrupted owner recovery remains separate from interrupted-turn replay. See [file dialogues](../workspaces/).

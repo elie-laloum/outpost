@@ -1,14 +1,21 @@
 # Changelog
 
-## Unreleased
+## 11.1.0
 
-- Add explicit directory-copy, read-only/writable source-mount and ephemeral file workspaces without host Git, configuration version 3, provider workspace capabilities and file dispatch/report contracts. Preserve legacy Git APIs and configuration defaults. Journal protected output publication with conditional rollback and explicit recovery; conserve settled files and conversations for local or explicit Transport-backed portable resume. Cover independent commands, cross-process dialogue, interrupted publication and an installed CLI running with Node, Docker and tar on a host without Git. Native CLI file variants and live cloud/Firecracker validation remain unvalidated; no publication or deployment is performed.
+This release adds YAML workflow composition, terminal recipe dialogues and Git-free file workspaces while preserving existing Git APIs and defaults.
+
+- Reorganize the English and French Guide around user tasks, with focused pages, preserved routes and section anchors, clearer setup paths and nine downloadable example projects. Make mobile diagrams readable without zoom and clarify desktop flow conditions. Correct journal/replay side effects, Git path handling and recovery instructions; document the local review report produced by the webhook example.
+- Show every public API overload and its own property table, correctly mark required fields from mapped types, and link reference contracts to their practical guides.
+- Define private vulnerability reporting through GitHub Security and security-fix support for the latest major version.
+- Make recipe contract classification portable across Windows and POSIX source paths.
+
+- Add explicit directory-copy, read-only/writable source-mount and ephemeral file workspaces without host Git, configuration version 3, provider workspace capabilities and file dispatch/report contracts. Preserve legacy Git APIs and configuration defaults. Journal protected output publication with conditional rollback and explicit recovery; conserve settled files and conversations for local or explicit Transport-backed portable resume. Cover independent commands, cross-process dialogue, interrupted publication and an installed CLI running with Node, Docker and tar on a host without Git. Native CLI file variants and live cloud/Firecracker validation remain unvalidated.
 
 - Add a runnable Linear development recipe with a separate TypeScript application, validated private API-key caching, issue selection, plan approval, implementation, enforced tests and formatted observation. Extend terminal recipe interaction to unsigned gates with saved evidence and explicit decisions; signed gates retain external proof submission. Test the flow offline with real Git and simulated services; live Linear/Codex remains unvalidated.
 
 - Handle durable recipe questions directly in the CLI: automatic terminal prompts, actor selection, saved answers and continuation without a custom runner. Add interactive/headless flags, keep JSON reporting final-only, and preserve pending questions on cancellation. Cover offline cross-process resume and real terminal input; no paid agent calls.
 
-- Serve recipe and configuration JSON Schemas from documentation URLs under `/schemas/`, with immutable per-version copies reconstructed from stable Git tags. Preserve archives across GitHub Pages deployments, check JSON content and HTTP responses, and document editor setup in English and French. URLs become public with the next eligible stable release deployment.
+- Serve recipe and configuration JSON Schemas from documentation URLs under `/schemas/`, with immutable per-version copies reconstructed from stable Git tags. Preserve archives across GitHub Pages deployments, check JSON content and HTTP responses, and document editor setup in English and French.
 
 - Complete the seven YAML composition lots with explicit experimental speculation, cumulative durable usage receipts, conflict resolvers, native reporters and OpenTelemetry. Keep machine settings in named local components, synchronize and close execution sandboxes before integration, and report resolver usage separately. Generate component documentation and enforce per-export/per-option parity classifications in CI. Add an offline community recipe and example; paid/cloud/remote-SDK validation remains absent.
 

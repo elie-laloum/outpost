@@ -3,6 +3,8 @@ title: "Share a run report"
 description: "Export a dispatch summary with committed files, failed tools, duration and usage."
 ---
 
+A report helps another person inspect a completed task. It does not enforce tests or publish a pull request. For activity before completion, use [live progress](../progress/); for saved events, use a [journal](../journals/).
+
 ## Save a summary for review
 
 After [your first task](../first-request/), use `result.report()` to turn the returned dispatch result into a review document. Save this as `report.ts`, alongside the configuration from [setup](../setup/), and run `node report.ts`. The agent must commit its changes for them to appear in the diff.
@@ -16,6 +18,7 @@ const result = await dispatch({
   repository,
   agent: coder,
   sandboxProvider,
+  branch: { mode: "named", name: "outpost/readme-improvement" },
   brief: { text: "Improve the README and commit the change." },
 });
 await writeFile("run-report.md", result.report({ format: "markdown" }));
@@ -30,7 +33,7 @@ The diff compares the exact commit before execution with the commit after synchr
 
 A satisfied completion condition means the dispatch matched its marker or validated its typed response. It does not certify passing tests. Failed shell commands appear when the adapter emits failed tool results; other failed tools also appear. Absence of observed failures is not proof that every command succeeded. Entries carry their pass and subagent identity where available.
 
-Duration covers the dispatch lifecycle, including allocation and cleanup for a cold dispatch. A warm `sandbox.dispatch()` measures its own operation and keeps the borrowed sandbox open. Usage includes repairs, steering and fallback attempts. With [prices](../budgets/), the report includes an estimate and marks partial pricing; without prices it states that cost is unavailable.
+Duration covers the dispatch lifecycle, including allocation and cleanup for a cold dispatch. A warm `sandbox.dispatch()` measures its own operation and keeps the borrowed sandbox open. Usage includes repairs, steering and fallback attempts. With [prices](../estimating-costs/), the report includes an estimate and marks partial pricing; without prices it states that cost is unavailable.
 
 ## Keep the snapshot after cleanup
 
@@ -38,7 +41,7 @@ Git statistics are collected before workspace disposal. Calling `report()` is sy
 
 The failure list retains at most 100 entries and counts additional failures. Descriptions and previews are limited to 4096 characters. Collection warnings identify lost events, unavailable statistics or truncated descriptions. An unavailable diff is distinct from an empty diff, and a collection failure does not turn a successful dispatch into a failed one.
 
-Inherited [redaction](../security/) masks all report strings, including answers, paths and commands. Markdown escapes embedded markup. Review the report before sharing: undeclared secrets can still occur in the answer, commit subjects or tool previews. If dispatch throws, there is no result to call; use [error recovery](../error-handling/) and the journal instead.
+Inherited [redaction](../redacting-secrets/) masks all report strings, including answers, paths and commands. Markdown escapes embedded markup. Review the report before sharing: undeclared secrets can still occur in the answer, commit subjects or tool previews. If dispatch throws, there is no result to call; use [error recovery](../error-handling/) and the journal instead.
 
 See [`DispatchResult.report`](../../reference/dispatchresult/), [`RunReport`](../../reference/runreport/) and [`RunReportOptions`](../../reference/runreportoptions/) for the exact contracts. The repository’s [offline example](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/56-run-reports) exercises a real local command failure and commit without an account or paid model call.
 

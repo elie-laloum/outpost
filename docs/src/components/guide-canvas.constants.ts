@@ -1,7 +1,7 @@
 export const CANVAS_MIN_SCALE = 0.3;
 export const CANVAS_MAX_SCALE = 2;
 // Below this, object text is too small to read, so the first view pans instead of shrinking further.
-export const CANVAS_READABLE_SCALE = 0.5;
+export const CANVAS_READABLE_SCALE = 1;
 // The frame takes the map's height at its first scale, within these bounds.
 export const CANVAS_MIN_HEIGHT = 320;
 export const CANVAS_MAX_HEIGHT_SHARE = 0.8;

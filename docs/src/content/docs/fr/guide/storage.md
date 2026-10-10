@@ -3,6 +3,8 @@ title: "Choisir où stocker les données"
 description: "Configurez les transports des données persistantes et repérez les fichiers qui restent dans le dépôt."
 ---
 
+Pour un dépôt Git, commencez dans `<repository>/.outpost` : worktrees, conversations et staging restent des fichiers locaux. Les objets des stockages par défaut passent par `.outpost/storage`. Les [workspaces de fichiers](../working-with-files/) utilisent leur répertoire `runtime.directory`, distinct de leurs données.
+
 ## Ce qu’Outpost enregistre
 
 Un transport enregistre des données binaires versionnées sous des clés. Les stockages qui s’appuient dessus les interprètent comme des checkpoints, des artefacts ou d’autres données persistantes. Le transport détermine leur emplacement ; chaque stockage détermine leur contenu.
@@ -127,7 +129,6 @@ Un transport distant permet de conserver les objets sur un autre service. Les é
 Pour créer un objet, utilisez `ifRevision: null`. Pour le remplacer ou le supprimer, indiquez la `revision` que vous avez lue. Si un autre processus a modifié l’objet entre-temps, l’opération lève `TransportConflict` sans écrire de données.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -144,7 +145,7 @@ try {
     ifRevision: first.revision,
   });
 } catch (error) {
-  if (error instanceof TransportConflict) reportValue("stale:", error.key);
+  if (error instanceof TransportConflict) console.log("stale:", error.key);
   // Example output: stale: notes/today
 }
 ```
@@ -152,6 +153,10 @@ try {
 <!-- check:run -->
 
 Le script affiche `stale: notes/today`. Les stockages appliquent la même barrière : un workflow qui a perdu la propriété de son checkpoint échoue à sa prochaine écriture au lieu d’écraser une exécution plus récente. Relisez l’objet avant de décider quoi faire.
+
+## Workspaces de fichiers
+
+Les modes de fichiers placent le stockage de contrôle sous `runtime.directory`, sans résolution de dépôt Git. Les fichiers portables exigent un Transport et un namespace explicites ; un checkpoint seul ne reconstruit pas une matérialisation perdue. Voir [la conservation des fichiers](../resuming-file-workspaces/).
 
 ## Limites
 
@@ -161,7 +166,3 @@ Le script affiche `stale: notes/today`. Les stockages appliquent la même barri�
 - Les clés sont des segments séparés par `/`, faits de lettres, chiffres, `.`, `_` et `-`, sans point initial, de 512 caractères au plus.
 
 API : [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/) · [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [createArtifactStore](../../reference/createartifactstore/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [createTransportConversations](../../reference/createtransportconversations/) · [SandboxOptions](../../reference/sandboxoptions/) · [createS3Transport](../../reference/creates3transport/).
-
-## Workspaces de fichiers
-
-Les modes de fichiers placent le stockage de contrôle sous `runtime.directory`, sans résolution de dépôt Git. Les fichiers portables exigent un Transport et un namespace explicites ; un checkpoint seul ne reconstruit pas une matérialisation perdue. Voir [la conservation des fichiers](../workspaces/#conserver-et-reprendre-les-fichiers).

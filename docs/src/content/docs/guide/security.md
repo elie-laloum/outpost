@@ -3,6 +3,12 @@ title: "Understand security boundaries"
 description: "Review the files, credentials and network access available to agents and host code."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="layers-you-set-yourself"></span>
+<span id="restrict-a-containers-access"></span>
+<span id="what-each-layer-covers"></span>
+
 ## What the agent can reach
 
 An agent can run project commands with the access provided by its sandbox. Review the environment, mounted files and credentials before starting a task; the sandbox provider determines these boundaries.
@@ -23,14 +29,14 @@ Every volume, device, network and shared cache you add widens that access; a rea
 
 Each piece of data goes only where your configuration sends it.
 
-| Data                                                | Where it goes                                                                                                                                                      |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Agent login](../authentication/)                   | Outpost reads the selected CLI’s login file on the host, never a system keychain, and copies it into the private sandbox home. Host execution gets variables only. |
-| API keys and [variables](../environment-variables/) | Into the sandbox environment. The agent can read every one of them.                                                                                                |
-| Provider and storage keys                           | Stay on the host with the [cloud provider](../cloud-sandboxes/) or [transport](../storage/) client. Agents never receive them.                                     |
-| Repository and inputs                               | Cloud sandboxes and Firecracker receive the Git history, `copies` and, on request, uncommitted work.                                                               |
-| Persisted objects                                   | A transport receives the artifacts, journals, checkpoints, transcripts and recovery data you route to it.                                                          |
-| Transcripts, logs and recovery bundles              | Kept on the host or in your transport. They can hold any secret that passed through the agent.                                                                     |
+| Data                                                | Where it goes                                                                                                                                                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Agent login](../authentication/)                   | Outpost reads the selected CLI’s login file on the host, never a system keychain, and copies it into the private sandbox home. Host execution gets variables only.                                |
+| API keys and [variables](../environment-variables/) | Into the sandbox environment. The agent can read every one of them.                                                                                                                               |
+| Provider and storage keys                           | Stay on the host with the [cloud provider](../cloud-sandboxes/) or [transport](../storage/) client. Outpost does not forward them. Local execution can still read the host environment and files. |
+| Repository and inputs                               | Cloud sandboxes and Firecracker receive the Git history, `copies` and, on request, uncommitted work.                                                                                              |
+| Persisted objects                                   | A transport receives the artifacts, journals, checkpoints, transcripts and recovery data you route to it.                                                                                         |
+| Transcripts, logs and recovery bundles              | Kept on the host or in your transport. They can hold any secret that passed through the agent.                                                                                                    |
 
 [MCP servers](../mcp-servers/) act with the agent’s authority and receive the variables you name. Their configuration holds variable names, never values. An [MCP login](../mcp-oauth/) copied into a sandbox can rotate its refresh token and sign out the host.
 
@@ -41,7 +47,7 @@ The sandbox confines the agent’s commands, not your own code. These parts run 
 <!-- features -->
 
 - [Harness tools](../harness-tools/): `execute` runs in the Outpost process and reaches the sandbox only through `context.sandbox`.
-- [Harness hooks](../harness-permissions/): Run in the Outpost process at each step of the built-in loop.
+- [Harness hooks](../harness-hooks/): Run in the Outpost process at each step of the built-in loop.
 - [Workflow callbacks](../task-dependencies/): Tasks, loop checks and gate verifiers are your code, run by the workflow engine.
 - [Preparation hooks](../environment-setup/): `workspaceReady` and `hostReady` commands run on the host, in the worktree.
 - [Returned code](../workspaces/): The agent’s commits land in your repository: review them before you build or test on the host.
@@ -103,3 +109,8 @@ Without network, a CLI agent cannot reach its model. Use the [built-in harness](
 Report a vulnerability privately through the repository’s [security policy](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/SECURITY.md), without live credentials.
 
 API: [ContainerOptions](../../reference/containeroptions/) · [EgressPolicy](../../reference/egresspolicy/) · [AgentAuthentication](../../reference/agentauthentication/) · [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/) · [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessHook](../../reference/defineharnesshook/).
+
+## Next steps
+
+- [Restrict the sandbox network](../network-restrictions/)
+- [Keep Git metadata private](../private-git/)

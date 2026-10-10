@@ -3,6 +3,8 @@ title: "Support a conversation format"
 description: "Capture and restore the native sessions of a CLI agent you add to Outpost."
 ---
 
+Add this only after the [CLI adapter](../custom-agents/) can identify and resume a session. Choose the helper matching the files the CLI actually writes; test capture and restoration against real session fixtures before advertising portable resume.
+
 ## Choose the storage format
 
 A custom CLI adapter can expose its native session storage through `storage`. Outpost then uses it to capture conversations after turns, restore them in another sandbox and archive them through a transport. Choose the helper that matches how your CLI saves sessions.
@@ -91,7 +93,6 @@ Transcripts record the directory the CLI ran in. Capture rewrites every `cwd` fi
 `createSessionBundleConversations()` packs a session directory into one JSON bundle. A Node.js script run in the sandbox does the packing; restoration unpacks the bundle in the new sandbox.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createSessionBundleConversations } from "@elie-laloum/outpost";
 
 export const storage = createSessionBundleConversations({
@@ -109,7 +110,7 @@ export const storage = createSessionBundleConversations({
   relocate: (_path, text, { cwd }) =>
     JSON.stringify({ ...JSON.parse(text), cwd }),
 });
-reportValue(storage.format);
+console.log(storage.format);
 // Example output: mycli
 ```
 

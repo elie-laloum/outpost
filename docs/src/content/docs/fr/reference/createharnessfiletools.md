@@ -19,10 +19,10 @@ Crée le jeu d’outils files. read_file renvoie jusqu’à 2000 lignes numérot
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                 | Présence  | Rôle                                                                                                                             |
-| ------------------- | ------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `FileSelectionOptions \| undefined`  | Optionnel | Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération. |
-| `options.selection` | `"git" \| "filesystem" \| undefined` | Optionnel | git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore.   |
+| Nom                 | Type                                 | Présence  | Rôle                                                                                                                           |
+| ------------------- | ------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `options`           | `FileSelectionOptions \| undefined`  | Optionnel | Choisit la sélection Git ou le système de fichiers pour lister les fichiers.                                                   |
+| `options.selection` | `"git" \| "filesystem" \| undefined` | Optionnel | git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore. |
 
 ## Retour
 

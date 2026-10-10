@@ -3,16 +3,25 @@ title: "Coordinate a change across repositories"
 description: "Update an API and its clients, review each branch and approve their integration."
 ---
 
-## What this example covers
+[Download all files](../../guide-examples/multi-repository-change.tar.gz). Extract into a dedicated directory, run `npm install`, then adapt `outpost.config.ts` using [Installation](../setup/). The commands below identify the scripts to run.
 
-<!-- features -->
+<!-- canvas -->
 
-- [Multiple repositories](../multiple-repositories/): One task per checkout, each with its own sandbox and branch.
-- [Typed responses](../typed-responses/): The API agent returns a validated description of its change.
-- [Tasks and dependencies](../task-dependencies/): The clients start after the API and read its output.
-- [Concurrency, retries and timeouts](../concurrency-and-retries/): Both clients run at the same time.
-- [Approvals](../approvals/): A maintainer decides before anything merges.
-- [Durable runs](../durable-runs/): The checkpoint keeps finished work between runs.
+- **Change API**: Keep the API change on its own branch.
+  - API repository
+  - → **Update web**: field mapping
+  - → **Update mobile**: field mapping
+- **Update web**: Use a separate branch and sandbox.
+  - Web repository
+  - → **Approve**: web complete
+- **Update mobile**: Use a separate branch and sandbox.
+  - Mobile repository
+  - → **Approve**: mobile complete
+- **Approve**: Wait for all three changes and a human decision.
+  - You
+  - → **Integrate**: approved
+- **Integrate**: Fast-forward repositories one at a time, API first; nothing is pushed.
+  - Your application
 
 ## Write the script
 
@@ -257,14 +266,13 @@ export function mergeDecision(
 ```
 
 ```ts title="rename-result.ts"
-import { reportValue } from "./reporter.ts";
 import type { WorkflowResult } from "@elie-laloum/outpost";
 
 export function showRun(result: WorkflowResult) {
-  reportValue(result.status);
+  console.log(result.status);
   // Example output: done
   for (const task of result.tasks)
-    reportValue(task.key, task.status, task.error ?? "");
+    console.log(task.key, task.status, task.error ?? "");
   // Example output: api done
 }
 ```
@@ -309,38 +317,6 @@ node rename-field.ts approve
 It prints `done`. The branches are merged into each checkout’s current branch, API first. Nothing is pushed.
 
 ## Understand the steps
-
-<!-- canvas -->
-
-- [Your script](../durable-runs/): `rename-field.ts` starts the run, then resumes it with `approve` or `reject`.
-  - host
-  - → **api**: `workflow.start()`
-  - → **approve**: decision
-- [api](../typed-responses/): Renames the field first and returns `{ from, to, notes }`, checked by `defineJsonResponse()`.
-  - workflow
-  - → **API**: brief
-  - → **Clients**: the change
-- [Clients](../concurrency-and-retries/): Both run at the same time, with `concurrency: 2`.
-  - workflow
-  - **web**: the API change in its brief
-    - → **Web**: brief
-  - **mobile**: the API change in its brief
-    - → **Mobile**: brief
-  - → **approve**: three branches
-- [approve](../approvals/): `defineApprovalTask()` saves the request and ends the process with `paused`.
-  - workflow
-  - → **merge**: approved
-- **merge**: Fast-forwards each checkout to its branch, API first.
-  - workflow
-  - → **Checkouts**: `git merge --ff-only`
-- [Sandboxes](../multiple-repositories/): One per repository, each on `outpost/rename-user-name`.
-  - sandbox
-  - **API**: `/projects/api`
-  - **Web**: `/projects/web`
-  - **Mobile**: `/projects/mobile`
-  - → **Checkouts**: commits on each branch
-- **Checkouts**: Your three repositories. Nothing is pushed.
-  - host
 
 Checkpoints hold JSON only. Each wrapper task therefore calls its isolated task’s `perform()` and keeps `repository`, `branch` and `commits`, not the dispatch result.
 

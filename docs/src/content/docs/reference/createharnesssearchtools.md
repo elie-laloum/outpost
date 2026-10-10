@@ -21,7 +21,7 @@ Create the search toolset: search runs git grep with an extended regular express
 
 | Name                | Type                                 | Presence | Meaning                                                                                                              |
 | ------------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `FileSelectionOptions \| undefined`  | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.             |
+| `options`           | `FileSelectionOptions \| undefined`  | Optional | Choose Git-aware or plain-filesystem search.                                                                         |
 | `options.selection` | `"git" \| "filesystem" \| undefined` | Optional | Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering. |
 
 ## Returns

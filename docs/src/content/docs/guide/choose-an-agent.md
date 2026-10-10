@@ -47,8 +47,6 @@ Pass the agent to `dispatch()` as `agent`. `authentication` chooses between your
 
 ## Select a model
 
-API reference: [ModelSpec](../../reference/modelspec/) and [AgentModel](../../reference/agentmodel/).
-
 `createAgent()` rejects model settings the harness cannot apply, including unsupported `reasoning` levels or `maxOutputTokens`. This check happens before execution. The model service checks your account’s access when the request runs; the API reference below describes the supported settings.
 
 API reference: [ModelSpec](../../reference/modelspec/) and [AgentModel](../../reference/agentmodel/).

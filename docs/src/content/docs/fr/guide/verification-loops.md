@@ -3,31 +3,30 @@ title: "Vérifier le travail et réessayer"
 description: "Utilisez les tests ou une revue pour accepter le travail d’un agent ou demander une nouvelle tentative."
 ---
 
+Utilisez une boucle lorsque votre code peut décider si le résultat est acceptable. Pour l’exemple avec agent et tests, préparez d’abord la [configuration](../setup/) et les [dépendances](../environment-setup/). Relancer après une erreur d’exécution et corriger après un contrôle refusé sont deux décisions distinctes.
+
+[Télécharger tous les fichiers](../../../guide-examples/fr/verification-loops.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
+
 ## Recommencer jusqu’à validation
 
 Définissez une tentative et une vérification avec `defineLoopTask()`. La vérification accepte le résultat ou renvoie des indications pour la tentative suivante. Fixez `maxRounds` pour arrêter la boucle si aucun résultat ne passe.
 
 <!-- canvas -->
 
-- **Essai**: Votre `attempt(context, feedback)` renvoie un candidat.
-  - Étapes
-  - **Premier tour**: La fonction de rappel reçoit `undefined` comme retour de la vérification.
-  - **Tours suivants**: La fonction de rappel reçoit le texte du dernier refus.
-  - → **Vérification**: puis
-- **Vérification**: Votre `check(context, candidate)` renvoie un verdict.
-  - Étapes
-  - **Accepter**: Renvoyer `{ done: true }`.
-  - **Refuser**: Renvoyer `{ done: false, feedback }` avec un texte.
-  - → **Suite**: puis
-- **Suite**: Le verdict décide.
-  - Étapes
-  - **Tour suivant**: Un refus alimente l’essai suivant.
-  - **Terminé**: Le candidat accepté devient la valeur de la tâche.
-  - **Épuisé**: Un refus au dernier tour fait échouer la tâche.
-    - `LoopTaskExhausted`
+- **Tentative**: Produire ou corriger un candidat.
+  - Agent
+  - → **Contrôle**: candidat prêt
+- **Contrôle**: Exécuter votre validation.
+  - Votre contrôle
+  - → **Tentative**: à corriger
+  - → **Résultat**: accepté
+  - → **Échec**: tours épuisés
+- **Résultat**: Renvoyer le candidat accepté.
+  - Workflow
+- **Échec**: Arrêter avec LoopTaskExhausted.
+  - Workflow
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const fix = defineLoopTask({
@@ -45,7 +44,7 @@ const fix = defineLoopTask({
 
 const result = await defineWorkflow("verified", [fix]).start();
 result.unwrap();
-reportValue(result.value(fix));
+console.log(result.value(fix));
 // Example output: { round: 2, feedback: 'Cover the missing edge case.' }
 ```
 
@@ -144,7 +143,6 @@ Lancez `run-loop.ts` : il garde la sandbox ouverte jusqu’à la fin du workflow
 <!-- tabs -->
 
 ```ts title="run-loop.ts"
-import { reportValue } from "./reporter.ts";
 import { openLoopSandbox } from "./loop-sandbox.ts";
 import { defineFix } from "./fix-loop.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
@@ -153,7 +151,7 @@ await using sandbox = await openLoopSandbox();
 export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-tests", [fix]).start();
 result.unwrap();
-reportValue(result.value(fix).summary);
+console.log(result.value(fix).summary);
 // Example output: Fixed the parser and verified the tests.
 ```
 

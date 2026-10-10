@@ -3,6 +3,7 @@ import { readFile, writeFile, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
+import { isSourceFile } from "./recipe-parity-path.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const manifest = JSON.parse(
@@ -60,9 +61,10 @@ for (const [entry, file] of entries) {
       for (const property of checker.getPropertiesOfType(part)) {
         const location =
           property.valueDeclaration ?? property.declarations?.[0];
+        if (!location) continue;
+        // TypeScript uses slash-separated source filenames on Windows too.
         if (
-          !location ||
-          !location.getSourceFile().fileName.startsWith(resolve(root, "src"))
+          !isSourceFile(resolve(root, "src"), location.getSourceFile().fileName)
         )
           continue;
         const name = property.name.replace(

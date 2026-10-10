@@ -3,6 +3,8 @@ title: "Partager des fichiers et des rapports"
 description: "Enregistrez les fichiers produits par vos tâches et transmettez leurs références entre tâches ou processus."
 ---
 
+Le stockage local ci-dessous permet d’essayer publication et lecture sans agent ni compte cloud. Enregistrez les fichiers nommés ensemble dans un projet ESM avec Outpost installé. Gardez seulement une référence dans le résultat du workflow lorsque le contenu doit survivre à l’exécution.
+
 ## Publier et lire un artefact
 
 Utilisez un artefact lorsqu’une tâche produit un fichier ou un rapport à conserver séparément de son résultat. `publishArtifact()` encode et enregistre le contenu, puis renvoie une référence que `readStoredArtifact()` utilise pour le relire.
@@ -28,7 +30,6 @@ export const store = createArtifactStore({
 ```
 
 ```ts title="publish.ts"
-import { reportValue } from "./reporter.ts";
 import { publishArtifact, readStoredArtifact } from "@elie-laloum/outpost";
 import { store, coverage } from "./coverage.ts";
 
@@ -38,13 +39,13 @@ export const reference = await publishArtifact(
   { lines: 87.5, files: ["src/parser.ts"] },
   { producer: { executionId: "nightly-42", taskKey: "coverage", attempt: 1 } },
 );
-reportValue(await readStoredArtifact(store, coverage, reference));
+console.log(await readStoredArtifact(store, coverage, reference));
 // Example output: { lines: 87.5, files: [ 'src/parser.ts' ] }
 ```
 
 <!-- check:run -->
 
-Le contenu est écrit dans `.outpost/storage/artifacts/<id>.blob`. La référence est un petit objet JSON : `id`, une empreinte SHA-256 `digest`, `size`, `contract`, `producer` et `parents`. La lecture vérifie le contrat, la taille et l’empreinte avant de décoder.
+Le contenu est conservé par le transport sous la clé logique `artifacts/<id>.blob`. Le transport local enveloppe les objets dans son répertoire `objects/` ; lisez-les par le stockage d’artefacts. La référence est un petit objet JSON : `id`, une empreinte SHA-256 `digest`, `size`, `contract`, `producer` et `parents`. La lecture vérifie le contrat, la taille et l’empreinte avant de décoder.
 
 ## Quand utiliser un artefact
 
@@ -118,14 +119,13 @@ export const summary = defineTask({
 ```
 
 ```ts title="audit-report.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { audit } from "./audit.ts";
 import { summary } from "./summary.ts";
 
 export const result = await defineWorkflow("audit", [audit, summary]).start();
 result.unwrap();
-reportValue(result.value(summary));
+console.log(result.value(summary));
 // Example output: 1 finding(s) in src/parser.ts
 ```
 

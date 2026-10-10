@@ -3,6 +3,8 @@ title: "Read execution state"
 description: "Build an interface around a run ID, a persisted snapshot and a resumable event cursor."
 ---
 
+Use this when a dashboard or another process must inspect a running workflow. Both processes need access to the same transport and execution ID. A heartbeat is an observation of activity; its expiry does not authorize restarting an owner.
+
 ## Record one execution
 
 Create a receiver with an application-selected ID and attach it to a fresh observation hub. Pass that hub to one `dispatch()` or workflow `start()`. The receiver stores a snapshot and redacted observations in your [transport](../storage/), independently of the execution journal. Save the transport in `storage.ts` so another process can read the same location.
@@ -57,20 +59,21 @@ Give the reader the same transport location and ID. It reads a single atomically
 
 ```ts title="snapshot.ts"
 import { transporter } from "./storage.ts";
-import { reportValue } from "./reporter.ts";
 import { readRun } from "@elie-laloum/outpost";
 
 export const run = await readRun({ transporter, id: "nightly_2026_10_07" });
 if (run) {
-  reportValue(
+  console.log(
     run.status,
     run.tasks.map((t) => `${t.key}: ${t.status}`),
   );
-  reportValue(run.dispatches, run.commits, run.usage, run.errors);
+  console.log(run.dispatches, run.commits, run.usage, run.errors);
 }
 ```
 
-Run `node snapshot.ts` in a second process; it reports the status and recorded fields. For the standard reporter helper, see [observability](../observability/). Snapshots reflect successfully delivered observations. `complete: false` marks detected sequence gaps or an expired running record. `complete: true` means no gap was detected; bounded sinks can still lose trailing events. There is no transactional guarantee tying this projection to a checkpoint. It cannot authorize replay, integration or resource recovery. Monetary estimates appear in `accounting.cost` when the workflow has a price table.
+Run `node snapshot.ts` in a second process to read the saved status. If prices are configured, `accounting.cost` contains the monetary estimate.
+
+`complete: false` signals a detected event gap or expired running record. `complete: true` means no gap was detected, but final events may still be lost. This view is independent of the checkpoint and never authorizes replay, integration or resource recovery.
 
 Tasks restored without previous observation history expose `usage.complete: false`; the workflow's cumulative total still comes from its checkpoint accounting.
 
@@ -81,7 +84,6 @@ First render the snapshot, then follow observations strictly after its `seq`. Ev
 ```ts title="watch.ts"
 import { transporter } from "./storage.ts";
 import { run } from "./snapshot.ts";
-import { reportValue } from "./reporter.ts";
 import { watchRun } from "@elie-laloum/outpost";
 
 if (run) {
@@ -90,12 +92,14 @@ if (run) {
     id: run.id,
     from: run.seq,
   })) {
-    reportValue(event.seq, event.scope.taskKey, event.event);
+    console.log(event.seq, event.scope.taskKey, event.event);
   }
 }
 ```
 
-Run `node watch.ts` to render the snapshot followed by subsequent events. `watchRun()` polls the transport and finishes after draining events from a settled or abandoned snapshot. Read a fresh snapshot to refresh your interface; heartbeat updates do not consume event cursors. Persist your last handled cursor to reconnect. Pass `signal` to cancel the reader without stopping execution. Missing event segments, malformed records and cursors ahead of the snapshot fail explicitly. Reads default to an 8 MiB per-object bound, which callers can lower.
+Run `node watch.ts` to read the snapshot and subsequent events. The reader polls storage until it has delivered the events of a settled or abandoned run. Save the last processed cursor to reconnect; heartbeat updates use no cursor. Cancel the reader with `signal` without stopping the run.
+
+Refresh your interface by reading the snapshot again. Missing segments, invalid records and cursors ahead of the snapshot fail explicitly. [Read limits](../../reference/watchrunoptions/) default to 8 MiB per object and can be lowered.
 
 ## Interpret heartbeats and resumes
 

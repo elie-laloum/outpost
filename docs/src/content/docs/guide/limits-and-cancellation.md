@@ -3,12 +3,13 @@ title: "Set deadlines and cancel work"
 description: "Bound agent execution time, control repeated passes and cancel from your code."
 ---
 
+Use the [setup configuration](../setup/) for these dispatch examples. Choose deadlines before starting unattended work, and decide how you will inspect a retained branch after cancellation. The [workflow budget](../budgets/) bounds cumulative work separately.
+
 ## Set task deadlines
 
 Set deadlines alongside the brief when a task needs tighter limits than the defaults. You can bound the whole agent turn and the time it may remain silent.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,13 +22,15 @@ const result = await dispatch({
   deadlineMs: 20 * 60_000,
   idleMs: 5 * 60_000,
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: Fixed the failing tests and committed the change.
 ```
 
 If the agent runs longer than 20 minutes, or stays silent for 5, the promise rejects with an [`OutpostError`](../error-handling/) of code `timeout`. The sandbox is released; the branch keeps what the agent committed.
 
 ## Choose a limit
+
+`deadlineMs` bounds a dispatch’s total duration; `idleMs` watches its silence. A task attempt uses `timeoutMs`, while the workflow sets its own deadline with `start({ timeoutMs })`. Start with a total deadline, then add silence detection only when a long quiet operation should be interrupted.
 
 API reference: [DispatchOptions](../../reference/dispatchoptions/).
 
@@ -68,39 +71,9 @@ The promise rejects with the value passed to `abort()`, here `"cancelled by user
 
 To change the agent’s direction without stopping it, [steer it](../steering/) instead.
 
-## Repeat the brief until the agent declares it done
+<span id="repeat-the-brief-until-the-agent-declares-it-done"></span>
 
-`passes` sends the brief again when a pass ends without a completion marker. Ask for the marker in the brief: Outpost does not add it.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-const result = await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/flaky-tests" },
-  brief: {
-    text: "Fix the flaky tests and commit. When every test passes, end your answer with READY_FOR_REVIEW.",
-  },
-  passes: 3,
-  until: "READY_FOR_REVIEW",
-});
-reportValue(result.completed, result.completion);
-// Example output: true READY_FOR_REVIEW
-```
-
-Each pass starts a new conversation on the same branch, so it sees the previous commits. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.
-
-API reference: [DispatchResult](../../reference/dispatchresult/).
-
-:::caution
-A marker is the agent’s declaration, not proof. Run your tests before relying on it; [Verification loops](../verification-loops/) repeat the agent until your check passes.
-:::
-
-If the agent writes its marker but keeps running, Outpost stops it `settleMs` after its last output. The result is kept and `warn` receives a message.
+For this step, follow [Repeat a brief across passes](../agent-passes/).
 
 ## Set Git and file operation deadlines
 

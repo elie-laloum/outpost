@@ -275,7 +275,7 @@ function canvas(list) {
         ),
       );
     content.push(
-      element("span", { className: ["sr-only"] }, [
+      element("span", { className: ["sr-only", "canvas-role"] }, [
         { type: "text", value: ` (${node.lanes.join(", ")})` },
       ]),
     );

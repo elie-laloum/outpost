@@ -3,6 +3,28 @@ title: "Compare agent approaches"
 description: "Run candidates on separate branches and use a check to select a result."
 ---
 
+[Download all files](../../guide-examples/compete-agents.tar.gz). Extract into a dedicated directory, run `npm install`, then adapt `outpost.config.ts` using [Installation](../setup/). The commands below identify the scripts to run.
+
+<!-- canvas -->
+
+- **Codex**: Work in its own branch and sandbox.
+  - Codex candidate
+  - → **Validate**: commits ready
+- **Claude**: Work in another branch and sandbox.
+  - Claude candidate
+  - → **Validate**: commits ready
+- **Validate**: Run each candidate’s tests.
+  - Your check
+  - → **Winner**: first accepted result
+  - → **No winner**: no accepted result
+- **Winner**: Stop other candidates and retain their branches.
+  - Workflow
+  - → **Integrate**: human approval
+- **Integrate**: Merge the selected commit without pushing.
+  - You
+- **No winner**: Inspect failures and retained work.
+  - You
+
 ## What this example covers
 
 :::caution[Experimental]
@@ -141,18 +163,17 @@ export async function askToMerge(branch: string) {
 ```
 
 ```ts title="compete.ts"
-import { reportValue } from "./reporter.ts";
 import { runCandidates } from "./run-candidates.ts";
 import { askToMerge } from "./merge-prompt.ts";
 import { mergeWinner } from "./merge-winner.ts";
 
 export const result = await runCandidates();
 for (const candidate of result.candidates)
-  reportValue(candidate.key, candidate.status, candidate.branch);
+  console.log(candidate.key, candidate.status, candidate.branch);
 // Example output: codex winner outpost/speculation/…/codex
 export const { winner, integration } = result;
 if (!winner) throw new Error(`No winner: ${result.status}`);
-reportValue(`${winner.key} wins, integration: ${integration?.status}`);
+console.log(`${winner.key} wins, integration: ${integration?.status}`);
 // Example output: codex wins, integration: undefined
 if (await askToMerge(winner.branch)) await mergeWinner(winner);
 ```
@@ -167,27 +188,7 @@ node compete.ts
 
 ## Understand the steps
 
-<!-- canvas -->
-
-- [Your script](../speculation/): `compete.ts` calls `speculate()`, prints each candidate, then asks before merging.
-  - host
-  - → **Admit**: `speculate()`
-  - → **Checkout**: `git merge`, after your answer
-- [Race](../speculation/): Every candidate starts from the checkout’s current commit; at most `concurrency` run at once.
-  - workflow
-  - **Admit**: each start consumes one of `budget.attempts`; the token limit stops them all
-    - → **Sandboxes**: the same brief
-  - **Validate**: no commits rejects; otherwise `npm test` decides
-  - **Select**: the first pass wins; the others are cancelled or skipped
-    - → **Your script**: `winner`, `integration`
-    - → **Checkout**: `git merge-tree`, read only
-- [Sandboxes](../sandbox-sessions/): One per candidate, on `outpost/speculation/<id>/<key>`; released at the end, branches kept.
-  - sandbox
-  - **codex**: fixes the bug and commits
-  - **claude**: fixes the bug and commits
-  - → **Validate**: commits, `npm test`
-- **Checkout**: Your branch. `checkSpeculationIntegration()` blocks the merge if it or the winner moved since. Outpost does not push.
-  - host
+Merging requires your approval and a final check of the winner commit and your checkout. If either changed, the merge is blocked.
 
 API reference: [SpeculationResult](../../reference/speculationresult/), [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) and [SpeculationIntegration](../../reference/speculationintegration/).
 
@@ -231,7 +232,6 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
-import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
@@ -245,7 +245,7 @@ export const result = await speculate({
   candidates,
   validate,
 });
-reportValue(result.winner?.key);
+console.log(result.winner?.key);
 // Example output: codex
 ```
 

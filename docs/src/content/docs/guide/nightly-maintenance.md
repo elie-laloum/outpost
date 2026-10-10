@@ -3,18 +3,22 @@ title: "Schedule nightly maintenance"
 description: "Schedule a maintenance workflow and resume the same run after a quota pause."
 ---
 
-## What this example covers
+[Download all files](../../guide-examples/nightly-maintenance.tar.gz). Extract into a dedicated directory, run `npm install`, then adapt `outpost.config.ts` using [Installation](../setup/). The commands below identify the scripts to run.
 
-<!-- features -->
+<!-- canvas -->
 
-- [Cron schedules](../cron-schedules/): Publish one job per night, in your time zone.
-- [Job queues and workers](../job-queues/): Run each job in a separate worker process.
-- [Durable runs](../durable-runs/): Save each finished task in a checkpoint.
-- [Quota pauses](../quota-pauses/): Pause on a usage limit instead of failing.
-- [Fallback agents](../fallback-agents/): Hand the work to a second agent at the limit.
-- [Typed responses](../typed-responses/): Validate the agent’s final report.
-
-Run a scheduler and a worker as two separate processes sharing `.outpost/jobs.sqlite`. The scheduler publishes maintenance jobs and the worker runs them. Save the two scripts beside the configuration from [Installation](../setup/).
+- **Schedule**: Queue this night’s run at 02:00 and its continuation at 07:00, Paris weekdays.
+  - Scheduler
+  - → **Update**: job claimed
+- **Update**: The agent updates dependencies, tests and commits accepted changes.
+  - Worker
+  - → **Morning report**: task completed
+  - → **Quota pause**: quota reached
+- **Quota pause**: Save progress; a later job resumes when permitted.
+  - Worker
+  - → **Update**: can resume
+- **Morning report**: Read the saved report and review the retained branch.
+  - You
 
 ## Schedule the nights
 
@@ -261,37 +265,29 @@ node scheduler.ts
 node worker.ts
 ```
 
+### Try it now
+
+Keep the worker running and run `node enqueue-now.ts` in another terminal. It publishes one job without waiting for the night. Read its result using the printed ID, as shown in [Jobs and workers](../job-queues/).
+
+```ts title="enqueue-now.ts"
+import { randomUUID } from "node:crypto";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+const id = `manual-${randomUUID()}`;
+try {
+  await queue.enqueue({
+    id,
+    handler: "nightly-deps",
+    input: { runId: id, input: null },
+  });
+  console.log(id);
+} finally {
+  queue.close();
+}
+```
+
 ## Understand the steps
-
-<!-- canvas -->
-
-- [Scheduler](../cron-schedules/): `runSchedules()` publishes a job at 02:00 and another at 07:00, Monday to Friday, Paris time.
-  - host
-  - → **Queue**: same `runId` twice
-- [Queue](../job-queues/): `.outpost/jobs.sqlite`; a job whose worker stops returns after its 30-second lease.
-  - host
-  - → **Worker**: claim
-- [Worker](../job-queues/): `defineWorkflowJob()` runs the night’s workflow under the checkpoint `deps-<date>`.
-  - host
-  - → **update**: start or resume
-  - → **Checkpoint**: finished tasks, pauses
-- [Workflow](../durable-runs/): Two tasks; `resume: "retry-incomplete"` reruns the unfinished one.
-  - workflow
-  - **update**: `defineIsolatedTask()` on `outpost/deps-<date>`
-    - → **Codex**: brief
-  - **publish**: saves the branch, the commits and the report
-    - → **Report**: `reports/deps-<date>.json`
-- [Codex](../codex/): Updates one dependency at a time, runs the tests, commits or reverts.
-  - sandbox
-  - → **Claude Code**: usage limit
-  - → **update**: `{ updated, skipped }`
-- [Claude Code](../claude-code/): `createFallbackAgent()` hands it the original brief on the same branch.
-  - sandbox
-  - → **update**: report, or a pause at its own limit
-- [Checkpoint](../durable-runs/): The 07:00 job resumes a paused task unless its reset is still beyond `maxWaitMs`.
-  - host
-- **Report**: You read it with the branch in the morning.
-  - host
 
 Claude Code can report when its limit resets; Codex never does. A run stopped by Codex alone therefore waits for the 07:00 job. With the fallback, the task pauses only when both agents hit their limit, and the reset is known only if both report one.
 
@@ -315,7 +311,7 @@ Replace `createSqliteTaskQueue()` with `createBullMQTaskQueue()` from [Redis and
 
 ### Schedule from CI
 
-Without a long-running scheduler, a scheduled CI job can call `nightly(runId).start()` with the same `checkpoint` and `onQuota` options. Store checkpoints in [S3 or R2](../object-storage/) so the next CI run resumes a paused one; see [Run in CI](../ci-automation/).
+Without a long-running scheduler, a scheduled CI job can call `nightly(runId).start()` with the same `checkpoint` and `onQuota` options. Store checkpoints in [S3 or R2](../object-storage/) and retain the worktrees and captured conversations before resuming on another runner; see [Run in CI](../ci-automation/).
 
 ## Limits
 

@@ -3,6 +3,8 @@ title: "Replay a recorded run"
 description: "Replay a journal and its recorded commits without sending a model request."
 ---
 
+Keep the starting Git commit and a replayable journal from the original task. Replay can reproduce recorded commits without a model call; it cannot recreate uncommitted edits or arbitrary external effects. For new workflow tests, also consider the [offline test kit](../testing-workflows/).
+
 ## Record a run and replay it
 
 Record a dispatch in a [journal](../journals/), then use a replay agent to reproduce its events and recorded commits. The replay sends no model requests; its usage fields reproduce the original counters rather than new consumption.
@@ -19,6 +21,7 @@ export const brief = { text: "Fix the failing parser test." };
 ```
 
 ```ts title="record.ts"
+import { writeFile } from "node:fs/promises";
 import { dispatch, readJournal } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { brief, transporter } from "./record-settings.ts";
@@ -35,15 +38,16 @@ export const journal = await readJournal({
   transporter,
   reference: recorded.logReference!,
 });
+await writeFile("recorded-journal.json", JSON.stringify(journal));
 ```
 
 ```ts title="replay.ts"
-import { reportValue } from "./reporter.ts";
 import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
-import { journal } from "./record.ts";
+import { readFile } from "node:fs/promises";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { brief } from "./record-settings.ts";
 
+const journal = JSON.parse(await readFile("recorded-journal.json", "utf8"));
 export const replaying = createReplayAgent({ journal });
 export const replayed = await dispatch({
   repository,
@@ -52,9 +56,11 @@ export const replayed = await dispatch({
   brief,
   branch: { mode: "named", name: "replayed-fix" },
 });
-reportValue(replayed.commits, replaying.remainingTurns);
+console.log(replayed.commits, replaying.remainingTurns);
 // Example output: [ { oid: '8f3a21c…', subject: 'Fix the failing test' } ] 0
 ```
+
+Run `node record.ts` once. Then `node replay.ts` reads `recorded-journal.json` from the same directory without importing the recording script. Keep the starting commit unchanged between the two commands.
 
 Both branches start from the same commit, so the replayed commits have the same ids as the recorded ones. From another commit with the same tree, trees and messages match but ids differ.
 
@@ -79,30 +85,10 @@ When the history cannot be recorded, the event keeps the baseline, gives the rea
 
 Pass the journal to `createReplayAgent()` and use the result as the `agent` of a `dispatch()` with the same brief. It replays turn by turn, in recorded order.
 
-<!-- canvas -->
-
-- **Check**: Before each turn.
-  - Steps
-  - **Compare the prompt**: The rendered prompt must equal the recorded one.
-  - → **Re-emit**: then
-- **Re-emit**: Instead of calling a model.
-  - Steps
-  - **Replay the events**: Agent or harness events, then the recorded text and usage. A `verbose` journal also replays raw lines and deltas.
-    - `observe`
-  - → **Rebuild**: then
-- **Rebuild**: On the last turn of the dispatch.
-  - Steps
-  - **Check the baseline**: The workspace tree must match the recorded baseline.
-    - sandbox
-  - **Apply each patch**: `git apply --index`, then compare the resulting tree.
-    - sandbox
-  - **Recreate the commit**: With the recorded identities, dates and message.
-    - sandbox
-  - → **Finish**: then
-- **Finish**: Like the recorded turn.
-  - Steps
-  - **Rethrow the failure**: A turn that failed when recorded throws its error code and message.
-  - **Return the result**: Otherwise the dispatch returns the recorded text, usage and commits.
+1. Compare the rendered prompt with the recorded prompt before each turn; a mismatch refuses replay.
+2. Replay recorded events, text and usage without calling a model. A verbose journal also replays raw lines and deltas.
+3. On the last turn, verify the workspace baseline, apply and check each patch, then recreate commits with their recorded metadata.
+4. Return the recorded result, or rethrow its recorded error code and message.
 
 Commits are rebuilt through the sandbox, so replays work with cloud sandboxes too. The sandbox needs `git`.
 
@@ -119,7 +105,6 @@ When the replay differs from its journal, it throws [`ReplayDivergence`](../../r
 API reference: [ReplayDivergenceKind](../../reference/replaydivergencekind/).
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   dispatch,
   createReplayAgent,
@@ -136,7 +121,7 @@ try {
   });
 } catch (error) {
   if (!(error instanceof ReplayDivergence)) throw error;
-  reportValue(error.kind, error.turn, error.expected, error.actual);
+  console.log(error.kind, error.turn, error.expected, error.actual);
   // Example output: prompt 0 Expected brief Actual brief
 }
 ```

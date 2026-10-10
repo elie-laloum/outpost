@@ -3,6 +3,8 @@ title: "Rédiger les consignes de l’agent"
 description: "Confiez une tâche à un agent avec du texte ou un modèle Markdown."
 ---
 
+Utilisez la [configuration initiale](../setup/). Enregistrez les deux fichiers ci-dessous ensemble et lancez `node feature.ts` après avoir adapté la demande et la commande de test au projet. Examinez ensuite la réponse et la branche.
+
 ## Envoyer du texte ou un fichier
 
 Le `brief` contient les consignes envoyées à l’agent. Utilisez `text` pour une demande écrite dans votre script, ou `file` pour des consignes que vous souhaitez conserver et réutiliser en Markdown.
@@ -28,7 +30,6 @@ Run `npm test` and commit your change.
 ```
 
 ```ts title="feature.ts"
-import { reportValue } from "./reporter.ts";
 import { fileURLToPath } from "node:url";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
@@ -43,64 +44,17 @@ const result = await dispatch({
     values: { FEATURE: "email validation" },
   },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: Added email validation to the signup form and committed it.
 ```
 
 Un `file` relatif se résout depuis le répertoire de travail du processus. Construisez le chemin à partir de `import.meta.url` pour lancer le script depuis n’importe où.
 
-| Emplacement       | Rempli avec                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| `{{FEATURE}}`     | `values.FEATURE` : une chaîne, un nombre fini ou un booléen.                         |
-| `{{WORK_BRANCH}}` | La branche sur laquelle travaille l’agent (voir [Dépôt et branche](../workspaces/)). |
-| `{{BASE_BRANCH}}` | La branche active dans votre dépôt au démarrage de la tâche.                         |
-
 Un emplacement sans valeur fait échouer la tâche avec le code d’erreur `prompt` avant le lancement de l’agent. Les valeurs que le fichier n’utilise pas sont signalées à votre fonction de rappel `warn`.
 
-## Insérer la sortie d’une commande
+<span id="insérer-la-sortie-dune-commande"></span>
 
-Écrivez `` !`command` `` pour remplacer le fragment par ce qu’affiche la commande. Servez-vous-en pour transmettre à l’agent le journal d’un test en échec ou l’historique récent.
-
-```md title="fix-test.md"
-Fix the failing test in {{TEST_FILE}}. Its current output:
-
-!`npx vitest run {{TEST_FILE}} 2>&1 | tail -n 40`
-
-Recent commits:
-
-!`git log --oneline -5`
-```
-
-Les commandes s’exécutent dans la sandbox, dans la copie de travail de l’agent, avec `sh -c`. Avant chaque passe, toutes les commandes du brief tournent en parallèle.
-
-<!-- features -->
-
-- **Sortie** : Seule la sortie standard est insérée ; ajoutez `2>&1` pour inclure les erreurs.
-- **Échec** : Un code de sortie non nul fait échouer la tâche avec le code `prompt` et arrête les autres commandes.
-- **Délai** : `expansionMs` borne chaque commande ; la valeur par défaut est de 30 secondes.
-
-```ts
-import { fileURLToPath } from "node:url";
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  expansionMs: 60_000,
-  brief: {
-    file: fileURLToPath(new URL("fix-test.md", import.meta.url)),
-    values: { TEST_FILE: "test/signup.test.ts" },
-  },
-});
-```
-
-:::caution
-Les commandes exécutent du code. Gardez la maîtrise des fichiers de modèle et ne passez à une commande que des `values` de confiance : elles sont insérées sans échappement.
-:::
-
-Les valeurs ne peuvent pas ajouter de commandes : Outpost repère les fragments `` !` `` dans le fichier avant de remplir les emplacements.
+Pour cette étape, suivez [Inclure la sortie d’une commande dans un brief](../prompt-commands/).
 
 ## Demander à l’agent, contrôler dans le code
 

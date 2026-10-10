@@ -139,24 +139,10 @@ La file enregistre chaque résultat dans son propre état Redis, puis marque le 
 
 Les réglages de connexion sont lus une seule fois, à l’ouverture de la file. Faites-les tourner en remplaçant les processus :
 
-<!-- canvas -->
-
-- **Préparer** : Avant tout redémarrage.
-  - Étapes
-  - **Ajouter un second utilisateur ACL** : Avec les mêmes permissions que l’actuel.
-    - Redis
-  - → **Déployer**: puis
-- **Déployer** : Anciens et nouveaux processus partagent la file.
-  - Étapes
-  - **Démarrer les nouveaux processus** : Workers et producteurs avec le nouvel identifiant, les mêmes `name` et `prefix`.
-    - `createBullMQTaskQueue()`
-  - → **Retirer**: puis
-- **Retirer** : Une fois les nouveaux processus démarrés.
-  - Étapes
-  - **Arrêter les anciens workers** : Annuler leur signal, attendre `runQueueWorker()`, puis `close()`.
-    - `runQueueWorker()`
-  - **Révoquer** : Supprimer l’ancien utilisateur ACL et déconnecter ses clients restants.
-    - Redis
+1. Créez un second utilisateur ACL Redis avec les mêmes permissions.
+2. Démarrez les producteurs et workers avec ses identifiants, en gardant les mêmes `name` et `prefix` de file.
+3. Arrêtez les anciens workers : annulez leur signal, attendez `runQueueWorker()`, puis fermez leurs connexions à la file.
+4. Supprimez l’ancien utilisateur ACL et déconnectez ses clients restants.
 
 Un identifiant révoqué pendant qu’un worker tourne encore lui fait perdre son bail. Un autre worker exécute alors le job de nouveau avec la même `idempotencyKey` : votre service d’effets doit dédupliquer ([Files de jobs et workers](../job-queues/)).
 

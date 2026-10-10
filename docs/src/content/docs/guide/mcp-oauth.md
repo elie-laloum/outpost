@@ -72,24 +72,9 @@ Declare both variables on the sandbox provider or in `.outpost/.env` ([Environme
 
 The HTTP bridge in the sandbox obtains the token itself, so the secret stays there and [outbound rules](../network-restrictions/) apply to the token requests.
 
-<!-- canvas -->
-
-- **Discover**: From the MCP server URL.
-  - Steps
-  - **Read the metadata**: Protected resource metadata, then the authorization server metadata and its token endpoint.
-    - sandbox
-  - → **Request**: then
-- **Request**: One `client_credentials` grant.
-  - Steps
-  - **Authenticate the client**: With `client_secret_basic`, or `client_secret_post` when the server advertises only that.
-    - sandbox
-  - **Bind the token**: The server URL is sent as `resource`.
-    - sandbox
-  - → **Reuse**: then
-- **Reuse**: Until the token expires.
-  - Steps
-  - **Retry on 401**: Discover again, request a new token and retry the request once.
-    - sandbox
+1. Inside the sandbox, discover the protected resource and authorization server metadata from the MCP URL.
+2. Request a `client_credentials` token with that URL as `resource`. Use `client_secret_basic`, or `client_secret_post` if the server advertises only that method.
+3. Reuse the token until expiry. On a `401`, rediscover the server, obtain a new token and retry once.
 
 ## Limits
 

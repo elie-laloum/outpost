@@ -3,9 +3,13 @@ title: "Automate your runs"
 description: "Choose CI, queues, schedules or webhooks to start work without an interactive session."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="run-work-as-it-arrives"></span>
+
 ## Choose what starts the work
 
-Choose how work should start: a CI job, a queued request, a schedule or a verified event. The workflow still runs from your TypeScript code; the entry point decides when to submit it.
+Choose how work should start: a CI job, a queued request, a schedule or a verified event. Declare the workflow in TypeScript or [YAML](../recipe-services/); the entry point decides when to submit it.
 
 <!-- features -->
 
@@ -24,34 +28,8 @@ Choose how work should start: a CI job, a queued request, a schedule or a verifi
   - GitHub
   - GitLab
   - Slack
-- [Durable runs](../durable-runs/): Each job runs under a checkpoint, so a restart resumes instead of restarting.
+- [Durable runs](../durable-runs/): Use `defineWorkflowJob()` to checkpoint a workflow job. An ordinary queue handler does not acquire a checkpoint automatically.
   - checkpoints
-
-## Run work as it arrives
-
-A worker process registers the handlers it knows and runs one job at a time until its signal aborts. Producers never send code, only a handler name and JSON input.
-
-```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
-
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const stop = new AbortController();
-process.once("SIGINT", () => stop.abort());
-try {
-  await runQueueWorker({
-    queue,
-    worker: "worker-1",
-    signal: stop.signal,
-    handlers: {
-      count: (input) => ({ value: Array.isArray(input) ? input.length : 0 }),
-    },
-  });
-} finally {
-  queue.close();
-}
-```
-
-Wrap the workflow itself in `defineWorkflowJob()` to get a checkpointed run per job, keyed by the job's `runId`. Schedules and webhooks publish into the same queue, so the worker is the only process that runs agents.
 
 ## Compare entry points
 

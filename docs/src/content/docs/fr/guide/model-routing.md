@@ -1,7 +1,9 @@
 ---
 title: "Router le modèle à chaque étape"
-description: "Choisir entre les modèles d’un provider avec une décision System One."
+description: "Choisir entre les modèles d’un fournisseur avec une décision System One."
 ---
+
+Connectez d’abord un [fournisseur de modèle](../model-providers/) et un [service de décision](../decisions/). Le routage choisit un candidat de ce fournisseur à chaque étape ; il ne change pas de sandbox et n’authentifie pas d’autres agents CLI.
 
 ## Déclarer le routage
 
@@ -79,13 +81,13 @@ export const agent = createAgent({
 });
 ```
 
-Passez cet agent à votre [dispatch](../first-request/) avec le provider de sandbox configuré. Les clés d’API restent sur l’hôte ; les outils utilisent la sandbox du dispatch. Un sous-agent peut déclarer son propre harness routé, avec son historique séparé et les budgets cumulés de ses ancêtres.
+Passez cet agent à votre [dispatch](../first-request/) avec le fournisseur de sandbox configuré. Les clés d’API restent sur l’hôte ; les outils utilisent la sandbox du dispatch. Un sous-agent peut déclarer son propre harness routé, avec son historique séparé et les budgets cumulés de ses ancêtres.
 
 ## Fournir un état utile
 
 Le routage est évalué une fois par étape, après compaction et avant `before-model`. L’état par défaut contient les instructions de session, messages visibles, outils disponibles, numéro d’étape et modèle actif. Les blocs de raisonnement opaques sont exclus. Les résultats d’outils et messages de réparation de réponse structurée influencent ainsi la décision suivante.
 
-Les instructions de session sont résolues une seule fois. La compaction utilise le modèle actif avant le nouveau routage. Les hooks et outils reçoivent le modèle sélectionné. La sélection préserve la sandbox, l’historique et les appels d’outils ; les règles existantes du provider filtrent le raisonnement rejouable incompatible.
+Les instructions de session sont résolues une seule fois. La compaction utilise le modèle actif avant le nouveau routage. Les hooks et outils reçoivent le modèle sélectionné. La sélection préserve la sandbox, l’historique et les appels d’outils ; les règles existantes du fournisseur filtrent le raisonnement rejouable incompatible.
 
 ```ts title="focused-routing.ts"
 import { defineHarnessModelRouting } from "@elie-laloum/outpost";
@@ -118,7 +120,7 @@ Les quotas, annulations, configurations incorrectes, réponses invalides et tron
 
 ## Observer et reprendre
 
-Les observations `decision` résument les requêtes du routeur ; les événements d’agent `model-route` indiquent chaque sélection et son motif. L’état des requêtes et les réponses détaillées exigent une observation verbose. L’usage est compté une fois, indépendamment des sinks, et s’ajoute aux budgets du harness, de ses ancêtres et du workflow.
+Les observations `decision` résument les requêtes du routeur ; les événements d’agent `model-route` indiquent chaque sélection et son motif. L’état des requêtes et les réponses détaillées exigent une observation verbose. L’usage est compté une fois, indépendamment des récepteurs, et s’ajoute aux budgets du harness, de ses ancêtres et du workflow.
 
 Les transcripts routés utilisent la version 2, avec le format de stockage `harness`. La version 1 reste lisible. Capture, reprise et fork préservent les messages ; l’étape suivante effectue une nouvelle décision sans rejouer les appels terminés. Le replay du journal restitue les sélections et observations de décision enregistrées sans contacter le routeur ; les données détaillées exigent toujours un hub verbose. Voir l’[observabilité](../observability/) et les [conversations](../conversations/).
 

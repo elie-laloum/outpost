@@ -1,20 +1,27 @@
 ---
-title: "Examiner une pull request à la demande"
+title: "Enregistrer une revue sur ajout de label"
 description: "Utilisez un webhook vérifié pour mettre en file une revue par un agent lorsqu’un label est ajouté."
 ---
 
 Enregistrez le script à côté de la configuration de la page [Installation](../setup/) et lancez-le avec Node.js. Il reçoit les événements de label vérifiés et publie des jobs de revue ; le worker exécute l’agent séparément.
 
-## Ce que montre l’exemple
+Le résultat de cet exemple est un rapport JSON dans `<repository>/.outpost/reviews/`, pas un commentaire GitHub. Préparez un clone local contenant les commits de base et de tête de la pull request. Définissez `REVIEW_REPOSITORY` avec son nom `owner/repository`, adaptez l’acteur autorisé dans `webhook-source.ts`, puis configurez le webhook et lancez les deux processus. Le worker affiche le chemin du rapport. Une publication GitHub peut être ajoutée ensuite, avec sa propre déduplication persistante.
 
-<!-- features -->
+[Télécharger tous les fichiers](../../../guide-examples/fr/review-on-label.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
 
-- [Webhooks](../webhooks/): Vérifier la livraison et transformer l’événement de label en job.
-- [Files de jobs et workers](../job-queues/): Transmettre le job du serveur à un processus worker.
-- [Exécutions durables](../durable-runs/): Enregistrer la sortie de chaque tâche sous le `runId` du job.
-- [Tâches et dépendances](../task-dependencies/): Récupérer, relire, puis publier.
-- [Réponses typées](../typed-responses/): Valider le verdict de l’agent.
-- [Dépôt et branche](../workspaces/): Faire partir la branche de revue du commit de tête de la pull request.
+<!-- canvas -->
+
+- **Recevoir le label**: Vérifier la signature, le label de relecture et la personne autorisée.
+  - Serveur HTTP
+  - → **Mettre en file**: validée
+- **Mettre en file**: Le serveur HTTP enregistre un job dans la file partagée.
+  - File
+  - → **Relire le diff**: job réservé
+- **Relire le diff**: L’agent examine la pull request dans sa sandbox.
+  - Worker
+  - → **Enregistrer le verdict**: verdict validé
+- **Enregistrer le verdict**: Écrire le rapport JSON local avec une clé évitant les doublons.
+  - Worker
 
 ## Écrire le script
 
@@ -76,7 +83,6 @@ export const on: TriggerRoute["on"] = (event) => {
 ```
 
 ```ts title="server.ts"
-import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
 import { source } from "./webhook-source.ts";
 import { on } from "./review-trigger.ts";
@@ -88,7 +94,7 @@ export const server = await serveTriggers({
   routes: [{ path: "/github", source, on }],
   onError: (error, failure) => console.error(failure, error),
 });
-reportValue(`Listening on ${server.url}/github`);
+console.log(`Listening on ${server.url}/github`);
 // Example output: Listening on http://127.0.0.1:8787/github
 process.once("SIGINT", async () => {
   await server.close();
@@ -96,7 +102,7 @@ process.once("SIGINT", async () => {
 });
 ```
 
-Validez les données du job et le verdict, puis fournissez les opérations GitHub de votre application.
+Validez les données du job et le verdict. Les effets ci-dessous vérifient les commits locaux et enregistrent un rapport JSON sans appeler l’API GitHub.
 
 Le schéma explicite de `verdict-schema.ts` décrit le JSON d’entrée injecté dans le prompt ; `verdict.ts` valide la réponse reçue.
 
@@ -170,18 +176,52 @@ export function readPullRequest(input: WorkflowJson): PullRequest {
 ```
 
 ```ts title="github-effects.ts"
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, writeFile, readFile, link, rm } from "node:fs/promises";
+import { join } from "node:path";
 import type { PullRequest, Verdict } from "./review.types.ts";
 import { repository } from "./outpost.config.ts";
 
-export async function fetchCommits(pull: PullRequest): Promise<void> {
-  throw new Error(`Fetch ${pull.base} and ${pull.head} into ${repository}`);
+const exec = promisify(execFile);
+export async function requireCommits(pull: PullRequest): Promise<void> {
+  if (pull.repository !== process.env.REVIEW_REPOSITORY)
+    throw new Error("Pull request does not match REVIEW_REPOSITORY");
+  for (const oid of [pull.base, pull.head]) {
+    if (!/^[a-f0-9]{40,64}$/.test(oid)) throw new Error("Invalid commit ID");
+    await exec("git", ["-C", repository, "cat-file", "-e", `${oid}^{commit}`]);
+  }
 }
-export async function postVerdict(
+export async function saveVerdict(
   pull: PullRequest,
   result: Verdict,
   idempotencyKey: string,
 ): Promise<void> {
-  throw new Error(`Post ${result.approved} on #${pull.number}`);
+  const directory = join(repository, ".outpost", "reviews");
+  await mkdir(directory, { recursive: true });
+  const key = createHash("sha256").update(idempotencyKey).digest("hex");
+  const destination = join(directory, `${key}.json`);
+  const temporary = join(directory, `${key}.${randomUUID()}.tmp`);
+  const body = JSON.stringify({ pull, result }, null, 2) + "\n";
+  await writeFile(temporary, body, { flag: "wx", mode: 0o600 });
+  try {
+    try {
+      await link(temporary, destination);
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        !("code" in error) ||
+        error.code !== "EEXIST"
+      )
+        throw error;
+      if ((await readFile(destination, "utf8")) !== body)
+        throw new Error("Verdict receipt differs");
+    }
+  } finally {
+    await rm(temporary, { force: true });
+  }
+  console.log(destination);
 }
 ```
 
@@ -199,7 +239,7 @@ export function pullBrief(pull: PullRequest) {
 }
 ```
 
-Lancez la revue sur le commit demandé et publiez le verdict avec des tâches dépendantes.
+Lancez la revue sur le commit demandé puis enregistrez le verdict avec une tâche dépendante.
 
 <!-- tabs -->
 
@@ -258,7 +298,7 @@ export function reviewTask(pull: PullRequest, fetch: Task<void>) {
 import type { PullRequest } from "./review.types.ts";
 import { reviewTask } from "./pull-review.ts";
 import { defineTask } from "@elie-laloum/outpost";
-import { postVerdict } from "./github-effects.ts";
+import { saveVerdict } from "./github-effects.ts";
 
 export function postTask(
   pull: PullRequest,
@@ -268,7 +308,7 @@ export function postTask(
     key: "post",
     after: [review],
     perform: (context) =>
-      postVerdict(pull, context.value(review), context.idempotencyKey),
+      saveVerdict(pull, context.value(review), context.idempotencyKey),
   });
 }
 ```
@@ -276,12 +316,15 @@ export function postTask(
 ```ts title="review-workflow.ts"
 import type { PullRequest } from "./review.types.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
-import { fetchCommits } from "./github-effects.ts";
+import { requireCommits } from "./github-effects.ts";
 import { reviewTask } from "./pull-review.ts";
 import { postTask } from "./post-review.ts";
 
 export function reviewWorkflow(pull: PullRequest) {
-  const fetch = defineTask({ key: "fetch", perform: () => fetchCommits(pull) });
+  const fetch = defineTask({
+    key: "fetch",
+    perform: () => requireCommits(pull),
+  });
   const review = reviewTask(pull, fetch);
   const post = postTask(pull, review);
   return defineWorkflow("review-pull-request", [fetch, review, post]);
@@ -335,44 +378,16 @@ Lancez le serveur HTTP et le worker dans deux terminaux distincts. Fournissez au
 
 ```sh
 GITHUB_WEBHOOK_SECRET=… node server.ts
-node worker.ts
+REVIEW_REPOSITORY=owner/repository node worker.ts
 ```
 
 Pointez le webhook du dépôt vers le chemin `/github` du serveur, derrière un proxy HTTPS, avec le même secret et l’événement « Pull requests ».
 
 ## Comprendre les étapes
 
-Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
+, dans le sens de la flèche.
 
-<!-- canvas -->
-
-- **GitHub**: Envoie une livraison signée quand un label est posé sur une pull request, et attend la réponse 10 secondes.
-  - GitHub
-  - → **Serveur**: webhook
-- [Serveur](../webhooks/): `serveTriggers()` vérifie la signature (`401` sinon), le label `outpost:review` et l’acteur dans `reviewers`.
-  - hôte
-  - → **File**: job `review`
-- [File](../job-queues/): `.outpost/jobs.sqlite`, partagée par le serveur et le worker.
-  - hôte
-  - → **Worker**: prise en charge
-- [Worker](../job-queues/): `runQueueWorker()` prend le job ; `defineWorkflowJob()` exécute le workflow sous son `runId`.
-  - hôte
-  - → **fetch**: démarrage
-  - → **Checkpoint**: sorties des tâches
-- [Workflow](../task-dependencies/): Trois tâches, l’une après l’autre.
-  - workflow
-  - **fetch**: votre code apporte les commits de base et de tête dans le clone
-  - **review**: `defineIsolatedTask()` sur une branche au commit de tête
-    - → **Sandbox**: brief
-  - **post**: votre code publie le verdict, dédupliqué par `context.idempotencyKey`
-    - → **GitHub**: verdict
-- [Sandbox](../choose-a-sandbox/): L’agent lit le diff de la pull request, pas votre checkout.
-  - sandbox
-  - → **review**: `{ approved, findings }` vérifié
-- [Checkpoint](../durable-runs/): Le même label sur le même commit restaure l’exécution terminée.
-  - hôte
-
-Le `runId` nomme le commit de tête. Rajouter le label sur le même commit restaure l’exécution terminée depuis son checkpoint : rien n’est relu ni publié deux fois. Un nouveau commit lance une nouvelle revue.
+Le `runId` nomme le commit de tête. Rajouter le label sur le même commit restaure l’exécution terminée depuis son checkpoint : les tâches terminées sont réutilisées. Un nouveau commit lance une nouvelle revue. Le reçu local détecte aussi une écriture répétée avec un contenu différent.
 
 `review` ne renvoie que `.value` : les checkpoints contiennent du JSON, pas les méthodes d’un résultat de dispatch ([D’une tâche à un workflow](../first-workflow/)).
 
@@ -380,17 +395,17 @@ Le `runId` nomme le commit de tête. Rajouter le label sur le même commit resta
 
 ### Merge requests GitLab
 
-Ajoutez une route `/gitlab` avec `createGitlabWebhook({ signingToken })`, qui vérifie un corps signé. `labelAdded()` reconnaît aussi les merge requests : lisez la tête dans `object_attributes.last_commit.id`, la base dans `object_attributes.target_branch`, et listez des acteurs `gitlab:<username>` dans `reviewers`.
+Pour GitLab, utilisez `createGitlabWebhook({ signingToken })` et autorisez des acteurs `gitlab:<username>`. Adaptez la résolution des entrées : l’événement nomme une branche cible, alors que cet exemple exige un identifiant de commit de base vérifié et disponible dans le clone local. `requireCommits` refuse un nom de branche.
 
 ### Une commande Slack
 
-Ajoutez une route `/slack` avec `createSlackSource({ signingSecret })` et `commandIssued(event, "/review")`, dont le `text` désigne la pull request. Slack ne transmet aucun commit : publiez `{ repository, number }` et laissez `fetch` renvoyer `{ base, head }`, que `review` lira.
+Ajoutez une route `/slack` avec `createSlackSource({ signingSecret })` et `commandIssued(event, "/review")`, dont le `text` désigne la pull request. Slack ne transmet aucun commit : ajoutez une résolution fiable de `{ repository, number }`, récupérez les commits de base et de tête, puis construisez les entrées de la revue. La fonction `requireCommits` existante vérifie seulement les commits locaux.
 
 ### Une file Redis
 
 Remplacez `createSqliteTaskQueue()` dans la configuration de la file par [`createBullMQTaskQueue()`](../redis-workers/) pour exécuter le serveur et les workers sur des machines distinctes. Plusieurs machines de workers demandent aussi un stockage de checkpoints partagé ([S3 et R2](../object-storage/)).
 
-### Approuver avant de publier
+### Approuver avant d’enregistrer ou publier
 
 Insérez une [étape d’approbation](../approvals/) entre `review` et `post`. Le job se termine alors en `paused`, avec l’étape d’approbation en attente dans sa valeur ; soumettez la décision à la même exécution comme dans [Files de jobs et workers](../job-queues/).
 
@@ -400,7 +415,7 @@ import type { Task } from "@elie-laloum/outpost";
 
 type Verdict = { approved: boolean; findings: string[] };
 declare const review: Task<Verdict>;
-declare function postVerdict(verdict: Verdict, key: string): Promise<void>;
+declare function saveVerdict(verdict: Verdict, key: string): Promise<void>;
 
 const approve = defineApprovalTask({
   key: "approve",
@@ -412,7 +427,7 @@ const post = defineTask({
   key: "post",
   after: [review, approve],
   perform: (context) =>
-    postVerdict(context.value(review), context.idempotencyKey),
+    saveVerdict(context.value(review), context.idempotencyKey),
 });
 ```
 
@@ -420,6 +435,6 @@ const post = defineTask({
 
 - Le worker relit le clone désigné par `repository` ; associez `pull.repository` à un clone pour servir plusieurs dépôts.
 - « Do not edit files » est une instruction donnée à l’agent. Sa branche de revue n’est jamais intégrée ni poussée ; supprimez les branches `outpost/review-*` dont vous n’avez plus besoin.
-- Un worker interrompu peut réexécuter `post` : faites dédupliquer `postVerdict` sur sa clé ([Files de jobs et workers](../job-queues/)).
+- Un worker interrompu peut réexécuter `post` : la fonction `saveVerdict` fournie déduplique sur sa clé ([Files de jobs et workers](../job-queues/)).
 
 API : [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [labelAdded](../../reference/labeladded/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [defineIsolatedTask](../../reference/defineisolatedtask/) · [defineJsonResponse](../../reference/definejsonresponse/).

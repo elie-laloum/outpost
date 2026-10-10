@@ -3,11 +3,13 @@ title: "Detect an agent repeating itself"
 description: "Stop, warn or redirect an agent when decoded tools or file changes repeat."
 ---
 
-## Stop repeated activity
+<span id="stop-repeated-activity"></span>
+
+## Observe repeated activity
 
 An agent can keep producing output while repeating the same commands or edits. Enable the activity watchdog alongside [time limits](../limits-and-cancellation/) to detect these repetitions. Use your agent and sandbox configuration from [setup](../setup/).
 
-This dispatch stops when the same decoded tool call or file-change payload occurs three times among the last twenty activity events. The occurrences can have other calls between them.
+Begin with warnings: legitimate polling and test retries can also repeat. This dispatch reports when the same decoded tool call or file-change payload occurs three times among the last twenty activity events. The occurrences can have other calls between them.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
@@ -21,12 +23,12 @@ await dispatch({
   brief: { text: "Fix the failing tests and commit the change." },
   watchdog: {
     repetition: { window: 20, maxRepeats: 3 },
-    onStuck: "stop",
+    onStuck: "warn",
   },
 });
 ```
 
-Outpost emits `stuck`, stops the agent and rejects with an `OutpostError` whose code is `stuck`. A `stopped` event gives the same reason. Cold dispatch releases its sandbox and retains work for [recovery](../recovery/); a warm session remains usable. Files and commits already written stay in place.
+To enforce a stop after observing the behavior, replace `warn` with `stop`. Outpost emits `stuck`, stops the agent and rejects with an `OutpostError` whose code is `stuck`. A `stopped` event gives the same reason. Cold dispatch releases its sandbox and retains work for [recovery](../recovery/); a warm session remains usable. Files and commits already written stay in place.
 
 ## Redirect the agent
 
@@ -66,7 +68,9 @@ This is an exact repetition heuristic, not a proof that the agent has made no pr
 
 Object key order is ignored; strings and array order remain significant. Call IDs identify protocol duplicates but do not distinguish otherwise identical actions. Subagent and parent-call scopes do distinguish actions. Text, tool output and tool results do not count toward the window. Detection compares decoded activity before redaction and retains fingerprints rather than full inputs.
 
-File-change events expose only what the adapter reports: identical paths and change kinds may match even when the file contents differ. The watchdog does not read files or compare Git diffs. A missing payload matches other missing payloads, separately from `null`. Other non-JSON payloads advance the window without matching. Agents that expose no tool or file-change events cannot trigger this detector. Replay agents refuse the option.
+The detector compares reported events, not file contents or Git diffs. Identical paths and change kinds can therefore match even if contents differ. An agent without tool or file-change events cannot trigger detection; replay agents refuse the option.
+
+Missing payloads match each other but not `null`. Other non-JSON payloads advance the comparison window without matching.
 
 The offline repository example in `examples/59-repetition-watchdog/` exercises stopping, warning and steering with a simulated model and real local commands, without credentials or paid requests. Native CLI and cloud runs remain to be validated live.
 

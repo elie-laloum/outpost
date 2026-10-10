@@ -21,7 +21,7 @@ Erreur enregistrée quand un usage signalé est marqué incomplet alors que le b
 
 | Nom         | Type                  | Présence  | Rôle                                                                                                    |
 | ----------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
-| `dimension` | `"usage"`             | Optionnel | Toujours usage : la comptabilité des tokens est incomplète et le budget n’a pas de repli en tentatives. |
+| `dimension` | `"usage"`             | Requis    | Toujours usage : la comptabilité des tokens est incomplète et le budget n’a pas de repli en tentatives. |
 | `name`      | `string`              | Requis    | Nom d’erreur stable WorkflowUsageUnavailable.                                                           |
 | `message`   | `string`              | Requis    | Explication lisible de l’échec.                                                                         |
 | `stack`     | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                                        |

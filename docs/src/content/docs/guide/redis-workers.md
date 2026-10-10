@@ -139,24 +139,10 @@ The queue records each result in its own Redis state first, then marks the BullM
 
 Connection settings are read once, when the queue opens. Rotate them by replacing processes:
 
-<!-- canvas -->
-
-- **Prepare**: Before any restart.
-  - Steps
-  - **Add a second ACL user**: With the same permissions as the current one.
-    - Redis
-  - → **Deploy**: then
-- **Deploy**: Old and new processes share the queue.
-  - Steps
-  - **Start new processes**: Workers and producers with the new credential, the same `name` and `prefix`.
-    - `createBullMQTaskQueue()`
-  - → **Retire**: then
-- **Retire**: Once the new processes run.
-  - Steps
-  - **Stop old workers**: Abort their signal, await `runQueueWorker()`, then `close()`.
-    - `runQueueWorker()`
-  - **Revoke**: Delete the old ACL user and disconnect its remaining clients.
-    - Redis
+1. Create a second Redis ACL user with the same permissions.
+2. Start producers and workers with the new credentials and the same queue `name` and `prefix`.
+3. Stop old workers: abort their signal, await `runQueueWorker()`, then close their queue connections.
+4. Delete the old ACL user and disconnect its remaining clients.
 
 A credential revoked while a worker still runs makes it lose its lease. Another worker then runs the job again with the same `idempotencyKey`: your effect service must deduplicate ([Job queues and workers](../job-queues/)).
 

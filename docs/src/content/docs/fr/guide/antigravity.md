@@ -3,6 +3,8 @@ title: "Configurer Antigravity"
 description: "Exécutez l’outil agy de Google et découvrez ses limites de reprise de conversation."
 ---
 
+Antigravity reprend une conversation uniquement dans sa sandbox encore ouverte. Il ne fournit ni capture portable ni fork automatique : choisissez une [session réutilisée](../sandbox-sessions/) si vous prévoyez un second tour.
+
 ## Installer
 
 L’[image d’agent](../agent-images/) fournit `agy` dans les conteneurs locaux. Dans une [sandbox cloud](../cloud-sandboxes/), Outpost l’installe s’il est absent, sauf si vous définissez `bootstrap: false`.

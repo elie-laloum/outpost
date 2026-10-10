@@ -3,6 +3,14 @@ title: "Follow progress"
 description: "Receive agent and workflow events while work is running."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="while-it-runs-and-after"></span>
+<span id="read-a-run-back"></span>
+<span id="what-outpost-keeps-after-a-failure"></span>
+
+For terminal output, start with the reporter below. For your own UI, use an `observe` callback. To combine agents, commands and workflow events in one execution, use an [observation hub](../observability/).
+
 Pass `createReporter()` as the dispatch’s `observe` callback to print progress in your terminal. Use it to see preparation, agent activity and the final execution summary.
 
 ```ts
@@ -27,7 +35,6 @@ API reference: [ReporterOptions](../../reference/reporteroptions/).
 Pass your own function as `observe`. Narrow on `kind` before reading the other fields.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -37,10 +44,10 @@ await dispatch({
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
   observe(event) {
-    if (event.kind === "tool") reportValue(`tool ${event.name}`);
+    if (event.kind === "tool") console.log(`tool ${event.name}`);
     // Example output: tool read_file
     if (event.kind === "summary")
-      reportValue(`pass ${event.pass}: ${event.tokens.output} output tokens`);
+      console.log(`pass ${event.pass}: ${event.tokens.output} output tokens`);
     // Example output: pass 1: 320 output tokens
   },
 });
@@ -81,17 +88,16 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="report-workflow.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { review } from "./reported-review.ts";
 
 export const result = await defineWorkflow("review", [review]).start({
   observe(event) {
-    if (event.type === "task") reportValue(event.key, event.status);
+    if (event.type === "task") console.log(event.key, event.status);
     // Example output: review done
   },
 });
-reportValue(result.status, result.observerErrors);
+console.log(result.status, result.observerErrors);
 // Example output: done []
 ```
 
@@ -126,3 +132,9 @@ Every agent emits text, tool calls and tool results. The other details depend on
 - An interactive terminal session opened with `attach()` produces no events.
 
 API: [createReporter](../../reference/createreporter/) · [createCustomReporter](../../reference/createcustomreporter/) · [AgentObservation](../../reference/agentobservation/) · [WorkflowEvent](../../reference/workflowevent/) · [ReporterOptions](../../reference/reporteroptions/).
+
+## Next steps
+
+- [Save a report for review](../run-reports/)
+- [Read events after the run](../journals/)
+- [Inspect retained work after a failure](../recovery/)

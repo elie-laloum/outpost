@@ -3,6 +3,8 @@ title: "Prendre en charge un format de conversation"
 description: "Enregistrez et restaurez les sessions natives d’un agent en ligne de commande ajouté à Outpost."
 ---
 
+Ajoutez ce support après que l’[adaptateur CLI](../custom-agents/) sait identifier et reprendre une session. Choisissez l’outil correspondant aux fichiers réellement écrits, puis testez capture et restauration sur des sessions réelles avant d’annoncer une reprise portable.
+
 ## Choisir le format de stockage
 
 Un adaptateur d’agent peut déclarer son stockage de sessions dans `storage`. Outpost l’utilise alors pour enregistrer les conversations après les échanges, les restaurer dans une autre sandbox et les archiver via un transport. Choisissez la fonction adaptée à la façon dont votre outil enregistre ses sessions.
@@ -91,7 +93,6 @@ Une transcription enregistre le dossier où la CLI s’exécutait. La capture re
 `createSessionBundleConversations()` regroupe un dossier de session en une seule archive JSON. Un script Node.js exécuté dans la sandbox crée cette archive ; la restauration en extrait les fichiers dans la nouvelle sandbox.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createSessionBundleConversations } from "@elie-laloum/outpost";
 
 export const storage = createSessionBundleConversations({
@@ -109,7 +110,7 @@ export const storage = createSessionBundleConversations({
   relocate: (_path, text, { cwd }) =>
     JSON.stringify({ ...JSON.parse(text), cwd }),
 });
-reportValue(storage.format);
+console.log(storage.format);
 // Example output: mycli
 ```
 

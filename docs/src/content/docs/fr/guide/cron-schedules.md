@@ -56,19 +56,7 @@ Un worker ouvre la même file et enregistre `audit` avec `defineWorkflowJob()`, 
 
 ## Écrire l’expression cron
 
-Une expression compte cinq champs séparés par des espaces : minute, heure, jour du mois, mois, jour de la semaine.
-
-| Syntaxe          | Exemple           | Déclenchement                                                                                                                 |
-| ---------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Valeur, `*`      | `30 2 * * *`      | À 02:30 chaque jour ; `*` accepte toute valeur.                                                                               |
-| Liste            | `0 9,18 * * *`    | À 09:00 et à 18:00.                                                                                                           |
-| Intervalle       | `0 9 * * 1-5`     | À 09:00, du lundi au vendredi.                                                                                                |
-| Pas              | `0 8-18/2 * * *`  | À 08:00, 10:00, …, 18:00. `*/15` dans le champ des minutes signifie toutes les 15 minutes.                                    |
-| Noms             | `0 9 1 JAN,JUL *` | À 09:00 le 1er janvier et le 1er juillet. Les noms `JAN`–`DEC` et `SUN`–`SAT` ignorent la casse ; `0` et `7` valent dimanche. |
-| Macro            | `@daily`          | À 00:00 chaque jour. Aussi `@hourly`, `@midnight`, `@weekly`, `@monthly`, `@yearly` et `@annually`.                           |
-| Deux champs jour | `0 9 1 * MON`     | À 09:00 le 1er du mois et chaque lundi, comme dans Vixie cron.                                                                |
-
-Cette union ne s’applique que si aucun des deux champs de jour ne commence par `*` ; sinon, un jour doit correspondre aux deux champs. Il n’y a pas de champ des secondes.
+Utilisez cinq champs dans l’ordre minute, heure, jour du mois, mois et jour de semaine. Par exemple, `0 2 * * 1-5` prévoit 02:00 en semaine ; `@daily` prévoit minuit. Définissez explicitement `timeZone` si l’heure locale compte. Le contrat de [createCronSchedule](../../reference/createcronschedule/) décrit les noms, plages, pas, macros et la combinaison des deux champs de jour.
 
 ## Nommer chaque exécution d’après sa date locale
 
@@ -131,11 +119,10 @@ Un créneau en échec n’est pas republié. Les erreurs levées par `onError` s
 `next(after)` renvoie le premier créneau strictement après une date, `previous(at)` le dernier créneau à cette date ou avant. Aucune des deux ne publie quoi que ce soit.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createCronSchedule } from "@elie-laloum/outpost";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
-reportValue(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
 // Example output: 2026-03-30T00:30:00.000Z
 ```
 
@@ -149,6 +136,10 @@ Ce code affiche `2026-03-30T00:30:00.000Z` : 02:30 n’existe pas à Paris le 29
 
 Sans processus de longue durée, un job CI planifié, comme un workflow GitHub Actions `schedule`, peut démarrer le workflow directement avec un checkpoint. Voir [Exécuter en CI](../ci-automation/).
 
+## Workspaces de fichiers
+
+Une recette de fichiers utilise le même contrat schedule vers file : le timer publie uniquement son job déterministe et le worker alloue le workspace. Voir [les workspaces de fichiers](../workspaces/) et [les services de recettes](../recipe-services/).
+
 ## Limites
 
 - La résolution la plus fine est la minute.
@@ -156,7 +147,3 @@ Sans processus de longue durée, un job CI planifié, comme un workflow GitHub A
 - Le `name` d’une planification est unique et n’utilise que des lettres, des chiffres, `.`, `_` et `-` (128 caractères au plus). Un `runId` compte au plus 256 caractères.
 
 API : [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
-
-## Workspaces de fichiers
-
-Une recette de fichiers utilise le même contrat schedule vers file : le timer publie uniquement son job déterministe et le worker alloue le workspace. Voir [les workspaces de fichiers](../workspaces/) et [les services de recettes](../recipe-services/).

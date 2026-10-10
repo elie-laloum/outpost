@@ -3,6 +3,22 @@ title: "Add a CLI agent"
 description: "Build an adapter that starts your agent CLI and reads its output as Outpost events."
 ---
 
+Use this integration path for a CLI Outpost does not provide. You need its executable in the sandbox and sample output from the real CLI. Keep process execution in the sandbox provider; this adapter only builds requests and decodes events.
+
+The example uses a local demo CLI, with no account or model call. Save `demo-cli.ts` in the target repository and the other files beside your configuration. `copies` makes this CLI available in the agent’s worktree. It reads the brief and emits two JSON events.
+
+```ts title="demo-cli.ts"
+let prompt = "";
+for await (const chunk of process.stdin) prompt += chunk;
+console.log(
+  JSON.stringify({
+    type: "message",
+    text: `Received ${prompt.length} characters`,
+  }),
+);
+console.log(JSON.stringify({ type: "usage", input: 0, output: 0 }));
+```
+
 ## Write a minimal adapter
 
 Implement an `AgentAdapter` to describe how your CLI starts and how its output becomes events: `request()` builds the command and `events()` reads its output lines. A `CliHarness` binds that adapter to the selected model, and `createAgent()` makes it usable in a dispatch.
@@ -52,8 +68,8 @@ import type { AgentModel, AgentAdapter } from "@elie-laloum/outpost";
 
 export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
   return ({ text }) => ({
-    executable: "mycli",
-    arguments: ["--json", ...(model ? ["--model", model.name] : [])],
+    executable: "node",
+    arguments: ["demo-cli.ts", ...(model ? ["--model", model.name] : [])],
     stdin: text ?? "",
   });
 }
@@ -81,7 +97,6 @@ export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
 ```
 
 ```ts title="mycli.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { myCli } from "./mycli-agent.ts";
@@ -90,14 +105,15 @@ export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: myCli,
+  copies: ["demo-cli.ts"],
   branch: { mode: "named", name: "outpost/mycli-review" },
   brief: { text: "Review the README for incorrect setup instructions." },
 });
-reportValue(result.text);
-// Example output: The README setup command uses an outdated flag.
+console.log(result.text);
+// Example output: Received 153 characters
 ```
 
-Outpost runs `mycli --json --model mycli-pro` in the sandbox with the brief on stdin, passes each stdout line to `events()` and returns the collected text in `result.text`. Install the CLI in your [agent image](../agent-images/) first.
+Outpost runs `node demo-cli.ts --model mycli-pro` in the sandbox with the brief on stdin, passes each stdout line to `events()` and returns the collected text in `result.text`. Run `node mycli.ts`: expect `Received … characters`. For a real integration, replace the demo command and decoder with the CLI installed in your [agent image](../agent-images/).
 
 ## Build the command
 

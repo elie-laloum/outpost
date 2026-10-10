@@ -13,9 +13,9 @@ import { loadModelPrices } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Charge une fois un catalogue models.dev ou OpenRouter avec annulation, délai et taille bornés, puis renvoie une table figée pour les alias de modèles explicitement choisis. Les prix des catalogues sont en USD ; EUR exige un taux fourni par l’appelant. Convertit les tarifs OpenRouter par token en tarifs par million. Refuse les modèles absents, tarifs invalides, paliers et frais supplémentaires non pris en charge ; aucun rafraîchissement ni accès réseau ne se produit pendant la comptabilisation du workflow.
+Charge une fois un catalogue models.dev ou OpenRouter avec annulation, délai et taille bornés, puis renvoie une table figée pour les alias de modèles explicitement choisis. Les prix des catalogues sont en USD ; EUR exige un taux fourni par l’appelant. Convertit les tarifs OpenRouter par token en tarifs par million. Refuse les modèles absents, tarifs invalides, paliers et frais supplémentaires non pris en charge ; aucun rafraîchissement ni accès réseau ne se produit pendant la comptabilisation du workflow. La table estime uniquement les frais des tokens ; taxes, remises, outils, images et autres dimensions de facturation sont exclus.
 
-[Exemple complet et règles détaillées](../../guide/budgets/).
+[Exemple complet et règles détaillées](../../guide/estimating-costs/).
 
 ## Paramètres et propriétés
 

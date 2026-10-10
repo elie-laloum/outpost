@@ -3,6 +3,8 @@ title: "Clean up stored data"
 description: "Preview a retention policy and remove eligible runtime data while preserving recoverable work."
 ---
 
+Use a preview first, on the repository or transport that owns the data. Keep recovery material until you have inspected it. Cleaning stored objects does not prove that an abandoned sandbox or worker has stopped.
+
 ## Preview a policy
 
 Start by previewing a retention policy. The report shows which runtime entries could be removed and which remain protected. Apply it only after reviewing the result.
@@ -49,6 +51,8 @@ API reference: [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy
 
 ## Read why an entry stays
 
+An entry stays when it is too recent, active, changed since the preview or outside the selected scope. Review and save uncommitted worktree files before cleanup. Branches, conversations and recovery data deliberately remain outside this policy; their presence is not a deletion failure.
+
 API reference: [RecoveryRetentionEntry](../../reference/recoveryretentionentry/).
 
 ## Prune from code
@@ -56,7 +60,6 @@ API reference: [RecoveryRetentionEntry](../../reference/recoveryretentionentry/)
 `planRecoveryRetention()` builds the same plan as the dry run. `pruneRecoveryRetention()` applies it and returns what it removed and kept.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   planRecoveryRetention,
   pruneRecoveryRetention,
@@ -70,10 +73,10 @@ const plan = await planRecoveryRetention({
     minAgeMs: 7 * 24 * 60 * 60 * 1000,
   },
 });
-reportValue(plan.quota, plan.projectedBytes);
+console.log(plan.quota, plan.projectedBytes);
 // Example output: within 4096
 const result = await pruneRecoveryRetention(plan);
-reportValue(result.removed, result.retained);
+console.log(result.removed, result.retained);
 // Example output: [ '/project/.outpost/workspaces/old-run' ] []
 ```
 
@@ -84,8 +87,8 @@ For data kept in a remote [transport](../storage/), pass `transporter` to `planR
 <!-- features -->
 
 - **Named branches**: Pruning a worktree keeps its branch. Delete merged ones with `git branch -d outpost/fix-tests`.
-- **Worktrees with changes**: Commit, copy or discard the files, after a look with [Recover work](../recovery/). `git -C <worktree> clean -fdX` deletes only ignored files.
-- **Cache volumes**: They outlive sandboxes and images. Remove them with the container engine, label `io.outpost.cache=true` ([Prepare the environment](../environment-setup/)).
+- **Worktrees with changes**: Commit, copy or discard the files, after a look with [Recover work](../recovery/). `git -C <worktree> clean -ndX` previews ignored files; after inspection, `git -C <worktree> clean -fdX` deletes only ignored files.
+- **Cache volumes**: They outlive sandboxes and images. Remove them with the container engine, label `io.outpost.cache=true` ([Prepare the environment](../dependency-caches/)).
 
 A worktree that became clean is removed by the next run of a `clean-workspaces` policy.
 

@@ -15,7 +15,7 @@ import type { AgentProfileTool } from "@elie-laloum/outpost";
 
 Portable built-in tool capability: read, edit, unrestricted shell, or shell:&lt;exact command>. Exact commands compare the entire string, including whitespace and shell syntax; no wildcard or prefix expansion occurs.
 
-[Complete example and detailed rules](../../guide/choose-an-agent/).
+[Complete example and detailed rules](../../guide/agent-profiles/).
 
 ## Signature
 

@@ -3,12 +3,13 @@ title: "Fixer des délais et annuler une tâche"
 description: "Limitez la durée d’exécution de l’agent, réglez les passages successifs et annulez depuis votre code."
 ---
 
+Utilisez la [configuration initiale](../setup/) pour ces exemples. Choisissez les délais avant une exécution sans surveillance et prévoyez l’inspection de la branche après annulation. Le [budget du workflow](../budgets/) limite séparément le travail cumulé.
+
 ## Limiter la durée d’une tâche
 
 Définissez les délais à côté du brief si la tâche demande des limites plus strictes que celles par défaut. Vous pouvez limiter la durée totale d’un échange et le temps pendant lequel l’agent peut rester silencieux.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -21,13 +22,15 @@ const result = await dispatch({
   deadlineMs: 20 * 60_000,
   idleMs: 5 * 60_000,
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: Fixed the failing tests and committed the change.
 ```
 
 Si l’agent tourne plus de 20 minutes, ou reste muet pendant 5, la promesse est rejetée avec une [`OutpostError`](../error-handling/) de code `timeout`. La sandbox est libérée ; la branche garde ce que l’agent a commité.
 
 ## Choisir une limite
+
+`deadlineMs` limite la durée totale d’un dispatch ; `idleMs` surveille son silence. Une tentative de tâche utilise `timeoutMs`, et le workflow impose son propre délai avec `start({ timeoutMs })`. Commencez par le délai total, puis ajoutez la surveillance du silence seulement si une longue opération silencieuse doit être interrompue.
 
 Référence API : [DispatchOptions](../../reference/dispatchoptions/).
 
@@ -68,39 +71,9 @@ La promesse est rejetée avec la valeur passée à `abort()`, ici `"cancelled by
 
 Pour changer la direction de l’agent sans l’arrêter, [réorientez-le](../steering/) plutôt.
 
-## Relancer le brief jusqu’à ce que l’agent le déclare terminé
+<span id="relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé"></span>
 
-`passes` renvoie le brief quand une passe se termine sans marqueur de fin. Demandez le marqueur dans le brief : Outpost ne l’ajoute pas.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-const result = await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/flaky-tests" },
-  brief: {
-    text: "Fix the flaky tests and commit. When every test passes, end your answer with READY_FOR_REVIEW.",
-  },
-  passes: 3,
-  until: "READY_FOR_REVIEW",
-});
-reportValue(result.completed, result.completion);
-// Example output: true READY_FOR_REVIEW
-```
-
-Chaque passe démarre une nouvelle conversation sur la même branche : elle voit donc les commits précédents. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.
-
-Référence API : [DispatchResult](../../reference/dispatchresult/).
-
-:::caution
-Un marqueur est une déclaration de l’agent, pas une preuve. Lancez vos tests avant de vous y fier ; les [boucles de vérification](../verification-loops/) relancent l’agent jusqu’à ce que votre contrôle passe.
-:::
-
-Si l’agent écrit son marqueur mais continue de tourner, Outpost l’arrête `settleMs` après sa dernière sortie. Le résultat est conservé et `warn` reçoit un message.
+Pour cette étape, suivez [Répéter un brief sur plusieurs passes](../agent-passes/).
 
 ## Limiter la durée des opérations Git et fichiers
 

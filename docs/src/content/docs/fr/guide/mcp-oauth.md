@@ -72,24 +72,9 @@ Déclarez les deux variables sur le fournisseur de sandbox ou dans `.outpost/.en
 
 Le pont HTTP de la sandbox obtient le jeton lui-même : le secret y reste et les [règles sortantes](../network-restrictions/) s’appliquent aux demandes de jeton.
 
-<!-- canvas -->
-
-- **Découvrir**: À partir de l’URL du serveur MCP.
-  - Étapes
-  - **Lire les métadonnées**: Métadonnées de la ressource protégée, puis celles du serveur d’autorisation et son point d’accès de jeton.
-    - sandbox
-  - → **Demander**: puis
-- **Demander**: Un grant `client_credentials`.
-  - Étapes
-  - **Authentifier le client**: Avec `client_secret_basic`, ou `client_secret_post` si le serveur n’annonce que celui-ci.
-    - sandbox
-  - **Lier le jeton**: L’URL du serveur est envoyée comme `resource`.
-    - sandbox
-  - → **Réutiliser**: puis
-- **Réutiliser**: Jusqu’à l’expiration du jeton.
-  - Étapes
-  - **Réessayer après un 401**: Refaire la découverte, demander un nouveau jeton et réessayer la requête une fois.
-    - sandbox
+1. Dans la sandbox, découvrez les métadonnées de la ressource protégée et du serveur d’autorisation depuis l’URL MCP.
+2. Demandez un token `client_credentials` avec cette URL comme `resource`. Utilisez `client_secret_basic`, ou `client_secret_post` si le serveur n’annonce que cette méthode.
+3. Réutilisez le token jusqu’à expiration. Sur une réponse `401`, refaites la découverte, obtenez un nouveau token et réessayez une seule fois.
 
 ## Limites
 

@@ -3,6 +3,8 @@ title: Durable YAML recipes
 description: Persist recipe work, request human input and resume by run ID.
 ---
 
+Use this guide after [running a YAML recipe](../yaml-recipes/). Choose a persistent storage location and a stable run ID before starting work; later status, answer and resume commands must refer to that same run.
+
 Format-3 recipes use the existing workflow checkpoint engine. Declare storage in the required local configuration, then select it from the shareable recipe. A paused execution releases its sandbox and retains its Git workspaces, completed task outputs, conversations and cumulative usage. [Recipe workflows](../recipe-workflows/) explains task composition.
 
 ## Configure persistent storage
@@ -79,7 +81,7 @@ An `interactive` task accepts [InteractiveAgentTaskOptions](../../reference/inte
 
 ## Answer directly in the terminal
 
-Run and resume display pending questions automatically when stdin and stderr are terminals. The CLI collects each answer and resumes the workflow using its saved request IDs, conversation and workspace. No custom runner or answer file is needed. A single declared actor is selected automatically; multiple actors offer a choice. See the [CLI flags](../cli/#outpost-recipe-run) to choose an actor explicitly.
+Run and resume display pending questions automatically when stdin and stderr are terminals. The CLI collects each answer and resumes the workflow using its saved request IDs, conversation and workspace. No custom runner or answer file is needed. A single declared actor is selected automatically; multiple actors offer a choice. See the [CLI flags](../recipe-cli/#outpost-recipe-run) to choose an actor explicitly.
 
 ```sh
 outpost recipe run --file recipe.yaml --config outpost.yaml

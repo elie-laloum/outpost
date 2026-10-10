@@ -15,7 +15,7 @@ import { snapshotWorkspaceFiles } from "@elie-laloum/outpost";
 
 Conserve une génération bornée vérifiée via Transport avec fichiers binaires, liens internes, permissions et répertoires vides.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/working-with-files/).
 
 ## Paramètres et propriétés
 

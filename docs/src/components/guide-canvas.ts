@@ -41,12 +41,20 @@ function mountCanvas(root: HTMLElement) {
   if (!viewport || !world || !links || !labels || !scale) return;
   root.setAttribute("data-ready", "");
   const view: CanvasView = { x: 0, y: 0, scale: 1 };
+  const compact = window.matchMedia("(max-width: 50rem)");
   const pointers = new Map<number, CanvasPointer>();
   // Until the reader moves the map, resizes keep re-framing the first view.
   let moved = false;
   let dragged = false;
 
   const apply = () => {
+    if (compact.matches) {
+      world.style.transform = "none";
+      viewport.style.height = "auto";
+      viewport.tabIndex = -1;
+      return;
+    }
+    viewport.tabIndex = 0;
     const width = world.offsetWidth * view.scale;
     const height = world.offsetHeight * view.scale;
     view.x = within(view.x, viewport.clientWidth - width);
@@ -66,6 +74,7 @@ function mountCanvas(root: HTMLElement) {
   };
   // The first view fits the map within the frame's width and tallest height, then sizes the frame to it.
   const frame = () => {
+    if (compact.matches) return apply();
     const { offsetWidth: width, offsetHeight: height } = world;
     const tallest = window.innerHeight * CANVAS_MAX_HEIGHT_SHARE;
     view.scale = clampScale(
@@ -113,6 +122,10 @@ function mountCanvas(root: HTMLElement) {
     moved = true;
   };
   const refresh = () => (moved ? apply() : frame());
+  compact.addEventListener("change", () => {
+    moved = false;
+    refresh();
+  });
 
   let edges: CanvasEdge[] = [];
   let focus: HTMLElement | null = null;
@@ -146,6 +159,7 @@ function mountCanvas(root: HTMLElement) {
 
   // The pointer is captured only once the press becomes a drag, so a plain click still reaches links.
   viewport.addEventListener("pointerdown", (event) => {
+    if (compact.matches) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     const point = local(event);
     pointers.set(event.pointerId, { start: point, last: point });
@@ -194,6 +208,7 @@ function mountCanvas(root: HTMLElement) {
     true,
   );
   viewport.addEventListener("dblclick", (event) => {
+    if (compact.matches) return;
     if ((event.target as Element | null)?.closest("a")) return;
     touch();
     zoomAt(CANVAS_ZOOM_STEP * CANVAS_ZOOM_STEP, local(event));
@@ -204,6 +219,7 @@ function mountCanvas(root: HTMLElement) {
       ".canvas-branch, .canvas-node",
     ) ?? null;
   viewport.addEventListener("pointerover", (event) => {
+    if (compact.matches) return;
     if (event.pointerType === "mouse") highlight(cardOf(event.target));
   });
   viewport.addEventListener("pointerleave", () => highlight(null));
@@ -213,6 +229,7 @@ function mountCanvas(root: HTMLElement) {
   viewport.addEventListener("focusout", () => highlight(null));
   // Tabbing to an object's link brings that object into view.
   viewport.addEventListener("focusin", (event) => {
+    if (compact.matches) return;
     const node = (event.target as Element | null)?.closest<HTMLElement>(
       ".canvas-node",
     );
@@ -235,6 +252,7 @@ function mountCanvas(root: HTMLElement) {
   viewport.addEventListener(
     "wheel",
     (event) => {
+      if (compact.matches) return;
       const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
       if (event.ctrlKey || event.metaKey) {
         event.preventDefault();

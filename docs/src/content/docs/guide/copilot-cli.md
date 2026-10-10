@@ -32,7 +32,9 @@ Copilot stores its login in the system keychain by default, which Outpost never 
 
 Other credential forms and where credentials go: [Authentication](../authentication/).
 
-## Use an API key
+<span id="use-an-api-key"></span>
+
+## API-key mode is unavailable
 
 Copilot has no API-key mode: `authentication: "usage"` is rejected when the agent is composed. Requests count against your Copilot plan.
 

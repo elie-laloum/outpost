@@ -3,6 +3,8 @@ title: "Travailler sur plusieurs dépôts"
 description: "Confiez chaque dépôt à sa propre tâche d’agent et reliez les tâches par leurs dépendances."
 ---
 
+Préparez une copie locale de chaque dépôt et la [configuration de l’agent](../setup/). Conservez une branche nommée par dépôt pour la relecture. La réussite d’un dépôt n’annule pas les effets d’un échec dans un autre.
+
 ## Une tâche par dépôt
 
 Confiez chaque dépôt à une tâche `defineIsolatedTask()` et reliez ces tâches dans un workflow. Une sandbox gère un seul dépôt : chaque tâche possède donc sa copie de travail et son historique Git.
@@ -31,7 +33,6 @@ export function upgrade(key: string, path: string) {
 ```
 
 ```ts title="upgrade-repositories.ts"
-import { reportValue } from "./reporter.ts";
 import { upgrade } from "./upgrade.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -41,7 +42,7 @@ export const result = await defineWorkflow("node-24", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
-reportValue(result.value(api).commits.length, result.value(web).commits.length);
+console.log(result.value(api).commits.length, result.value(web).commits.length);
 // Example output: 1 1
 ```
 

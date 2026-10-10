@@ -15,16 +15,16 @@ import { inspectFileWorkspace } from "@elie-laloum/outpost";
 
 Reads the current versioned workspace record and revision without acquiring a sandbox or changing materialized files.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/resuming-file-workspaces/).
 
 ## Parameters and properties
 
-| Name                  | Type                             | Presence | Meaning                                                                                                  |
-| --------------------- | -------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `options`             | `FileWorkspaceInspectionOptions` | Required | Options selecting source, execution capabilities or inspected recovery preconditions for this operation. |
-| `options.runtime`     | `WorkspaceRuntime`               | Required | Control directory and logical namespace, separate from the workspace files.                              |
-| `options.id`          | `string`                         | Required | Stable identifier of this resource, independent of its materialization path.                             |
-| `options.transporter` | `Transport \| undefined`         | Optional | Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.               |
+| Name                  | Type                             | Presence | Meaning                                                                                          |
+| --------------------- | -------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `options`             | `FileWorkspaceInspectionOptions` | Required | Runtime location and snapshot transport used to inspect the saved workspace without starting it. |
+| `options.runtime`     | `WorkspaceRuntime`               | Required | Control directory and logical namespace, separate from the workspace files.                      |
+| `options.id`          | `string`                         | Required | Stable identifier of this resource, independent of its materialization path.                     |
+| `options.transporter` | `Transport \| undefined`         | Optional | Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.       |
 
 ## Returns
 

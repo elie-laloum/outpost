@@ -3,6 +3,8 @@ title: Recipe jobs and services
 description: Publish recipe jobs and explicitly start workers, schedules and webhook services.
 ---
 
+Prepare a [recipe configuration](../recipe-configuration/) and a [durable recipe](../recipe-durability/) before running them in a worker. The configuration snippets below extend that file; their declarations alone start no background service.
+
 Configuration format 2 declares queues, jobs and services alongside agents and storage. Reading or validating these declarations starts no server, worker or schedule. `recipe enqueue` publishes a job; `recipe serve --service` starts exactly the selected service and its dependencies. [Durable recipes](../recipe-durability/) explains the checkpoints used by recipe jobs.
 
 ## Declare a queue and recipe job

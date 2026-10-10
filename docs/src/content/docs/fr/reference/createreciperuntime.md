@@ -15,7 +15,7 @@ import { createRecipeRuntime } from "@elie-laloum/outpost/recipes";
 
 Valide un projet YAML et crée un runtime appartenant à l’appelant. Chaque exécution importe les extensions déclarées, crée ses composants et sa sandbox, exécute le workflow, intègre selon la politique de branche puis ferme les ressources avant les rapports explicitement configurés.
 
-[Exemple complet et règles détaillées](../../guide/yaml-recipes/).
+[Exemple complet et règles détaillées](../../guide/recipe-extensions/).
 
 ## Paramètres et propriétés
 

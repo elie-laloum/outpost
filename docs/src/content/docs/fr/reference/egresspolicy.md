@@ -7,11 +7,25 @@ sidebar:
 
 ## Import
 
+Choisissez un seul de ces imports équivalents.
+
 ```ts
 import type { EgressPolicy } from "@elie-laloum/outpost";
+```
+
+```ts
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/docker";
+```
+
+```ts
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/podman";
+```
+
+```ts
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/vercel";
+```
+
+```ts
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/daytona";
 ```
 

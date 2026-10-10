@@ -48,7 +48,6 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
-import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
@@ -61,7 +60,7 @@ export const result = await speculate({
   candidates,
   validate,
 });
-reportValue(result.status, result.winner?.branch);
+console.log(result.status, result.winner?.branch);
 // Example output: winner outpost/speculation/…/codex
 ```
 
@@ -96,13 +95,7 @@ Passez `signal` à chaque commande. Il se déclenche quand un autre candidat gag
 
 Le `commit` du gagnant est le `HEAD` lu après le retour de `validate` et de l’éventuel callback `score`. Un commit créé dans l’un ou l’autre fait partie du gagnant ; les modifications non commitées, non. Un agent de revue lancé dans `validate` ne doit donc pas commiter : voir [Laisser un agent de revue trancher](../compete-agents/).
 
-## Lire le résultat
-
-Référence API : [SpeculationResult](../../reference/speculationresult/).
-
-Examinez les résultats des candidats avant de choisir ce que vous souhaitez conserver.
-
-Référence API : [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) et [SpeculationResult](../../reference/speculationresult/).
+Examinez `result.winner` et les [résultats des candidats](../../reference/speculativecandidateresult/) avant de choisir les branches à garder.
 
 ## Budget et nettoyage
 
@@ -142,88 +135,6 @@ export async function canMerge(branch: string, commit?: string) {
 
 Passez `winner.branch` et `winner.commit`. Une branche déplacée depuis la validation donne `blocked`. La vérification ne fusionne jamais : lancez `git merge` vous-même.
 
-## Reprendre après un arrêt brutal
-
-Passez `durability` à `speculate()`. Tentatives, usage, sorties et ressources allouées sont enregistrés via un [transport](../storage/), et une course terminée est renvoyée sans être relancée.
-
-```ts
-import { join } from "node:path";
-import {
-  createLocalTransport,
-  type SpeculationDurability,
-} from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.ts";
-
-export const durability: SpeculationDurability = {
-  transporter: createLocalTransport({
-    directory: join(repository, ".outpost", "storage"),
-  }),
-  runId: "parser-race",
-  version: "1",
-};
-```
-
-Changez `version` quand vous modifiez les agents, `validate` ou `score`. Une course enregistrée dont les briefs, le budget, le fournisseur, le mode de sélection ou la `version` diffèrent est refusée : relancez-la sous un nouveau `runId`.
-
-Une course durable exige un fournisseur capable de retrouver et d’arrêter ses sandboxes après un arrêt brutal. Docker et Podman dans leur mode monté par défaut en sont capables ; les autres fournisseurs sont refusés, sauf si vous [implémentez la récupération](../custom-sandbox-providers/).
-
-### Récupérer après un arrêt brutal
-
-Une course interrompue par un arrêt brutal reste détenue par son coordinateur, le processus qui a lancé `speculate()`. Libérez-la avant de la rejouer.
-
-<!-- canvas -->
-
-- **Arrêter**: Terminer l’ancien coordinateur.
-  - Étapes
-  - **Arrêter le processus**: Un délai écoulé ou un PID absent ne prouve pas qu’il est arrêté.
-    - host
-  - → **Inspecter**: puis
-- **Inspecter**: Lire la course enregistrée.
-  - Étapes
-  - **Lire l’état enregistré**: Gardez sa `revision` ; le contenu liste le `resourceId` de chaque candidat.
-    - `transporter.read()`
-  - → **Libérer**: puis
-- **Libérer**: Abandonner l’ancienne propriété.
-  - Étapes
-  - **Récupérer**: Échoue si la révision a changé depuis votre lecture ; ne supprime rien.
-    - `recoverSpeculation()`
-  - → **Rejouer**: puis
-- **Rejouer**: Relancer la course.
-  - Étapes
-  - **Autoriser le rejeu**: Mêmes options, avec `resume: "retry-incomplete"` dans `durability`.
-    - `speculate()`
-  - **Réconcilier**: Les sandboxes enregistrées sont arrêtées ; les candidats interrompus repartent sur une nouvelle branche.
-    - sandbox
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { createHash } from "node:crypto";
-import { join } from "node:path";
-import { createLocalTransport, recoverSpeculation } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.ts";
-const transporter = createLocalTransport({
-  directory: join(repository, ".outpost", "storage"),
-});
-const key = `speculations/${createHash("sha256").update("parser-race").digest("hex")}.json`;
-const saved = await transporter.read(key);
-if (saved) {
-  reportValue(new TextDecoder().decode(saved.bytes));
-  // Example output: {"runId":"parser-race",…}
-  await recoverSpeculation({
-    transporter,
-    runId: "parser-race",
-    revision: saved.revision,
-    coordinatorStopped: true,
-  });
-}
-```
-
-Un candidat interrompu repart comme une nouvelle tentative, sur `…/<key>/2`, depuis le commit d’origine. Son ancienne branche et son ancien worktree figurent dans `result.previousAttempts`. Les candidats validés et notés avant l’arrêt brutal gardent leurs scores enregistrés ; la sélection best attend toujours les candidats admis restants. Un arrêt brutal pendant la notation exige une nouvelle tentative explicitement autorisée.
-
-## Reprendre après un quota
-
-Une course durable terminée avec le statut `quota` n’est pas définitive. Rappeler `speculate()` avec la même `durability` relance uniquement les candidats arrêtés par une limite d’usage ou de débit, comme nouvelles tentatives. `result.quota.resetAt` donne l’heure de réinitialisation quand l’agent la communique ; [Pauses sur quota](../quota-pauses/) explique comment l’attendre.
-
 ## Limites
 
 - `speculate()` ne fusionne jamais, ne pousse rien et n’ouvre aucune pull request.
@@ -234,3 +145,15 @@ Une course durable terminée avec le statut `quota` n’est pas définitive. Rap
 - Les résultats durables doivent contenir des valeurs JSON, et un arrêt brutal en cours d’exécution rend l’usage incomplet : ajoutez `budget.attempts` aux limites de tokens.
 
 API : [speculate](../../reference/speculate/) · [SpeculationOptions](../../reference/speculationoptions/) · [SpeculationResult](../../reference/speculationresult/) · [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) · [SpeculativeValidation](../../reference/speculativevalidation/) · [checkSpeculationIntegration](../../reference/checkspeculationintegration/) · [SpeculationDurability](../../reference/speculationdurability/) · [recoverSpeculation](../../reference/recoverspeculation/).
+
+## Pour aller plus loin
+
+- [Reprendre une compétition enregistrée](../resuming-speculation/)
+
+<span id="lire-le-résultat"></span>
+
+[Exécuter des candidats concurrents](../speculation/).
+
+<span id="reprendre-après-un-arrêt-brutal"></span>
+<span id="récupérer-après-un-arrêt-brutal"></span>
+<span id="reprendre-après-un-quota"></span>

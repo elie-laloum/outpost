@@ -3,6 +3,28 @@ title: "Comparer les approches des agents"
 description: "Lancez plusieurs candidats sur des branches séparées et choisissez un résultat à l’aide d’une vérification."
 ---
 
+[Télécharger tous les fichiers](../../../guide-examples/fr/compete-agents.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
+
+<!-- canvas -->
+
+- **Codex**: Travailler dans sa branche et sa sandbox.
+  - Candidat Codex
+  - → **Valider**: commits prêts
+- **Claude**: Travailler dans une autre branche et sandbox.
+  - Candidat Claude
+  - → **Valider**: commits prêts
+- **Valider**: Exécuter les tests de chaque candidat.
+  - Votre contrôle
+  - → **Gagnant**: premier résultat accepté
+  - → **Sans gagnant**: aucun résultat accepté
+- **Gagnant**: Arrêter les autres candidats et conserver leurs branches.
+  - Workflow
+  - → **Intégrer**: accord humain
+- **Intégrer**: Fusionner le commit choisi sans pousser.
+  - Vous
+- **Sans gagnant**: Examiner les échecs et le travail conservé.
+  - Vous
+
 ## Ce que montre l’exemple
 
 :::caution[Expérimental]
@@ -141,18 +163,17 @@ export async function askToMerge(branch: string) {
 ```
 
 ```ts title="compete.ts"
-import { reportValue } from "./reporter.ts";
 import { runCandidates } from "./run-candidates.ts";
 import { askToMerge } from "./merge-prompt.ts";
 import { mergeWinner } from "./merge-winner.ts";
 
 export const result = await runCandidates();
 for (const candidate of result.candidates)
-  reportValue(candidate.key, candidate.status, candidate.branch);
+  console.log(candidate.key, candidate.status, candidate.branch);
 // Example output: codex winner outpost/speculation/…/codex
 export const { winner, integration } = result;
 if (!winner) throw new Error(`No winner: ${result.status}`);
-reportValue(`${winner.key} wins, integration: ${integration?.status}`);
+console.log(`${winner.key} wins, integration: ${integration?.status}`);
 // Example output: codex wins, integration: undefined
 if (await askToMerge(winner.branch)) await mergeWinner(winner);
 ```
@@ -169,27 +190,7 @@ node compete.ts
 
 Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-<!-- canvas -->
-
-- [Votre script](../speculation/): `compete.ts` appelle `speculate()`, affiche chaque candidat, puis demande avant de fusionner.
-  - hôte
-  - → **Admission**: `speculate()`
-  - → **Checkout**: `git merge`, après votre réponse
-- [Course](../speculation/): Chaque candidat part du commit actuel du checkout ; `concurrency` en exécute au plus autant à la fois.
-  - workflow
-  - **Admission**: chaque démarrage consomme une tentative de `budget.attempts` ; la limite de tokens les arrête tous
-    - → **Sandboxes**: le même brief
-  - **Validation**: sans commit, refusé ; sinon `npm test` tranche
-  - **Sélection**: le premier qui passe gagne ; les autres sont annulés ou sautés
-    - → **Votre script**: `winner`, `integration`
-    - → **Checkout**: `git merge-tree`, en lecture seule
-- [Sandboxes](../sandbox-sessions/): Une par candidat, sur `outpost/speculation/<id>/<key>` ; libérées à la fin, branches conservées.
-  - sandbox
-  - **codex**: corrige le bug et commite
-  - **claude**: corrige le bug et commite
-  - → **Validation**: commits, `npm test`
-- **Checkout**: Votre branche. `checkSpeculationIntegration()` bloque la fusion si elle ou le gagnant a bougé depuis. Outpost ne pousse rien.
-  - hôte
+La fusion exige votre accord et un dernier contrôle du commit gagnant et de votre checkout. Si l’un a changé, elle est refusée.
 
 Référence API : [SpeculationResult](../../reference/speculationresult/), [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) et [SpeculationIntegration](../../reference/speculationintegration/).
 
@@ -233,7 +234,6 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
-import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
@@ -247,7 +247,7 @@ export const result = await speculate({
   candidates,
   validate,
 });
-reportValue(result.winner?.key);
+console.log(result.winner?.key);
 // Example output: codex
 ```
 

@@ -1,5 +1,38 @@
+import { chapters } from "../scripts/navigation.mjs";
 import { readFile, readdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
+
+for (const locale of ["", "fr/"]) {
+  test(`mobile canvas keeps steps and loop conditions readable (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.goto(`${locale}guide/development-workflow/`);
+    const canvas = page.locator("[data-canvas]").first();
+    await expect(canvas).toHaveAttribute("data-ready", "");
+    await expect(canvas.locator(".canvas-controls")).toBeHidden();
+    await expect(canvas.locator(".canvas-out").first()).toBeVisible();
+    const layout = await canvas.evaluate((element) => {
+      const world = element.querySelector(".canvas-world");
+      const frame = element
+        .querySelector(".canvas-viewport")
+        .getBoundingClientRect();
+      const scale = new DOMMatrixReadOnly(getComputedStyle(world).transform).a;
+      return [...element.querySelectorAll(".canvas-node-text")].map((node) => ({
+        font: parseFloat(getComputedStyle(node).fontSize) * scale,
+        fits: node.getBoundingClientRect().right <= frame.right + 1,
+      }));
+    });
+    expect(layout.length).toBeGreaterThan(3);
+    expect(layout.every(({ font, fits }) => font >= 14 && fits)).toBe(true);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(canvas.locator(".canvas-controls")).toBeVisible();
+    await expect(canvas.locator(".canvas-scale")).toHaveText("100 %");
+    const scale = await canvas.locator(".canvas-scale").textContent();
+    await canvas.locator('[data-zoom="in"]').click();
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
+  });
+}
 import { referenceSidebar } from "../scripts/reference-navigation.mjs";
 
 const referenceEntry = `${referenceSidebar[0].slug}/`;
@@ -105,7 +138,9 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".docs-navigation summary h2")).toHaveCount(13);
+    await expect(page.locator(".docs-navigation summary h2")).toHaveCount(
+      chapters.length,
+    );
     await expect(page.locator(".docs-navigation details[open]")).toHaveCount(1);
     const spacing = await page
       .locator(".docs-navigation")
@@ -203,7 +238,7 @@ for (const [locale, heading, start, copied] of [
     await expect(story.locator(".step-icon svg")).toHaveCount(4);
     await expect(story.locator(".story-link")).toHaveAttribute(
       "href",
-      `/outpost/${locale}guide/development-workflow/`,
+      `/outpost/${locale}guide/first-workflow/`,
     );
     await expect(page.locator(".landing .overview a")).toHaveCount(3);
     await expect(
@@ -250,30 +285,10 @@ for (const [locale, heading, start, copied] of [
         ),
     ).toBe(true);
     const canvas = page.locator(".home-content [data-canvas]");
-    await expect(canvas.locator(".canvas-node")).toHaveCount(9);
+    await expect(canvas.locator(".canvas-node")).toHaveCount(3);
     const stages = locale
-      ? [
-          "Ticket export CSV",
-          "Préparer le plan",
-          "Implémenter l’export",
-          "Exécuter les tests",
-          "Relire le diff",
-          "Réunir les verdicts",
-          "Valider la livraison",
-          "Préparer la branche",
-          "Arrêter le run",
-        ]
-      : [
-          "CSV export ticket",
-          "Plan the change",
-          "Implement the export",
-          "Run the tests",
-          "Review the diff",
-          "Collect the verdicts",
-          "Approve delivery",
-          "Prepare the branch",
-          "Stop the run",
-        ];
+      ? ["Relire le README", "Préparer un résumé", "Examiner le résultat"]
+      : ["Review the README", "Prepare a summary", "Inspect the result"];
     await expect(canvas.locator(".canvas-node-title")).toHaveText(stages);
     const edges = await canvas.evaluate((element) =>
       [...element.querySelectorAll(".canvas-node")].flatMap((node) =>
@@ -285,28 +300,18 @@ for (const [locale, heading, start, copied] of [
         })),
       ),
     );
-    expect(edges).toHaveLength(11);
-    expect(edges).toEqual(
-      expect.arrayContaining([
-        { from: stages[2], to: stages[3] },
-        { from: stages[2], to: stages[4] },
-        { from: stages[3], to: stages[5] },
-        { from: stages[4], to: stages[5] },
-        { from: stages[5], to: stages[2] },
-        { from: stages[5], to: stages[6] },
-        { from: stages[5], to: stages[8] },
-        { from: stages[6], to: stages[7] },
-        { from: stages[6], to: stages[8] },
-      ]),
-    );
+    expect(edges).toEqual([
+      { from: stages[0], to: stages[1] },
+      { from: stages[1], to: stages[2] },
+    ]);
     await canvas.locator('[data-zoom="fit"]').click();
-    await expect(canvas.locator(".canvas-link")).toHaveCount(11);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(2);
     const scale = await canvas.locator(".canvas-scale").textContent();
     await canvas.locator('[data-zoom="in"]').click();
     await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
     const features = page.locator(".home-content a.feature-cell");
-    await expect(features).toHaveCount(9);
-    await expect(features.locator(".feature-icon svg")).toHaveCount(9);
+    await expect(features).toHaveCount(3);
+    await expect(features.locator(".feature-icon svg")).toHaveCount(3);
     await expect(features.first()).toHaveAttribute(
       "href",
       "guide/verification-loops/",
@@ -317,11 +322,11 @@ for (const [locale, heading, start, copied] of [
         ? "Ce que vous pouvez construire avec Outpost"
         : "What you can build with Outpost",
     );
-    await expect(capabilities.locator("a.capability")).toHaveCount(9);
+    await expect(capabilities.locator("a.capability")).toHaveCount(3);
     await expect(
       capabilities.locator("a.capability > svg:first-child"),
-    ).toHaveCount(9);
-    await expect(capabilities.locator("h3")).toHaveCount(9);
+    ).toHaveCount(3);
+    await expect(capabilities.locator("h3")).toHaveCount(3);
     await expect(capabilities.locator("a.capability").first()).toHaveAttribute(
       "href",
       `/outpost/${locale}guide/choose-an-agent/`,
@@ -329,7 +334,7 @@ for (const [locale, heading, start, copied] of [
     expect(await page.evaluate(() => window.homeRenderErrors)).toEqual([]);
     await story.locator(".story-link").click();
     await expect(page).toHaveURL(
-      new RegExp(`/${locale}guide/development-workflow/$`),
+      new RegExp(`/${locale}guide/first-workflow/$`),
     );
     await page.goBack();
     await hero.getByRole("link", { name: start, exact: true }).click();
@@ -351,9 +356,6 @@ for (const [locale, heading, start, copied] of [
         const dimensions = await page.evaluate(() => {
           const content = document
             .querySelector(".rail")
-            .getBoundingClientRect();
-          const notice = document
-            .querySelector(".home-content .starlight-aside")
             .getBoundingClientRect();
           const capabilities = [
             ...document.querySelectorAll(".capability-grid li"),
@@ -377,7 +379,6 @@ for (const [locale, heading, start, copied] of [
             searchLeft: document
               .querySelector(".docs-search")
               .getBoundingClientRect().left,
-            notice: { left: notice.left, right: notice.right },
             capabilities,
             overflow: document.documentElement.scrollWidth > window.innerWidth,
             storyPadding: parseFloat(
@@ -422,13 +423,7 @@ for (const [locale, heading, start, copied] of [
             ).toBeLessThanOrEqual(1);
           }
         }
-        expect(
-          Math.abs(dimensions.notice.left - dimensions.content.left),
-        ).toBeLessThanOrEqual(1);
-        expect(
-          Math.abs(dimensions.notice.right - dimensions.content.right),
-        ).toBeLessThanOrEqual(1);
-        expect(dimensions.capabilities).toHaveLength(9);
+        expect(dimensions.capabilities).toHaveLength(3);
         const columns = width <= 560 ? 1 : width <= 896 ? 2 : 3;
         for (const [index, card] of dimensions.capabilities.entries()) {
           expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
@@ -636,7 +631,9 @@ test("short request snippet copies exactly with the keyboard", async ({
   const expected = markdown
     .match(/```ts title="review\.ts"\n([\s\S]*?)```/)[1]
     .trimEnd();
-  const code = page.locator("pre").filter({ hasText: "outpost/readme-review" });
+  const code = page
+    .locator("pre")
+    .filter({ hasText: "const result = await dispatch({" });
   const copy = code.locator("..").getByRole("button", { name: "Copy code" });
   await copy.focus();
   await page.keyboard.press("Enter");
@@ -657,9 +654,7 @@ for (const locale of ["", "fr/"]) {
       ),
     ).toBe(true);
     await page.getByRole("button", { name: "Menu", exact: true }).click();
-    const setup = page
-      .locator(".docs-navigation a")
-      .filter({ hasText: /^Installation$/ });
+    const setup = page.locator('.docs-navigation a[href$="/guide/setup/"]');
     await expect(setup).toBeVisible();
     await setup.click();
     await expect(page).toHaveURL(/\/guide\/setup\/$/);
@@ -921,8 +916,8 @@ for (const locale of ["", "fr/"]) {
     for (const width of [390, 800, 1440, 1920, 2560]) {
       await page.setViewportSize({ width, height: 900 });
       for (const route of [
-        "guide/first-request/",
-        "guide/harness-permissions/",
+        "guide/working-with-files/",
+        "guide/harness-hooks/",
         "guide/host-process/",
         "reference/speculate/",
         "guide/speculation/",
@@ -971,8 +966,12 @@ for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}guide/first-request/`);
     const article = page.locator(".sl-markdown-content");
     await expect(article.locator("table")).toHaveCount(0);
-    await article.getByRole("link", { name: "Usage", exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/${locale}reference/usage/$`));
+    await article
+      .getByRole("link", { name: "DispatchResult", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}reference/dispatchresult/$`),
+    );
     await expect(page.locator(".prop")).not.toHaveCount(0);
   });
 
@@ -1086,20 +1085,21 @@ for (const locale of ["", "fr/"]) {
     await expect(page.locator(".title-show")).toContainText(
       'import { dispatch } from "@elie-laloum/outpost"',
     );
-    await expect(page.locator(".prop")).toHaveCount(46);
+    await expect(page.locator(".prop")).toHaveCount(116);
     for (const name of ["options.prices", "options.redact", "options.watchdog"])
       await expect(
         page.locator(".prop-name").filter({ hasText: name }),
-      ).toHaveCount(1);
+      ).toHaveCount(3);
     const guard = page.locator(".prop").filter({
       has: page.locator(".prop-name").filter({ hasText: "options.guard" }),
     });
-    await expect(guard).toHaveCount(1);
-    await expect(guard.locator(".prop-type")).toContainText("DiffGuard");
+    await expect(guard).toHaveCount(2);
+    await expect(guard.nth(0).locator(".prop-type")).toHaveText("undefined");
+    await expect(guard.nth(1).locator(".prop-type")).toContainText("DiffGuard");
     await expect(
       page.locator(".prop").first().locator(".prop-presence"),
     ).toHaveAttribute("data-required", "");
-    const pin = page.locator('.bay[data-role="contract"] .bay-pin');
+    const pin = page.locator('.bay[data-role="contract"] .bay-pin').first();
     await expect(pin).toHaveAttribute("data-pinned", "");
     await page.mouse.wheel(0, 1600);
     await expect
@@ -1188,11 +1188,14 @@ for (const locale of ["", "fr/"]) {
     await expect(features.locator(".feature-icon svg").first()).toBeVisible();
     await expect(page.locator("ol.path a.path-cell")).toHaveCount(3);
     await features.locator("a.feature-cell").first().click();
-    await expect(page).toHaveURL(new RegExp(`/${locale}guide/briefs/$`));
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}guide/sandbox-sessions/$`),
+    );
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/how-it-works/`);
-    await expect(page.locator(".sl-markdown-content table")).toHaveCount(2);
-    await expect(page.locator(".sl-markdown-content pre")).toHaveCount(2);
+    await expect(page.locator(".sl-markdown-content table")).toHaveCount(0);
+    await expect(page.locator(".sl-markdown-content pre")).toHaveCount(0);
+    await expect(page.locator("[data-canvas] .canvas-node")).toHaveCount(5);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -1351,29 +1354,48 @@ for (const locale of ["", "fr/"]) {
     });
   }
 
-  test(`sequential diagrams retain steps, tags and navigation in a canvas (${locale || "en"})`, async ({
+  test(`verification diagrams show accepted, exhausted and correction paths (${locale || "en"})`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/verification-loops/`);
     const canvas = page.locator("[data-canvas]").first();
     await expect(page.locator(".flow")).toHaveCount(0);
-    await expect(canvas.locator(".canvas-node")).toHaveCount(3);
-    await expect(canvas.locator(".canvas-branch")).toHaveCount(7);
-    await expect(canvas.locator(".canvas-out > li")).toHaveCount(2);
-    await expect(canvas.locator(".canvas-link")).toHaveCount(5);
-    await expect(canvas.locator(".canvas-branch .tags")).toContainText(
-      "LoopTaskExhausted",
+    await expect(canvas.locator(".canvas-node")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(4);
+    const edges = await canvas.evaluate((element) =>
+      [...element.querySelectorAll(".canvas-node")].flatMap((node) =>
+        [...node.querySelectorAll(".canvas-out [data-to]")].map((edge) => ({
+          from: node.querySelector(".canvas-node-title").textContent.trim(),
+          to: element
+            .querySelector(`#${edge.dataset.to} .canvas-node-title`)
+            .textContent.trim(),
+          condition: edge.textContent.trim(),
+        })),
+      ),
     );
-    await canvas.locator('[data-zoom="fit"]').click();
-    await expect(canvas.locator(".canvas-scale")).not.toHaveText("100 %");
+    const [attempt, check, result, failure] = locale
+      ? ["Tentative", "Contrôle", "Résultat", "Échec"]
+      : ["Attempt", "Check", "Result", "Failure"];
+    expect(edges.map(({ from, to }) => [from, to])).toEqual([
+      [attempt, check],
+      [check, attempt],
+      [check, result],
+      [check, failure],
+    ]);
+    expect(
+      edges.every(({ condition }) => !["then", "puis"].includes(condition)),
+    ).toBe(true);
+    await expect(canvas).toContainText("LoopTaskExhausted");
+    await expect(canvas.locator(".canvas-controls")).toBeHidden();
+    await expect(canvas.locator(".canvas-out").first()).toBeVisible();
     await page.goto(`${locale}guide/first-workflow/`);
     const tabs = page.locator(".code-tabs").first();
     await expect(tabs.locator(".code-tab")).toHaveCount(3);
     await tabs.locator(".code-tab").last().click();
     await expect(tabs.locator(".code-tab-panel").last()).toBeVisible();
     await expect(tabs.locator(".code-tab-panel").last()).toContainText(
-      '"./fix-task.ts"',
+      '"./review-task.ts"',
     );
     expect(
       await page.evaluate(
@@ -1389,15 +1411,20 @@ for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}guide/fix-failing-ci/`);
     const canvas = page.locator("[data-canvas]");
     await expect(canvas.locator(".canvas-node")).toHaveCount(4);
-    await expect(canvas.locator(".canvas-branch")).toHaveCount(4);
-    await expect(canvas.locator(".canvas-label")).toHaveCount(5);
-    await expect(canvas.locator(".canvas-link")).toHaveCount(6);
+    await expect(canvas.locator(".canvas-branch")).toHaveCount(0);
+    await expect(canvas.locator(".canvas-label")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(4);
+    await expect(canvas.locator(".canvas-out").first()).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(canvas.locator(".canvas-controls")).toBeVisible();
     const world = canvas.locator(".canvas-world");
     const before = await world.getAttribute("style");
     await canvas.locator('[data-zoom="in"]').click();
     await expect(world).not.toHaveAttribute("style", before ?? "");
+    const zoomed = await canvas.locator(".canvas-scale").textContent();
     await canvas.locator('[data-zoom="fit"]').click();
-    await expect(canvas.locator(".canvas-scale")).not.toHaveText("100 %");
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText(zoomed);
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/storage/`);
     await expect(page.locator("ul.files .file")).not.toHaveCount(0);
     await page.goto(`${locale}guide/development-workflow/`);

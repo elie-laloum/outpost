@@ -7,8 +7,13 @@ sidebar:
 
 ## Import
 
+Choisissez un seul de ces imports équivalents.
+
 ```ts
 import type { DependencyCache } from "@elie-laloum/outpost/providers/docker";
+```
+
+```ts
 import type { DependencyCache } from "@elie-laloum/outpost/providers/podman";
 ```
 

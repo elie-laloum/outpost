@@ -7,8 +7,13 @@ sidebar:
 
 ## Import
 
+Choisissez un seul de ces imports équivalents.
+
 ```ts
 import type { CloudDependencyCache } from "@elie-laloum/outpost/providers/vercel";
+```
+
+```ts
 import type { CloudDependencyCache } from "@elie-laloum/outpost/providers/daytona";
 ```
 

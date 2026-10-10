@@ -1,0 +1,1062 @@
+[
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nrequest ready\napproved\nrejected\nRequest\nSave the gate and wait for an authorized person.\n(Run)\n→ Decision : request ready\nDecision\nYour application submits the choice and reason.\n(Run)\n→ Continue : approved\n→ Stop : rejected\nContinue\nRun dependent tasks"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\ncommits ready\nfirst success\nmerge approved\nCandidates\nCodex and Claude work on separate branches within the budget.\n(Run)\n→ Validate : commits ready\nValidate\nRun the tests in each candidate’s sandbox.\n(Run)\n→ Winner : first success\nWinner\nCancel or skip"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nPreparation\nplan ready\napproved\nPlan\nClarify the ticket and propose the tests and code.\n(Preparation)\n→ Approval : plan ready\nApproval\nThe owner accepts or stops the run.\n(Preparation)\n→ Tests : approved\nTests\nWrite tests and commit them only after the chec"
+      },
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nDelivery\nchanges ready\nneeds work\nall checks pass\nImplement\nChange production code without editing the tests.\n(Delivery)\n→ Check : changes ready\nCheck\nCheck changed files, run tests and obtain the review verdict.\n(Delivery)\n→ Implement : needs work\n→ Branch"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\ncandidate ready\nneeds work\nchecks pass\nrounds exhausted\nCorrect\nThe agent edits and commits on the work branch.\n(Run)\n→ Check : candidate ready\nCheck\nTests must pass and the working tree must be clean.\n(Run)\n→ Correct : needs work\n→ Review branch : chec"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "how-it-works",
+    "canvases": [
+      {
+        "scale": 0.823529,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 10.09,
+        "viewportWidth": 1176,
+        "worldWidth": 1428,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Drag to move · Ctrl + scroll to zoom\n82 %\nOutpost\nAgent\nworkspace ready\nready\nprocess complete\nfinished\nPrepare files\nOpen the workspace selected by the repository and branch policy.\n(Outpost)\n→ Open the sandbox : workspace ready\nOpen the sandbox\nAllocate the environment and prepare the agent’s acce"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nneeds input\nwork complete\nperson responds\nnext turn\nAgent turn\nWork from the brief or latest answer; save the conversation and close the sandbox.\n(Run)\n→ Question : needs input\n→ Result : work complete\nQuestion\nSave the question and return waiting-input"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\njob claimed\nresult saved\nSubmit\nThe producer saves a job in the shared queue.\n(Run)\n→ Execute : job claimed\nExecute\nThe worker runs the registered handler while renewing its lease.\n(Run)\n→ Read : result saved\nRead\nThe producer looks up the job ID to rea"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nfield mapping\nfield mapping\nweb complete\nmobile complete\napproved\nChange API\nKeep the API change on its own branch.\n(Run)\n→ Update web : field mapping\n→ Update mobile : field mapping\nUpdate web\nUse a separate branch and sandbox.\n(Run)\n→ Approve : web co"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\njob claimed\ntask completed\nquota reached\ncan resume\nSchedule\nQueue this night’s run at 02:00 and its continuation at 07:00, Paris weekdays.\n(Run)\n→ Update : job claimed\nUpdate\nThe agent updates dependencies, tests and commits accepted changes.\n(Run)\n→ M"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\ncan wait\ncannot wait\nreset reached\nlater start\nQuota reached\nSave the pause without consuming a retry.\n(Run)\n→ Wait : can wait\n→ Paused : cannot wait\nWait\nKeep the process waiting until reset.\n(Run)\n→ Resume : reset reached\nPaused\nReturn the saved pause"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nsandbox ready\nfinished\nsafe to apply\nconflict/failure\nSend files\nCopy Git history and selected files to the sandbox.\n(Run)\n→ Work : sandbox ready\nWork\nRun an agent or command remotely.\n(Run)\n→ Check return : finished\nCheck return\nDownload and validate c"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nrequest accepted\ncommits fetched\nvalid verdict\nReceive label\nVerify the signature, review label and permitted actor.\n(Run)\n→ Queue review : request accepted\nQueue review\nA worker starts or resumes the saved review.\n(Run)\n→ Review diff : commits fetched\n"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\nprompt\nchild result\nDelegate\nThe parent sends a prompt, without its conversation history.\n(Run)\n→ Child : prompt\nChild\nWork with a separate history in the parent’s sandbox and files.\n(Run)\n→ Parent resumes : child result\nParent resumes\nRead the child’s "
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\ncandidate ready\nneeds work\naccepted\nrounds exhausted\nAttempt\nProduce or correct a candidate.\n(Run)\n→ Check : candidate ready\nCheck\nRun your validation.\n(Run)\n→ Attempt : needs work\n→ Result : accepted\n→ Failure : rounds exhausted\nResult\nReturn the accep"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 1440,
+    "slug": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Drag to move · Ctrl + scroll to zoom\n100 %\nRun\naccepted event\nbad signature\njob claimed\nVerify\nCheck the incoming signature before routing the event.\n(Run)\n→ Queue : accepted event\n→ Reject : bad signature\nQueue\nStore a job and answer the HTTP request.\n(Run)\n→ Worker : job claimed\nReject\nReturn 401 "
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "approvals",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\nrequest ready\napproved\nrejected\nRequest\nSave the gate and wait for an authorized person.\n(Run)\n→ Decision : request ready\nDecision\nYour application submits the choice and reason.\n(Run)\n→ Continue : approved\n→ Stop : rejected\nContinue\nRun dependent tasks.\n(Run)\nStop\nSkip dependent tasks; the"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "compete-agents",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\ncommits ready\nfirst success\nmerge approved\nCandidates\nCodex and Claude work on separate branches within the budget.\n(Run)\n→ Validate : commits ready\nValidate\nRun the tests in each candidate’s sandbox.\n(Run)\n→ Winner : first success\nWinner\nCancel or skip remaining candidates; keep their bran"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "development-workflow",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nPreparation\nplan ready\napproved\nPlan\nClarify the ticket and propose the tests and code.\n(Preparation)\n→ Approval : plan ready\nApproval\nThe owner accepts or stops the run.\n(Preparation)\n→ Tests : approved\nTests\nWrite tests and commit them only after the checks accept.\n(Preparation)"
+      },
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nDelivery\nchanges ready\nneeds work\nall checks pass\nImplement\nChange production code without editing the tests.\n(Delivery)\n→ Check : changes ready\nCheck\nCheck changed files, run tests and obtain the review verdict.\n(Delivery)\n→ Implement : needs work\n→ Branch : all checks pass\nBranch\nCommit the c"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\ncandidate ready\nneeds work\nchecks pass\nrounds exhausted\nCorrect\nThe agent edits and commits on the work branch.\n(Run)\n→ Check : candidate ready\nCheck\nTests must pass and the working tree must be clean.\n(Run)\n→ Correct : needs work\n→ Review branch : checks pass\n→ Stop : rounds exhausted\nRevi"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "how-it-works",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1428,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nOutpost\nAgent\nworkspace ready\nready\nprocess complete\nfinished\nPrepare files\nOpen the workspace selected by the repository and branch policy.\n(Outpost)\n→ Open the sandbox : workspace ready\nOpen the sandbox\nAllocate the environment and prepare the agent’s access and project tools.\n(Outpost)\n→ Run"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\nneeds input\nwork complete\nperson responds\nnext turn\nAgent turn\nWork from the brief or latest answer; save the conversation and close the sandbox.\n(Run)\n→ Question : needs input\n→ Result : work complete\nQuestion\nSave the question and return waiting-input.\n(Run)\n→ Answer : person responds\nAns"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "job-queues",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nRun\njob claimed\nresult saved\nSubmit\nThe producer saves a job in the shared queue.\n(Run)\n→ Execute : job claimed\nExecute\nThe worker runs the registered handler while renewing its lease.\n(Run)\n→ Read : result saved\nRead\nThe producer looks up the job ID to read its result or error.\n(Run)"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nRun\nfield mapping\nfield mapping\nweb complete\nmobile complete\napproved\nChange API\nKeep the API change on its own branch.\n(Run)\n→ Update web : field mapping\n→ Update mobile : field mapping\nUpdate web\nUse a separate branch and sandbox.\n(Run)\n→ Approve : web complete\nUpdate mobile\nUse a separate br"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\njob claimed\ntask completed\nquota reached\ncan resume\nSchedule\nQueue this night’s run at 02:00 and its continuation at 07:00, Paris weekdays.\n(Run)\n→ Update : job claimed\nUpdate\nThe agent updates dependencies, tests and commits accepted changes.\n(Run)\n→ Morning report : task completed\n→ Quota"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\ncan wait\ncannot wait\nreset reached\nlater start\nQuota reached\nSave the pause without consuming a retry.\n(Run)\n→ Wait : can wait\n→ Paused : cannot wait\nWait\nKeep the process waiting until reset.\n(Run)\n→ Resume : reset reached\nPaused\nReturn the saved pause; independent tasks may finish.\n(Run)\n"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nRun\nsandbox ready\nfinished\nsafe to apply\nconflict/failure\nSend files\nCopy Git history and selected files to the sandbox.\n(Run)\n→ Work : sandbox ready\nWork\nRun an agent or command remotely.\n(Run)\n→ Check return : finished\nCheck return\nDownload and validate changes; check for concurrent host edit"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "review-on-label",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\nrequest accepted\ncommits fetched\nvalid verdict\nReceive label\nVerify the signature, review label and permitted actor.\n(Run)\n→ Queue review : request accepted\nQueue review\nA worker starts or resumes the saved review.\n(Run)\n→ Review diff : commits fetched\nReview diff\nThe agent examines the pul"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "subagents",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nRun\nprompt\nchild result\nDelegate\nThe parent sends a prompt, without its conversation history.\n(Run)\n→ Child : prompt\nChild\nWork with a separate history in the parent’s sandbox and files.\n(Run)\n→ Parent resumes : child result\nParent resumes\nRead the child’s result and continue the main task.\n(Ru"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "verification-loops",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\ncandidate ready\nneeds work\naccepted\nrounds exhausted\nAttempt\nProduce or correct a candidate.\n(Run)\n→ Check : candidate ready\nCheck\nRun your validation.\n(Run)\n→ Attempt : needs work\n→ Result : accepted\n→ Failure : rounds exhausted\nResult\nReturn the accepted candidate.\n(Run)\nFailure\nStop with"
+      }
+    ]
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "slug": "webhooks",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nRun\naccepted event\nbad signature\njob claimed\nVerify\nCheck the incoming signature before routing the event.\n(Run)\n→ Queue : accepted event\n→ Reject : bad signature\nQueue\nStore a job and answer the HTTP request.\n(Run)\n→ Worker : job claimed\nReject\nReturn 401 without publishing a job.\n(Run)\nWorker"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "approvals",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\ndemande affichée\napprouvé\nrefusé\nDemande\nEnregistrer la demande et attendre une personne autorisée.\n(Exécution)\n→ Décision : demande affichée\nDécision\nVotre application transmet le choix et son motif.\n(Exécution)\n→ Suite : appro"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "compete-agents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\ncommits prêts\npremier accepté\nfusion approuvée\nCandidats\nCodex et Claude travaillent sur des branches séparées dans le budget fixé.\n(Exécution)\n→ Valider : commits prêts\nValider\nLancer les tests dans la sandbox de chaque candida"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "development-workflow",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nPréparation\nplan prêt\napprouvé\nPlan\nClarifier le ticket et proposer les tests et le code.\n(Préparation)\n→ Approbation : plan prêt\nApprobation\nLe responsable accepte ou arrête le workflow.\n(Préparation)\n→ Tests : approuvé\nTests\nÉcrire les "
+      },
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nRéalisation\nprêt à vérifier\nà corriger\nvalidé\nImplémenter\nModifier le code sans toucher aux tests.\n(Réalisation)\n→ Contrôler : prêt à vérifier\nContrôler\nVérifier les fichiers modifiés, lancer les tests et obtenir le verdict de relecture.\n"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nprêt à vérifier\nà corriger\nvalidé\ntours épuisés\nCorriger\nL’agent modifie et committe sur la branche de travail.\n(Exécution)\n→ Contrôler : prêt à vérifier\nContrôler\nLes tests doivent passer et le répertoire de travail être propre"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "how-it-works",
+    "canvases": [
+      {
+        "scale": 0.823529,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 10.09,
+        "viewportWidth": 1176,
+        "worldWidth": 1428,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n82 %\nOutpost\nAgent\nworkspace prêt\npréparation terminée\nprocessus terminé\nrésultat ou échec\nPréparer les fichiers\nOuvrir le workspace choisi par le dépôt et la politique de branche.\n(Outpost)\n→ Ouvrir la sandbox : workspace prêt\nOuvrir la sandbo"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nbesoin d’aide\ntravail terminé\nréponse reçue\ntour suivant\nTour de l’agent\nTravailler depuis le brief ou la réponse ; conserver la conversation et fermer la sandbox.\n(Exécution)\n→ Question : besoin d’aide\n→ Résultat : travail term"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "job-queues",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\njob réservé\nrésultat sauvé\nSoumettre\nLe producteur enregistre un job dans la file partagée.\n(Exécution)\n→ Exécuter : job réservé\nExécuter\nLe worker lance le traitement et renouvelle sa réservation.\n(Exécution)\n→ Lire : résultat "
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nrenommage validé\nrenommage validé\nweb terminé\nmobile terminé\napprouvé\nModifier l’API\nConserver la modification de l’API sur sa branche.\n(Exécution)\n→ Adapter le web : renommage validé\n→ Adapter le mobile : renommage validé\nAdapt"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\njob réservé\ntâche terminée\nquota atteint\nreprise possible\nPlanifier\nMettre en file le travail de 02 h et sa reprise de 07 h, en semaine à Paris.\n(Exécution)\n→ Mettre à jour : job réservé\nMettre à jour\nL’agent met à jour les dépe"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nattente possible\nattente exclue\ndate atteinte\nnouvel appel\nQuota atteint\nEnregistrer la pause sans consommer de nouvelle tentative.\n(Exécution)\n→ Attente : attente possible\n→ En pause : attente exclue\nAttente\nAttendre la réiniti"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 5,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nsandbox prête\nterminé\nretour validé\nconflit / échec\nEnvoyer\nCopier l’historique Git et les fichiers sélectionnés dans la sandbox.\n(Exécution)\n→ Travailler : sandbox prête\nTravailler\nExécuter un agent ou une commande à distance.\n"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "review-on-label",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 1141,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nvalidée\ncommits reçus\nverdict validé\nRecevoir le label\nVérifier la signature, le label de relecture et la personne autorisée.\n(Exécution)\n→ Mettre en file : validée\nMettre en file\nUn worker démarre ou reprend la relecture enregi"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "subagents",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 3,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\nprompt\nrésultat\nDéléguer\nLe parent envoie un prompt, sans son historique de conversation.\n(Exécution)\n→ Sous-agent : prompt\nSous-agent\nTravailler avec son propre historique dans la sandbox et les fichiers du parent.\n(Exécution)\n"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "verification-loops",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\ncandidat prêt\nà corriger\naccepté\ntours épuisés\nTentative\nProduire ou corriger un candidat.\n(Exécution)\n→ Contrôle : candidat prêt\nContrôle\nExécuter votre validation.\n(Exécution)\n→ Tentative : à corriger\n→ Résultat : accepté\n→ Éc"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 1440,
+    "slug": "webhooks",
+    "canvases": [
+      {
+        "scale": 1,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 12.25,
+        "viewportWidth": 1176,
+        "worldWidth": 854,
+        "overflow": false,
+        "nodeCount": 4,
+        "text": "Glissez pour vous déplacer · Ctrl + molette pour zoomer\n100 %\nExécution\névénement retenu\nsignature fausse\njob réservé\nVérifier\nContrôler la signature avant de sélectionner le traitement.\n(Exécution)\n→ File : événement retenu\n→ Refus : signature fausse\nFile\nEnregistrer un job et répondre à la requête"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "approvals",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\ndemande affichée\napprouvé\nrefusé\nDemande\nEnregistrer la demande et attendre une personne autorisée.\n(Exécution)\n→ Décision : demande affichée\nDécision\nVotre application transmet le choix et son motif.\n(Exécution)\n→ Suite : approuvé\n→ Arrêt : refusé\nSuite\nExécuter les tâches dépendante"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "compete-agents",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\ncommits prêts\npremier accepté\nfusion approuvée\nCandidats\nCodex et Claude travaillent sur des branches séparées dans le budget fixé.\n(Exécution)\n→ Valider : commits prêts\nValider\nLancer les tests dans la sandbox de chaque candidat.\n(Exécution)\n→ Gagnant : premier accepté\nGagnant\nAnnule"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "development-workflow",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nPréparation\nplan prêt\napprouvé\nPlan\nClarifier le ticket et proposer les tests et le code.\n(Préparation)\n→ Approbation : plan prêt\nApprobation\nLe responsable accepte ou arrête le workflow.\n(Préparation)\n→ Tests : approuvé\nTests\nÉcrire les tests et les committer seulement après validation.\n(Prépa"
+      },
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nRéalisation\nprêt à vérifier\nà corriger\nvalidé\nImplémenter\nModifier le code sans toucher aux tests.\n(Réalisation)\n→ Contrôler : prêt à vérifier\nContrôler\nVérifier les fichiers modifiés, lancer les tests et obtenir le verdict de relecture.\n(Réalisation)\n→ Implémenter : à corriger\n→ Branche : vali"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "fix-failing-ci",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\nprêt à vérifier\nà corriger\nvalidé\ntours épuisés\nCorriger\nL’agent modifie et committe sur la branche de travail.\n(Exécution)\n→ Contrôler : prêt à vérifier\nContrôler\nLes tests doivent passer et le répertoire de travail être propre.\n(Exécution)\n→ Corriger : à corriger\n→ Relire la branche"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "how-it-works",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1428,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nOutpost\nAgent\nworkspace prêt\npréparation terminée\nprocessus terminé\nrésultat ou échec\nPréparer les fichiers\nOuvrir le workspace choisi par le dépôt et la politique de branche.\n(Outpost)\n→ Ouvrir la sandbox : workspace prêt\nOuvrir la sandbox\nAllouer l’environnement et préparer l’accès de l’agent"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "interactive-tasks",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\nbesoin d’aide\ntravail terminé\nréponse reçue\ntour suivant\nTour de l’agent\nTravailler depuis le brief ou la réponse ; conserver la conversation et fermer la sandbox.\n(Exécution)\n→ Question : besoin d’aide\n→ Résultat : travail terminé\nQuestion\nEnregistrer la question et renvoyer waiting-"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "job-queues",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nExécution\njob réservé\nrésultat sauvé\nSoumettre\nLe producteur enregistre un job dans la file partagée.\n(Exécution)\n→ Exécuter : job réservé\nExécuter\nLe worker lance le traitement et renouvelle sa réservation.\n(Exécution)\n→ Lire : résultat sauvé\nLire\nLe producteur retrouve le résultat ou l’erreur"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "multi-repository-change",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nExécution\nrenommage validé\nrenommage validé\nweb terminé\nmobile terminé\napprouvé\nModifier l’API\nConserver la modification de l’API sur sa branche.\n(Exécution)\n→ Adapter le web : renommage validé\n→ Adapter le mobile : renommage validé\nAdapter le web\nUtiliser une branche et une sandbox séparées.\n("
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "nightly-maintenance",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\njob réservé\ntâche terminée\nquota atteint\nreprise possible\nPlanifier\nMettre en file le travail de 02 h et sa reprise de 07 h, en semaine à Paris.\n(Exécution)\n→ Mettre à jour : job réservé\nMettre à jour\nL’agent met à jour les dépendances, teste et committe les changements acceptés.\n(Exé"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "quota-pauses",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\nattente possible\nattente exclue\ndate atteinte\nnouvel appel\nQuota atteint\nEnregistrer la pause sans consommer de nouvelle tentative.\n(Exécution)\n→ Attente : attente possible\n→ En pause : attente exclue\nAttente\nAttendre la réinitialisation dans le processus.\n(Exécution)\n→ Reprise : date"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "remote-synchronization",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 5,
+        "text": "50 %\nExécution\nsandbox prête\nterminé\nretour validé\nconflit / échec\nEnvoyer\nCopier l’historique Git et les fichiers sélectionnés dans la sandbox.\n(Exécution)\n→ Travailler : sandbox prête\nTravailler\nExécuter un agent ou une commande à distance.\n(Exécution)\n→ Vérifier le retour : terminé\nVérifier le re"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "review-on-label",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 1141,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\nvalidée\ncommits reçus\nverdict validé\nRecevoir le label\nVérifier la signature, le label de relecture et la personne autorisée.\n(Exécution)\n→ Mettre en file : validée\nMettre en file\nUn worker démarre ou reprend la relecture enregistrée.\n(Exécution)\n→ Relire le diff : commits reçus\nRelir"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "subagents",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 3,
+        "text": "50 %\nExécution\nprompt\nrésultat\nDéléguer\nLe parent envoie un prompt, sans son historique de conversation.\n(Exécution)\n→ Sous-agent : prompt\nSous-agent\nTravailler avec son propre historique dans la sandbox et les fichiers du parent.\n(Exécution)\n→ Reprise du parent : résultat\nReprise du parent\nLire le "
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "verification-loops",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\ncandidat prêt\nà corriger\naccepté\ntours épuisés\nTentative\nProduire ou corriger un candidat.\n(Exécution)\n→ Contrôle : candidat prêt\nContrôle\nExécuter votre validation.\n(Exécution)\n→ Tentative : à corriger\n→ Résultat : accepté\n→ Échec : tours épuisés\nRésultat\nRenvoyer le candidat accepté"
+      }
+    ]
+  },
+  {
+    "lang": "fr",
+    "width": 390,
+    "slug": "webhooks",
+    "canvases": [
+      {
+        "scale": 0.5,
+        "bodyFontPx": 12.25,
+        "effectiveBodyFontPx": 6.13,
+        "viewportWidth": 390,
+        "worldWidth": 854,
+        "overflow": true,
+        "nodeCount": 4,
+        "text": "50 %\nExécution\névénement retenu\nsignature fausse\njob réservé\nVérifier\nContrôler la signature avant de sélectionner le traitement.\n(Exécution)\n→ File : événement retenu\n→ Refus : signature fausse\nFile\nEnregistrer un job et répondre à la requête HTTP.\n(Exécution)\n→ Worker : job réservé\nRefus\nRenvoyer "
+      }
+    ]
+  }
+]

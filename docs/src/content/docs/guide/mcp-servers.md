@@ -3,6 +3,8 @@ title: "Connect MCP servers"
 description: "Give an agent MCP tools, resources and prompts with explicitly declared credentials."
 ---
 
+Start with a working [CLI agent](../choose-an-agent/) or [built-in harness](../harness/). The sandbox must be able to start or reach the declared server. Keep server tokens in explicitly selected environment variables.
+
 ## Declare servers
 
 Declare MCP servers in `mcpServers`, using a name for each server. A server can start from a command or expose a Streamable HTTP endpoint. CLI harnesses and the built-in harness accept the same declaration.

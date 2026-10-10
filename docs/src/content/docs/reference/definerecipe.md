@@ -13,7 +13,7 @@ import { defineRecipe } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Parse and validate a local YAML recipe, bind commands and named agents to a caller-owned sandbox, and return a sequential Workflow. Version 1 keeps strings literal; version 2 resolves typed inputs and explicit references to direct dependency outputs. Never allocate, integrate or close the sandbox; the caller owns those actions. Workflow retries, cancellation and usage accounting remain available.
+Parse and validate a local YAML recipe and compile it into a Workflow. Format 1 keeps strings literal; format 2 adds typed scalar inputs and direct dependency references; format 3 adds structured inputs, conditions, callbacks, loops, decisions and isolated tasks. The engine borrows the supplied sandbox: its caller owns integration and cleanup. Isolated tasks own their separate resources. Workflow retries, cancellation and usage accounting apply.
 
 [Complete example and detailed rules](../../guide/yaml-recipes/).
 

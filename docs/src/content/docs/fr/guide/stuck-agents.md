@@ -3,11 +3,13 @@ title: "Détecter un agent qui tourne en rond"
 description: "Arrêter, avertir ou rediriger un agent quand ses outils ou changements de fichiers se répètent."
 ---
 
-## Arrêter l’activité répétitive
+<span id="arrêter-lactivité-répétitive"></span>
+
+## Observer l’activité répétitive
 
 Un agent peut continuer à produire des sorties tout en répétant les mêmes commandes ou modifications. Activez le watchdog d’activité en complément des [limites de temps](../limits-and-cancellation/) pour détecter ces répétitions. Utilisez la configuration d’agent et de sandbox de l’[installation](../setup/).
 
-Ce dispatch s’arrête quand un même appel d’outil décodé ou contenu de changement de fichiers apparaît trois fois parmi les vingt derniers événements d’activité. D’autres appels peuvent séparer ces occurrences.
+Commencez par des avertissements : une attente ou une relance légitime de tests peut se répéter. Ce dispatch signale quand un même appel d’outil décodé ou contenu de changement de fichiers apparaît trois fois parmi les vingt derniers événements d’activité. D’autres appels peuvent séparer ces occurrences.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
@@ -21,12 +23,12 @@ await dispatch({
   brief: { text: "Corrige les tests qui échouent et commite le changement." },
   watchdog: {
     repetition: { window: 20, maxRepeats: 3 },
-    onStuck: "stop",
+    onStuck: "warn",
   },
 });
 ```
 
-Outpost émet `stuck`, arrête l’agent et rejette avec une `OutpostError` de code `stuck`. Un événement `stopped` indique la même raison. Le dispatch froid libère sa sandbox et conserve le travail pour la [récupération](../recovery/) ; une session chaude reste utilisable. Les fichiers et commits déjà écrits restent en place.
+Pour imposer ensuite l’arrêt, remplacez `warn` par `stop`. Outpost émet `stuck`, arrête l’agent et rejette avec une `OutpostError` de code `stuck`. Un événement `stopped` indique la même raison. Le dispatch froid libère sa sandbox et conserve le travail pour la [récupération](../recovery/) ; une session chaude reste utilisable. Les fichiers et commits déjà écrits restent en place.
 
 ## Rediriger l’agent
 
@@ -66,7 +68,9 @@ Cette heuristique de répétition exacte ne prouve pas l’absence de progrès. 
 
 L’ordre des clés d’objet est ignoré ; les chaînes et l’ordre des tableaux restent significatifs. Les IDs d’appel identifient les doublons du protocole sans distinguer des actions identiques. Les portées des sous-agents et appels parents distinguent les actions. Texte, sorties et résultats d’outils ne comptent pas dans la fenêtre. La comparaison porte sur l’activité décodée avant masquage et conserve des empreintes plutôt que les entrées complètes.
 
-Les événements de changement de fichiers exposent seulement ce que rapporte l’adaptateur : les mêmes chemins et types de changement peuvent correspondre même si le contenu diffère. Le watchdog ne lit pas les fichiers et ne compare pas les diffs Git. Un contenu absent correspond aux autres contenus absents, séparément de `null`. Les autres contenus non JSON avancent la fenêtre sans correspondance. Les agents sans événements outil ou changement de fichiers ne peuvent pas déclencher ce détecteur. Les agents de rejeu refusent l’option.
+Le détecteur compare les événements rapportés, pas les fichiers ni les diffs Git. Des chemins et types de changement identiques peuvent donc correspondre malgré des contenus différents. Un agent sans événements d’outils ou de fichiers ne déclenche pas la détection ; les agents de rejeu refusent cette option.
+
+Les contenus absents correspondent entre eux, mais pas à `null`. Les autres contenus non JSON font avancer la fenêtre de comparaison sans correspondance.
 
 L’exemple hors ligne du dépôt dans `examples/59-repetition-watchdog/` exerce arrêt, avertissement et steering avec un modèle simulé et de vraies commandes locales, sans identifiants ni appels payants. Les exécutions réelles des CLI natives et du cloud restent à valider.
 

@@ -3,6 +3,8 @@ title: "Donner des outils au modèle"
 description: "Choisissez les outils de la sandbox ou définissez vos propres outils pour le harness intégré."
 ---
 
+Partez d’un [harness fonctionnel](../harness/). Donnez-lui les outils nécessaires, puis ajoutez un outil personnalisé si une opération manque. Les effets sur les fichiers et commandes doivent passer par la sandbox fournie à l’outil.
+
 ## Donner des outils prêts à l’emploi au modèle
 
 Passez les outils ou ensembles d’outils nécessaires au modèle à `createHarness({ tools })`. Le modèle peut appeler uniquement les outils déclarés : commencez par ceux dont la tâche a besoin.
@@ -43,7 +45,6 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="review.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./reviewer.ts";
@@ -54,7 +55,7 @@ export const result = await dispatch({
   agent: reviewer,
   brief: { text: "Review the last commit and report risky changes." },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: The last commit accepts unchecked input in src/parser.ts.
 ```
 
@@ -72,104 +73,18 @@ Cet agent de revue lit, recherche et consulte l’historique, mais ne peut modif
 
 Les chemins restent à l’intérieur du dépôt. Pour configurer les limites des commandes, consultez [createHarnessShellTools](../../reference/createharnessshelltools/).
 
-## Définir un outil
+<span id="définir-un-outil"></span>
+<span id="regrouper-des-outils"></span>
 
-Cet outil propose au modèle de lancer les tests dans la sandbox. Le modèle peut demander tous les tests ou limiter l’exécution à un nom.
-
-<!-- tabs -->
-
-```ts title="test-input.ts"
-import { z } from "zod";
-
-export const testInput = z.object({ match: z.string().optional() });
-export type TestInput = z.infer<typeof testInput>;
-```
-
-```ts title="execute-tests.ts"
-import type { TestInput } from "./test-input.ts";
-import type { HarnessToolContext } from "@elie-laloum/outpost";
-
-export async function executeTests(
-  { match }: TestInput,
-  { sandbox, signal }: HarnessToolContext,
-) {
-  const result = await sandbox.invoke({
-    executable: "npm",
-    arguments: [
-      "test",
-      ...(match ? ["--", `--test-name-pattern=${match}`] : []),
-    ],
-    signal,
-  });
-  return {
-    content: result.stdout + result.stderr,
-    isError: result.status !== 0,
-  };
-}
-```
-
-```ts title="run-tests.ts"
-import { defineHarnessTool } from "@elie-laloum/outpost";
-import { testInput } from "./test-input.ts";
-import { executeTests } from "./execute-tests.ts";
-
-export const runTests = defineHarnessTool({
-  name: "run_tests",
-  description:
-    "Run the test suite, optionally only the tests whose name matches.",
-  input: testInput,
-  resources: ({ match }) => ({ command: `npm test ${match ?? ""}`.trim() }),
-  execute: executeTests,
-});
-```
-
-Référence API : [HarnessToolOptions](../../reference/harnesstooloptions/), [HarnessToolContext](../../reference/harnesstoolcontext/) et [ToolOutput](../../reference/tooloutput/).
-
-Un nom d’outil compte de 1 à 64 lettres, chiffres, `_` ou `-`. Une erreur levée renvoie son message au modèle, sauf si `toolExecution.onError` vaut `"fail"` (voir [Harness intégré](../harness/)).
-
-## Regrouper des outils
-
-`defineHarnessToolset()` réunit des outils et d’autres ensembles sous un même nom, pour les partager entre plusieurs harness.
-
-<!-- tabs -->
-
-```ts title="inspect-tools.ts"
-import {
-  defineHarnessToolset,
-  createHarnessFileTools,
-  createHarnessSearchTools,
-  createHarnessGitTools,
-} from "@elie-laloum/outpost";
-
-export const inspect = defineHarnessToolset({
-  name: "inspect",
-  tools: [
-    createHarnessFileTools(),
-    createHarnessSearchTools(),
-    createHarnessGitTools(),
-  ],
-});
-```
-
-```ts title="coding-tools.ts"
-import {
-  defineHarnessToolset,
-  createHarnessEditTools,
-  createHarnessShellTools,
-} from "@elie-laloum/outpost";
-import { inspect } from "./inspect-tools.ts";
-
-export const coding = defineHarnessToolset({
-  name: "coding",
-  tools: [inspect, createHarnessEditTools(), createHarnessShellTools()],
-});
-```
-
-Chaque nom d’outil doit être unique dans le harness : ses outils, ses ensembles imbriqués et les outils de ses [compétences](../harness-context/). Un doublon échoue dès la création du harness.
+Pour cette étape, suivez [Créer un outil pour votre agent](../custom-harness-tools/).
 
 ## Utiliser les outils d’un serveur MCP
 
 Pour exposer les outils d’un serveur existant, déclarez-le avec `createHarness({ mcpServers })`. [Serveurs MCP](../mcp-servers/) détaille la configuration ; ses noms d’outils partagent le même espace de noms.
+
+## Workspaces de fichiers
+
+Listing et recherche sélectionnent Git par défaut pour les appels existants. Choisir explicitement `filesystem` dans un workspace de fichiers ; ces opérations s’exécutent dans la sandbox empruntée, gardent permissions et limites, ne suivent pas les liens et n’appliquent pas `.gitignore`. Voir [les workspaces de fichiers](../workspaces/).
 
 ## Limites
 
@@ -178,7 +93,3 @@ Pour exposer les outils d’un serveur existant, déclarez-le avec `createHarnes
 - Un résultat de plus de 100 000 caractères est tronqué avant d’atteindre le modèle.
 
 API : [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/) · [ToolOutput](../../reference/tooloutput/) · [ToolResources](../../reference/toolresources/) · [createHarnessFileTools](../../reference/createharnessfiletools/) · [createHarnessSearchTools](../../reference/createharnesssearchtools/) · [createHarnessGitTools](../../reference/createharnessgittools/) · [createHarnessEditTools](../../reference/createharnessedittools/) · [createHarnessShellTools](../../reference/createharnessshelltools/).
-
-## Workspaces de fichiers
-
-Listing et recherche sélectionnent Git par défaut pour les appels existants. Choisir explicitement `filesystem` dans un workspace de fichiers ; ces opérations s’exécutent dans la sandbox empruntée, gardent permissions et limites, ne suivent pas les liens et n’appliquent pas `.gitignore`. Voir [les workspaces de fichiers](../workspaces/).

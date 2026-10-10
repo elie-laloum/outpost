@@ -19,13 +19,31 @@ Compose a harness and a model into a frozen agent, without starting a process or
 
 ## Parameters and properties
 
+### Variant 1 — `CliAgentOptions`
+
+| Name              | Type                     | Presence | Meaning                                                                                                                                                                                                                                     |
+| ----------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `CliAgentOptions`        | Required | Harness and model selection to bind into one executable agent.                                                                                                                                                                              |
+| `options.harness` | `CliHarness`             | Required | CLI preset, such as createCodexHarness(), bound to model when the agent is created.                                                                                                                                                         |
+| `options.model`   | `ModelSpec \| undefined` | Optional | Model name or { name, reasoning, maxOutputTokens }; the preset rejects unsupported reasoning or maxOutputTokens here. Omitted, the CLI uses its default model, except that Kimi usage authentication and a Codex modelProvider require one. |
+
+### Variant 2 — `CustomAgentOptions`
+
+| Name              | Type                 | Presence | Meaning                                                                                                                                                                          |
+| ----------------- | -------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `CustomAgentOptions` | Required | Harness and model selection to bind into one executable agent.                                                                                                                   |
+| `options.harness` | `Harness`            | Required | Built-in Outpost harness with its configured model provider.                                                                                                                     |
+| `options.model`   | `ModelSpec`          | Required | Model name or { name, reasoning, maxOutputTokens }. The model provider rejects unsupported reasoning or output limits here; the service checks the model name when it is called. |
+
+### Variant 3 — `AgentOptions`
+
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name              | Type                                                                         | Presence          | Meaning                                                                                                                                                                                                                                     |
-| ----------------- | ---------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`         | `CliAgentOptions \| CustomAgentOptions \| AgentOptions`                      | Required          | Harness and model selection to bind into one executable agent.                                                                                                                                                                              |
-| `options.harness` | `CliHarness \| Harness \| CliHarness \| Harness`                             | Required          | CLI preset, such as createCodexHarness(), bound to model when the agent is created.                                                                                                                                                         |
-| `options.model`   | `ModelSpec \| undefined \| ModelSpec \| ModelSpec \| undefined \| ModelSpec` | Variant-dependent | Model name or { name, reasoning, maxOutputTokens }; the preset rejects unsupported reasoning or maxOutputTokens here. Omitted, the CLI uses its default model, except that Kimi usage authentication and a Codex modelProvider require one. |
+| Name              | Type                                  | Presence          | Meaning                                                                                                                                                                                                                                     |
+| ----------------- | ------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `AgentOptions`                        | Required          | Harness and model selection to bind into one executable agent.                                                                                                                                                                              |
+| `options.harness` | `CliHarness \| Harness`               | Required          | CLI preset, such as createCodexHarness(), bound to model when the agent is created.                                                                                                                                                         |
+| `options.model`   | `ModelSpec \| undefined \| ModelSpec` | Variant-dependent | Model name or { name, reasoning, maxOutputTokens }; the preset rejects unsupported reasoning or maxOutputTokens here. Omitted, the CLI uses its default model, except that Kimi usage authentication and a Codex modelProvider require one. |
 
 ## Returns
 
@@ -35,6 +53,10 @@ The fields below cover all variants; the signature specifies their allowed combi
 
 ```ts
 export declare function createAgent(options: CliAgentOptions): CliAgent;
+
+export declare function createAgent(options: CustomAgentOptions): CustomAgent;
+
+export declare function createAgent(options: AgentOptions): Agent;
 ```
 
 ## Related contracts

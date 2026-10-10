@@ -15,7 +15,7 @@ import { calculateUsageCost } from "@elie-laloum/outpost";
 
 Estime les frais des tokens dans la devise de la table à partir de Usage.models. Les tarifs sont par million de tokens. Les lectures et écritures du cache sont facturées une fois selon la convention d’entrée de chaque modèle ; les tarifs de cache omis utilisent celui de l’entrée. Un modèle, un tarif ou un usage manquant renvoie complete: false et une borne inférieure. Les compteurs ou tarifs invalides lèvent une erreur. Il s’agit d’une estimation, pas d’une facture.
 
-[Exemple complet et règles détaillées](../../guide/budgets/).
+[Exemple complet et règles détaillées](../../guide/estimating-costs/).
 
 ## Paramètres et propriétés
 

@@ -21,7 +21,7 @@ Create the files toolset. read_file returns up to 2000 numbered lines of a UTF-8
 
 | Name                | Type                                 | Presence | Meaning                                                                                                              |
 | ------------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `FileSelectionOptions \| undefined`  | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.             |
+| `options`           | `FileSelectionOptions \| undefined`  | Optional | Choose Git-aware or plain-filesystem selection for file listing.                                                     |
 | `options.selection` | `"git" \| "filesystem" \| undefined` | Optional | Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering. |
 
 ## Returns

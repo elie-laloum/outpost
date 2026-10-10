@@ -15,7 +15,7 @@ import { createRecipeRuntime } from "@elie-laloum/outpost/recipes";
 
 Validate a YAML project and create a caller-owned runtime. Each run imports declared extensions, creates its owned components and sandbox, executes the workflow, integrates according to branch policy and closes resources before publishing explicitly configured reports.
 
-[Complete example and detailed rules](../../guide/yaml-recipes/).
+[Complete example and detailed rules](../../guide/recipe-extensions/).
 
 ## Parameters and properties
 

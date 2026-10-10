@@ -3,6 +3,8 @@ title: "Choose where data is stored"
 description: "Configure transports for durable data and locate the files that stay in the repository."
 ---
 
+For a Git repository, start in `<repository>/.outpost`: worktrees, conversations and staging remain local files. Default stores use `.outpost/storage` for transported objects. [File workspaces](../working-with-files/) use their `runtime.directory`, separately from their data.
+
 ## What Outpost saves
 
 A transport stores versioned bytes under keys. The stores built on it interpret those bytes as checkpoints, artifacts or other durable data. Choose the transport to decide where the data lives, and the store to decide what it represents.
@@ -127,7 +129,6 @@ A remote transport moves stored objects, not the runtime. These still need the h
 Every write names the revision it expects: `ifRevision: null` creates, the observed `revision` replaces or removes. If another writer changed the object first, the call throws `TransportConflict` and nothing is written.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -144,7 +145,7 @@ try {
     ifRevision: first.revision,
   });
 } catch (error) {
-  if (error instanceof TransportConflict) reportValue("stale:", error.key);
+  if (error instanceof TransportConflict) console.log("stale:", error.key);
   // Example output: stale: notes/today
 }
 ```
@@ -152,6 +153,10 @@ try {
 <!-- check:run -->
 
 It prints `stale: notes/today`. Stores use the same fence: a workflow that lost ownership of its checkpoint fails on its next write instead of overwriting a newer run. Re-read the object before you decide what to do.
+
+## File workspaces
+
+File modes place control storage under `runtime.directory`, without resolving a Git repository. Portable files require an explicit Transport and namespace; a checkpoint alone cannot reconstruct lost materializations. See [file retention](../resuming-file-workspaces/).
 
 ## Limits
 
@@ -161,7 +166,3 @@ It prints `stale: notes/today`. Stores use the same fence: a workflow that lost 
 - Keys are `/`-separated segments of letters, digits, `.`, `_` and `-`, not starting with a dot, up to 512 characters.
 
 API: [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/) · [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [createArtifactStore](../../reference/createartifactstore/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [createTransportConversations](../../reference/createtransportconversations/) · [SandboxOptions](../../reference/sandboxoptions/) · [createS3Transport](../../reference/creates3transport/).
-
-## File workspaces
-
-File modes place control storage under `runtime.directory`, without resolving a Git repository. Portable files require an explicit Transport and namespace; a checkpoint alone cannot reconstruct lost materializations. See [file retention](../workspaces/#preserve-and-resume-files).

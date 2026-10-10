@@ -15,16 +15,16 @@ import { inspectFileWorkspace } from "@elie-laloum/outpost";
 
 Lit l’enregistrement versionné courant du workspace et sa révision sans acquérir de sandbox ni modifier les fichiers matérialisés.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/resuming-file-workspaces/).
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                             | Présence  | Rôle                                                                                                                             |
-| --------------------- | -------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `FileWorkspaceInspectionOptions` | Requis    | Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération. |
-| `options.runtime`     | `WorkspaceRuntime`               | Requis    | Répertoire de contrôle et namespace logique, séparés des fichiers du workspace.                                                  |
-| `options.id`          | `string`                         | Requis    | Identifiant stable de cette ressource, indépendant du chemin de matérialisation.                                                 |
-| `options.transporter` | `Transport \| undefined`         | Optionnel | Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials.                 |
+| Nom                   | Type                             | Présence  | Rôle                                                                                                              |
+| --------------------- | -------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `options`             | `FileWorkspaceInspectionOptions` | Requis    | Répertoire de contrôle et transport de snapshot utilisés pour inspecter le workspace enregistré sans le démarrer. |
+| `options.runtime`     | `WorkspaceRuntime`               | Requis    | Répertoire de contrôle et namespace logique, séparés des fichiers du workspace.                                   |
+| `options.id`          | `string`                         | Requis    | Identifiant stable de cette ressource, indépendant du chemin de matérialisation.                                  |
+| `options.transporter` | `Transport \| undefined`         | Optionnel | Transport fourni par le caller pour la conservation ; aucun chargement implicite de SDK cloud ou de credentials.  |
 
 ## Retour
 

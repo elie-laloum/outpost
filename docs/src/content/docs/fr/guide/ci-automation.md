@@ -122,6 +122,12 @@ Ouvrez la pull request ou fusionnez selon vos règles habituelles de revue et de
 
 Un runner hébergé est supprimé après le job, avec le répertoire `.outpost/` du dépôt. Téléversez ce qu’il faut pour inspecter ou reprendre une exécution en échec.
 
+:::caution
+Les journaux et transferts peuvent eux-mêmes contenir des secrets ou des fichiers d’identifiants. Cette sélection de chemins ne nettoie pas leur contenu. Examinez les données avant tout téléversement et limitez l’accès aux archives ; ne publiez pas automatiquement des données sensibles.
+:::
+
+Après avoir vérifié leur contenu, ajoutez les chemins de récupération retenus à l’étape d’échec. Cet exemple conserve l’archive pendant sept jours.
+
 ```yaml
 - if: failure()
   uses: actions/upload-artifact@v4
@@ -138,7 +144,7 @@ Un runner hébergé est supprimé après le job, avec le répertoire `.outpost/`
 
 Ces chemins contiennent les transferts conservés après une synchronisation en échec, les checkpoints de workflow et les [journaux](../journals/) ([Où vivent les données](../storage/)). Ne téléversez jamais les conversations, `.env` ni les fichiers d’identifiants : toute personne ayant accès en lecture au dépôt peut télécharger les artefacts de CI.
 
-Les commits de l’agent restent sur sa branche : poussez-la depuis une étape `if: failure()` pour les garder. Pour reprendre une exécution dans un job ultérieur, gardez ses checkpoints dans [S3 ou R2](../object-storage/) plutôt que sur le runner.
+Les commits de l’agent restent sur sa branche : poussez-la depuis une étape `if: failure()` pour les garder. Un checkpoint dans [S3 ou R2](../object-storage/) ne conserve ni les worktrees Git ni les conversations natives. Reprenez sur un runner qui garde ces ressources, ou restaurez-les et vérifiez-les explicitement au préalable. Pousser la branche ne suffit pas.
 
 ## Lancer des exécutions sans job de CI
 

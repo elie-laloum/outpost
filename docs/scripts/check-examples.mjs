@@ -52,12 +52,6 @@ try {
       configuration,
     );
     roots.push(resolve(localeDirectory, "outpost.config.ts"));
-    const reporter = setup.match(
-      /```ts title="reporter\.ts"\n([\s\S]*?)```/,
-    )?.[1];
-    assert.ok(reporter, `Missing published reporter: ${locale}`);
-    await writeFile(resolve(localeDirectory, "reporter.ts"), reporter);
-    roots.push(resolve(localeDirectory, "reporter.ts"));
     const names = [
       "index.md",
       ...(await readdir(resolve(content, locale + "guide")))
@@ -65,7 +59,27 @@ try {
         .map((name) => `guide/${name}`),
     ];
     for (const name of names) {
-      const markdown = await readFile(resolve(content, locale, name), "utf8");
+      let markdown = await readFile(resolve(content, locale, name), "utf8");
+      const included = [];
+      for (const match of markdown.matchAll(
+        /<!-- example:include ([a-z0-9-]+) ([\w. -]+) -->/g,
+      )) {
+        const source = await readFile(
+          resolve(content, locale, "guide", `${match[1]}.md`),
+          "utf8",
+        );
+        for (const filename of match[2].split(" ")) {
+          const block = [
+            ...source.matchAll(/^```ts title="([\w.-]+\.ts)"\n[\s\S]*?^```/gm),
+          ].find((candidate) => candidate[1] === filename);
+          assert.ok(
+            block,
+            `Missing shared example ${filename} from ${match[1]}`,
+          );
+          included.push(block[0]);
+        }
+      }
+      markdown = `${included.join("\n\n")}\n\n${markdown}`;
       let index = 0;
       const project = resolve(
         localeDirectory,
@@ -88,10 +102,6 @@ try {
             await copyFile(
               resolve(localeDirectory, "outpost.config.ts"),
               resolve(project, "outpost.config.ts"),
-            );
-            await copyFile(
-              resolve(localeDirectory, "reporter.ts"),
-              resolve(project, "reporter.ts"),
             );
           }
           projectFiles.add(title);

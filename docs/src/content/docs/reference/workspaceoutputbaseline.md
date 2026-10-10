@@ -13,10 +13,10 @@ import type { WorkspaceOutputBaseline } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                            | Presence | Meaning                                                                                                  |
-| ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `options`  | `WorkspaceOutputOptions`        | Required | Options selecting source, execution capabilities or inspected recovery preconditions for this operation. |
-| `expected` | `readonly WorkspaceFileEntry[]` | Required | Destination manifest captured before execution and used to detect concurrent edits.                      |
+| Name       | Type                            | Presence | Meaning                                                                                |
+| ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `options`  | `WorkspaceOutputOptions`        | Required | Publication options whose destination state was captured for later conflict detection. |
+| `expected` | `readonly WorkspaceFileEntry[]` | Required | Destination manifest captured before execution and used to detect concurrent edits.    |
 
 ## Signature
 

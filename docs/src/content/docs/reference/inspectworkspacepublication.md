@@ -15,7 +15,7 @@ import { inspectWorkspacePublication } from "@elie-laloum/outpost";
 
 Reads and validates a versioned publication journal at its exact Transport revision without changing files.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/publishing-files/).
 
 ## Parameters and properties
 

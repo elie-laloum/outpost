@@ -15,7 +15,7 @@ import type { AgentProfileTool } from "@elie-laloum/outpost";
 
 Capacité portable d’outil intégré : read, edit, shell sans restriction ou shell:&lt;commande exacte>. Les commandes exactes comparent la chaîne entière, espaces et syntaxe shell compris ; aucune expansion de joker ou préfixe n’a lieu.
 
-[Exemple complet et règles détaillées](../../guide/choose-an-agent/).
+[Exemple complet et règles détaillées](../../guide/agent-profiles/).
 
 ## Signature
 

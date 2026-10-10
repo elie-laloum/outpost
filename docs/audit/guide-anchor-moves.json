@@ -1,0 +1,1452 @@
+[
+  {
+    "source": "guide/yaml-recipes/#create-a-recipe",
+    "retained": "guide/yaml-recipes/#create-a-recipe",
+    "destination": "guide/yaml-recipes/"
+  },
+  {
+    "source": "guide/yaml-recipes/#enable-editor-completion",
+    "retained": "guide/yaml-recipes/#enable-editor-completion",
+    "destination": "guide/recipe-configuration/#enable-editor-completion"
+  },
+  {
+    "source": "guide/yaml-recipes/#declare-parameters-and-steps",
+    "retained": "guide/yaml-recipes/#declare-parameters-and-steps",
+    "destination": "guide/yaml-recipes/"
+  },
+  {
+    "source": "guide/yaml-recipes/#reuse-a-step-result",
+    "retained": "guide/yaml-recipes/#reuse-a-step-result",
+    "destination": "guide/recipe-workflows/#reuse-a-step-result"
+  },
+  {
+    "source": "guide/yaml-recipes/#configure-execution-once",
+    "retained": "guide/yaml-recipes/#configure-execution-once",
+    "destination": "guide/recipe-configuration/#configure-execution-once"
+  },
+  {
+    "source": "guide/yaml-recipes/#run-and-inspect-the-result",
+    "retained": "guide/yaml-recipes/#run-and-inspect-the-result",
+    "destination": "guide/yaml-recipes/"
+  },
+  {
+    "source": "guide/yaml-recipes/#use-the-engine-in-typescript",
+    "retained": "guide/yaml-recipes/#use-the-engine-in-typescript",
+    "destination": "guide/recipe-extensions/#use-the-engine-in-typescript"
+  },
+  {
+    "source": "guide/yaml-recipes/#find-and-download-recipes",
+    "retained": "guide/yaml-recipes/#find-and-download-recipes",
+    "destination": "guide/sharing-recipes/#find-and-download-recipes"
+  },
+  {
+    "source": "guide/yaml-recipes/#contribute-and-test-a-recipe",
+    "retained": "guide/yaml-recipes/#contribute-and-test-a-recipe",
+    "destination": "guide/sharing-recipes/#contribute-and-test-a-recipe"
+  },
+  {
+    "source": "guide/yaml-recipes/#declare-observation-and-final-reports",
+    "retained": "guide/yaml-recipes/#declare-observation-and-final-reports",
+    "destination": "guide/recipe-configuration/#declare-observation-and-final-reports"
+  },
+  {
+    "source": "guide/yaml-recipes/#reuse-local-observer-objects",
+    "retained": "guide/yaml-recipes/#reuse-local-observer-objects",
+    "destination": "guide/recipe-extensions/#reuse-local-observer-objects"
+  },
+  {
+    "source": "guide/yaml-recipes/#compose-native-configuration-components",
+    "retained": "guide/yaml-recipes/#compose-native-configuration-components",
+    "destination": "guide/recipe-configuration/#compose-native-configuration-components"
+  },
+  {
+    "source": "guide/yaml-recipes/#select-secrets-before-allocation",
+    "retained": "guide/yaml-recipes/#select-secrets-before-allocation",
+    "destination": "guide/recipe-configuration/#select-secrets-before-allocation"
+  },
+  {
+    "source": "guide/yaml-recipes/#run-the-outpost-harness-from-yaml",
+    "retained": "guide/yaml-recipes/#run-the-outpost-harness-from-yaml",
+    "destination": "guide/recipe-configuration/#run-the-outpost-harness-from-yaml"
+  },
+  {
+    "source": "guide/yaml-recipes/#bind-typed-callbacks-locally",
+    "retained": "guide/yaml-recipes/#bind-typed-callbacks-locally",
+    "destination": "guide/recipe-extensions/#bind-typed-callbacks-locally"
+  },
+  {
+    "source": "guide/yaml-recipes/#file-workspaces",
+    "retained": "guide/yaml-recipes/#file-workspaces",
+    "destination": "guide/recipe-configuration/#file-workspaces"
+  },
+  {
+    "source": "guide/workspaces/#git-workspaces",
+    "retained": "guide/workspaces/#git-workspaces",
+    "destination": "guide/workspaces/"
+  },
+  {
+    "source": "guide/workspaces/#point-at-a-checkout",
+    "retained": "guide/workspaces/#point-at-a-checkout",
+    "destination": "guide/git-workspaces/#point-at-a-checkout"
+  },
+  {
+    "source": "guide/workspaces/#choose-where-commits-land",
+    "retained": "guide/workspaces/#choose-where-commits-land",
+    "destination": "guide/git-workspaces/#choose-where-commits-land"
+  },
+  {
+    "source": "guide/workspaces/#refuse-unwanted-committed-changes",
+    "retained": "guide/workspaces/#refuse-unwanted-committed-changes",
+    "destination": "guide/integrating-changes/#refuse-unwanted-committed-changes"
+  },
+  {
+    "source": "guide/workspaces/#gate-integration-on-a-check",
+    "retained": "guide/workspaces/#gate-integration-on-a-check",
+    "destination": "guide/integrating-changes/#gate-integration-on-a-check"
+  },
+  {
+    "source": "guide/workspaces/#resolve-merge-conflicts-with-an-agent",
+    "retained": "guide/workspaces/#resolve-merge-conflicts-with-an-agent",
+    "destination": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent"
+  },
+  {
+    "source": "guide/workspaces/#reuse-one-workspace-across-sandboxes",
+    "retained": "guide/workspaces/#reuse-one-workspace-across-sandboxes",
+    "destination": "guide/git-workspaces/#reuse-one-workspace-across-sandboxes"
+  },
+  {
+    "source": "guide/workspaces/#copy-ignored-files-into-the-worktree",
+    "retained": "guide/workspaces/#copy-ignored-files-into-the-worktree",
+    "destination": "guide/git-workspaces/#copy-ignored-files-into-the-worktree"
+  },
+  {
+    "source": "guide/workspaces/#recover-retained-work",
+    "retained": "guide/workspaces/#recover-retained-work",
+    "destination": "guide/git-workspaces/#recover-retained-work"
+  },
+  {
+    "source": "guide/workspaces/#limits",
+    "retained": "guide/workspaces/#limits",
+    "destination": "guide/git-workspaces/#limits"
+  },
+  {
+    "source": "guide/workspaces/#file-workspaces",
+    "retained": "guide/workspaces/#file-workspaces",
+    "destination": "guide/workspaces/"
+  },
+  {
+    "source": "guide/workspaces/#run-a-command-in-an-ephemeral-workspace",
+    "retained": "guide/workspaces/#run-a-command-in-an-ephemeral-workspace",
+    "destination": "guide/working-with-files/#run-a-command-in-an-ephemeral-workspace"
+  },
+  {
+    "source": "guide/workspaces/#copy-and-publish-a-directory",
+    "retained": "guide/workspaces/#copy-and-publish-a-directory",
+    "destination": "guide/publishing-files/#copy-and-publish-a-directory"
+  },
+  {
+    "source": "guide/workspaces/#mount-a-source-explicitly",
+    "retained": "guide/workspaces/#mount-a-source-explicitly",
+    "destination": "guide/working-with-files/#mount-a-source-explicitly"
+  },
+  {
+    "source": "guide/workspaces/#preserve-and-resume-files",
+    "retained": "guide/workspaces/#preserve-and-resume-files",
+    "destination": "guide/working-with-files/#preserve-and-resume-files"
+  },
+  {
+    "source": "guide/workspaces/#run-independent-jobs",
+    "retained": "guide/workspaces/#run-independent-jobs",
+    "destination": "guide/working-with-files/#run-independent-jobs"
+  },
+  {
+    "source": "guide/workspaces/#check-capabilities-and-recover-publication",
+    "retained": "guide/workspaces/#check-capabilities-and-recover-publication",
+    "destination": "guide/working-with-files/#check-capabilities-and-recover-publication"
+  },
+  {
+    "source": "guide/unattended-runs/#run-work-as-it-arrives",
+    "retained": "guide/unattended-runs/#run-work-as-it-arrives",
+    "destination": "guide/unattended-runs/"
+  },
+  {
+    "source": "guide/typed-workflows/#connect-the-steps",
+    "retained": "guide/task-dependencies/#connect-the-steps",
+    "destination": "guide/task-dependencies/"
+  },
+  {
+    "source": "guide/typed-workflows/#check-a-tasks-result",
+    "retained": "guide/task-dependencies/#check-a-tasks-result",
+    "destination": "guide/task-dependencies/"
+  },
+  {
+    "source": "guide/typed-workflows/#pick-a-task-type",
+    "retained": "guide/task-dependencies/#pick-a-task-type",
+    "destination": "guide/task-dependencies/"
+  },
+  {
+    "source": "guide/setup/#prepare-agent-access",
+    "retained": "guide/setup/#prepare-agent-access",
+    "destination": "guide/setup/"
+  },
+  {
+    "source": "guide/setup/#create-your-configuration-file",
+    "retained": "guide/setup/#create-your-configuration-file",
+    "destination": "guide/setup/"
+  },
+  {
+    "source": "guide/recipe-advanced/#declare-reporters-and-telemetry",
+    "retained": "guide/recipe-advanced/#declare-reporters-and-telemetry",
+    "destination": "guide/recipe-advanced/"
+  },
+  {
+    "source": "guide/recipe-advanced/#track-coverage-and-validation",
+    "retained": "guide/recipe-advanced/#track-coverage-and-validation",
+    "destination": "guide/recipe-advanced/"
+  },
+  {
+    "source": "guide/observe-and-recover/#while-it-runs-and-after",
+    "retained": "guide/progress/#while-it-runs-and-after",
+    "destination": "guide/progress/"
+  },
+  {
+    "source": "guide/observe-and-recover/#read-a-run-back",
+    "retained": "guide/progress/#read-a-run-back",
+    "destination": "guide/progress/"
+  },
+  {
+    "source": "guide/observe-and-recover/#what-outpost-keeps-after-a-failure",
+    "retained": "guide/progress/#what-outpost-keeps-after-a-failure",
+    "destination": "guide/progress/"
+  },
+  {
+    "source": "guide/observability/#export-to-opentelemetry",
+    "retained": "guide/observability/#export-to-opentelemetry",
+    "destination": "guide/opentelemetry/#export-to-opentelemetry"
+  },
+  {
+    "source": "guide/observability/#without-a-hub",
+    "retained": "guide/observability/#without-a-hub",
+    "destination": "guide/opentelemetry/#without-a-hub"
+  },
+  {
+    "source": "guide/job-queues/#expose-a-queue-over-http",
+    "retained": "guide/job-queues/#expose-a-queue-over-http",
+    "destination": "guide/http-queues/#expose-a-queue-over-http"
+  },
+  {
+    "source": "guide/isolation/#layers-you-set-yourself",
+    "retained": "guide/security/#layers-you-set-yourself",
+    "destination": "guide/security/"
+  },
+  {
+    "source": "guide/isolation/#restrict-a-containers-access",
+    "retained": "guide/security/#restrict-a-containers-access",
+    "destination": "guide/security/"
+  },
+  {
+    "source": "guide/isolation/#what-each-layer-covers",
+    "retained": "guide/security/#what-each-layer-covers",
+    "destination": "guide/security/"
+  },
+  {
+    "source": "guide/introduction/#what-you-can-do-with-outpost",
+    "retained": "guide/introduction/#what-you-can-do-with-outpost",
+    "destination": "guide/introduction/"
+  },
+  {
+    "source": "guide/introduction/#run-your-first-task",
+    "retained": "guide/introduction/#run-your-first-task",
+    "destination": "guide/introduction/"
+  },
+  {
+    "source": "guide/introduction/#understand-the-building-blocks",
+    "retained": "guide/introduction/#understand-the-building-blocks",
+    "destination": "guide/introduction/"
+  },
+  {
+    "source": "guide/introduction/#continue-with-your-own-use-case",
+    "retained": "guide/introduction/#continue-with-your-own-use-case",
+    "destination": "guide/introduction/"
+  },
+  {
+    "source": "guide/integration-ports/#replace-one-integration",
+    "retained": "guide/integration-ports/#replace-one-integration",
+    "destination": "guide/integration-ports/"
+  },
+  {
+    "source": "guide/integration-ports/#what-outpost-keeps-doing",
+    "retained": "guide/integration-ports/#what-outpost-keeps-doing",
+    "destination": "guide/integration-ports/"
+  },
+  {
+    "source": "guide/how-it-works/#three-choices-for-each-task",
+    "retained": "guide/how-it-works/#three-choices-for-each-task",
+    "destination": "guide/how-it-works/"
+  },
+  {
+    "source": "guide/how-it-works/#one-call-to-dispatch",
+    "retained": "guide/how-it-works/#one-call-to-dispatch",
+    "destination": "guide/how-it-works/"
+  },
+  {
+    "source": "guide/how-it-works/#keep-an-environment-for-several-operations",
+    "retained": "guide/how-it-works/#keep-an-environment-for-several-operations",
+    "destination": "guide/how-it-works/"
+  },
+  {
+    "source": "guide/how-it-works/#separate-the-workspace-from-the-sandbox",
+    "retained": "guide/how-it-works/#separate-the-workspace-from-the-sandbox",
+    "destination": "guide/how-it-works/"
+  },
+  {
+    "source": "guide/how-it-works/#find-the-files-after-a-run",
+    "retained": "guide/how-it-works/#find-the-files-after-a-run",
+    "destination": "guide/how-it-works/"
+  },
+  {
+    "source": "guide/harness-context/#write-the-system-instructions",
+    "retained": "guide/harness-context/#write-the-system-instructions",
+    "destination": "guide/harness-skills/#write-the-system-instructions"
+  },
+  {
+    "source": "guide/harness-context/#load-skills-on-demand",
+    "retained": "guide/harness-context/#load-skills-on-demand",
+    "destination": "guide/harness-skills/#load-skills-on-demand"
+  },
+  {
+    "source": "guide/first-workflow/#connect-two-tasks",
+    "retained": "guide/first-workflow/#connect-two-tasks",
+    "destination": "guide/first-workflow/"
+  },
+  {
+    "source": "guide/first-workflow/#run-the-script",
+    "retained": "guide/first-workflow/#run-the-script",
+    "destination": "guide/first-workflow/"
+  },
+  {
+    "source": "guide/first-workflow/#read-the-dependencies-and-results",
+    "retained": "guide/first-workflow/#read-the-dependencies-and-results",
+    "destination": "guide/first-workflow/"
+  },
+  {
+    "source": "guide/first-workflow/#add-a-check-when-you-need-one",
+    "retained": "guide/first-workflow/#add-a-check-when-you-need-one",
+    "destination": "guide/first-workflow/"
+  },
+  {
+    "source": "guide/first-request/#create-the-script",
+    "retained": "guide/first-request/#create-the-script",
+    "destination": "guide/first-request/"
+  },
+  {
+    "source": "guide/first-request/#run-the-script",
+    "retained": "guide/first-request/#run-the-script",
+    "destination": "guide/first-request/"
+  },
+  {
+    "source": "guide/first-request/#ask-for-a-change",
+    "retained": "guide/first-request/#ask-for-a-change",
+    "destination": "guide/first-request/"
+  },
+  {
+    "source": "guide/first-request/#understand-the-run",
+    "retained": "guide/first-request/#understand-the-run",
+    "destination": "guide/first-request/"
+  },
+  {
+    "source": "guide/first-request/#next-steps",
+    "retained": "guide/first-request/#next-steps",
+    "destination": "guide/first-request/"
+  },
+  {
+    "source": "guide/development-workflow/#clarify-the-ticket-and-approve-the-plan",
+    "retained": "guide/development-workflow/#clarify-the-ticket-and-approve-the-plan",
+    "destination": "guide/plan-a-change/#clarify-the-ticket-and-approve-the-plan"
+  },
+  {
+    "source": "guide/cloud-sandboxes/#repository-access",
+    "retained": "guide/cloud-sandboxes/#repository-access",
+    "destination": "guide/remote-synchronization/#repository-access"
+  },
+  {
+    "source": "guide/cloud-sandboxes/#choose-the-branch",
+    "retained": "guide/cloud-sandboxes/#choose-the-branch",
+    "destination": "guide/remote-synchronization/#choose-the-branch"
+  },
+  {
+    "source": "guide/cloud-sandboxes/#send-files-git-does-not-have",
+    "retained": "guide/cloud-sandboxes/#send-files-git-does-not-have",
+    "destination": "guide/remote-synchronization/#send-files-git-does-not-have"
+  },
+  {
+    "source": "guide/cloud-sandboxes/#when-synchronization-stops",
+    "retained": "guide/cloud-sandboxes/#when-synchronization-stops",
+    "destination": "guide/remote-synchronization/#when-synchronization-stops"
+  },
+  {
+    "source": "guide/approvals/#require-a-signed-decision",
+    "retained": "guide/approvals/#require-a-signed-decision",
+    "destination": "guide/signed-approvals/#require-a-signed-decision"
+  },
+  {
+    "source": "guide/approvals/#rotate-approver-keys",
+    "retained": "guide/approvals/#rotate-approver-keys",
+    "destination": "guide/signed-approvals/#rotate-approver-keys"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#créer-une-recette",
+    "retained": "fr/guide/yaml-recipes/#créer-une-recette",
+    "destination": "fr/guide/yaml-recipes/"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#activer-les-suggestions-de-léditeur",
+    "retained": "fr/guide/yaml-recipes/#activer-les-suggestions-de-léditeur",
+    "destination": "fr/guide/recipe-configuration/#activer-les-suggestions-de-léditeur"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#déclarer-les-paramètres-et-les-étapes",
+    "retained": "fr/guide/yaml-recipes/#déclarer-les-paramètres-et-les-étapes",
+    "destination": "fr/guide/yaml-recipes/"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#réutiliser-le-résultat-dune-étape",
+    "retained": "fr/guide/yaml-recipes/#réutiliser-le-résultat-dune-étape",
+    "destination": "fr/guide/recipe-workflows/#réutiliser-le-résultat-dune-étape"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#configurer-lexécution-une-fois",
+    "retained": "fr/guide/yaml-recipes/#configurer-lexécution-une-fois",
+    "destination": "fr/guide/recipe-configuration/#configurer-lexécution-une-fois"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#exécuter-et-inspecter-le-résultat",
+    "retained": "fr/guide/yaml-recipes/#exécuter-et-inspecter-le-résultat",
+    "destination": "fr/guide/yaml-recipes/"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#utiliser-le-moteur-en-typescript",
+    "retained": "fr/guide/yaml-recipes/#utiliser-le-moteur-en-typescript",
+    "destination": "fr/guide/recipe-extensions/#utiliser-le-moteur-en-typescript"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#trouver-et-télécharger-des-recettes",
+    "retained": "fr/guide/yaml-recipes/#trouver-et-télécharger-des-recettes",
+    "destination": "fr/guide/sharing-recipes/#trouver-et-télécharger-des-recettes"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#contribuer-et-tester-une-recette",
+    "retained": "fr/guide/yaml-recipes/#contribuer-et-tester-une-recette",
+    "destination": "fr/guide/sharing-recipes/#contribuer-et-tester-une-recette"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#déclarer-lobservation-et-les-rapports-finaux",
+    "retained": "fr/guide/yaml-recipes/#déclarer-lobservation-et-les-rapports-finaux",
+    "destination": "fr/guide/recipe-configuration/#déclarer-lobservation-et-les-rapports-finaux"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#réutiliser-des-objets-observateurs-locaux",
+    "retained": "fr/guide/yaml-recipes/#réutiliser-des-objets-observateurs-locaux",
+    "destination": "fr/guide/recipe-extensions/#réutiliser-des-objets-observateurs-locaux"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#composer-les-composants-natifs-de-configuration",
+    "retained": "fr/guide/yaml-recipes/#composer-les-composants-natifs-de-configuration",
+    "destination": "fr/guide/recipe-configuration/#composer-les-composants-natifs-de-configuration"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#sélectionner-les-secrets-avant-allocation",
+    "retained": "fr/guide/yaml-recipes/#sélectionner-les-secrets-avant-allocation",
+    "destination": "fr/guide/recipe-configuration/#sélectionner-les-secrets-avant-allocation"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#exécuter-le-harness-outpost-depuis-le-yaml",
+    "retained": "fr/guide/yaml-recipes/#exécuter-le-harness-outpost-depuis-le-yaml",
+    "destination": "fr/guide/recipe-configuration/#exécuter-le-harness-outpost-depuis-le-yaml"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#brancher-des-callbacks-typés-locaux",
+    "retained": "fr/guide/yaml-recipes/#brancher-des-callbacks-typés-locaux",
+    "destination": "fr/guide/recipe-extensions/#brancher-des-callbacks-typés-locaux"
+  },
+  {
+    "source": "fr/guide/yaml-recipes/#workspaces-de-fichiers",
+    "retained": "fr/guide/yaml-recipes/#workspaces-de-fichiers",
+    "destination": "fr/guide/recipe-configuration/#workspaces-de-fichiers"
+  },
+  {
+    "source": "fr/guide/workspaces/#workspaces-git",
+    "retained": "fr/guide/workspaces/#workspaces-git",
+    "destination": "fr/guide/workspaces/"
+  },
+  {
+    "source": "fr/guide/workspaces/#choisir-le-dépôt-de-travail",
+    "retained": "fr/guide/workspaces/#choisir-le-dépôt-de-travail",
+    "destination": "fr/guide/git-workspaces/#choisir-le-dépôt-de-travail"
+  },
+  {
+    "source": "fr/guide/workspaces/#choisir-la-stratégie-de-branche",
+    "retained": "fr/guide/workspaces/#choisir-la-stratégie-de-branche",
+    "destination": "fr/guide/git-workspaces/#choisir-la-stratégie-de-branche"
+  },
+  {
+    "source": "fr/guide/workspaces/#refuser-les-changements-commités-indésirables",
+    "retained": "fr/guide/workspaces/#refuser-les-changements-commités-indésirables",
+    "destination": "fr/guide/integrating-changes/#refuser-les-changements-commités-indésirables"
+  },
+  {
+    "source": "fr/guide/workspaces/#conditionner-lintégration-à-une-vérification",
+    "retained": "fr/guide/workspaces/#conditionner-lintégration-à-une-vérification",
+    "destination": "fr/guide/integrating-changes/#conditionner-lintégration-à-une-vérification"
+  },
+  {
+    "source": "fr/guide/workspaces/#résoudre-les-conflits-de-fusion-avec-un-agent",
+    "retained": "fr/guide/workspaces/#résoudre-les-conflits-de-fusion-avec-un-agent",
+    "destination": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent"
+  },
+  {
+    "source": "fr/guide/workspaces/#réutiliser-un-workspace-pour-plusieurs-sandboxes",
+    "retained": "fr/guide/workspaces/#réutiliser-un-workspace-pour-plusieurs-sandboxes",
+    "destination": "fr/guide/git-workspaces/#réutiliser-un-workspace-pour-plusieurs-sandboxes"
+  },
+  {
+    "source": "fr/guide/workspaces/#copier-des-fichiers-ignorés-dans-le-worktree",
+    "retained": "fr/guide/workspaces/#copier-des-fichiers-ignorés-dans-le-worktree",
+    "destination": "fr/guide/git-workspaces/#copier-des-fichiers-ignorés-dans-le-worktree"
+  },
+  {
+    "source": "fr/guide/workspaces/#récupérer-le-travail-conservé",
+    "retained": "fr/guide/workspaces/#récupérer-le-travail-conservé",
+    "destination": "fr/guide/git-workspaces/#récupérer-le-travail-conservé"
+  },
+  {
+    "source": "fr/guide/workspaces/#limites",
+    "retained": "fr/guide/workspaces/#limites",
+    "destination": "fr/guide/git-workspaces/#limites"
+  },
+  {
+    "source": "fr/guide/workspaces/#workspaces-de-fichiers",
+    "retained": "fr/guide/workspaces/#workspaces-de-fichiers",
+    "destination": "fr/guide/workspaces/"
+  },
+  {
+    "source": "fr/guide/workspaces/#exécuter-une-commande-dans-un-workspace-éphémère",
+    "retained": "fr/guide/workspaces/#exécuter-une-commande-dans-un-workspace-éphémère",
+    "destination": "fr/guide/working-with-files/#exécuter-une-commande-dans-un-workspace-éphémère"
+  },
+  {
+    "source": "fr/guide/workspaces/#copier-puis-restituer-un-dossier",
+    "retained": "fr/guide/workspaces/#copier-puis-restituer-un-dossier",
+    "destination": "fr/guide/publishing-files/#copier-puis-restituer-un-dossier"
+  },
+  {
+    "source": "fr/guide/workspaces/#monter-une-source-explicitement",
+    "retained": "fr/guide/workspaces/#monter-une-source-explicitement",
+    "destination": "fr/guide/working-with-files/#monter-une-source-explicitement"
+  },
+  {
+    "source": "fr/guide/workspaces/#conserver-et-reprendre-les-fichiers",
+    "retained": "fr/guide/workspaces/#conserver-et-reprendre-les-fichiers",
+    "destination": "fr/guide/working-with-files/#conserver-et-reprendre-les-fichiers"
+  },
+  {
+    "source": "fr/guide/workspaces/#exécuter-des-jobs-indépendants",
+    "retained": "fr/guide/workspaces/#exécuter-des-jobs-indépendants",
+    "destination": "fr/guide/working-with-files/#exécuter-des-jobs-indépendants"
+  },
+  {
+    "source": "fr/guide/workspaces/#vérifier-les-capacités-et-récupérer-une-publication",
+    "retained": "fr/guide/workspaces/#vérifier-les-capacités-et-récupérer-une-publication",
+    "destination": "fr/guide/working-with-files/#vérifier-les-capacités-et-récupérer-une-publication"
+  },
+  {
+    "source": "fr/guide/unattended-runs/#traiter-le-travail-à-mesure-quil-arrive",
+    "retained": "fr/guide/unattended-runs/#traiter-le-travail-à-mesure-quil-arrive",
+    "destination": "fr/guide/unattended-runs/"
+  },
+  {
+    "source": "fr/guide/typed-workflows/#relier-les-étapes",
+    "retained": "fr/guide/task-dependencies/#relier-les-étapes",
+    "destination": "fr/guide/task-dependencies/"
+  },
+  {
+    "source": "fr/guide/typed-workflows/#vérifier-le-résultat-dune-tâche",
+    "retained": "fr/guide/task-dependencies/#vérifier-le-résultat-dune-tâche",
+    "destination": "fr/guide/task-dependencies/"
+  },
+  {
+    "source": "fr/guide/typed-workflows/#choisir-un-type-de-tâche",
+    "retained": "fr/guide/task-dependencies/#choisir-un-type-de-tâche",
+    "destination": "fr/guide/task-dependencies/"
+  },
+  {
+    "source": "fr/guide/setup/#préparer-laccès-de-lagent",
+    "retained": "fr/guide/setup/#préparer-laccès-de-lagent",
+    "destination": "fr/guide/setup/"
+  },
+  {
+    "source": "fr/guide/setup/#créer-le-fichier-de-configuration",
+    "retained": "fr/guide/setup/#créer-le-fichier-de-configuration",
+    "destination": "fr/guide/setup/"
+  },
+  {
+    "source": "fr/guide/recipe-advanced/#déclarer-les-rapports-et-la-télémétrie",
+    "retained": "fr/guide/recipe-advanced/#déclarer-les-rapports-et-la-télémétrie",
+    "destination": "fr/guide/recipe-advanced/"
+  },
+  {
+    "source": "fr/guide/recipe-advanced/#suivre-la-couverture-et-les-validations",
+    "retained": "fr/guide/recipe-advanced/#suivre-la-couverture-et-les-validations",
+    "destination": "fr/guide/recipe-advanced/"
+  },
+  {
+    "source": "fr/guide/observe-and-recover/#choisir-le-mode-de-suivi",
+    "retained": "fr/guide/progress/#choisir-le-mode-de-suivi",
+    "destination": "fr/guide/progress/"
+  },
+  {
+    "source": "fr/guide/observe-and-recover/#relire-une-exécution",
+    "retained": "fr/guide/progress/#relire-une-exécution",
+    "destination": "fr/guide/progress/"
+  },
+  {
+    "source": "fr/guide/observe-and-recover/#ce-quoutpost-garde-après-un-échec",
+    "retained": "fr/guide/progress/#ce-quoutpost-garde-après-un-échec",
+    "destination": "fr/guide/progress/"
+  },
+  {
+    "source": "fr/guide/observability/#exporter-vers-opentelemetry",
+    "retained": "fr/guide/observability/#exporter-vers-opentelemetry",
+    "destination": "fr/guide/opentelemetry/#exporter-vers-opentelemetry"
+  },
+  {
+    "source": "fr/guide/observability/#sans-hub",
+    "retained": "fr/guide/observability/#sans-hub",
+    "destination": "fr/guide/opentelemetry/#sans-hub"
+  },
+  {
+    "source": "fr/guide/job-queues/#exposer-une-file-via-http",
+    "retained": "fr/guide/job-queues/#exposer-une-file-via-http",
+    "destination": "fr/guide/http-queues/#exposer-une-file-via-http"
+  },
+  {
+    "source": "fr/guide/isolation/#choisir-les-contrôles-nécessaires",
+    "retained": "fr/guide/security/#choisir-les-contrôles-nécessaires",
+    "destination": "fr/guide/security/"
+  },
+  {
+    "source": "fr/guide/isolation/#limiter-les-accès-du-conteneur",
+    "retained": "fr/guide/security/#limiter-les-accès-du-conteneur",
+    "destination": "fr/guide/security/"
+  },
+  {
+    "source": "fr/guide/isolation/#ce-que-couvre-chaque-couche",
+    "retained": "fr/guide/security/#ce-que-couvre-chaque-couche",
+    "destination": "fr/guide/security/"
+  },
+  {
+    "source": "fr/guide/introduction/#ce-que-vous-pouvez-faire-avec-outpost",
+    "retained": "fr/guide/introduction/#ce-que-vous-pouvez-faire-avec-outpost",
+    "destination": "fr/guide/introduction/"
+  },
+  {
+    "source": "fr/guide/introduction/#lancer-votre-première-tâche",
+    "retained": "fr/guide/introduction/#lancer-votre-première-tâche",
+    "destination": "fr/guide/introduction/"
+  },
+  {
+    "source": "fr/guide/introduction/#comprendre-les-éléments-de-base",
+    "retained": "fr/guide/introduction/#comprendre-les-éléments-de-base",
+    "destination": "fr/guide/introduction/"
+  },
+  {
+    "source": "fr/guide/introduction/#continuer-selon-votre-besoin",
+    "retained": "fr/guide/introduction/#continuer-selon-votre-besoin",
+    "destination": "fr/guide/introduction/"
+  },
+  {
+    "source": "fr/guide/integration-ports/#remplacer-une-intégration",
+    "retained": "fr/guide/integration-ports/#remplacer-une-intégration",
+    "destination": "fr/guide/integration-ports/"
+  },
+  {
+    "source": "fr/guide/integration-ports/#ce-quoutpost-continue-de-faire",
+    "retained": "fr/guide/integration-ports/#ce-quoutpost-continue-de-faire",
+    "destination": "fr/guide/integration-ports/"
+  },
+  {
+    "source": "fr/guide/how-it-works/#trois-choix-pour-chaque-tâche",
+    "retained": "fr/guide/how-it-works/#trois-choix-pour-chaque-tâche",
+    "destination": "fr/guide/how-it-works/"
+  },
+  {
+    "source": "fr/guide/how-it-works/#un-appel-à-dispatch",
+    "retained": "fr/guide/how-it-works/#un-appel-à-dispatch",
+    "destination": "fr/guide/how-it-works/"
+  },
+  {
+    "source": "fr/guide/how-it-works/#garder-un-environnement-pour-plusieurs-opérations",
+    "retained": "fr/guide/how-it-works/#garder-un-environnement-pour-plusieurs-opérations",
+    "destination": "fr/guide/how-it-works/"
+  },
+  {
+    "source": "fr/guide/how-it-works/#séparer-le-workspace-de-la-sandbox",
+    "retained": "fr/guide/how-it-works/#séparer-le-workspace-de-la-sandbox",
+    "destination": "fr/guide/how-it-works/"
+  },
+  {
+    "source": "fr/guide/how-it-works/#retrouver-les-fichiers-après-une-exécution",
+    "retained": "fr/guide/how-it-works/#retrouver-les-fichiers-après-une-exécution",
+    "destination": "fr/guide/how-it-works/"
+  },
+  {
+    "source": "fr/guide/harness-context/#écrire-les-instructions-système",
+    "retained": "fr/guide/harness-context/#écrire-les-instructions-système",
+    "destination": "fr/guide/harness-skills/#écrire-les-instructions-système"
+  },
+  {
+    "source": "fr/guide/harness-context/#charger-des-compétences-à-la-demande",
+    "retained": "fr/guide/harness-context/#charger-des-compétences-à-la-demande",
+    "destination": "fr/guide/harness-skills/#charger-des-compétences-à-la-demande"
+  },
+  {
+    "source": "fr/guide/first-workflow/#relier-deux-tâches",
+    "retained": "fr/guide/first-workflow/#relier-deux-tâches",
+    "destination": "fr/guide/first-workflow/"
+  },
+  {
+    "source": "fr/guide/first-workflow/#exécuter-le-script",
+    "retained": "fr/guide/first-workflow/#exécuter-le-script",
+    "destination": "fr/guide/first-workflow/"
+  },
+  {
+    "source": "fr/guide/first-workflow/#lire-les-dépendances-et-les-résultats",
+    "retained": "fr/guide/first-workflow/#lire-les-dépendances-et-les-résultats",
+    "destination": "fr/guide/first-workflow/"
+  },
+  {
+    "source": "fr/guide/first-workflow/#ajouter-une-vérification",
+    "retained": "fr/guide/first-workflow/#ajouter-une-vérification",
+    "destination": "fr/guide/first-workflow/"
+  },
+  {
+    "source": "fr/guide/first-request/#créer-le-script",
+    "retained": "fr/guide/first-request/#créer-le-script",
+    "destination": "fr/guide/first-request/"
+  },
+  {
+    "source": "fr/guide/first-request/#exécuter-le-script",
+    "retained": "fr/guide/first-request/#exécuter-le-script",
+    "destination": "fr/guide/first-request/"
+  },
+  {
+    "source": "fr/guide/first-request/#demander-une-modification",
+    "retained": "fr/guide/first-request/#demander-une-modification",
+    "destination": "fr/guide/first-request/"
+  },
+  {
+    "source": "fr/guide/first-request/#comprendre-lexécution",
+    "retained": "fr/guide/first-request/#comprendre-lexécution",
+    "destination": "fr/guide/first-request/"
+  },
+  {
+    "source": "fr/guide/first-request/#étapes-suivantes",
+    "retained": "fr/guide/first-request/#étapes-suivantes",
+    "destination": "fr/guide/first-request/"
+  },
+  {
+    "source": "fr/guide/development-workflow/#clarifier-le-ticket-et-approuver-le-plan",
+    "retained": "fr/guide/development-workflow/#clarifier-le-ticket-et-approuver-le-plan",
+    "destination": "fr/guide/plan-a-change/#clarifier-le-ticket-et-approuver-le-plan"
+  },
+  {
+    "source": "fr/guide/cloud-sandboxes/#accès-au-dépôt",
+    "retained": "fr/guide/cloud-sandboxes/#accès-au-dépôt",
+    "destination": "fr/guide/remote-synchronization/#accès-au-dépôt"
+  },
+  {
+    "source": "fr/guide/cloud-sandboxes/#choisir-la-branche",
+    "retained": "fr/guide/cloud-sandboxes/#choisir-la-branche",
+    "destination": "fr/guide/remote-synchronization/#choisir-la-branche"
+  },
+  {
+    "source": "fr/guide/cloud-sandboxes/#envoyer-des-fichiers-absents-de-git",
+    "retained": "fr/guide/cloud-sandboxes/#envoyer-des-fichiers-absents-de-git",
+    "destination": "fr/guide/remote-synchronization/#envoyer-des-fichiers-absents-de-git"
+  },
+  {
+    "source": "fr/guide/cloud-sandboxes/#quand-la-synchronisation-sarrête",
+    "retained": "fr/guide/cloud-sandboxes/#quand-la-synchronisation-sarrête",
+    "destination": "fr/guide/remote-synchronization/#quand-la-synchronisation-sarrête"
+  },
+  {
+    "source": "fr/guide/approvals/#exiger-une-décision-signée",
+    "retained": "fr/guide/approvals/#exiger-une-décision-signée",
+    "destination": "fr/guide/signed-approvals/#exiger-une-décision-signée"
+  },
+  {
+    "source": "fr/guide/approvals/#renouveler-les-clés-des-approbateurs",
+    "retained": "fr/guide/approvals/#renouveler-les-clés-des-approbateurs",
+    "destination": "fr/guide/signed-approvals/#renouveler-les-clés-des-approbateurs"
+  },
+  {
+    "source": "#one-task-now-a-workflow-when-you-need-it",
+    "retained": "#one-task-now-a-workflow-when-you-need-it",
+    "destination": ""
+  },
+  {
+    "source": "#deliver-a-csv-export-from-ticket-to-branch",
+    "retained": "#deliver-a-csv-export-from-ticket-to-branch",
+    "destination": ""
+  },
+  {
+    "source": "#start-with-work-already-on-your-plate",
+    "retained": "#start-with-work-already-on-your-plate",
+    "destination": ""
+  },
+  {
+    "source": "#keep-your-tools-choose-how-they-work-together",
+    "retained": "#keep-your-tools-choose-how-they-work-together",
+    "destination": ""
+  },
+  {
+    "source": "fr/#une-tâche-pour-commencer-un-workflow-pour-la-suite",
+    "retained": "fr/#une-tâche-pour-commencer-un-workflow-pour-la-suite",
+    "destination": "fr/"
+  },
+  {
+    "source": "fr/#livrer-un-export-csv-du-ticket-à-la-branche",
+    "retained": "fr/#livrer-un-export-csv-du-ticket-à-la-branche",
+    "destination": "fr/"
+  },
+  {
+    "source": "fr/#commencez-par-ce-qui-vous-attend-déjà",
+    "retained": "fr/#commencez-par-ce-qui-vous-attend-déjà",
+    "destination": "fr/"
+  },
+  {
+    "source": "fr/#vos-outils-habituels-votre-façon-de-les-assembler",
+    "retained": "fr/#vos-outils-habituels-votre-façon-de-les-assembler",
+    "destination": "fr/"
+  },
+  {
+    "source": "guide/recipe-configuration/#declare-observation-and-final-reports",
+    "retained": "guide/recipe-configuration/#declare-observation-and-final-reports",
+    "destination": "guide/recipe-observation/"
+  },
+  {
+    "source": "guide/recipe-configuration/#select-secrets-before-allocation",
+    "retained": "guide/recipe-configuration/#select-secrets-before-allocation",
+    "destination": "guide/secret-sources/"
+  },
+  {
+    "source": "guide/recipe-configuration/#run-the-outpost-harness-from-yaml",
+    "retained": "guide/recipe-configuration/#run-the-outpost-harness-from-yaml",
+    "destination": "guide/recipe-harness/"
+  },
+  {
+    "source": "guide/recipe-configuration/#declare-reporters-and-telemetry",
+    "retained": "guide/recipe-configuration/#declare-reporters-and-telemetry",
+    "destination": "guide/recipe-observation/"
+  },
+  {
+    "source": "guide/working-with-files/#preserve-and-resume-files",
+    "retained": "guide/working-with-files/#preserve-and-resume-files",
+    "destination": "guide/resuming-file-workspaces/"
+  },
+  {
+    "source": "guide/working-with-files/#run-independent-jobs",
+    "retained": "guide/working-with-files/#run-independent-jobs",
+    "destination": "guide/queued-workflows/"
+  },
+  {
+    "source": "guide/speculation/#read-the-result",
+    "retained": "guide/speculation/#read-the-result",
+    "destination": "guide/speculation/"
+  },
+  {
+    "source": "guide/speculation/#resume-after-a-crash",
+    "retained": "guide/speculation/#resume-after-a-crash",
+    "destination": "guide/resuming-speculation/"
+  },
+  {
+    "source": "guide/speculation/#recover-after-a-crash",
+    "retained": "guide/speculation/#recover-after-a-crash",
+    "destination": "guide/resuming-speculation/"
+  },
+  {
+    "source": "guide/speculation/#resume-after-a-quota",
+    "retained": "guide/speculation/#resume-after-a-quota",
+    "destination": "guide/resuming-speculation/"
+  },
+  {
+    "source": "guide/observability/#delivery-and-failures",
+    "retained": "guide/observability/#delivery-and-failures",
+    "destination": "guide/observation-delivery/"
+  },
+  {
+    "source": "guide/observability/#when-agent-output-is-too-large",
+    "retained": "guide/observability/#when-agent-output-is-too-large",
+    "destination": "guide/observation-delivery/"
+  },
+  {
+    "source": "guide/observability/#handle-agent-events-asynchronously",
+    "retained": "guide/observability/#handle-agent-events-asynchronously",
+    "destination": "guide/observation-delivery/"
+  },
+  {
+    "source": "guide/observability/#limits",
+    "retained": "guide/observability/#limits",
+    "destination": "guide/observation-delivery/"
+  },
+  {
+    "source": "guide/observability/#mask-secrets-before-saving-or-observing",
+    "retained": "guide/observability/#mask-secrets-before-saving-or-observing",
+    "destination": "guide/redacting-secrets/"
+  },
+  {
+    "source": "guide/job-queues/#wait-for-a-job-inside-a-workflow",
+    "retained": "guide/job-queues/#wait-for-a-job-inside-a-workflow",
+    "destination": "guide/queued-workflows/"
+  },
+  {
+    "source": "guide/job-queues/#run-a-checkpointed-workflow-per-job",
+    "retained": "guide/job-queues/#run-a-checkpointed-workflow-per-job",
+    "destination": "guide/queued-workflows/"
+  },
+  {
+    "source": "guide/job-queues/#resume-a-run",
+    "retained": "guide/job-queues/#resume-a-run",
+    "destination": "guide/queued-workflows/"
+  },
+  {
+    "source": "guide/job-queues/#approve-or-answer-a-paused-run",
+    "retained": "guide/job-queues/#approve-or-answer-a-paused-run",
+    "destination": "guide/queued-workflows/"
+  },
+  {
+    "source": "guide/job-queues/#leases-and-retries",
+    "retained": "guide/job-queues/#leases-and-retries",
+    "destination": "guide/operating-workers/"
+  },
+  {
+    "source": "guide/job-queues/#deduplicate-effects-with-idempotency-keys",
+    "retained": "guide/job-queues/#deduplicate-effects-with-idempotency-keys",
+    "destination": "guide/operating-workers/"
+  },
+  {
+    "source": "guide/job-queues/#operate-workers",
+    "retained": "guide/job-queues/#operate-workers",
+    "destination": "guide/operating-workers/"
+  },
+  {
+    "source": "guide/development-workflow/#what-this-example-covers",
+    "retained": "guide/development-workflow/#what-this-example-covers",
+    "destination": "guide/development-workflow/"
+  },
+  {
+    "source": "guide/development-workflow/#prepare-and-reuse-the-sandbox",
+    "retained": "guide/development-workflow/#prepare-and-reuse-the-sandbox",
+    "destination": "guide/prepare-change-tests/"
+  },
+  {
+    "source": "guide/development-workflow/#write-and-check-the-tests",
+    "retained": "guide/development-workflow/#write-and-check-the-tests",
+    "destination": "guide/prepare-change-tests/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-run",
+    "retained": "guide/cli/#outpost-recipe-run",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-status-resume-answer-and-decide",
+    "retained": "guide/cli/#outpost-recipe-status-resume-answer-and-decide",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-enqueue-and-serve",
+    "retained": "guide/cli/#outpost-recipe-enqueue-and-serve",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-init",
+    "retained": "guide/cli/#outpost-recipe-init",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-validate",
+    "retained": "guide/cli/#outpost-recipe-validate",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recipe-list-and-outpost-recipe-fetch",
+    "retained": "guide/cli/#outpost-recipe-list-and-outpost-recipe-fetch",
+    "destination": "guide/recipe-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recovery-inspect",
+    "retained": "guide/cli/#outpost-recovery-inspect",
+    "destination": "guide/recovery-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recovery-verify",
+    "retained": "guide/cli/#outpost-recovery-verify",
+    "destination": "guide/recovery-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recovery-restore",
+    "retained": "guide/cli/#outpost-recovery-restore",
+    "destination": "guide/recovery-cli/"
+  },
+  {
+    "source": "guide/cli/#outpost-recovery-prune",
+    "retained": "guide/cli/#outpost-recovery-prune",
+    "destination": "guide/recovery-cli/"
+  },
+  {
+    "source": "guide/budgets/#estimate-and-limit-monetary-cost",
+    "retained": "guide/budgets/#estimate-and-limit-monetary-cost",
+    "destination": "guide/estimating-costs/"
+  },
+  {
+    "source": "guide/budgets/#load-a-public-pricing-catalog",
+    "retained": "guide/budgets/#load-a-public-pricing-catalog",
+    "destination": "guide/estimating-costs/"
+  },
+  {
+    "source": "fr/guide/recipe-configuration/#déclarer-lobservation-et-les-rapports-finaux",
+    "retained": "fr/guide/recipe-configuration/#déclarer-lobservation-et-les-rapports-finaux",
+    "destination": "fr/guide/recipe-observation/"
+  },
+  {
+    "source": "fr/guide/recipe-configuration/#sélectionner-les-secrets-avant-allocation",
+    "retained": "fr/guide/recipe-configuration/#sélectionner-les-secrets-avant-allocation",
+    "destination": "fr/guide/secret-sources/"
+  },
+  {
+    "source": "fr/guide/recipe-configuration/#exécuter-le-harness-outpost-depuis-le-yaml",
+    "retained": "fr/guide/recipe-configuration/#exécuter-le-harness-outpost-depuis-le-yaml",
+    "destination": "fr/guide/recipe-harness/"
+  },
+  {
+    "source": "fr/guide/recipe-configuration/#déclarer-les-rapports-et-la-télémétrie",
+    "retained": "fr/guide/recipe-configuration/#déclarer-les-rapports-et-la-télémétrie",
+    "destination": "fr/guide/recipe-observation/"
+  },
+  {
+    "source": "fr/guide/working-with-files/#conserver-et-reprendre-les-fichiers",
+    "retained": "fr/guide/working-with-files/#conserver-et-reprendre-les-fichiers",
+    "destination": "fr/guide/resuming-file-workspaces/"
+  },
+  {
+    "source": "fr/guide/working-with-files/#exécuter-des-jobs-indépendants",
+    "retained": "fr/guide/working-with-files/#exécuter-des-jobs-indépendants",
+    "destination": "fr/guide/queued-workflows/"
+  },
+  {
+    "source": "fr/guide/speculation/#lire-le-résultat",
+    "retained": "fr/guide/speculation/#lire-le-résultat",
+    "destination": "fr/guide/speculation/"
+  },
+  {
+    "source": "fr/guide/speculation/#reprendre-après-un-arrêt-brutal",
+    "retained": "fr/guide/speculation/#reprendre-après-un-arrêt-brutal",
+    "destination": "fr/guide/resuming-speculation/"
+  },
+  {
+    "source": "fr/guide/speculation/#récupérer-après-un-arrêt-brutal",
+    "retained": "fr/guide/speculation/#récupérer-après-un-arrêt-brutal",
+    "destination": "fr/guide/resuming-speculation/"
+  },
+  {
+    "source": "fr/guide/speculation/#reprendre-après-un-quota",
+    "retained": "fr/guide/speculation/#reprendre-après-un-quota",
+    "destination": "fr/guide/resuming-speculation/"
+  },
+  {
+    "source": "fr/guide/observability/#livraison-et-erreurs",
+    "retained": "fr/guide/observability/#livraison-et-erreurs",
+    "destination": "fr/guide/observation-delivery/"
+  },
+  {
+    "source": "fr/guide/observability/#traiter-une-sortie-trop-volumineuse",
+    "retained": "fr/guide/observability/#traiter-une-sortie-trop-volumineuse",
+    "destination": "fr/guide/observation-delivery/"
+  },
+  {
+    "source": "fr/guide/observability/#traiter-les-événements-dagent-de-façon-asynchrone",
+    "retained": "fr/guide/observability/#traiter-les-événements-dagent-de-façon-asynchrone",
+    "destination": "fr/guide/observation-delivery/"
+  },
+  {
+    "source": "fr/guide/observability/#limites",
+    "retained": "fr/guide/observability/#limites",
+    "destination": "fr/guide/observation-delivery/"
+  },
+  {
+    "source": "fr/guide/observability/#masquer-les-secrets-avant-sauvegarde-ou-observation",
+    "retained": "fr/guide/observability/#masquer-les-secrets-avant-sauvegarde-ou-observation",
+    "destination": "fr/guide/redacting-secrets/"
+  },
+  {
+    "source": "fr/guide/job-queues/#attendre-un-job-dans-un-workflow",
+    "retained": "fr/guide/job-queues/#attendre-un-job-dans-un-workflow",
+    "destination": "fr/guide/queued-workflows/"
+  },
+  {
+    "source": "fr/guide/job-queues/#associer-un-checkpoint-à-chaque-job",
+    "retained": "fr/guide/job-queues/#associer-un-checkpoint-à-chaque-job",
+    "destination": "fr/guide/queued-workflows/"
+  },
+  {
+    "source": "fr/guide/job-queues/#reprendre-une-exécution",
+    "retained": "fr/guide/job-queues/#reprendre-une-exécution",
+    "destination": "fr/guide/queued-workflows/"
+  },
+  {
+    "source": "fr/guide/job-queues/#approuver-ou-répondre-à-une-exécution-en-pause",
+    "retained": "fr/guide/job-queues/#approuver-ou-répondre-à-une-exécution-en-pause",
+    "destination": "fr/guide/queued-workflows/"
+  },
+  {
+    "source": "fr/guide/job-queues/#réservation-des-jobs-et-nouvelles-tentatives",
+    "retained": "fr/guide/job-queues/#réservation-des-jobs-et-nouvelles-tentatives",
+    "destination": "fr/guide/operating-workers/"
+  },
+  {
+    "source": "fr/guide/job-queues/#dédupliquer-les-effets-avec-les-clés-didempotence",
+    "retained": "fr/guide/job-queues/#dédupliquer-les-effets-avec-les-clés-didempotence",
+    "destination": "fr/guide/operating-workers/"
+  },
+  {
+    "source": "fr/guide/job-queues/#exploiter-les-workers",
+    "retained": "fr/guide/job-queues/#exploiter-les-workers",
+    "destination": "fr/guide/operating-workers/"
+  },
+  {
+    "source": "fr/guide/development-workflow/#ce-que-montre-lexemple",
+    "retained": "fr/guide/development-workflow/#ce-que-montre-lexemple",
+    "destination": "fr/guide/development-workflow/"
+  },
+  {
+    "source": "fr/guide/development-workflow/#préparer-et-réutiliser-la-sandbox",
+    "retained": "fr/guide/development-workflow/#préparer-et-réutiliser-la-sandbox",
+    "destination": "fr/guide/prepare-change-tests/"
+  },
+  {
+    "source": "fr/guide/development-workflow/#écrire-et-vérifier-les-tests",
+    "retained": "fr/guide/development-workflow/#écrire-et-vérifier-les-tests",
+    "destination": "fr/guide/prepare-change-tests/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-run",
+    "retained": "fr/guide/cli/#outpost-recipe-run",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-status-resume-answer-et-decide",
+    "retained": "fr/guide/cli/#outpost-recipe-status-resume-answer-et-decide",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-enqueue-et-serve",
+    "retained": "fr/guide/cli/#outpost-recipe-enqueue-et-serve",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-init",
+    "retained": "fr/guide/cli/#outpost-recipe-init",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-validate",
+    "retained": "fr/guide/cli/#outpost-recipe-validate",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recipe-list-et-outpost-recipe-fetch",
+    "retained": "fr/guide/cli/#outpost-recipe-list-et-outpost-recipe-fetch",
+    "destination": "fr/guide/recipe-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recovery-inspect",
+    "retained": "fr/guide/cli/#outpost-recovery-inspect",
+    "destination": "fr/guide/recovery-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recovery-verify",
+    "retained": "fr/guide/cli/#outpost-recovery-verify",
+    "destination": "fr/guide/recovery-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recovery-restore",
+    "retained": "fr/guide/cli/#outpost-recovery-restore",
+    "destination": "fr/guide/recovery-cli/"
+  },
+  {
+    "source": "fr/guide/cli/#outpost-recovery-prune",
+    "retained": "fr/guide/cli/#outpost-recovery-prune",
+    "destination": "fr/guide/recovery-cli/"
+  },
+  {
+    "source": "fr/guide/budgets/#estimer-et-limiter-le-coût-monétaire",
+    "retained": "fr/guide/budgets/#estimer-et-limiter-le-coût-monétaire",
+    "destination": "fr/guide/estimating-costs/"
+  },
+  {
+    "source": "fr/guide/budgets/#charger-un-catalogue-public-de-tarifs",
+    "retained": "fr/guide/budgets/#charger-un-catalogue-public-de-tarifs",
+    "destination": "fr/guide/estimating-costs/"
+  },
+  {
+    "source": "guide/working-with-files/#check-capabilities-and-recover-publication",
+    "retained": "guide/working-with-files/#check-capabilities-and-recover-publication",
+    "destination": "guide/publishing-files/"
+  },
+  {
+    "source": "fr/guide/working-with-files/#vérifier-les-capacités-et-récupérer-une-publication",
+    "retained": "fr/guide/working-with-files/#vérifier-les-capacités-et-récupérer-une-publication",
+    "destination": "fr/guide/publishing-files/"
+  },
+  {
+    "source": "guide/environment-setup/#reinstall-only-when-files-change",
+    "retained": "guide/environment-setup/#reinstall-only-when-files-change",
+    "destination": "guide/dependency-caches/#reinstall-only-when-files-change"
+  },
+  {
+    "source": "guide/environment-setup/#reuse-downloads-across-containers",
+    "retained": "guide/environment-setup/#reuse-downloads-across-containers",
+    "destination": "guide/dependency-caches/#reuse-downloads-across-containers"
+  },
+  {
+    "source": "guide/environment-setup/#reuse-downloads-in-cloud-sandboxes",
+    "retained": "guide/environment-setup/#reuse-downloads-in-cloud-sandboxes",
+    "destination": "guide/dependency-caches/#reuse-downloads-in-cloud-sandboxes"
+  },
+  {
+    "source": "guide/environment-setup/#manage-cache-volumes",
+    "retained": "guide/environment-setup/#manage-cache-volumes",
+    "destination": "guide/dependency-caches/#manage-cache-volumes"
+  },
+  {
+    "source": "fr/guide/environment-setup/#réinstaller-seulement-quand-les-fichiers-changent",
+    "retained": "fr/guide/environment-setup/#réinstaller-seulement-quand-les-fichiers-changent",
+    "destination": "fr/guide/dependency-caches/#réinstaller-seulement-quand-les-fichiers-changent"
+  },
+  {
+    "source": "fr/guide/environment-setup/#réutiliser-les-téléchargements-entre-conteneurs",
+    "retained": "fr/guide/environment-setup/#réutiliser-les-téléchargements-entre-conteneurs",
+    "destination": "fr/guide/dependency-caches/#réutiliser-les-téléchargements-entre-conteneurs"
+  },
+  {
+    "source": "fr/guide/environment-setup/#réutiliser-les-téléchargements-dans-le-cloud",
+    "retained": "fr/guide/environment-setup/#réutiliser-les-téléchargements-dans-le-cloud",
+    "destination": "fr/guide/dependency-caches/#réutiliser-les-téléchargements-dans-le-cloud"
+  },
+  {
+    "source": "fr/guide/environment-setup/#gérer-les-volumes-de-cache",
+    "retained": "fr/guide/environment-setup/#gérer-les-volumes-de-cache",
+    "destination": "fr/guide/dependency-caches/#gérer-les-volumes-de-cache"
+  },
+  {
+    "source": "guide/harness-tools/#define-a-tool",
+    "retained": "guide/harness-tools/#define-a-tool",
+    "destination": "guide/custom-harness-tools/#define-a-tool"
+  },
+  {
+    "source": "guide/harness-tools/#group-tools-into-a-toolset",
+    "retained": "guide/harness-tools/#group-tools-into-a-toolset",
+    "destination": "guide/custom-harness-tools/#group-tools-into-a-toolset"
+  },
+  {
+    "source": "fr/guide/harness-tools/#définir-un-outil",
+    "retained": "fr/guide/harness-tools/#définir-un-outil",
+    "destination": "fr/guide/custom-harness-tools/#définir-un-outil"
+  },
+  {
+    "source": "fr/guide/harness-tools/#regrouper-des-outils",
+    "retained": "fr/guide/harness-tools/#regrouper-des-outils",
+    "destination": "fr/guide/custom-harness-tools/#regrouper-des-outils"
+  },
+  {
+    "source": "guide/harness-permissions/#intercept-calls-with-hooks",
+    "retained": "guide/harness-permissions/#intercept-calls-with-hooks",
+    "destination": "guide/harness-hooks/#intercept-calls-with-hooks"
+  },
+  {
+    "source": "guide/harness-permissions/#order-of-checks-and-hooks",
+    "retained": "guide/harness-permissions/#order-of-checks-and-hooks",
+    "destination": "guide/harness-hooks/#order-of-checks-and-hooks"
+  },
+  {
+    "source": "fr/guide/harness-permissions/#intercepter-les-appels-avec-des-hooks",
+    "retained": "fr/guide/harness-permissions/#intercepter-les-appels-avec-des-hooks",
+    "destination": "fr/guide/harness-hooks/#intercepter-les-appels-avec-des-hooks"
+  },
+  {
+    "source": "fr/guide/harness-permissions/#ordre-des-contrôles-et-des-hooks",
+    "retained": "fr/guide/harness-permissions/#ordre-des-contrôles-et-des-hooks",
+    "destination": "fr/guide/harness-hooks/#ordre-des-contrôles-et-des-hooks"
+  },
+  {
+    "source": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent",
+    "retained": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent",
+    "destination": "guide/resolving-conflicts/#resolve-merge-conflicts-with-an-agent"
+  },
+  {
+    "source": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent",
+    "retained": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent",
+    "destination": "fr/guide/resolving-conflicts/#résoudre-les-conflits-de-fusion-avec-un-agent"
+  },
+  {
+    "source": "guide/webhooks/#read-the-http-response",
+    "retained": "guide/webhooks/#read-the-http-response",
+    "destination": "guide/operating-webhooks/#read-the-http-response"
+  },
+  {
+    "source": "guide/webhooks/#deduplicate-redeliveries",
+    "retained": "guide/webhooks/#deduplicate-redeliveries",
+    "destination": "guide/operating-webhooks/#deduplicate-redeliveries"
+  },
+  {
+    "source": "guide/webhooks/#derive-the-run-from-the-payload",
+    "retained": "guide/webhooks/#derive-the-run-from-the-payload",
+    "destination": "guide/operating-webhooks/#derive-the-run-from-the-payload"
+  },
+  {
+    "source": "guide/webhooks/#rotate-a-secret",
+    "retained": "guide/webhooks/#rotate-a-secret",
+    "destination": "guide/operating-webhooks/#rotate-a-secret"
+  },
+  {
+    "source": "guide/webhooks/#operate-the-server",
+    "retained": "guide/webhooks/#operate-the-server",
+    "destination": "guide/operating-webhooks/#operate-the-server"
+  },
+  {
+    "source": "guide/webhooks/#limits",
+    "retained": "guide/webhooks/#limits",
+    "destination": "guide/operating-webhooks/#limits"
+  },
+  {
+    "source": "fr/guide/webhooks/#lire-la-réponse-http",
+    "retained": "fr/guide/webhooks/#lire-la-réponse-http",
+    "destination": "fr/guide/operating-webhooks/#lire-la-réponse-http"
+  },
+  {
+    "source": "fr/guide/webhooks/#éviter-les-jobs-en-double",
+    "retained": "fr/guide/webhooks/#éviter-les-jobs-en-double",
+    "destination": "fr/guide/operating-webhooks/#éviter-les-jobs-en-double"
+  },
+  {
+    "source": "fr/guide/webhooks/#identifier-lexécution-à-partir-de-lévénement",
+    "retained": "fr/guide/webhooks/#identifier-lexécution-à-partir-de-lévénement",
+    "destination": "fr/guide/operating-webhooks/#identifier-lexécution-à-partir-de-lévénement"
+  },
+  {
+    "source": "fr/guide/webhooks/#renouveler-un-secret",
+    "retained": "fr/guide/webhooks/#renouveler-un-secret",
+    "destination": "fr/guide/operating-webhooks/#renouveler-un-secret"
+  },
+  {
+    "source": "fr/guide/webhooks/#exploiter-le-serveur",
+    "retained": "fr/guide/webhooks/#exploiter-le-serveur",
+    "destination": "fr/guide/operating-webhooks/#exploiter-le-serveur"
+  },
+  {
+    "source": "fr/guide/webhooks/#limites",
+    "retained": "fr/guide/webhooks/#limites",
+    "destination": "fr/guide/operating-webhooks/#limites"
+  },
+  {
+    "source": "guide/durable-runs/#recover-a-run-after-a-crash",
+    "retained": "guide/durable-runs/#recover-a-run-after-a-crash",
+    "destination": "guide/recovering-workflows/#recover-a-run-after-a-crash"
+  },
+  {
+    "source": "fr/guide/durable-runs/#récupérer-une-exécution-après-un-plantage",
+    "retained": "fr/guide/durable-runs/#récupérer-une-exécution-après-un-plantage",
+    "destination": "fr/guide/recovering-workflows/#récupérer-une-exécution-après-un-plantage"
+  },
+  {
+    "source": "guide/recipe-workflows/#declare-local-actions",
+    "retained": "guide/recipe-workflows/#declare-local-actions",
+    "destination": "guide/recipe-callbacks/#declare-local-actions"
+  },
+  {
+    "source": "fr/guide/recipe-workflows/#déclarer-des-actions-locales",
+    "retained": "fr/guide/recipe-workflows/#déclarer-des-actions-locales",
+    "destination": "fr/guide/recipe-callbacks/#déclarer-des-actions-locales"
+  },
+  {
+    "source": "guide/sandbox-sessions/#open-an-interactive-terminal",
+    "retained": "guide/sandbox-sessions/#open-an-interactive-terminal",
+    "destination": "guide/interactive-terminal/#open-an-interactive-terminal"
+  },
+  {
+    "source": "fr/guide/sandbox-sessions/#ouvrir-un-terminal-interactif",
+    "retained": "fr/guide/sandbox-sessions/#ouvrir-un-terminal-interactif",
+    "destination": "fr/guide/interactive-terminal/#ouvrir-un-terminal-interactif"
+  },
+  {
+    "source": "guide/limits-and-cancellation/#repeat-the-brief-until-the-agent-declares-it-done",
+    "retained": "guide/limits-and-cancellation/#repeat-the-brief-until-the-agent-declares-it-done",
+    "destination": "guide/agent-passes/#repeat-the-brief-until-the-agent-declares-it-done"
+  },
+  {
+    "source": "fr/guide/limits-and-cancellation/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé",
+    "retained": "fr/guide/limits-and-cancellation/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé",
+    "destination": "fr/guide/agent-passes/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé"
+  },
+  {
+    "source": "guide/briefs/#insert-command-output",
+    "retained": "guide/briefs/#insert-command-output",
+    "destination": "guide/prompt-commands/#insert-command-output"
+  },
+  {
+    "source": "fr/guide/briefs/#insérer-la-sortie-dune-commande",
+    "retained": "fr/guide/briefs/#insérer-la-sortie-dune-commande",
+    "destination": "fr/guide/prompt-commands/#insérer-la-sortie-dune-commande"
+  },
+  {
+    "source": "guide/conversations/#where-conversations-are-stored",
+    "retained": "guide/conversations/#where-conversations-are-stored",
+    "destination": "guide/conversation-storage/#where-conversations-are-stored"
+  },
+  {
+    "source": "guide/conversations/#archive-and-share-through-a-transport",
+    "retained": "guide/conversations/#archive-and-share-through-a-transport",
+    "destination": "guide/conversation-storage/#archive-and-share-through-a-transport"
+  },
+  {
+    "source": "guide/conversations/#turn-capture-off",
+    "retained": "guide/conversations/#turn-capture-off",
+    "destination": "guide/conversation-storage/#turn-capture-off"
+  },
+  {
+    "source": "fr/guide/conversations/#où-les-conversations-sont-stockées",
+    "retained": "fr/guide/conversations/#où-les-conversations-sont-stockées",
+    "destination": "fr/guide/conversation-storage/#où-les-conversations-sont-stockées"
+  },
+  {
+    "source": "fr/guide/conversations/#archiver-et-partager-via-un-transport",
+    "retained": "fr/guide/conversations/#archiver-et-partager-via-un-transport",
+    "destination": "fr/guide/conversation-storage/#archiver-et-partager-via-un-transport"
+  },
+  {
+    "source": "fr/guide/conversations/#désactiver-la-capture",
+    "retained": "fr/guide/conversations/#désactiver-la-capture",
+    "destination": "fr/guide/conversation-storage/#désactiver-la-capture"
+  },
+  {
+    "source": "guide/task-dependencies/#share-a-sandbox-between-tasks",
+    "retained": "guide/task-dependencies/#share-a-sandbox-between-tasks",
+    "destination": "guide/sandbox-sessions/#share-a-sandbox-between-tasks"
+  },
+  {
+    "source": "fr/guide/task-dependencies/#partager-une-sandbox-entre-les-tâches",
+    "retained": "fr/guide/task-dependencies/#partager-une-sandbox-entre-les-tâches",
+    "destination": "fr/guide/sandbox-sessions/#partager-une-sandbox-entre-les-tâches"
+  }
+]

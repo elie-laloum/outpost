@@ -52,7 +52,6 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="harness-review.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./review-agent.ts";
@@ -63,9 +62,9 @@ export const result = await dispatch({
   agent: reviewer,
   brief: { text: "List the exported functions that no test calls." },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: No test calls parseDate() or formatDate().
-reportValue(result.usage);
+console.log(result.usage);
 // Example output: { input: 1200, cached: 0, output: 320 }
 ```
 
@@ -73,32 +72,7 @@ Set `ANTHROPIC_API_KEY`, then run `node harness-review.ts`. `result.text` holds 
 
 ## The loop at a glance
 
-<!-- canvas -->
-
-- **Start the turn**: Once per brief, pass or repair.
-  - Steps
-  - **Build the system prompt**: Resolve `instructions` and the skill catalog.
-    - host
-  - **Start MCP servers**: Declared `mcpServers` start and add their tools.
-    - sandbox
-  - → **Run a step**: then
-- **Run a step**: Repeated until the model answers without tool calls.
-  - Steps
-  - **Request the model**: Send the history, the system prompt and the tool list.
-    - host
-  - **Check the calls**: Validate each input against its schema, then apply permissions and `before-tool` hooks.
-    - host
-  - **Run the tools**: Consecutive read-only calls run in parallel, the others one at a time.
-    - sandbox
-  - **Return the results**: Results and tool errors join the history for the next step.
-    - host
-  - → **Finish**: then
-- **Finish**: The model answers.
-  - Steps
-  - **Return the answer**: The final text becomes `result.text`, unless a `stop` hook or a steering message sends the model back to work.
-    - host
-
-Outpost checks the limits before every step and after each model response. The first one reached ends the turn with an [`OutpostError`](../error-handling/).
+The harness sends the current conversation and available tools to the model. A tool request is validated and checked against permissions before it executes; its result becomes the next model input. The turn ends when the model answers without another tool call, or a limit or failure stops it. Your tool code runs on the host: use the borrowed sandbox for commands and files. [Tool permissions](../harness-permissions/) and [context management](../harness-context/) explain those controls.
 
 ## Limit a model turn
 
@@ -163,7 +137,6 @@ export const agent = createAgent({
 ```
 
 ```ts title="observe-harness.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch, createObservationHub } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./observed-agent.ts";
@@ -175,7 +148,7 @@ await dispatch({
   brief: { text: "Explain how the build is configured." },
   observation: createObservationHub({ verbose: true }),
   observe(event) {
-    if (event.kind === "tool") reportValue(event.name, event.input);
+    if (event.kind === "tool") console.log(event.name, event.input);
     // Example output: read_file { path: "README.md" }
     if (event.kind === "model-request") console.dir(event.request);
   },

@@ -3,12 +3,13 @@ title: "Enregistrer et reprendre un workflow"
 description: "Utilisez des checkpoints pour reprendre un workflow et autorisez explicitement les nouvelles tentatives après une interruption."
 ---
 
+Commencez par l’exemple hors ligne ci-dessous pour voir une tâche terminée réutilisée après redémarrage. Il faut Node.js, Outpost et un dossier de stockage inscriptible. Avec de vrais agents, conservez aussi leurs workspaces, pas seulement le checkpoint.
+
 ## Enregistrer la progression
 
 Passez un `checkpoint` à la méthode `start()` du workflow si vous devez poursuivre dans un autre processus. Outpost enregistre les changements d’état des tâches et leurs résultats sous le `runId` du checkpoint.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   createLocalTransport,
   defineTask,
@@ -24,7 +25,7 @@ const result = await defineWorkflow("scan", [scan]).start({
   checkpoint: { store, runId: "scan-2026-09", version: "1" },
 });
 result.unwrap();
-reportValue(result.value(scan));
+console.log(result.value(scan));
 // Example output: { files: 12 }
 ```
 
@@ -125,19 +126,18 @@ export function uploadCount() {
 ```
 
 ```ts title="resume-upload.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { upload } from "./upload.ts";
 import { store } from "./upload-store.ts";
 
 export const workflow = defineWorkflow("upload", [upload]);
 export const checkpoint = { store, runId: "upload-1", version: "1" };
-reportValue((await workflow.start({ checkpoint })).status);
+console.log((await workflow.start({ checkpoint })).status);
 // Example output: failed
 export const resumed = await workflow.start({
   checkpoint: { ...checkpoint, resume: "retry-incomplete" },
 });
-reportValue(resumed.status);
+console.log(resumed.status);
 // Example output: done
 ```
 
@@ -154,48 +154,9 @@ Le script affiche `failed`, puis `done`. Sans `resume`, le second `start()` est 
 
 Une tâche relancée repart pour une nouvelle série de tentatives `retry`. Une tâche `done` ne s’exécute jamais à nouveau. Une exécution arrêtée par son [budget](../budgets/) reprend de la même façon ; passez un `budget` plus large, car la consommation continue de s’additionner.
 
-## Récupérer une exécution après un plantage
+<span id="récupérer-une-exécution-après-un-plantage"></span>
 
-Une exécution possède son checkpoint pendant `start()` et le libère quand `start()` se termine. Si le processus meurt, la propriété reste : tout `start()` suivant pour ce `runId` est refusé jusqu’à ce que vous la libériez.
-
-<!-- canvas -->
-
-- **Arrêter**: Assurez-vous que l’ancien processus n’écrit plus.
-  - Étapes
-  - **Arrêter le processus**: Confirmez qu’il s’est terminé. Un PID ne prouve pas qu’un processus distant s’est arrêté.
-  - → **Déverrouiller**: puis
-- **Déverrouiller**: Libérez la propriété, gardez la progression.
-  - Étapes
-  - **Lire la révision**: Lisez l’objet du checkpoint de l’exécution depuis le transport.
-    - `Transport`
-  - **Libérer la propriété**: L’appel est refusé si l’objet a changé depuis votre lecture.
-    - `recoverWorkflowCheckpoint()`
-  - → **Reprendre**: puis
-- **Reprendre**: Relancez le même workflow avec le même checkpoint.
-  - Étapes
-  - **Autoriser le rejeu**: La tâche interrompue est relancée avec `resume: "retry-incomplete"`.
-    - `start()`
-
-```ts
-import { createHash } from "node:crypto";
-import {
-  createLocalTransport,
-  recoverWorkflowCheckpoint,
-} from "@elie-laloum/outpost";
-
-const transporter = createLocalTransport({ directory: ".outpost/storage" });
-const runId = "scan-2026-09";
-const digest = createHash("sha256").update(runId).digest("hex");
-const saved = await transporter.read(`checkpoints/${digest}.json`);
-if (saved)
-  await recoverWorkflowCheckpoint({
-    transporter,
-    runId,
-    revision: saved.revision,
-  });
-```
-
-La clé du checkpoint est `checkpoints/` suivi du SHA-256 du `runId`. La progression reste intacte ; relancez l’exécution avec `resume: "retry-incomplete"`.
+Pour cette étape, suivez [Récupérer un workflow après un plantage](../recovering-workflows/).
 
 ## Reprendre un workflow lancé depuis une file
 

@@ -3,6 +3,8 @@ title: "Stocker les données dans S3 ou R2"
 description: "Connectez un stockage objet pour partager artefacts, checkpoints et journaux entre machines."
 ---
 
+Le stockage distant partage les objets enregistrés, pas les worktrees Git ni les fichiers de conversation encore locaux. Une reprise sur une autre machine exige aussi ces ressources aux emplacements attendus, ou leur restauration explicite.
+
 ## Créer le transport
 
 Installez le SDK AWS à côté d’Outpost pour utiliser un stockage objet compatible S3. Cette dépendance est facultative et se charge depuis le point d’entrée du transport S3.

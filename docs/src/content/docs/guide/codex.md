@@ -105,7 +105,7 @@ Headless runs skip Codex’s approval prompts and its own sandbox: the Outpost s
 ## Limits
 
 - Outpost never reads the system keychain: a login stored there cannot be copied. Sign in again with file storage.
-- `maxOutputTokens` and `reasoning` values outside the list above are rejected when the agent is composed.
+- `maxOutputTokens` and `reasoning` values outside the [createCodexHarness contract](../../reference/createcodexharness/) are rejected when the agent is composed.
 - A custom `modelProvider` accepts only `usage` authentication. Chat Completions endpoints do not work.
 - Codex marks `app-server` as experimental; steering depends on its protocol.
 - With [host execution](../host-process/), nothing isolates Codex, since headless runs bypass its own sandbox.

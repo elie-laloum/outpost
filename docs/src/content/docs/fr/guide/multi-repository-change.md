@@ -3,16 +3,25 @@ title: "Coordonner une modification entre dépôts"
 description: "Modifiez une API et ses clients, examinez chaque branche et approuvez leur intégration."
 ---
 
-## Ce que montre l’exemple
+[Télécharger tous les fichiers](../../../guide-examples/fr/multi-repository-change.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
 
-<!-- features -->
+<!-- canvas -->
 
-- [Plusieurs dépôts](../multiple-repositories/): Une tâche par checkout, chacune avec sa sandbox et sa branche.
-- [Réponses typées](../typed-responses/): L’agent de l’API renvoie une description validée de sa modification.
-- [Tâches et dépendances](../task-dependencies/): Les clients démarrent après l’API et lisent son résultat.
-- [Concurrence, relances et délais](../concurrency-and-retries/): Les deux clients s’exécutent en même temps.
-- [Approbations](../approvals/): Un mainteneur décide avant toute fusion.
-- [Exécutions durables](../durable-runs/): Le checkpoint conserve le travail terminé d’une exécution à l’autre.
+- **Modifier l’API**: Conserver la modification de l’API sur sa branche.
+  - Dépôt API
+  - → **Adapter le web**: renommage validé
+  - → **Adapter le mobile**: renommage validé
+- **Adapter le web**: Utiliser une branche et une sandbox séparées.
+  - Dépôt web
+  - → **Approuver**: web terminé
+- **Adapter le mobile**: Utiliser une branche et une sandbox séparées.
+  - Dépôt mobile
+  - → **Approuver**: mobile terminé
+- **Approuver**: Attendre les trois modifications et la décision humaine.
+  - Vous
+  - → **Intégrer**: approuvé
+- **Intégrer**: Avancer les dépôts un par un, API d’abord ; rien n’est poussé.
+  - Votre application
 
 ## Écrire le script
 
@@ -257,14 +266,13 @@ export function mergeDecision(
 ```
 
 ```ts title="rename-result.ts"
-import { reportValue } from "./reporter.ts";
 import type { WorkflowResult } from "@elie-laloum/outpost";
 
 export function showRun(result: WorkflowResult) {
-  reportValue(result.status);
+  console.log(result.status);
   // Example output: done
   for (const task of result.tasks)
-    reportValue(task.key, task.status, task.error ?? "");
+    console.log(task.key, task.status, task.error ?? "");
   // Example output: api done
 }
 ```
@@ -310,39 +318,7 @@ Le script affiche `done`. Les branches sont fusionnées dans la branche courante
 
 ## Comprendre les étapes
 
-Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
-
-<!-- canvas -->
-
-- [Votre script](../durable-runs/): `rename-field.ts` démarre l’exécution, puis la reprend avec `approve` ou `reject`.
-  - hôte
-  - → **api**: `workflow.start()`
-  - → **approve**: décision
-- [api](../typed-responses/): Renomme d’abord le champ et rend `{ from, to, notes }`, vérifié par `defineJsonResponse()`.
-  - workflow
-  - → **API**: brief
-  - → **Clients**: le changement
-- [Clients](../concurrency-and-retries/): Les deux s’exécutent en même temps, avec `concurrency: 2`.
-  - workflow
-  - **web**: le changement de l’API dans son brief
-    - → **Web**: brief
-  - **mobile**: le changement de l’API dans son brief
-    - → **Mobile**: brief
-  - → **approve**: trois branches
-- [approve](../approvals/): `defineApprovalTask()` enregistre la demande et termine le processus en `paused`.
-  - workflow
-  - → **merge**: approuvé
-- **merge**: Avance chaque checkout jusqu’à sa branche, l’API d’abord.
-  - workflow
-  - → **Checkouts**: `git merge --ff-only`
-- [Sandboxes](../multiple-repositories/): Une par dépôt, chacune sur `outpost/rename-user-name`.
-  - sandbox
-  - **API**: `/projects/api`
-  - **Web**: `/projects/web`
-  - **Mobile**: `/projects/mobile`
-  - → **Checkouts**: commits sur chaque branche
-- **Checkouts**: Vos trois dépôts. Rien n’est poussé.
-  - hôte
+, dans le sens de la flèche.
 
 Un checkpoint ne contient que du JSON. Chaque tâche du workflow appelle donc le `perform()` de sa tâche isolée et garde `repository`, `branch` et `commits`, pas le résultat du dispatch.
 

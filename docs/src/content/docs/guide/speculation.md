@@ -48,7 +48,6 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
-import { reportValue } from "./reporter.ts";
 import { speculate } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
@@ -61,7 +60,7 @@ export const result = await speculate({
   candidates,
   validate,
 });
-reportValue(result.status, result.winner?.branch);
+console.log(result.status, result.winner?.branch);
 // Example output: winner outpost/speculation/…/codex
 ```
 
@@ -96,13 +95,7 @@ Pass `signal` to every command. It fires when another candidate wins in first mo
 
 The winner’s `commit` is `HEAD` read after `validate` and any `score` callback return. A commit made during either callback becomes part of the winner; uncommitted edits do not. A reviewer agent dispatched in `validate` must therefore not commit: see [Let a review agent decide](../compete-agents/).
 
-## Read the result
-
-API reference: [SpeculationResult](../../reference/speculationresult/).
-
-Inspect the candidate results before choosing what to keep.
-
-API reference: [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) and [SpeculationResult](../../reference/speculationresult/).
+Inspect `result.winner` and the [candidate results](../../reference/speculativecandidateresult/) before deciding which branches to keep.
 
 ## Budget and cleanup
 
@@ -142,88 +135,6 @@ export async function canMerge(branch: string, commit?: string) {
 
 Pass `winner.branch` and `winner.commit`. A branch that moved since validation is `blocked`. The check never merges: run `git merge` yourself.
 
-## Resume after a crash
-
-Pass `durability` to `speculate()`. Attempts, usage, outputs and allocated resources are saved through a [transport](../storage/), and a finished race is returned without running again.
-
-```ts
-import { join } from "node:path";
-import {
-  createLocalTransport,
-  type SpeculationDurability,
-} from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.ts";
-
-export const durability: SpeculationDurability = {
-  transporter: createLocalTransport({
-    directory: join(repository, ".outpost", "storage"),
-  }),
-  runId: "parser-race",
-  version: "1",
-};
-```
-
-Change `version` when you change the agents, `validate` or `score`. A saved race whose briefs, budget, provider, selection mode or `version` differ is rejected: start it under a new `runId`.
-
-Durable races need a provider that can find and stop its sandboxes after a crash. Docker and Podman in their default mounted mode can; other providers are rejected unless you [implement recovery](../custom-sandbox-providers/).
-
-### Recover after a crash
-
-A crashed race stays owned by its coordinator, the process that ran `speculate()`. Release it before replaying.
-
-<!-- canvas -->
-
-- **Stop**: End the old coordinator.
-  - Steps
-  - **Stop the process**: A timeout or a missing PID does not prove it stopped.
-    - host
-  - → **Inspect**: then
-- **Inspect**: Read the saved race.
-  - Steps
-  - **Read the saved state**: Keep its `revision`; the content lists each candidate’s `resourceId`.
-    - `transporter.read()`
-  - → **Release**: then
-- **Release**: Give up the old ownership.
-  - Steps
-  - **Recover**: Fails if the revision changed since you read it; deletes nothing.
-    - `recoverSpeculation()`
-  - → **Replay**: then
-- **Replay**: Run the race again.
-  - Steps
-  - **Authorize replay**: Same options, with `resume: "retry-incomplete"` in `durability`.
-    - `speculate()`
-  - **Reconcile**: Registered sandboxes are stopped; interrupted candidates restart on a new branch.
-    - sandbox
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { createHash } from "node:crypto";
-import { join } from "node:path";
-import { createLocalTransport, recoverSpeculation } from "@elie-laloum/outpost";
-import { repository } from "./outpost.config.ts";
-const transporter = createLocalTransport({
-  directory: join(repository, ".outpost", "storage"),
-});
-const key = `speculations/${createHash("sha256").update("parser-race").digest("hex")}.json`;
-const saved = await transporter.read(key);
-if (saved) {
-  reportValue(new TextDecoder().decode(saved.bytes));
-  // Example output: {"runId":"parser-race",…}
-  await recoverSpeculation({
-    transporter,
-    runId: "parser-race",
-    revision: saved.revision,
-    coordinatorStopped: true,
-  });
-}
-```
-
-An interrupted candidate runs again as a new attempt, on `…/<key>/2`, from the original commit. Its earlier branch and worktree are listed in `result.previousAttempts`. Candidates validated and scored before the crash keep their saved scores; best selection still waits for the remaining admitted candidates. A crash during scoring requires an explicitly authorized new attempt.
-
-## Resume after a quota
-
-A durable race that ends with status `quota` is not final. Calling `speculate()` again with the same `durability` reruns only the candidates a usage or rate limit stopped, as new attempts. `result.quota.resetAt` gives the reset time when the agent reports it; [Quota pauses](../quota-pauses/) covers waiting for it.
-
 ## Limits
 
 - `speculate()` never merges, pushes or opens a pull request.
@@ -234,3 +145,15 @@ A durable race that ends with status `quota` is not final. Calling `speculate()`
 - Durable results must hold JSON values, and a crash mid-run makes usage incomplete: add `budget.attempts` next to token limits.
 
 API: [speculate](../../reference/speculate/) · [SpeculationOptions](../../reference/speculationoptions/) · [SpeculationResult](../../reference/speculationresult/) · [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) · [SpeculativeValidation](../../reference/speculativevalidation/) · [checkSpeculationIntegration](../../reference/checkspeculationintegration/) · [SpeculationDurability](../../reference/speculationdurability/) · [recoverSpeculation](../../reference/recoverspeculation/).
+
+## Continue
+
+- [Resume a saved race](../resuming-speculation/)
+
+<span id="read-the-result"></span>
+
+[Run competing candidates](../speculation/).
+
+<span id="resume-after-a-crash"></span>
+<span id="recover-after-a-crash"></span>
+<span id="resume-after-a-quota"></span>

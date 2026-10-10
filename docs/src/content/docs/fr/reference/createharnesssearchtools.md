@@ -19,10 +19,10 @@ Crée le jeu d’outils search : search exécute git grep avec une expression r�
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                 | Présence  | Rôle                                                                                                                             |
-| ------------------- | ------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `FileSelectionOptions \| undefined`  | Optionnel | Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération. |
-| `options.selection` | `"git" \| "filesystem" \| undefined` | Optionnel | git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore.   |
+| Nom                 | Type                                 | Présence  | Rôle                                                                                                                           |
+| ------------------- | ------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `options`           | `FileSelectionOptions \| undefined`  | Optionnel | Choisit la recherche Git ou dans le système de fichiers.                                                                       |
+| `options.selection` | `"git" \| "filesystem" \| undefined` | Optionnel | git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore. |
 
 ## Retour
 

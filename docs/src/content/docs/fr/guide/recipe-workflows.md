@@ -3,6 +3,8 @@ title: "Composer des workflows YAML"
 description: "Transmettre des valeurs JSON, choisir des conditions et composer des tâches isolées avec le moteur existant."
 ---
 
+Étendez [votre première recette](../yaml-recipes/) lorsque les étapes suivantes ont besoin de résultats structurés ou de conditions. Enregistrez le premier bloc dans `recipe.yaml`, passez le champ `version` à la racine de votre `outpost.yaml` à `2`, puis lancez `npx outpost recipe run --file recipe.yaml --config outpost.yaml --json`. Le résultat `envelope` contient les noms de fichiers sélectionnés.
+
 ## Transmettre des valeurs structurées
 
 Le format de recette 3 et la configuration 2 étendent les [recettes YAML](../yaml-recipes/) avec des paramètres JSON et la composition de workflows. Conservez deux fichiers séparés. Objets, tableaux et null complètent les paramètres scalaires ; un `schema` JSON facultatif valide les valeurs imbriquées avant le chargement des extensions et l’allocation. Une valeur passée par `--input 'changes={"files":["a.ts"]}'` conserve son type.
@@ -55,7 +57,7 @@ workflow:
   budget: { attempts: 10 }
 ```
 
-Les commandes et agents sur une sandbox partagée restent séquentiels par défaut. Si la concurrence peut faire chevaucher deux tâches partagées, la validation refuse la recette ; ordonnez-les avec des dépendances ou utilisez `isolated`. Les tâches de données, callbacks et décisions n’allouent aucune sandbox. Chaque requête isolée choisit son dépôt, provider, agent et sa politique de branche via [defineIsolatedTask](../../reference/defineisolatedtask/). Les requêtes concurrentes sur un même workspace emprunté ou courant sont refusées.
+Les commandes et agents sur une sandbox partagée restent séquentiels par défaut. Si la concurrence peut faire chevaucher deux tâches partagées, la validation refuse la recette ; ordonnez-les avec des dépendances ou utilisez `isolated`. Les tâches de données, callbacks et décisions n’allouent aucune sandbox. Chaque requête isolée choisit son dépôt, fournisseur, agent et sa politique de branche via [defineIsolatedTask](../../reference/defineisolatedtask/). Les requêtes concurrentes sur un même workspace emprunté ou courant sont refusées.
 
 ```yaml title="recipe.yaml — tâche isolée"
 - key: update-library
@@ -69,35 +71,23 @@ Les commandes et agents sur une sandbox partagée restent séquentiels par défa
 
 Les chemins des options natives se résolvent depuis le fichier de configuration locale. Chaque dépôt isolé s’intègre indépendamment, selon sa politique de branche ; aucune transaction ne couvre plusieurs dépôts.
 
-## Déclarer des actions locales
+<span id="déclarer-des-actions-locales"></span>
 
-Pour une transformation complexe, `call` sélectionne un callback explicitement configuré et `arguments` construit son entrée JSON. Le callback reçoit cette valeur et le contexte natif de tâche : annulation, déclaration de consommation et clé d’idempotence. Sa valeur de retour doit être du JSON sans perte. La recette partageable choisit une référence déclarée ; elle ne peut ajouter aucun import de module.
-
-```yaml title="recipe.yaml — transformation"
-- key: summarize
-  after: [select]
-  call: { $ref: functions.summary }
-  arguments: { $step: select, path: [value] }
-```
-
-Déclarez le module, l’export, sa version et le contrat du callback dans la configuration locale. Un alias dans `functions` garde la recette indépendante des noms de modules locaux. La validation résout ces métadonnées sans importer le module ; l’exécution vérifie son export avant l’allocation.
-
-```yaml title="outpost.yaml — liaison du callback"
-extensions:
-  summary:
-    module: ./steps.ts
-    export: summary
-    kind: callback
-    contract: call.options.perform
-    version: "1"
-functions:
-  summary: { $ref: extensions.summary }
-```
-
-`loop` accepte `maxRounds`, `attempt` et `check` via [defineLoopTask](../../reference/definelooptask/). Liez les callbacks avec `loop.options.attempt` et `loop.options.check` ; le résultat d’une tentative devient le `value` JSON de l’étape, tandis que le contrôle reçoit le résultat sans enveloppe. Le moteur existant maintient l’historique des tours et la consommation. Les boucles refusent les options ordinaires de retry, gate et interaction.
-
-`decision` accepte provider, modèle, contrat de décision et politique de troncature de [defineDecisionTask](../../reference/definedecisiontask/). Une expression `state` séparée fournit le contexte structuré et le résultat est accessible dans `value`. Une requête de décision n’alloue pas de sandbox.
+Pour cette étape, suivez [Appeler des actions locales depuis YAML](../recipe-callbacks/).
 
 ## Exécuter l’exemple hors ligne
 
 `examples/68-recipe-workflows` compose des paramètres structurés, une condition, une transformation locale et une boucle de deux tours. Après compilation d’Outpost, lancez `node --test examples/68-recipe-workflows/index.ts`. Cet exemple n’alloue aucune sandbox et n’appelle aucun modèle. Les tests fonctionnels comparent aussi la consommation YAML et TypeScript et exécutent des agents de test isolés sur deux vrais dépôts Git temporaires ; la validation cloud et les appels payants restent séparés.
+
+## Réutiliser le résultat d’une étape
+
+Un agent expose `text` ; une commande expose `stdout`, `stderr` et le nombre `status`. Ajoutez chaque étape référencée à `after`, même si une autre dépendance la suit déjà. Ajoutez cette tâche à [votre première recette YAML](../yaml-recipes/) pour résumer la revue :
+
+```yaml title="recipe.yaml — append to tasks"
+- key: summary
+  after: [review]
+  agent: coder
+  brief: "Summarize these findings without editing files: {{ steps.review.text }}"
+```
+
+Le moteur transmet le résultat réel à l’étape suivante. Les rapports CLI limitent chaque champ textuel retourné à 16 384 caractères avec un marqueur de troncature explicite. Les références transmettent des données, sans continuer une conversation ; les fichiers restent partagés dans le workspace de la sandbox.

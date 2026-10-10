@@ -15,7 +15,7 @@ import { inspectWorkspacePathLocks } from "@elie-laloum/outpost";
 
 Lists host-user locks coordinating overlapping materializations, mounts and publication destinations across runtime directories.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/working-with-files/).
 
 ## Returns
 

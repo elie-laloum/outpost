@@ -15,7 +15,7 @@ import { restoreWorkspaceFiles } from "@elie-laloum/outpost";
 
 Matérialise et vérifie un snapshot de fichiers conservé dans une destination exclusive ; conserve la compatibilité de lecture des archives existantes.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/working-with-files/).
 
 ## Paramètres et propriétés
 

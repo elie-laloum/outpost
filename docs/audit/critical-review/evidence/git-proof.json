@@ -1,0 +1,10 @@
+{
+  "commitDiffEmptyDespiteEdits": true,
+  "status": " M README.md\n?? \"test/a b.test.ts\"\n?? \"test/\\303\\251t\\303\\251.test.ts\"\n",
+  "parsedPaths": [
+    "README.md",
+    "\"test/a b.test.ts\"",
+    "\"test/\\303\\251t\\303\\251.test.ts\""
+  ],
+  "parsedPathsExist": [true, false, false]
+}

@@ -3,6 +3,22 @@ title: "Ajouter un agent en ligne de commande"
 description: "Créez un adaptateur qui lance votre agent et traduit sa sortie en événements Outpost."
 ---
 
+Utilisez cette intégration pour une CLI absente d’Outpost. Son exécutable doit être installé dans la sandbox, et vous devez disposer d’exemples de sorties réelles. L’exécution des processus reste au fournisseur de sandbox ; l’adaptateur prépare les demandes et décode les événements.
+
+L’exemple ci-dessous utilise une fausse CLI locale, sans compte ni appel au modèle. Enregistrez `demo-cli.ts` dans le dépôt cible ; les autres fichiers restent à côté de la configuration. `copies` rend cette CLI disponible dans le worktree de l’agent. Elle lit le brief et émet deux événements JSON.
+
+```ts title="demo-cli.ts"
+let prompt = "";
+for await (const chunk of process.stdin) prompt += chunk;
+console.log(
+  JSON.stringify({
+    type: "message",
+    text: `Received ${prompt.length} characters`,
+  }),
+);
+console.log(JSON.stringify({ type: "usage", input: 0, output: 0 }));
+```
+
 ## Écrire un adaptateur minimal
 
 Implémentez un `AgentAdapter` pour décrire le lancement de votre outil et traduire sa sortie en événements : `request()` construit la commande et `events()` lit les lignes produites. Un `CliHarness` associe l’adaptateur au modèle choisi, puis `createAgent()` rend l’agent utilisable dans une tâche.
@@ -52,8 +68,8 @@ import type { AgentModel, AgentAdapter } from "@elie-laloum/outpost";
 
 export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
   return ({ text }) => ({
-    executable: "mycli",
-    arguments: ["--json", ...(model ? ["--model", model.name] : [])],
+    executable: "node",
+    arguments: ["demo-cli.ts", ...(model ? ["--model", model.name] : [])],
     stdin: text ?? "",
   });
 }
@@ -81,7 +97,6 @@ export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
 ```
 
 ```ts title="mycli.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { myCli } from "./mycli-agent.ts";
@@ -90,14 +105,15 @@ export const result = await dispatch({
   repository,
   sandboxProvider,
   agent: myCli,
+  copies: ["demo-cli.ts"],
   branch: { mode: "named", name: "outpost/mycli-review" },
   brief: { text: "Review the README for incorrect setup instructions." },
 });
-reportValue(result.text);
-// Example output: The README setup command uses an outdated flag.
+console.log(result.text);
+// Example output: Received 153 characters
 ```
 
-Outpost exécute `mycli --json --model mycli-pro` dans la sandbox avec le brief sur stdin, transmet chaque ligne de stdout à `events()` et renvoie le texte collecté dans `result.text`. Installez d’abord la CLI dans votre [image d’agent](../agent-images/).
+Outpost exécute `mycli --json --model mycli-pro` dans la sandbox avec le brief sur stdin, transmet chaque ligne de stdout à `events()` et renvoie le texte collecté dans `result.text`. Lancez `node mycli.ts` : la sortie attendue est `Received … characters`. Pour une intégration réelle, remplacez la commande et le décodeur par ceux de la CLI installée dans votre [image d’agent](../agent-images/).
 
 ## Construire la commande
 

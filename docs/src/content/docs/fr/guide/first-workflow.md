@@ -1,80 +1,83 @@
 ---
 title: "Votre premier workflow"
-description: "Lancez une tâche d’agent, transmettez son résultat à une seconde tâche et récupérez la sortie du workflow."
+description: "Relier une tâche d’agent à une fonction et examiner leur résultat typé."
 ---
 
-## Relier deux tâches
+<!-- Retained section anchors for existing bookmarks. -->
 
-Un workflow décrit des tâches et leurs dépendances. Dans cet exemple, un agent corrige les tests sur une branche séparée. Une seconde tâche lit son résultat et renvoie un court résumé.
+<span id="relier-deux-tâches"></span>
+<span id="exécuter-le-script"></span>
+<span id="lire-les-dépendances-et-les-résultats"></span>
+<span id="ajouter-une-vérification"></span>
 
-Reprenez la configuration de la page [Installation](../setup/) et enregistrez ces trois fichiers à côté. Chaque onglet présente un fichier : la tâche de l’agent, la tâche de synthèse et le script qui les exécute.
+## Transmettre la réponse de l’agent à votre code
+
+Après [votre première tâche](../first-request/), ajoutez une étape qui lit son résultat. Ce tutoriel reprend le même README commité et la même [configuration](../setup/), sans tests en échec ni checkpoint à préparer.
+
+Enregistrez ces trois fichiers à côté de `outpost.config.ts`. Le premier déclare la tâche de l’agent, le deuxième construit un résumé et le dernier démarre le workflow.
 
 <!-- tabs -->
 
-```ts title="fix-task.ts"
+```ts title="review-task.ts"
 import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
-export const fix = defineIsolatedTask({
-  key: "fix",
+export const review = defineIsolatedTask({
+  key: "review",
   request: () => ({
     repository,
     sandboxProvider,
     agent: coder,
-    branch: { mode: "named", name: "outpost/fix-tests" },
-    brief: { text: "Fix the failing tests, run them and commit the fix." },
+    branch: { mode: "named", name: "outpost/workflow-review" },
+    brief: { text: "Summarize the README setup steps without editing files." },
   }),
 });
 ```
 
 ```ts title="summary.ts"
 import { defineTask } from "@elie-laloum/outpost";
-import { fix } from "./fix-task.ts";
+import { review } from "./review-task.ts";
 
 export const summary = defineTask({
   key: "summary",
-  after: [fix],
+  after: [review],
   perform: (context) => ({
-    branch: context.value(fix).branch,
-    commits: context.value(fix).commits.length,
+    text: context.value(review).text,
+    branch: context.value(review).branch,
+    commits: context.value(review).commits.length,
   }),
 });
 ```
 
-```ts title="fix.ts"
-import { reportValue } from "./reporter.ts";
+```ts title="workflow.ts"
 import { defineWorkflow } from "@elie-laloum/outpost";
-import { fix } from "./fix-task.ts";
+import { review } from "./review-task.ts";
 import { summary } from "./summary.ts";
 
-export const result = await defineWorkflow("fix-tests", [fix, summary]).start();
+const result = await defineWorkflow("readme-review", [review, summary]).start();
 result.unwrap();
-reportValue(result.value(summary));
-// Example output: { branch: 'outpost/fix-tests', commits: 1 }
+console.log(result.value(summary));
+// Example output: { text: 'Install ...', branch: 'outpost/workflow-review', commits: 0 }
 ```
 
-## Exécuter le script
+## Lancer le workflow
 
-L’agent travaille sur `outpost/fix-tests`. Lorsqu’il termine avec succès, la tâche `summary` renvoie le nom de la branche et le nombre de commits. Ce nombre dépend des modifications produites par l’agent.
+L’agent lit d’abord le README. Si sa tâche réussit, votre fonction `summary` s’exécute et le script affiche son résultat.
 
 ```sh
-node fix.ts
+node workflow.ts
 ```
 
-Examinez la branche avant de la fusionner. Un workflow réussi signifie que ses tâches ont terminé sans erreur ; cet exemple ne vérifie pas lui-même que les tests passent.
+Examinez la réponse, le nom de branche et le nombre de commits. `unwrap()` lève une erreur si le workflow n’a pas réussi : le script n’affiche donc pas un résumé de réussite après une tâche en échec. Cet exemple ne demande aucune modification et n’intègre jamais la branche.
 
-## Lire les dépendances et les résultats
+## Comprendre la dépendance
 
-`defineIsolatedTask()` lance l’agent dans sa propre sandbox. `defineTask()` exécute votre fonction. Ces déclarations ne lancent rien avant l’appel à la méthode `start()` du workflow.
+`after: [review]` fait attendre `summary` et lui permet de lire `context.value(review)` avec le bon type TypeScript. Déclarer les tâches ne les exécute pas : `.start()` lance le graphe. La tâche isolée ouvre et ferme sa propre sandbox ; votre résumé s’exécute dans le processus Node.js.
 
-`after: [fix]` indique que `summary` doit attendre `fix`. Cette déclaration lui permet aussi de lire la sortie de la première tâche avec `context.value(fix)`, en conservant son type TypeScript.
+Les résultats de cette exécution restent en mémoire. Un workflow avec checkpoint exige des sorties JSON pour chaque tâche enregistrée, y compris celle de l’agent : consultez [Enregistrer et reprendre un workflow](../durable-runs/) lorsque vous en avez besoin.
 
-`result.unwrap()` lève une erreur si le workflow n’a pas terminé avec succès. Après cet appel, `result.value(summary)` vous donne le résumé. La page [Relier les tâches et leurs dépendances](../task-dependencies/) détaille les échecs, les tâches ignorées et l’exécution en parallèle.
+## Aller plus loin
 
-## Ajouter une vérification
-
-Pour que le résultat des tests décide si le travail est accepté, ajoutez une [boucle de vérification](../verification-loops/). Pour attendre la décision d’une personne, ajoutez une [tâche d’approbation](../approvals/).
-
-Si le workflow doit reprendre dans un autre processus, [enregistrez sa progression](../durable-runs/) dans un checkpoint. Vous pouvez ajouter ces fonctions au même ensemble de tâches.
+[Tâches et dépendances](../task-dependencies/) présente les autres types de tâches et leurs résultats. Ajoutez une [boucle de vérification](../verification-loops/) pour qu’un vrai test décide de l’acceptation du travail, puis des [tests hors ligne](../testing-workflows/) pour vérifier votre logique sans appel au modèle.
 
 API : [defineIsolatedTask](../../reference/defineisolatedtask/) · [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/).

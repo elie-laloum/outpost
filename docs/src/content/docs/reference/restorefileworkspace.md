@@ -15,14 +15,14 @@ import { restoreFileWorkspace } from "@elie-laloum/outpost";
 
 Restores an inspected settled file resource locally, or a verified portable snapshot with an explicit Transport. Missing or replaced local work is refused.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/resuming-file-workspaces/).
 
 ## Parameters and properties
 
 | Name                | Type                                                                                                                                                                                                         | Presence | Meaning                                                                                                                 |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `record`            | `FileWorkspaceRecord`                                                                                                                                                                                        | Required | Versioned workspace description retaining ownership, settled generation and recovery references.                        |
-| `options`           | `RestoreFileWorkspaceOptions \| undefined`                                                                                                                                                                   | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.                |
+| `options`           | `RestoreFileWorkspaceOptions \| undefined`                                                                                                                                                                   | Optional | Select local or portable restoration and explicit ownership recovery authorizations.                                    |
 | `options.runtime`   | `WorkspaceRuntimeOptions \| undefined`                                                                                                                                                                       | Optional | Control directory and logical namespace, separate from the workspace files.                                             |
 | `options.retention` | `WorkspaceRetention \| undefined`                                                                                                                                                                            | Optional | run cleans successful owned work, local retains it, portable additionally requires an explicit Transport and namespace. |
 | `options.portable`  | `boolean \| undefined`                                                                                                                                                                                       | Optional | Restore a verified snapshot into a new owned materialization; mounted sources must remain accessible and unchanged.     |

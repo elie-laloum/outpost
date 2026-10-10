@@ -271,6 +271,65 @@
   }
 }
 
+/* The small-screen view keeps every condition beside its source step. */
+@media (max-width: 50rem) {
+  .sl-markdown-content
+    .bay
+    .canvas
+    :is(.canvas-bar, .canvas-lane, .canvas-links, .canvas-labels) {
+    display: none;
+  }
+  .sl-markdown-content .bay .canvas .canvas-viewport {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    background: none;
+    cursor: auto;
+  }
+  .sl-markdown-content .bay .canvas .canvas-world {
+    display: block;
+    width: 100%;
+    padding: 0;
+    transform: none;
+    user-select: text;
+  }
+  .sl-markdown-content .bay .canvas .canvas-nodes {
+    display: grid;
+    gap: 1rem;
+  }
+  .sl-markdown-content .bay .canvas li.canvas-node {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+    min-width: 0;
+  }
+  .sl-markdown-content
+    .bay
+    .canvas
+    :is(
+      .canvas-node-text,
+      .canvas-node-title,
+      .canvas-branch-text,
+      .canvas-branch-title
+    ) {
+    font-size: 1rem;
+  }
+  .sl-markdown-content .bay .canvas :is(.canvas-out, .canvas-role) {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    margin-top: 0.75rem;
+    padding: 0;
+    list-style: none;
+    font-size: 1rem;
+    color: var(--sl-color-gray-2);
+    grid-column: 1 / -1;
+  }
+}
+
 /* A component followed by prose closes its frame and leaves room before the text. */
 .sl-markdown-content .bay ol.path:not(:last-child) {
   margin-bottom: 1.75rem;
@@ -813,7 +872,7 @@
   width: 2.75rem;
   border-right: 1px solid var(--docs-line);
   color: var(--sl-color-gray-3);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 500;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -873,7 +932,7 @@
   border: 1px solid var(--docs-line);
   background: var(--sl-color-black);
   color: var(--sl-color-gray-2);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   line-height: 1.4;
   white-space: nowrap;
   transform: translate(-50%, -50%);
@@ -882,7 +941,7 @@
   padding: 0;
   border: 0;
   background: none;
-  font-size: 0.8125rem;
+  font-size: 1rem;
 }
 .sl-markdown-content .bay li.canvas-node {
   position: relative;
@@ -917,7 +976,7 @@
 }
 .sl-markdown-content .bay .canvas-node-text {
   color: var(--sl-color-gray-3);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -998,14 +1057,14 @@
 }
 .sl-markdown-content .bay .canvas-branch-title {
   color: var(--sl-color-white);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.35;
 }
 .sl-markdown-content .bay .canvas-branch-text {
   grid-column: 1 / -1;
   color: var(--sl-color-gray-3);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 .sl-markdown-content .bay .canvas-branch-icon .guide-icon {

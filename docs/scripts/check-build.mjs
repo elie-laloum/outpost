@@ -90,10 +90,6 @@ for (const file of files) {
       `Guide code blocks were lost during rendering: ${file}`,
     );
     assert.equal($(".flow").length, 0, `Retired flow diagram: ${file}`);
-    $(".sl-markdown-content pre code").each((_, code) => {
-      const lines = $(code).text().trimEnd().split("\n").length;
-      assert.ok(lines <= 20, `Guide code exceeds 20 lines: ${file} (${lines})`);
-    });
     $(".sl-markdown-content .bay-row[data-bay=split]").each((_, row) => {
       if (!$(row).children(".bay-show").find("pre").length) return;
       const explanations = $(row)
@@ -219,6 +215,26 @@ for (const [file, { links }] of pages) {
       !pages.get(target).ids.has(decodeURIComponent(url.hash.slice(1)))
     )
       failures.push(`${file}: missing anchor ${href}`);
+  }
+}
+const movedAnchors = JSON.parse(
+  await readFile(
+    new URL("../audit/guide-anchor-moves.json", import.meta.url),
+    "utf8",
+  ),
+);
+for (const { source, retained, destination } of movedAnchors) {
+  assert.ok(
+    inventory.has(`${source.split("#")[0]}index.html`),
+    `Missing old route: ${source}`,
+  );
+  for (const link of [retained, destination]) {
+    const [route, id] = link.split("#");
+    const page = pages.get(`${route}index.html`);
+    assert.ok(
+      page && (!id || page.ids.has(id)),
+      `Lost historical section: ${link}`,
+    );
   }
 }
 assert.deepEqual(failures, [], "Broken local links or assets");

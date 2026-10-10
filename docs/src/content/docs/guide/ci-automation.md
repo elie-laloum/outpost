@@ -122,6 +122,12 @@ Open the pull request or merge through your usual review and approval rules. To 
 
 A hosted runner is deleted after the job, with the repository’s `.outpost/` directory. Upload what you need to inspect or resume a failed run.
 
+:::caution
+Journals and transfers can themselves contain secrets or credential files. Selecting these paths does not sanitize their contents. Inspect the data before uploading and restrict archive access; do not automatically publish sensitive data.
+:::
+
+After reviewing their contents, add the selected recovery paths to the failure step. This example keeps the artifact for seven days.
+
 ```yaml
 - if: failure()
   uses: actions/upload-artifact@v4
@@ -138,7 +144,7 @@ A hosted runner is deleted after the job, with the repository’s `.outpost/` di
 
 These paths hold the transfers kept after a failed synchronization, workflow checkpoints and [journals](../journals/) ([Where data lives](../storage/)). Never upload conversations, `.env` or credential files: anyone with read access to the repository can download CI artifacts.
 
-The agent’s commits stay on its branch: push it from an `if: failure()` step to keep them. To resume a run in a later job, keep its checkpoints in [S3 or R2](../object-storage/) rather than on the runner.
+The agent’s commits stay on its branch: push it from an `if: failure()` step to keep them. A checkpoint in [S3 or R2](../object-storage/) does not save Git worktrees or native conversations. Resume on a retained runner with those resources, or explicitly restore and validate them first. Pushing a branch alone is insufficient.
 
 ## Start runs without a CI job
 

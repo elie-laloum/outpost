@@ -12,7 +12,6 @@ Git privé est un prototype à activer explicitement : son comportement peut enc
 Définissez `repositoryMode: "isolated"` sur un fournisseur Docker ou Podman pour donner au conteneur sa propre copie Git. Cette option est expérimentale ; la tâche conserve les mêmes réglages d’agent et d’exécution.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
@@ -29,7 +28,7 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/private-fix" },
   brief: { text: "Fix the failing unit test and commit the fix." },
 });
-reportValue(result.branch, result.commits.length);
+console.log(result.branch, result.commits.length);
 // Example output: outpost/private-fix 1
 ```
 
@@ -37,15 +36,15 @@ Outpost copie l’historique de la branche dans le conteneur, et l’agent trava
 
 ## Ce qui change par rapport au mode monté
 
-| Aspect                                 | Monté (par défaut)                                                   | Isolé                                                                                     |
-| -------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Ce que voit le conteneur               | Votre worktree dans `/workspace` et les dossiers Git de l’hôte       | Un checkout privé dans `/tmp/outpost/workspace`, avec son propre `.git`                   |
-| Retour des changements                 | Immédiat : l’agent écrit dans votre worktree                         | Après chaque dispatch, `sandbox.command()` ou session interactive, validés puis appliqués |
-| Hooks, config et refs de l’hôte        | Partagés et modifiables : ce que l’agent écrit s’applique sur l’hôte | Ni copiés à l’aller ni au retour : seuls les commits et fichiers de la branche reviennent |
-| Politique de branche par défaut        | `current`                                                            | `integrate` ; `current` est refusé                                                        |
-| CLI de l’agent                         | Doit être dans l’image                                               | Installée dans la sandbox si elle manque ; `bootstrap: false` désactive l’installation    |
-| [Spéculation durable](../speculation/) | Prise en charge                                                      | Refusée : le fournisseur ne sait pas récupérer un conteneur abandonné                     |
-| Terminal interactif                    | Pris en charge                                                       | Pris en charge ; les changements reviennent quand vous quittez                            |
+| Aspect                                 | Monté (par défaut)                                                   | Isolé                                                                                                                                                       |
+| -------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ce que voit le conteneur               | Votre worktree dans `/workspace` et les dossiers Git de l’hôte       | Un checkout privé dans `/tmp/outpost/workspace`, avec son propre `.git`                                                                                     |
+| Retour des changements                 | Immédiat : l’agent écrit dans votre worktree                         | Après chaque dispatch, `sandbox.command()` ou session interactive, validés puis appliqués                                                                   |
+| Hooks, config et refs de l’hôte        | Partagés et modifiables : ce que l’agent écrit s’applique sur l’hôte | Hooks/config non copiés. L’archive reçue contient l’historique de toutes les refs ; seule la branche choisie est extraite. Seuls ses changements reviennent |
+| Politique de branche par défaut        | `current`                                                            | `integrate` ; `current` est refusé                                                                                                                          |
+| CLI de l’agent                         | Doit être dans l’image                                               | Installée dans la sandbox si elle manque ; `bootstrap: false` désactive l’installation                                                                      |
+| [Spéculation durable](../speculation/) | Prise en charge                                                      | Refusée : le fournisseur ne sait pas récupérer un conteneur abandonné                                                                                       |
+| Terminal interactif                    | Pris en charge                                                       | Pris en charge ; les changements reviennent quand vous quittez                                                                                              |
 
 `copies` et `includeUncommitted` ajoutent des entrées comme sur les [sandboxes cloud](../cloud-sandboxes/). Politiques de branche : [Dépôt et branche](../workspaces/).
 

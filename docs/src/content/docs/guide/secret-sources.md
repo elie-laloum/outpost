@@ -3,6 +3,8 @@ title: "Load secrets from a service"
 description: "Resolve declared API keys on the host with Vault, OpenBao, 1Password, Infisical or a cloud secret manager."
 ---
 
+Choose the service you already use: [Vault/OpenBao](#use-vault-or-openbao), [1Password](#use-1password), [Infisical](#use-infisical), [AWS](#use-aws-secrets-manager), [Google Cloud](#use-google-cloud-secret-manager) or [Azure](#use-azure-key-vault). Follow one service section, then pass the selected variables to your agent.
+
 ## Resolve before allocating a sandbox
 
 Call `fromSecrets()` at the start of your script, then pass its result as `variables` on a CLI harness or sandbox provider. It returns a frozen object containing only the requested names. Outpost does not write these values to an environment file or change `process.env`.
@@ -171,7 +173,6 @@ Implement `SecretSource` with a named `resolve()` method that reads only its req
 
 ```ts
 import { fromSecrets, type SecretSource } from "@elie-laloum/outpost";
-import { reportValue } from "./reporter.ts";
 
 const source: SecretSource = {
   name: "fixture",
@@ -183,7 +184,7 @@ const source: SecretSource = {
 const variables = await fromSecrets(source, ["EXAMPLE_KEY"]);
 if (Object.keys(variables).length !== 1)
   throw new Error("Unexpected selection");
-reportValue(Object.keys(variables));
+console.log(Object.keys(variables));
 ```
 
 <!-- check:run -->
@@ -193,3 +194,28 @@ reportValue(Object.keys(variables));
 Deterministic tests cover the KV v2 HTTP protocol, native SDK method boundaries, selection, cancellation, deadlines, malformed values and error sanitization. They do not establish successful authentication against live Vault, OpenBao, 1Password, Infisical, AWS, GCP or Azure accounts. Run the service you use with a dedicated identity before relying on its configuration in production.
 
 API: [fromSecrets](../../reference/fromsecrets/) · [SecretSource](../../reference/secretsource/) · [FromSecretsOptions](../../reference/fromsecretsoptions/).
+
+## Select secrets before allocation
+
+An environment value can use `{ env: VARIABLE_NAME }`. Secret-manager components use their public options; clients supplied by installed SDKs are borrowed `object` extensions. For example, the Vault token below is read on the host only during execution. Native secret sources are under `secrets`; `variables.secrets` selects explicit names through `fromSecrets()`.
+
+```yaml title="outpost.yaml — a host-side secret source"
+secrets:
+  build:
+    type: vault
+    address: https://vault.example.com
+    token: { env: VAULT_TOKEN }
+    mount: secret
+    path: build
+variables:
+  selected:
+    type: secrets
+    source: { $ref: secrets.build }
+    names: [BUILD_TOKEN]
+sandbox:
+  provider: docker
+  image: outpost:sandbox
+  variables: { $ref: variables.selected }
+```
+
+Only the selected values reach the sandbox. Validation neither imports user modules nor reads secret values. Missing values fail before allocation; the runtime masks selected values in observations, returned reports and execution diagnostics. It does not modify the host environment. See [secret sources](../secret-sources/) for manager-specific restrictions and credential ownership.

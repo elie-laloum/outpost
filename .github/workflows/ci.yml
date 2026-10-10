@@ -30,6 +30,7 @@ jobs:
       - run: node scripts/recipe-catalog.mjs
       - run: node scripts/recipe-schemas.mjs
       - run: node scripts/recipe-native-schemas.mjs
+      - run: node --test scripts/recipe-parity-path.test.mjs
       - run: node scripts/recipe-parity.mjs
       - run: node scripts/recipe-component-docs.mjs
       - run: bun run architecture

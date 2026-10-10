@@ -105,7 +105,7 @@ Les exécutions sans terminal ignorent les demandes d’approbation de Codex et 
 ## Limites
 
 - Outpost ne lit jamais le trousseau du système : une connexion qui y est stockée ne peut pas être copiée. Reconnectez-vous avec un stockage en fichier.
-- `maxOutputTokens` et les valeurs de `reasoning` hors de la liste ci-dessus sont refusés à la composition de l’agent.
+- `maxOutputTokens` et les valeurs de `reasoning` hors du [contrat createCodexHarness](../../reference/createcodexharness/) sont refusés à la composition de l’agent.
 - Un `modelProvider` personnalisé n’accepte que l’authentification `usage`. Les points d’accès Chat Completions ne fonctionnent pas.
 - Codex présente `app-server` comme expérimental ; la réorientation dépend de son protocole.
 - Avec l’[exécution sur l’hôte](../host-process/), rien n’isole Codex, puisque les exécutions sans terminal contournent sa propre sandbox.

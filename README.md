@@ -24,7 +24,7 @@
 
 Outpost is a TypeScript library and CLI for running coding agents in sandboxes and composing their work. Give an agent a task, choose its execution environment, and collect its answer, commits and usage. Start with one request; add parallel tasks, verification loops and human decisions as your workflow grows.
 
-Implemented but unreleased: directory and ephemeral workspaces run commands and compatible harnesses without host Git. Configuration version 3 declares file sources, runtime storage and protected output publication; existing Git defaults stay unchanged. See the [English guide](docs/src/content/docs/guide/workspaces.md) or [French guide](docs/src/content/docs/fr/guide/workspaces.md).
+Directory and ephemeral workspaces run commands and compatible harnesses without host Git. Configuration version 3 declares file sources, runtime storage and protected output publication; existing Git defaults stay unchanged. See the [English guide](docs/src/content/docs/guide/workspaces.md) or [French guide](docs/src/content/docs/fr/guide/workspaces.md).
 
 ## Why Outpost?
 
@@ -36,7 +36,7 @@ Implemented but unreleased: directory and ephemeral workspaces run commands and 
 
 ## Quickstart
 
-You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [Codex guide](https://elie-laloum.github.io/outpost/guide/codex/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
+You need **Node.js 24+**, **Git**, a repository with a committed README, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [Codex guide](https://elie-laloum.github.io/outpost/guide/codex/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
 
 Install the package, then build the agent image in a dedicated directory:
 
@@ -56,7 +56,6 @@ Use an ESM directory (`"type": "module"` in `package.json`); a CommonJS reposito
 import {
   createAgent,
   createCodexHarness,
-  createReporter,
   dispatch,
 } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -67,17 +66,15 @@ const result = await dispatch({
     harness: createCodexHarness({ authentication: "account" }),
   }),
   sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
-  observe: createReporter(),
-  branch: { mode: "named", name: "outpost/fix-tests" },
+  branch: { mode: "named", name: "outpost/readme-review" },
   brief: {
-    text: "Fix the failing tests, run them to verify and commit the change.",
+    text: "Review the README setup instructions. Report problems or say none were found. Do not edit files.",
   },
 });
 
-// Example output:
-// [outpost · pass 1] running · codex
-// Fixed the failing tests and committed the change.
-// [outpost · pass 1] finished · 12.00s · status 0 · input 1200 · cache read 0 · cache write 0 · output 320
+console.log(result.text);
+console.log(result.commits);
+// Expected commits: []
 ```
 
 `dispatch()` closes the sandbox it allocates; the named branch remains for review. Use a fresh branch name for each independent task. The agent’s answer is not an enforced test result: add explicit verification when checks must gate integration.

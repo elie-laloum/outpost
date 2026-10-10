@@ -3,12 +3,13 @@ title: "Envoyer des consignes pendant une tâche"
 description: "Donnez une nouvelle consigne à un agent en cours d’exécution et suivez sa transmission."
 ---
 
+La réorientation ajoute une consigne à une tâche active sans l’annuler. Conservez la promesse renvoyée par `send()` pour distinguer livraison et échec ; une consigne livrée n’est pas nécessairement suivie par l’agent.
+
 ## Envoyer une consigne
 
 Créez un contrôleur de réorientation et passez-le à la tâche. Pendant l’exécution, `send()` envoie une nouvelle consigne et se termine lorsqu’Outpost peut indiquer comment elle a été transmise.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -22,7 +23,7 @@ const running = dispatch({
   steering,
 });
 const delivery = await steering.send("Leave the legacy/ folder untouched.");
-reportValue(delivery.mode);
+console.log(delivery.mode);
 // Example output: "injected" ou "resumed"
 const result = await running;
 ```

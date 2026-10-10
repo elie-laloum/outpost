@@ -9,7 +9,7 @@ description: "Configure local containers, repository mounts and the user that ru
 
 - **Docker or Podman**: Installed and running. On macOS, start a Podman machine with `podman machine start`.
 - [An agent image](../agent-images/): Contains the agent CLIs your tasks will use.
-- **A Git repository**: The checkout the container mounts.
+- [Working files](../working-with-files/): This procedure mounts a Git checkout; directory and ephemeral sources also work without Git.
 
 Before running a task, check that the container engine responds and the agent image is available:
 
@@ -72,7 +72,7 @@ Every mount, device and network you add widens what the agent can reach. To keep
 
 Rootless Podman maps your host user into the container with `--userns keep-id`, so files the agent writes stay owned by you. Set `userns: false` to leave the mapping to your Podman configuration. When Podman runs as root, set `userns: "keep-id"` to request it.
 
-Choose SELinux labels that match your host instead of loosening repository permissions.
+On SELinux hosts, keep the default `label: "z"` when mounts are shared by containers. Use `"Z"` for a private mount used by one container, or `false` when your host policy already handles labels. These settings change mount labels, not project permissions.
 
 API reference: [ContainerOptions](../../reference/containeroptions/).
 

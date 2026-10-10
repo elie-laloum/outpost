@@ -3,6 +3,8 @@ title: "Nettoyer les données enregistrées"
 description: "Examinez une politique de conservation et supprimez les données admissibles en préservant le travail récupérable."
 ---
 
+Commencez par un aperçu sur le dépôt ou transport qui contient les données. Gardez les éléments de récupération jusqu’à leur inspection. Nettoyer des objets enregistrés ne prouve pas qu’une sandbox ou un worker abandonné s’est arrêté.
+
 ## Prévisualiser une politique
 
 Commencez par examiner une politique de conservation sans l’appliquer. Le rapport indique quelles données d’exécution peuvent être supprimées et lesquelles restent protégées. Appliquez la politique après avoir consulté ce résultat.
@@ -49,6 +51,8 @@ Référence API : [RecoveryRetentionPolicy](../../reference/recoveryretentionpol
 
 ## Comprendre pourquoi une entrée reste
 
+Une entrée reste si elle est trop récente, active, modifiée depuis l’aperçu ou hors du périmètre choisi. Un worktree avec des fichiers non commités doit être relu et sauvegardé avant nettoyage. Les branches, conversations et données de récupération restent volontairement hors de cette politique ; leur présence n’est pas un échec de suppression.
+
 Référence API : [RecoveryRetentionEntry](../../reference/recoveryretentionentry/).
 
 ## Nettoyer depuis le code
@@ -56,7 +60,6 @@ Référence API : [RecoveryRetentionEntry](../../reference/recoveryretentionentr
 `planRecoveryRetention()` construit le même plan que la prévisualisation. `pruneRecoveryRetention()` l’applique et renvoie ce qu’il a supprimé et conservé.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   planRecoveryRetention,
   pruneRecoveryRetention,
@@ -70,10 +73,10 @@ const plan = await planRecoveryRetention({
     minAgeMs: 7 * 24 * 60 * 60 * 1000,
   },
 });
-reportValue(plan.quota, plan.projectedBytes);
+console.log(plan.quota, plan.projectedBytes);
 // Example output: within 4096
 const result = await pruneRecoveryRetention(plan);
-reportValue(result.removed, result.retained);
+console.log(result.removed, result.retained);
 // Example output: [ '/project/.outpost/workspaces/old-run' ] []
 ```
 
@@ -84,8 +87,8 @@ Pour des données conservées dans un [transport](../storage/) distant, passez `
 <!-- features -->
 
 - **Branches nommées** : Supprimer un worktree conserve sa branche. Effacez celles déjà fusionnées avec `git branch -d outpost/fix-tests`.
-- **Worktrees modifiés** : Committez, copiez ou jetez les fichiers après un examen avec [Récupérer du travail](../recovery/). `git -C <worktree> clean -fdX` ne supprime que les fichiers ignorés.
-- **Volumes de cache** : Ils survivent aux sandboxes et aux images. Supprimez-les avec le moteur de conteneurs, label `io.outpost.cache=true` ([Préparer l’environnement](../environment-setup/)).
+- **Worktrees modifiés** : Committez, copiez ou jetez les fichiers après un examen avec [Récupérer du travail](../recovery/). `git -C <worktree> clean -ndX` prévisualise les fichiers ignorés ; après examen, `git -C <worktree> clean -fdX` ne supprime que les fichiers ignorés.
+- **Volumes de cache** : Ils survivent aux sandboxes et aux images. Supprimez-les avec le moteur de conteneurs, label `io.outpost.cache=true` ([Préparer l’environnement](../dependency-caches/)).
 
 Un worktree redevenu propre est supprimé à la prochaine exécution d’une politique `clean-workspaces`.
 

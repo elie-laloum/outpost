@@ -3,12 +3,14 @@ title: "Continue a conversation"
 description: "Resume an agent’s saved context or start a separate conversation from it."
 ---
 
+After a [successful first task](../first-request/), continue its conversation for a follow-up request. Keep the branch or files separately: a saved conversation preserves the discussion, not a running process or a copy of every workspace file.
+
 ## Continue a conversation
 
 Call `result.resume()` to send a follow-up request to the conversation created by a dispatch. The saved context includes the earlier messages, so the agent can continue from its previous work.
 
 ```ts
-import { reportValue } from "./reporter.ts";
+import { writeFile } from "node:fs/promises";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -18,10 +20,12 @@ const first = await dispatch({
   agent: coder,
   brief: { text: "Inspect the parser and explain its edge cases." },
 });
+if (!first.conversation) throw new Error("No portable conversation captured");
+await writeFile("conversation-id.txt", first.conversation);
 const next = await first.resume({
   brief: { text: "Which edge case deserves a regression test first?" },
 });
-reportValue(next.text);
+console.log(next.text);
 // Example output: Add a regression test for empty parser input.
 ```
 
@@ -31,12 +35,31 @@ The follow-up runs in a fresh sandbox with the same repository, provider and bra
 
 `result.conversation` holds the conversation ID. To resume from another script, pass `continuation: { id }` to `dispatch()`. Outpost finds it in the agent’s store on this host or, once archived through a transport, on any machine.
 
+Save `first.conversation` in `conversation-id.txt` after the first call. The following script reads that ID; use the same repository and branch as the original run.
+
+```ts title="resume-conversation.ts"
+import { readFile } from "node:fs/promises";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+const id = (await readFile("conversation-id.txt", "utf8")).trim();
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  continuation: { id },
+  brief: { text: "Summarize the edge cases you found earlier." },
+});
+console.log(result.text);
+```
+
+Run `node resume-conversation.ts`. The answer uses the saved context. An archived conversation does not transport the worktree: make its files available too before resuming.
+
 ## Branch a conversation
 
 Use `result.fork()` to explore another approach from the same saved context. It starts a separate conversation and leaves the original unchanged. Give the fork its own branch when its commits need to stay separate.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -50,7 +73,7 @@ const alternative = await first.fork({
   branch: { mode: "named", name: "outpost/parser-state-machine" },
   brief: { text: "Rewrite the parser as a state machine and commit it." },
 });
-reportValue(alternative.conversation, alternative.branch);
+console.log(alternative.conversation, alternative.branch);
 // Example output: session-2 outpost/parser-state-machine
 ```
 
@@ -91,67 +114,11 @@ Cold means a new sandbox (`dispatch()`, `result.resume()` on a `dispatch()` resu
 | [Built-in harness](../harness/) | Yes         | Yes               | Yes  |
 | Antigravity                     | No          | Same sandbox only | No   |
 
-## Where conversations are stored
+<span id="where-conversations-are-stored"></span>
+<span id="archive-and-share-through-a-transport"></span>
+<span id="turn-capture-off"></span>
 
-After each turn, Outpost copies the conversation from the sandbox to the host. `result.transcript` holds the path of that copy.
-
-| Agent            | Default store                  | Host location                               |
-| ---------------- | ------------------------------ | ------------------------------------------- |
-| Claude Code      | `createClaudeConversations()`  | `~/.claude/projects/<project>/<id>.jsonl`   |
-| Codex            | `createCodexConversations()`   | `~/.codex/sessions/<yyyy>/<mm>/<dd>/`       |
-| Copilot CLI      | `createCopilotConversations()` | `.outpost/conversations/copilot/<id>.json`  |
-| Kimi Code        | `createKimiConversations()`    | `.outpost/conversations/kimi/<id>.json`     |
-| Built-in harness | `createHarnessConversations()` | `.outpost/conversations/harness/<id>.jsonl` |
-
-Copilot and Kimi keep a session as a directory: Outpost packs it into one JSON bundle. The `conversationHome` option of `dispatch()` or `createSandbox()` replaces `~`, or the repository for bundles, as the root of these paths.
-
-Restoring rewrites the repository paths recorded in the conversation to those of the new sandbox. To give a CLI you add its own store, see [Native conversation formats](../conversation-formats/).
-
-## Archive and share through a transport
-
-`createTransportConversations()` wraps an agent’s store and also archives each capture through a [transport](../storage/). A conversation then resumes on another machine, or after the repository’s `.outpost` directory is deleted.
-
-```ts
-import {
-  createAgent,
-  createCodexConversations,
-  createCodexHarness,
-  createLocalTransport,
-  createTransportConversations,
-} from "@elie-laloum/outpost";
-
-const conversations = createTransportConversations(createCodexConversations(), {
-  transporter: createLocalTransport({ directory: "/mnt/shared/outpost" }),
-  namespace: "my-project",
-});
-
-export const coder = createAgent({
-  harness: createCodexHarness({ authentication: "account", conversations }),
-});
-```
-
-<!-- features -->
-
-- **Matching format**: Wrap the store of the same agent, such as `createHarnessConversations()` for `createHarness()`. A mismatch fails when the harness is created.
-- **Stable namespace**: Use one project name on every machine that shares these conversations.
-- **Shared transport**: Use [S3 or R2](../object-storage/) between hosts; a local transport coordinates writers on one machine only.
-
-`result.transcriptReference` identifies the archived copy. The Claude Code, Codex, Copilot and Kimi presets and `createHarness()` accept `conversations`.
-
-## Turn capture off
-
-`saveConversations: false` on Claude Code or Codex keeps conversations inside the sandbox: only a warm resume can continue them. `conversations: false` on `createHarness()` saves no transcript and rejects resume, fork and response repairs. Copilot and Kimi always capture.
-
-```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
-
-export const reviewer = createAgent({
-  harness: createClaudeHarness({
-    authentication: "account",
-    saveConversations: false,
-  }),
-});
-```
+For this step, follow [Store and share conversations](../conversation-storage/).
 
 ## Limits
 

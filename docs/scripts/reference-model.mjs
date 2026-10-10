@@ -35,13 +35,15 @@ function properties(type, checker) {
   });
 }
 
-export function referenceModel(symbol, declaration, checker) {
+export function referenceModel(symbol, declaration, checker, signature) {
   const contract = isContract(declaration);
   const type =
     contract || ts.isClassDeclaration(declaration)
       ? checker.getDeclaredTypeOfSymbol(symbol)
       : checker.getTypeOfSymbolAtLocation(symbol, declaration);
-  const signatures = checker.getSignaturesOfType(type, ts.SignatureKind.Call);
+  const signatures = signature
+    ? [signature]
+    : checker.getSignaturesOfType(type, ts.SignatureKind.Call);
   const members = signatures.length
     ? [
         ...signatures.flatMap((signature) => signature.parameters),
@@ -85,8 +87,8 @@ export function referenceModel(symbol, declaration, checker) {
         ),
       optional:
         !!(property.flags & ts.SymbolFlags.Optional) ||
-        !!location.questionToken ||
-        !!location.initializer,
+        (ts.isParameter(location) &&
+          (!!location.questionToken || !!location.initializer)),
     });
     return fieldType;
   };

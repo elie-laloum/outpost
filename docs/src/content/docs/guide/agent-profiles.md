@@ -3,31 +3,25 @@ title: "Reuse an agent configuration"
 description: "Share literal instructions, built-in tool restrictions and MCP servers across agent harnesses."
 ---
 
+After [running one agent](../first-request/), extract the instructions and MCP declarations you want several agents to share. Model choice and authentication stay on each harness. A profile is reusable configuration, not a sandbox boundary.
+
 ## Declare the profile once
 
 Use `defineAgentProfile()` to keep your team's instructions and MCP servers independent of its chosen CLI. The declaration is validated and copied into a frozen object; it starts no process and reads no credentials. Follow [setup](../setup/) before running a CLI agent.
 
-Save this declaration in `profile.ts`. This MCP server is a program in your repository, executed inside the sandbox. Its token is referenced by variable name; supply the value through the [sandbox environment](../environment-variables/).
+Save the instructions in `profile.ts`. This first profile needs no MCP server.
 
 ```ts title="profile.ts"
 import { defineAgentProfile } from "@elie-laloum/outpost";
 
 export const profile = defineAgentProfile({
   instructions: "Never modify generated files.",
-  mcpServers: {
-    docs: {
-      command: "node",
-      arguments: ["mcp/docs.mjs"],
-      variables: ["DOCS_TOKEN"],
-      tools: { exclude: ["delete_note"] },
-    },
-  },
 });
 ```
 
 ## Choose the agent separately
 
-Save `agent.ts` beside the profile. The authentication remains on the harness; the profile contains neither credentials nor model settings. Both agents below reuse the same instructions and MCP declaration. Pass either agent to [dispatch](../first-request/) with the same repository and sandbox provider.
+Save `agent.ts` beside the profile. The authentication remains on the harness; the profile contains neither credentials nor model settings. Both agents below reuse the same instructions. Pass either agent to [dispatch](../first-request/) with the same repository and sandbox provider.
 
 ```ts title="agent.ts"
 import {
@@ -45,7 +39,7 @@ export const codex = createAgent({
 });
 ```
 
-Claude receives appended system instructions and native MCP JSON. Codex receives `developer_instructions` and MCP TOML values through configuration overrides, including its app-server path. Copilot, Kimi and Antigravity prepend the instructions as literal text to each request, including repairs and resumes. The final-answer contract remains after the request text. These projections do not write shared instructions into the repository or change host credential files. Native MCP home files still follow the [existing merge behavior](../mcp-servers/).
+The harness applies instructions to every request, including repairs and resumes, without writing them into your repository or changing host credentials. See [defineAgentProfile](../../reference/defineagentprofile/) for each CLI’s projection and [MCP configuration](../mcp-servers/) for configuration merging.
 
 ## Restrict the built-in tools
 
@@ -62,9 +56,13 @@ export const restricted = defineAgentProfile({
 });
 ```
 
-Apply `restricted` to `createClaudeHarness()` or `createHarness()`. Claude projects the restriction into its available built-in tools and a `PreToolUse` hook, uses `dontAsk`, and disables inherited user/project/local setting sources and inherited MCP configurations for this request. The hook checks the entire shell command: `npm test --watch`, wrappers, extra whitespace and `npm test && git push` are refused. A conflicting explicit Claude permission mode fails when composing the agent. The command hook needs Node.js inside the sandbox and a CLI installation that can execute its shell command.
+Apply `restricted` to `createClaudeHarness()` or `createHarness()`. Claude enforces the list through native tool selection and a command hook, disables inherited settings/MCP configuration for that request, and rejects incompatible permission modes. The hook needs Node.js and a CLI able to execute it inside the sandbox.
 
-The built-in Outpost harness maps reading to `read_file`, `list_files` and `search`, editing to `write_file` and `edit_file`, and shell access to `shell`. Declare the corresponding [toolsets](../harness-tools/) on the harness; a profile supplies policy, not implementations. Other custom tools, Git tools and delegation tools are denied when a list is present. Profile permissions intersect with [harness permissions](../harness-permissions/), are checked again after input-changing hooks, and remain active in descendant subagents. Each subagent may impose its own profile restrictions.
+A shell grant matches the entire command: `npm test --watch`, extra whitespace, wrappers and `npm test && git push` do not match `shell:npm test`.
+
+On the built-in harness, declare the [toolsets](../harness-tools/) as well as the profile: a policy does not install tools. `read` covers `read_file`, `list_files` and `search`; `edit` covers `write_file` and `edit_file`; `shell` covers `shell`. Other custom, Git and delegation tools are denied when a list is present.
+
+Profile restrictions intersect with [harness permissions](../harness-permissions/) and are rechecked after hooks rewrite input. Descendant subagents inherit them and may add their own restrictions.
 
 The instructions are behavioral guidance. Tool restrictions control calls through the selected agent's protocol; they are not a filesystem or network security boundary. A permitted shell command or MCP tool can have broader effects. Claude managed policy and trusted CLI configuration still apply. See [security](../security/).
 

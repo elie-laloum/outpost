@@ -52,7 +52,6 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="harness-review.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./review-agent.ts";
@@ -63,9 +62,9 @@ export const result = await dispatch({
   agent: reviewer,
   brief: { text: "List the exported functions that no test calls." },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: No test calls parseDate() or formatDate().
-reportValue(result.usage);
+console.log(result.usage);
 // Example output: { input: 1200, cached: 0, output: 320 }
 ```
 
@@ -73,32 +72,7 @@ Définissez `ANTHROPIC_API_KEY`, puis lancez `node harness-review.ts`. `result.t
 
 ## Étapes de la boucle
 
-<!-- canvas -->
-
-- **Ouvrir le tour**: Une fois par brief, passe ou réparation.
-  - Étapes
-  - **Construire le prompt système**: Résoudre `instructions` et le catalogue de compétences.
-    - hôte
-  - **Démarrer les serveurs MCP**: Les `mcpServers` déclarés démarrent et ajoutent leurs outils.
-    - sandbox
-  - → **Exécuter une étape**: puis
-- **Exécuter une étape**: Répétée jusqu’à ce que le modèle réponde sans appel d’outil.
-  - Étapes
-  - **Interroger le modèle**: Envoyer l’historique, le prompt système et la liste des outils.
-    - hôte
-  - **Contrôler les appels**: Valider chaque entrée contre son schéma, puis appliquer les permissions et les hooks `before-tool`.
-    - hôte
-  - **Exécuter les outils**: Les appels consécutifs en lecture seule tournent en parallèle, les autres un par un.
-    - sandbox
-  - **Renvoyer les résultats**: Résultats et erreurs d’outils rejoignent l’historique pour l’étape suivante.
-    - hôte
-  - → **Terminer**: puis
-- **Terminer**: Le modèle répond.
-  - Étapes
-  - **Rendre la réponse**: Le texte final devient `result.text`, sauf si un hook `stop` ou une nouvelle instruction envoyée pendant l’exécution relance le modèle.
-    - hôte
-
-Outpost vérifie les limites avant chaque étape et après chaque réponse du modèle. La première atteinte termine le tour par une [`OutpostError`](../error-handling/).
+Le harness envoie au modèle la conversation et les outils disponibles. Chaque appel d’outil est validé et contrôlé par les permissions avant son exécution ; son résultat alimente la requête suivante. L’échange se termine lorsque le modèle répond sans nouvel appel d’outil, ou lorsqu’une limite ou un échec l’arrête. Votre code d’outil s’exécute sur l’hôte : utilisez la sandbox empruntée pour les commandes et fichiers. Les guides [Permissions](../harness-permissions/) et [Gestion de l’historique](../harness-context/) détaillent ces contrôles.
 
 ## Limiter un échange avec le modèle
 
@@ -163,7 +137,6 @@ export const agent = createAgent({
 ```
 
 ```ts title="observe-harness.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch, createObservationHub } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./observed-agent.ts";
@@ -175,7 +148,7 @@ await dispatch({
   brief: { text: "Explain how the build is configured." },
   observation: createObservationHub({ verbose: true }),
   observe(event) {
-    if (event.kind === "tool") reportValue(event.name, event.input);
+    if (event.kind === "tool") console.log(event.name, event.input);
     // Example output: read_file { path: "README.md" }
     if (event.kind === "model-request") console.dir(event.request);
   },
@@ -205,4 +178,4 @@ API : [createHarness](../../reference/createharness/) · [HarnessOptions](../../
 
 ## Router chaque étape de modèle
 
-Ajoutez une déclaration `routing` facultative pour choisir parmi les modèles du provider de ce harness après compaction et avant les hooks du modèle. Outils et hooks voient le modèle sélectionné tandis que la sandbox et l’historique restent disponibles. Consultez le [routage de modèles](../model-routing/) pour la validation des candidats, l’état, le repli et l’usage.
+Ajoutez une déclaration `routing` facultative pour choisir parmi les modèles du fournisseur de ce harness après compaction et avant les hooks du modèle. Outils et hooks voient le modèle sélectionné tandis que la sandbox et l’historique restent disponibles. Consultez le [routage de modèles](../model-routing/) pour la validation des candidats, l’état, le repli et l’usage.

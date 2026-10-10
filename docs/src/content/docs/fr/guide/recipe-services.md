@@ -3,6 +3,8 @@ title: Jobs et services de recettes
 description: Publier des jobs et démarrer explicitement workers, cron et webhooks.
 ---
 
+Préparez une [configuration d’exécution](../recipe-configuration/) et une [recette durable](../recipe-durability/) avant de les confier à un worker. Les blocs ci-dessous complètent ce fichier ; les déclarer ne démarre aucun service en arrière-plan.
+
 La configuration de format 2 déclare files, jobs et services aux côtés des agents et du stockage. Lire ou valider ces déclarations ne démarre aucun serveur, worker ou planning. `recipe enqueue` publie un job ; `recipe serve --service` démarre uniquement le service sélectionné et ses dépendances. Les [recettes durables](../recipe-durability/) expliquent leurs checkpoints.
 
 ## Déclarer une file et un job de recette

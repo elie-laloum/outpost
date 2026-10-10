@@ -3,31 +3,25 @@ title: "Réutiliser une configuration d’agent"
 description: "Partager les instructions littérales, restrictions d’outils intégrés et serveurs MCP entre harness."
 ---
 
+Après avoir [lancé un agent](../first-request/), extrayez les consignes et serveurs MCP à partager. Le modèle et l’authentification restent propres à chaque harness. Un profil est une configuration réutilisable, pas une frontière d’isolation.
+
 ## Déclarer le profil une fois
 
 Utilisez `defineAgentProfile()` pour conserver les instructions et serveurs MCP de votre équipe indépendamment du CLI choisi. La déclaration est validée et copiée dans un objet figé ; elle ne démarre aucun processus et ne lit aucun identifiant. Suivez [l’installation](../setup/) avant d’exécuter un agent CLI.
 
-Enregistrez cette déclaration dans `profile.ts`. Le serveur MCP est un programme du dépôt, exécuté dans la sandbox. Son token est référencé par nom de variable ; fournissez sa valeur dans [l’environnement de la sandbox](../environment-variables/).
+Enregistrez les instructions dans `profile.ts`. Ce premier profil ne nécessite aucun serveur MCP.
 
 ```ts title="profile.ts"
 import { defineAgentProfile } from "@elie-laloum/outpost";
 
 export const profile = defineAgentProfile({
   instructions: "Never modify generated files.",
-  mcpServers: {
-    docs: {
-      command: "node",
-      arguments: ["mcp/docs.mjs"],
-      variables: ["DOCS_TOKEN"],
-      tools: { exclude: ["delete_note"] },
-    },
-  },
 });
 ```
 
 ## Choisir l’agent séparément
 
-Enregistrez `agent.ts` à côté du profil. L’authentification reste sur le harness ; le profil ne contient ni identifiants ni réglages du modèle. Les deux agents suivants réutilisent les mêmes instructions et la même déclaration MCP. Passez l’un ou l’autre à [dispatch](../first-request/), avec le même dépôt et le même fournisseur de sandbox.
+Enregistrez `agent.ts` à côté du profil. L’authentification reste sur le harness ; le profil ne contient ni identifiants ni réglages du modèle. Les deux agents suivants réutilisent les mêmes instructions. Passez l’un ou l’autre à [dispatch](../first-request/), avec le même dépôt et le même fournisseur de sandbox.
 
 ```ts title="agent.ts"
 import {
@@ -45,7 +39,7 @@ export const codex = createAgent({
 });
 ```
 
-Claude reçoit des instructions système ajoutées et du JSON MCP natif. Codex reçoit `developer_instructions` et les valeurs TOML MCP par surcharge de configuration, y compris en mode app-server. Copilot, Kimi et Antigravity placent les instructions comme texte littéral avant chaque demande, y compris les réparations et reprises. Le contrat de réponse finale reste après le texte de la demande. Ces projections n’écrivent pas les instructions partagées dans le dépôt et ne changent pas les fichiers d’authentification hôte. Les fichiers MCP natifs du répertoire personnel conservent [leur comportement de fusion existant](../mcp-servers/).
+Le harness applique les instructions à chaque demande, y compris les corrections et reprises, sans les écrire dans votre dépôt ni modifier les identifiants de l’hôte. [defineAgentProfile](../../reference/defineagentprofile/) détaille leur traduction pour chaque CLI ; la [configuration MCP](../mcp-servers/) explique la fusion des réglages.
 
 ## Restreindre les outils intégrés
 
@@ -62,9 +56,13 @@ export const restricted = defineAgentProfile({
 });
 ```
 
-Appliquez `restricted` à `createClaudeHarness()` ou `createHarness()`. Claude traduit la restriction dans sa sélection d’outils intégrés et un hook `PreToolUse`, utilise `dontAsk` et désactive les sources de réglages utilisateur/projet/local et les configurations MCP héritées pour cette demande. Le hook contrôle la commande shell entière : `npm test --watch`, les wrappers, les espaces supplémentaires et `npm test && git push` sont refusés. Un mode de permission Claude explicite incompatible échoue à la composition de l’agent. Le hook de commande exige Node.js dans la sandbox et une installation CLI capable d’exécuter sa commande shell.
+Appliquez `restricted` à `createClaudeHarness()` ou `createHarness()`. Claude applique la liste via sa sélection d’outils et un hook de commande, désactive les réglages et configurations MCP hérités pour cette demande, et refuse les modes de permission incompatibles. Le hook exige Node.js et une CLI capable de l’exécuter dans la sandbox.
 
-Le harness Outpost intégré associe la lecture à `read_file`, `list_files` et `search`, l’édition à `write_file` et `edit_file` et le shell à `shell`. Déclarez les [jeux d’outils](../harness-tools/) correspondants sur le harness ; le profil fournit une politique, pas des implémentations. Les autres outils personnalisés, Git et de délégation sont refusés lorsqu’une liste est présente. Les permissions du profil se cumulent avec les [permissions du harness](../harness-permissions/), sont réévaluées après les hooks qui changent les entrées et restent actives dans les sous-agents descendants. Chaque sous-agent peut imposer ses propres restrictions de profil.
+Une autorisation shell porte sur la commande entière : `npm test --watch`, les espaces supplémentaires, les wrappers et `npm test && git push` ne correspondent pas à `shell:npm test`.
+
+Dans le harness intégré, déclarez les [jeux d’outils](../harness-tools/) en plus du profil : une politique n’installe pas d’outils. `read` couvre `read_file`, `list_files` et `search` ; `edit` couvre `write_file` et `edit_file` ; `shell` couvre `shell`. Les autres outils personnalisés, Git et de délégation sont refusés lorsqu’une liste est présente.
+
+Les restrictions du profil se cumulent avec les [permissions du harness](../harness-permissions/) et sont revérifiées après modification des paramètres par un hook. Les sous-agents les héritent et peuvent ajouter leurs propres restrictions.
 
 Les instructions guident le comportement. Les restrictions d’outils contrôlent les appels via le protocole de l’agent choisi ; elles ne constituent pas une frontière de sécurité du système de fichiers ou du réseau. Une commande shell ou un outil MCP autorisé peut avoir des effets plus larges. La politique administrée de Claude et sa configuration CLI de confiance restent applicables. Voir [la sécurité](../security/).
 

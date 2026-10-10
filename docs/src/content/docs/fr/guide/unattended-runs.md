@@ -3,9 +3,13 @@ title: "Automatiser les exécutions"
 description: "Choisissez la CI, les files, les planifications ou les webhooks pour lancer du travail sans session interactive."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="traiter-le-travail-à-mesure-quil-arrive"></span>
+
 ## Choisir le déclencheur
 
-Choisissez ce qui déclenche le travail : un job de CI, une demande en file, un horaire ou un événement vérifié. Le workflow s’exécute toujours depuis votre code TypeScript ; le point d’entrée détermine quand le soumettre.
+Choisissez ce qui déclenche le travail : un job de CI, une demande en file, un horaire ou un événement vérifié. Déclarez le workflow en TypeScript ou en [YAML](../recipe-services/) ; le point d’entrée détermine quand le soumettre.
 
 <!-- features -->
 
@@ -24,34 +28,8 @@ Choisissez ce qui déclenche le travail : un job de CI, une demande en file, un 
   - GitHub
   - GitLab
   - Slack
-- [Exécutions durables](../durable-runs/): Chaque job tourne sous un checkpoint : un redémarrage reprend au lieu de repartir de zéro.
+- [Exécutions durables](../durable-runs/): Utilisez `defineWorkflowJob()` pour enregistrer l’avancement d’un job de workflow. Un traitement de file ordinaire n’obtient pas de checkpoint automatiquement.
   - checkpoints
-
-## Traiter le travail à mesure qu’il arrive
-
-Un processus worker enregistre les traitements qu’il connaît et traite un job à la fois jusqu’à ce que son signal l’arrête. Les producteurs n’envoient jamais de code, seulement un nom de traitement et du JSON.
-
-```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
-
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
-const stop = new AbortController();
-process.once("SIGINT", () => stop.abort());
-try {
-  await runQueueWorker({
-    queue,
-    worker: "worker-1",
-    signal: stop.signal,
-    handlers: {
-      count: (input) => ({ value: Array.isArray(input) ? input.length : 0 }),
-    },
-  });
-} finally {
-  queue.close();
-}
-```
-
-Enveloppez le workflow dans `defineWorkflowJob()` pour obtenir une exécution sous checkpoint par job, identifiée par le `runId` du job. Planifications et webhooks déposent dans la même file : le worker reste le seul processus à faire tourner des agents.
 
 ## Comparer les déclencheurs
 

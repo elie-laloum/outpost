@@ -15,7 +15,7 @@ import { inspectWorkspacePublication } from "@elie-laloum/outpost";
 
 Lit et valide un journal de publication versionné à sa révision Transport exacte sans modifier les fichiers.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/publishing-files/).
 
 ## Paramètres et propriétés
 

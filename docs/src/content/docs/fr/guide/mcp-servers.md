@@ -3,6 +3,8 @@ title: "Connecter des serveurs MCP"
 description: "Donnez à un agent des outils, des ressources et des prompts MCP avec des identifiants déclarés explicitement."
 ---
 
+Partez d’un [agent CLI](../choose-an-agent/) ou d’un [harness intégré](../harness/) fonctionnel. La sandbox doit pouvoir démarrer ou joindre le serveur déclaré. Conservez les jetons dans des variables d’environnement explicitement sélectionnées.
+
 ## Déclarer les serveurs
 
 Déclarez les serveurs MCP dans `mcpServers`, en donnant un nom à chacun. Un serveur peut être lancé par une commande ou exposer un point d’accès Streamable HTTP. Les harness des agents et le harness intégré acceptent la même déclaration.

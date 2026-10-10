@@ -60,18 +60,36 @@ export function explain(symbol, declaration, group, language, checker) {
   }
   if (entries.length) {
     output += `\n\n## ${fr ? "Paramètres et propriétés" : "Parameters and properties"}\n\n`;
-    if (entries.some((entry) => entry.conditional))
-      output += fr
-        ? "Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.\n\n"
-        : "The fields below cover all variants; the signature specifies their allowed combinations.\n\n";
-    output += `| ${fr ? "Nom" : "Name"} | Type | ${fr ? "Présence" : "Presence"} | ${fr ? "Rôle" : "Meaning"} |\n| --- | --- | --- | --- |\n`;
-    for (const entry of entries) {
-      used.fields.add(entry.key in fields ? entry.key : entry.owner);
-      const description = bilingual(
-        fields[entry.key] ?? fields[entry.owner],
-        entry.key,
-      )[language];
-      output += `| \`${escape(entry.name)}\` | \`${escape(entry.type)}\` | ${presence(entry, language)} | ${prose(escape(description))} |\n`;
+    const variants =
+      signatures.length > 1
+        ? signatures.map((signature) =>
+            referenceModel(symbol, declaration, checker, signature),
+          )
+        : [{ entries }];
+    for (const [index, variant] of variants.entries()) {
+      if (variants.length > 1) {
+        const signature = signatures[index];
+        const parameter = signature.parameters[0];
+        const type = checker.getTypeOfSymbolAtLocation(
+          parameter,
+          signature.declaration,
+        );
+        output += `### ${fr ? "Variante" : "Variant"} ${index + 1} — \`${displayType(checker.typeToString(type))}\`\n\n`;
+      }
+      if (variant.entries.some((entry) => entry.conditional))
+        output += fr
+          ? "Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.\n\n"
+          : "The fields below cover all variants; the signature specifies their allowed combinations.\n\n";
+      output += `| ${fr ? "Nom" : "Name"} | Type | ${fr ? "Présence" : "Presence"} | ${fr ? "Rôle" : "Meaning"} |\n| --- | --- | --- | --- |\n`;
+      for (const entry of variant.entries) {
+        used.fields.add(entry.key in fields ? entry.key : entry.owner);
+        const description = bilingual(
+          fields[entry.key] ?? fields[entry.owner],
+          entry.key,
+        )[language];
+        output += `| \`${escape(entry.name)}\` | \`${escape(entry.type)}\` | ${presence(entry, language)} | ${prose(escape(description))} |\n`;
+      }
+      output += "\n";
     }
   }
   if (signatures.length && !ts.isInterfaceDeclaration(declaration)) {

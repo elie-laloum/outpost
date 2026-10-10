@@ -79,6 +79,8 @@ Both providers stream. The harness emits `text-delta` events while the model wri
 
 ## Bound each request
 
+For example, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` fails a request after thirty seconds without progress. While streaming, each received chunk restarts that timer. Add `deadlineMs` to the dispatch to bound a stream that keeps producing text.
+
 API reference: [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) and [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
 A timeout fails with code `timeout`. The harness streams with both providers, so a long answer that keeps arriving never times out: bound the whole turn with [limits](../limits-and-cancellation/).

@@ -2,7 +2,7 @@ export const groups = [
   {
     id: "file-workspaces",
     title: ["File workspaces", "Workspaces de fichiers"],
-    guide: "guide/workspaces",
+    guide: "guide/working-with-files",
     names:
       "createWorkspace restoreFileWorkspace workspaceFingerprint snapshotWorkspaceFiles restoreWorkspaceFiles prepareWorkspaceOutputs publishWorkspaceOutputs inspectWorkspacePublication recoverWorkspacePublication inspectFileWorkspace recoverFileWorkspace defineIsolatedCommandTask WorkspaceSource GitWorkspaceSource FileWorkspaceSource WorkspaceSession WorkspaceRuntime WorkspaceRuntimeOptions WorkspaceRetention WorkspaceInput WorkspaceFileEntry FileWorkspaceRecord WorkspaceAllocationRecord WorkspaceConversationArchive WorkspaceOutputOptions WorkspaceOutputBaseline WorkspacePublication FileWorkspace FileWorkspaceOptions GitWorkspace GitWorkspaceOptions GitWorkspaceSandboxOptions GitDispatchRequest CreatedWorkspace FileWorkspaceRecoveryAuthorization RestoreFileWorkspaceOptions FileWorkspaceInspection FileWorkspaceInspectionOptions FileWorkspaceRecoveryOptions FileSandbox FileSandboxOptions FileSandboxSettings FileDispatchRequest FileDispatchResult FileAttachResult FileRunReport FileAgentTaskOptions FileIsolatedTaskOptions MixedIsolatedTaskOptions MixedAgentTaskOptions IsolatedCommandTaskOptions FileIsolatedCommandRequest FileRecipeBindings MixedRecipeBindings FileRecipeConfiguration FileInteractiveAgentTaskOptions FileInteractiveAgentResult FileSelectionOptions PublicationJournal PublicationOperation PublicationDirectory PublicationRecoveryOptions WorkspaceCheckpointMetadata TaskWorkspaceCheckpoint FileSandboxContext SandboxWorkspaces inspectWorkspacePathLocks recoverWorkspacePathLock WorkspacePathLock WorkspacePathRecoveryOptions",
   },
@@ -30,7 +30,7 @@ export const groups = [
   {
     id: "pricing",
     title: ["Pricing", "Tarification"],
-    guide: "guide/budgets",
+    guide: "guide/estimating-costs",
     names:
       "calculateUsageCost loadModelPrices ModelPricesOptions ModelPrice ModelPriceTable UsageCost WorkflowCostUnavailable",
   },
@@ -58,7 +58,7 @@ export const groups = [
   {
     id: "workspaces",
     title: ["Workspaces", "Workspaces"],
-    guide: "guide/workspaces",
+    guide: "guide/git-workspaces",
     names:
       "openWorkspace createAgentConflictResolver Workspace WorkspaceOptions WorkspaceRecord BranchPolicy DiffGuard IntegrationOptions ConflictResolver ConflictContext ConflictResolution AgentConflictResolverOptions Commit Disposal StageLimits LifecycleHooks changed ChangedCondition LifecycleCommand",
   },
@@ -234,6 +234,21 @@ export const groups = [
 
 // Guide page with the complete example for a symbol when it differs from its family's page.
 const guidePages = {
+  "custom-harness-tools": "defineHarnessTool",
+  "harness-hooks": "defineHarnessHook",
+  "recipe-callbacks": "RecipeComponentContext",
+  "agent-profiles":
+    "defineAgentProfile AgentProfile AgentProfileOptions AgentProfileTool",
+  "resuming-file-workspaces":
+    "restoreFileWorkspace inspectFileWorkspace recoverFileWorkspace FileWorkspaceRecoveryOptions WorkspaceRetention",
+  "publishing-files":
+    "prepareWorkspaceOutputs publishWorkspaceOutputs inspectWorkspacePublication recoverWorkspacePublication WorkspaceOutputOptions PublicationRecoveryOptions",
+  "resuming-speculation":
+    "recoverSpeculation SpeculationDurability SpeculationRecoveryOptions",
+  "operating-workers": "QueueWorkerOptions QueueHandlerContext",
+  "observation-delivery":
+    "ObservationHubOptions ObservationSink CustomReporterOptions",
+
   "durable-runs":
     "createWorkflowCheckpointStore recoverWorkflowCheckpoint CheckpointRecoveryOptions",
   "object-storage": "createS3Transport S3TransportOptions",
@@ -276,7 +291,7 @@ const guidePages = {
   "conversation-formats":
     "createTranscriptConversations createSessionBundleConversations TranscriptConversationLayout SessionBundleProfile SessionBundleFiles SessionBundleHelpers SessionBundleRelocation",
   observability:
-    "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver WorkflowTelemetry",
+    "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub createCustomReporter CustomReporter ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver WorkflowTelemetry",
   "run-state":
     "createRunObserver readRun watchRun RunStatus RunTask RunPass RunDispatch RunError RunSnapshot RunEvent RunObserverOptions RunObserver ReadRunOptions WatchRunOptions",
   "record-replay":
@@ -307,7 +322,7 @@ const guidePages = {
     "createBullMQTaskQueue BullMQTaskQueue BullMQTaskQueueOptions",
   "cron-schedules":
     "createCronSchedule runSchedules CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure",
-  "job-queues":
+  "queued-workflows":
     "defineWorkflowJob WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
 };
 
@@ -316,3 +331,10 @@ export const symbolGuides = Object.fromEntries(
     names.split(" ").map((name) => [name, `guide/${page}`]),
   ),
 );
+
+Object.assign(symbolGuides, {
+  createRecipeRuntime: "guide/recipe-extensions",
+  defineHarnessTool: "guide/custom-harness-tools",
+  defineHarnessHook: "guide/harness-hooks",
+  createAgentConflictResolver: "guide/resolving-conflicts",
+});

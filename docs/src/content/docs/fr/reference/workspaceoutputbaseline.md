@@ -13,10 +13,10 @@ import type { WorkspaceOutputBaseline } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                            | Présence | Rôle                                                                                                                             |
-| ---------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `options`  | `WorkspaceOutputOptions`        | Requis   | Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération. |
-| `expected` | `readonly WorkspaceFileEntry[]` | Requis   | Manifest de destination capturé avant exécution et utilisé pour détecter les modifications concurrentes.                         |
+| Nom        | Type                            | Présence | Rôle                                                                                                       |
+| ---------- | ------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `options`  | `WorkspaceOutputOptions`        | Requis   | Options de publication dont l’état de destination a été capturé pour détecter les changements concurrents. |
+| `expected` | `readonly WorkspaceFileEntry[]` | Requis   | Manifest de destination capturé avant exécution et utilisé pour détecter les modifications concurrentes.   |
 
 ## Signature
 

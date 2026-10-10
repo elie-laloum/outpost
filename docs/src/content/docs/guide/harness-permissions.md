@@ -3,6 +3,8 @@ title: "Control tool permissions"
 description: "Allow or deny tool calls and use hooks to inspect the built-in agent loop."
 ---
 
+Apply permissions after choosing the [tools](../harness-tools/) the model can call. Test a permitted call and a denied call before relying on the rules. Tool declarations and hooks run on the host and must themselves be trusted.
+
 Use permissions to decide which tool calls are allowed, and hooks to run your code at specific points in the [built-in loop](../harness/). Both are options of `createHarness()`. For commands that prepare a sandbox before a turn, use [environment hooks](../environment-setup/) instead.
 
 ## Allow only what the task needs
@@ -74,78 +76,10 @@ The first matching rule decides. Without a match, `default` applies; it is `"all
 
 `paths` and `commands` match only tools that declare them. The built-in file, edit and search tools declare their paths; `shell` and `git` declare their command. For your own tools, declare `resources(input)` (see [Tools](../harness-tools/)).
 
-## Intercept calls with hooks
+<span id="intercept-calls-with-hooks"></span>
+<span id="order-of-checks-and-hooks"></span>
 
-Use hooks to add instructions at the start, refuse `write_file` calls after step 20 and ask for a test report before the agent finishes. Pass the exported list to `createHarness({ hooks })`.
-
-<!-- tabs -->
-
-```ts title="editing-hooks.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
-
-export const startHook = defineHarnessHook({
-  on: "session-start",
-  run: () => ({ instructions: "Run npm test before you answer." }),
-});
-export const editHook = defineHarnessHook({
-  on: "before-tool",
-  run({ call, step }) {
-    if (call.name === "write_file" && step > 20)
-      return { deny: "Stop editing and summarize your changes." };
-  },
-});
-```
-
-```ts title="completion-hook.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
-
-export const completionHook = defineHarnessHook({
-  on: "stop",
-  run({ text }) {
-    if (!text.includes("npm test"))
-      return { continue: "Run npm test and report its result." };
-  },
-});
-```
-
-```ts title="hooks.ts"
-import { startHook, editHook } from "./editing-hooks.ts";
-import { completionHook } from "./completion-hook.ts";
-
-export const hooks = [startHook, editHook, completionHook];
-```
-
-Pass the list to `createHarness({ hooks })`. A hook that returns nothing leaves the loop unchanged.
-
-API reference: [HarnessHookPhase](../../reference/harnesshookphase/), [HarnessHookEvents](../../reference/harnesshookevents/), [HarnessHookDecisions](../../reference/harnesshookdecisions/) and [HarnessHookContext](../../reference/harnesshookcontext/).
-
-## Order of checks and hooks
-
-<!-- canvas -->
-
-- **Check**: Before the tool runs.
-  - Steps
-  - **Validate**: The input must match the tool’s schema.
-  - **Evaluate permissions**: A denial ends the call; hooks do not run.
-    - `permissions`
-  - **Run before-tool hooks**: In declaration order. A `deny` ends the chain; an `input` goes to the next hook.
-    - `before-tool`
-  - **Re-check a rewrite**: Outpost validates the new input and evaluates permissions again.
-    - `permissions`
-  - → **Run**: then
-- **Run**: The tool executes against the sandbox.
-  - Steps
-  - → **Return**: then
-- **Return**: The model receives the result.
-  - Steps
-  - **Run after-tool hooks**: Also for denied and failed calls. Each can replace the result.
-    - `after-tool`
-
-Hooks of the same phase run in declaration order. For `stop`, the first hook that returns `{ continue }` wins, and the extra step still counts toward `limits.maxSteps`.
-
-:::caution
-A hook that throws, or returns a value its phase does not accept, fails the turn. [Progress observers](../progress/) cannot change the outcome; hooks can.
-:::
+For this step, follow [Intercept the agent loop](../harness-hooks/).
 
 ## Apply rules to subagents
 

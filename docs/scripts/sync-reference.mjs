@@ -221,7 +221,13 @@ for (const [symbol, { declaration, related }] of symbols) {
     ts.isTypeAliasDeclaration(declaration)
       ? "type "
       : "";
-  let code = declaration.getText().replaceAll(/import\("[^"\n]+"\)\./g, "");
+  const declarations = ts.isFunctionDeclaration(declaration)
+    ? symbol.declarations.filter(ts.isFunctionDeclaration)
+    : [declaration];
+  let code = declarations
+    .map((item) => item.getText())
+    .join("\n\n")
+    .replaceAll(/import\("[^"\n]+"\)\./g, "");
   if (ts.isVariableDeclaration(declaration))
     code = `export declare const ${code};`;
   const externalImports = declaration
@@ -258,10 +264,13 @@ for (const [symbol, { declaration, related }] of symbols) {
           ? "Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript ou le type public qui le référence."
           : "Supporting contract not directly exported; use TypeScript inference or the public type that references it.";
     const imports = exported
-      ? `\n\n## Import\n\n\`\`\`ts\n${publicNames
+      ? `\n\n## Import\n\n${publicNames.get(symbol).length > 1 ? (language ? "Choisissez un seul de ces imports équivalents.\n\n" : "Choose one of these equivalent imports.\n\n") : ""}${publicNames
           .get(symbol)
-          .map((entry) => `import ${kind}{ ${symbol.name} } from "${entry}";`)
-          .join("\n")}\n\`\`\``
+          .map(
+            (entry) =>
+              `\`\`\`ts\nimport ${kind}{ ${symbol.name} } from "${entry}";\n\`\`\``,
+          )
+          .join("\n\n")}`
       : "";
     const links = [...related]
       .sort((a, b) => a.name.localeCompare(b.name))

@@ -1,14 +1,21 @@
 ---
 title: "Votre première tâche"
-description: "Écrivez un script TypeScript, lancez un agent et examinez sa réponse et ses commits."
+description: "Lancer une revue du README et examiner la réponse et la branche."
 ---
 
-## Créer le script
+<!-- Retained section anchors for existing bookmarks. -->
 
-Créez `review.ts` à côté de la configuration de la page [Installation](../setup/). Ce premier script demande à l’agent de lire le README et de présenter ses observations. `dispatch()` ouvre une nouvelle sandbox, et la branche nommée donne à la tâche sa propre copie du dépôt.
+<span id="créer-le-script"></span>
+<span id="exécuter-le-script"></span>
+<span id="demander-une-modification"></span>
+<span id="comprendre-lexécution"></span>
+<span id="étapes-suivantes"></span>
+
+## Demander une revue du README
+
+Utilisez la configuration de la page [Installation](../setup/). Le dépôt cible doit contenir un README commité. Enregistrez `review.ts` à côté de `outpost.config.ts` ; le script demande une revue à l’agent sur une branche séparée.
 
 ```ts title="review.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -18,73 +25,47 @@ const result = await dispatch({
   agent: coder,
   branch: { mode: "named", name: "outpost/readme-review" },
   brief: {
-    text: "Review the README for incorrect setup instructions. Report findings without editing files.",
+    text: "Review the README setup instructions. Report problems or say none were found. Do not edit files.",
   },
 });
-reportValue(result.text);
-// Example output: The README setup command uses an outdated flag.
-reportValue(result.usage);
-// Example output: { input: 1200, cached: 0, output: 320 }
-reportValue(result.commits);
+console.log(result.text);
+console.log(result.commits);
 // Example output: []
 ```
 
-## Exécuter le script
+## Exécuter et examiner le résultat
 
-Le script affiche les observations de l’agent une fois la tâche terminée. Cette demande porte sur une lecture sans modification : aucun nouveau commit n’est donc attendu.
+Lancez le script depuis son dossier :
 
 ```sh
 node review.ts
 ```
 
-Référence API : [DispatchResult](../../reference/dispatchresult/) et [Usage](../../reference/usage/).
+À la fin de la tâche, il affiche les observations de l’agent, ou une réponse indiquant qu’aucun problème n’a été trouvé, puis la liste des commits. La demande exclut les modifications : une liste vide est donc attendue. La réponse du modèle peut varier ; la sortie montrée n’est pas un résultat de test fixe.
 
-## Demander une modification
-
-Pour demander à l’agent de modifier le dépôt, créez `fix.ts` avec un autre nom de branche et des consignes demandant un commit. Gardez `review.ts` si vous souhaitez réutiliser la demande de lecture dans la [CI](../ci-automation/).
-
-```ts title="fix.ts"
-import { reportValue } from "./reporter.ts";
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-const result = await dispatch({
-  repository,
-  sandboxProvider,
-  agent: coder,
-  branch: { mode: "named", name: "outpost/readme-fix" },
-  brief: {
-    text: "Fix the README setup command, verify that it works and commit the correction.",
-  },
-});
-reportValue(result.text);
-// Example output: Corrected the README setup command and committed it.
-reportValue(result.commits);
-// Example output: [ { oid: '8f3a21c…', subject: 'Fix README setup command' } ]
-```
-
-Lancez `node fix.ts`, puis examinez les commits et les modifications avec les commandes ci-dessous. Une nouvelle branche nommée part de votre `HEAD` et reste disponible après la tâche. Utilisez un nom différent pour chaque tâche indépendante ; une branche qui existe déjà est réutilisée.
+Cette consigne n’impose pas un accès en lecture seule. Examinez la branche si vous devez vérifier ce point :
 
 ```sh
-git log --oneline HEAD..outpost/readme-fix
-git diff HEAD...outpost/readme-fix
+git -C /absolute/path/to/your-repository diff HEAD...outpost/readme-review
+git -C /absolute/path/to/your-repository worktree list
 ```
 
-:::note
-La réponse décrit ce que l’agent dit avoir fait. Examinez les modifications et lancez les vérifications nécessaires avant d’accepter le travail.
-:::
+Le diff ci-dessus compare les commits. Si `worktree list` montre encore un répertoire pour `outpost/readme-review`, inspectez aussi ses fichiers :
 
-## Comprendre l’exécution
+```sh
+git -C /path/from/worktree-list status --short --untracked-files=all
+git -C /path/from/worktree-list diff HEAD
+```
 
-Outpost a ouvert un worktree sous `.outpost/workspaces/`, exécuté l’agent dans une sandbox, puis fermé la sandbox en gardant la branche. La page [Fonctionnement](../how-it-works/) détaille ce cycle de vie.
+`status` révèle les fichiers non suivis ; le second diff montre les modifications suivies, indexées ou non. Lisez les fichiers non suivis avant de conclure que rien n’a changé.
 
-## Étapes suivantes
+Outpost ferme la sandbox qu’il a ouverte et conserve la branche nommée. Une nouvelle branche part du `HEAD` du dépôt ; un nom existant réutilise le travail précédent. Choisissez un autre nom pour une tâche indépendante. Une copie de travail contenant des changements peut rester disponible pour [inspection et récupération](../recovery/).
 
-<!-- path -->
+## Continuer à partir du résultat
 
-1. [D’une tâche à un workflow](../first-workflow/) : Enchaîner des tâches avec des dépendances.
-2. [Réponses typées](../typed-responses/) : Recevoir des données validées plutôt que du texte libre.
-3. [Sessions de sandbox](../sandbox-sessions/) : Lancer vos tests avant de fusionner.
-4. [Dépôt et branche](../workspaces/) : Travailler dans votre checkout ou fusionner automatiquement.
+- [Demander une modification](../git-workspaces/) : Garder les changements sur une branche à relire.
+- [Exécuter une vérification indépendante](../sandbox-sessions/) : Tester le travail dans la même sandbox.
+- [Relier deux tâches](../first-workflow/) : Transmettre la réponse à votre code.
+- [Suivre la progression](../progress/) : Afficher l’activité pendant le travail du modèle.
 
-API : [dispatch](../../reference/dispatch/) · [DispatchResult](../../reference/dispatchresult/).
+[DispatchResult](../../reference/dispatchresult/) décrit la réponse, les commits et la consommation. La page [Comment Outpost exécute une tâche](../how-it-works/) explique quelles ressources restent après cet appel.

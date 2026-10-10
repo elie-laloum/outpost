@@ -1,6 +1,6 @@
 ---
-title: "Gérer le contexte et les compétences"
-description: "Limitez l’historique envoyé au modèle et chargez les consignes propres à une tâche quand elles sont utiles."
+title: "Gérer l’historique de conversation"
+description: "Réduire l’historique envoyé au modèle tout en conservant la transcription."
 ---
 
 ## Limiter la taille de l’historique
@@ -43,6 +43,8 @@ Dès que l’historique sérialisé dépasse 200 000 caractères, le modèle ré
 
 ## Choisir une stratégie
 
+Choisissez `summarizeHistory()` quand une longue discussion doit garder ses décisions : les anciens messages deviennent un résumé, au prix d’un appel au modèle. Choisissez `truncateToolResults()` quand quelques sorties d’outils occupent l’essentiel de l’historique : leur contenu est raccourci sans produire de résumé. Conservez assez de messages récents pour la tâche en cours.
+
 Référence API : [summarizeHistory](../../reference/summarizehistory/), [truncateToolResults](../../reference/truncatetoolresults/) et [HarnessContextStrategyOptions](../../reference/harnesscontextstrategyoptions/).
 
 Le résumé utilise le modèle et le fournisseur de l’agent. Ses tokens comptent dans la consommation du tour et dans le budget `limits.usage` du harness.
@@ -79,84 +81,17 @@ La liste renvoyée doit commencer et finir par un message utilisateur, et garder
 
 La réduction de l’historique change ce que le modèle reçoit, pas ce qui est stocké. La transcription garde tous les messages antérieurs et enregistre chaque réduction de l’historique ; [reprendre la conversation](../conversations/) repart de l’historique compacté. Les observateurs reçoivent un événement `compaction` avec le nom de la stratégie et le nombre de messages.
 
-## Écrire les instructions système
-
-Référence API : [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) et [HarnessSkillOptions](../../reference/harnessskilloptions/).
-
-Lisez le fichier `AGENTS.md` du projet dans la sandbox empruntée pour construire les instructions système. Cet exemple utilise son contenu si la lecture réussit et renvoie une chaîne vide dans le cas contraire.
-
-```ts
-import { defineHarnessInstructions } from "@elie-laloum/outpost";
-
-export const projectGuidance = defineHarnessInstructions(
-  async ({ sandbox, signal }) => {
-    const result = await sandbox.invoke({
-      executable: "cat",
-      arguments: ["AGENTS.md"],
-      signal,
-    });
-    return result.status === 0 ? result.stdout : "";
-  },
-);
-```
-
-Passez `instructions: ["Answer with evidence.", projectGuidance]`. Le résolveur reçoit la `sandbox` empruntée, le `signal`, le `model` et, quand le harness déclare des [serveurs MCP](../mcp-servers/), un accès `mcp` à leurs prompts.
-
-## Charger des compétences à la demande
-
-Une compétence regroupe des consignes et des outils que le modèle ne charge que lorsqu’il en a besoin. Ses instructions restent hors du prompt système jusque-là.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import {
-  createHarnessGitTools,
-  defineHarnessSkill,
-} from "@elie-laloum/outpost";
-
-export const review = defineHarnessSkill({
-  name: "review",
-  description: "Inspect a patch and report concrete regressions.",
-  instructions:
-    "Read the diff. Check changed behavior against callers and tests. Cite file paths.",
-  tools: [createHarnessGitTools()],
-});
-reportValue(
-  review.name,
-  review.tools.map((tool) => tool.name),
-);
-// Example output: review [ 'git' ]
-```
-
-<!-- check:run -->
-
-Le script affiche `review [ 'git' ]` : le nom de la compétence et les outils qu’elle rend disponibles. Ajoutez-la au harness avec `createHarness({ skills: [review] })`.
-
-<!-- canvas -->
-
-- **Annoncer** : Les instructions système listent le nom et la description de chaque compétence.
-  - Étapes
-  - → **Charger**: puis
-- **Charger** : Le modèle appelle `load_skill` avec le nom d’une compétence.
-  - Étapes
-  - **Renvoyer les instructions** : Outpost les résout et les renvoie comme résultat de l’outil.
-  - **Débloquer les outils** : Les outils de la compétence deviennent appelables pour le reste de la conversation.
-  - → **Utiliser**: puis
-- **Utiliser** : Le modèle suit les instructions et appelle les outils de la compétence.
-  - Étapes
-  - **Avant le chargement** : Un appel à un outil de la compétence renvoie une erreur qui demande de charger la compétence.
-
-Référence API : [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) et [HarnessSkillOptions](../../reference/harnessskilloptions/).
-
-:::caution
-Une compétence donne des consignes au modèle ; elle ne les fait pas respecter par le moteur. Pour bloquer un outil, utilisez les [permissions](../harness-permissions/) ; pour exiger une décision avant de continuer, utilisez les [approbations](../approvals/).
-:::
-
 ## Limites
 
 - `summarizeHistory()` mesure des caractères sérialisés, pas des tokens. Gardez une marge quand vous dimensionnez `triggerCharacters` d’après la fenêtre du modèle.
 - Un résumé incomplet ou vide fait échouer le tour avec le code `response`.
-- Une réduction de l’historique qui supprime l’appel à `load_skill` reverrouille les outils de la compétence jusqu’à ce que le modèle la recharge.
-- Les définitions des outils sont envoyées à chaque requête, même si leurs compétences ne sont pas encore chargées. Le chargement à la demande réduit le texte des instructions, mais pas les schémas d’outils.
 - `conversations: false` cesse de stocker la transcription et désactive la reprise et les réparations de réponse ([Conversations](../conversations/)).
 
 API : [summarizeHistory](../../reference/summarizehistory/) · [truncateToolResults](../../reference/truncatetoolresults/) · [defineHarnessContextStrategy](../../reference/defineharnesscontextstrategy/) · [defineHarnessInstructions](../../reference/defineharnessinstructions/) · [defineHarnessSkill](../../reference/defineharnessskill/) · [HarnessOptions](../../reference/customharnessoptions/).
+
+## Pour continuer
+
+- [Charger les instructions et compétences du projet](../harness-skills/)
+
+<span id="écrire-les-instructions-système"></span>
+<span id="charger-des-compétences-à-la-demande"></span>

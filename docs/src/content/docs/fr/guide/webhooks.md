@@ -3,6 +3,8 @@ title: "Lancer du travail depuis des webhooks"
 description: "Vérifiez les événements reçus et publiez les jobs du workflow correspondant dans une file."
 ---
 
+Préparez une [file et un worker](../job-queues/) avant d’exposer un webhook. Le serveur HTTP vérifie puis met la demande en file ; il n’exécute pas l’agent. Votre application doit aussi décider quels expéditeurs vérifiés peuvent demander du travail.
+
 ## Recevoir un webhook et publier un job
 
 Utilisez une source de webhook pour vérifier la requête reçue, puis associez l’événement accepté à un job de la file. `serveTriggers()` traite la requête HTTP ; les workers exécutent le workflow après la publication.
@@ -13,7 +15,9 @@ Utilisez une source de webhook pour vérifier la requête reçue, puis associez 
 import type { TriggerRoute } from "@elie-laloum/outpost";
 import { labelAdded } from "@elie-laloum/outpost";
 
+const allowedActors = new Set(["github:octocat"]);
 export const on: TriggerRoute["on"] = (event) => {
+  if (!event.actor || !allowedActors.has(event.actor)) return undefined;
   const issue = labelAdded(event, "outpost:fix");
   if (!issue) return undefined;
   return {
@@ -36,7 +40,6 @@ export const routes = [
 ```
 
 ```ts title="server.ts"
-import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
 import { routes } from "./github-route.ts";
 
@@ -47,7 +50,7 @@ export const server = await serveTriggers({
   routes,
   onError: (error, failure) => console.error(failure, error),
 });
-reportValue(`Listening on ${server.url}`);
+console.log(`Listening on ${server.url}`);
 // Example output: Listening on http://127.0.0.1:8787
 ```
 
@@ -55,22 +58,54 @@ Ajouter le label `outpost:fix` à une issue ou à une pull request publie un job
 
 <!-- canvas -->
 
-- **Serveur**: Répond à l’émetteur en quelques secondes.
-  - Étapes
-  - **Vérifier**: La source contrôle la signature, sinon la réponse est `401`.
-    - `createGithubWebhook()`
-  - **Router**: `on(event)` renvoie un job, ou `undefined` pour ignorer l’événement.
-    - `labelAdded()`
-    - `commandIssued()`
-  - **Publier**: Le job entre dans la file sous l’identifiant `trigger:<path>:<delivery>`.
-    - `serveTriggers()`
-  - → **Worker**: puis
-- **Worker**: Exécute le job dans son propre processus.
-  - Étapes
-  - **Exécuter**: Un workflow avec checkpoint, sous le `runId` du job.
-    - `defineWorkflowJob()`
+- **Vérifier**: Contrôler la signature avant de sélectionner le traitement.
+  - Serveur HTTP
+  - → **File**: événement retenu
+  - → **Refus**: signature fausse
+- **File**: Enregistrer un job et répondre à la requête HTTP.
+  - File
+  - → **Worker**: job réservé
+- **Refus**: Renvoyer 401 sans publier de job.
+  - Serveur HTTP
+- **Worker**: Exécuter le workflow dans un autre processus.
+  - Worker
 
 Un job nomme un `handler` enregistré par le worker, un `runId` de 256 caractères au plus et un `input` JSON facultatif. Gardez `on()` rapide : GitHub attend une réponse pendant 10 secondes, Slack pendant 3 secondes.
+
+## Vérifier une livraison locale
+
+Définissez `GITHUB_WEBHOOK_SECRET` pour les deux processus et lancez `node server.ts`. Dans un autre terminal, exécutez `node send-webhook.ts` : vous devez obtenir `202`, puis `401`. Aucun worker n’est nécessaire pour ce contrôle ; le job reste dans la file. Remplacez `github:octocat` par les acteurs autorisés avant de connecter un dépôt réel.
+
+```ts title="send-webhook.ts"
+import { createHmac, randomUUID } from "node:crypto";
+
+const secret = process.env.GITHUB_WEBHOOK_SECRET;
+if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
+const body = JSON.stringify({
+  action: "labeled",
+  label: { name: "outpost:fix" },
+  issue: { number: 42 },
+  repository: { full_name: "acme/app" },
+  sender: { login: "octocat" },
+});
+const signature = createHmac("sha256", secret).update(body).digest("hex");
+for (const digest of [signature, "0".repeat(64)]) {
+  const response = await fetch(
+    `${process.env.WEBHOOK_URL ?? "http://127.0.0.1:8787"}/github`,
+    {
+      method: "POST",
+      body,
+      headers: {
+        "content-type": "application/json",
+        "x-github-event": "issues",
+        "x-github-delivery": randomUUID(),
+        "x-hub-signature-256": `sha256=${digest}`,
+      },
+    },
+  );
+  console.log(response.status);
+}
+```
 
 ## Choisir une source
 
@@ -118,76 +153,11 @@ function fromCommand(event: TriggerEvent): TriggerJob | undefined {
 
 Passez `fromCommand` comme `on` d’une route. `event.actor` n’est pas un acteur d’étape d’approbation Outpost : les [approbations](../approvals/) authentifient leurs décideurs séparément.
 
-## Lire la réponse HTTP
+<span id="lire-la-réponse-http"></span>
+<span id="éviter-les-jobs-en-double"></span>
+<span id="identifier-lexécution-à-partir-de-lévénement"></span>
+<span id="renouveler-un-secret"></span>
+<span id="exploiter-le-serveur"></span>
+<span id="limites"></span>
 
-| Statut | Signification                                                                       |
-| ------ | ----------------------------------------------------------------------------------- |
-| `202`  | Job publié, ou déjà publié pour cette livraison. Le corps vaut `{"job": "<id>"}`.   |
-| `204`  | Événement vérifié ignoré : `on()` a renvoyé `undefined`.                            |
-| `400`  | Le corps de la requête n’a pas pu être lu.                                          |
-| `401`  | Vérification échouée : signature, secret, fenêtre d’horodatage ou en-tête manquant. |
-| `404`  | Aucune route pour ce chemin.                                                        |
-| `405`  | Méthode autre que `POST`.                                                           |
-| `413`  | Corps au-delà de `maxBytes` : 1 Mio par défaut, 25 Mio au plus.                     |
-| `500`  | `on()` a levé une erreur ou renvoyé un job invalide.                                |
-| `503`  | La file a refusé le job. L’émetteur peut renvoyer la même livraison.                |
-
-Les routes Slack répondent `200` avec un corps vide au lieu de `202` et `204`. `onError` reçoit le `path`, l’étape `stage` (`verify`, `route` ou `enqueue`) et la `delivery` de l’échec, jamais un secret.
-
-## Éviter les jobs en double
-
-L’identifiant du job contient l’identifiant de livraison. Une nouvelle tentative de l’émetteur ou une relivraison manuelle le réutilise : la file garde un seul job tant qu’elle le conserve.
-
-Une nouvelle livraison publie un nouveau job, même pour le même événement, comme un label ajouté à nouveau. C’est le `runId` qui décide si le travail est refait. Les traitements qui publient un résultat ont toujours besoin de leurs propres [clés d’idempotence](../job-queues/).
-
-## Identifier l’exécution à partir de l’événement
-
-Construisez le `runId` à partir de ce qui identifie le travail dans la charge : `owner/name#12`, ou un commit de tête. Les jobs de même `runId` et de même `input` partagent un [checkpoint](../durable-runs/) : `defineWorkflowJob()` restaure les tâches déjà terminées au lieu de les relancer.
-
-Un `input` différent sous le même `runId` échoue sur un checkpoint incompatible, car la version du checkpoint inclut une empreinte de l’input. Deux commandes au texte différent sur une même issue ont donc besoin de `runId` distincts, par exemple en y ajoutant `event.delivery`.
-
-Les signatures GitHub ne portent pas d’horodatage : une requête interceptée peut être rejouée sous un nouvel identifiant de livraison. Un `runId` dérivé de la charge fait converger ce rejeu vers la même exécution. La recette [Relire une pull request à la demande](../review-on-label/) associe chaque exécution au commit de tête.
-
-## Renouveler un secret
-
-Chaque option de secret accepte aussi une fonction qui renvoie les secrets acceptés à cet instant. La source l’appelle à chaque requête.
-
-```ts
-import { createGithubWebhook } from "@elie-laloum/outpost";
-
-const source = createGithubWebhook({
-  secret: () =>
-    [
-      process.env.GITHUB_WEBHOOK_SECRET,
-      process.env.GITHUB_WEBHOOK_SECRET_PREVIOUS,
-    ].filter((value) => value !== undefined),
-});
-```
-
-Acceptez les deux secrets, changez le secret chez l’émetteur, puis retirez l’ancien. Une fonction qui lève une erreur ou ne renvoie aucun secret refuse toutes les requêtes avec `401`.
-
-## Exploiter le serveur
-
-`serveTriggers()` écoute par défaut sur `127.0.0.1` ; `host` et `port` le modifient. Placez devant lui un reverse proxy qui termine TLS, et n’exposez que les chemins des routes.
-
-```ts
-import type { DurableTaskQueue, TriggerServer } from "@elie-laloum/outpost";
-
-declare const server: TriggerServer;
-declare const queue: DurableTaskQueue;
-
-process.once("SIGTERM", async () => {
-  await server.close();
-  queue.close();
-});
-```
-
-Fermez d’abord le serveur, pour qu’aucune requête n’atteigne une file fermée.
-
-## Limites
-
-- Outpost n’appelle pas les API GitHub, GitLab ou Slack : votre workflow publie les commentaires ou messages sur le résultat.
-- L’Events API de Slack et son défi de vérification d’URL ne sont pas pris en charge.
-- Aucune commande CLI `outpost` ne lance le serveur : démarrez-le depuis votre propre script.
-
-API : [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [createGitlabWebhook](../../reference/creategitlabwebhook/) · [createSlackSource](../../reference/createslacksource/) · [createStandardWebhook](../../reference/createstandardwebhook/) · [labelAdded](../../reference/labeladded/) · [commandIssued](../../reference/commandissued/) · [TriggerEvent](../../reference/triggerevent/) · [TriggerJob](../../reference/triggerjob/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+Pour cette étape, suivez [Exploiter un serveur de webhooks](../operating-webhooks/).

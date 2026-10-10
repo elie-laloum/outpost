@@ -3,6 +3,8 @@ title: "Déléguer à des sous-agents"
 description: "Donnez au harness intégré des sous-agents aux limites explicites qui partagent sa sandbox."
 ---
 
+Ce guide permet à un [harness intégré](../harness/) de demander une revue à un sous-agent borné. Celui-ci utilise la sandbox du parent : déléguer ne crée ni branche isolée ni workspace indépendant.
+
 ## Déclarer un sous-agent comme outil
 
 Déclarez un sous-agent avec `defineHarnessSubagent()` et exposez-le comme outil du harness parent. Il utilise la sandbox du parent, mais conserve son propre historique de conversation, ses permissions et ses limites.
@@ -68,7 +70,6 @@ export const coordinator = createAgent({
 ```
 
 ```ts title="run.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { coordinator } from "./coordinator.ts";
@@ -79,7 +80,7 @@ export const result = await dispatch({
   agent: coordinator,
   brief: { text: "Have the validation code reviewed, then list the risks." },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: The reviewer found unchecked input in src/validation.ts.
 ```
 
@@ -89,23 +90,14 @@ Le coordinateur décide quand appeler `review`. Chaque appel démarre le relecte
 
 <!-- canvas -->
 
-- **Déléguer**: Le modèle parent appelle l’outil sous-agent.
-  - Étapes
-  - **Envoyer un prompt**: La seule entrée est `{ "prompt": "…" }`.
-  - **Démarrer l’enfant**: Son historique contient ses propres instructions et ce prompt, rien du parent.
-    - hôte
-  - → **Travailler**: puis
-- **Travailler**: L’enfant exécute sa propre boucle.
-  - Étapes
-  - **Utiliser ses outils**: Commandes et modifications s’exécutent dans la sandbox et le worktree du parent.
-    - sandbox
-  - **Compter ses tokens**: L’usage s’additionne chez l’enfant, le parent et chaque ancêtre.
-  - → **Rendre**: puis
-- **Rendre**: Le parent lit un résultat d’outil.
-  - Étapes
-  - **Enregistrer le transcript**: La conversation enfant est capturée, même après un échec.
-    - hôte
-  - **Répondre au parent**: Un texte JSON avec `text`, la réponse finale de l’enfant, et `conversation` quand l’enfant en conserve une.
+- **Déléguer**: Le parent envoie un prompt, sans son historique de conversation.
+  - Sandbox partagée
+  - → **Sous-agent**: prompt
+- **Sous-agent**: Travailler avec son propre historique dans la sandbox et les fichiers du parent.
+  - Sandbox partagée
+  - → **Reprise du parent**: résultat
+- **Reprise du parent**: Lire le résultat du sous-agent et poursuivre la tâche principale.
+  - Sandbox partagée
 
 Les enfants partagent la sandbox du parent : ils n’allouent aucun fournisseur et n’ouvrent aucun workspace, si bien que le parent voit leurs modifications immédiatement. Les délégations s’exécutent une à une, même quand les autres outils du parent s’exécutent en parallèle.
 
@@ -134,12 +126,11 @@ Reprendre le parent ne relance pas l’enfant : le parent rejoue les résultats 
 Chaque délégation émet un événement `subagent` quand elle démarre, se termine ou échoue. Tous les autres événements de l’enfant, `usage` compris, portent l’identifiant de son exécution dans `subagentId`.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import type { DispatchOptions } from "@elie-laloum/outpost";
 
 const observe: DispatchOptions["observe"] = (event) => {
   if (event.kind === "subagent")
-    reportValue(event.name, event.status, event.id, event.conversation);
+    console.log(event.name, event.status, event.id, event.conversation);
   // Example output: review started subagent-1 undefined
 };
 ```

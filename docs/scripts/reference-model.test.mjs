@@ -79,6 +79,53 @@ test("union-only and inherited fields keep their declaring context", () => {
   );
 });
 
+test("resolved required fields do not inherit an optional source declaration", () => {
+  const get = model(`
+    type Required<T> = { [P in keyof T]-?: T[P] };
+    interface Settings { agent?: string; }
+    declare function dispatch(options: Required<Settings>): void;
+  `);
+  assert.equal(
+    get("dispatch").entries.find((entry) => entry.name === "options.agent")
+      .optional,
+    false,
+  );
+});
+
+test("overloaded entry points retain every signature and each variant's fields", async () => {
+  const counts = {
+    createagent: 3,
+    attach: 3,
+    createsandbox: 3,
+    dispatch: 3,
+    defineagenttask: 3,
+    defineisolatedtask: 3,
+    defineinteractiveagenttask: 2,
+    createworkspace: 2,
+  };
+  for (const locale of ["", "fr/"]) {
+    for (const [name, count] of Object.entries(counts)) {
+      const source = await page(`${locale}reference/${name}.md`);
+      assert.equal(
+        [...source.matchAll(/export declare function /g)].length,
+        count,
+        `${locale}${name}`,
+      );
+      assert.equal(
+        [...source.matchAll(/^### (?:Variant|Variante) /gm)].length,
+        count,
+        `${locale}${name}`,
+      );
+    }
+    const source = await page(`${locale}reference/dispatch.md`);
+    const agents = source
+      .split("\n")
+      .filter((line) => line.startsWith("| `options.agent`"));
+    assert.equal(agents.length, 3);
+    assert.ok(agents.every((line) => /\| (?:Required|Requis)\s*\|/.test(line)));
+  }
+});
+
 test("a new property cannot borrow a description just because its name matches", () => {
   const { symbol, declaration, checker } = model(
     "interface NewContract { usage: number; }",

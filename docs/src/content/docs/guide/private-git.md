@@ -12,7 +12,6 @@ Private Git is an opt-in prototype: its behavior can still change.
 Set `repositoryMode: "isolated"` on a Docker or Podman provider to give the container its own Git checkout. This option is experimental; the rest of the task uses the same agent and dispatch settings.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
@@ -29,7 +28,7 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/private-fix" },
   brief: { text: "Fix the failing unit test and commit the fix." },
 });
-reportValue(result.branch, result.commits.length);
+console.log(result.branch, result.commits.length);
 // Example output: outpost/private-fix 1
 ```
 
@@ -37,15 +36,15 @@ Outpost copies the branch history into the container and the agent works on that
 
 ## What changes compared with mounted mode
 
-| Aspect                                 | Mounted (default)                                              | Isolated                                                                   |
-| -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| What the container sees                | Your worktree at `/workspace` and the host Git directories     | A private checkout at `/tmp/outpost/workspace` with its own `.git`         |
-| How changes come back                  | At once: the agent writes to your worktree                     | After each dispatch, `sandbox.command()` or attach, validated then applied |
-| Host hooks, config, refs               | Shared and writable: what the agent writes applies on the host | Not copied in or back: only the branch’s commits and files return          |
-| Default branch policy                  | `current`                                                      | `integrate`; `current` is rejected                                         |
-| Agent CLI                              | Must be in the image                                           | Installed in the sandbox when missing; `bootstrap: false` turns this off   |
-| [Durable speculation](../speculation/) | Supported                                                      | Rejected: the provider cannot recover abandoned containers                 |
-| Interactive terminal                   | Supported                                                      | Supported; changes come back when you quit                                 |
+| Aspect                                 | Mounted (default)                                              | Isolated                                                                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What the container sees                | Your worktree at `/workspace` and the host Git directories     | A private checkout at `/tmp/outpost/workspace` with its own `.git`                                                                                 |
+| How changes come back                  | At once: the agent writes to your worktree                     | After each dispatch, `sandbox.command()` or attach, validated then applied                                                                         |
+| Host hooks, config, refs               | Shared and writable: what the agent writes applies on the host | Host hooks/config are not copied. The incoming bundle contains all refs’ history; only the selected branch is checked out. Only its changes return |
+| Default branch policy                  | `current`                                                      | `integrate`; `current` is rejected                                                                                                                 |
+| Agent CLI                              | Must be in the image                                           | Installed in the sandbox when missing; `bootstrap: false` turns this off                                                                           |
+| [Durable speculation](../speculation/) | Supported                                                      | Rejected: the provider cannot recover abandoned containers                                                                                         |
+| Interactive terminal                   | Supported                                                      | Supported; changes come back when you quit                                                                                                         |
 
 `copies` and `includeUncommitted` select extra inputs as on [cloud sandboxes](../cloud-sandboxes/). Branch policies: [Repository and branch](../workspaces/).
 

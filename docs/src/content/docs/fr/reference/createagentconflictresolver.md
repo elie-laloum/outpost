@@ -15,7 +15,7 @@ import { createAgentConflictResolver } from "@elie-laloum/outpost";
 
 Crée une stratégie explicite qui prépare une fusion dans le workspace de résolution fourni, lance un seul dispatch d’agent puis exécute la vérification obligatoire dans la même sandbox. Exige un sandboxProvider et une commande de vérification non interactive, renvoie le commit vérifié, l’usage et la sortie du contrôle, et ferme sa sandbox quel que soit le résultat. Refuse les entrées non fusionnées, l’ascendance manquante, les changements non ignorés non commités et les commits modifiés par la vérification. Aucun modèle ni sandbox ne s’exécute à la construction.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/resolving-conflicts/).
 
 ## Paramètres et propriétés
 

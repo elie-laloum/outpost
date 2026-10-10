@@ -15,7 +15,7 @@ import { inspectWorkspacePathLocks } from "@elie-laloum/outpost";
 
 Liste les verrous d’hôte/utilisateur coordonnant matérialisations, montages et destinations de publication qui se chevauchent entre répertoires de runtime.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/working-with-files/).
 
 ## Retour
 

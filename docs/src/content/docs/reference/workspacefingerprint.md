@@ -15,7 +15,7 @@ import { workspaceFingerprint } from "@elie-laloum/outpost";
 
 Computes a canonical file manifest fingerprint without Git, retaining paths, content, types, modes, links and selection identity.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/working-with-files/).
 
 ## Parameters and properties
 

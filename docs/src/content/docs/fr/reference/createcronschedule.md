@@ -13,7 +13,9 @@ import { createCronSchedule } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Analyse une expression cron à cinq champs, ou une macro comme @daily, évaluée dans un fuseau horaire IANA (UTC par défaut). Le résultat figé calcule les créneaux avec next() et previous() et ne publie rien. La construction refuse les champs invalides, les fuseaux inconnus et les expressions sans aucune occurrence.
+Analyse une expression cron à cinq champs, ou une macro comme `@daily`, évaluée dans un fuseau horaire IANA (UTC par défaut). Le résultat figé calcule les créneaux avec next() et previous() et ne publie rien. La construction refuse les champs invalides, les fuseaux inconnus et les expressions sans aucune occurrence. Les macros acceptées sont `@hourly` (`0 * * * *`), `@daily` et `@midnight` (`0 0 * * *`), `@weekly` (`0 0 * * 0`), `@monthly` (`0 0 1 * *`), ainsi que `@yearly` et `@annually` (`0 0 1 1 *`).
+
+Les noms `JAN–DEC` et `SUN–SAT` ignorent la casse. Le jour du mois et le jour de semaine sont des alternatives uniquement si aucun des deux champs ne commence par `*` ; sinon les deux doivent correspondre. Aucun champ ne représente les secondes. Chaque champ accepte une valeur, `*` pour toutes les valeurs, une liste séparée par des virgules (`9,18`), un intervalle inclusif (`1-5`) ou un pas positif (`8-18/2` ou `*/15`).
 
 [Exemple complet et règles détaillées](../../guide/cron-schedules/).
 

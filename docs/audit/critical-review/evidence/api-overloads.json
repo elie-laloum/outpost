@@ -1,0 +1,130 @@
+[
+  {
+    "name": "createAgent",
+    "signatures": [
+      {
+        "text": "(options: CliAgentOptions): CliAgent",
+        "agentOptional": null
+      },
+      {
+        "text": "(options: CustomAgentOptions): CustomAgent",
+        "agentOptional": null
+      },
+      {
+        "text": "(options: AgentOptions): Agent",
+        "agentOptional": null
+      }
+    ]
+  },
+  {
+    "name": "attach",
+    "signatures": [
+      {
+        "text": "(options: FileSandboxOptions & AttachOptions & RequiredAgent): Promise<FileAttachResult>",
+        "agentOptional": false
+      },
+      {
+        "text": "(options: GitWorkspaceSandboxOptions & AttachOptions & RequiredAgent): Promise<AttachResult>",
+        "agentOptional": false
+      },
+      {
+        "text": "(options: SandboxOptions & AttachOptions & RequiredAgent): Promise<AttachResult>",
+        "agentOptional": false
+      }
+    ]
+  },
+  {
+    "name": "createSandbox",
+    "signatures": [
+      {
+        "text": "(options: FileSandboxOptions): Promise<FileSandbox>",
+        "agentOptional": true
+      },
+      {
+        "text": "(options: GitWorkspaceSandboxOptions): Promise<Sandbox>",
+        "agentOptional": true
+      },
+      {
+        "text": "(options?: SandboxOptions | undefined): Promise<Sandbox>",
+        "agentOptional": null
+      }
+    ]
+  },
+  {
+    "name": "dispatch",
+    "signatures": [
+      {
+        "text": "<T = undefined>(options: FileDispatchRequest<T>): Promise<FileDispatchResult<T>>",
+        "agentOptional": false
+      },
+      {
+        "text": "<T = undefined>(options: GitDispatchRequest<T>): Promise<DispatchResult<T>>",
+        "agentOptional": false
+      },
+      {
+        "text": "<T = undefined>(options: DispatchRequest<T>): Promise<DispatchResult<T>>",
+        "agentOptional": false
+      }
+    ]
+  },
+  {
+    "name": "defineAgentTask",
+    "signatures": [
+      {
+        "text": "<T>(options: Omit<TaskOptions<FileDispatchResult<T>>, \"perform\" | \"cache\"> & FileAgentTaskOptions<T>): Task<...>",
+        "agentOptional": null
+      },
+      {
+        "text": "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & AgentTaskOptions<T>): Task<DispatchResult<T>>",
+        "agentOptional": null
+      },
+      {
+        "text": "<T>(options: Omit<TaskOptions<DispatchResult<T> | FileDispatchResult<T>>, \"perform\" | \"cache\"> & MixedAgentTaskOptions<T>): Task<...>",
+        "agentOptional": null
+      }
+    ]
+  },
+  {
+    "name": "defineIsolatedTask",
+    "signatures": [
+      {
+        "text": "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & IsolatedTaskOptions<T>): Task<DispatchResult<...>>",
+        "agentOptional": null
+      },
+      {
+        "text": "<T>(options: Omit<TaskOptions<FileDispatchResult<T>>, \"perform\" | \"cache\"> & FileIsolatedTaskOptions<T>): Task<...>",
+        "agentOptional": null
+      },
+      {
+        "text": "<T>(options: Omit<TaskOptions<DispatchResult<T> | FileDispatchResult<T>>, \"perform\" | \"cache\"> & MixedIsolatedTaskOptions<T>): Task<...>",
+        "agentOptional": null
+      }
+    ]
+  },
+  {
+    "name": "defineInteractiveAgentTask",
+    "signatures": [
+      {
+        "text": "(options: InteractiveAgentTaskOptions): Task<InteractiveAgentResult>",
+        "agentOptional": false
+      },
+      {
+        "text": "(options: FileInteractiveAgentTaskOptions): Task<FileInteractiveAgentResult>",
+        "agentOptional": false
+      }
+    ]
+  },
+  {
+    "name": "createWorkspace",
+    "signatures": [
+      {
+        "text": "(options: GitWorkspaceOptions): Promise<GitWorkspace>",
+        "agentOptional": null
+      },
+      {
+        "text": "(options: FileWorkspaceOptions): Promise<FileWorkspace>",
+        "agentOptional": null
+      }
+    ]
+  }
+]

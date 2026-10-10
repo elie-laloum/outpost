@@ -3,6 +3,8 @@ title: "Share files and reports"
 description: "Store task outputs as artifacts and pass references between tasks or processes."
 ---
 
+Use the local store below to try publication and reading without an agent or cloud account. Save the named files together in an ESM project with Outpost installed. Store only a reference in the workflow result when the payload should outlive that run.
+
 ## Publish and read an artifact
 
 Use an artifact when a task produces a file or report that you want to store separately from its result. `publishArtifact()` encodes and stores the content, then returns a reference that `readStoredArtifact()` can use to read it back.
@@ -28,7 +30,6 @@ export const store = createArtifactStore({
 ```
 
 ```ts title="publish.ts"
-import { reportValue } from "./reporter.ts";
 import { publishArtifact, readStoredArtifact } from "@elie-laloum/outpost";
 import { store, coverage } from "./coverage.ts";
 
@@ -38,13 +39,13 @@ export const reference = await publishArtifact(
   { lines: 87.5, files: ["src/parser.ts"] },
   { producer: { executionId: "nightly-42", taskKey: "coverage", attempt: 1 } },
 );
-reportValue(await readStoredArtifact(store, coverage, reference));
+console.log(await readStoredArtifact(store, coverage, reference));
 // Example output: { lines: 87.5, files: [ 'src/parser.ts' ] }
 ```
 
 <!-- check:run -->
 
-The payload lands in `.outpost/storage/artifacts/<id>.blob`. The reference is a small JSON object: `id`, a SHA-256 `digest`, `size`, `contract`, `producer` and `parents`. Reading checks the contract, the size and the digest before decoding.
+The content is stored through the configured transport under the logical key `artifacts/<id>.blob`. The local transport wraps objects under its `objects/` directory; read them through the artifact store. The reference is a small JSON object: `id`, a SHA-256 `digest`, `size`, `contract`, `producer` and `parents`. Reading checks the contract, the size and the digest before decoding.
 
 ## When to use an artifact
 
@@ -118,14 +119,13 @@ export const summary = defineTask({
 ```
 
 ```ts title="audit-report.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { audit } from "./audit.ts";
 import { summary } from "./summary.ts";
 
 export const result = await defineWorkflow("audit", [audit, summary]).start();
 result.unwrap();
-reportValue(result.value(summary));
+console.log(result.value(summary));
 // Example output: 1 finding(s) in src/parser.ts
 ```
 

@@ -15,7 +15,7 @@ import { snapshotWorkspaceFiles } from "@elie-laloum/outpost";
 
 Conserves a bounded verified generation through Transport with binary files, internal links, permissions and empty directories.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/working-with-files/).
 
 ## Parameters and properties
 

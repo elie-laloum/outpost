@@ -3,6 +3,14 @@ title: "Suivre la progression"
 description: "Recevez les événements des agents et des workflows pendant leur exécution."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="choisir-le-mode-de-suivi"></span>
+<span id="relire-une-exécution"></span>
+<span id="ce-quoutpost-garde-après-un-échec"></span>
+
+Pour lire l’activité dans le terminal, commencez par le reporter ci-dessous. Pour votre interface, utilisez un callback `observe`. Pour réunir agents, commandes et workflow dans une même exécution, utilisez un [hub d’observation](../observability/).
+
 Passez `createReporter()` dans l’option `observe` de la tâche pour afficher sa progression dans le terminal. Vous verrez la préparation, l’activité de l’agent et le bilan de l’exécution.
 
 ```ts
@@ -27,7 +35,6 @@ Référence API : [ReporterOptions](../../reference/reporteroptions/).
 Passez votre propre fonction comme `observe`. Filtrez sur `kind` avant de lire les autres champs.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -37,10 +44,10 @@ await dispatch({
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
   observe(event) {
-    if (event.kind === "tool") reportValue(`tool ${event.name}`);
+    if (event.kind === "tool") console.log(`tool ${event.name}`);
     // Example output: tool read_file
     if (event.kind === "summary")
-      reportValue(`pass ${event.pass}: ${event.tokens.output} output tokens`);
+      console.log(`pass ${event.pass}: ${event.tokens.output} output tokens`);
     // Example output: pass 1: 320 output tokens
   },
 });
@@ -81,17 +88,16 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="report-workflow.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { review } from "./reported-review.ts";
 
 export const result = await defineWorkflow("review", [review]).start({
   observe(event) {
-    if (event.type === "task") reportValue(event.key, event.status);
+    if (event.type === "task") console.log(event.key, event.status);
     // Example output: review done
   },
 });
-reportValue(result.status, result.observerErrors);
+console.log(result.status, result.observerErrors);
 // Example output: done []
 ```
 
@@ -126,3 +132,9 @@ Tous les agents émettent du texte, des appels d’outils et leurs résultats. L
 - Une session de terminal interactive ouverte avec `attach()` ne produit aucun événement.
 
 API : [createReporter](../../reference/createreporter/) · [createCustomReporter](../../reference/createcustomreporter/) · [AgentObservation](../../reference/agentobservation/) · [WorkflowEvent](../../reference/workflowevent/) · [ReporterOptions](../../reference/reporteroptions/).
+
+## Pour continuer
+
+- [Enregistrer un rapport de relecture](../run-reports/)
+- [Lire les événements après l’exécution](../journals/)
+- [Examiner le travail conservé après un échec](../recovery/)

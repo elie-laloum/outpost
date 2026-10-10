@@ -3,6 +3,8 @@ title: "Faire une pause quand un quota est atteint"
 description: "Enregistrez un workflow après une erreur de quota définitive et reprenez quand l’accès est disponible."
 ---
 
+Configurez d’abord une [exécution durable](../durable-runs/). La pause de quota convient à une reprise ultérieure lorsque l’accès redevient disponible. Un [agent de secours](../fallback-agents/) convient si un autre agent explicitement configuré doit prendre le relais immédiatement.
+
 ## Mettre en pause au lieu d’échouer
 
 Définissez `onQuota` dans la méthode `start()` du workflow pour conserver la progression après une erreur de quota définitive. Avec un checkpoint configuré, la tâche concernée se met en pause afin de reprendre plus tard.
@@ -44,7 +46,6 @@ export const checkpoint = {
 ```
 
 ```ts title="resume.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { review } from "./quota-review.ts";
 import { checkpoint } from "./quota-checkpoint.ts";
@@ -54,7 +55,7 @@ export const result = await defineWorkflow("nightly", [review]).start({
   onQuota: { action: "pause", maxWaitMs: 6 * 60 * 60_000 },
 });
 result.unwrap();
-reportValue(result.value(review));
+console.log(result.value(review));
 // Example output: reviewed
 ```
 
@@ -83,23 +84,22 @@ Un [agent de secours](../fallback-agents/) change d’agent au lieu d’attendre
 
 ## Ce qui se passe après une erreur de quota
 
+L’attente dans le processus exige une date de réinitialisation connue dans `maxWaitMs`. Sinon, le workflow reste en pause. Lors d’un nouvel appel, une date inconnue ou passée permet une tentative immédiate ; une date trop éloignée laisse la tâche en pause.
+
 <!-- canvas -->
 
-- **Pause**: La tentative qui a atteint la limite s’arrête.
-  - Étapes
-  - **Garder les retries**: L’erreur ne consomme pas les tentatives de `retry`.
-  - **Enregistrer la pause**: La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé.
-  - → **Attente**: puis
-- **Attente**: Seulement si l’heure de réinitialisation est connue.
-  - Étapes
-  - **Attendre dans le processus**: Une réinitialisation comprise dans `maxWaitMs` émet un événement `quota` de `status: "waiting"`, puis relance la tâche.
-  - **Pause durable**: Sinon, la tâche reste en pause. Les tâches indépendantes continuent, les tâches dépendantes attendent et `start()` renvoie `paused`.
-  - → **Reprise**: puis
-- **Reprise**: Un `start()` ultérieur avec le même checkpoint.
-  - Étapes
-  - **Relancer**: Une réinitialisation inconnue ou passée relance la tâche aussitôt.
-  - **Attendre d’abord**: Une réinitialisation comprise dans `maxWaitMs` est attendue, puis la tâche s’exécute.
-  - **Rester en pause**: Une réinitialisation plus lointaine laisse la tâche en pause sans appeler l’agent.
+- **Quota atteint**: Enregistrer la pause sans consommer de nouvelle tentative.
+  - Workflow
+  - → **Attente**: date connue dans maxWaitMs
+  - → **En pause**: date inconnue ou trop tardive
+- **Attente**: Attendre la réinitialisation dans le processus.
+  - Processus
+  - → **Reprise**: date atteinte
+- **En pause**: Renvoyer la pause enregistrée ; les tâches indépendantes peuvent finir.
+  - Processus
+  - → **Reprise**: nouvel appel
+- **Reprise**: Continuer la conversation capturée ou relancer la tâche selon ses capacités.
+  - Workflow
 
 L’enregistrement en pause dans `result.tasks` contient `quota.resetAt` : planifiez le `start()` suivant à partir de cette heure. `onQuota` autorise la relance, sans `resume: "retry-incomplete"`. Une [tâche en boucle](../verification-loops/) reprend la phase du tour qui a atteint la limite.
 

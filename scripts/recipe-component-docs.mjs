@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import prettier from "prettier";
+import { referenceSidebar } from "../docs/scripts/reference-navigation.mjs";
 import { nativeRecipeTypes } from "../src/application/recipes/native-catalog.constants.ts";
 import {
   nativeRecipeComponents,
@@ -29,6 +30,7 @@ const tests = [
   "recipe-advanced",
 ];
 const index = {};
+const contracts = new Map();
 function fields(
   schema,
   root = schema,
@@ -81,6 +83,8 @@ for (const definition of definitions.toSorted((a, b) =>
       name === definition.name.replace("Options.options", ".options"),
   );
   const lot = native?.[5] ?? (definition.name.startsWith("variables.") ? 2 : 1);
+  const contract = referenceSidebar.find((item) => item.label === native?.[1]);
+  if (contract) contracts.set(definition.name, contract);
   index[definition.name] = {
     kind: definition.kind,
     lot,
@@ -104,19 +108,69 @@ async function output(path, content, parser) {
 await output("recipes/components.json", JSON.stringify(index), "json");
 for (const fr of [false, true]) {
   let content = fr
-    ? `---\ntitle: Composants YAML disponibles\ndescription: Correspondance générée entre les composants YAML, leurs contrats TypeScript et leur propriété.\n---\n\nCes déclarations proviennent du registre utilisé pour valider et exécuter les recettes. Déclarez un composant avec \`type\` ou réutilisez-le avec \`$ref\` depuis la configuration locale. Le guide [des recettes YAML](../yaml-recipes/) explique les familles et les extensions ; les [compositions avancées](../recipe-advanced/) présentent la spéculation et les résolveurs.\n\n`
-    : `---\ntitle: Available YAML components\ndescription: Generated mapping of YAML components, TypeScript contracts and ownership.\n---\n\nThese declarations come from the registry used to validate and execute recipes. Declare a component with \`type\` or reuse it with \`$ref\` from local configuration. The [YAML recipes guide](../yaml-recipes/) explains families and extensions; [advanced composition](../recipe-advanced/) covers speculation and resolvers.\n\n`;
+    ? `---\ntitle: Composants YAML disponibles\ndescription: Correspondance générée entre les composants YAML, leurs contrats TypeScript et leur propriété.\n---\n\nCes déclarations proviennent du registre utilisé pour valider et exécuter les recettes. Déclarez un composant avec \`type\` ou réutilisez-le avec \`$ref\` depuis la configuration locale. La [configuration des recettes](../recipe-configuration/) explique les familles et les [extensions locales](../recipe-extensions/) ; les [compositions avancées](../recipe-advanced/) présentent la spéculation et les résolveurs.\n\n`
+    : `---\ntitle: Available YAML components\ndescription: Generated mapping of YAML components, TypeScript contracts and ownership.\n---\n\nThese declarations come from the registry used to validate and execute recipes. Declare a component with \`type\` or reuse it with \`$ref\` from local configuration. The [recipe configuration guide](../recipe-configuration/) explains families and [local extensions](../recipe-extensions/); [advanced composition](../recipe-advanced/) covers speculation and resolvers.\n\n`;
   content += fr
     ? `Les identifiants se lisent \`catégorie.type\`. Les lignes \`*Options.options\` représentent les sections du document : \`workflow\`, \`workspace\`, \`integration\` ou les options d’une tâche. Les propriétés détaillées restent celles des contrats TypeScript liés depuis les guides. Le schéma de l’éditeur et \`recipes/components.json\` répertorient leurs champs et les références de callbacks.\n\n`
     : `Identifiers read as \`category.type\`. The \`*Options.options\` rows represent document sections: \`workflow\`, \`workspace\`, \`integration\` or task options. Detailed properties retain the TypeScript contracts linked from the guides. The editor schema and \`recipes/components.json\` list their fields and callback references.\n\n`;
   content += fr
     ? `Un composant indiqué « runtime » est fermé par le runtime ; « valeur » désigne une configuration, une factory sans ressource ouverte ou un objet sans fermeture propre. Les dépendances possédées sont fermées en ordre inverse, les observateurs en dernier. Un export emprunté reste toujours à la charge de son propriétaire. L’activation expérimentale exige \`experimental: true\` dans la configuration.\n\n`
     : `A component marked “runtime” is closed by the runtime; “value” denotes configuration, an allocation-free factory or an object without its own cleanup. Owned dependencies close in reverse order, with observers last. Borrowed exports always remain caller-owned. Experimental activation requires \`experimental: true\` in configuration.\n\n`;
-  content += fr
-    ? `| Identifiant | Catégorie | Fermeture | Lot | Statut |\n| --- | --- | --- | --- | --- |\n`
-    : `| Identifier | Category | Cleanup | Lot | Status |\n| --- | --- | --- | --- | --- |\n`;
-  for (const [name, entry] of Object.entries(index))
-    content += `| \`${name}\` | \`${entry.kind}\` | ${entry.owned ? "runtime" : fr ? "valeur" : "value"} | ${entry.lot} | ${entry.experimental ? (fr ? "expérimental" : "experimental") : fr ? "implémenté" : "implemented"} |\n`;
+  const families = [
+    [
+      "Agents and model loops",
+      "Agents et boucles de modèle",
+      /^(agent|harness|modelProvider|profile|instructions|response|context|routing|conversations|steering)$/,
+    ],
+    [
+      "Tools and permissions",
+      "Outils et permissions",
+      /^(tool|toolset|permissions|skill|hook)$/,
+    ],
+    [
+      "Execution and secrets",
+      "Exécution et secrets",
+      /^(sandboxProvider|sandboxOptions|variables|secretSource)$/,
+    ],
+    [
+      "Storage and observation",
+      "Stockage et observation",
+      /^(artifact|artifactStore|checkpointStore|taskCacheStore|transport|observation|sink)$/,
+    ],
+    [
+      "Queues and triggers",
+      "Files et déclencheurs",
+      /^(queue|job|cron|schedule|service|triggerSource|triggerMapper)$/,
+    ],
+    [
+      "Decisions and integration",
+      "Décisions et intégration",
+      /^(decision|decisionProvider|verifier|resolver)$/,
+    ],
+    ["Task and workflow options", "Options de tâches et workflows", /Options$/],
+  ];
+  const listed = new Set();
+  for (const [en, translated, pattern] of families) {
+    content += `\n## ${fr ? translated : en}\n\n`;
+    content += fr
+      ? `| Identifiant | Contrat | Fermeture | Statut |\n| --- | --- | --- | --- |\n`
+      : `| Identifier | Contract | Cleanup | Status |\n| --- | --- | --- | --- |\n`;
+    for (const [name, entry] of Object.entries(index).filter(
+      ([name]) => !listed.has(name) && pattern.test(name.split(".")[0]),
+    )) {
+      listed.add(name);
+      const contract = contracts.get(name);
+      const fallback = fr
+        ? "[Configuration YAML](../recipe-configuration/)"
+        : "[YAML configuration](../recipe-configuration/)";
+      const link = contract
+        ? `[${contract.label}](../../${contract.slug}/)`
+        : fallback;
+      content += `| \`${name}\` | ${link} | ${entry.owned ? "runtime" : fr ? "valeur" : "value"} | ${entry.experimental ? (fr ? "expérimental" : "experimental") : fr ? "implémenté" : "implemented"} |\n`;
+    }
+  }
+  if (listed.size !== Object.keys(index).length)
+    throw new Error("Unclassified YAML component");
   content += fr
     ? `\nLa couverture décrit la composition locale, pas une validation de chaque service distant. Les tests utilisent des agents simulés, des modèles HTTP locaux, Git, Docker et Redis réels ; les appels payants, clouds et gestionnaires de secrets distants restent sans validation live.\n`
     : `\nCoverage describes local composition, not validation of every remote service. Tests use simulated agents, local HTTP models, real Git, Docker and Redis; paid calls, clouds and remote secret managers remain without live validation.\n`;

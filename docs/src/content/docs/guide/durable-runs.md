@@ -3,12 +3,13 @@ title: "Save and resume a workflow"
 description: "Use checkpoints to resume a workflow and explicitly retry interrupted tasks."
 ---
 
+Start with the offline example below to see a completed task reused after a restart. You need Node.js, Outpost and a writable storage directory. When adding real agent tasks, keep their workspaces available as well as the checkpoint.
+
 ## Save progress
 
 Pass a `checkpoint` to the workflow’s `start()` method when you need to continue in a later process. Outpost saves task transitions and results under the checkpoint’s `runId`.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   createLocalTransport,
   defineTask,
@@ -24,7 +25,7 @@ const result = await defineWorkflow("scan", [scan]).start({
   checkpoint: { store, runId: "scan-2026-09", version: "1" },
 });
 result.unwrap();
-reportValue(result.value(scan));
+console.log(result.value(scan));
 // Example output: { files: 12 }
 ```
 
@@ -125,19 +126,18 @@ export function uploadCount() {
 ```
 
 ```ts title="resume-upload.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { upload } from "./upload.ts";
 import { store } from "./upload-store.ts";
 
 export const workflow = defineWorkflow("upload", [upload]);
 export const checkpoint = { store, runId: "upload-1", version: "1" };
-reportValue((await workflow.start({ checkpoint })).status);
+console.log((await workflow.start({ checkpoint })).status);
 // Example output: failed
 export const resumed = await workflow.start({
   checkpoint: { ...checkpoint, resume: "retry-incomplete" },
 });
-reportValue(resumed.status);
+console.log(resumed.status);
 // Example output: done
 ```
 
@@ -154,48 +154,9 @@ It prints `failed`, then `done`. Without `resume`, the second `start()` rejects.
 
 Rerun tasks start a new series of `retry` attempts. `done` tasks never run again. A run stopped by its [budget](../budgets/) resumes the same way; pass a larger `budget`, since usage keeps adding up.
 
-## Recover a run after a crash
+<span id="recover-a-run-after-a-crash"></span>
 
-While `start()` is running, the process owns the checkpoint. A normal return releases that ownership. If the process dies, the ownership record remains and prevents another run from starting under the same `runId` until you recover it explicitly.
-
-<!-- canvas -->
-
-- **Stop**: Make sure the old runner no longer writes.
-  - Steps
-  - **Stop the process**: Confirm it exited. A PID does not prove that a remote runner stopped.
-  - → **Unlock**: then
-- **Unlock**: Clear the owner, keep the progress.
-  - Steps
-  - **Read the revision**: Read the run's checkpoint object from the transport.
-    - `Transport`
-  - **Clear the owner**: It rejects if the object changed since you read it.
-    - `recoverWorkflowCheckpoint()`
-  - → **Resume**: then
-- **Resume**: Start the same workflow with the same checkpoint.
-  - Steps
-  - **Authorize the replay**: The interrupted task reruns with `resume: "retry-incomplete"`.
-    - `start()`
-
-```ts
-import { createHash } from "node:crypto";
-import {
-  createLocalTransport,
-  recoverWorkflowCheckpoint,
-} from "@elie-laloum/outpost";
-
-const transporter = createLocalTransport({ directory: ".outpost/storage" });
-const runId = "scan-2026-09";
-const digest = createHash("sha256").update(runId).digest("hex");
-const saved = await transporter.read(`checkpoints/${digest}.json`);
-if (saved)
-  await recoverWorkflowCheckpoint({
-    transporter,
-    runId,
-    revision: saved.revision,
-  });
-```
-
-The checkpoint's key is `checkpoints/` followed by the SHA-256 of the `runId`. Progress stays intact; start the run again with `resume: "retry-incomplete"`.
+For this step, follow [Recover a workflow after a crash](../recovering-workflows/).
 
 ## Resume a run from a queue job
 

@@ -1,0 +1,828 @@
+[
+  {
+    "page": "agent-images.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 111
+  },
+  {
+    "page": "agent-profiles.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 101
+  },
+  {
+    "page": "antigravity.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 79
+  },
+  {
+    "page": "approvals.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 152
+  },
+  {
+    "page": "artifacts.md",
+    "codeIdentical": true,
+    "englishBlocks": 8,
+    "frenchBlocks": 8,
+    "lines": 194
+  },
+  {
+    "page": "authentication.md",
+    "codeIdentical": false,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 95
+  },
+  {
+    "page": "briefs.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 123
+  },
+  {
+    "page": "budgets.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 161
+  },
+  {
+    "page": "choose-a-sandbox.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 88
+  },
+  {
+    "page": "choose-an-agent.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 109
+  },
+  {
+    "page": "ci-automation.md",
+    "codeIdentical": false,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 158
+  },
+  {
+    "page": "claude-code.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 101
+  },
+  {
+    "page": "cli.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 142
+  },
+  {
+    "page": "cloud-sandboxes.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 128
+  },
+  {
+    "page": "codex.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 114
+  },
+  {
+    "page": "compete-agents.md",
+    "codeIdentical": true,
+    "englishBlocks": 18,
+    "frenchBlocks": 18,
+    "lines": 360
+  },
+  {
+    "page": "concurrency-and-retries.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 174
+  },
+  {
+    "page": "containers.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 91
+  },
+  {
+    "page": "conversation-formats.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 153
+  },
+  {
+    "page": "conversations.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 171
+  },
+  {
+    "page": "copilot-cli.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 63
+  },
+  {
+    "page": "cron-schedules.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 150
+  },
+  {
+    "page": "custom-agents.md",
+    "codeIdentical": true,
+    "englishBlocks": 9,
+    "frenchBlocks": 9,
+    "lines": 245
+  },
+  {
+    "page": "custom-sandbox-providers.md",
+    "codeIdentical": true,
+    "englishBlocks": 12,
+    "frenchBlocks": 12,
+    "lines": 288
+  },
+  {
+    "page": "decisions.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 154
+  },
+  {
+    "page": "development-workflow.md",
+    "codeIdentical": true,
+    "englishBlocks": 13,
+    "frenchBlocks": 13,
+    "lines": 317
+  },
+  {
+    "page": "diagnostics.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 139
+  },
+  {
+    "page": "durable-runs.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 220
+  },
+  {
+    "page": "environment-setup.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 162
+  },
+  {
+    "page": "environment-variables.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 99
+  },
+  {
+    "page": "error-handling.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 156
+  },
+  {
+    "page": "estimating-costs.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 75
+  },
+  {
+    "page": "fallback-agents.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 100
+  },
+  {
+    "page": "firecracker.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 101
+  },
+  {
+    "page": "first-request.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 62
+  },
+  {
+    "page": "first-workflow.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 84
+  },
+  {
+    "page": "fix-failing-ci.md",
+    "codeIdentical": true,
+    "englishBlocks": 9,
+    "frenchBlocks": 9,
+    "lines": 220
+  },
+  {
+    "page": "git-workspaces.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 85
+  },
+  {
+    "page": "harness-context.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 100
+  },
+  {
+    "page": "harness-permissions.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 149
+  },
+  {
+    "page": "harness-skills.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 78
+  },
+  {
+    "page": "harness-tools.md",
+    "codeIdentical": true,
+    "englishBlocks": 9,
+    "frenchBlocks": 9,
+    "lines": 186
+  },
+  {
+    "page": "harness.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 182
+  },
+  {
+    "page": "host-process.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 62
+  },
+  {
+    "page": "how-it-works.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 58
+  },
+  {
+    "page": "http-queues.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 31
+  },
+  {
+    "page": "integrating-changes.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 116
+  },
+  {
+    "page": "integration-ports.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 56
+  },
+  {
+    "page": "interactive-tasks.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 214
+  },
+  {
+    "page": "introduction.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 47
+  },
+  {
+    "page": "job-queues.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 124
+  },
+  {
+    "page": "journals.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 137
+  },
+  {
+    "page": "kimi-code.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 111
+  },
+  {
+    "page": "limits-and-cancellation.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 145
+  },
+  {
+    "page": "mcp-oauth.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 87
+  },
+  {
+    "page": "mcp-servers.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 177
+  },
+  {
+    "page": "model-providers.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 115
+  },
+  {
+    "page": "model-routing.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 128
+  },
+  {
+    "page": "multi-repository-change.md",
+    "codeIdentical": true,
+    "englishBlocks": 23,
+    "frenchBlocks": 23,
+    "lines": 430
+  },
+  {
+    "page": "multiple-repositories.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 137
+  },
+  {
+    "page": "network-restrictions.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 112
+  },
+  {
+    "page": "nightly-maintenance.md",
+    "codeIdentical": true,
+    "englishBlocks": 14,
+    "frenchBlocks": 14,
+    "lines": 314
+  },
+  {
+    "page": "object-storage.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 127
+  },
+  {
+    "page": "observability.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 145
+  },
+  {
+    "page": "observation-delivery.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 94
+  },
+  {
+    "page": "opentelemetry.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 64
+  },
+  {
+    "page": "operating-workers.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 58
+  },
+  {
+    "page": "plan-a-change.md",
+    "codeIdentical": true,
+    "englishBlocks": 10,
+    "frenchBlocks": 10,
+    "lines": 190
+  },
+  {
+    "page": "prepare-change-tests.md",
+    "codeIdentical": true,
+    "englishBlocks": 18,
+    "frenchBlocks": 18,
+    "lines": 316
+  },
+  {
+    "page": "private-git.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 85
+  },
+  {
+    "page": "progress.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 139
+  },
+  {
+    "page": "publishing-files.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 107
+  },
+  {
+    "page": "queued-workflows.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 152
+  },
+  {
+    "page": "quota-pauses.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 178
+  },
+  {
+    "page": "recipe-advanced.md",
+    "codeIdentical": false,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 77
+  },
+  {
+    "page": "recipe-cli.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 103
+  },
+  {
+    "page": "recipe-configuration.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 134
+  },
+  {
+    "page": "recipe-durability.md",
+    "codeIdentical": false,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 120
+  },
+  {
+    "page": "recipe-extensions.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 81
+  },
+  {
+    "page": "recipe-harness.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 65
+  },
+  {
+    "page": "recipe-linear-development.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 59
+  },
+  {
+    "page": "recipe-observation.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 48
+  },
+  {
+    "page": "recipe-services.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 120
+  },
+  {
+    "page": "recipe-workflows.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 119
+  },
+  {
+    "page": "record-replay.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 194
+  },
+  {
+    "page": "recovery-cli.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 82
+  },
+  {
+    "page": "recovery.md",
+    "codeIdentical": true,
+    "englishBlocks": 9,
+    "frenchBlocks": 9,
+    "lines": 206
+  },
+  {
+    "page": "redacting-secrets.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 67
+  },
+  {
+    "page": "redis-workers.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 156
+  },
+  {
+    "page": "remote-synchronization.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 60
+  },
+  {
+    "page": "resuming-file-workspaces.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 49
+  },
+  {
+    "page": "resuming-speculation.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 69
+  },
+  {
+    "page": "retention.md",
+    "codeIdentical": false,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 122
+  },
+  {
+    "page": "review-on-label.md",
+    "codeIdentical": true,
+    "englishBlocks": 20,
+    "frenchBlocks": 20,
+    "lines": 411
+  },
+  {
+    "page": "run-reports.md",
+    "codeIdentical": false,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 50
+  },
+  {
+    "page": "run-state.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 113
+  },
+  {
+    "page": "sandbox-sessions.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 159
+  },
+  {
+    "page": "secret-sources.md",
+    "codeIdentical": true,
+    "englishBlocks": 9,
+    "frenchBlocks": 9,
+    "lines": 220
+  },
+  {
+    "page": "security.md",
+    "codeIdentical": true,
+    "englishBlocks": 1,
+    "frenchBlocks": 1,
+    "lines": 117
+  },
+  {
+    "page": "setup.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 66
+  },
+  {
+    "page": "sharing-recipes.md",
+    "codeIdentical": true,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 40
+  },
+  {
+    "page": "signed-approvals.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 74
+  },
+  {
+    "page": "speculation.md",
+    "codeIdentical": true,
+    "englishBlocks": 5,
+    "frenchBlocks": 5,
+    "lines": 164
+  },
+  {
+    "page": "steering.md",
+    "codeIdentical": false,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 100
+  },
+  {
+    "page": "storage.md",
+    "codeIdentical": false,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 167
+  },
+  {
+    "page": "stuck-agents.md",
+    "codeIdentical": false,
+    "englishBlocks": 2,
+    "frenchBlocks": 2,
+    "lines": 76
+  },
+  {
+    "page": "subagents.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 150
+  },
+  {
+    "page": "task-cache.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 186
+  },
+  {
+    "page": "task-dependencies.md",
+    "codeIdentical": true,
+    "englishBlocks": 7,
+    "frenchBlocks": 7,
+    "lines": 192
+  },
+  {
+    "page": "testing-workflows.md",
+    "codeIdentical": true,
+    "englishBlocks": 4,
+    "frenchBlocks": 4,
+    "lines": 96
+  },
+  {
+    "page": "typed-responses.md",
+    "codeIdentical": true,
+    "englishBlocks": 8,
+    "frenchBlocks": 8,
+    "lines": 177
+  },
+  {
+    "page": "unattended-runs.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 54
+  },
+  {
+    "page": "verification-loops.md",
+    "codeIdentical": true,
+    "englishBlocks": 10,
+    "frenchBlocks": 10,
+    "lines": 242
+  },
+  {
+    "page": "webhooks.md",
+    "codeIdentical": true,
+    "englishBlocks": 6,
+    "frenchBlocks": 6,
+    "lines": 192
+  },
+  {
+    "page": "working-with-files.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 116
+  },
+  {
+    "page": "workspaces.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 63
+  },
+  {
+    "page": "yaml-components.md",
+    "codeIdentical": true,
+    "englishBlocks": 0,
+    "frenchBlocks": 0,
+    "lines": 118
+  },
+  {
+    "page": "yaml-recipes.md",
+    "codeIdentical": true,
+    "englishBlocks": 3,
+    "frenchBlocks": 3,
+    "lines": 112
+  }
+]

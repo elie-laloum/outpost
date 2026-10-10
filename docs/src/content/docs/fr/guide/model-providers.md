@@ -79,6 +79,8 @@ Les deux fournisseurs diffusent en streaming. Le harness émet des événements 
 
 ## Limiter la durée des requêtes
 
+Par exemple, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` refuse une requête après trente secondes sans progrès. En streaming, chaque fragment reçu renouvelle ce délai. Ajoutez un `deadlineMs` au dispatch pour limiter aussi un flux qui continue à produire du texte.
+
 Référence API : [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) et [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
 Un dépassement échoue avec le code `timeout`. Le harness diffuse en streaming avec les deux fournisseurs : une longue réponse qui continue d’arriver n’expire donc jamais. Limitez le tour entier avec les [limites](../limits-and-cancellation/).

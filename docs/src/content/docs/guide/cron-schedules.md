@@ -56,19 +56,7 @@ A worker opens the same queue and registers `audit` with `defineWorkflowJob()`, 
 
 ## Write the cron expression
 
-An expression has five fields separated by spaces: minute, hour, day of month, month, day of week.
-
-| Syntax     | Example           | Fires                                                                                                    |
-| ---------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| Value, `*` | `30 2 * * *`      | At 02:30 every day; `*` matches any value.                                                               |
-| List       | `0 9,18 * * *`    | At 09:00 and 18:00.                                                                                      |
-| Range      | `0 9 * * 1-5`     | At 09:00, Monday to Friday.                                                                              |
-| Step       | `0 8-18/2 * * *`  | At 08:00, 10:00, …, 18:00. `*/15` in the minute field means every 15 minutes.                            |
-| Names      | `0 9 1 JAN,JUL *` | At 09:00 on 1 January and 1 July. Names `JAN`–`DEC` and `SUN`–`SAT` ignore case; `0` and `7` are Sunday. |
-| Macro      | `@daily`          | At 00:00 every day. Also `@hourly`, `@midnight`, `@weekly`, `@monthly`, `@yearly` and `@annually`.       |
-| Both days  | `0 9 1 * MON`     | At 09:00 on the 1st of the month and on every Monday, as in Vixie cron.                                  |
-
-This union applies only when neither day field starts with `*`; otherwise a day must match both fields. There is no seconds field.
+Use five fields in minute, hour, day-of-month, month and day-of-week order. For example, `0 2 * * 1-5` schedules 02:00 on weekdays; `@daily` schedules midnight. Set `timeZone` explicitly when the local time matters. The [createCronSchedule contract](../../reference/createcronschedule/) lists names, ranges, steps, macros and the rule for combining both day fields.
 
 ## Name each run after its local date
 
@@ -131,11 +119,10 @@ A failed slot is not published again. Errors thrown by `onError` are ignored.
 `next(after)` returns the first slot strictly after a date, `previous(at)` the latest slot at or before it. Neither publishes anything.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createCronSchedule } from "@elie-laloum/outpost";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
-reportValue(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
+console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
 // Example output: 2026-03-30T00:30:00.000Z
 ```
 
@@ -149,6 +136,10 @@ This prints `2026-03-30T00:30:00.000Z`: 02:30 does not exist in Paris on 29 Marc
 
 Without a long-running process, a scheduled CI job, such as a GitHub Actions `schedule` workflow, can start the workflow directly with a checkpoint. See [Run in CI](../ci-automation/).
 
+## File workspaces
+
+A file recipe uses the same schedule-to-queue contract: a timer only publishes its deterministic job, and the worker allocates the workspace. See [file workspaces](../workspaces/) and [recipe services](../recipe-services/).
+
 ## Limits
 
 - The finest resolution is one minute.
@@ -156,7 +147,3 @@ Without a long-running process, a scheduled CI job, such as a GitHub Actions `sc
 - A schedule `name` is unique and uses letters, digits, `.`, `_` and `-` (128 characters at most). A `runId` has at most 256 characters.
 
 API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
-
-## File workspaces
-
-A file recipe uses the same schedule-to-queue contract: a timer only publishes its deterministic job, and the worker allocates the workspace. See [file workspaces](../workspaces/) and [recipe services](../recipe-services/).

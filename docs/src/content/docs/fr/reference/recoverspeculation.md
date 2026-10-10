@@ -19,7 +19,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost";
 
 Libère la propriété d’une course durable dont le coordinateur s’est arrêté, à condition que son objet enregistré soit toujours à la révision indiquée ; sinon rejette avec TransportConflict. N’arrête et ne supprime rien : le prochain appel à speculate() arrête les ressources enregistrées et exige resume: retry-incomplete pour rejouer les candidats interrompus.
 
-[Exemple complet et règles détaillées](../../guide/speculation/).
+[Exemple complet et règles détaillées](../../guide/resuming-speculation/).
 
 ## Paramètres et propriétés
 

@@ -3,6 +3,8 @@ title: "Ajouter un fournisseur de sandbox"
 description: "Connectez un environnement capable d’exécuter des commandes, de transférer des fichiers et de libérer ses ressources."
 ---
 
+Ce guide est un patron d’adaptateur : `sdk` représente votre SDK, pas un module fourni par Outpost. Implémentez ses opérations puis validez-les avec le diagnostic ci-dessous. Pour un premier environnement exécutable sans écrire d’adaptateur, utilisez [Docker ou Podman](../containers/).
+
 ## Écrire un fournisseur minimal
 
 Implémentez un `SandboxProvider` pour ouvrir un environnement d’exécution. Il renvoie un `SandboxLease` qu’Outpost utilise pour lancer les commandes et transférer les fichiers. L’exemple ci-dessous présente une intégration de machines virtuelles ; `vms` représente le SDK de la plateforme.
@@ -252,7 +254,6 @@ export function openDiagnosticLease() {
 ```
 
 ```ts title="diagnose.ts"
-import { reportValue } from "./reporter.ts";
 import { openDiagnosticLease, vmSandboxProvider } from "./diagnostic-lease.ts";
 import { diagnoseSandbox } from "@elie-laloum/outpost";
 
@@ -262,7 +263,7 @@ try {
     transfers: true,
     sandboxProvider: vmSandboxProvider,
   });
-  reportValue(report.hasFailures, report.checks);
+  console.log(report.hasFailures, report.checks);
   // Example output: false [ { id: "sandbox.node", status: "pass", … }, … ]
 } finally {
   await lease.release();
@@ -275,6 +276,10 @@ Le diagnostic vous laisse le bail : libérez-le vous-même. Lancez ensuite un vr
 Les tests avec des mocks prouvent le protocole, pas l’environnement. Testez les montages, les terminaux et les restrictions réseau sur la vraie plateforme.
 :::
 
+## Workspaces de fichiers
+
+La capacité optionnelle `SandboxProvider.workspaces` déclare les bindings de fichiers pris en charge et acquiert depuis `FileSandboxContext`. Les anciens fournisseurs gardent `acquire(SandboxContext)` pour Git. Une capacité de fichiers absente est refusée avant allocation. Voir [les workspaces de fichiers](../workspaces/).
+
 ## Limites
 
 - **Pas de `recover` dans les fonctions utilitaires**: `createMountedSandboxProvider()` et `createRemoteSandboxProvider()` acceptent `name`, `variables` et `acquire` ; ajoutez `recover` en étalant le résultat, comme ci-dessus.
@@ -282,7 +287,3 @@ Les tests avec des mocks prouvent le protocole, pas l’environnement. Testez le
 - **Sonde de transfert partielle**: `transfers: true` vérifie un seul fichier binaire. Liens symboliques, modes, dossiers et transferts par lots restent non vérifiés.
 
 API : [SandboxProvider](../../reference/sandboxprovider/) · [SandboxLease](../../reference/sandboxlease/) · [SandboxContext](../../reference/sandboxcontext/) · [FileTransfers](../../reference/filetransfers/) · [createMountedSandboxProvider](../../reference/createmountedsandboxprovider/) · [createRemoteSandboxProvider](../../reference/createremotesandboxprovider/) · [diagnoseSandbox](../../reference/diagnosesandbox/).
-
-## Workspaces de fichiers
-
-La capacité optionnelle `SandboxProvider.workspaces` déclare les bindings de fichiers pris en charge et acquiert depuis `FileSandboxContext`. Les anciens providers gardent `acquire(SandboxContext)` pour Git. Une capacité de fichiers absente est refusée avant allocation. Voir [les workspaces de fichiers](../workspaces/).

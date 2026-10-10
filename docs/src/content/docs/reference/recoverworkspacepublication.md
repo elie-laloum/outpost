@@ -15,7 +15,7 @@ import { recoverWorkspacePublication } from "@elie-laloum/outpost";
 
 Explicitly finishes or rolls back an inspected publication, fencing stale writers and preserving concurrent changes. It never replays completed tasks.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/publishing-files/).
 
 ## Parameters and properties
 
@@ -24,7 +24,7 @@ Explicitly finishes or rolls back an inspected publication, fencing stale writer
 | `transporter`              | `Transport`                               | Required | Caller-owned Transport used for conservation; no implicit cloud SDK or credential loading.                    |
 | `reference`                | `TransportReference`                      | Required | Transport key and revision identifying the conserved object; conditional revisions fence stale writers.       |
 | `action`                   | `"finish" \| "rollback"`                  | Required | Explicit finish or rollback request; both verify current preconditions and never execute workflow tasks.      |
-| `options`                  | `PublicationRecoveryOptions \| undefined` | Optional | Options selecting source, execution capabilities or inspected recovery preconditions for this operation.      |
+| `options`                  | `PublicationRecoveryOptions \| undefined` | Optional | Confirm that the publication owner has stopped before finishing or conditionally reversing writes.            |
 | `options.processesStopped` | `true \| undefined`                       | Optional | Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry. |
 
 ## Returns

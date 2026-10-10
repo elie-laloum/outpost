@@ -1,52 +1,43 @@
 ---
-title: "Installation"
-description: "Installez Outpost, construisez l’image des agents et créez votre configuration TypeScript."
+title: "Installer Outpost"
+description: "Préparer le paquet, l’image et la configuration pour une première tâche."
 ---
+
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="préparer-laccès-de-lagent"></span>
+<span id="créer-le-fichier-de-configuration"></span>
 
 ## Avant de commencer
 
-Il vous faut Node.js 24 ou une version plus récente, Git, un dépôt contenant au moins un commit et Docker en cours d’exécution. Ce guide utilise Codex ; vous pourrez ensuite [choisir un autre agent](../choose-an-agent/).
-
-Exécutez les commandes suivantes dans le dossier où vous souhaitez écrire vos scripts. Vous pouvez utiliser votre dépôt ou un dossier séparé.
+Ce tutoriel utilise Codex dans Docker pour travailler sur un dépôt Git. Préparez Node.js 24 ou une version ultérieure, Git, un dépôt contenant au moins un commit et un moteur Docker démarré. Vos scripts peuvent se trouver dans ce dépôt ou dans un dossier séparé.
 
 ## Installer le paquet
 
-Vos scripts importent la bibliothèque depuis ce paquet. La deuxième commande ajoute `"type": "module"` au `package.json` du dossier pour que Node.js exécute les exemples `.ts` comme des modules ESM. Si votre dépôt utilise CommonJS, gardez ces scripts dans un dossier séparé avec son propre `package.json`.
+Exécutez ces commandes dans le dossier de vos scripts. La seconde en fait un projet ESM afin que Node.js exécute directement les exemples TypeScript. Si votre projet utilise déjà CommonJS, créez un dossier de scripts séparé avec son propre manifeste.
 
 ```sh
 npm install @elie-laloum/outpost
 npm pkg set type=module
 ```
 
-La commande `outpost` sert notamment à construire les images et à vérifier votre environnement.
-
 ## Construire l’image des agents
 
-Générez et construisez l’image dans un dossier dédié :
+Préparez les outils une seule fois dans un dossier dédié. La première construction télécharge les CLI des agents et peut prendre plusieurs minutes.
 
 ```sh
 npx outpost init --yes --directory .outpost-image --image outpost:dev
 ```
 
-La première construction télécharge les outils des agents et peut prendre quelques minutes. Attendez qu’elle se termine avant de lancer une tâche.
+Attendez la réussite de la construction. `init` crée aussi des exemples de workflow dans `.outpost-image` ; ce tutoriel utilise le script que vous allez écrire. Pour ajouter les outils du projet ou utiliser Podman, consultez [Construire une image d’agent](../agent-images/).
 
-Ici, `init` prépare le Dockerfile et construit l’image. La commande génère aussi des exemples de workflow dans `.outpost-image` ; dans la suite du guide, vous écrirez vos propres scripts. Vous n’avez pas besoin d’exécuter le projet généré.
+## Préparer l’accès à l’agent
 
-Vous pouvez modifier `.outpost-image/Dockerfile` pour ajouter les outils de votre projet, puis reconstruire l’image avec `npx outpost image build --directory .outpost-image --image outpost:dev`. La page [Construire une image d’agent](../agent-images/) explique aussi comment utiliser Podman.
+La configuration ci-dessous utilise une session Codex enregistrée sur votre machine. Suivez [Configurer Codex](../codex/#se-connecter-avec-son-compte) avant de lancer une tâche. Pour une clé API, consultez [Authentification](../authentication/) : les accès par compte et par API ont des facturations distinctes.
 
-## Préparer l’accès de l’agent
+## Enregistrer la configuration
 
-La configuration ci-dessous utilise votre compte Codex. Connectez-vous d’abord sur votre machine en enregistrant les identifiants dans un fichier. La page [Configurer Codex](../codex/#se-connecter-avec-son-compte) indique la commande et l’emplacement de ce fichier.
-
-Pour utiliser une clé d’API ou un autre agent, consultez [Authentification](../authentication/). L’accès par compte et l’accès par API sont facturés séparément.
-
-## Créer le fichier de configuration
-
-Enregistrez ce fichier à côté de vos scripts. Il déclare l’agent, l’image et le dépôt ; vos scripts importeront ces valeurs explicitement.
-
-Enregistrez aussi `reporter.ts` à côté de vos scripts. Les exemples l’importent pour afficher leurs résultats avec `createReporter()`. `reportValue()` transmet un événement texte au reporter ; `format()` conserve la présentation des objets de Node.js. Pour suivre les événements pendant une tâche, passez directement `createReporter()` à `observe` ([suivre la progression](../progress/)). Les commentaires « Example output » illustrent une sortie ; les réponses, identifiants et mesures varient à chaque exécution.
-
-<!-- tabs -->
+Enregistrez `outpost.config.ts` à côté de vos scripts. Remplacez le chemin du dépôt par le chemin absolu de votre copie de travail. Les scripts importent explicitement ces valeurs ; aucun chargement automatique de configuration n’est nécessaire.
 
 ```ts title="outpost.config.ts"
 import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
@@ -58,31 +49,17 @@ export const coder = createAgent({
 export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
 });
-export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
+export const repository = "/absolute/path/to/your-repository";
 ```
 
-```ts title="reporter.ts"
-import { format } from "node:util";
-import { createReporter } from "@elie-laloum/outpost";
-
-const reporter = createReporter();
-export function reportValue(...values: unknown[]) {
-  reporter({ kind: "text", text: `${format(...values)}\n` });
-}
-```
-
-`repository` utilise le dossier courant, sauf si vous définissez `OUTPOST_REPOSITORY` avec le chemin absolu d’un autre dépôt. Si vos scripts se trouvent hors du dépôt, renseignez cette variable avant de les exécuter.
-
-Tous les fichiers TypeScript du guide utilisent l’extension `.ts`, y compris dans les imports. Node.js 24 les exécute directement ; vous n’avez pas besoin de les compiler avant de les lancer.
-
-Les exemples plus longs du guide sont répartis en plusieurs fichiers, présentés dans des onglets. Enregistrez chaque onglet sous le nom indiqué, dans le même répertoire que cette configuration. Le texte précise quel script exécuter.
+Enregistrez ensuite chaque onglet de code sous le nom indiqué, à côté de cette configuration sauf précision contraire. Les exemples utilisent des fichiers et imports `.ts`, exécutables avec Node.js 24+ sans compilation préalable.
 
 ## Vérifier l’image
 
-`doctor` vérifie les outils locaux et l’image. Il n’envoie aucune requête au modèle et ne teste pas votre connexion. Si une vérification échoue, la commande se termine avec le code 1 ; la page [Diagnostiquer un problème](../diagnostics/) explique le rapport.
+Lancez les contrôles locaux avant un appel au modèle :
 
 ```sh
 npx outpost doctor --image outpost:dev
 ```
 
-Vous pouvez maintenant [lancer votre première tâche](../first-request/).
+Corrigez les lignes `FAIL` à l’aide du guide [Diagnostic](../diagnostics/). `doctor` vérifie les outils et l’image, pas votre connexion ni l’accès au modèle. Vous pouvez maintenant lancer [votre première tâche](../first-request/) ou [votre première recette YAML](../yaml-recipes/).

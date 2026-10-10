@@ -3,12 +3,13 @@ title: "Send instructions during a task"
 description: "Give a running agent a new instruction and track how it is delivered."
 ---
 
+Use steering to add context to an active task without cancelling it. Keep the promise returned by `send()` so your application can distinguish delivered instructions from a failed delivery; delivery does not prove the agent followed the instruction.
+
 ## Send an instruction
 
 Create a steering controller and pass it to the dispatch. While the task runs, `send()` submits another instruction and resolves when Outpost can report how it was delivered.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -22,7 +23,7 @@ const running = dispatch({
   steering,
 });
 const delivery = await steering.send("Leave the legacy/ folder untouched.");
-reportValue(delivery.mode);
+console.log(delivery.mode);
 // Example output: injected
 const result = await running;
 ```

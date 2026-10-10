@@ -41,7 +41,6 @@ export function executionCount() {
 ```
 
 ```ts title="run-cache.ts"
-import { reportValue } from "./reporter.ts";
 import { summarize } from "./summarize.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -49,7 +48,7 @@ for (let run = 1; run <= 2; run++) {
   const summary = summarize();
   const result = await defineWorkflow("release-notes", [summary]).start();
   result.unwrap();
-  reportValue(result.value(summary), result.tasks[0]?.cacheHit ?? false);
+  console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
   // Example output (second run): { summary: '3 fixes', execution: 1 } true
 }
 ```
@@ -139,6 +138,10 @@ Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/), [TaskOp
 
 ## Faire expirer ou renouveler les entrées
 
+Définissez `maxAgeMs` dans la politique de cache pour limiter sa durée. Changez `version` lorsque votre code, modèle ou consigne change : une entrée de la version précédente ne sera plus réutilisée. L’expiration provoque une nouvelle exécution au prochain accès ; elle ne supprime pas immédiatement l’objet stocké.
+
+Pour forcer un nouveau calcul sans changer la clé, utilisez `mode: "refresh"`.
+
 Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/).
 
 ## Suivre les événements du cache
@@ -146,7 +149,6 @@ Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/).
 Affichez les événements du cache depuis l’observateur du workflow pour suivre les résultats trouvés, les absences et les erreurs de stockage. Un échec du cache n’empêche pas la tâche de s’exécuter ou de terminer.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import type { Workflow } from "@elie-laloum/outpost";
 
 declare const workflow: Workflow;
@@ -154,7 +156,7 @@ declare const workflow: Workflow;
 await workflow.start({
   observe: (event) => {
     if (event.type === "cache")
-      reportValue(event.key, event.cache, event.error);
+      console.log(event.key, event.cache, event.error);
     // Example output: summary hit undefined
   },
 });
@@ -172,6 +174,10 @@ Les entrées ne sont pas authentifiées : quiconque peut écrire dans le transpo
 
 Les entrées restent sous `task-cache/` dans le transport jusqu’à ce que vous les supprimiez. Ajoutez le périmètre `task-cache` à une [politique de rétention](../retention/) pour purger celles plus anciennes que `minAgeMs`.
 
+## Workspaces de fichiers
+
+Un hit de cache JSON ne restaure et ne rejoue jamais des effets de fichiers. Identité de workspace, empreintes des entrées et générations settled sont distinctes des valeurs en cache. Les caches de dépendances utilisent namespace et source logique, sans UUID de run. Voir [les workspaces de fichiers](../workspaces/).
+
 ## Limites
 
 - Les exécutions concurrentes de même empreinte s’exécutent toutes ; la première entrée écrite est conservée.
@@ -181,7 +187,3 @@ Les entrées restent sous `task-cache/` dans le transport jusqu’à ce que vous
 - Ne mettez pas en cache une `defineArtifactTask` lue par une tâche suivante : un hit dans une nouvelle exécution restaure une référence à l’exécution précédente, et `readArtifact()` échoue avec « Artifact dependency producer mismatch ».
 
 API : [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/) · [WorkflowEvent](../../reference/workflowevent/).
-
-## Workspaces de fichiers
-
-Un hit de cache JSON ne restaure et ne rejoue jamais des effets de fichiers. Identité de workspace, empreintes des entrées et générations settled sont distinctes des valeurs en cache. Les caches de dépendances utilisent namespace et source logique, sans UUID de run. Voir [les workspaces de fichiers](../workspaces/).

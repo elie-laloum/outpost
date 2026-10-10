@@ -3,7 +3,7 @@ title: "Read execution journals"
 description: "Record agent events and read the journal of a completed or failed dispatch."
 ---
 
-Use [run reports](../run-reports/) to save a dispatch summary with committed files, observed failures, duration and reported usage. Reports remain available after workspace cleanup.
+Use a journal when the terminal output is no longer enough to investigate a run. Keep its `logReference` with the result or error. For a document to share with a reviewer, use a [run report](../run-reports/) instead.
 
 ## Record a journal
 
@@ -12,35 +12,36 @@ Each dispatch records its events in a journal by default. Set `logging.transport
 <!-- tabs -->
 
 ```ts title="record-journal.ts"
+import { writeFile } from "node:fs/promises";
 import { createLocalTransport, dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
-export const transporter = createLocalTransport({
-  directory: ".outpost/storage",
-});
-export const result = await dispatch({
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
+const result = await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
+  branch: { mode: "named", name: "outpost/journal-review" },
   brief: { text: "Describe the repository without changing it." },
   logging: { transporter },
 });
+if (!result.logReference) throw new Error("No journal was recorded");
+await writeFile("journal-reference.json", JSON.stringify(result.logReference));
 ```
 
 ```ts title="read-journal.ts"
-import { reportValue } from "./reporter.ts";
-import { result, transporter } from "./record-journal.ts";
-import { readJournal } from "@elie-laloum/outpost";
+import { readFile } from "node:fs/promises";
+import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
 
-if (result.logReference) {
-  const events = await readJournal({
-    transporter,
-    reference: result.logReference,
-  });
-  reportValue(events.length);
-  // Example output: 12
-}
+const reference = JSON.parse(await readFile("journal-reference.json", "utf8"));
+const events = await readJournal({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
+  reference,
+});
+console.log(events.length);
 ```
+
+Run `node record-journal.ts` once, then `node read-journal.ts` from the same directory. The second script prints the number of saved events without starting an agent. Keep the reference file with its storage.
 
 `result.logReference` points to the finished journal. Without `logging`, Outpost writes it to a local transport in `<repository>/.outpost/storage`. To keep journals elsewhere, pass another transport: see [Where data lives](../storage/) and [S3 and R2](../object-storage/).
 

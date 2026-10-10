@@ -21,7 +21,7 @@ Error recorded when reported usage is marked incomplete while the budget sets to
 
 | Name        | Type                  | Presence | Meaning                                                                                     |
 | ----------- | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `dimension` | `"usage"`             | Optional | Always usage: token accounting is incomplete and the budget has no attempt fallback.        |
+| `dimension` | `"usage"`             | Required | Always usage: token accounting is incomplete and the budget has no attempt fallback.        |
 | `name`      | `string`              | Required | Stable error name WorkflowUsageUnavailable.                                                 |
 | `message`   | `string`              | Required | Human-readable explanation of the failure.                                                  |
 | `stack`     | `string \| undefined` | Optional | JavaScript stack trace for the error, when available.                                       |

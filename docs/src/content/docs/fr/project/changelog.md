@@ -10,15 +10,22 @@ next: false
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
-## Unreleased
+## 11.1.0
 
-- Ajout explicite de workspaces de fichiers copiés, montés en lecture seule/écriture ou éphémères sans Git hôte, de la configuration 3, des capacités providers et des contrats de dispatch/rapports de fichiers. Maintien des API Git et defaults legacy. Restitution protégée journalisée avec rollback conditionnel et récupération explicite ; conservation des fichiers et conversations settled pour reprise locale ou portable avec Transport explicite. Tests de commandes indépendantes, dialogue entre processus, publication interrompue et CLI installée sur un hôte Node, Docker et tar sans Git. Variantes CLI natives de fichiers et validations live cloud/Firecracker restent non validées ; aucune publication ni aucun déploiement.
+Cette version ajoute la composition de workflows YAML, les dialogues de recettes dans le terminal et les workspaces de fichiers sans Git, en conservant les API et les valeurs par défaut Git existantes.
+
+- Réorganise le Guide anglais et français autour des tâches, avec des pages ciblées, des URL et ancres conservées, une prise en main plus directe et neuf projets d’exemples téléchargeables. Rend les schémas lisibles sur mobile sans zoom et précise leurs conditions sur grand écran. Corrige les effets de bord de la lecture et du rejeu des journaux, les chemins Git et les procédures de récupération ; décrit le rapport local réellement produit par l’exemple de revue sur webhook.
+- Affiche chaque surcharge de l’API avec sa propre table de propriétés, identifie correctement les champs obligatoires des types mappés et relie les contrats aux guides pratiques.
+- Définit le signalement privé des vulnérabilités via GitHub Security et les correctifs de sécurité pour la dernière version majeure.
+- Rend la classification des contrats de recettes compatible avec les chemins Windows et POSIX.
+
+- Ajout explicite de workspaces de fichiers copiés, montés en lecture seule/écriture ou éphémères sans Git hôte, de la configuration 3, des capacités providers et des contrats de dispatch/rapports de fichiers. Maintien des API Git et defaults legacy. Restitution protégée journalisée avec rollback conditionnel et récupération explicite ; conservation des fichiers et conversations settled pour reprise locale ou portable avec Transport explicite. Tests de commandes indépendantes, dialogue entre processus, publication interrompue et CLI installée sur un hôte Node, Docker et tar sans Git. Variantes CLI natives de fichiers et validations live cloud/Firecracker restent non validées.
 
 - Ajoute une recette de développement Linear avec une application TypeScript indépendante, cache privé de clés API validées, choix du ticket, approbation du plan, implémentation, tests obligatoires et observation formatée. Étend la saisie CLI aux gates non signées avec résultats sauvegardés et décisions explicites ; les gates signées conservent la soumission externe de preuves. Parcours testé hors ligne avec Git réel et services simulés ; Linear/Codex réel reste non validé.
 
 - Gère les questions des recettes durables directement dans la CLI : saisie automatique en terminal, sélection d’acteur, réponses persistées et poursuite sans script personnalisé. Ajoute les modes interactif et automatisé, conserve un unique rapport JSON final et préserve les questions après annulation. Couvre les reprises entre processus hors ligne et la saisie sur terminal réel, sans appel payant.
 
-- Expose les JSON Schemas des recettes et configurations sous `/schemas/` dans la documentation, avec des copies figées par version reconstruites depuis les tags Git stables. Conserve les archives entre déploiements GitHub Pages, vérifie le contenu JSON et les réponses HTTP et documente la configuration de l’éditeur en français et en anglais. Les URLs seront publiques après le prochain déploiement de release stable éligible.
+- Expose les JSON Schemas des recettes et configurations sous `/schemas/` dans la documentation, avec des copies figées par version reconstruites depuis les tags Git stables. Conserve les archives entre déploiements GitHub Pages, vérifie le contenu JSON et les réponses HTTP et documente la configuration de l’éditeur en français et en anglais.
 
 - Termine les sept lots de composition YAML avec spéculation expérimentale explicite, reçus de consommation durable, résolveurs de conflits, reporters natifs et OpenTelemetry. Garde les réglages machine dans des composants locaux nommés, synchronise et ferme la sandbox avant intégration et rapporte séparément la consommation du résolveur. Génère la documentation des composants et contrôle les classifications par export et option en CI. Ajoute une recette communautaire et un exemple hors ligne ; validations payantes, cloud et SDK distants restent absentes.
 

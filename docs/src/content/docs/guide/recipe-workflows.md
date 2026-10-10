@@ -3,6 +3,8 @@ title: "Compose YAML workflows"
 description: "Pass JSON values, select conditions and compose isolated tasks with the existing workflow engine."
 ---
 
+Extend [your first recipe](../yaml-recipes/) when later steps need structured results or conditions. Save the first block as `recipe.yaml`, change the top-level `version` in your local `outpost.yaml` to `2`, then run `npx outpost recipe run --file recipe.yaml --config outpost.yaml --json`. The `envelope` result contains the selected file names.
+
 ## Pass structured values
 
 Recipe format 3 and configuration format 2 extend [YAML recipes](../yaml-recipes/) with JSON inputs and workflow composition. Keep the two files separate. Objects, arrays and null are supported alongside scalar inputs; an optional JSON `schema` validates nested values before extension loading or allocation. A value supplied through `--input 'changes={"files":["a.ts"]}'` retains its type.
@@ -69,35 +71,23 @@ Shared sandbox commands and agents default to sequential execution. If concurren
 
 Paths in native component options resolve relative to the local configuration file. Each isolated repository integrates independently under its own branch policy; there is no transaction spanning repositories.
 
-## Declare local actions
+<span id="declare-local-actions"></span>
 
-For a complex transformation, `call` selects an explicitly configured callback and `arguments` builds its JSON input. The callback receives that value and the native task context, including cancellation, usage reporting and the idempotency key. Its returned value must be lossless JSON. The shareable recipe selects a declared reference; it cannot add a module import.
-
-```yaml title="recipe.yaml — transformation"
-- key: summarize
-  after: [select]
-  call: { $ref: functions.summary }
-  arguments: { $step: select, path: [value] }
-```
-
-Declare the module, export, version and callback contract in the local configuration. Alias the extension in `functions` to keep recipes independent of local module names. Validation resolves this metadata without importing the module; execution verifies its export before allocating resources.
-
-```yaml title="outpost.yaml — callback binding"
-extensions:
-  summary:
-    module: ./steps.ts
-    export: summary
-    kind: callback
-    contract: call.options.perform
-    version: "1"
-functions:
-  summary: { $ref: extensions.summary }
-```
-
-`loop` accepts `maxRounds`, `attempt` and `check`, through [defineLoopTask](../../reference/definelooptask/). Bind callbacks using `loop.options.attempt` and `loop.options.check`; attempt results become the step's JSON `value`, while the check receives the unwrapped result. Round history and usage are maintained by the existing scheduler. Loops do not accept ordinary retry, gate or interaction options.
-
-`decision` accepts the provider, model, decision contract and truncation policy of [defineDecisionTask](../../reference/definedecisiontask/). A separate `state` expression supplies its structured context, and the result is available under `value`. No sandbox is allocated for a decision request.
+For this step, follow [Call local actions from YAML](../recipe-callbacks/).
 
 ## Run the offline example
 
 The repository's `examples/68-recipe-workflows` composes structured inputs, a condition, a local transformation and a two-round loop. After building Outpost, run `node --test examples/68-recipe-workflows/index.ts`. The example allocates no sandbox and makes no model call. Functional tests also compare YAML and TypeScript usage and run isolated fixture agents against two real temporary Git repositories; live cloud and paid agent validation remains separate.
+
+## Reuse a step result
+
+An agent exposes `text`; a command exposes `stdout`, `stderr` and numeric `status`. Add every referenced step to `after`, even when another dependency already follows it. Append this task to [your first YAML recipe](../yaml-recipes/) to summarize the review:
+
+```yaml title="recipe.yaml — append to tasks"
+- key: summary
+  after: [review]
+  agent: coder
+  brief: "Summarize these findings without editing files: {{ steps.review.text }}"
+```
+
+The engine passes the actual result to the next step. CLI reports bound each returned text field to 16,384 characters with an explicit truncation marker. References provide data, not conversation continuation; files remain shared through the sandbox workspace.

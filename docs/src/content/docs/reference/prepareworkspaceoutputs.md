@@ -15,7 +15,7 @@ import { prepareWorkspaceOutputs } from "@elie-laloum/outpost";
 
 Captures expected destination manifests before execution for protected publication, without writing outputs.
 
-[Complete example and detailed rules](../../guide/workspaces/).
+[Complete example and detailed rules](../../guide/publishing-files/).
 
 ## Parameters and properties
 

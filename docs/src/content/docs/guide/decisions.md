@@ -3,6 +3,8 @@ title: "Evaluate a typed decision"
 description: "Use Jev or a compatible Laya server for typed choices, scores and yes/no probabilities."
 ---
 
+Use a typed decision when your application needs a choice or score over known state, without asking an agent to edit files. The final offline example lets you exercise result handling without service credentials; the service example needs your own endpoint and key.
+
 ## Declare the questions
 
 `defineDecision()` validates and freezes questions. A `choice` selects a named option, a `score` evaluates ordered levels, and `noul` returns the probability of yes. This declaration preserves the answer keys and choice literals in TypeScript.
@@ -55,7 +57,6 @@ Pass text, an object or an array containing lossless JSON. Cycles, dates, undefi
 import { decide } from "@elie-laloum/outpost";
 import { routing } from "./decision.ts";
 import { provider } from "./decision-provider.ts";
-import { reportValue } from "./reporter.ts";
 
 const result = await decide({
   provider,
@@ -64,7 +65,7 @@ const result = await decide({
   state: { goal: "Fix a parser", lastTool: "Two regression tests failed" },
 });
 const route: "fast" | "deep" = result.answers.route.choice;
-reportValue(route, result.answers.difficulty.score, result.answers.safe.noul);
+console.log(route, result.answers.difficulty.score, result.answers.safe.noul);
 ```
 
 Run `node evaluate.ts` with the service available. The result includes the provider, actual response model, normalized usage and available metadata. The HTTP provider retains the native JSON response in `metadata`, including Laya routing and input diagnostics. Decision models are names; generation and reasoning settings belong to conversational models.
@@ -136,7 +137,6 @@ export const fixture: DecisionProvider = {
 import { decide } from "@elie-laloum/outpost";
 import { readOnly } from "./offline-decision.ts";
 import { fixture } from "./fixture-provider.ts";
-import { reportValue } from "./reporter.ts";
 
 const result = await decide({
   provider: fixture,
@@ -144,7 +144,7 @@ const result = await decide({
   decision: readOnly,
   state: "Read the test report.",
 });
-reportValue(result.answers.safe.noul);
+console.log(result.answers.safe.noul);
 // Example output: 0.9
 ```
 

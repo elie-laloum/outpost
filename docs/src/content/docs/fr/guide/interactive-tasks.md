@@ -3,6 +3,8 @@ title: "Permettre à l’agent de poser des questions"
 description: "Suspendez une tâche pour obtenir une réponse humaine et poursuivez la conversation enregistrée."
 ---
 
+Préparez un [checkpoint](../durable-runs/) et un agent capable de capturer et reprendre une conversation portable. Une question en attente libère sa sandbox. Conservez le workspace et la conversation jusqu’à la prochaine réponse.
+
 ## Choisir entre une question et une approbation
 
 Utilisez une tâche interactive si l’agent a besoin d’une information humaine pour poursuivre. Utilisez une tâche d’approbation si votre workflow attend une autorisation. Ces deux pauses ont des entrées et des règles de reprise différentes.
@@ -49,7 +51,6 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="start.ts"
-import { reportValue } from "./reporter.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 import { clarify } from "./clarify.ts";
 import { store } from "./question-store.ts";
@@ -57,7 +58,7 @@ import { store } from "./question-store.ts";
 export const workflow = defineWorkflow("discovery", [clarify]);
 export const checkpoint = { store, runId: "discovery-42", version: "1" };
 export const result = await workflow.start({ checkpoint });
-reportValue(result.status, result.inputRequests[0]?.question);
+console.log(result.status, result.inputRequests[0]?.question);
 // Example output: waiting-input What should the new endpoint return?
 ```
 
@@ -71,27 +72,18 @@ Codex, Claude Code, Copilot CLI, Kimi Code et le [harness intégré](../harness/
 
 <!-- canvas -->
 
-- **Tour**: L’agent travaille dans une sandbox neuve.
-  - Étapes
-  - **Exécution**: Il poursuit sa conversation avec le brief ou la dernière réponse.
-    - sandbox
-  - **Fermeture**: Outpost enregistre la conversation et ferme la sandbox.
-    - host
-  - → **Question**: puis
-- **Question**: L’exécution s’arrête sur `waiting-input`.
-  - Étapes
-  - **Enregistrement**: Le checkpoint conserve la question ; les tâches dépendantes attendent.
-    - `inputRequests`
-  - → **Réponse**: puis
-- **Réponse**: Votre application la soumet.
-  - Étapes
-  - **Validation**: Outpost vérifie et enregistre la réponse, puis lance le tour suivant.
-    - `start({ answers })`
-  - → **Sortie**: puis
-- **Sortie**: L’agent termine avec du JSON au lieu de poser une question.
-  - Étapes
-  - **Conservation**: Le checkpoint conserve la sortie.
-    - `result.value()`
+- **Tour de l’agent**: Travailler depuis le brief ou la réponse ; conserver la conversation et fermer la sandbox.
+  - Agent
+  - → **Question**: besoin d’aide
+  - → **Résultat**: travail terminé
+- **Question**: Enregistrer la question et renvoyer waiting-input.
+  - Workflow
+  - → **Réponse**: réponse reçue
+- **Réponse**: Valider et enregistrer la réponse.
+  - Votre application
+  - → **Tour de l’agent**: tour suivant
+- **Résultat**: Conserver le résultat JSON final.
+  - Workflow
 
 ## Afficher les questions
 
@@ -205,6 +197,10 @@ const region = defineTask({
 
 `perform` repart du début après chaque réponse. Lisez `interaction.state` pour sauter le travail déjà fait, et `save(state)` pour enregistrer l’avancement ; les deux ne contiennent que du JSON.
 
+## Workspaces de fichiers
+
+Un dialogue de fichiers possédé déclare `workspaceSource` à la place d’un dépôt. Fichiers settled et conversations portables sont capturés avant fermeture de la sandbox et publication de la question humaine. La récupération d’un propriétaire interrompu reste séparée du rejeu d’un tour interrompu. Voir [les dialogues de fichiers](../workspaces/).
+
 ## Limites
 
 - Une question au dernier des `maxTurns` fait échouer la tâche au lieu d’attendre.
@@ -215,7 +211,3 @@ const region = defineTask({
 Un scénario complet, avec une approbation, des tests rouges et du code relu : [Construire un workflow de développement](../development-workflow/).
 
 API : [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)
-
-## Workspaces de fichiers
-
-Un dialogue de fichiers possédé déclare `workspaceSource` à la place d’un dépôt. Fichiers settled et conversations portables sont capturés avant fermeture de la sandbox et publication de la question humaine. La récupération d’un propriétaire interrompu reste séparée du rejeu d’un tour interrompu. Voir [les dialogues de fichiers](../workspaces/).

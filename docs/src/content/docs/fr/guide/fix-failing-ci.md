@@ -3,22 +3,30 @@ title: "Réparer une CI en échec"
 description: "Laissez un agent corriger le code et réessayer jusqu’à ce que votre commande de test réussisse."
 ---
 
-## Ce que montre l’exemple
+[Télécharger tous les fichiers](../../../guide-examples/fr/fix-failing-ci.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
 
-<!-- features -->
+<!-- canvas -->
 
-- [Sessions de sandbox](../sandbox-sessions/): Une sandbox à chaud garde les dépendances entre les tours de l’agent et les tests.
-- [Dépôt et branche](../workspaces/): La correction arrive sur une branche nommée, jamais sur votre checkout.
-- [Préparer l’environnement](../environment-setup/): Les dépendances s’installent une fois, avant le premier tour.
-- [Boucles de vérification](../verification-loops/): Tenter, vérifier, renvoyer l’échec, recommencer.
-- [Budgets](../budgets/): Plafonner les tentatives et les tokens de toute l’exécution.
-- [Exécuter en CI](../ci-automation/): Une exécution en échec lève une erreur, le job sort donc avec un code non nul.
+- **Corriger**: L’agent modifie et committe sur la branche de travail.
+  - Agent
+  - → **Contrôler**: prêt à vérifier
+- **Contrôler**: Les tests doivent passer et le répertoire de travail être propre.
+  - Votre contrôle
+  - → **Corriger**: à corriger
+  - → **Relire la branche**: validé
+  - → **Arrêter**: tours épuisés
+- **Relire la branche**: Examiner outpost/fix-ci ; rien n’est fusionné ni poussé.
+  - Vous
+- **Arrêter**: Conserver le travail pour examen.
+  - Workflow
 
 ## Écrire le script
 
 Enregistrez les fichiers présentés dans les onglets à côté de la configuration de la page [Installation](../setup/). Le script principal garde une sandbox ouverte pour que les modifications de l’agent et votre commande de test utilisent les mêmes fichiers.
 
 Séparez la création de la sandbox, la tentative de l’agent et la vérification des commits.
+
+L’allocation et la fermeture restent dans le point d’entrée. La boucle regroupe la tentative et le contrôle pour rendre leur enchaînement visible.
 
 <!-- tabs -->
 
@@ -37,113 +45,58 @@ export function openFixSandbox() {
 }
 ```
 
-```ts title="fix-request.ts"
-export function fixRequest(feedback?: string) {
-  return {
-    brief: {
-      text: [
-        "`npm test` fails. Fix the code so that it passes, then commit the fix.",
-        feedback ? `The last check failed:\n${feedback}` : "",
-      ].join("\n\n"),
-    },
-  };
-}
-```
-
-```ts title="fix-attempt.ts"
-import type { Sandbox, LoopTaskContext } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
-import { fixRequest } from "./fix-request.ts";
-
-export function createAttempt(sandbox: Sandbox) {
-  return async (context: LoopTaskContext, feedback: string | undefined) => {
-    const agent = defineAgentTask({
-      key: "coder",
-      sandbox,
-      request: () => fixRequest(feedback),
-    });
-    const result = await agent.perform(context);
-    return { summary: result.text, commits: result.commits.length };
-  };
-}
-```
-
-```ts title="test-command.ts"
-import type { Sandbox, LoopTaskContext } from "@elie-laloum/outpost";
-
-export async function testCommand(sandbox: Sandbox, context: LoopTaskContext) {
-  return sandbox.command({
-    executable: "npm",
-    arguments: ["test"],
-    retain: 20_000,
-    signal: context.signal,
-  });
-}
-```
-
-```ts title="check-commit.ts"
-import type {
-  Sandbox,
-  LoopTaskContext,
-  LoopCheckResult,
-} from "@elie-laloum/outpost";
-
-export async function checkCommit(
-  sandbox: Sandbox,
-  context: LoopTaskContext,
-): Promise<LoopCheckResult> {
-  const status = await sandbox.command({
-    executable: "git",
-    arguments: ["status", "--porcelain"],
-    signal: context.signal,
-  });
-  const feedback = `Tests pass. Commit these changes:\n${status.stdout}`;
-  return status.stdout.trim() ? { done: false, feedback } : { done: true };
-}
-```
-
-Assemblez la boucle et lancez `fix-ci.ts`, qui possède et ferme la sandbox.
-
-<!-- tabs -->
-
-```ts title="fix-check.ts"
-import type {
-  Sandbox,
-  LoopTaskContext,
-  LoopCheckResult,
-} from "@elie-laloum/outpost";
-import { testCommand } from "./test-command.ts";
-import { checkCommit } from "./check-commit.ts";
-
-export function createCheck(sandbox: Sandbox) {
-  return async (context: LoopTaskContext): Promise<LoopCheckResult> => {
-    const tests = await testCommand(sandbox, context);
-    if (tests.status !== 0)
-      return { done: false, feedback: `${tests.stdout}\n${tests.stderr}` };
-    return checkCommit(sandbox, context);
-  };
-}
-```
-
 ```ts title="fix-task.ts"
 import type { Sandbox } from "@elie-laloum/outpost";
-import { defineLoopTask } from "@elie-laloum/outpost";
-import { createAttempt } from "./fix-attempt.ts";
-import { createCheck } from "./fix-check.ts";
+import { defineAgentTask, defineLoopTask } from "@elie-laloum/outpost";
 
 export function defineFix(sandbox: Sandbox) {
   return defineLoopTask({
     key: "fix",
     maxRounds: 4,
     timeoutMs: 1_200_000,
-    attempt: createAttempt(sandbox),
-    check: createCheck(sandbox),
+    async attempt(context, feedback) {
+      const agent = defineAgentTask({
+        key: "coder",
+        sandbox,
+        request: () => ({
+          brief: {
+            text: [
+              "npm test fails. Fix the code, run the tests and commit the fix.",
+              feedback ? `Previous check:\n${feedback}` : "",
+            ].join("\n\n"),
+          },
+        }),
+      });
+      const result = await agent.perform(context);
+      return { summary: result.text, commits: result.commits.length };
+    },
+    async check(context) {
+      const tests = await sandbox.command({
+        executable: "npm",
+        arguments: ["test"],
+        retain: 20_000,
+        signal: context.signal,
+      });
+      if (tests.status !== 0)
+        return { done: false, feedback: `${tests.stdout}\n${tests.stderr}` };
+      const status = await sandbox.command({
+        executable: "git",
+        arguments: ["status", "--porcelain"],
+        signal: context.signal,
+      });
+      if (status.status !== 0) throw new Error(status.stderr);
+      if (status.stdout.trim())
+        return {
+          done: false,
+          feedback: `Tests pass. Commit the changes:\n${status.stdout}`,
+        };
+      return { done: true };
+    },
   });
 }
 ```
 
 ```ts title="fix-ci.ts"
-import { reportValue } from "./reporter.ts";
 import { openFixSandbox } from "./fix-sandbox.ts";
 import { defineFix } from "./fix-task.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
@@ -152,15 +105,15 @@ export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-ci", [fix]).start({
   budget: { attempts: 4, usage: { input: 5_000_000, output: 200_000 } },
 });
-reportValue(`status: ${result.status}`);
+console.log(`status: ${result.status}`);
 // Example output: status: done
-reportValue(`branch: ${sandbox.workspace.branch}`);
+console.log(`branch: ${sandbox.workspace.branch}`);
 // Example output: branch: outpost/fix-ci
-reportValue(`rounds: ${result.tasks[0]?.rounds?.length ?? 0}`);
+console.log(`rounds: ${result.tasks[0]?.rounds?.length ?? 0}`);
 // Example output: rounds: 2
-reportValue(`tokens: ${JSON.stringify(result.usage.tokens)}`);
+console.log(`tokens: ${JSON.stringify(result.usage.tokens)}`);
 // Example output: tokens: {"input":1200,"cached":0,"output":320}
-if (result.status === "done") reportValue(result.value(fix).summary);
+if (result.status === "done") console.log(result.value(fix).summary);
 // Example output: Fixed the parser and verified the tests.
 result.unwrap();
 ```
@@ -180,27 +133,7 @@ L’agent peut modifier les tests ou le script `test`. Relisez le diff, et laiss
 
 ## Comprendre les étapes
 
-Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
-
-<!-- canvas -->
-
-- [Votre script](../ci-automation/): `fix-ci.ts` ouvre la sandbox, démarre le workflow avec son `budget` et fixe le code de sortie.
-  - hôte
-  - → **Sandbox**: `createSandbox()`
-  - → **Tentative**: `workflow.start()`
-- [Boucle](../verification-loops/): `defineLoopTask()`, 4 tours au plus, chacun limité par `timeoutMs`.
-  - workflow
-  - **Tentative**: le brief, plus le dernier échec
-    - → **Agent**: `perform(context)`
-  - **Vérification**: `npm test` doit sortir avec 0, puis l’arbre doit être propre ; les 20 000 derniers caractères de sortie deviennent le retour
-    - → **Commandes**: `sandbox.command()`
-- [Sandbox](../sandbox-sessions/): Reste ouverte d’un tour à l’autre : dépendances et modifications sont conservées.
-  - sandbox
-  - **Commandes**: `npm ci` une fois, avant le premier tour ; `npm test` à chaque tour
-  - **Agent**: modifie et commite ; ses tokens comptent dans `budget`
-  - → **Branche**: commits
-- **Branche**: `outpost/fix-ci` dans `.outpost/workspaces` ; `await using` ferme la sandbox et la conserve. Rien n’est fusionné ni poussé.
-  - hôte
+, dans le sens de la flèche.
 
 `perform(context)` relie l’usage et l’annulation de l’agent au workflow : ses tokens comptent dans `budget`. `timeoutMs` borne chaque tour.
 

@@ -3,6 +3,8 @@ title: "Store data in S3 or R2"
 description: "Connect an object store to share artifacts, checkpoints and journals between machines."
 ---
 
+Remote storage shares persisted objects, not Git worktrees or conversation files that remain local. Resuming on another machine also requires those resources at their expected locations, or explicit restoration.
+
 ## Create the transport
 
 Install the AWS SDK alongside Outpost to use an S3-compatible object store. This dependency is optional and is loaded through the S3 transport entry point.

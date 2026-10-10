@@ -15,7 +15,11 @@ import { defineAgentProfile } from "@elie-laloum/outpost";
 
 Declare a CLI-independent, frozen agent profile without executing anything. Validate literal instructions, built-in tool allowlists and MCP declarations; copy nested lists and server configuration so later caller edits cannot change the profile. Each harness projects the declaration and refuses unsupported capabilities.
 
-[Complete example and detailed rules](../../guide/choose-an-agent/).
+Claude appends system instructions and native MCP JSON; Codex uses developer_instructions and MCP TOML configuration overrides, including app-server. Copilot, Kimi and Antigravity prepend literal instructions to each request, including repairs and resumes, before final-answer instructions. Profiles do not write instructions into the repository or modify host credential files.
+
+Claude allowlists use native tool selection, dontAsk and a PreToolUse command hook, with inherited user/project/local settings and MCP configuration disabled for the request. Conflicting permission modes fail at composition; command hooks require Node.js and a CLI able to execute them inside the sandbox.
+
+[Complete example and detailed rules](../../guide/agent-profiles/).
 
 ## Parameters and properties
 

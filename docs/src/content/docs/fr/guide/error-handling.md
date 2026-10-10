@@ -3,6 +3,8 @@ title: "Gérer les erreurs"
 description: "Examinez les erreurs des agents et des workflows, puis décidez ce qui peut être relancé."
 ---
 
+Distinguez le signalement d’un échec, la nouvelle tentative et la récupération des fichiers. Cette page explique résultats et exceptions ; la [récupération](../recovery/) traite de l’état conservé, et les [nouvelles tentatives](../concurrency-and-retries/) de la relance.
+
 ## Comprendre les retours d’erreur
 
 L’erreur reçue dépend de l’opération. Un appel d’agent rejette sa promesse en cas d’échec ; un workflow renvoie généralement un résultat contenant les tâches en échec. Le tableau ci-dessous indique comment traiter chaque appel.
@@ -36,7 +38,9 @@ try {
 } catch (error) {
   if (!(error instanceof OutpostError)) throw error;
   console.error(error.code, error.message);
-  console.error(recoveryDetails(error));
+  const saved = recoveryDetails(error);
+  console.error({ branch: saved?.branch, directory: saved?.directory });
+  throw error;
 }
 ```
 
@@ -49,6 +53,8 @@ Référence API : [recoveryDetails](../../reference/recoverydetails/).
 [Récupérer le travail](../recovery/) montre comment exploiter ces emplacements.
 
 ## Codes d’erreur
+
+Une configuration invalide demande une correction avant tout nouvel essai. Un conflit, un refus de garde-fou ou une erreur de synchronisation demande d’abord une inspection du travail conservé. Une limite de consommation ou une panne reconnue peut suivre une politique explicite de pause ou de secours. Ne réessayez pas automatiquement toute erreur.
 
 Référence API : [FaultCode](../../reference/faultcode/).
 
@@ -94,7 +100,6 @@ export const deploy = defineTask({
 ```
 
 ```ts title="run-deploy.ts"
-import { reportValue } from "./reporter.ts";
 import {
   defineWorkflow,
   WorkflowFailure,
@@ -108,7 +113,7 @@ try {
 } catch (error) {
   if (!(error instanceof WorkflowFailure)) throw error;
   const [first] = error.result.errors;
-  if (first instanceof OutpostError) reportValue(error.code, first.details);
+  if (first instanceof OutpostError) console.log(error.code, first.details);
   // Example output: provider { status: 502 }
 }
 ```

@@ -21,7 +21,6 @@ A retained worktree is an ordinary Git worktree on its branch: open it, commit w
 [`recoveryDetails()`](../../reference/recoverydetails/) returns what Outpost attached to the error: `branch`, `directory`, `commits`, `transcript` and `logReference` when available.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { dispatch, OutpostError, recoveryDetails } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -33,7 +32,7 @@ try {
     branch: { mode: "named", name: "outpost/upgrade-deps" },
     brief: { text: "Upgrade the test dependencies and commit the change." },
   });
-  if (result.retainedDirectory) reportValue("Kept:", result.retainedDirectory);
+  if (result.retainedDirectory) console.log("Kept:", result.retainedDirectory);
   // Example output: Kept: /project/.outpost/workspaces/…
 } catch (error) {
   console.error(recoveryDetails(error));
@@ -52,28 +51,9 @@ When the run itself also failed, the synchronization error arrives inside an `Ag
 
 A transfer holds two sides: `previous`, your checkout before the sandbox’s changes, and `incoming`, the sandbox’s changes. Restore one side into a new directory, never over your checkout.
 
-<!-- canvas -->
-
-- **Look**: Nothing is changed.
-  - Steps
-  - **Inspect**: List workspaces, locks and recorded sandbox activity.
-    - `recovery inspect`
-  - **Verify**: Check the transfer’s files, checksums and Git history.
-    - `recovery verify`
-  - → **Restore**: then
-- **Restore**: Rebuild one side in a new directory.
-  - Steps
-  - **Plan**: Preview the commit and files to restore.
-    - `recovery restore`
-  - **Apply**: Create a detached checkout from the plan.
-    - `--apply`
-  - → **Integrate**: then
-- **Integrate**: You decide what comes back.
-  - Steps
-  - **Compare**: Review the restored checkout against your repository.
-    - git
-  - **Bring back**: Commit, cherry-pick or merge the parts you keep.
-    - git
+1. **Inspect and verify.** List retained work, then check the transfer's files, checksums and Git history. These operations change nothing.
+2. **Restore separately.** Preview the recovery plan, then use `--apply` to create a detached checkout in a new directory.
+3. **Review and integrate.** Compare it with your repository, then commit, cherry-pick or merge only the work you decide to keep.
 
 ### Inspect
 
@@ -130,7 +110,6 @@ export const transfer = process.env.TRANSFER!;
 ```
 
 ```ts title="verify-transfer.ts"
-import { reportValue } from "./reporter.ts";
 import { inspectRecovery, verifyRecoveryTransfer } from "@elie-laloum/outpost";
 import { repository, transfer } from "./recovery-target.ts";
 
@@ -140,7 +119,7 @@ export async function verifyTransfer() {
     git: true,
     locks: true,
   });
-  reportValue(inventory.git?.workspaces);
+  console.log(inventory.git?.workspaces);
   // Example output: [ { branch: "outpost/fix-tests", … } ]
   const verification = await verifyRecoveryTransfer(transfer, {
     checksums: true,
@@ -153,7 +132,6 @@ export async function verifyTransfer() {
 ```
 
 ```ts title="restore.ts"
-import { reportValue } from "./reporter.ts";
 import { verifyTransfer } from "./verify-transfer.ts";
 import {
   planRecoveryRestore,
@@ -169,7 +147,7 @@ export const plan = await planRecoveryRestore({
   side: "incoming",
 });
 export const restored = await restoreRecoveryTransfer(plan);
-reportValue(restored.directory, restored.commit);
+console.log(restored.directory, restored.commit);
 // Example output: /project/.outpost/workspaces/… 8f3a21c…
 ```
 
@@ -180,7 +158,6 @@ reportValue(restored.directory, restored.commit);
 `archiveRecovery()` verifies a transfer and uploads it through a transport. `materializeRecoveryArchive()` downloads it on any machine and checks its checksums again.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import {
   archiveRecovery,
   createLocalTransport,
@@ -196,7 +173,7 @@ const staging = await materializeRecoveryArchive({
   reference,
   destination: "/projects/transfer-copy",
 });
-reportValue(staging);
+console.log(staging);
 // Example output: /project/.outpost/recovery/run-1
 ```
 
@@ -212,6 +189,10 @@ A crashed workflow or candidate race keeps ownership of its checkpoint. After st
 Never delete `.outpost` or its folders by hand: they can hold the only copy of the agent’s work. Remove what you no longer need with [Retention and cleanup](../retention/).
 :::
 
+## File workspaces
+
+For directory and ephemeral resources, inspect `recovery inspect --runtime-directory PATH`. Publication `inspect`, `finish` and `rollback` operate on their own journal without rerunning workflow tasks. Writable mount effects remain immediate and have no publication rollback. See [file recovery](../publishing-files/#recover-an-interrupted-publication).
+
 ## Limits
 
 - Checksums detect damage against an unsigned manifest; they do not prove who produced the transfer.
@@ -222,7 +203,3 @@ Never delete `.outpost` or its folders by hand: they can hold the only copy of t
 - An archive holds recovery files, not the repository: restoring still needs the source repository.
 
 API: [recoveryDetails](../../reference/recoverydetails/) · [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [archiveRecovery](../../reference/archiverecovery/) · [materializeRecoveryArchive](../../reference/materializerecoveryarchive/).
-
-## File workspaces
-
-For directory and ephemeral resources, inspect `recovery inspect --runtime-directory PATH`. Publication `inspect`, `finish` and `rollback` operate on their own journal without rerunning workflow tasks. Writable mount effects remain immediate and have no publication rollback. See [file recovery](../workspaces/#check-capabilities-and-recover-publication).

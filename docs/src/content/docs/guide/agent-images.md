@@ -67,10 +67,9 @@ Do not `COPY` `~/.codex`, `~/.claude`, `.env` or keys into the recipe, and do no
 Each Outpost release pins one version per CLI, exposed as `agentVersions`. `init` writes these versions into the recipe.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { agentVersions } from "@elie-laloum/outpost";
 
-reportValue(agentVersions.codex);
+console.log(agentVersions.codex);
 // Example output: 0.156.1
 ```
 

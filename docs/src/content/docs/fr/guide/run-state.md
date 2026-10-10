@@ -3,6 +3,8 @@ title: "Lire l’état d’une exécution"
 description: "Construire une interface autour d’un ID, d’une fiche persistée et d’un curseur reprenable."
 ---
 
+Utilisez ce guide si un tableau de bord ou un autre processus doit consulter un workflow en cours. Les deux processus doivent accéder au même transport et au même ID. Un heartbeat observe l’activité ; son expiration n’autorise pas la reprise de propriété.
+
 ## Enregistrer une exécution
 
 Créez un récepteur avec un ID choisi par votre application et attachez-le à un nouveau hub d’observation. Passez ce hub à un seul `dispatch()` ou `start()` de workflow. Le récepteur conserve une fiche et les observations masquées dans votre [transport](../storage/), indépendamment du journal d’exécution. Enregistrez le transport dans `storage.ts` pour qu’un autre processus puisse lire le même emplacement.
@@ -57,20 +59,21 @@ Donnez au lecteur le même emplacement de transport et le même ID. Il lit une f
 
 ```ts title="snapshot.ts"
 import { transporter } from "./storage.ts";
-import { reportValue } from "./reporter.ts";
 import { readRun } from "@elie-laloum/outpost";
 
 export const run = await readRun({ transporter, id: "nightly_2026_10_07" });
 if (run) {
-  reportValue(
+  console.log(
     run.status,
     run.tasks.map((t) => `${t.key}: ${t.status}`),
   );
-  reportValue(run.dispatches, run.commits, run.usage, run.errors);
+  console.log(run.dispatches, run.commits, run.usage, run.errors);
 }
 ```
 
-Exécutez `node snapshot.ts` dans un second processus ; il affiche le statut et les champs enregistrés. Pour le helper de rapport standard, consultez l’[observabilité](../observability/). La fiche reflète les observations livrées avec succès. `complete: false` signale des trous détectés dans la séquence ou l’expiration d’une fiche en cours. `complete: true` indique qu’aucun trou n’a été détecté ; des événements finaux peuvent néanmoins être perdus par un récepteur borné. Aucune transaction ne lie cette projection au checkpoint. Elle n’autorise ni rejeu, ni intégration, ni récupération de ressources. Les estimations monétaires apparaissent dans `accounting.cost` si le workflow possède une table de prix.
+Lancez `node snapshot.ts` dans un second processus pour lire le statut enregistré. Si des tarifs sont configurés, `accounting.cost` contient l’estimation monétaire.
+
+`complete: false` signale un trou détecté dans les événements ou une fiche active expirée. `complete: true` signifie qu’aucun trou n’a été détecté, mais les derniers événements peuvent avoir été perdus. Cette vue est indépendante du checkpoint et n’autorise jamais de nouvelle tentative, d’intégration ou de récupération de ressources.
 
 Les tâches restaurées sans historique d’observation précédent exposent `usage.complete: false` ; le total cumulé du workflow provient toujours de la comptabilité du checkpoint.
 
@@ -81,7 +84,6 @@ Affichez d’abord la fiche, puis suivez les observations strictement après son
 ```ts title="watch.ts"
 import { transporter } from "./storage.ts";
 import { run } from "./snapshot.ts";
-import { reportValue } from "./reporter.ts";
 import { watchRun } from "@elie-laloum/outpost";
 
 if (run) {
@@ -90,12 +92,14 @@ if (run) {
     id: run.id,
     from: run.seq,
   })) {
-    reportValue(event.seq, event.scope.taskKey, event.event);
+    console.log(event.seq, event.scope.taskKey, event.event);
   }
 }
 ```
 
-Exécutez `node watch.ts` pour afficher la fiche puis les événements suivants. `watchRun()` interroge le transport et termine après avoir livré les événements d’une fiche terminée, suspendue ou abandonnée. Relisez la fiche pour actualiser votre interface ; les heartbeats ne consomment pas de curseur. Conservez le dernier curseur traité pour vous reconnecter. Passez `signal` pour annuler le lecteur sans arrêter l’exécution. Les segments absents, fiches invalides et curseurs en avance échouent explicitement. Les lectures sont bornées à 8 Mio par objet par défaut ; vous pouvez réduire cette limite.
+Lancez `node watch.ts` pour lire la fiche puis les événements suivants. Le lecteur interroge le stockage jusqu’à avoir livré les événements d’une exécution terminée, suspendue ou abandonnée. Gardez le dernier curseur traité pour vous reconnecter ; les heartbeats ne consomment pas de curseur. Annulez le lecteur avec `signal` sans arrêter l’exécution.
+
+Relisez la fiche pour actualiser votre interface. Les segments absents, fiches invalides et curseurs en avance sont refusés. Les [limites de lecture](../../reference/watchrunoptions/) sont de 8 Mio par objet par défaut et peuvent être réduites.
 
 ## Interpréter les heartbeats et les reprises
 

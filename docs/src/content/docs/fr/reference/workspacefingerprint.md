@@ -15,7 +15,7 @@ import { workspaceFingerprint } from "@elie-laloum/outpost";
 
 Calcule une empreinte canonique de manifest de fichiers sans Git, conservant chemins, contenus, types, modes, liens et identité de sélection.
 
-[Exemple complet et règles détaillées](../../guide/workspaces/).
+[Exemple complet et règles détaillées](../../guide/working-with-files/).
 
 ## Paramètres et propriétés
 

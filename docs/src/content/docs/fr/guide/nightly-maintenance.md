@@ -3,18 +3,22 @@ title: "Planifier une maintenance nocturne"
 description: "Planifiez un workflow de maintenance et reprenez la même exécution après une pause liée au quota."
 ---
 
-## Ce que montre l’exemple
+[Télécharger tous les fichiers](../../../guide-examples/fr/nightly-maintenance.tar.gz). Extrayez l’archive dans un dossier dédié, lancez `npm install`, puis adaptez `outpost.config.ts` selon [Installation](../setup/). Les commandes ci-dessous indiquent les scripts à exécuter.
 
-<!-- features -->
+<!-- canvas -->
 
-- [Planification cron](../cron-schedules/): Publie un job par nuit, dans votre fuseau horaire.
-- [Files de jobs et workers](../job-queues/): Exécute chaque job dans un processus worker séparé.
-- [Exécutions durables](../durable-runs/): Enregistre chaque tâche terminée dans un checkpoint.
-- [Pauses sur quota](../quota-pauses/): Met en pause sur une limite d’usage au lieu d’échouer.
-- [Agents de secours](../fallback-agents/): Confie le travail à un second agent quand la limite est atteinte.
-- [Réponses typées](../typed-responses/): Valide le rapport final de l’agent.
-
-Lancez un planificateur et un worker dans deux processus séparés qui partagent `.outpost/jobs.sqlite`. Le planificateur publie les jobs de maintenance et le worker les exécute. Enregistrez les deux scripts à côté de la configuration de la page [Installation](../setup/).
+- **Planifier**: Mettre en file le travail de 02 h et sa reprise de 07 h, en semaine à Paris.
+  - Planificateur
+  - → **Mettre à jour**: job réservé
+- **Mettre à jour**: L’agent met à jour les dépendances, teste et committe les changements acceptés.
+  - Worker
+  - → **Rapport du matin**: tâche terminée
+  - → **Pause de quota**: quota atteint
+- **Pause de quota**: Conserver la progression ; un job ultérieur reprend quand c’est possible.
+  - Worker
+  - → **Mettre à jour**: reprise possible
+- **Rapport du matin**: Lire le rapport enregistré et relire la branche conservée.
+  - Vous
 
 ## Planifier les nuits
 
@@ -261,39 +265,31 @@ node scheduler.ts
 node worker.ts
 ```
 
+### Essayer immédiatement
+
+Laissez le worker ouvert et lancez `node enqueue-now.ts` dans un autre terminal. Il publie un seul job sans attendre la nuit. Lisez ensuite son résultat par l’identifiant affiché, comme dans [Jobs et workers](../job-queues/).
+
+```ts title="enqueue-now.ts"
+import { randomUUID } from "node:crypto";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+const id = `manual-${randomUUID()}`;
+try {
+  await queue.enqueue({
+    id,
+    handler: "nightly-deps",
+    input: { runId: id, input: null },
+  });
+  console.log(id);
+} finally {
+  queue.close();
+}
+```
+
 ## Comprendre les étapes
 
-Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
-
-<!-- canvas -->
-
-- [Planificateur](../cron-schedules/): `runSchedules()` publie un job à 02:00 et un autre à 07:00, du lundi au vendredi, heure de Paris.
-  - hôte
-  - → **File**: deux fois le même `runId`
-- [File](../job-queues/): `.outpost/jobs.sqlite` ; un job dont le worker s’arrête revient après son bail de 30 secondes.
-  - hôte
-  - → **Worker**: prise en charge
-- [Worker](../job-queues/): `defineWorkflowJob()` exécute le workflow de la nuit sous le checkpoint `deps-<date>`.
-  - hôte
-  - → **update**: démarrage ou reprise
-  - → **Checkpoint**: tâches terminées, pauses
-- [Workflow](../durable-runs/): Deux tâches ; `resume: "retry-incomplete"` relance celle qui n’a pas fini.
-  - workflow
-  - **update**: `defineIsolatedTask()` sur `outpost/deps-<date>`
-    - → **Codex**: brief
-  - **publish**: enregistre la branche, les commits et le rapport
-    - → **Rapport**: `reports/deps-<date>.json`
-- [Codex](../codex/): Met à jour une dépendance à la fois, lance les tests, commite ou annule.
-  - sandbox
-  - → **Claude Code**: limite d’usage
-  - → **update**: `{ updated, skipped }`
-- [Claude Code](../claude-code/): `createFallbackAgent()` lui confie le brief d’origine sur la même branche.
-  - sandbox
-  - → **update**: rapport, ou pause à sa propre limite
-- [Checkpoint](../durable-runs/): Le job de 07:00 reprend une tâche en pause, sauf si sa réinitialisation dépasse encore `maxWaitMs`.
-  - hôte
-- **Rapport**: Vous le lisez le matin avec la branche.
-  - hôte
+, dans le sens de la flèche.
 
 Claude Code peut indiquer quand sa limite se réinitialise ; Codex ne le fait jamais. Une exécution arrêtée par Codex seul attend donc le job de 07:00. Avec l’agent de secours, la tâche ne se met en pause que si les deux agents atteignent leur limite, et la réinitialisation n’est connue que si les deux l’indiquent.
 

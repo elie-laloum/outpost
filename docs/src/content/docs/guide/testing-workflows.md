@@ -33,9 +33,20 @@ import test from "node:test";
 import { dispatch } from "@elie-laloum/outpost";
 import { createMemorySandboxProvider } from "@elie-laloum/outpost/testing";
 import { coder } from "./coder.ts";
-import { repository } from "./outpost.config.ts";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { execFileSync } from "node:child_process";
 
-test("coder commits the fix", async () => {
+test("coder commits the fix", async (t) => {
+  const repository = await mkdtemp(join(tmpdir(), "outpost-test-"));
+  t.after(() => rm(repository, { recursive: true, force: true }));
+  const git = (...args: string[]) =>
+    execFileSync("git", ["-C", repository, ...args]);
+  git("init");
+  git("config", "user.name", "Outpost test");
+  git("config", "user.email", "test@example.invalid");
+  git("commit", "--allow-empty", "-m", "Initial commit");
   const result = await dispatch({
     repository,
     agent: coder,

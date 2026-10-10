@@ -15,7 +15,9 @@ import { defineAgentProfile } from "@elie-laloum/outpost";
 
 Déclare un profil d’agent figé indépendant des CLI sans rien exécuter. Valide les instructions littérales, listes d’outils intégrés autorisés et déclarations MCP ; copie les listes imbriquées et configurations de serveur pour que les modifications ultérieures de l’appelant ne changent pas le profil. Chaque harness traduit la déclaration et refuse les capacités non prises en charge.
 
-[Exemple complet et règles détaillées](../../guide/choose-an-agent/).
+Claude ajoute des instructions système et du JSON MCP natif ; Codex utilise developer_instructions et les surcharges TOML MCP, y compris en mode app-server. Copilot, Kimi et Antigravity ajoutent les instructions littérales avant chaque demande, corrections et reprises comprises, avant les instructions de réponse finale. Les profils n’écrivent pas les instructions dans le dépôt et ne modifient pas les identifiants de l’hôte. Les listes Claude utilisent la sélection native d’outils, dontAsk et un hook PreToolUse, avec les réglages utilisateur/projet/local et le MCP hérités désactivés pour la demande. Un mode de permission incompatible échoue à la composition ; les hooks exigent Node.js et une CLI capable de les exécuter dans la sandbox.
+
+[Exemple complet et règles détaillées](../../guide/agent-profiles/).
 
 ## Paramètres et propriétés
 

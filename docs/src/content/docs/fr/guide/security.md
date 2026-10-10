@@ -3,6 +3,12 @@ title: "Comprendre les limites de sécurité"
 description: "Examinez les fichiers, les identifiants et les accès réseau disponibles pour les agents et le code hôte."
 ---
 
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="choisir-les-contrôles-nécessaires"></span>
+<span id="limiter-les-accès-du-conteneur"></span>
+<span id="ce-que-couvre-chaque-couche"></span>
+
 ## Ce que l’agent peut atteindre
 
 Un agent peut exécuter les commandes du projet avec les accès fournis par sa sandbox. Examinez l’environnement, les fichiers montés et les identifiants avant de lancer une tâche ; le fournisseur de sandbox détermine ces limites.
@@ -23,14 +29,14 @@ Chaque volume, périphérique, réseau ou cache partagé ajouté élargit ces ac
 
 Chaque donnée ne va que là où votre configuration l’envoie.
 
-| Donnée                                               | Destination                                                                                                                                                                                                      |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Connexion de l’agent](../authentication/)           | Outpost lit sur l’hôte le fichier de connexion de la CLI choisie, jamais un trousseau système, et le copie dans le répertoire personnel privé de la sandbox. L’exécution sur l’hôte ne reçoit que des variables. |
-| Clés d’API et [variables](../environment-variables/) | Dans l’environnement de la sandbox. L’agent peut toutes les lire.                                                                                                                                                |
-| Clés du fournisseur et du stockage                   | Restent sur l’hôte, avec le client du [fournisseur cloud](../cloud-sandboxes/) ou du [transport](../storage/). Les agents ne les reçoivent jamais.                                                               |
-| Dépôt et entrées                                     | Les sandboxes cloud et Firecracker reçoivent l’historique Git, les `copies` et, sur demande, le travail non commité.                                                                                             |
-| Objets persistés                                     | Un transport reçoit les artefacts, journaux, checkpoints, transcriptions et données de reprise que vous lui confiez.                                                                                             |
-| Transcriptions, logs et lots de reprise              | Conservés sur l’hôte ou dans votre transport. Ils peuvent contenir tout secret passé par l’agent.                                                                                                                |
+| Donnée                                               | Destination                                                                                                                                                                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Connexion de l’agent](../authentication/)           | Outpost lit sur l’hôte le fichier de connexion de la CLI choisie, jamais un trousseau système, et le copie dans le répertoire personnel privé de la sandbox. L’exécution sur l’hôte ne reçoit que des variables.                |
+| Clés d’API et [variables](../environment-variables/) | Dans l’environnement de la sandbox. L’agent peut toutes les lire.                                                                                                                                                               |
+| Clés du fournisseur et du stockage                   | Restent sur l’hôte, avec le client du [fournisseur cloud](../cloud-sandboxes/) ou du [transport](../storage/). Outpost ne les transmet pas. Une exécution locale peut néanmoins lire les fichiers et l’environnement de l’hôte. |
+| Dépôt et entrées                                     | Les sandboxes cloud et Firecracker reçoivent l’historique Git, les `copies` et, sur demande, le travail non commité.                                                                                                            |
+| Objets persistés                                     | Un transport reçoit les artefacts, journaux, checkpoints, transcriptions et données de reprise que vous lui confiez.                                                                                                            |
+| Transcriptions, logs et lots de reprise              | Conservés sur l’hôte ou dans votre transport. Ils peuvent contenir tout secret passé par l’agent.                                                                                                                               |
 
 Les [serveurs MCP](../mcp-servers/) agissent avec l’autorité de l’agent et reçoivent les variables que vous nommez. Leur configuration contient des noms de variables, jamais de valeurs. Une [connexion MCP](../mcp-oauth/) copiée dans une sandbox peut renouveler son refresh token et déconnecter l’hôte.
 
@@ -41,7 +47,7 @@ La sandbox confine les commandes de l’agent, pas votre propre code. Ces élém
 <!-- features -->
 
 - [Outils du harness](../harness-tools/): `execute` s’exécute dans le processus Outpost et n’atteint la sandbox que par `context.sandbox`.
-- [Hooks du harness](../harness-permissions/): S’exécutent dans le processus Outpost à chaque étape de la boucle intégrée.
+- [Hooks du harness](../harness-hooks/): S’exécutent dans le processus Outpost à chaque étape de la boucle intégrée.
 - [Fonctions du workflow](../task-dependencies/): Tâches, vérifications de boucle et vérificateurs de décision sont votre code, exécuté par le moteur de workflow.
 - [Hooks de préparation](../environment-setup/): Les commandes `workspaceReady` et `hostReady` s’exécutent sur l’hôte, dans le worktree.
 - [Code rapporté](../workspaces/): Les commits de l’agent arrivent dans votre dépôt : relisez-les avant de compiler ou de tester sur l’hôte.
@@ -103,3 +109,8 @@ Sans réseau, un agent CLI ne peut pas joindre son modèle. Utilisez le [harness
 Signalez une vulnérabilité en privé selon la [politique de sécurité](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/SECURITY.md) du dépôt, sans identifiants réels.
 
 API : [ContainerOptions](../../reference/containeroptions/) · [EgressPolicy](../../reference/egresspolicy/) · [AgentAuthentication](../../reference/agentauthentication/) · [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/) · [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessHook](../../reference/defineharnesshook/).
+
+## Pour continuer
+
+- [Restreindre le réseau de la sandbox](../network-restrictions/)
+- [Garder les métadonnées Git privées](../private-git/)

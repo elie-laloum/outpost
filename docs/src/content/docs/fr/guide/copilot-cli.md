@@ -32,7 +32,9 @@ Par défaut, Copilot enregistre sa connexion dans le trousseau système, qu’Ou
 
 Autres formes d’identifiants et emplacement des secrets : [Authentification](../authentication/).
 
-## Utiliser une clé d’API
+<span id="utiliser-une-clé-dapi"></span>
+
+## Le mode clé d’API n’est pas disponible
 
 Copilot n’a pas de mode par clé API : `authentication: "usage"` est refusé à la composition de l’agent. Les requêtes sont décomptées de votre abonnement Copilot.
 
@@ -40,7 +42,7 @@ Copilot n’a pas de mode par clé API : `authentication: "usage"` est refusé �
 
 <!-- features -->
 
-- [Conversations](../conversations/) : Capturées sous forme de archive de session, puis reprises à chaud ou à froid avec `--resume`.
+- [Conversations](../conversations/) : Capturées sous forme d’archive de session, puis reprises à chaud ou à froid avec `--resume`.
 - [Réponses typées](../typed-responses/) : Une réponse invalide est réparée en reprenant la même conversation.
 - [Réorientation](../steering/) : Outpost arrête le processus et reprend la session avec votre texte.
 - [Serveurs MCP](../mcp-servers/) : Transmis à chaque exécution avec `--additional-mcp-config`.

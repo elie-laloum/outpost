@@ -13,7 +13,7 @@ import { defineRecipe } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Analyse et valide une recette YAML locale, lie commandes et agents nommés à la sandbox de l’appelant et renvoie un Workflow séquentiel. La version 1 garde les chaînes littérales ; la version 2 résout les paramètres typés et les références explicites aux sorties des dépendances directes. N’alloue, n’intègre et ne ferme jamais la sandbox ; l’appelant possède ces actions. Les retries, l’annulation et le suivi de consommation des workflows restent disponibles.
+Analyse et valide une recette YAML locale, puis la compile en Workflow. Le format 1 conserve les chaînes littérales ; le format 2 ajoute des paramètres scalaires typés et les références aux dépendances directes ; le format 3 ajoute des paramètres structurés, conditions, callbacks, boucles, décisions et tâches isolées. Le moteur emprunte la sandbox fournie : l’appelant possède l’intégration et le nettoyage. Les tâches isolées possèdent leurs ressources distinctes. Les reprises après échec, l’annulation et le suivi de consommation des workflows s’appliquent.
 
 [Exemple complet et règles détaillées](../../guide/yaml-recipes/).
 

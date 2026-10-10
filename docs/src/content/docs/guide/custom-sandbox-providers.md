@@ -3,6 +3,8 @@ title: "Add a sandbox provider"
 description: "Connect an execution environment that runs commands, transfers files and releases resources."
 ---
 
+This guide is an adapter pattern: `sdk` represents your SDK, not a module supplied by Outpost. Implement its operations and validate them with the diagnostics below. For a first executable environment without writing an adapter, use [Docker or Podman](../containers/).
+
 ## Write a minimal provider
 
 Implement a `SandboxProvider` to open an execution environment. It returns a `SandboxLease` through which Outpost runs commands and transfers files. The example below outlines a virtual machine integration; `vms` represents that platform’s SDK.
@@ -252,7 +254,6 @@ export function openDiagnosticLease() {
 ```
 
 ```ts title="diagnose.ts"
-import { reportValue } from "./reporter.ts";
 import { openDiagnosticLease, vmSandboxProvider } from "./diagnostic-lease.ts";
 import { diagnoseSandbox } from "@elie-laloum/outpost";
 
@@ -262,7 +263,7 @@ try {
     transfers: true,
     sandboxProvider: vmSandboxProvider,
   });
-  reportValue(report.hasFailures, report.checks);
+  console.log(report.hasFailures, report.checks);
   // Example output: false [ { id: "sandbox.node", status: "pass", … }, … ]
 } finally {
   await lease.release();
@@ -275,6 +276,10 @@ The diagnosis leaves the lease to you: release it yourself. Then run a real `dis
 Mock tests prove the protocol, not the environment. Test mounts, terminals and network restrictions against the real platform.
 :::
 
+## File workspaces
+
+The optional `SandboxProvider.workspaces` capability declares supported file bindings and acquires from `FileSandboxContext`. Legacy providers keep `acquire(SandboxContext)` for Git. Missing file capabilities are refused before allocation. See [file workspaces](../workspaces/).
+
 ## Limits
 
 - **No `recover` in the helpers**: `createMountedSandboxProvider()` and `createRemoteSandboxProvider()` accept `name`, `variables` and `acquire`; add `recover` by spreading the result, as above.
@@ -282,7 +287,3 @@ Mock tests prove the protocol, not the environment. Test mounts, terminals and n
 - **Partial transfer probe**: `transfers: true` checks one binary file. Symlinks, modes, directories and batch transfers stay unverified.
 
 API: [SandboxProvider](../../reference/sandboxprovider/) · [SandboxLease](../../reference/sandboxlease/) · [SandboxContext](../../reference/sandboxcontext/) · [FileTransfers](../../reference/filetransfers/) · [createMountedSandboxProvider](../../reference/createmountedsandboxprovider/) · [createRemoteSandboxProvider](../../reference/createremotesandboxprovider/) · [diagnoseSandbox](../../reference/diagnosesandbox/).
-
-## File workspaces
-
-The optional `SandboxProvider.workspaces` capability declares supported file bindings and acquires from `FileSandboxContext`. Legacy providers keep `acquire(SandboxContext)` for Git. Missing file capabilities are refused before allocation. See [file workspaces](../workspaces/).

@@ -406,5 +406,11 @@
   "/guide/repository-and-branch/": "/guide/workspaces/",
   "/guide/file-workspaces/": "/guide/workspaces/",
   "/fr/guide/repository-and-branch/": "/fr/guide/workspaces/",
-  "/fr/guide/file-workspaces/": "/fr/guide/workspaces/"
+  "/fr/guide/file-workspaces/": "/fr/guide/workspaces/",
+  "/guide/typed-workflows/": "/guide/task-dependencies/",
+  "/fr/guide/typed-workflows/": "/fr/guide/task-dependencies/",
+  "/guide/observe-and-recover/": "/guide/progress/",
+  "/fr/guide/observe-and-recover/": "/fr/guide/progress/",
+  "/guide/isolation/": "/guide/security/",
+  "/fr/guide/isolation/": "/fr/guide/security/"
 }

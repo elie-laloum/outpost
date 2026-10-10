@@ -3,6 +3,8 @@ title: "Pass environment variables"
 description: "Declare which variables reach the sandbox, agent and commands."
 ---
 
+Select variables for the process that needs them. Model-provider, storage and sandbox-allocation credentials usually belong to host clients; agent and tool credentials may need to enter the sandbox. Do not forward the whole host environment.
+
 ## Choose where to declare a variable
 
 Declare each variable where it is needed: on the sandbox provider, on a CLI harness or on one command. Outpost forwards declared names; choose the scope that reaches only the processes needing the value.
@@ -37,15 +39,15 @@ Load declared names from [secret managers](../secret-sources/) with `fromSecrets
 
 ## Understand value precedence
 
-When a name appears in several places, the more specific source wins:
-
-`.outpost/.env` → sandbox provider → harness → command
+For an ordinary command, command variables override provider variables, which override values loaded from `.outpost/.env`. Harness variables target agent processes; they are not an override layer for provider variables. Declare each name in only one of those two places.
 
 Outpost also sets `GIT_AUTHOR_*` and `GIT_COMMITTER_*` from the repository’s Git configuration; any declared source overrides them.
 
 :::caution
 A name cannot be declared on both the harness and the sandbox provider. Dispatch fails before the agent starts with `Agent and sandbox variables overlap: NAME` (code `configuration`).
 :::
+
+File workspaces (`directory` and `ephemeral`) never load `.env` implicitly. Pass their variables explicitly.
 
 ## Keep values in `.outpost/.env`
 

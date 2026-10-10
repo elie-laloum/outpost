@@ -7,8 +7,13 @@ sidebar:
 
 ## Import
 
+Choose one of these equivalent imports.
+
 ```ts
 import type { ContainerOptions } from "@elie-laloum/outpost/providers/docker";
+```
+
+```ts
 import type { ContainerOptions } from "@elie-laloum/outpost/providers/podman";
 ```
 

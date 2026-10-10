@@ -3,6 +3,8 @@ title: "Delegate to subagents"
 description: "Give the built-in harness bounded child agents that share its sandbox."
 ---
 
+Use this guide to let an existing [built-in harness](../harness/) ask a bounded reviewer for help. The child uses the parent’s sandbox, so delegation does not create an isolated branch or an independently writable workspace.
+
 ## Expose a child agent as a tool
 
 Declare a subagent with `defineHarnessSubagent()` and expose it as a tool of the parent harness. It borrows the parent’s sandbox but keeps its own conversation history, permissions and limits.
@@ -68,7 +70,6 @@ export const coordinator = createAgent({
 ```
 
 ```ts title="run.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { coordinator } from "./coordinator.ts";
@@ -79,7 +80,7 @@ export const result = await dispatch({
   agent: coordinator,
   brief: { text: "Have the validation code reviewed, then list the risks." },
 });
-reportValue(result.text);
+console.log(result.text);
 // Example output: The reviewer found unchecked input in src/validation.ts.
 ```
 
@@ -89,23 +90,14 @@ The coordinator decides when to call `review`. Each call starts the reviewer wit
 
 <!-- canvas -->
 
-- **Delegate**: The parent model calls the subagent tool.
-  - Steps
-  - **Send a prompt**: The only input is `{ "prompt": "…" }`.
-  - **Start the child**: Its history holds its own instructions and that prompt, nothing from the parent.
-    - host
-  - → **Work**: then
-- **Work**: The child runs its own loop.
-  - Steps
-  - **Use its tools**: Commands and edits run in the parent’s sandbox and worktree.
-    - sandbox
-  - **Count its tokens**: Usage adds up in the child, the parent and every ancestor.
-  - → **Return**: then
-- **Return**: The parent reads a tool result.
-  - Steps
-  - **Save the transcript**: The child conversation is captured, even after a failure.
-    - host
-  - **Answer the parent**: JSON text with `text`, the child’s final answer, and `conversation` when the child keeps one.
+- **Delegate**: The parent sends a prompt, without its conversation history.
+  - Shared sandbox
+  - → **Child**: prompt
+- **Child**: Work with a separate history in the parent’s sandbox and files.
+  - Shared sandbox
+  - → **Parent resumes**: child result
+- **Parent resumes**: Read the child’s result and continue the main task.
+  - Shared sandbox
 
 Children share the parent’s sandbox: they allocate no provider and open no workspace, so the parent sees their edits at once. Delegations run one at a time, even when the parent’s other tools run in parallel.
 
@@ -134,12 +126,11 @@ Resuming the parent does not run the child again: the parent replays the recorde
 Each delegation emits a `subagent` event when it starts, finishes or fails. Every other event from the child, including `usage`, carries its run id in `subagentId`.
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import type { DispatchOptions } from "@elie-laloum/outpost";
 
 const observe: DispatchOptions["observe"] = (event) => {
   if (event.kind === "subagent")
-    reportValue(event.name, event.status, event.id, event.conversation);
+    console.log(event.name, event.status, event.id, event.conversation);
   // Example output: review started subagent-1 undefined
 };
 ```

@@ -1,20 +1,27 @@
 ---
-title: "Review a pull request on demand"
+title: "Save a review when a label is added"
 description: "Use a verified webhook to queue an agent review when a label is added."
 ---
 
 Save the script next to the configuration from [Installation](../setup/) and run it with Node.js. It receives verified label events and publishes review jobs; the worker runs the agent separately.
 
-## What this example covers
+This example produces a JSON report in `<repository>/.outpost/reviews/`, not a GitHub comment. Prepare a local clone containing the pull request’s base and head commits. Set `REVIEW_REPOSITORY` to its `owner/repository` name, update the allowed actor in `webhook-source.ts`, then configure the webhook and start both processes. The worker prints the report path. Add GitHub publication later with its own persistent deduplication.
 
-<!-- features -->
+[Download all files](../../guide-examples/review-on-label.tar.gz). Extract into a dedicated directory, run `npm install`, then adapt `outpost.config.ts` using [Installation](../setup/). The commands below identify the scripts to run.
 
-- [Webhooks](../webhooks/): Verify the delivery and turn the label event into a job.
-- [Job queues and workers](../job-queues/): Hand the job from the server to a worker process.
-- [Durable runs](../durable-runs/): Save each task’s output under the job’s `runId`.
-- [Tasks and dependencies](../task-dependencies/): Fetch, review, then post.
-- [Typed responses](../typed-responses/): Validate the agent’s verdict.
-- [Repository and branch](../workspaces/): Start the review branch at the pull request’s head commit.
+<!-- canvas -->
+
+- **Receive label**: Verify the signature, review label and permitted actor.
+  - HTTP server
+  - → **Queue review**: request accepted
+- **Queue review**: The HTTP server stores a job in the shared queue.
+  - Queue
+  - → **Review diff**: job claimed
+- **Review diff**: The agent examines the pull request in its own sandbox.
+  - Worker
+  - → **Save verdict**: valid verdict
+- **Save verdict**: Write the local JSON report with an idempotency key.
+  - Worker
 
 ## Write the script
 
@@ -76,7 +83,6 @@ export const on: TriggerRoute["on"] = (event) => {
 ```
 
 ```ts title="server.ts"
-import { reportValue } from "./reporter.ts";
 import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
 import { source } from "./webhook-source.ts";
 import { on } from "./review-trigger.ts";
@@ -88,7 +94,7 @@ export const server = await serveTriggers({
   routes: [{ path: "/github", source, on }],
   onError: (error, failure) => console.error(failure, error),
 });
-reportValue(`Listening on ${server.url}/github`);
+console.log(`Listening on ${server.url}/github`);
 // Example output: Listening on http://127.0.0.1:8787/github
 process.once("SIGINT", async () => {
   await server.close();
@@ -170,18 +176,52 @@ export function readPullRequest(input: WorkflowJson): PullRequest {
 ```
 
 ```ts title="github-effects.ts"
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, writeFile, readFile, link, rm } from "node:fs/promises";
+import { join } from "node:path";
 import type { PullRequest, Verdict } from "./review.types.ts";
 import { repository } from "./outpost.config.ts";
 
-export async function fetchCommits(pull: PullRequest): Promise<void> {
-  throw new Error(`Fetch ${pull.base} and ${pull.head} into ${repository}`);
+const exec = promisify(execFile);
+export async function requireCommits(pull: PullRequest): Promise<void> {
+  if (pull.repository !== process.env.REVIEW_REPOSITORY)
+    throw new Error("Pull request does not match REVIEW_REPOSITORY");
+  for (const oid of [pull.base, pull.head]) {
+    if (!/^[a-f0-9]{40,64}$/.test(oid)) throw new Error("Invalid commit ID");
+    await exec("git", ["-C", repository, "cat-file", "-e", `${oid}^{commit}`]);
+  }
 }
-export async function postVerdict(
+export async function saveVerdict(
   pull: PullRequest,
   result: Verdict,
   idempotencyKey: string,
 ): Promise<void> {
-  throw new Error(`Post ${result.approved} on #${pull.number}`);
+  const directory = join(repository, ".outpost", "reviews");
+  await mkdir(directory, { recursive: true });
+  const key = createHash("sha256").update(idempotencyKey).digest("hex");
+  const destination = join(directory, `${key}.json`);
+  const temporary = join(directory, `${key}.${randomUUID()}.tmp`);
+  const body = JSON.stringify({ pull, result }, null, 2) + "\n";
+  await writeFile(temporary, body, { flag: "wx", mode: 0o600 });
+  try {
+    try {
+      await link(temporary, destination);
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        !("code" in error) ||
+        error.code !== "EEXIST"
+      )
+        throw error;
+      if ((await readFile(destination, "utf8")) !== body)
+        throw new Error("Verdict receipt differs");
+    }
+  } finally {
+    await rm(temporary, { force: true });
+  }
+  console.log(destination);
 }
 ```
 
@@ -199,7 +239,7 @@ export function pullBrief(pull: PullRequest) {
 }
 ```
 
-Run the reviewer on the requested commit and publish its verdict through dependent tasks.
+Run the reviewer on the requested commit and save its verdict through a dependent task.
 
 <!-- tabs -->
 
@@ -258,7 +298,7 @@ export function reviewTask(pull: PullRequest, fetch: Task<void>) {
 import type { PullRequest } from "./review.types.ts";
 import { reviewTask } from "./pull-review.ts";
 import { defineTask } from "@elie-laloum/outpost";
-import { postVerdict } from "./github-effects.ts";
+import { saveVerdict } from "./github-effects.ts";
 
 export function postTask(
   pull: PullRequest,
@@ -268,7 +308,7 @@ export function postTask(
     key: "post",
     after: [review],
     perform: (context) =>
-      postVerdict(pull, context.value(review), context.idempotencyKey),
+      saveVerdict(pull, context.value(review), context.idempotencyKey),
   });
 }
 ```
@@ -276,12 +316,15 @@ export function postTask(
 ```ts title="review-workflow.ts"
 import type { PullRequest } from "./review.types.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
-import { fetchCommits } from "./github-effects.ts";
+import { requireCommits } from "./github-effects.ts";
 import { reviewTask } from "./pull-review.ts";
 import { postTask } from "./post-review.ts";
 
 export function reviewWorkflow(pull: PullRequest) {
-  const fetch = defineTask({ key: "fetch", perform: () => fetchCommits(pull) });
+  const fetch = defineTask({
+    key: "fetch",
+    perform: () => requireCommits(pull),
+  });
   const review = reviewTask(pull, fetch);
   const post = postTask(pull, review);
   return defineWorkflow("review-pull-request", [fetch, review, post]);
@@ -335,42 +378,14 @@ Start the HTTP server and the queue worker in separate terminals. Give the serve
 
 ```sh
 GITHUB_WEBHOOK_SECRET=… node server.ts
-node worker.ts
+REVIEW_REPOSITORY=owner/repository node worker.ts
 ```
 
 Point the repository’s webhook at the server’s `/github` path through an HTTPS proxy, with the same secret and the “Pull requests” event.
 
 ## Understand the steps
 
-<!-- canvas -->
-
-- **GitHub**: Sends a signed delivery when a label is added to a pull request, and waits 10 seconds for the answer.
-  - GitHub
-  - → **Server**: webhook
-- [Server](../webhooks/): `serveTriggers()` checks the signature (`401` otherwise), the `outpost:review` label and the actor in `reviewers`.
-  - host
-  - → **Queue**: `review` job
-- [Queue](../job-queues/): `.outpost/jobs.sqlite`, shared by the server and the worker.
-  - host
-  - → **Worker**: claim
-- [Worker](../job-queues/): `runQueueWorker()` claims the job; `defineWorkflowJob()` runs the workflow under its `runId`.
-  - host
-  - → **fetch**: start
-  - → **Checkpoint**: task outputs
-- [Workflow](../task-dependencies/): Three tasks, one after the other.
-  - workflow
-  - **fetch**: your code brings the base and head commits into the clone
-  - **review**: `defineIsolatedTask()` on a branch at the head commit
-    - → **Sandbox**: brief
-  - **post**: your code publishes the verdict, keyed by `context.idempotencyKey`
-    - → **GitHub**: verdict
-- [Sandbox](../choose-a-sandbox/): The agent reads the pull request’s diff, not your checkout.
-  - sandbox
-  - → **review**: checked `{ approved, findings }`
-- [Checkpoint](../durable-runs/): The same label on the same commit restores the finished run.
-  - host
-
-The `runId` names the head commit. Adding the label again on the same commit restores the finished run from its checkpoint, so nothing is reviewed or posted twice; a new commit starts a new review.
+The `runId` names the head commit. Adding the label again on the same commit restores the finished run from its checkpoint, so the completed tasks are reused; a new commit starts a new review. The local receipt also detects a conflicting repeated write.
 
 `review` returns only `.value`: checkpoints hold JSON, not the methods of a dispatch result ([From a task to a workflow](../first-workflow/)).
 
@@ -378,17 +393,17 @@ The `runId` names the head commit. Adding the label again on the same commit res
 
 ### GitLab merge requests
 
-Add a `/gitlab` route with `createGitlabWebhook({ signingToken })`, which verifies a signed body. `labelAdded()` also recognizes merge requests: read the head from `object_attributes.last_commit.id`, the base from `object_attributes.target_branch`, and list `gitlab:<username>` actors in `reviewers`.
+For GitLab, use `createGitlabWebhook({ signingToken })` and authorize `gitlab:<username>` actors. Adapt the input resolver: the event names a target branch, while this example requires a verified base commit ID available in the local clone. Passing the branch name to `requireCommits` is rejected.
 
 ### A Slack command
 
-Add a `/slack` route with `createSlackSource({ signingSecret })` and `commandIssued(event, "/review")`, whose `text` names the pull request. Slack carries no commits: publish `{ repository, number }` and let `fetch` return `{ base, head }` for `review` to read.
+Add a `/slack` route with `createSlackSource({ signingSecret })` and `commandIssued(event, "/review")`, whose `text` names the pull request. Slack carries no commits: add a trusted resolver for `{ repository, number }`, obtain and prepare the base and head commits, then build the review input. The existing `requireCommits` only checks local commits.
 
 ### A Redis queue
 
 Replace `createSqliteTaskQueue()` in the queue configuration with [`createBullMQTaskQueue()`](../redis-workers/) to run the server and workers on separate machines. Several worker machines also need a shared checkpoint store ([S3 and R2](../object-storage/)).
 
-### Approve before posting
+### Approve before saving or publishing
 
 Insert an [approval gate](../approvals/) between `review` and `post`. The job then completes as `paused`, with the pending gate in its value; submit the decision to the same run as shown in [Job queues and workers](../job-queues/).
 
@@ -398,7 +413,7 @@ import type { Task } from "@elie-laloum/outpost";
 
 type Verdict = { approved: boolean; findings: string[] };
 declare const review: Task<Verdict>;
-declare function postVerdict(verdict: Verdict, key: string): Promise<void>;
+declare function saveVerdict(verdict: Verdict, key: string): Promise<void>;
 
 const approve = defineApprovalTask({
   key: "approve",
@@ -410,7 +425,7 @@ const post = defineTask({
   key: "post",
   after: [review, approve],
   perform: (context) =>
-    postVerdict(context.value(review), context.idempotencyKey),
+    saveVerdict(context.value(review), context.idempotencyKey),
 });
 ```
 
@@ -418,6 +433,6 @@ const post = defineTask({
 
 - The worker reviews the clone named by `repository`; map `pull.repository` to a clone to serve several repositories.
 - “Do not edit files” is an instruction to the agent. Its review branch is never merged or pushed; delete `outpost/review-*` branches when you no longer need them.
-- A crashed worker can run `post` again: make `postVerdict` deduplicate on its key ([Job queues and workers](../job-queues/)).
+- A crashed worker can run `post` again: the provided `saveVerdict` deduplicates on its key ([Job queues and workers](../job-queues/)).
 
 API: [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [labelAdded](../../reference/labeladded/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [defineIsolatedTask](../../reference/defineisolatedtask/) · [defineJsonResponse](../../reference/definejsonresponse/).

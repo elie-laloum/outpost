@@ -3,6 +3,8 @@ title: "Utiliser un agent de secours"
 description: "Confiez le travail à un autre agent lorsqu’une erreur de quota ou de disponibilité prévue survient."
 ---
 
+Configurez et authentifiez chaque candidat avant de composer le secours. Préparez les CLI dans l’image d’un conteneur monté. Sur une sandbox distante, l’installation automatique prépare chaque candidat au moment de sa sélection, sauf si elle est désactivée. Tenez compte des changements laissés par un candidat échoué avant de faire poursuivre un autre.
+
 ## Composer un agent de secours
 
 Créez un agent de secours avec une liste ordonnée de candidats et les types d’erreur attendus dans `on`. Outpost passe au candidat suivant uniquement si l’agent courant rencontre une erreur de quota ou de disponibilité couverte par cette liste.
@@ -29,7 +31,6 @@ export const agent = createFallbackAgent(
 ```
 
 ```ts title="run.ts"
-import { reportValue } from "./reporter.ts";
 import { dispatch } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./fallback.ts";
@@ -40,7 +41,7 @@ export const result = await dispatch({
   agent,
   brief: { text: "Fix the failing tests." },
 });
-reportValue(result.fallback?.selected.name);
+console.log(result.fallback?.selected.name);
 // Example output: claude
 ```
 
@@ -52,7 +53,7 @@ Un agent de secours s’utilise partout où un agent est accepté, y compris `cr
 
 Référence API : [FallbackAgentOptions](../../reference/fallbackagentoptions/).
 
-Tout autre échec, y compris une annulation ou un délai dépassé, est relancé immédiatement. Exception : un délai dépassé après que l’agent a signalé un échec de connexion compte comme une panne. Une panne garde son code (`process`, `provider` ou `timeout`) ; détectez-la avec `unavailableFault(error)`.
+Tout autre échec, y compris une annulation ou un délai dépassé, est propagé immédiatement. Exception : un délai dépassé après que l’agent a signalé un échec de connexion compte comme une panne. Une panne garde son code (`process`, `provider` ou `timeout`) ; détectez-la avec `unavailableFault(error)`.
 
 ## Ce que voit le candidat suivant
 
@@ -76,7 +77,7 @@ Chaque passage de relais émet un [événement d’agent](../progress/) `fallbac
 
 ## Quand tous les candidats échouent
 
-La dernière erreur est relancée, et `recoveryDetails(error).fallback` liste les candidats arrêtés. S’ils ont tous atteint une limite, l’erreur a le code `quota` et porte la réinitialisation la plus proche, à condition que chaque candidat en ait indiqué une.
+La dernière erreur est propagée, et `recoveryDetails(error).fallback` liste les candidats arrêtés. S’ils ont tous atteint une limite, l’erreur a le code `quota` et porte la réinitialisation la plus proche, à condition que chaque candidat en ait indiqué une.
 
 Avec [`onQuota`](../quota-pauses/), le workflow se met en pause jusqu’à cette réinitialisation. La tentative reprise repart du premier candidat, avec le brief d’origine :
 

@@ -3,6 +3,8 @@ title: "Work across repositories"
 description: "Give each repository its own agent task and connect them with workflow dependencies."
 ---
 
+Prepare one local checkout per repository and the [agent configuration](../setup/). Keep a named branch in each repository for review. Success in one repository does not roll back a failure in another.
+
 ## Run one task per repository
 
 Give each repository its own `defineIsolatedTask()` and connect those tasks in a workflow. Each sandbox owns one repository, so every task works with its own checkout and Git history.
@@ -31,7 +33,6 @@ export function upgrade(key: string, path: string) {
 ```
 
 ```ts title="upgrade-repositories.ts"
-import { reportValue } from "./reporter.ts";
 import { upgrade } from "./upgrade.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
 
@@ -41,7 +42,7 @@ export const result = await defineWorkflow("node-24", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
-reportValue(result.value(api).commits.length, result.value(web).commits.length);
+console.log(result.value(api).commits.length, result.value(web).commits.length);
 // Example output: 1 1
 ```
 

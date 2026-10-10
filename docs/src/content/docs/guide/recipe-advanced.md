@@ -1,9 +1,14 @@
 ---
-title: Advanced recipe composition
-description: Compose experimental candidates, conflict resolvers and declared telemetry from YAML.
+title: "Compare and integrate recipe results"
+description: "Select candidate work and verify conflict resolution before integration."
 ---
 
-Recipe format 3 and configuration format 2 compose the public declarative families through native engines. [Available components](../yaml-components/) is generated from their descriptors. Functions, SDK clients and custom runtime objects use explicit local extensions; immediate inspection, signing and recovery utilities remain callable from trusted TypeScript modules. This is a local, unreleased implementation. Provider and agent restrictions still apply.
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="declare-reporters-and-telemetry"></span>
+<span id="track-coverage-and-validation"></span>
+
+Recipe format 3 and configuration format 2 compose the public declarative families through native engines. [Available components](../yaml-components/) is generated from their descriptors. Functions, SDK clients and custom runtime objects use explicit local extensions; immediate inspection, signing and recovery utilities remain callable from trusted TypeScript modules. Provider and agent restrictions still apply.
 
 ## Share candidate selection
 
@@ -21,7 +26,7 @@ tasks:
     speculation: { $ref: speculations.compare }
 ```
 
-Speculation requires `experimental: true` in configuration. Its native budget, validation and selection rules still apply. For `select: best`, supply a scoring callback as well as validation. Declare callbacks with contracts `speculation.options.validate` and `speculation.options.score`; see [local extensions](../yaml-recipes/#reuse-local-observer-objects).
+Speculation requires `experimental: true` in configuration. Its native budget, validation and selection rules still apply. For `select: best`, supply a scoring callback as well as validation. Declare callbacks with contracts `speculation.options.validate` and `speculation.options.score`; see [local extensions](../recipe-extensions/#reuse-local-observer-objects).
 
 ```yaml title="outpost.yaml — candidate configuration"
 experimental: true
@@ -42,7 +47,15 @@ speculations:
 
 Add this section to the complete local configuration containing version, repository, sandbox, provider, agent and extension declarations. Selection retains the native winning branch and integration preflight; it never merges the winner implicitly. Results are JSON projections under `outputs.select.value`, including candidate results, retained workspaces and cumulative usage. [Speculation](../speculation/) explains selection and recovery. `examples/71-recipe-speculation/index.ts` runs offline after `bun run build` with `node --test examples/71-recipe-speculation/index.ts`.
 
-Durable speculation also requires a workflow checkpoint and a provider with native recovery. Its effective inner run ID is the JSON tuple `[workflowRunId, taskKey, configuredSpeculationRunId]`, returned as `value.runId`; different workflow runs cannot reuse each other’s candidates. Its inner checkpoint identity includes the recipe, resolved parameters and relevant local configuration. The usage ledger and workflow receipts retain tokens across interrupted publication and replay. `recipe resume --retry-incomplete` authorizes interrupted candidate replay; it does not recover an owned speculation or remove workspace locks. Stop the old coordinator and use native `recoverSpeculation` with its exact revision before replay. Local and memory providers do not advertise recovery; unsupported combinations fail before allocation.
+Durable speculation also requires a workflow checkpoint and a provider with native recovery.
+
+Its effective inner run ID is the JSON tuple `[workflowRunId, taskKey, configuredSpeculationRunId]`, returned as `value.runId`; different workflow runs cannot reuse each other’s candidates. Its inner checkpoint identity includes the recipe, resolved parameters and relevant local configuration.
+
+The usage ledger and workflow receipts retain tokens across interrupted publication and replay.
+
+`recipe resume --retry-incomplete` authorizes interrupted candidate replay; it does not recover an owned speculation or remove workspace locks.
+
+Stop the old coordinator and use native `recoverSpeculation` with its exact revision before replay. Local and memory providers do not advertise recovery; unsupported combinations fail before allocation.
 
 ## Resolve integration conflicts
 
@@ -61,31 +74,3 @@ integration:
 ```
 
 The [native conflict-resolution contract](../workspaces/) still verifies the combined commit, rechecks diff guards and fences changed host/source commits. Verification failure retains recovery workspaces. A recipe cannot replace that verification with an agent's unverified assertion.
-
-## Declare reporters and telemetry
-
-A console sink is sufficient for normal event output. Existing text reporters, custom reporter handlers and OpenTelemetry can also be composed as sinks. OpenTelemetry borrows a host tracer and meter from declared extensions; only the observer is closed, and the optional integration is loaded when used.
-
-```yaml title="outpost.yaml — telemetry"
-observation:
-  scope: { executionId: review }
-  sinks:
-    - type: reporter
-      label: review
-    - type: opentelemetry
-      tracer: { $ref: extensions.tracer }
-      meter: { $ref: extensions.meter }
-reports:
-  - type: json
-    stream: stdout
-```
-
-A custom reporter uses `type: custom` and named `handlers`, each referencing a callback with its slot contract, such as `sink.custom.handlers.summary`. Shared hub scope accompanies allocation, tasks, agents, integration and cleanup. Owned sinks flush after the resources they observe. Borrowed objects stay caller-owned, and observer failures do not change execution outcomes. With neither observation nor reports, successful execution remains silent; `--json` explicitly requests one final report.
-
-## Track coverage and validation
-
-`recipes/parity.json` classifies public exports and options; `recipes/components.json` links component option paths to native or extension composition and family tests. CI rejects unclassified exports, changed signatures, new fields without classification, stale schemas and stale generated documentation. Native schemas come from the same TypeScript contracts, including mapped callback handler types.
-
-The seven delivery lots cover configuration, harnesses, workflows, storage, services and experimental composition. Results and immediate utility functions do not acquire independent YAML declarations. `defineRecipe()` retains borrowed sandbox bindings; advanced document options require `createRecipeRuntime()` instead of being silently ignored. JSON projections retain conversation/artifact/workspace references and omit runtime methods.
-
-Deterministic equivalence and failure tests use real temporary Git repositories, local processes and simulated agents/models. Docker and Redis have real integration checks. Podman was unavailable in the implementation environment; paid agents, cloud restoration, remote SDK authentication and external OpenTelemetry exporters have not received live validation.

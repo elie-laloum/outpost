@@ -1,80 +1,83 @@
 ---
 title: "Your first workflow"
-description: "Run an agent task, pass its result to a second task and read the workflow’s output."
+description: "Connect an agent task to a function and inspect their typed result."
 ---
 
-## Connect two tasks
+<!-- Retained section anchors for existing bookmarks. -->
 
-A workflow describes tasks and the dependencies between them. In this example, an agent fixes the tests on a separate branch. A second task reads its result and returns a short summary.
+<span id="connect-two-tasks"></span>
+<span id="run-the-script"></span>
+<span id="read-the-dependencies-and-results"></span>
+<span id="add-a-check-when-you-need-one"></span>
 
-Use the configuration from [Installation](../setup/) and save these three files next to it. Each tab shows one file: the agent task, the summary task and the script that runs them.
+## Pass an agent’s answer to your code
+
+After [your first task](../first-request/), add a second step that reads its result. This lesson uses the same committed README and [configuration](../setup/); it does not need failing tests or a checkpoint.
+
+Save these three files beside `outpost.config.ts`. The first declares the agent task, the second builds a summary, and the last starts the workflow.
 
 <!-- tabs -->
 
-```ts title="fix-task.ts"
+```ts title="review-task.ts"
 import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
-export const fix = defineIsolatedTask({
-  key: "fix",
+export const review = defineIsolatedTask({
+  key: "review",
   request: () => ({
     repository,
     sandboxProvider,
     agent: coder,
-    branch: { mode: "named", name: "outpost/fix-tests" },
-    brief: { text: "Fix the failing tests, run them and commit the fix." },
+    branch: { mode: "named", name: "outpost/workflow-review" },
+    brief: { text: "Summarize the README setup steps without editing files." },
   }),
 });
 ```
 
 ```ts title="summary.ts"
 import { defineTask } from "@elie-laloum/outpost";
-import { fix } from "./fix-task.ts";
+import { review } from "./review-task.ts";
 
 export const summary = defineTask({
   key: "summary",
-  after: [fix],
+  after: [review],
   perform: (context) => ({
-    branch: context.value(fix).branch,
-    commits: context.value(fix).commits.length,
+    text: context.value(review).text,
+    branch: context.value(review).branch,
+    commits: context.value(review).commits.length,
   }),
 });
 ```
 
-```ts title="fix.ts"
-import { reportValue } from "./reporter.ts";
+```ts title="workflow.ts"
 import { defineWorkflow } from "@elie-laloum/outpost";
-import { fix } from "./fix-task.ts";
+import { review } from "./review-task.ts";
 import { summary } from "./summary.ts";
 
-export const result = await defineWorkflow("fix-tests", [fix, summary]).start();
+const result = await defineWorkflow("readme-review", [review, summary]).start();
 result.unwrap();
-reportValue(result.value(summary));
-// Example output: { branch: 'outpost/fix-tests', commits: 1 }
+console.log(result.value(summary));
+// Example output: { text: 'Install ...', branch: 'outpost/workflow-review', commits: 0 }
 ```
 
-## Run the script
+## Run the workflow
 
-The agent works on `outpost/fix-tests`. After it succeeds, the `summary` task returns the branch name and the number of commits. The exact commit count depends on the work the agent produced.
+The agent reads the README first. If that task succeeds, your `summary` function runs and the script prints its result.
 
 ```sh
-node fix.ts
+node workflow.ts
 ```
 
-Review the branch before merging it. A successful workflow means its tasks completed; this example does not independently check whether the tests pass.
+Inspect the answer, branch name and commit count. `unwrap()` throws if the workflow did not succeed, so the script does not print a successful summary after a failed task. This example asks for no edits and never integrates the branch.
 
-## Read the dependencies and results
+## Understand the dependency
 
-`defineIsolatedTask()` runs the agent in its own sandbox. `defineTask()` runs your function. Neither starts work until you call the workflow’s `start()` method.
+`after: [review]` makes `summary` wait and lets it read `context.value(review)` with the correct TypeScript type. Neither task starts when declared: `.start()` runs the graph. The isolated task opens and closes its own sandbox; your summary runs in the Node.js process.
 
-`after: [fix]` tells `summary` to wait for `fix`. It also lets `summary` read the first task’s output with `context.value(fix)`; TypeScript keeps the value’s type.
+This run keeps its outputs in memory. A checkpointed workflow needs JSON outputs from every stored task, including the agent step: follow [Save and resume a workflow](../durable-runs/) when you need that behavior.
 
-`result.unwrap()` throws if the workflow did not finish successfully. After it returns, `result.value(summary)` gives you the summary. See [Connect tasks and dependencies](../task-dependencies/) for failures, skipped tasks and parallel execution.
+## Build on the two steps
 
-## Add a check when you need one
-
-To make test results decide whether work is accepted, add a [verification loop](../verification-loops/). To require a person’s decision, add an [approval task](../approvals/).
-
-When the workflow needs to resume in a later process, [save its progress](../durable-runs/) with a checkpoint. You can add these features to the same task graph.
+[Tasks and dependencies](../task-dependencies/) covers other task types and results. Use a [verification loop](../verification-loops/) when a real test must accept the work, and [offline workflow tests](../testing-workflows/) to exercise your control flow without model calls.
 
 API: [defineIsolatedTask](../../reference/defineisolatedtask/) · [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/).

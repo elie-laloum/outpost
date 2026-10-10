@@ -8971,16 +8971,16 @@
     "Déclare un workspace Git requis ; l’exécution de fichiers refuse cet outil avant acquisition."
   ],
   "createHarnessFileTools.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Choose Git-aware or plain-filesystem selection for file listing.",
+    "Choisit la sélection Git ou le système de fichiers pour lister les fichiers."
   ],
   "FileSelectionOptions.selection": [
     "Defaults to git for legacy calls; filesystem performs bounded sandbox traversal without Git or .gitignore filtering.",
     "git par défaut pour les appels legacy ; filesystem effectue un parcours borné dans la sandbox sans Git ni filtrage .gitignore."
   ],
   "createHarnessSearchTools.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Choose Git-aware or plain-filesystem search.",
+    "Choisit la recherche Git ou dans le système de fichiers."
   ],
   "WorkflowCheckpoint.workspaces": [
     "Opt-in versioned file resource capability; older providers and checkpoints preserve their Git contract.",
@@ -9543,8 +9543,8 @@
     "Construit la requête de commande ou d’agent déclarée depuis le contexte de tâche courant avant acquisition."
   ],
   "defineIsolatedCommandTask.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Declare the task key, dependencies and the command request whose sandbox the task owns.",
+    "Déclare la clé, les dépendances et la requête de commande dont la tâche possède la sandbox."
   ],
   "IsolatedCommandTaskOptions.request": [
     "Build the declared command or agent request from the current task context before acquisition.",
@@ -9599,8 +9599,8 @@
     "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
   ],
   "createWorkspace.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Select the Git branch or file source, runtime location and ownership policy for the new workspace.",
+    "Choisit la branche Git ou la source de fichiers, le répertoire de contrôle et la politique de propriété du workspace."
   ],
   "GitWorkspaceOptions.source": [
     "Declared source for an owned resource; mutually exclusive with borrowing an open workspace.",
@@ -9639,8 +9639,8 @@
     "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
   ],
   "restoreFileWorkspace.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Select local or portable restoration and explicit ownership recovery authorizations.",
+    "Choisit la restauration locale ou portable et les autorisations explicites de récupération de propriété."
   ],
   "RestoreFileWorkspaceOptions.runtime": [
     "Control directory and logical namespace, separate from the workspace files.",
@@ -9707,8 +9707,8 @@
     "Identité stable du workspace auquel appartient ce journal de publication."
   ],
   "PublicationJournal.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Publication destination, selected paths and replacement policy recorded before writes began.",
+    "Destination, chemins sélectionnés et politique de remplacement enregistrés avant le début des écritures."
   ],
   "PublicationJournal.staging": [
     "Exclusive validated incoming directory on the destination filesystem, retained for explicit recovery.",
@@ -9791,8 +9791,8 @@
     "Demande explicite finish ou rollback ; toutes deux vérifient les préconditions actuelles et n’exécutent jamais les tâches du workflow."
   ],
   "recoverWorkspacePublication.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Confirm that the publication owner has stopped before finishing or conditionally reversing writes.",
+    "Confirme l’arrêt du propriétaire avant de terminer ou d’annuler conditionnellement les écritures."
   ],
   "PublicationRecoveryOptions.processesStopped": [
     "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
@@ -9823,8 +9823,8 @@
     "Destination hôte conservant les chemins relatifs sélectionnés ; le chevauchement d’une source inscriptible active est refusé."
   ],
   "WorkspaceOutputBaseline.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Publication options whose destination state was captured for later conflict detection.",
+    "Options de publication dont l’état de destination a été capturé pour détecter les changements concurrents."
   ],
   "WorkspaceOutputBaseline.expected": [
     "Destination manifest captured before execution and used to detect concurrent edits.",
@@ -9867,8 +9867,8 @@
     "Répertoire canonique inspecté qui doit correspondre au verrou abandonné exact."
   ],
   "recoverWorkspacePathLock.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Stopped-process confirmation and inspected revision required to release path ownership.",
+    "Confirmation d’arrêt des processus et révision inspectée nécessaires pour libérer la propriété du chemin."
   ],
   "WorkspacePathRecoveryOptions.processesStopped": [
     "Explicit assertion that the prior owner and its processes have stopped; never inferred from heartbeat expiry.",
@@ -9931,8 +9931,8 @@
     "Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche."
   ],
   "inspectFileWorkspace.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Runtime location and snapshot transport used to inspect the saved workspace without starting it.",
+    "Répertoire de contrôle et transport de snapshot utilisés pour inspecter le workspace enregistré sans le démarrer."
   ],
   "FileWorkspaceInspectionOptions.runtime": [
     "Control directory and logical namespace, separate from the workspace files.",
@@ -9959,8 +9959,8 @@
     "Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération."
   ],
   "recoverFileWorkspace.options": [
-    "Options selecting source, execution capabilities or inspected recovery preconditions for this operation.",
-    "Options sélectionnant la source, les capacités d’exécution ou les préconditions de récupération inspectées pour cette opération."
+    "Inspected revision, stopped-process confirmations and explicit adoption choices for interrupted files or a changed mount.",
+    "Révision inspectée, confirmations d’arrêt et choix explicites d’adoption des fichiers interrompus ou d’un montage modifié."
   ],
   "FileWorkspaceRecoveryOptions.expectedRevision": [
     "Revision obtained by inspection; recovery refuses a changed persisted record.",

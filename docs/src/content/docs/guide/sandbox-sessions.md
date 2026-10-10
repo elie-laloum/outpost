@@ -3,12 +3,13 @@ title: "Reuse a sandbox"
 description: "Keep an environment open for agent turns, commands and tests on the same files."
 ---
 
+Start with the [agent configuration](../setup/) and a project whose test command is available in the sandbox. [Prepare dependencies](../environment-setup/) before running the check. A command result must be checked: receiving stdout alone does not mean it succeeded.
+
 ## Open a sandbox
 
 Open a sandbox with `createSandbox()` when several operations need the same files and installed dependencies. `await using` closes it at the end of the scope, including when an operation throws.
 
 ```ts title="session.ts"
-import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -22,7 +23,7 @@ const tests = await sandbox.command({
   executable: "npm",
   arguments: ["test"],
 });
-reportValue(tests.status === 0 ? "Tests pass" : tests.stderr);
+console.log(tests.status === 0 ? "Tests pass" : tests.stderr);
 // Example output: Tests pass
 ```
 
@@ -39,7 +40,6 @@ An `agent` passed to `sandbox.dispatch()` replaces the one given to `createSandb
 `sandbox.command()` runs one executable with an array of arguments. No shell parses them: `*`, `|` and `$HOME` reach the program as plain text. Call a shell yourself when you need one.
 
 ```ts title="command.ts"
-import { reportValue } from "./reporter.ts";
 import { createSandbox } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -49,7 +49,7 @@ const result = await sandbox.command({
   arguments: ["-c", "node --version | tail -n 1"],
   variables: { CI: "1" },
 });
-reportValue(result.stdout.trim());
+console.log(result.stdout.trim());
 // Example output: v24.15.0
 ```
 
@@ -93,36 +93,9 @@ Pass it to `sandbox.command(build)`. Stopping a command terminates its process g
 An exception thrown inside `observe` stops the command, which then rejects with that exception.
 :::
 
-## Open an interactive terminal
+<span id="open-an-interactive-terminal"></span>
 
-`sandbox.attach()` starts the agent’s own CLI in your terminal, inside the sandbox. You work with it by hand; the call resolves when you quit, with `status` and the `commits` made during the session.
-
-```ts
-import { reportValue } from "./reporter.ts";
-import { createSandbox } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.ts";
-
-await using sandbox = await createSandbox({
-  repository,
-  sandboxProvider,
-  agent: coder,
-});
-const session = await sandbox.attach({
-  brief: { text: "Walk me through the payment module." },
-});
-reportValue(session.status, session.commits);
-// Example output: 0 []
-```
-
-Run it from a real terminal. `continuation` reopens a captured conversation. The top-level [`attach()`](../../reference/attach/) opens and closes its own sandbox, and applies the branch policy when the session exits with status 0.
-
-| Provider             | `attach()` |
-| -------------------- | ---------- |
-| Docker, Podman, host | Supported  |
-| Daytona              | Supported  |
-| Vercel, Firecracker  | Rejected   |
-
-Attach needs a CLI agent such as Codex or Claude Code. The [built-in harness](../harness/), [fallback agents](../fallback-agents/) and [replay agents](../record-replay/) are rejected.
+For this step, follow [Open an interactive agent terminal](../interactive-terminal/).
 
 ## Integrate the work yourself
 
@@ -147,6 +120,10 @@ if (tests.status === 0) await sandbox.workspace.integrate();
 
 With other branch modes, `integrate()` does nothing. A merge conflict, or a host branch switched during the run, rejects with code `conflict` and keeps the worktree. `close({ preserve: true })` also keeps it for inspection ([Recover work](../recovery/)).
 
+## File workspaces
+
+File sandboxes borrow an open `FileWorkspace` or own an explicit `workspaceSource`. Closing a borrowed sandbox leaves its workspace open. [File workspaces](../workspaces/) explains provider bindings, output publication and retention.
+
 ## Limits
 
 - A sandbox runs one operation at a time: a second call made while one runs is rejected, not queued. Use separate sandboxes for parallel work.
@@ -154,6 +131,60 @@ With other branch modes, `integrate()` does nothing. A merge conflict, or a host
 
 API: [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
 
-## File workspaces
+## Share a sandbox between tasks
 
-File sandboxes borrow an open `FileWorkspace` or own an explicit `workspaceSource`. Closing a borrowed sandbox leaves its workspace open. [File workspaces](../workspaces/) explains provider bindings, output publication and retention.
+`defineAgentTask()` and `defineCommandTask()` run in a sandbox you opened with [`createSandbox()`](../sandbox-sessions/). The tasks share its files; you close it.
+
+<!-- tabs -->
+
+```ts title="fix-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineAgentTask } from "@elie-laloum/outpost";
+
+export function defineFix(sandbox: Sandbox) {
+  return defineAgentTask({
+    key: "fix",
+    sandbox,
+    request: () => ({ brief: { text: "Fix the failing date tests." } }),
+  });
+}
+```
+
+```ts title="test-dates.ts"
+import type { Sandbox } from "@elie-laloum/outpost";
+import { defineFix } from "./fix-dates.ts";
+import { defineCommandTask } from "@elie-laloum/outpost";
+
+export function defineTests(
+  sandbox: Sandbox,
+  fix: ReturnType<typeof defineFix>,
+) {
+  return defineCommandTask({
+    key: "test",
+    after: [fix],
+    sandbox,
+    command: { executable: "npm", arguments: ["test"] },
+  });
+}
+```
+
+```ts title="run-dates.ts"
+import { createSandbox, defineWorkflow } from "@elie-laloum/outpost";
+import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { defineFix } from "./fix-dates.ts";
+import { defineTests } from "./test-dates.ts";
+
+await using sandbox = await createSandbox({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/check-dates" },
+  hooks: { sandboxReady: [{ executable: "npm", arguments: ["ci"] }] },
+});
+export const fix = defineFix(sandbox);
+export const test = defineTests(sandbox, fix);
+export const result = await defineWorkflow("fix-dates", [fix, test]).start();
+result.unwrap();
+```
+
+`test` runs `npm test` on the agent’s edits. A nonzero exit status fails the task.

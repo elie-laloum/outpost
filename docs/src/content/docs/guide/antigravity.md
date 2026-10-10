@@ -3,6 +3,8 @@ title: "Configure Antigravity"
 description: "Run Google’s agy CLI and understand its conversation limits."
 ---
 
+Antigravity resumes a conversation only inside its still-open sandbox. It has no portable capture or automated fork: use a [reusable session](../sandbox-sessions/) when you need a second turn.
+
 ## Install
 
 Use the [agent image](../agent-images/) to make `agy` available in a local container. In a [cloud sandbox](../cloud-sandboxes/), Outpost installs it when it is missing, unless you set `bootstrap: false`.

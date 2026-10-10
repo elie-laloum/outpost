@@ -3,31 +3,30 @@ title: "Check work and retry"
 description: "Use test output or a review to accept an agent’s work or request another attempt."
 ---
 
+Use a loop when your code can decide whether a result is acceptable. For the agent-and-tests example, prepare the [configuration](../setup/) and [dependencies](../environment-setup/) first. A retry after an execution error and another attempt after a failed check are different decisions.
+
+[Download all files](../../guide-examples/verification-loops.tar.gz). Extract into a dedicated directory, run `npm install`, then adapt `outpost.config.ts` using [Installation](../setup/). The commands below identify the scripts to run.
+
 ## Repeat until a check accepts
 
 Define an attempt and a check with `defineLoopTask()`. The check accepts the result or returns feedback for the next attempt. Set `maxRounds` so a result that never passes ends with a bounded failure.
 
 <!-- canvas -->
 
-- **Attempt**: Your `attempt(context, feedback)` returns a candidate.
-  - Steps
-  - **First round**: The callback receives `undefined` as feedback.
-  - **Later rounds**: The callback receives the text of the last rejection.
-  - → **Check**: then
-- **Check**: Your `check(context, candidate)` returns a verdict.
-  - Steps
-  - **Accept**: Return `{ done: true }`.
-  - **Reject**: Return `{ done: false, feedback }` with a text.
-  - → **Next**: then
-- **Next**: The verdict decides.
-  - Steps
-  - **Next round**: A rejection feeds the next attempt.
-  - **Done**: The accepted candidate becomes the task's value.
-  - **Exhausted**: A rejection in the last round fails the task.
-    - `LoopTaskExhausted`
+- **Attempt**: Produce or correct a candidate.
+  - Agent
+  - → **Check**: candidate ready
+- **Check**: Run your validation.
+  - Your check
+  - → **Attempt**: needs work
+  - → **Result**: accepted
+  - → **Failure**: rounds exhausted
+- **Result**: Return the accepted candidate.
+  - Workflow
+- **Failure**: Stop with LoopTaskExhausted.
+  - Workflow
 
 ```ts
-import { reportValue } from "./reporter.ts";
 import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 
 const fix = defineLoopTask({
@@ -45,7 +44,7 @@ const fix = defineLoopTask({
 
 const result = await defineWorkflow("verified", [fix]).start();
 result.unwrap();
-reportValue(result.value(fix));
+console.log(result.value(fix));
 // Example output: { round: 2, feedback: 'Cover the missing edge case.' }
 ```
 
@@ -144,7 +143,6 @@ Run `run-loop.ts`; it keeps the sandbox open until the workflow finishes.
 <!-- tabs -->
 
 ```ts title="run-loop.ts"
-import { reportValue } from "./reporter.ts";
 import { openLoopSandbox } from "./loop-sandbox.ts";
 import { defineFix } from "./fix-loop.ts";
 import { defineWorkflow } from "@elie-laloum/outpost";
@@ -153,7 +151,7 @@ await using sandbox = await openLoopSandbox();
 export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-tests", [fix]).start();
 result.unwrap();
-reportValue(result.value(fix).summary);
+console.log(result.value(fix).summary);
 // Example output: Fixed the parser and verified the tests.
 ```
 
