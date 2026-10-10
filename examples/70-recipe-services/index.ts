@@ -10,9 +10,10 @@ import { setTimeout as delay } from "node:timers/promises";
 import { createRecipeRuntime } from "../../dist/recipes.js";
 import { createSqliteTaskQueue } from "../../dist/index.js";
 
-test("explicit worker executes a queued recipe", async (t) => {
+test("explicit worker executes a queued recipe", async () => {
+  await using cleanup = new AsyncDisposableStack();
   const directory = await mkdtemp(join(tmpdir(), "outpost-service-example-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  cleanup.defer(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml");
   await copyFile(resolve(import.meta.dirname, "recipe.yaml"), file);
@@ -37,14 +38,14 @@ test("explicit worker executes a queued recipe", async (t) => {
   assert.equal(await publisher.status("example"), undefined);
   await using worker = await createRecipeRuntime({ file, config });
   const serving = worker.serve({ service: "worker" });
-  t.after(async () => {
+  cleanup.defer(async () => {
     await worker.close();
     await serving;
   });
   const queue = await createSqliteTaskQueue(
     join(directory, ".outpost/jobs.sqlite"),
   );
-  t.after(() => queue.close());
+  cleanup.defer(() => queue.close());
   for (let attempt = 0; attempt < 200; attempt++) {
     if ((await queue.get(job.id))?.status === "done") break;
     await delay(10);

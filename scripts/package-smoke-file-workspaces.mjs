@@ -9,7 +9,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 
 export function smokeFileWorkspaces(directory, checkTypes) {
   const consumer = join(directory, "file-workspaces.ts");
@@ -47,7 +47,10 @@ void [sandbox,branch,legacySandbox,attach];
     `#!/bin/sh\necho invoked >> '${trap.replaceAll("'", "'\\''")}'\nexit 99\n`,
   );
   chmodSync(join(bin, "git"), 0o700);
-  const environment = { ...process.env, PATH: `${bin}:${process.env.PATH}` };
+  const environment = {
+    ...process.env,
+    PATH: `${bin}${delimiter}${process.env.PATH}`,
+  };
   const file = join(directory, "file-recipe.yaml"),
     config = join(directory, "file-outpost.yaml");
   writeFileSync(
