@@ -181,7 +181,7 @@ function smokeWithoutGit(directory, cli) {
   copyFileSync(client, join(context, "docker"));
   writeFileSync(
     join(context, "Dockerfile"),
-    "FROM node:24-slim\nCOPY docker /usr/local/bin/docker\n",
+    'FROM node:24-slim\nARG OUTPOST_TEST_UID\nRUN getent passwd "$OUTPOST_TEST_UID" || useradd --no-create-home --uid "$OUTPOST_TEST_UID" --home-dir /home/node outpost-smoke\nCOPY docker /usr/local/bin/docker\n',
   );
   const image = `outpost-package-no-git:${process.pid}`;
   const file = join(directory, "no-git-recipe.yaml"),
@@ -223,9 +223,19 @@ function smokeWithoutGit(directory, cli) {
   );
   const socket = process.env.OUTPOST_DOCKER_SOCKET ?? "/var/run/docker.sock";
   try {
-    execFileSync("docker", ["build", "--network=none", "-t", image, context], {
-      stdio: "inherit",
-    });
+    execFileSync(
+      "docker",
+      [
+        "build",
+        "--network=none",
+        "--build-arg",
+        `OUTPOST_TEST_UID=${process.getuid()}`,
+        "-t",
+        image,
+        context,
+      ],
+      { stdio: "inherit" },
+    );
     const script = `const cp=require('child_process');if(cp.spawnSync('git',['--version']).error?.code!=='ENOENT')throw Error('Host contains Git');cp.execFileSync('tar',['--version']);const result=cp.spawnSync('node',${JSON.stringify([cli, "recipe", "run", "--file", file, "--config", config, "--json"])},{stdio:'inherit'});process.exit(result.status??1)`;
     execFileSync(
       "docker",

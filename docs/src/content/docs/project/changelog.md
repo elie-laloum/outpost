@@ -20,6 +20,7 @@ This release adds YAML workflow composition, terminal recipe dialogues and Git-f
 - Make recipe contract classification portable across Windows and POSIX source paths.
 - Build public declarations before checking consumer fixture types so validation works on a fresh checkout.
 - Prepare the Git-free Node image explicitly for container tests and document the required image pull.
+- Create the host UID's account in the Git-free package test image, and adapt container documentation checks to the simplified setup example.
 
 - Add explicit directory-copy, read-only/writable source-mount and ephemeral file workspaces without host Git, configuration version 3, provider workspace capabilities and file dispatch/report contracts. Preserve legacy Git APIs and configuration defaults. Journal protected output publication with conditional rollback and explicit recovery; conserve settled files and conversations for local or explicit Transport-backed portable resume. Cover independent commands, cross-process dialogue, interrupted publication and an installed CLI running with Node, Docker and tar on a host without Git. Native CLI file variants and live cloud/Firecracker validation remain unvalidated.
 
