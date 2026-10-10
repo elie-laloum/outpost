@@ -68,6 +68,11 @@ export function sameLocalFile(
   );
 }
 
+export function sameLocalMode(left: number, right: number): boolean {
+  const mask = process.platform === "win32" ? 0o200 : 0o777;
+  return (left & mask) === (right & mask);
+}
+
 export function validateFilePaths(paths: readonly string[]): void {
   if (
     new Set(paths).size !== paths.length ||

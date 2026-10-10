@@ -4,6 +4,7 @@ import { posix } from "node:path";
 import { invariant } from "../domain/errors.ts";
 import type { WorkspaceFileEntry } from "../domain/file-workspace.types.ts";
 import { safeDestination } from "../infrastructure/files.ts";
+import { sameLocalMode } from "../infrastructure/file-manifest.ts";
 import type {
   PublicationDirectory,
   PublicationJournal,
@@ -45,7 +46,7 @@ export async function planPublicationDirectories(
       entries.some((entry) => entry.path === path && entry.kind === "directory")
     )
       invariant(
-        (info.mode & 0o777) === mode,
+        sameLocalMode(info.mode, mode),
         "Existing publication directory mode differs; use a new destination",
       );
     if (!info) planned.push({ path, mode, phase: "pending" });
@@ -84,9 +85,9 @@ export async function applyPublicationDirectories(
       "Publication directory was replaced",
     );
     invariant(
-      (info.mode & 0o777) === directory.mode ||
+      sameLocalMode(info.mode, directory.mode) ||
         (directory.phase === "created" &&
-          (info.mode & 0o777) === directory.createdMode),
+          sameLocalMode(info.mode, directory.createdMode ?? directory.mode)),
       "Publication directory mode changed",
     );
   }
@@ -109,9 +110,9 @@ export async function settlePublicationDirectories(
       "Publication directory was replaced",
     );
     invariant(
-      (info.mode & 0o777) === directory.mode ||
+      sameLocalMode(info.mode, directory.mode) ||
         (directory.phase === "created" &&
-          (info.mode & 0o777) === directory.createdMode),
+          sameLocalMode(info.mode, directory.createdMode ?? directory.mode)),
       "Publication directory mode changed",
     );
     if (directory.phase === "settled") continue;
@@ -169,8 +170,8 @@ export async function preparePublicationRollback(
           current.isDirectory() &&
             current.dev === directory.identity.device &&
             current.ino === directory.identity.inode &&
-            ((current.mode & 0o777) === directory.mode ||
-              (current.mode & 0o777) === directory.createdMode),
+            (sameLocalMode(current.mode, directory.mode) ||
+              sameLocalMode(current.mode, directory.createdMode)),
           "Publication directory changed before rollback",
         );
         await handle.chmod(directory.createdMode);
@@ -197,7 +198,7 @@ export async function verifyPublicationDirectories(
       info.isDirectory() &&
         info.dev === directory.identity?.device &&
         info.ino === directory.identity.inode &&
-        (info.mode & 0o777) === directory.mode,
+        sameLocalMode(info.mode, directory.mode),
       "Publication directory verification failed",
     );
   }
@@ -233,8 +234,8 @@ export async function rollbackPublicationDirectories(
           "Publication directory changed during rollback",
         );
         invariant(
-          (info.mode & 0o777) === directory.mode ||
-            (info.mode & 0o777) === directory.createdMode,
+          sameLocalMode(info.mode, directory.mode) ||
+            sameLocalMode(info.mode, directory.createdMode ?? directory.mode),
           "Publication directory mode changed during rollback",
         );
         await rmdir(target);

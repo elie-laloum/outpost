@@ -79,6 +79,8 @@ Publication validates and stages every output before mutation, journals the plan
 
 Closing a workspace or sandbox primitive alone does not publish files. Dispatch wrappers publish their declared outputs after success and after sandbox operations stop.
 
+On Windows, permission checks cover the writable bit supported by Node.js; POSIX owner, group and executable permissions are not preserved. Existing Windows access controls still apply.
+
 ## Recover an interrupted publication
 
 Inspect the publication first. Replace `PUBLICATION_ID` with the retained journal’s ID; `documents` is this example’s namespace.

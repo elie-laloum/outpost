@@ -233,6 +233,41 @@ test("file selections refuse links through excluded aliases before copying or pu
   }
 });
 
+test("directory copies preserve relative file and directory links with native separators", async () => {
+  const root = await mkdtemp(join(tmpdir(), "outpost-native-links-"));
+  try {
+    const source = join(root, "source");
+    await mkdir(join(source, "nested"), { recursive: true });
+    await writeFile(join(source, "nested", "value.txt"), "selected");
+    await symlink("nested", join(source, "alias"), "dir");
+    await symlink(
+      join("alias", "value.txt"),
+      join(source, "result.txt"),
+      "file",
+    );
+    await using workspace = await createWorkspace({
+      source: {
+        kind: "directory",
+        directory: source,
+        access: { mode: "copy" },
+      },
+      runtime: { directory: join(root, "control") },
+    });
+    assert.equal(
+      await readFile(join(workspace.directory, "result.txt"), "utf8"),
+      "selected",
+    );
+    assert.ok(
+      (await lstat(join(workspace.directory, "alias"))).isSymbolicLink(),
+    );
+    assert.ok(
+      (await lstat(join(workspace.directory, "result.txt"))).isSymbolicLink(),
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("relative link traversal expands selected aliases before processing parent segments", async () => {
   const root = await mkdtemp(join(tmpdir(), "outpost-relative-alias-"));
   try {
@@ -241,7 +276,7 @@ test("relative link traversal expands selected aliases before processing parent 
     await mkdir(join(source, "safe"));
     await writeFile(join(source, "value.json"), "selected");
     await writeFile(join(root, "value.json"), "external");
-    await symlink("../safe", join(source, "dir", "alias"));
+    await symlink("../safe", join(source, "dir", "alias"), "dir");
     await symlink("alias/../../value.json", join(source, "dir", "result.json"));
     await assert.rejects(
       createWorkspace({

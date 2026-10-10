@@ -36,6 +36,16 @@ jobs:
       - run: bun run architecture
       - run: bun run build
       - run: bun run typecheck
+      - name: Validate Windows file workspace and recipe portability
+        if: runner.os == 'Windows'
+        run: >-
+          node --test test/unit/publication-directory-modes.test.ts
+          test/functional/file-workspaces.test.ts
+          test/functional/file-workspace-recovery.test.ts
+          test/functional/file-publication-report.test.ts
+          test/functional/recipe-durable.test.ts
+          test/functional/recipe-services.test.ts
+          test/functional/linear-development-recipe.test.ts
       - run: bun run coverage
       - run: node --test examples/64-yaml-recipes/index.ts
       - run: node --test examples/65-recipe-observation/index.ts

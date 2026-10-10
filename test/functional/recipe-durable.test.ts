@@ -17,6 +17,7 @@ test("a YAML checkpoint resumes in another process, retaining committed and unco
   const execute = promisify(execFile);
   const git = (...args: string[]) => execute("git", args, { cwd: repository });
   await git("init", "-b", "main");
+  await git("config", "core.autocrlf", "false");
   await git("config", "user.name", "Recipe");
   await git("config", "user.email", "recipe@example.invalid");
   await writeFile(join(repository, "initial"), "initial");
@@ -269,7 +270,10 @@ test("durable YAML preserves cumulative usage, refuses implicit replay and fence
       settings,
     ]),
     (error) =>
-      error instanceof Error && "signal" in error && error.signal === "SIGKILL",
+      error instanceof Error &&
+      (process.platform === "win32"
+        ? "code" in error && error.code === 1
+        : "signal" in error && error.signal === "SIGKILL"),
   );
   await using recovered = await createRecipeRuntime({ file, config });
   const status = await recovered.status("crash");

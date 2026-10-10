@@ -37,9 +37,10 @@ async function availablePort(): Promise<number> {
   return address.port;
 }
 
-test("YAML enqueue and explicit workers use native durable jobs across processes without starting other services", async (t) => {
+test("YAML enqueue and explicit workers use native durable jobs across processes without starting other services", async () => {
+  await using cleanup = new AsyncDisposableStack();
   const directory = await mkdtemp(join(tmpdir(), "outpost-recipe-service-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  cleanup.defer(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml"),
     db = join(directory, "jobs.sqlite"),
@@ -141,7 +142,7 @@ test("YAML enqueue and explicit workers use native durable jobs across processes
   assert.equal(JSON.parse(queued.stdout).status, "pending");
   await assert.rejects(stat(evidence), /ENOENT/);
   const queue = await createSqliteTaskQueue(db);
-  t.after(() => queue.close());
+  cleanup.defer(() => queue.close());
   const child = spawn(
     process.execPath,
     [
@@ -157,8 +158,11 @@ test("YAML enqueue and explicit workers use native durable jobs across processes
     ],
     { stdio: ["ignore", "pipe", "pipe"] },
   );
-  t.after(() => {
-    if (child.exitCode === null) child.kill("SIGKILL");
+  cleanup.defer(async () => {
+    if (child.exitCode !== null || child.signalCode !== null) return;
+    const exit = once(child, "exit");
+    child.kill("SIGKILL");
+    await exit;
   });
   let stdout = "",
     stderr = "";
@@ -182,7 +186,11 @@ test("YAML enqueue and explicit workers use native durable jobs across processes
   await exit;
   assert.equal(stdout, "");
   assert.equal(stderr, "");
-  assert.equal(child.exitCode, 143);
+  assert.equal(child.exitCode, process.platform === "win32" ? null : 143);
+  assert.equal(
+    child.signalCode,
+    process.platform === "win32" ? "SIGTERM" : null,
+  );
   await assert.rejects(runtime.serve({ service: "missing" }), /Unknown/);
   await assert.rejects(runtime.serve({ service: "forbidden" }), /Unselected/);
   await writeFile(
@@ -210,9 +218,10 @@ test("YAML enqueue and explicit workers use native durable jobs across processes
   );
 });
 
-test("a selected YAML webhook verifies signatures and only enqueues deterministic native jobs", async (t) => {
+test("a selected YAML webhook verifies signatures and only enqueues deterministic native jobs", async () => {
+  await using cleanup = new AsyncDisposableStack();
   const directory = await mkdtemp(join(tmpdir(), "outpost-recipe-trigger-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  cleanup.defer(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml"),
     db = join(directory, "jobs.sqlite"),
@@ -220,7 +229,7 @@ test("a selected YAML webhook verifies signatures and only enqueues deterministi
   const secret = "recipe-webhook-test-secret";
   const previous = process.env.OUTPOST_RECIPE_WEBHOOK_TEST;
   process.env.OUTPOST_RECIPE_WEBHOOK_TEST = secret;
-  t.after(() => {
+  cleanup.defer(() => {
     if (previous === undefined) delete process.env.OUTPOST_RECIPE_WEBHOOK_TEST;
     else process.env.OUTPOST_RECIPE_WEBHOOK_TEST = previous;
   });
@@ -275,7 +284,7 @@ test("a selected YAML webhook verifies signatures and only enqueues deterministi
   await using runtime = await createRecipeRuntime({ file, config });
   const stop = new AbortController(),
     service = runtime.serve({ service: "webhook", signal: stop.signal });
-  t.after(async () => {
+  cleanup.defer(async () => {
     stop.abort();
     await service;
   });
@@ -315,7 +324,7 @@ test("a selected YAML webhook verifies signatures and only enqueues deterministi
     401,
   );
   const queue = await createSqliteTaskQueue(db);
-  t.after(() => queue.close());
+  cleanup.defer(() => queue.close());
   const job = await queue.get("trigger:/github:delivery-4");
   assert.equal(job?.status, "pending");
   assert.equal(job?.handler, "review");
@@ -328,9 +337,10 @@ test("a selected YAML webhook verifies signatures and only enqueues deterministi
   await assert.rejects(fetch(url), /fetch failed/);
 });
 
-test("YAML HTTP queues rotate declared callbacks and schedules publish without executing", async (t) => {
+test("YAML HTTP queues rotate declared callbacks and schedules publish without executing", async () => {
+  await using cleanup = new AsyncDisposableStack();
   const directory = await mkdtemp(join(tmpdir(), "outpost-recipe-http-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  cleanup.defer(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml"),
     db = join(directory, "jobs.sqlite"),
@@ -338,7 +348,7 @@ test("YAML HTTP queues rotate declared callbacks and schedules publish without e
   const module = resolve("test/fixtures/recipe-service.ts");
   const previous = process.env.OUTPOST_RECIPE_QUEUE_TOKEN;
   process.env.OUTPOST_RECIPE_QUEUE_TOKEN = "a".repeat(40);
-  t.after(() => {
+  cleanup.defer(() => {
     if (previous === undefined) delete process.env.OUTPOST_RECIPE_QUEUE_TOKEN;
     else process.env.OUTPOST_RECIPE_QUEUE_TOKEN = previous;
   });
@@ -427,7 +437,7 @@ test("YAML HTTP queues rotate declared callbacks and schedules publish without e
   await validateRecipeProject({ file, config });
   await using server = await createRecipeRuntime({ file, config });
   const serving = server.serve({ service: "http" });
-  t.after(async () => {
+  cleanup.defer(async () => {
     await server.close();
     await serving;
   });
@@ -467,12 +477,12 @@ test("YAML HTTP queues rotate declared callbacks and schedules publish without e
   );
   await using clock = await createRecipeRuntime({ file, config });
   const running = clock.serve({ service: "clock" });
-  t.after(async () => {
+  cleanup.defer(async () => {
     await clock.close();
     await running;
   });
   const queue = await createSqliteTaskQueue(db);
-  t.after(() => queue.close());
+  cleanup.defer(() => queue.close());
   let scheduled: QueueJob | undefined;
   for (let attempt = 0; attempt < 100 && !scheduled; attempt++) {
     const job = await queue.claim({
@@ -524,9 +534,10 @@ test("YAML HTTP queues rotate declared callbacks and schedules publish without e
   );
 });
 
-test("a YAML queued task composes defineQueuedTask with a native defineWorkflowJob and preserves usage", async (t) => {
+test("a YAML queued task composes defineQueuedTask with a native defineWorkflowJob and preserves usage", async () => {
+  await using cleanup = new AsyncDisposableStack();
   const directory = await mkdtemp(join(tmpdir(), "outpost-recipe-queued-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  cleanup.defer(() => rm(directory, { recursive: true, force: true }));
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml");
   await writeFile(
@@ -587,7 +598,7 @@ test("a YAML queued task composes defineQueuedTask with a native defineWorkflowJ
   );
   await using worker = await createRecipeRuntime({ file, config });
   const serving = worker.serve({ service: "worker" });
-  t.after(async () => {
+  cleanup.defer(async () => {
     await worker.close();
     await serving;
   });

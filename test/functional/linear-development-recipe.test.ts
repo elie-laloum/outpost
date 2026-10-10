@@ -32,7 +32,24 @@ async function project(t: TestContext, prompt = false) {
         source !== resolve("test-recipe-linear-development/repo/.git"),
     },
   );
-  const file = resolve("test-recipe-linear-development/recipe.yaml");
+  let file = resolve("test-recipe-linear-development/recipe.yaml");
+  if (process.platform === "win32") {
+    const recipe = parse(await readFile(file, "utf8"));
+    const verification = recipe.tasks.find(
+      (task: unknown) =>
+        task &&
+        typeof task === "object" &&
+        "key" in task &&
+        task.key === "verification",
+    );
+    assert.ok(verification);
+    verification.command = {
+      executable: "cmd.exe",
+      arguments: ["/d", "/s", "/c", "npm test"],
+    };
+    file = join(directory, "recipe.yaml");
+    await writeFile(file, stringify(recipe));
+  }
   const config = join(directory, "outpost.yaml");
   const source = parse(
     await readFile(

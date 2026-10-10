@@ -6,6 +6,7 @@ import {
   open,
   readdir,
   readlink,
+  stat,
   symlink,
 } from "node:fs/promises";
 import { dirname, isAbsolute, matchesGlob, posix, resolve } from "node:path";
@@ -183,6 +184,7 @@ export async function workspaceManifest(
       let target: string | undefined;
       if (info.isSymbolicLink()) {
         target = await readlink(file);
+        if (process.platform === "win32") target = target.replaceAll("\\", "/");
         invariant(
           !isAbsolute(target) &&
             !target.includes("\\") &&
@@ -247,7 +249,22 @@ export async function copyWorkspaceManifest(
     }
     if (entry.kind === "link") {
       invariant(entry.target !== undefined, "Missing workspace link target");
-      await symlink(entry.target, target);
+      let type: "dir" | "file" | undefined;
+      if (process.platform === "win32") {
+        const info = await stat(
+          await safeDestination(source, entry.path),
+        ).catch((error: unknown) => {
+          if (
+            error instanceof Error &&
+            "code" in error &&
+            (error.code === "ENOENT" || error.code === "ELOOP")
+          )
+            return undefined;
+          throw error;
+        });
+        type = info?.isDirectory() ? "dir" : "file";
+      }
+      await symlink(entry.target, target, type);
       continue;
     }
     const original = await open(

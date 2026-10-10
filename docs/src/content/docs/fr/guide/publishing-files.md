@@ -79,6 +79,8 @@ La publication valide et prépare toutes les sorties avant mutation, journalise 
 
 La fermeture d'une primitive de workspace ou de sandbox ne publie rien par elle-même. Les wrappers de dispatch publient leurs sorties déclarées après succès et après arrêt des opérations de sandbox.
 
+Sous Windows, les permissions sont vérifiées à partir du droit d’écriture pris en charge par Node.js ; les droits POSIX de propriétaire, de groupe et d’exécution ne sont pas conservés. Les contrôles d’accès Windows existants continuent de s’appliquer.
+
 ## Récupérer une publication interrompue
 
 Inspectez d’abord la publication. Remplacez `PUBLICATION_ID` par l’identifiant du journal conservé ; `documents` est le namespace de cet exemple.
