@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add dedicated Docker/Podman egress companions for HTTP/HTTPS domain policies and raw TCP/UDP CIDR filtering, with denial precedence, TLS server-name checks, bounded kernel heartbeat expiry and companion recovery. Keep deny-all offline and refuse conflicting networks. Add `egressImage`, the source example in `exemples/container-egress/`, bilingual guidance and a tested-image publication workflow. The first public default image/digest, native macOS/Windows VM checks, standalone rootless host checks and native IPv6 routing validation remain prerequisites; local builds use an explicit image.
+
 ## 11.1.3
 
 This release refreshes the documentation and visual identity without changing the library's runtime behavior or public API.

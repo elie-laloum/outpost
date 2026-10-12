@@ -4,6 +4,9 @@ import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
 import type { Command } from "../domain/command.types.ts";
 import { containerNetworks } from "./container-network.ts";
+import { validateEgress } from "../domain/egress.ts";
+import { createContainerEgress } from "./container-egress.ts";
+import { egressVariables } from "./egress/egress.constants.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import {
@@ -43,11 +46,26 @@ export function containerProvider(
   executor: Executor = executeProcess,
   platform: NodeJS.Platform = process.platform,
 ): SandboxProvider {
+  const policy = validateEgress(options.egress);
   const config = {
     ...options,
+    ...(policy ? { egress: policy } : {}),
     networks: containerNetworks(options),
     caches: (options.caches ?? []).map((cache) => ({ ...cache })),
   };
+  if (config.egressImage !== undefined) {
+    invariant(
+      config.egress?.mode === "allowlist",
+      "egressImage requires an egress allowlist",
+    );
+    invariant(
+      typeof config.egressImage === "string" &&
+        config.egressImage.length > 0 &&
+        !config.egressImage.startsWith("-") &&
+        !/\s/.test(config.egressImage),
+      "Invalid egressImage reference",
+    );
+  }
   invariant(
     config.repositoryMode === undefined ||
       config.repositoryMode === "mounted" ||
@@ -114,6 +132,11 @@ export function containerProvider(
         root,
         home,
       );
+      const egress =
+        config.egress?.mode === "allowlist"
+          ? createContainerEgress(call, name, config, engine, user)
+          : undefined;
+      if (egress) Object.assign(env, egressVariables);
       const caches = await cacheMounts(
         config.caches ?? [],
         context.repository,
@@ -124,7 +147,9 @@ export function containerProvider(
       for (const cache of caches)
         volumes.push("--volume", `${cache.volume}:${cache.target}:nocopy`);
       const args = containerPlan({
-        config,
+        config: egress
+          ? { ...config, networks: [`container:${egress.name}`] }
+          : config,
         engine,
         user,
         root,
@@ -135,10 +160,17 @@ export function containerProvider(
       });
       let closed = false,
         releasing: Promise<void> | undefined;
+      let attempted = false;
       let unregister = () => {};
       const release = (): Promise<void> => {
         closed = true;
-        releasing ??= call(["rm", "--force", name])
+        releasing ??= (async () => {
+          if (attempted) {
+            await call(["rm", "--force", name]);
+            attempted = false;
+          }
+          await egress?.release();
+        })()
           .then(() => {
             unregister();
           })
@@ -163,6 +195,8 @@ export function containerProvider(
           );
         await context.registerRecovery?.(name);
         context.signal?.throwIfAborted();
+        await egress?.start(context.signal);
+        attempted = true;
         await call(args, {
           ...(context.signal ? { signal: context.signal } : {}),
         });
@@ -241,11 +275,15 @@ export function containerProvider(
       }
       unregister = registerCleanup(release, () => {
         if (!closed)
-          execFileSync(engine, ["rm", "--force", name], {
-            timeout: containerDefaults.cleanupMs,
-            stdio: "ignore",
-            windowsHide: true,
-          });
+          execFileSync(
+            engine,
+            ["rm", "--force", name, ...(egress ? [egress.name] : [])],
+            {
+              timeout: containerDefaults.cleanupMs,
+              stdio: "ignore",
+              windowsHide: true,
+            },
+          );
       });
       return {
         root,

@@ -12497,6 +12497,7 @@
     "signatures": [],
     "options": {
       "egress": "EgressPolicy | undefined",
+      "egressImage": "string | undefined",
       "repositoryMode": "\"mounted\" | \"isolated\" | undefined",
       "caches": "readonly DependencyCache[] | undefined",
       "image": "string | undefined",
@@ -12519,6 +12520,7 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
       "egress": "native",
+      "egressImage": "native",
       "repositoryMode": "native",
       "caches": "native",
       "image": "native",
@@ -12647,6 +12649,7 @@
     "signatures": [],
     "options": {
       "egress": "EgressPolicy | undefined",
+      "egressImage": "string | undefined",
       "repositoryMode": "\"mounted\" | \"isolated\" | undefined",
       "caches": "readonly DependencyCache[] | undefined",
       "image": "string | undefined",
@@ -12669,6 +12672,7 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
       "egress": "native",
+      "egressImage": "native",
       "repositoryMode": "native",
       "caches": "native",
       "image": "native",

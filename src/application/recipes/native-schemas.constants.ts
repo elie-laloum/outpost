@@ -16624,6 +16624,9 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
+      egressImage: {
+        type: "string",
+      },
       repositoryMode: {
         anyOf: [
           {
@@ -16842,6 +16845,9 @@ export const nativeRecipeSchemas: Readonly<
             additionalProperties: false,
           },
         ],
+      },
+      egressImage: {
+        type: "string",
       },
       repositoryMode: {
         anyOf: [

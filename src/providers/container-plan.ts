@@ -1,4 +1,5 @@
 import type { ContainerPlanOptions } from "./container.types.ts";
+import { containerUserNamespace } from "./container-egress.ts";
 
 export function containerPlan({
   config,
@@ -21,14 +22,9 @@ export function containerPlan({
     "--init",
     "--user",
     `${user.uid}:${user.gid}`,
-    ...(engine === "podman" &&
-    config.userns !== false &&
-    (process.getuid?.() !== 0 || config.userns === "keep-id")
-      ? [
-          "--userns",
-          config.user ? `keep-id:uid=${user.uid},gid=${user.gid}` : "keep-id",
-        ]
-      : []),
+    ...(engine === "podman" && config.egress?.mode === "allowlist"
+      ? ["--userns", `container:${name}-egress`]
+      : containerUserNamespace(engine, config, user)),
     "--workdir",
     config.repositoryMode === "isolated" ? "/" : root,
     "--cap-drop",

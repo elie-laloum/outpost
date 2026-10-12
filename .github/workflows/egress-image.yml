@@ -1,0 +1,102 @@
+name: Egress image
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the tested egress image
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: egress-image-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        engine: [docker, podman]
+        platform:
+          - { runner: ubuntu-latest, arch: amd64 }
+          - { runner: ubuntu-24.04-arm, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - run: ${{ matrix.engine }} build -t outpost-egress:ci -f images/egress/Dockerfile .
+      - run: ${{ matrix.engine }} pull docker.io/library/node:24-slim
+      - run: node --test test/container-egress.test.ts
+        env:
+          OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
+          OUTPOST_EGRESS_IMAGE: outpost-egress:ci
+      - if: matrix.engine == 'docker'
+        run: docker save outpost-egress:ci -o "$RUNNER_TEMP/egress-image.tar"
+      - if: matrix.engine == 'docker'
+        uses: actions/upload-artifact@v7
+        with:
+          name: egress-image-${{ matrix.platform.arch }}
+          path: ${{ runner.temp }}/egress-image.tar
+          retention-days: 7
+  publish:
+    needs: validate
+    if: inputs.publish && vars.OUTPOST_EGRESS_IMAGE_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: egress-image
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: egress-image-*
+          path: ${{ runner.temp }}
+          digest-mismatch: error
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested bytes
+        id: publish
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          image="ghcr.io/${REPOSITORY,,}/egress"
+          tag="sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          for arch in amd64 arm64; do
+            docker load -i "$RUNNER_TEMP/egress-image-$arch/egress-image.tar"
+            docker tag outpost-egress:ci "$image:$tag-$arch"
+            docker push "$image:$tag-$arch"
+          done
+          docker buildx imagetools create -t "$image:$tag" "$image:$tag-amd64" "$image:$tag-arm64"
+          digest=$(docker buildx imagetools inspect "$image:$tag" --format '{{.Manifest.Digest}}')
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.publish.outputs.image }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          push-to-registry: true
+      - name: Verify and record publication instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ${{ steps.publish.outputs.image }}
+          DIGEST: ${{ steps.publish.outputs.digest }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPOSITORY" --signer-workflow "$REPOSITORY/.github/workflows/egress-image.yml" --source-ref refs/heads/main --source-digest "$GITHUB_SHA"
+          echo "Record the verified image before releasing Outpost: node scripts/record-egress-image.mjs $IMAGE@$DIGEST" >> "$GITHUB_STEP_SUMMARY"

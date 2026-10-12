@@ -8977,6 +8977,9 @@
                 }
               ]
             },
+            "egressImage": {
+              "type": "string"
+            },
             "repositoryMode": {
               "anyOf": [
                 {
@@ -9203,6 +9206,9 @@
                   "additionalProperties": false
                 }
               ]
+            },
+            "egressImage": {
+              "type": "string"
             },
             "repositoryMode": {
               "anyOf": [

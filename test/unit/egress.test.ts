@@ -108,8 +108,9 @@ test("container deny-all is enforced at creation and survives caller mutation", 
       () =>
         containerProvider(engine, {
           egress: { mode: "allowlist", domains: ["example.com"] },
+          networks: "host",
         }),
-      /cannot enforce/,
+      /conflicts/,
     );
     assert.throws(
       () =>

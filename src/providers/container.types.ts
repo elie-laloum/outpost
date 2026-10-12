@@ -10,6 +10,7 @@ import type { DependencyCache } from "./container-cache.types.ts";
 
 export interface ContainerOptions {
   readonly egress?: EgressPolicy;
+  readonly egressImage?: string;
   readonly repositoryMode?: "mounted" | "isolated";
   readonly caches?: readonly DependencyCache[];
   readonly image?: string;

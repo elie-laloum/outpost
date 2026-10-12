@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Unreleased
+
+- Ajoute des conteneurs egress dédiés Docker/Podman pour les domaines HTTP/HTTPS et le filtrage CIDR TCP/UDP direct, avec priorité des interdictions, contrôle du nom TLS, expiration bornée des autorisations dans le noyau et récupération du conteneur associé. Maintient deny-all hors ligne et refuse les réseaux incompatibles. Ajoute `egressImage`, l’exemple source `exemples/container-egress/`, les guides bilingues et un workflow de publication de l’image testée. La première image publique et son digest par défaut, les VM natives macOS/Windows, les hôtes autonomes sans root et le routage IPv6 natif restent à valider ; les builds locaux sélectionnent leur image explicitement.
+
 ## 11.1.3
 
 Cette version renouvelle la documentation et l’identité visuelle sans modifier le comportement de la bibliothèque ni son API publique.

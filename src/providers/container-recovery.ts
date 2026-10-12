@@ -27,7 +27,7 @@ export async function recoverContainer(
         "ls",
         "--all",
         "--filter",
-        `name=^${resourceId}$`,
+        `name=^${resourceId}(-egress)?$`,
         "--format",
         "{{.Names}}",
       ],
@@ -36,12 +36,18 @@ export async function recoverContainer(
     executor,
   );
   if (!result.stdout.trim()) return;
+  const names = result.stdout.trim().split(/\r?\n/);
   invariant(
-    result.stdout.trim() === resourceId,
+    names.every(
+      (name) => name === resourceId || name === `${resourceId}-egress`,
+    ),
     "Recoverable container identity mismatch",
   );
-  await requireSuccess(
-    { executable: engine, arguments: ["rm", "--force", resourceId], ...limits },
-    executor,
-  );
+  for (const name of [resourceId, `${resourceId}-egress`]) {
+    if (!names.includes(name)) continue;
+    await requireSuccess(
+      { executable: engine, arguments: ["rm", "--force", name], ...limits },
+      executor,
+    );
+  }
 }

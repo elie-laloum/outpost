@@ -2723,8 +2723,8 @@
     "Échec de l’allocation, du dispatch, de validate, de score ou du nettoyage ; un message texte dans un enregistrement durable restauré."
   ],
   "ContainerOptions.egress": [
-    "deny-all only, applied as the none network. An allowlist, or networks other than none, fails with code configuration at creation.",
-    "deny-all uniquement, appliqué par le réseau none. Une allowlist, ou des networks autres que none, échoue avec le code configuration dès la création."
+    "deny-all uses the none network. An allowlist starts a dedicated proxy and namespace firewall before sandbox commands: domains allow HTTP on port 80 and HTTPS CONNECT on 443 with matching TLS SNI; CIDRs allow raw TCP/UDP, with denyCidrs taking precedence. Explicit networks conflict with an allowlist. See the network guide for image publication and validation limits.",
+    "deny-all utilise le réseau none. Une allowlist démarre un proxy dédié et un pare-feu de namespace avant les commandes : les domaines autorisent HTTP sur 80 et HTTPS CONNECT sur 443 avec SNI TLS correspondant ; les CIDR autorisent TCP/UDP direct, denyCidrs étant prioritaire. Des networks explicites sont incompatibles avec une allowlist. Le guide réseau précise la publication de l’image et les limites de validation."
   ],
   "ContainerOptions.repositoryMode": [
     "mounted (default) mounts the worktree at /workspace with its Git metadata. isolated makes the provider remote: the history is uploaded to /tmp/outpost/workspace, volumes cannot expose the host repository, and durable speculation recovery is unavailable.",
@@ -2739,8 +2739,8 @@
     "Image à exécuter, outpost:<nom du répertoire du dépôt> par défaut. Quand user est absent et que l’image déclare un autre utilisateur numérique que le vôtre, l’acquisition échoue avec le code provider."
   ],
   "ContainerOptions.user": [
-    "UID and GID of commands in the container, default your host UID and GID (1000:1000 where unavailable).",
-    "UID et GID des commandes dans le conteneur, vos UID et GID hôtes par défaut (1000:1000 s’ils sont indisponibles)."
+    "UID and GID of sandbox commands, default your host IDs (1000:1000 where unavailable). UID 65532 is reserved for the dedicated egress proxy when an allowlist is configured.",
+    "UID et GID des commandes, vos identifiants hôtes par défaut (1000:1000 si indisponibles). L’UID 65532 est réservé au proxy dédié lorsqu’une allowlist est configurée."
   ],
   "ContainerOptions.volumes": [
     "Extra host mounts into the container.",
@@ -2751,8 +2751,8 @@
     "Variables d’environnement définies pour chaque commande de la sandbox, en valeurs littérales. Une clé aussi déclarée par l’agent échoue avec le code configuration."
   ],
   "ContainerOptions.networks": [
-    "Engine network or networks to attach, passed as --network.",
-    "Réseau ou réseaux du moteur à attacher, passés par --network."
+    "Engine networks passed as --network. An egress allowlist refuses explicit networks because Outpost owns the filtered network namespace.",
+    "Réseaux du moteur passés par --network. Une allowlist egress refuse les réseaux explicites, car Outpost gère le namespace réseau filtré."
   ],
   "ContainerOptions.groups": [
     "Supplementary groups for the container user, passed as --group-add.",
@@ -10009,5 +10009,9 @@
   "WorkspacePathLock.excludedDirectories": [
     "Canonical control subdirectories excluded from a copy-source read lock. Owned materializations can coexist there while overlapping data writers and full source mounts remain fenced. Older locks omit this field.",
     "Sous-répertoires de contrôle canoniques exclus du verrou de lecture d’une source copiée. Les matérialisations possédées y coexistent ; les writers de données et les montages complets restent protégés. Les anciens verrous omettent ce champ."
+  ],
+  "ContainerOptions.egressImage": [
+    "Override the trusted companion image for an allowlist. Use an immutable digest in production. The engine downloads a missing image. Until the first default image is published and its digest recorded, build images/egress and set this explicitly. The image must implement the matching Outpost egress runtime protocol.",
+    "Remplace l’image de confiance du conteneur de filtrage pour une allowlist. Utilisez un digest immuable en production. Le moteur télécharge une image absente. Avant la publication de la première image par défaut et l’enregistrement de son digest, construisez images/egress et renseignez cette option. L’image doit implémenter le protocole du runtime egress Outpost correspondant."
   ]
 }
