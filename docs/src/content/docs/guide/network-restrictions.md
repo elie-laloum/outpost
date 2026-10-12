@@ -82,13 +82,7 @@ Confirmation happens after the sandbox starts, so code the image launches on its
 
 An allowlist automatically starts one dedicated egress container per sandbox. The sandbox shares its network namespace, but not its filesystem or process namespace. Only the companion receives `NET_ADMIN`; the sandbox cannot change the firewall, including commands run with `elevated`. Both containers are removed on release, and explicit recovery also finds a companion left by interrupted provisioning. No host firewall configuration or `sudo` is required by Outpost.
 
-This implementation is unreleased. Its first public companion image and default digest have not been published. From a source checkout, build the image and select it explicitly. Replace `docker` with `podman` throughout when using Podman.
-
-```sh
-bun install --frozen-lockfile
-bun run build
-docker build -t outpost-egress:dev -f images/egress/Dockerfile .
-```
+This provider implementation is unreleased in the npm package. Its companion image is public, supports Linux amd64 and arm64, and is pinned by digest in Outpost. The engine downloads it automatically when absent; no local companion build or registry login is required.
 
 Use a domain for web access and a CIDR for direct TCP/UDP access. This example grants HTTPS to a registry and direct connections to a documentation-only IP range; replace that range with your service's actual addresses. `denyCidrs` takes priority over domain and CIDR grants.
 
@@ -97,7 +91,6 @@ import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/dock
 
 const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
-  egressImage: "outpost-egress:dev",
   egress: {
     mode: "allowlist",
     domains: ["registry.npmjs.org"],
@@ -107,7 +100,7 @@ const sandboxProvider = createDockerSandboxProvider({
 });
 ```
 
-The Podman factory accepts the same options. Once a tested companion image is published and its digest recorded in Outpost, omitting `egressImage` uses that immutable default; the engine downloads it when absent. An override is trusted runtime code, so pin its digest in production. The companion receives the policy, not the workspace or agent credentials.
+The Podman factory accepts the same options. Omitting `egressImage` selects the verified public image pinned by digest. For development, build `images/egress/Dockerfile` and select it with `egressImage: "outpost-egress:dev"`. An override is trusted runtime code, so pin its digest in production. The companion receives the policy, not the workspace or agent credentials.
 
 Outpost sets upper- and lowercase `HTTP_PROXY`/`HTTPS_PROXY`, a loopback-only `NO_PROXY`, and `NODE_USE_ENV_PROXY=1`. Software that ignores the proxy must use an explicitly allowed CIDR or its connection fails. Domain rules permit HTTP on port 80 and HTTPS CONNECT on port 443. For domain targets, CONNECT must carry a bounded TLS ClientHello whose SNI matches the requested host; encrypted HTTP headers are not inspected. Plain HTTP is forwarded with the authorized target's Host header. WebSocket upgrades over plain HTTP and other proxy ports are refused.
 
@@ -115,7 +108,7 @@ CIDRs independently permit raw TCP and UDP on any port, including IPv6 when the 
 
 Acquisition waits for the firewall and proxy before starting the sandbox. External permissions expire in the kernel within three seconds if the companion dies or stops refreshing them; filtering never falls back to unrestricted networking. Local commands remain usable. UID 65532 is reserved for the proxy. Additional `networks` are refused with an allowlist.
 
-The regression fixture checks real HTTP/HTTPS, TCP/UDP, denial precedence, elevated commands, IPv4-mapped addresses, companion loss and cleanup. Docker on Linux, plus rootless Docker and Podman in nested Linux test environments, have been exercised. Native macOS/Windows VM setups, standalone rootless hosts and native IPv6 routing still require live validation; an OS name alone does not establish support. An engine that cannot install the firewall refuses acquisition. Image pulls and model requests made on the host remain outside this policy.
+The regression fixture checks real HTTP/HTTPS, TCP/UDP, denial precedence, elevated commands, IPv4-mapped addresses, companion loss and cleanup. The [publication workflow](https://github.com/elie-laloum/outpost/actions/runs/38321177589) passed Docker and rootless Podman tests on GitHub-hosted Linux amd64/arm64 runners. Rootless Docker and Podman also passed in nested Linux test environments. Native macOS/Windows VM setups, standalone rootless Docker hosts and native IPv6 routing still require live validation; an OS name alone does not establish support. An engine that cannot install the firewall refuses acquisition. Image pulls and model requests made on the host remain outside this policy.
 
 The source example is in `exemples/container-egress/`; it needs no model credentials. The image publication procedure is in `images/egress/README.md`.
 

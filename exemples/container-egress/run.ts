@@ -20,7 +20,9 @@ await using sandbox = await workspace.sandbox({
   sandboxProvider: factories[engine]({
     image:
       process.env.OUTPOST_CONTAINER_IMAGE ?? "docker.io/library/node:24-slim",
-    egressImage: process.env.OUTPOST_EGRESS_IMAGE ?? "outpost-egress:dev",
+    ...(process.env.OUTPOST_EGRESS_IMAGE
+      ? { egressImage: process.env.OUTPOST_EGRESS_IMAGE }
+      : {}),
     egress: {
       mode: "allowlist",
       domains: ["example.com"],

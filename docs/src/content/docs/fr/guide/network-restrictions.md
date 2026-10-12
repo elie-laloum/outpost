@@ -82,13 +82,7 @@ La confirmation intervient après le démarrage de la sandbox : du code lancé p
 
 Une allowlist démarre automatiquement un conteneur egress dédié par sandbox. La sandbox partage son namespace réseau, mais ni son système de fichiers ni son namespace de processus. Seul le conteneur de filtrage reçoit `NET_ADMIN` ; la sandbox ne peut pas modifier le pare-feu, même avec une commande `elevated`. Les deux conteneurs sont supprimés à la fermeture ; la récupération explicite retrouve aussi le conteneur de filtrage laissé par une allocation interrompue. Outpost ne demande ni modification du pare-feu hôte ni `sudo`.
 
-Cette implémentation n’est pas encore publiée. Sa première image publique et son digest par défaut restent à publier. Depuis les sources, construisez l’image et sélectionnez-la explicitement. Remplacez `docker` par `podman` pour utiliser Podman.
-
-```sh
-bun install --frozen-lockfile
-bun run build
-docker build -t outpost-egress:dev -f images/egress/Dockerfile .
-```
+Cette implémentation des providers n’est pas encore publiée dans le package npm. Son image de filtrage est publique, prend en charge Linux amd64 et arm64, et son digest est épinglé dans Outpost. Le moteur la télécharge automatiquement si nécessaire ; aucune construction locale du conteneur de filtrage ni connexion au registre n’est requise.
 
 Utilisez un domaine pour le web et un CIDR pour les connexions TCP/UDP directes. Cet exemple autorise un registre en HTTPS et une plage IP réservée à la documentation ; remplacez cette plage par les adresses réelles de votre service. `denyCidrs` est prioritaire sur les autorisations de domaines et de CIDR.
 
@@ -97,7 +91,6 @@ import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/dock
 
 const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
-  egressImage: "outpost-egress:dev",
   egress: {
     mode: "allowlist",
     domains: ["registry.npmjs.org"],
@@ -107,7 +100,7 @@ const sandboxProvider = createDockerSandboxProvider({
 });
 ```
 
-La factory Podman accepte les mêmes options. Après publication d’une image testée et enregistrement de son digest dans Outpost, omettre `egressImage` utilisera cette référence immuable ; le moteur téléchargera l’image si nécessaire. Une image de remplacement est du code de confiance : épinglez son digest en production. Le conteneur de filtrage reçoit la politique, sans workspace ni identifiants de l’agent.
+La factory Podman accepte les mêmes options. Omettre `egressImage` sélectionne l’image publique vérifiée et épinglée par digest. Pour le développement, construisez `images/egress/Dockerfile` et sélectionnez-la avec `egressImage: "outpost-egress:dev"`. Une image de remplacement est du code de confiance : épinglez son digest en production. Le conteneur de filtrage reçoit la politique, sans workspace ni identifiants de l’agent.
 
 Outpost définit `HTTP_PROXY`/`HTTPS_PROXY` en majuscules et minuscules, un `NO_PROXY` limité au loopback et `NODE_USE_ENV_PROXY=1`. Un logiciel ignorant le proxy doit utiliser un CIDR explicitement autorisé, sinon sa connexion échoue. Les domaines autorisent HTTP sur le port 80 et HTTPS CONNECT sur le port 443. Pour une cible par domaine, CONNECT doit contenir un ClientHello TLS borné dont le SNI correspond à l’hôte demandé ; les en-têtes HTTP chiffrés ne sont pas inspectés. En HTTP, le proxy impose l’en-tête Host de la destination autorisée. Les upgrades WebSocket en HTTP non chiffré et les autres ports du proxy sont refusés.
 
@@ -115,7 +108,7 @@ Les CIDR autorisent indépendamment TCP et UDP directs sur tous les ports, avec 
 
 L’allocation attend le pare-feu et le proxy avant de démarrer la sandbox. Les autorisations externes expirent dans le noyau en trois secondes au maximum si le service de filtrage disparaît ou ne les renouvelle plus ; il n’existe aucun repli vers un réseau sans restrictions. Les commandes locales restent utilisables. L’UID 65532 est réservé au proxy. Des `networks` supplémentaires sont refusés avec une allowlist.
 
-Le test réel couvre HTTP/HTTPS, TCP/UDP, la priorité des interdictions, les commandes élevées, les adresses IPv4 mappées, la perte du service et le nettoyage. Docker sur Linux, ainsi que Docker et Podman sans root dans des environnements Linux imbriqués, ont été exercés. Les VM natives macOS/Windows, les hôtes autonomes sans root et le routage IPv6 natif restent à valider en conditions réelles ; le nom du système seul ne démontre pas la prise en charge. Un moteur incapable d’installer le pare-feu refuse l’allocation. Les téléchargements d’images et les appels modèles faits sur l’hôte restent hors de cette politique.
+Le test réel couvre HTTP/HTTPS, TCP/UDP, la priorité des interdictions, les commandes élevées, les adresses IPv4 mappées, la perte du service et le nettoyage. Le [workflow de publication](https://github.com/elie-laloum/outpost/actions/runs/38321177589) a validé Docker et Podman sans root sur les runners Linux amd64/arm64 hébergés par GitHub. Docker et Podman sans root ont aussi été validés dans des environnements Linux imbriqués. Les VM natives macOS/Windows, les hôtes Docker autonomes sans root et le routage IPv6 natif restent à valider en conditions réelles ; le nom du système seul ne démontre pas la prise en charge. Un moteur incapable d’installer le pare-feu refuse l’allocation. Les téléchargements d’images et les appels modèles faits sur l’hôte restent hors de cette politique.
 
 L’exemple source se trouve dans `exemples/container-egress/` et ne demande aucun identifiant de modèle. La publication de l’image est décrite dans `images/egress/README.md`.
 

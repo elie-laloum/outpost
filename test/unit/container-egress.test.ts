@@ -4,6 +4,7 @@ import { once } from "node:events";
 import { request } from "node:http";
 import { connect } from "node:net";
 import { containerProvider } from "../../src/providers/container.ts";
+import { defaultEgressImage } from "../../src/providers/container-egress.constants.ts";
 import { recoverContainer } from "../../src/providers/container-recovery.ts";
 import { egressAccess } from "../../src/providers/egress/policy.ts";
 import { createEgressProxy } from "../../src/providers/egress/proxy.ts";
@@ -51,7 +52,7 @@ test("allowlists establish a private policy owner before creating the sandbox an
       engine,
       {
         image: "agent",
-        egressImage: "proxy",
+        ...(engine === "podman" ? { egressImage: "proxy" } : {}),
         egress: { mode: "allowlist", domains },
       },
       async (command) => {
@@ -83,6 +84,10 @@ test("allowlists establish a private policy owner before creating the sandbox an
     assert.equal(creates.length, 2);
     const gateway = creates[0]!.arguments!;
     const sandbox = creates[1]!.arguments!;
+    assert.equal(
+      gateway.at(-2),
+      engine === "docker" ? defaultEgressImage : "proxy",
+    );
     assert.ok(gateway.includes("NET_ADMIN"));
     assert.ok(!sandbox.includes("NET_ADMIN"));
     assert.ok(!gateway.includes("--volume"));

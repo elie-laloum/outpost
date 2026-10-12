@@ -5,12 +5,11 @@ Run from this repository with Node.js 24+ and the chosen engine. No model creden
 ```sh
 bun install --frozen-lockfile
 bun run build
-docker build -t outpost-egress:dev -f images/egress/Dockerfile .
 docker pull docker.io/library/node:24-slim
 node exemples/container-egress/run.ts docker
 ```
 
-For Podman, replace the two Docker commands with Podman and pass `podman` to the script. `OUTPOST_CONTAINER_IMAGE` and `OUTPOST_EGRESS_IMAGE` override the image references. The companion's first public default image has not yet been published, so this source example selects the local build explicitly.
+For Podman, use `podman pull` and pass `podman` to the script. The engine automatically downloads the public companion image pinned by digest in Outpost, with Linux amd64 and arm64 variants. `OUTPOST_CONTAINER_IMAGE` and `OUTPOST_EGRESS_IMAGE` override the image references. To test a locally built companion, follow `images/egress/README.md` and set `OUTPOST_EGRESS_IMAGE=outpost-egress:dev`.
 
 Expected output: an HTTP success status for `example.com`, a refused unlisted HTTPS destination, and a successful raw TCP connection to the allowed CIDR. The ephemeral workspace, sandbox and companion close automatically. The CIDR also permits UDP to that address; the deterministic container regression checks UDP echo and blocked traffic without relying on a public DNS service.
 

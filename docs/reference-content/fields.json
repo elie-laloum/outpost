@@ -10011,7 +10011,7 @@
     "Sous-répertoires de contrôle canoniques exclus du verrou de lecture d’une source copiée. Les matérialisations possédées y coexistent ; les writers de données et les montages complets restent protégés. Les anciens verrous omettent ce champ."
   ],
   "ContainerOptions.egressImage": [
-    "Override the trusted companion image for an allowlist. Use an immutable digest in production. The engine downloads a missing image. Until the first default image is published and its digest recorded, build images/egress and set this explicitly. The image must implement the matching Outpost egress runtime protocol.",
-    "Remplace l’image de confiance du conteneur de filtrage pour une allowlist. Utilisez un digest immuable en production. Le moteur télécharge une image absente. Avant la publication de la première image par défaut et l’enregistrement de son digest, construisez images/egress et renseignez cette option. L’image doit implémenter le protocole du runtime egress Outpost correspondant."
+    "Override the trusted companion image for an allowlist. Use an immutable digest in production. The engine downloads a missing image. Omitting this option uses the public amd64/arm64 image pinned by verified digest in Outpost. Build images/egress and set this explicitly to test a local companion. The image must implement the matching Outpost egress runtime protocol.",
+    "Remplace l’image de confiance du conteneur de filtrage pour une allowlist. Utilisez un digest immuable en production. Le moteur télécharge une image absente. Omettre cette option utilise l’image publique amd64/arm64 épinglée par digest vérifié dans Outpost. Construisez images/egress et renseignez cette option pour tester un conteneur de filtrage local. L’image doit implémenter le protocole du runtime egress Outpost correspondant."
   ]
 }
