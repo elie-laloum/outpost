@@ -39,7 +39,11 @@ test("container allowlists reject unmanaged networks and invalid companion image
 
 test("allowlists establish a private policy owner before creating the sandbox and snapshot caller data", async (t) => {
   const root = await repository(t);
-  for (const engine of ["docker", "podman"] as const) {
+  for (const [engine, platform] of [
+    ["docker", "linux"],
+    ["podman", "linux"],
+    ["podman", "darwin"],
+  ] as const) {
     const calls: Command[] = [];
     const domains = ["example.com"];
     let id = "";
@@ -52,6 +56,8 @@ test("allowlists establish a private policy owner before creating the sandbox an
       },
       async (command) => {
         calls.push(command);
+        if (command.arguments?.[0] === "machine")
+          return { status: 0, stdout: '[{"Running":true}]', stderr: "" };
         return {
           status: 0,
           stdout:
@@ -59,6 +65,7 @@ test("allowlists establish a private policy owner before creating the sandbox an
           stderr: "",
         };
       },
+      platform,
     );
     domains.push("other.example.com");
     const lease = await provider.acquire({
