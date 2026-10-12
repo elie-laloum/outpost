@@ -38,10 +38,6 @@ const structuredData = {
 };
 ---
 <StarlightHead />
-{[16, 32].map((size) => <>
-  <link rel="icon" type="image/png" sizes={`${size}x${size}`} media="(prefers-color-scheme: light)" href={`${base}/favicon-${size}x${size}.png`} />
-  <link rel="icon" type="image/png" sizes={`${size}x${size}`} media="(prefers-color-scheme: dark)" href={`${base}/favicon-dark-${size}x${size}.png`} />
-</>)}
 <link rel="apple-touch-icon" sizes="180x180" href={`${base}/apple-touch-icon.png`} />
 {home && <>
   <meta property="og:image" content={imageUrl} />

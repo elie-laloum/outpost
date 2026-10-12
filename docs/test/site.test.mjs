@@ -1,6 +1,53 @@
 import { chapters } from "../scripts/navigation.mjs";
 import { readFile, readdir } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
+import sharp from "sharp";
+
+for (const locale of ["", "fr/"]) {
+  test(`favicon keeps a transparent background and follows the browser theme (${locale || "en"})`, async ({
+    page,
+    context,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(locale || "./");
+    await page.evaluate(
+      () => (document.documentElement.dataset.theme = "light"),
+    );
+    const icons = page.locator('link[rel~="icon"]');
+    await expect(icons).toHaveCount(1);
+    const url = await icons.evaluate((link) => link.href);
+    const favicon = await context.newPage();
+    try {
+      await favicon.setViewportSize({ width: 128, height: 128 });
+      await favicon.goto(url);
+      for (const theme of ["dark", "light", "dark"]) {
+        await favicon.emulateMedia({ colorScheme: theme });
+        const screenshot = await favicon.screenshot({ omitBackground: true });
+        const { data } = await sharp(screenshot)
+          .ensureAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        let transparent = 0;
+        const strokes = [];
+        for (let offset = 0; offset < data.length; offset += 4) {
+          if (data[offset + 3] === 0) transparent++;
+          if (data[offset + 3] > 200)
+            strokes.push(
+              (data[offset] + data[offset + 1] + data[offset + 2]) / 3,
+            );
+        }
+        expect(transparent).toBeGreaterThan((128 * 128) / 2);
+        expect(strokes.length).toBeGreaterThan(100);
+        const brightness =
+          strokes.reduce((sum, value) => sum + value, 0) / strokes.length;
+        if (theme === "dark") expect(brightness).toBeGreaterThan(230);
+        if (theme === "light") expect(brightness).toBeLessThan(25);
+      }
+    } finally {
+      await favicon.close();
+    }
+  });
+}
 
 for (const locale of ["", "fr/"]) {
   test(`mobile canvas keeps steps and loop conditions readable (${locale || "en"})`, async ({

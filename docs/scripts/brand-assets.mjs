@@ -34,12 +34,26 @@ const icon = (color, size, background = "#00000000") => {
 };
 
 const symbol = await icon("white", 128);
+const blackSymbol = await icon("black", 128);
 await writeFile(asset("outpost-symbol-white.png"), symbol);
-await writeFile(asset("outpost-symbol-black.png"), await icon("black", 128));
-const sizes = [16, 32, 48];
-const icons = await Promise.all(
-  sizes.map((size) => icon("black", size, "#ffffff")),
+await writeFile(asset("outpost-symbol-black.png"), blackSymbol);
+await writeFile(
+  output("favicon-adaptive.svg"),
+  `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <style>
+    .dark { display: none; }
+    @media (prefers-color-scheme: dark) {
+      .light { display: none; }
+      .dark { display: block; }
+    }
+  </style>
+  <image class="light" width="128" height="128" href="data:image/png;base64,${blackSymbol.toString("base64")}"/>
+  <image class="dark" width="128" height="128" href="data:image/png;base64,${symbol.toString("base64")}"/>
+</svg>
+`,
 );
+const sizes = [16, 32, 48];
+const icons = await Promise.all(sizes.map((size) => icon("black", size)));
 const directory = Buffer.alloc(6 + sizes.length * 16);
 directory.writeUInt16LE(1, 2);
 directory.writeUInt16LE(sizes.length, 4);

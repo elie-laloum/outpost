@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "cheerio";
+import sharp from "sharp";
 import { recipeSchemaAssets } from "./recipe-schema-assets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../dist");
@@ -26,6 +27,15 @@ for (const locale of ["", "fr/"])
     "Roadmap must remain in the repository only",
   );
 const pages = new Map();
+const ico = await readFile(resolve(root, "favicon.ico"));
+for (let index = 0; index < ico.readUInt16LE(4); index++) {
+  const entry = 6 + index * 16;
+  const offset = ico.readUInt32LE(entry + 12);
+  const length = ico.readUInt32LE(entry + 8);
+  const frame = sharp(ico.subarray(offset, offset + length));
+  assert.equal((await frame.metadata()).hasAlpha, true);
+  assert.equal((await frame.stats()).channels[3].min, 0);
+}
 let guideCards = 0;
 for (const file of files) {
   const $ = load(await readFile(resolve(root, file), "utf8"));
@@ -57,17 +67,12 @@ for (const file of files) {
     assert.equal(png.readUInt32BE(20), 630);
     assert.equal(
       $('link[rel="shortcut icon"]').attr("href"),
-      `${base}/favicon.ico`,
+      `${base}/favicon-adaptive.svg`,
     );
+    assert.equal($('link[rel~="icon"]').length, 1);
     for (const size of [16, 32]) {
       for (const theme of ["light", "dark"]) {
         const path = `favicon-${theme === "dark" ? "dark-" : ""}${size}x${size}.png`;
-        assert.equal(
-          $(
-            `link[rel="icon"][sizes="${size}x${size}"][media="(prefers-color-scheme: ${theme})"]`,
-          ).attr("href"),
-          `${base}/${path}`,
-        );
         const icon = await readFile(resolve(root, path));
         assert.equal(icon.readUInt32BE(16), size);
         assert.equal(icon.readUInt32BE(20), size);
