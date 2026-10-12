@@ -49,6 +49,8 @@ API reference: [summarizeHistory](../../reference/summarizehistory/), [truncateT
 
 A summary uses the agent’s model and provider. Its tokens count in the turn’s usage and in the harness `limits.usage` budget.
 
+The API records the [summary instructions and reinsertion prefix](../../reference/summarizehistory/#outpost-instructions), plus the [tool-result truncation marker](../../reference/truncatetoolresults/#outpost-instructions). Their wording is fixed; a custom context strategy can replace the mechanism.
+
 ## Write a custom strategy
 
 Compose strategies when a conversation needs both shorter tool results and a summary. This example applies the two in that order.

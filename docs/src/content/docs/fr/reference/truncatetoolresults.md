@@ -29,6 +29,23 @@ Crée une stratégie de contexte qui coupe les anciens résultats d’outils à 
 
 `HarnessContextStrategy`
 
+<span id="outpost-instructions"></span>
+
+## Instructions ajoutées par Outpost
+
+Les templates ci-dessous conservent le texte anglais envoyé au modèle. `${…}` désigne les valeurs insérées à l’exécution, pas la syntaxe des variables d’un brief.
+
+Quand un ancien résultat d’outil dépasse `maxCharacters`, son contenu est remplacé par :
+
+```text
+${retainedContent}
+[earlier output truncated from ${originalLength} characters]
+```
+
+`retainedContent` contient les `maxCharacters` premières unités de code de la chaîne JavaScript ; `originalLength` est la propriété `length` de la chaîne initiale. Ce marqueur appartient au résultat d’outil et ne déclenche aucun appel au modèle. Sa formulation est fixe. Modifiez `maxCharacters` ou `keepRecent` pour régler la troncature, ou fournissez une stratégie de contexte personnalisée pour appliquer une autre transformation.
+
+Implémentation : [context.ts](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/src/domain/context.ts).
+
 ## Signature
 
 ```ts

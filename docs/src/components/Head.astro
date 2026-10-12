@@ -38,6 +38,11 @@ const structuredData = {
 };
 ---
 <StarlightHead />
+{[16, 32].map((size) => <>
+  <link rel="icon" type="image/png" sizes={`${size}x${size}`} media="(prefers-color-scheme: light)" href={`${base}/favicon-${size}x${size}.png`} />
+  <link rel="icon" type="image/png" sizes={`${size}x${size}`} media="(prefers-color-scheme: dark)" href={`${base}/favicon-dark-${size}x${size}.png`} />
+</>)}
+<link rel="apple-touch-icon" sizes="180x180" href={`${base}/apple-touch-icon.png`} />
 {home && <>
   <meta property="og:image" content={imageUrl} />
   <meta property="og:image:width" content="1200" />
@@ -57,13 +62,6 @@ const structuredData = {
       button.setAttribute("role", "button");
       button.tabIndex = 0;
       button.setAttribute("aria-label", document.documentElement.lang === "fr" ? "Copier le code" : "Copy code");
-    }
-  };
-  const prepareReferenceStatus = () => {
-    const label = document.documentElement.lang === "fr" ? "Expérimental" : "Experimental";
-    for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-api-status="experimental"]')) {
-      link.title = label;
-      link.setAttribute("aria-label", `${link.textContent?.trim()} — ${label}`);
     }
   };
   // Pin a section's code only when it fits the viewport and its prose is taller.
@@ -86,8 +84,6 @@ const structuredData = {
   document.addEventListener("astro:page-load", mountCanvases);
   mountCodeTabs();
   document.addEventListener("astro:page-load", mountCodeTabs);
-  prepareReferenceStatus();
-  document.addEventListener("astro:page-load", prepareReferenceStatus);
   prepareCopyButtons();
   document.addEventListener("astro:page-load", prepareCopyButtons);
   document.addEventListener("keydown", (event) => {

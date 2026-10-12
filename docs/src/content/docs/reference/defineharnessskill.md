@@ -31,6 +31,39 @@ Define a skill: instructions and optional tools that a built-in harness lists by
 
 `HarnessSkill`
 
+<span id="outpost-instructions"></span>
+
+## Instructions added by Outpost
+
+Templates below preserve the English text sent to the model. `${…}` marks runtime substitutions, not brief template syntax.
+
+When `createHarness({ skills })` receives a nonempty skill list, it adds this catalog to the system instructions after profile and harness instructions, before session-start hook additions:
+
+```text
+Skills are available on demand. Call load_skill with a skill name to read its instructions and enable its tools before using them:
+- ${skill.name}: ${skill.description}
+```
+
+The name/description line repeats for each skill in declaration order. The injected `load_skill` tool has this model-visible description:
+
+```text
+Load a skill listed in the instructions: returns its instructions and enables its tools for the following steps.
+```
+
+Loading a skill resolves its instructions and returns them as tool output. If the skill has tools, the output is:
+
+```text
+${resolvedInstructions}
+
+Tools now available: ${toolNames}.
+```
+
+`toolNames` joins the skill's tool names with `, `. Without tools, only `resolvedInstructions` is returned. Loading does not append the skill body to the system prompt.
+
+Skill names, descriptions and instruction sources are configurable. The catalog introduction, loader description and tool-availability suffix are fixed; there is no override option. Omitting skills removes this machinery. Whether tools stay unlocked is determined from the effective history, so compaction can require loading a skill again.
+
+Implementation: [skill.ts](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/src/domain/skill.ts) · [harness.ts](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/src/domain/harness.ts) · [harness-loop.ts](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/src/application/harness-loop.ts).
+
 ## Signature
 
 ```ts

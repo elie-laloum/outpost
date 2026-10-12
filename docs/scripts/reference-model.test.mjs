@@ -11,6 +11,14 @@ import {
 import { explain } from "./reference-explanations.mjs";
 import { referenceSidebar } from "./reference-navigation.mjs";
 import { resolveRoute } from "./route-redirects.mjs";
+import { responseInstructions } from "../../src/domain/response-instructions.ts";
+import { SUMMARY_INSTRUCTIONS } from "../../src/domain/context.constants.ts";
+import {
+  interactiveTurnInstructions,
+  interactiveResponseSchema,
+} from "../../src/application/interactive-task.constants.ts";
+import { quotaResumeInstructions } from "../../src/application/quota-resume.constants.ts";
+import { skillCatalog } from "../../src/domain/skill.ts";
 
 function model(source) {
   const file = ts.createSourceFile(
@@ -48,6 +56,47 @@ function model(source) {
     };
   };
 }
+
+test("injected prompt reference preserves literal tags in both languages", () => {
+  const { symbol, declaration, checker } = model(
+    "interface ResponseSpec { readonly tag: string; }",
+  )("ResponseSpec");
+  for (const language of [0, 1]) {
+    const content = explain(symbol, declaration, undefined, language, checker);
+    assert.ok(content.includes('<span id="outpost-instructions"></span>'));
+    assert.ok(content.includes("<${tag}>...</${tag}>"));
+    assert.ok(content.includes("```text\nFinal response format:"));
+    assert.ok(content.includes("Further repair attempts after this one:"));
+    assert.ok(!content.includes("&lt;${tag}>"));
+  }
+});
+
+test("documented prompt text matches the runtime in both languages", async () => {
+  const prompts = JSON.parse(
+    await readFile(
+      new URL("../reference-content/prompts.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const response = responseInstructions({ tag: "${tag}" });
+  const catalog = skillCatalog([
+    { name: "${skill.name}", description: "${skill.description}" },
+  ]);
+  for (const [name, text] of [
+    ["ResponseSpec", response],
+    ["summarizeHistory", SUMMARY_INSTRUCTIONS],
+    ["defineInteractiveAgentTask", interactiveTurnInstructions],
+    [
+      "defineInteractiveAgentTask",
+      JSON.stringify(interactiveResponseSchema, null, 2),
+    ],
+    ["QuotaResumePolicy", quotaResumeInstructions],
+    ["defineHarnessSkill", catalog],
+  ]) {
+    for (const content of prompts[name])
+      assert.ok(content.includes(text), name);
+  }
+});
 
 test("union-only and inherited fields keep their declaring context", () => {
   const get = model(`
@@ -202,6 +251,9 @@ test("every navigable reference is unique, ordered and free of generic boilerpla
               ? [
                   "Import",
                   "Paramètres et propriétés",
+                  ...(source.includes('id="outpost-instructions"')
+                    ? ["Instructions ajoutées par Outpost"]
+                    : []),
                   "Signature",
                   ...(source.includes("## Contrats associés")
                     ? ["Contrats associés"]
@@ -210,6 +262,9 @@ test("every navigable reference is unique, ordered and free of generic boilerpla
               : [
                   "Import",
                   "Parameters and properties",
+                  ...(source.includes('id="outpost-instructions"')
+                    ? ["Instructions added by Outpost"]
+                    : []),
                   "Signature",
                   ...(source.includes("## Related contracts")
                     ? ["Related contracts"]
@@ -366,29 +421,17 @@ test("Firecracker is classified only under Providers and marked stable", () => {
   }
 });
 
-test("experimental references explain their status before the API content in both languages", async () => {
-  const experimental = navigation
-    .flatMap((group) => group.items)
-    .filter((item) => item.attrs?.["data-api-status"] === "experimental");
-  for (const item of experimental) {
-    for (const [locale, label] of [
-      ["", "Experimental"],
-      ["fr/", "Expérimental"],
-    ]) {
+test("reference symbols have no experimental badges or generated maturity warnings", async () => {
+  for (const item of navigation.flatMap((group) => group.items)) {
+    assert.equal(item.attrs?.["data-api-status"], undefined, item.slug);
+    for (const locale of ["", "fr/"]) {
       const source = await page(`${locale}${item.slug}.md`);
-      const body = source.replace(/^---\n[\s\S]*?\n---\n/, "").trimStart();
-      assert.ok(body.startsWith(`:::caution[${label}]`), item.slug);
-      const end = body.indexOf("\n:::");
-      assert.ok(end > body.indexOf("\n") + 1, item.slug);
-      assert.ok(end < body.indexOf("## Import"), item.slug);
+      assert.doesNotMatch(
+        source,
+        /:::caution\[(Experimental|Expérimental)\]/,
+        item.slug,
+      );
     }
-  }
-  for (const name of [
-    "createcodexharness",
-    "createfirecrackersandboxprovider",
-  ]) {
-    const stable = await page(`reference/${name}.md`);
-    assert.ok(!stable.includes(":::caution[Experimental]"), name);
   }
 });
 
@@ -443,15 +486,6 @@ test("reference prose keeps angle-bracket placeholders visible", async () => {
       await page(`${locale}reference/runschedules.md`),
       /schedule:&lt;name>:&lt;/,
     );
-});
-
-test("the speculation API is marked experimental", () => {
-  const speculation =
-    navigation[groups.findIndex((group) => group.id === "speculation")];
-  const entry = speculation.items.find(
-    (item) => item.slug === "reference/speculate",
-  );
-  assert.equal(entry.attrs?.["data-api-status"], "experimental");
 });
 
 test("type aliases without properties explain their values", async () => {

@@ -5,10 +5,6 @@ sidebar:
   order: 20
 ---
 
-:::caution[Experimental]
-Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).
-:::
-
 ## Import
 
 ```ts

@@ -1,0 +1,356 @@
+---
+import LandingIcon from "./LandingIcon.astro";
+import type { ScenarioExplorerProps as Props } from "./scenario-explorer.types.ts";
+const { scenarios } = Astro.props;
+const locale = Astro.locals.starlightRoute.locale === "fr" ? "fr/" : "";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<section class="scenarios" id="possibilities" aria-labelledby="scenarios-title">
+  <header>
+    <p class="eyebrow">{scenarios.label}</p>
+    <h2 id="scenarios-title">{scenarios.title}</h2>
+    <p class="intro">{scenarios.text}</p>
+  </header>
+  <outpost-scenarios>
+    <div class="scenario-tabs" aria-label={scenarios.label} hidden>
+      {scenarios.items.map((item) => (
+        <button type="button" id={`scenario-tab-${item.id}`} aria-controls={`scenario-${item.id}`}>
+          <LandingIcon name={item.icon} /><span>{item.label}</span>
+        </button>
+      ))}
+    </div>
+    {scenarios.items.map((item) => (
+      <section class="scenario-panel" id={`scenario-${item.id}`} aria-labelledby={`scenario-title-${item.id}`}>
+        <div class="scenario-brief">
+          <h3 id={`scenario-title-${item.id}`}>{item.title}</h3>
+          <div class="request">
+            <p class="eyebrow">{scenarios.requestLabel}</p>
+            <p>{item.request}</p>
+          </div>
+        </div>
+        <ol class="scenario-steps">
+          {item.steps.map((step, index) => (
+            <li>
+              <div class="step-meta"><LandingIcon name={step.icon} /><span>{String(index + 1).padStart(2, "0")} · {step.role}</span></div>
+              <h4>{step.title}</h4>
+              <p>{step.text}</p>
+              <div class="step-mechanisms">
+                {step.mechanisms.map((mechanism) => (
+                  <a href={`${base}/${locale}${mechanism.href}`}>{mechanism.label}<span aria-hidden="true">→</span></a>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div class="scenario-result">
+          <LandingIcon name="approve" />
+          <div><p class="eyebrow">{scenarios.resultLabel}</p><p class="result-text">{item.result}</p><p class="boundary">{item.boundary}</p></div>
+        </div>
+      </section>
+    ))}
+  </outpost-scenarios>
+  <p class="scenario-note">{scenarios.note}</p>
+</section>
+
+<script>
+  class OutpostScenarios extends HTMLElement {
+    connectedCallback() {
+      if (this.hasAttribute("data-ready")) return;
+      const list = this.querySelector<HTMLElement>(".scenario-tabs");
+      const tabs = [
+        ...this.querySelectorAll<HTMLButtonElement>(".scenario-tabs button"),
+      ];
+      const panels = [...this.querySelectorAll<HTMLElement>(".scenario-panel")];
+      if (!list || !tabs.length || tabs.length !== panels.length) return;
+      this.dataset.ready = "";
+      list.setAttribute("role", "tablist");
+      const select = (index: number, focus = false) => {
+        tabs.forEach((tab, position) => {
+          tab.setAttribute("aria-selected", String(position === index));
+          tab.tabIndex = position === index ? 0 : -1;
+          panels[position].hidden = position !== index;
+        });
+        if (focus) tabs[index].focus();
+      };
+      tabs.forEach((tab, index) => {
+        tab.setAttribute("role", "tab");
+        panels[index].setAttribute("role", "tabpanel");
+        panels[index].setAttribute("aria-labelledby", tab.id);
+        panels[index].tabIndex = 0;
+        tab.addEventListener("click", () => select(index));
+        tab.addEventListener("keydown", (event) => {
+          const positions: Record<string, number> = {
+            ArrowLeft: (index + tabs.length - 1) % tabs.length,
+            ArrowRight: (index + 1) % tabs.length,
+            Home: 0,
+            End: tabs.length - 1,
+          };
+          const next = positions[event.key];
+          if (next === undefined) return;
+          event.preventDefault();
+          select(next, true);
+        });
+      });
+      select(0);
+      list.hidden = false;
+    }
+  }
+  if (!customElements.get("outpost-scenarios"))
+    customElements.define("outpost-scenarios", OutpostScenarios);
+</script>
+
+<style>
+  .scenarios {
+    padding: 3rem var(--docs-pad);
+    border-top: 1px solid var(--docs-line);
+    scroll-margin-top: calc(var(--sl-nav-height) + 1rem);
+  }
+  header {
+    max-width: 70ch;
+    margin-bottom: 2rem;
+  }
+  .eyebrow {
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    margin: 0 0 0.65rem;
+  }
+  h2 {
+    color: var(--sl-color-white);
+    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .intro,
+  .scenario-note {
+    color: var(--sl-color-gray-2);
+    line-height: 1.7;
+  }
+  .intro {
+    margin: 0.85rem 0 0;
+  }
+  .scenarios :global(svg) {
+    display: block;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+  }
+  outpost-scenarios {
+    display: block;
+  }
+  .scenario-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .scenario-tabs button {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.8rem 1rem;
+    min-height: 3rem;
+    text-align: left;
+    line-height: 1.4;
+    margin: 0;
+    border: 1px solid var(--docs-line);
+    background: var(--sl-color-black);
+    color: var(--sl-color-gray-2);
+    font: inherit;
+    cursor: pointer;
+  }
+  .scenario-tabs button[aria-selected="true"] {
+    color: var(--sl-color-white);
+    border-color: var(--sl-color-accent);
+    background: var(--sl-color-accent-low);
+  }
+  .scenario-tabs button:hover {
+    border-color: var(--sl-color-gray-3);
+  }
+  button:focus-visible,
+  .step-mechanisms a:focus-visible,
+  .scenario-panel:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 3px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .scenario-panel {
+    border: 1px solid var(--docs-line);
+    background: var(--docs-code-bg);
+  }
+  outpost-scenarios:not([data-ready]) .scenario-panel + .scenario-panel {
+    margin-top: 1.5rem;
+  }
+  .scenario-brief {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 3rem;
+    padding: 1.5rem;
+  }
+  h3 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: var(--sl-color-white);
+    text-wrap: balance;
+  }
+  .request {
+    border-left: 2px solid var(--sl-color-accent);
+    padding-left: 1.25rem;
+  }
+  .request p:last-child {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    line-height: 1.6;
+  }
+  .scenario-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: auto auto 1fr auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    border-block: 1px solid var(--docs-line);
+    background: var(--sl-color-black);
+  }
+  .scenario-steps li {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.5rem;
+    margin: 0;
+  }
+  .scenario-steps li + li {
+    border-left: 1px solid var(--docs-line);
+  }
+  .step-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--sl-color-accent);
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  .step-meta :global(svg) {
+    flex-shrink: 0;
+  }
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sl-color-white);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .scenario-steps p {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--sl-color-gray-2);
+    margin: 0;
+  }
+  .step-mechanisms {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 0.25rem 1rem;
+    padding-top: 0.25rem;
+  }
+  .step-mechanisms a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    min-height: 1.75rem;
+    color: var(--sl-color-gray-2);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+  }
+  .step-mechanisms a:hover,
+  .step-mechanisms a:focus-visible {
+    color: var(--sl-color-white);
+    text-decoration-color: currentColor;
+  }
+  .step-mechanisms a span {
+    flex-shrink: 0;
+  }
+  .scenario-result {
+    display: grid;
+    grid-template-columns: 1.4rem minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+    padding: 1.5rem;
+    color: var(--sl-color-white);
+  }
+  .scenario-result :global(svg) {
+    flex-shrink: 0;
+    color: var(--sl-color-accent);
+  }
+  .result-text {
+    margin: 0;
+    line-height: 1.6;
+  }
+  .boundary {
+    margin: 0.65rem 0 0;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .scenario-note {
+    max-width: 95ch;
+    margin: 1.5rem 0 0;
+    font-size: 0.9375rem;
+  }
+  @media (max-width: 64rem) {
+    .scenario-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .scenario-steps li:nth-child(3) {
+      border-left: 0;
+    }
+    .scenario-steps li:nth-child(n + 3) {
+      border-top: 1px solid var(--docs-line);
+    }
+  }
+  @media (max-width: 40rem) {
+    .scenarios {
+      padding-block: 2rem;
+    }
+    .scenario-brief {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.25rem;
+    }
+    .scenario-steps {
+      grid-template-columns: 1fr;
+    }
+    .scenario-steps li {
+      padding: 1.25rem;
+    }
+    .scenario-steps li + li {
+      border-left: 0;
+      border-top: 1px solid var(--docs-line);
+    }
+    .scenario-tabs button {
+      font-size: 0.875rem;
+    }
+    .scenario-tabs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .scenario-tabs button:last-child {
+      grid-column: 1 / -1;
+    }
+    .scenario-result {
+      padding-inline: 1.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,7 @@
+---
+import { iconMarkup } from "../../../scripts/guide-icons.mjs";
+import type { LandingIconProps as Props } from "./landing-icon.types.ts";
+const { name } = Astro.props;
+---
+
+<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" set:html={iconMarkup(name)} />

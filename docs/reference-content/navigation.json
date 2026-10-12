@@ -3455,119 +3455,67 @@
       {
         "slug": "reference/speculate",
         "label": "speculate",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/recoverspeculation",
         "label": "recoverSpeculation",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/checkspeculationintegration",
         "label": "checkSpeculationIntegration",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/speculativeoutput",
         "label": "SpeculativeOutput",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/speculationdurability",
         "label": "SpeculationDurability",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculationrecoveryoptions",
         "label": "SpeculationRecoveryOptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculationintegration",
         "label": "SpeculationIntegration",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculationoptions",
         "label": "SpeculationOptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculationresult",
         "label": "SpeculationResult",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculativecandidate",
         "label": "SpeculativeCandidate",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculativecandidateresult",
         "label": "SpeculativeCandidateResult",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculativehostsnapshot",
         "label": "SpeculativeHostSnapshot",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculativevalidation",
         "label": "SpeculativeValidation",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   }

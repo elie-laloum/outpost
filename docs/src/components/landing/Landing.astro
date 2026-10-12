@@ -1,10 +1,11 @@
 ---
 import { render } from "astro:content";
 import manifest from "../../../../package.json";
-import { iconForHref, iconMarkup } from "../../../scripts/guide-icons.mjs";
 import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
 import InstallCommand from "./InstallCommand.astro";
+import LandingIcon from "./LandingIcon.astro";
+import ScenarioExplorer from "./ScenarioExplorer.astro";
 
 const route = Astro.locals.starlightRoute;
 const landing = route.entry.data.landing!;
@@ -12,7 +13,7 @@ const { Content } = await render(route.entry);
 const locale = route.locale === "fr" ? "fr/" : "";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) =>
-  /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
+  /^(https?:|#)/.test(path) ? path : `${base}/${locale}${path}`;
 ---
 
 <main class="landing" data-pagefind-body>
@@ -20,143 +21,43 @@ const href = (path: string) =>
     <section class="hero" aria-labelledby="_top">
       <div class="hero-copy">
         <p class="category">{landing.category}</p>
-        <h1 id="_top">
-          {landing.headline.map((line) => <span>{line}</span>)}
-        </h1>
+        <h1 id="_top">{landing.headline.map((line) => <span>{line}</span>)}</h1>
         <p class="lead">{landing.lead}</p>
         <div class="actions">
-          <a class="button primary" href={href(landing.primary.href)}>
-            {landing.primary.label}<Arrow />
-          </a>
-          <a class="button" href={href(landing.secondary.href)}>
-            {landing.secondary.label}<Arrow />
-          </a>
+          <a class="button primary" href={href(landing.primary.href)}>{landing.primary.label}<Arrow /></a>
+          <a class="button" href={href(landing.secondary.href)}>{landing.secondary.label}<Arrow /></a>
         </div>
-        <InstallCommand install={landing.install} />
-        <p class="prerequisites">{landing.install.prerequisites}</p>
       </div>
     </section>
-    <section class="story" aria-labelledby="story-title">
-      <p class="category">{landing.story.label}</p>
-      <h2 id="story-title">{landing.story.title}</h2>
-      <ol>
-        {landing.story.steps.map((step, index) => (
-          <li>
-            <a href={href(step.href)}>
-              <span class="step-meta">
-                <span class="step-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                <span class="step-role">{step.role}</span>
-              </span>
-              <span class="step-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                  set:html={iconMarkup(step.icon)}
-                />
-              </span>
-              <span class="step-copy"><strong>{step.title}</strong><span class="step-description">{step.text}</span></span>
-            </a>
-          </li>
-        ))}
-      </ol>
-      <a class="story-result" href={href(landing.story.result.href)}>
-        <svg
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          focusable="false"
-          set:html={iconMarkup("branch")}
-        />
-        <span class="result-copy">
-          <span class="result-label">{landing.story.result.label}</span>
-          <code>{landing.story.result.branch}</code>
-          <span class="result-description">{landing.story.result.text}</span>
-        </span>
-        <Arrow />
-      </a>
-      <a class="story-link" href={href(landing.story.link.href)}>
-        {landing.story.link.label}<Arrow />
-      </a>
-    </section>
+    <ScenarioExplorer scenarios={landing.scenarios} />
     <ul class="overview">
-      {
-        landing.overview.map((entry) => (
-        <li>
-          <a href={href(entry.href)}>
-            <svg
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              focusable="false"
-              set:html={iconMarkup(iconForHref(entry.href))}
-            />
-            <span class="overview-copy">
-              <strong>{entry.title}</strong><span>{entry.text}</span>
-            </span>
-            <Arrow />
-          </a>
-        </li>
-        ))
-      }
+      {landing.overview.map((entry) => (
+        <li><LandingIcon name={entry.icon} /><div><h2>{entry.title}</h2><p>{entry.text}</p></div></li>
+      ))}
     </ul>
-
-    <div class="home-content sl-markdown-content">
-      <Content />
-    </div>
-
+    <div class="home-content sl-markdown-content"><Content /></div>
     <section class="capabilities" aria-labelledby="capabilities-title">
       <div class="capabilities-heading">
         <h2 id="capabilities-title">{landing.capabilities.title}</h2>
         <p>{landing.capabilities.text}</p>
       </div>
       <ul class="capability-grid">
-        {
-          landing.capabilities.items.map((entry) => (
-            <li>
-              <a class="capability" href={href(entry.href)}>
-                <svg
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                  set:html={iconMarkup(iconForHref(entry.href))}
-                />
-                <Arrow />
-                <h3>{entry.title}</h3>
-                <p>{entry.text}</p>
-              </a>
-            </li>
-          ))
-        }
+        {landing.capabilities.items.map((entry) => (
+          <li class="capability"><LandingIcon name={entry.icon} /><h3>{entry.title}</h3><p>{entry.text}</p></li>
+        ))}
       </ul>
     </section>
-
+    <section class="start" aria-labelledby="start-title">
+      <div>
+        <h2 id="start-title">{landing.closing.title}</h2>
+        <p>{landing.closing.text}</p>
+        <a class="button primary" href={href(landing.closing.link.href)}>{landing.closing.link.label}<Arrow /></a>
+      </div>
+      <div class="installation">
+        <InstallCommand install={landing.install} />
+        <p class="prerequisites">{landing.install.prerequisites}</p>
+      </div>
+    </section>
     <footer class="landing-footer">
       <div class="footer-brand">
         <Brand href={`${base}/${locale}`} />
@@ -197,18 +98,13 @@ const href = (path: string) =>
     margin: 0;
   }
   .hero {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
     padding-top: var(--sl-nav-height);
   }
   .hero-copy {
     display: flex;
-    flex: 1;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: clamp(3rem, 7vw, 7rem) var(--docs-pad) clamp(3rem, 5vw, 5rem);
+    padding: clamp(3rem, 6vw, 6rem) var(--docs-pad);
     text-align: center;
     background-image: radial-gradient(
       circle,
@@ -220,20 +116,14 @@ const href = (path: string) =>
   .category {
     color: var(--sl-color-gray-3);
     font-size: 0.875rem;
-    font-weight: 500;
-  }
-  .hero-copy > .category {
-    padding: 0.45rem 0.85rem;
-    border: 1px solid var(--docs-line);
-    background: var(--sl-color-black);
   }
   h1 {
-    margin-top: 1.75rem !important;
-    max-width: 22ch;
+    margin-top: 1.5rem !important;
+    max-width: 24ch;
     color: var(--sl-color-white);
-    font-size: clamp(2.6rem, 6.6vw, 6.2rem);
+    font-size: clamp(2.6rem, 5.7vw, 5.5rem);
     font-weight: 600;
-    line-height: 1.04;
+    line-height: 1.08;
     letter-spacing: -0.04em;
     text-wrap: balance;
   }
@@ -244,8 +134,8 @@ const href = (path: string) =>
     color: var(--sl-color-gray-3);
   }
   .lead {
-    max-width: 61ch;
-    margin-top: 1.75rem !important;
+    max-width: 63ch;
+    margin-top: 1.5rem !important;
     color: var(--sl-color-gray-2);
     font-size: 1.2rem;
     line-height: 1.7;
@@ -283,146 +173,6 @@ const href = (path: string) =>
   .button.primary:hover {
     background: var(--sl-color-gray-2);
   }
-  .hero-copy :global(outpost-install) {
-    width: min(100%, 32rem);
-    text-align: left;
-    margin-top: 2rem;
-  }
-  .prerequisites {
-    margin-top: 0.8rem !important;
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-  }
-  .story {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem 2rem;
-    padding: 2.5rem var(--docs-pad);
-    border-top: 1px solid var(--docs-line);
-    background: var(--docs-code-bg);
-  }
-  .story > .category {
-    grid-column: 1 / -1;
-  }
-  .story h2 {
-    color: var(--sl-color-white);
-    font-size: clamp(1.4rem, 2.5vw, 2rem);
-    font-weight: 500;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-    text-wrap: balance;
-  }
-  .story ol {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-column: 1 / -1;
-    list-style: none;
-    padding: 0;
-    margin: 1.5rem 0;
-    border: 1px solid var(--docs-line);
-    background: var(--sl-color-black);
-  }
-  .story li {
-    min-width: 0;
-  }
-  .story li + li {
-    border-left: 1px solid var(--docs-line);
-  }
-  .story li a {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-content: start;
-    gap: 1.5rem 0.5rem;
-    height: 100%;
-    padding: 1.5rem;
-    color: var(--sl-color-white);
-    text-decoration: none;
-  }
-  .story li a:hover {
-    background: var(--docs-code-bg);
-  }
-  .step-icon {
-    display: flex;
-    align-items: center;
-    color: var(--sl-color-accent);
-  }
-  .step-icon svg {
-    width: 24px;
-    height: 24px;
-  }
-  .step-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .step-number {
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-  }
-  .step-role {
-    color: var(--sl-color-gray-2);
-    font-size: 0.8125rem;
-  }
-  .step-copy {
-    grid-column: 1 / -1;
-  }
-  .story strong {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-  .step-description {
-    display: block;
-    margin-top: 0.5rem;
-    color: var(--sl-color-gray-2);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    text-wrap: pretty;
-  }
-  .story-link {
-    display: flex;
-    grid-column: 2;
-    grid-row: 2;
-    align-items: center;
-    gap: 1rem;
-    color: var(--sl-color-white);
-    font-size: 0.9375rem;
-    text-underline-offset: 0.25em;
-  }
-  .story-result {
-    display: grid;
-    grid-column: 1 / -1;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 1rem;
-    color: var(--sl-color-white);
-    text-decoration: none;
-  }
-  .result-copy {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.5rem 1rem;
-    min-width: 0;
-  }
-  .result-label {
-    color: var(--sl-color-gray-3);
-    font-size: 0.875rem;
-  }
-  .story-result code {
-    padding: 0;
-    font-family: var(--sl-font-mono);
-    font-size: 0.9375rem;
-    overflow-wrap: anywhere;
-  }
-  .result-description {
-    color: var(--sl-color-gray-2);
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
   .overview {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -430,39 +180,30 @@ const href = (path: string) =>
     padding: 0;
     border-block: 1px solid var(--docs-line);
   }
-  .overview li + li {
-    border-left: 1px solid var(--docs-line);
-  }
-  .overview a {
+  .overview li {
+    padding: 2rem var(--docs-pad);
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    height: 100%;
-    padding: 2rem var(--docs-pad);
-    color: var(--sl-color-white);
-    text-decoration: none;
   }
-  .overview a:hover {
-    background: var(--docs-code-bg);
+  .overview li + li {
+    border-left: 1px solid var(--docs-line);
   }
-  .overview svg {
+  .overview :global(svg) {
     flex-shrink: 0;
+    color: var(--sl-color-accent);
   }
-  .overview-copy {
-    display: grid;
-    flex: 1;
-    gap: 0.6rem;
-  }
-  .overview strong {
+  .overview h2 {
     font-size: 1.1rem;
     font-weight: 500;
-    letter-spacing: -0.015em;
+    line-height: 1.4;
+    color: var(--sl-color-white);
   }
-  .overview-copy > span {
+  .overview p {
+    margin-top: 0.6rem;
     color: var(--sl-color-gray-2);
     font-size: 0.9375rem;
     line-height: 1.65;
-    text-wrap: pretty;
   }
   .home-content {
     font-size: 1.0714rem;
@@ -479,7 +220,8 @@ const href = (path: string) =>
   .capabilities-heading {
     padding: 3rem var(--docs-pad);
   }
-  .capabilities-heading h2 {
+  .capabilities-heading h2,
+  .start h2 {
     color: var(--sl-color-white);
     font-size: clamp(1.8rem, 3vw, 2.75rem);
     font-weight: 600;
@@ -487,7 +229,8 @@ const href = (path: string) =>
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
-  .capabilities-heading p {
+  .capabilities-heading p,
+  .start p {
     max-width: 65ch;
     margin-top: 1rem;
     color: var(--sl-color-gray-2);
@@ -501,44 +244,50 @@ const href = (path: string) =>
     list-style: none;
     border-top: 1px solid var(--docs-line);
   }
-  .capability-grid li {
+  .capability {
     min-width: 0;
     border-right: 1px solid var(--docs-line);
+    padding: 2rem var(--docs-pad);
   }
-  .capability-grid li:nth-child(3n) {
+  .capability:nth-child(3n) {
     border-right: 0;
   }
-  .capability-grid li:nth-child(n + 4) {
+  .capability:nth-child(n + 4) {
     border-top: 1px solid var(--docs-line);
   }
-  .capability {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-content: start;
-    gap: 1rem;
-    height: 100%;
-    padding: 2rem var(--docs-pad);
-    color: var(--sl-color-white);
-    text-decoration: none;
-  }
-  .capability:hover {
-    background: var(--sl-color-black);
-  }
-  .capability > :is(h3, p) {
-    grid-column: 1 / -1;
+  .capability :global(svg) {
+    color: var(--sl-color-accent);
   }
   .capability h3 {
-    margin: 0;
+    margin: 1rem 0;
     font-size: 1.15rem;
     font-weight: 500;
     line-height: 1.4;
     letter-spacing: -0.015em;
+    color: var(--sl-color-white);
   }
   .capability p {
     color: var(--sl-color-gray-2);
     font-size: 0.9375rem;
     line-height: 1.65;
-    text-wrap: pretty;
+  }
+  .start {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 3rem;
+    padding: 3rem var(--docs-pad);
+    border-bottom: 1px solid var(--docs-line);
+  }
+  .start .button {
+    margin-top: 1.5rem;
+  }
+  .installation {
+    min-width: 0;
+  }
+  .start .prerequisites {
+    font-size: 0.8125rem;
+    color: var(--sl-color-gray-3);
   }
   .landing-footer {
     display: grid;
@@ -578,49 +327,25 @@ const href = (path: string) =>
   }
   .landing a:focus-visible {
     outline: 2px solid var(--sl-color-accent);
-    outline-offset: -2px;
+    outline-offset: 3px;
   }
   @media (max-width: 64rem) {
-    .story ol {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .story li:nth-child(3) {
-      border-left: 0;
-    }
-    .story li:nth-child(n + 3) {
-      border-top: 1px solid var(--docs-line);
-    }
-    .story {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .story-link {
-      grid-column: 1;
-      grid-row: auto;
-      justify-content: space-between;
-    }
-    .overview a {
-      flex-wrap: wrap;
-    }
-    .overview-copy {
-      flex-basis: 100%;
-      order: 1;
-    }
-    .overview a :global(.arrow) {
-      margin-left: auto;
+    .overview li {
+      flex-direction: column;
     }
   }
   @media (min-width: 40.001rem) and (max-width: 64rem) {
     .capability-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .capability-grid li:nth-child(n) {
+    .capability:nth-child(n) {
       border-right: 1px solid var(--docs-line);
       border-top: 0;
     }
-    .capability-grid li:nth-child(2n) {
+    .capability:nth-child(2n) {
       border-right: 0;
     }
-    .capability-grid li:nth-child(n + 3) {
+    .capability:nth-child(n + 3) {
       border-top: 1px solid var(--docs-line);
     }
   }
@@ -635,27 +360,16 @@ const href = (path: string) =>
       flex-direction: column;
       align-self: stretch;
     }
-    .hero-copy {
-      padding-top: 3rem;
-    }
-    .overview {
+    .overview,
+    .start {
       display: block;
+    }
+    .overview li {
+      flex-direction: row;
     }
     .overview li + li {
       border-left: 0;
       border-top: 1px solid var(--docs-line);
-    }
-    .overview a {
-      flex-wrap: nowrap;
-      align-items: center;
-      padding-block: 1.25rem;
-    }
-    .overview-copy {
-      flex-basis: auto;
-      order: 0;
-    }
-    .result-copy {
-      display: grid;
     }
     .landing-footer {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -667,23 +381,14 @@ const href = (path: string) =>
     .capability-grid {
       grid-template-columns: minmax(0, 1fr);
     }
-    .capability-grid li {
+    .capability {
       border-right: 0;
     }
-    .capability-grid li + li {
+    .capability + .capability {
       border-top: 1px solid var(--docs-line);
     }
-    .capability {
-      padding-block: 1.5rem;
-    }
-  }
-  @media (max-width: 28rem) {
-    .story ol {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .story li + li {
-      border-left: 0;
-      border-top: 1px solid var(--docs-line);
+    .installation {
+      margin-top: 2rem;
     }
   }
 </style>

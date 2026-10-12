@@ -1,5 +1,14 @@
 # Historique des versions
 
+## 11.1.3
+
+Cette version renouvelle la documentation et l’identité visuelle sans modifier le comportement de la bibliothèque ni son API publique.
+
+- Présente cinq scénarios de workflows sur l’accueil français et anglais : mails, veille, documents, demandes clients et logiciel. Relie chaque étape aux mécanismes correspondants du Guide, dont les décisions typées System One, tout en gardant les exemples compréhensibles sur la page.
+- Fait de l’API la référence complète des prompts ajoutés par Outpost : templates exacts, points d’injection, valeurs dynamiques, possibilités de personnalisation et consignes fixes. Relie les pages concernées du Guide à ces contrats.
+- Répartit les contrats API associés à parts égales sur toute la largeur de chaque ligne, avec trois colonnes au maximum. Retire les badges expérimentaux et les avertissements de maturité générés des pages API ; conserve les prérequis d’exécution, les activations explicites et les limites de validation réelle dans les contrats et les guides.
+- Remplace le logo sur le site, la bannière du README et les aperçus de partage bilingues. Ajoute les variantes claires et sombres, les favicons adaptés au thème du navigateur et une icône Apple, avec une génération reproductible des assets lors du build documentaire.
+
 ## 11.1.2
 
 Cette version ajoute la composition de workflows YAML, les dialogues de recettes dans le terminal et les workspaces de fichiers sans Git, en conservant les API et les valeurs par défaut Git existantes.

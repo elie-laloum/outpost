@@ -12,9 +12,6 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
-const experimental = JSON.parse(
-  await readFile(resolve(root, "reference-content/experimental.json"), "utf8"),
-);
 const manifest = JSON.parse(
   await readFile(resolve(root, "../package.json"), "utf8"),
 );
@@ -155,18 +152,6 @@ for (const [name, guide] of Object.entries(symbolGuides)) {
   });
 }
 
-for (const group of groups) {
-  for (const name of group.experimental ?? []) {
-    if (!group.names.split(" ").includes(name))
-      throw new Error(`Experimental symbol missing from its family: ${name}`);
-    for (const language of [0, 1])
-      if (!experimental[name]?.[language]?.trim())
-        throw new Error(
-          `Missing experimental explanation: ${name} (${language})`,
-        );
-  }
-}
-
 const navigation = groups.map((group) => ({
   title: group.title,
   items: [
@@ -189,12 +174,6 @@ const navigation = groups.map((group) => ({
           label: symbol.name,
           attrs: {
             "data-api-kind": kind,
-            ...(group.experimental?.includes(symbol.name)
-              ? {
-                  "data-api-status": "experimental",
-                  title: "Experimental / Expérimental",
-                }
-              : {}),
           },
         };
       }),
@@ -254,9 +233,6 @@ for (const [symbol, { declaration, related }] of symbols) {
     [0, ""],
     [1, "fr/"],
   ]) {
-    const warning = group?.experimental?.includes(symbol.name)
-      ? `:::caution[${language ? "Expérimental" : "Experimental"}]\n${experimental[symbol.name][language]}\n:::\n\n`
-      : "";
     const lead =
       exported || isContract(declaration)
         ? ""
@@ -282,7 +258,6 @@ for (const [symbol, { declaration, related }] of symbols) {
     expected.set(
       `${locale}reference/${slug(symbol)}.md`,
       front(symbol.name, referenceRank(declaration, checker, symbol) * 10) +
-        warning +
         lead +
         imports +
         explain(symbol, declaration, group, language, checker) +

@@ -8,7 +8,7 @@ const links = z.object({ title: z.string(), links: z.array(link) });
 const capability = z.object({
   title: z.string(),
   text: z.string(),
-  href: z.string(),
+  icon: z.string(),
 });
 const landing = z.object({
   category: z.string(),
@@ -16,31 +16,40 @@ const landing = z.object({
   lead: z.string(),
   primary: link,
   secondary: link,
-  story: z.object({
+  scenarios: z.object({
     label: z.string(),
     title: z.string(),
-    steps: z
+    text: z.string(),
+    requestLabel: z.string(),
+    resultLabel: z.string(),
+    note: z.string(),
+    items: z
       .array(
         z.object({
+          id: z.string().regex(/^[a-z][a-z-]*$/),
+          label: z.string(),
+          icon: z.string(),
           title: z.string(),
-          text: z.string(),
-          role: z.string(),
-          icon: z.enum(["approve", "agent", "ci", "branch"]),
-          href: z.string(),
+          request: z.string(),
+          steps: z
+            .array(
+              z.object({
+                title: z.string(),
+                text: z.string(),
+                role: z.string(),
+                icon: z.string(),
+                mechanisms: z.array(link).min(1).max(2),
+              }),
+            )
+            .length(4),
+          result: z.string(),
+          boundary: z.string(),
         }),
       )
-      .length(4),
-    result: z.object({
-      label: z.string(),
-      branch: z.string(),
-      text: z.string(),
-      href: z.string(),
-    }),
-    link,
+      .min(2),
   }),
-  overview: z
-    .array(z.object({ title: z.string(), text: z.string(), href: z.string() }))
-    .length(3),
+  overview: z.array(capability).length(3),
+  closing: z.object({ title: z.string(), text: z.string(), link }),
   install: z.object({
     managers: z.string(),
     commands: z

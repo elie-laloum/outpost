@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://elie-laloum.github.io/outpost/">
-    <img src="outpost-banner.png" alt="Outpost — Coding agents. Workflows in TypeScript." width="100%">
+    <img src="outpost-banner.png" alt="Outpost — Your agents. Your tools. Your workflows." width="100%">
   </a>
 </p>
 

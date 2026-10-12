@@ -117,6 +117,8 @@ La première tentative après une pause reçoit `context.quota` : la conversatio
 
 Un tour poursuivi envoie une courte consigne de reprise au lieu du brief. Passez `quotaResume: "restart"` à une tâche d’agent ou isolée pour renvoyer la requête d’origine.
 
+L’API donne le [prompt exact de reprise après quota](../../reference/quotaresumepolicy/#outpost-instructions), ses conditions d’utilisation et sa variante avec balise de réponse. Son texte est fixe.
+
 Claude Code, Codex, Copilot CLI et Kimi Code peuvent poursuivre. Un [agent de secours](../fallback-agents/) repart de son premier candidat avec le brief d’origine.
 
 ## Transmettre la conversation à un traitement en file

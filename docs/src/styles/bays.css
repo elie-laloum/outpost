@@ -237,6 +237,18 @@
 .sl-markdown-content .bay ul.cells > li > a:hover {
   background: var(--docs-code-bg);
 }
+.sl-markdown-content .bay[data-role="related"] ul.cells {
+  display: flex;
+  flex-wrap: wrap;
+}
+.sl-markdown-content .bay[data-role="related"] ul.cells > li {
+  flex: 1 1 calc(100% / 3);
+  min-width: 0;
+}
+.sl-markdown-content .bay[data-role="related"] ul.cells > li > a {
+  height: 100%;
+  overflow-wrap: anywhere;
+}
 
 /* Reference property rows */
 .sl-markdown-content .bay ul.props {
@@ -351,6 +363,9 @@
   }
   .sl-markdown-content .bay ul.cells > li {
     border-right: 0 !important;
+  }
+  .sl-markdown-content .bay[data-role="related"] ul.cells > li {
+    flex-basis: 100%;
   }
   .sl-markdown-content .bay table {
     display: block;

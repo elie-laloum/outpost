@@ -57,7 +57,25 @@ for (const file of files) {
     assert.equal(png.readUInt32BE(20), 630);
     assert.equal(
       $('link[rel="shortcut icon"]').attr("href"),
-      `${base}/favicon.svg`,
+      `${base}/favicon.ico`,
+    );
+    for (const size of [16, 32]) {
+      for (const theme of ["light", "dark"]) {
+        const path = `favicon-${theme === "dark" ? "dark-" : ""}${size}x${size}.png`;
+        assert.equal(
+          $(
+            `link[rel="icon"][sizes="${size}x${size}"][media="(prefers-color-scheme: ${theme})"]`,
+          ).attr("href"),
+          `${base}/${path}`,
+        );
+        const icon = await readFile(resolve(root, path));
+        assert.equal(icon.readUInt32BE(16), size);
+        assert.equal(icon.readUInt32BE(20), size);
+      }
+    }
+    assert.equal(
+      $('link[rel="apple-touch-icon"]').attr("href"),
+      `${base}/apple-touch-icon.png`,
     );
     const data = JSON.parse($('script[type="application/ld+json"]').text());
     assert.equal(data["@context"], "https://schema.org");

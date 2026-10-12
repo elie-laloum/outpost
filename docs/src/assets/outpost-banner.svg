@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="683" viewBox="0 0 2048 683">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#273347"/>
+    </pattern>
+  </defs>
+  <rect width="2048" height="683" fill="#101722"/>
+  <rect width="2048" height="683" fill="url(#grid)"/>
+  <path d="M1380 0v683" stroke="#344155"/>
+  <g font-family="DejaVu Sans, sans-serif">
+    <text x="96" y="155" fill="#a9b5c7" font-size="28" letter-spacing="4">AGENT WORKFLOWS</text>
+    <text x="86" y="355" fill="#fff" font-size="160" font-weight="600" letter-spacing="-6">Outpost</text>
+    <text x="96" y="445" fill="#a9b5c7" font-size="44">Your agents. Your tools. Your workflows.</text>
+    <text x="96" y="573" fill="#a9b5c7" font-size="28">TypeScript &amp; YAML</text>
+  </g>
+  <image href="./outpost-symbol-white.png" x="1490" y="118" width="448" height="448"/>
+</svg>

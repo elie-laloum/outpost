@@ -49,6 +49,8 @@ Référence API : [summarizeHistory](../../reference/summarizehistory/), [trunca
 
 Le résumé utilise le modèle et le fournisseur de l’agent. Ses tokens comptent dans la consommation du tour et dans le budget `limits.usage` du harness.
 
+L’API décrit les [instructions de résumé et son préfixe de réinsertion](../../reference/summarizehistory/#outpost-instructions), ainsi que le [marqueur de troncature des résultats d’outils](../../reference/truncatetoolresults/#outpost-instructions). Leur formulation est fixe ; une stratégie de contexte personnalisée peut remplacer le mécanisme.
+
 ## Écrire une stratégie personnalisée
 
 Composez plusieurs stratégies lorsque votre conversation doit combiner réduction des sorties d’outils et résumé. Cet exemple applique les deux traitements dans cet ordre.

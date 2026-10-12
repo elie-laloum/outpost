@@ -30,6 +30,8 @@ const resolution = await workspace.integrate({
 
 Outpost freezes the source and host commits, opens a separate named worktree and prepares the conflicting merge inside the explicit provider's sandbox. The agent must resolve and commit it. Outpost then runs `npm test` on that combined commit, requires status zero and refuses nonignored uncommitted changes or a changed commit during verification. Install the project's test dependencies in the chosen environment first; the strategy does not install them automatically.
 
+Add `instructions` to `createAgentConflictResolver()` for project-specific guidance. It is appended to the [built-in resolution brief documented in the API](../../reference/createagentconflictresolver/#outpost-instructions); it does not replace that brief.
+
 Before integrating, Outpost checks that both original branches still point to their frozen commits, that the host checkout is clean, and that the resolution contains both commits. The source workspace's `guard` is enforced again on the final resolution diff. It fast-forwards the host to the exact verified commit under the integration lock. It never pushes.
 
 On failure, cancellation or deadline, the original branches are not moved by the resolver. Both source and resolution worktrees remain; `recoveryDetails(error)` identifies the resolution branch and directory and includes `sourceBranch` and `sourceDirectory`. Inspect these before retrying. Mounted Git metadata is writable by the agent: these checks are integration guarantees for cooperating code, not an adversarial security boundary.

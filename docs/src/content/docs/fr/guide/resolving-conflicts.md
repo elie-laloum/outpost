@@ -30,6 +30,8 @@ const resolution = await workspace.integrate({
 
 Outpost fige les commits source et hôte, ouvre un worktree nommé séparé et prépare la fusion conflictuelle dans la sandbox du fournisseur explicite. L’agent doit la résoudre et la commiter. Outpost exécute ensuite `npm test` sur ce commit combiné, exige le statut zéro et refuse les changements non ignorés non commités ou un commit modifié pendant la vérification. Installez d’abord les dépendances de test du projet dans l’environnement choisi ; la stratégie ne les installe pas automatiquement.
 
+Ajoutez `instructions` à `createAgentConflictResolver()` pour donner des consignes propres au projet. Elles complètent le [brief de résolution intégré décrit dans l’API](../../reference/createagentconflictresolver/#outpost-instructions), sans le remplacer.
+
 Avant intégration, Outpost vérifie que les deux branches d’origine pointent toujours sur les commits figés, que le checkout hôte est propre et que la résolution contient les deux commits. Le `guard` du workspace source est revérifié sur le diff final de résolution. Outpost avance la branche hôte jusqu’au commit exact vérifié sous le verrou d’intégration. Il ne pousse jamais.
 
 En cas d’échec, d’annulation ou de dépassement du délai, le mécanisme de résolution ne déplace pas les branches d’origine. Les worktrees source et de résolution restent disponibles ; `recoveryDetails(error)` identifie la branche et le dossier de résolution et comprend `sourceBranch` et `sourceDirectory`. Inspectez-les avant de réessayer. Les métadonnées Git montées sont accessibles en écriture à l’agent : ces contrôles sont des garanties d’intégration pour du code coopératif, pas une frontière de sécurité adversariale.

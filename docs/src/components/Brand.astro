@@ -1,4 +1,6 @@
 ---
+import blackLogo from "../assets/outpost-symbol-black.png";
+import whiteLogo from "../assets/outpost-symbol-white.png";
 interface Props {
   href: string;
   suffix?: string;
@@ -15,7 +17,8 @@ const { href, suffix, class: className, iconOnly = false } = Astro.props;
   translate="no"
   aria-label={iconOnly ? "Outpost" : undefined}
 >
-  <span class="mark" aria-hidden="true"></span>
+  <img class="mark mark-light" src={blackLogo.src} width={blackLogo.width} height={blackLogo.height} alt="" aria-hidden="true" />
+  <img class="mark mark-dark" src={whiteLogo.src} width={whiteLogo.width} height={whiteLogo.height} alt="" aria-hidden="true" />
   {!iconOnly && <span class="name">Outpost</span>}
   {suffix && <span class="suffix">{suffix}</span>}
 </a>
@@ -35,10 +38,10 @@ const { href, suffix, class: className, iconOnly = false } = Astro.props;
   .mark {
     flex: 0 0 auto;
     align-self: center;
-    width: 1.125em;
-    height: 1em;
-    background-color: currentColor;
-    mask: url("../assets/outpost-mark.png") center / contain no-repeat;
+    display: block;
+    width: 1.5em;
+    height: 1.5em;
+    object-fit: contain;
   }
   .suffix {
     margin-left: 0.1rem;
@@ -46,5 +49,12 @@ const { href, suffix, class: className, iconOnly = false } = Astro.props;
     font-size: 0.8rem;
     font-weight: 400;
     letter-spacing: 0;
+  }
+  .mark-dark,
+  :global([data-theme="dark"]) .mark-light {
+    display: none;
+  }
+  :global([data-theme="dark"]) .mark-dark {
+    display: block;
   }
 </style>

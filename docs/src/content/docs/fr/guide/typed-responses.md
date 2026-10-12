@@ -81,6 +81,8 @@ Les réparations exigent un agent capable de reprendre sa conversation ; sinon, 
 
 Fournir `response` ajoute des consignes de réponse finale après le brief rendu et les messages de steering incorporés au début du tour. Elles demandent une seule balise finale `<verdict>…</verdict>`, contenant du JSON valide, sans texte après la balise fermante. Elles remplacent les consignes de format contradictoires tout en conservant les instructions de la tâche. Aucune option ne permet de les désactiver.
 
+L’API présente les [prompts exacts de format et de réparation](../../reference/responsespec/#outpost-instructions), leurs valeurs dynamiques et leurs limites de personnalisation.
+
 Outpost obtient automatiquement le JSON Schema d’entrée via [Standard JSON Schema](https://standardschema.dev/json-schema), pris en charge directement par Zod 4.2+. Il transmet ce schéma avec les consignes. Le schéma d’entrée décrit ce que l’agent doit renvoyer ; la validation peut transformer ce JSON en un `result.value` différent.
 
 Pour une fonction de parsing ou un validateur sans convertisseur compatible, fournissez `jsonSchema` explicitement. Ce schéma est prioritaire sur la conversion automatique. La définition échoue avec le code `configuration` si le schéma manque, si la conversion échoue ou si le schéma contient des valeurs non conservables en JSON. Outpost capture une copie du schéma, sans les métadonnées de protocole `~standard` non énumérables, et ne résout pas les références distantes.

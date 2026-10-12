@@ -9,13 +9,11 @@ const space = docsSpace(route);
 const crumbs = breadcrumbs(route);
 const link = space === "reference" ? currentLink(route.sidebar) : undefined;
 const kind = link?.attrs["data-api-kind"];
-const experimental = link?.attrs["data-api-status"] === "experimental";
 const importLine = entry.body?.match(/^## Import\n\n```ts\n([\s\S]*?)```/m)?.[1];
 const description = entry.data.description;
 const body = entry.body?.replace(/^:::[\s\S]*?:::\s*/, "").trimStart() ?? "";
 const showDescription =
   description && !/ — Outpost API$/.test(description) && !body.startsWith(description);
-const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
 // Long names need the full width; their import then sits under the title.
 const split = Boolean(importLine) && entry.data.title.length <= 24;
 ---
@@ -37,11 +35,6 @@ const split = Boolean(importLine) && entry.data.title.length <= 24;
       <h1 id="_top" class:list={{ symbol: Boolean(kind) }} data-api-kind={kind}>
         {kind && <span class="kind" aria-hidden="true" />}
         {kind ? <Identifier name={entry.data.title} /> : entry.data.title}
-        {
-          experimental && (
-            <span class="flask" role="img" aria-label={experimentalLabel} title={experimentalLabel} />
-          )
-        }
       </h1>
       {showDescription && <p class="description">{description}</p>}
       {
@@ -139,8 +132,7 @@ const split = Boolean(importLine) && entry.data.title.length <= 24;
     font-weight: 500;
     letter-spacing: -0.02em;
   }
-  .kind,
-  .flask {
+  .kind {
     display: inline-block;
     width: 1.25rem;
     height: 1.25rem;
@@ -165,11 +157,6 @@ const split = Boolean(importLine) && entry.data.title.length <= 24;
   }
   .kind {
     margin-right: 0.6rem;
-  }
-  .flask {
-    margin-left: 0.6rem;
-    background-color: var(--sl-color-accent);
-    mask-image: url("../assets/reference-experiment.svg");
   }
   .description {
     max-width: 44rem;

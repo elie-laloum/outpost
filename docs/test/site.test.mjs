@@ -204,48 +204,100 @@ for (const [locale, title, reference] of [
   });
 }
 
-for (const [locale, heading, start, copied] of [
-  ["", "Your agents.", "Try it on your project", "Copy the install command"],
+for (const [locale, heading, explore, start, copied] of [
+  [
+    "",
+    "Your agents.",
+    "Explore the possibilities",
+    "Start with the Guide",
+    "Copy the install command",
+  ],
   [
     "fr/",
     "Vos agents.",
-    "Essayer sur mon projet",
+    "Voir les possibilités",
+    "Commencer avec le Guide",
     "Copier la commande d’installation",
   ],
 ]) {
-  test(`home explains a task with working examples, a canvas and useful links (${locale || "en"})`, async ({
+  test(`home explains agent workflows through scenarios without leaving the page (${locale || "en"})`, async ({
     page,
     context,
   }) => {
-    await page.addInitScript(() => {
-      window.homeRenderErrors = [];
-      window.addEventListener("error", (event) => {
-        window.homeRenderErrors.push(event.message);
-      });
-    });
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto(locale);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       heading,
     );
-    await expect(page.locator(".docs-header .brand")).toHaveAttribute(
-      "href",
-      `/outpost/${locale}`,
+    const hero = page.locator(".hero");
+    await hero.getByRole("link", { name: explore, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}#possibilities$`));
+    const explorer = page.locator("outpost-scenarios");
+    const tabs = explorer.getByRole("tab");
+    await expect(tabs).toHaveText(
+      locale
+        ? ["Mails", "Veille", "Documents", "Demandes clients", "Logiciel"]
+        : ["Email", "Research", "Documents", "Customer requests", "Software"],
     );
-    const hero = page.locator(".landing .hero");
-    const story = page.locator(".landing .story");
-    await expect(story.locator("ol a")).toHaveCount(4);
-    await expect(story.locator(".step-icon svg")).toHaveCount(4);
-    await expect(story.locator(".story-link")).toHaveAttribute(
-      "href",
-      `/outpost/${locale}guide/first-workflow/`,
-    );
-    await expect(page.locator(".landing .overview a")).toHaveCount(3);
+    for (let index = 0; index < 5; index++) {
+      await tabs.nth(index).click();
+      await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
+      const panel = explorer.getByRole("tabpanel");
+      await expect(panel).toHaveCount(1);
+      await expect(panel.locator(".scenario-steps li")).toHaveCount(4);
+      await expect(panel.locator(".scenario-steps svg")).toHaveCount(4);
+      await expect(panel.locator(".scenario-result")).not.toBeEmpty();
+      await expect(panel.locator(".boundary")).not.toBeEmpty();
+      for (const step of await panel.locator(".scenario-steps li").all()) {
+        const links = step.locator(".step-mechanisms a");
+        expect(await links.count()).toBeGreaterThanOrEqual(1);
+        expect(await links.count()).toBeLessThanOrEqual(2);
+        for (const link of await links.all()) {
+          await expect(link).toBeVisible();
+          await expect(link).toHaveAttribute(
+            "href",
+            new RegExp(`^/outpost/${locale}guide/[a-z-]+/$`),
+          );
+        }
+      }
+      await expect(page).toHaveURL(new RegExp(`/${locale}#possibilities$`));
+    }
+    await tabs.last().focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(tabs.first()).toBeFocused();
+    await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("End");
+    await expect(tabs.last()).toBeFocused();
+    await page.keyboard.press("Home");
+    await expect(tabs.first()).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
+    await expect(tabs.last()).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(explorer.getByRole("tabpanel")).toBeFocused();
+    await page.keyboard.press("Tab");
     await expect(
-      page.locator(".landing .overview a > svg:first-child"),
-    ).toHaveCount(3);
-    const install = hero.locator("outpost-install");
-    await expect(install.getByRole("tab")).toHaveCount(4);
+      explorer.getByRole("tabpanel").locator(".step-mechanisms a").first(),
+    ).toBeFocused();
+    await expect(page.locator(".scenario-note")).toContainText("MCP");
+    await expect(page.locator(".capabilities .capability")).toHaveCount(6);
+    await expect(page.locator(".capabilities a")).toHaveCount(0);
+    await expect(page.locator(".capability > svg")).toHaveCount(6);
+    const canvas = page.locator(".home-content [data-canvas]");
+    await expect(canvas.locator(".canvas-node")).toHaveCount(5);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(5);
+    const check = canvas.locator(".canvas-node").filter({
+      has: page.locator(".canvas-node-title", {
+        hasText: locale ? "Vérifier" : "Check",
+      }),
+    });
+    await expect(check.locator(".canvas-out [data-to]")).toHaveCount(2);
+    await canvas.locator('[data-zoom="fit"]').click();
+    const scale = await canvas.locator(".canvas-scale").textContent();
+    await canvas.locator('[data-zoom="in"]').click();
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
+    const install = page.locator(".start outpost-install");
     await install.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npm install @elie-laloum/outpost",
@@ -261,88 +313,61 @@ for (const [locale, heading, start, copied] of [
       "aria-selected",
       "true",
     );
+    expect(errors).toEqual([]);
+    await hero.getByRole("link", { name: start, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/introduction/$`));
+  });
 
-    const tabs = page.locator(".home-content .code-tabs");
-    await expect(tabs.locator(".code-tab")).toHaveText([
-      "outpost.config.ts",
-      "task.ts",
-    ]);
-    await expect(tabs.locator(".code-tab-panel").first()).toContainText(
-      'authentication: "account"',
-    );
-    await tabs.locator(".code-tab").last().click();
-    await expect(tabs.locator(".code-tab-panel").last()).toBeVisible();
-    await expect(tabs.locator(".code-tab-panel").last()).toContainText(
-      "dispatch({",
-    );
-    expect(
-      await page
-        .locator(".home-content pre code")
-        .evaluateAll((blocks) =>
-          blocks.every(
-            (block) => block.textContent.trimEnd().split("\n").length <= 20,
-          ),
-        ),
-    ).toBe(true);
-    const canvas = page.locator(".home-content [data-canvas]");
-    await expect(canvas.locator(".canvas-node")).toHaveCount(3);
-    const stages = locale
-      ? ["Relire le README", "Préparer un résumé", "Examiner le résultat"]
-      : ["Review the README", "Prepare a summary", "Inspect the result"];
-    await expect(canvas.locator(".canvas-node-title")).toHaveText(stages);
-    const edges = await canvas.evaluate((element) =>
-      [...element.querySelectorAll(".canvas-node")].flatMap((node) =>
-        [...node.querySelectorAll(".canvas-out [data-to]")].map((edge) => ({
-          from: node.querySelector(".canvas-node-title").textContent.trim(),
-          to: element
-            .querySelector(`#${edge.dataset.to} .canvas-node-title`)
-            .textContent.trim(),
-        })),
-      ),
-    );
-    expect(edges).toEqual([
-      { from: stages[0], to: stages[1] },
-      { from: stages[1], to: stages[2] },
-    ]);
-    await canvas.locator('[data-zoom="fit"]').click();
-    await expect(canvas.locator(".canvas-link")).toHaveCount(2);
-    const scale = await canvas.locator(".canvas-scale").textContent();
-    await canvas.locator('[data-zoom="in"]').click();
-    await expect(canvas.locator(".canvas-scale")).not.toHaveText(scale);
-    const features = page.locator(".home-content a.feature-cell");
-    await expect(features).toHaveCount(3);
-    await expect(features.locator(".feature-icon svg")).toHaveCount(3);
-    await expect(features.first()).toHaveAttribute(
-      "href",
-      "guide/verification-loops/",
-    );
-    const capabilities = page.locator(".capabilities");
-    await expect(capabilities.getByRole("heading", { level: 2 })).toHaveText(
-      locale
-        ? "Ce que vous pouvez construire avec Outpost"
-        : "What you can build with Outpost",
-    );
-    await expect(capabilities.locator("a.capability")).toHaveCount(3);
-    await expect(
-      capabilities.locator("a.capability > svg:first-child"),
-    ).toHaveCount(3);
-    await expect(capabilities.locator("h3")).toHaveCount(3);
-    await expect(capabilities.locator("a.capability").first()).toHaveAttribute(
-      "href",
-      `/outpost/${locale}guide/choose-an-agent/`,
-    );
-    expect(await page.evaluate(() => window.homeRenderErrors)).toEqual([]);
-    await story.locator(".story-link").click();
-    await expect(page).toHaveURL(
-      new RegExp(`/${locale}guide/first-workflow/$`),
+  test(`home explains mechanisms with links to the matching Guide (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(locale);
+    const decision = page
+      .locator("#scenario-mail")
+      .getByRole("link", { name: /System One/ });
+    await decision.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/decisions/$`));
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      locale ? "décision typée" : "typed decision",
     );
     await page.goBack();
-    await hero.getByRole("link", { name: start, exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
+    await page
+      .getByRole("tab", {
+        name: locale ? "Demandes clients" : "Customer requests",
+      })
+      .click();
+    await page.getByRole("tabpanel").getByRole("link", { name: /MCP/ }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/mcp-servers/$`));
+  });
+
+  test(`home scenarios remain readable without JavaScript (${locale || "en"})`, async ({
+    browser,
+    baseURL,
+  }) => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      baseURL,
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(locale);
+      await expect(page.locator(".scenario-tabs")).toBeHidden();
+      for (const panel of await page.locator(".scenario-panel").all())
+        await expect(panel).toBeVisible();
+      await expect(page.locator(".scenario-panel")).toHaveCount(5);
+      await page
+        .locator("#scenario-mail")
+        .getByRole("link", { name: /System One/ })
+        .click();
+      await expect(page).toHaveURL(new RegExp(`/${locale}guide/decisions/$`));
+    } finally {
+      await context.close();
+    }
   });
 
   for (const width of [320, 390, 800, 1440, 2560]) {
-    test(`home remains readable and its features fit the grid (${locale || "en"}, ${width}px)`, async ({
+    test(`home remains readable and its scenarios fit the page (${locale || "en"}, ${width}px)`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -353,109 +378,89 @@ for (const [locale, heading, start, copied] of [
           (value) => (document.documentElement.dataset.theme = value),
           theme,
         );
-        const dimensions = await page.evaluate(() => {
-          const content = document
-            .querySelector(".rail")
-            .getBoundingClientRect();
-          const capabilities = [
-            ...document.querySelectorAll(".capability-grid li"),
-          ].map((link) => {
-            const box = link.getBoundingClientRect();
+        for (const tab of await page
+          .locator("outpost-scenarios")
+          .getByRole("tab")
+          .all()) {
+          await tab.click();
+          const dimensions = await page.evaluate(() => {
+            const rail = document
+              .querySelector(".rail")
+              .getBoundingClientRect();
+            const panel = document
+              .querySelector(".scenario-panel:not([hidden])")
+              .getBoundingClientRect();
+            const steps = [
+              ...document.querySelectorAll(
+                ".scenario-panel:not([hidden]) .scenario-steps li",
+              ),
+            ].map((step) => ({
+              top: step.getBoundingClientRect().top,
+              title: step.querySelector("h4").getBoundingClientRect().top,
+              text: step.querySelector("p").getBoundingClientRect().top,
+              icon: step.querySelector("svg").getBoundingClientRect().top,
+              iconWidth: step.querySelector("svg").getBoundingClientRect()
+                .width,
+              mechanisms: step
+                .querySelector(".step-mechanisms")
+                .getBoundingClientRect().top,
+            }));
+            const cards = [...document.querySelectorAll(".capability")].map(
+              (card) => {
+                const rect = card.getBoundingClientRect();
+                return {
+                  left: rect.left,
+                  right: rect.right,
+                  width: rect.width,
+                  top: rect.top,
+                  bottom: rect.bottom,
+                };
+              },
+            );
             return {
-              left: box.left,
-              right: box.right,
-              top: box.top,
-              bottom: box.bottom,
-              width: box.width,
+              overflow:
+                document.documentElement.scrollWidth > window.innerWidth,
+              left: rail.left,
+              right: rail.right,
+              panelLeft: panel.left,
+              panelRight: panel.right,
+              cards,
+              steps,
             };
           });
-          return {
-            hero: document.querySelector(".hero").getBoundingClientRect()
-              .height,
-            storyTop:
-              document.querySelector(".story").getBoundingClientRect().top +
-              window.scrollY,
-            content: { left: content.left, right: content.right },
-            searchLeft: document
-              .querySelector(".docs-search")
-              .getBoundingClientRect().left,
-            capabilities,
-            overflow: document.documentElement.scrollWidth > window.innerWidth,
-            storyPadding: parseFloat(
-              getComputedStyle(document.querySelector(".story")).paddingLeft,
-            ),
-            cards: [...document.querySelectorAll(".overview a")].map((card) => {
-              const box = card.getBoundingClientRect();
-              return {
-                left: box.left,
-                right: box.right,
-                top: box.top,
-                bottom: box.bottom,
-              };
-            }),
-          };
-        });
-        expect(dimensions.overflow).toBe(false);
-        if (width === 2560)
-          expect(
-            Math.abs(dimensions.searchLeft - dimensions.content.left),
-          ).toBeLessThanOrEqual(1);
-        expect(Math.abs(dimensions.hero - 900)).toBeLessThanOrEqual(1);
-        expect(
-          Math.abs(dimensions.storyTop - dimensions.hero),
-        ).toBeLessThanOrEqual(1);
-        expect(dimensions.storyPadding).toBeGreaterThanOrEqual(16);
-        for (const card of dimensions.cards) {
-          expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
-          expect(card.right).toBeLessThanOrEqual(dimensions.content.right);
-        }
-        if (width <= 560) {
-          for (let index = 1; index < dimensions.cards.length; index++) {
-            expect(dimensions.cards[index].top).toBeGreaterThanOrEqual(
-              dimensions.cards[index - 1].bottom,
-            );
+          expect(dimensions.overflow).toBe(false);
+          expect(dimensions.panelLeft).toBeGreaterThanOrEqual(dimensions.left);
+          expect(dimensions.panelRight).toBeLessThanOrEqual(dimensions.right);
+          expect(dimensions.cards).toHaveLength(6);
+          for (const step of dimensions.steps) {
+            expect(step.iconWidth).toBeGreaterThan(16);
+            for (const sibling of dimensions.steps.filter(
+              (other) => Math.abs(other.top - step.top) < 1,
+            )) {
+              for (const part of ["title", "text", "icon", "mechanisms"])
+                expect(
+                  Math.abs(step[part] - sibling[part]),
+                ).toBeLessThanOrEqual(1);
+            }
           }
-        }
-        if (width >= 800) {
-          for (const card of dimensions.cards) {
+          const columns = width <= 560 ? 1 : width <= 896 ? 2 : 3;
+          for (const [index, card] of dimensions.cards.entries()) {
+            expect(card.left).toBeGreaterThanOrEqual(dimensions.left);
+            expect(card.right).toBeLessThanOrEqual(dimensions.right);
             expect(
-              Math.abs(card.top - dimensions.cards[0].top),
+              Math.abs(card.width - dimensions.cards[0].width),
             ).toBeLessThanOrEqual(1);
+            if (index < columns)
+              expect(
+                Math.abs(card.top - dimensions.cards[0].top),
+              ).toBeLessThanOrEqual(1);
+            if (index >= columns)
+              expect(card.top).toBeGreaterThanOrEqual(
+                dimensions.cards[index - columns].bottom,
+              );
           }
         }
-        expect(dimensions.capabilities).toHaveLength(3);
-        const columns = width <= 560 ? 1 : width <= 896 ? 2 : 3;
-        for (const [index, card] of dimensions.capabilities.entries()) {
-          expect(card.left).toBeGreaterThanOrEqual(dimensions.content.left);
-          expect(card.right).toBeLessThanOrEqual(dimensions.content.right);
-          expect(
-            Math.abs(card.width - dimensions.capabilities[0].width),
-          ).toBeLessThanOrEqual(1);
-          if (index < columns) {
-            expect(
-              Math.abs(card.top - dimensions.capabilities[0].top),
-            ).toBeLessThanOrEqual(1);
-          }
-          if (index >= columns) {
-            expect(card.top).toBeGreaterThanOrEqual(
-              dimensions.capabilities[index - columns].bottom,
-            );
-          }
-        }
-        const row = page
-          .locator(".home-content .bay-row[data-bay=split]")
-          .first();
-        const say = await row.locator(".bay-say").boundingBox();
-        const code = await row.locator(".code-tabs").boundingBox();
-        if (width > 1024)
-          expect(code.x).toBeGreaterThanOrEqual(say.x + say.width - 1);
-        if (width <= 1024)
-          expect(code.y).toBeGreaterThanOrEqual(say.y + say.height - 1);
       }
-      await page.locator("a.capability").first().click();
-      await expect(page).toHaveURL(
-        new RegExp(`/${locale}guide/choose-an-agent/$`),
-      );
     });
   }
 }
@@ -479,7 +484,7 @@ test("documentation section styles leave the landing untouched", async ({
 }) => {
   await page.goto("");
   const primary = page.locator(".landing .hero .button.primary");
-  await expect(primary).toHaveText(/Try it on your project/);
+  await expect(primary).toHaveText(/Explore the possibilities/);
   const colors = await primary.evaluate((element) => {
     const style = getComputedStyle(element);
     return [style.color, style.backgroundColor];
@@ -697,9 +702,27 @@ test("theme changes and long API signatures remain within the page", async ({
     .first();
   await toggle.click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator(".docs-brand .mark-light")).toBeVisible();
+  await expect(page.locator(".docs-brand .mark-dark")).toBeHidden();
+  await expect
+    .poll(() =>
+      page
+        .locator(".docs-brand .mark-light")
+        .evaluate((image) => image.naturalWidth),
+    )
+    .toBe(128);
   await toggle.focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator(".docs-brand .mark-dark")).toBeVisible();
+  await expect(page.locator(".docs-brand .mark-light")).toBeHidden();
+  await expect
+    .poll(() =>
+      page
+        .locator(".docs-brand .mark-dark")
+        .evaluate((image) => image.naturalWidth),
+    )
+    .toBe(128);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -815,8 +838,12 @@ for (const locale of ["", "fr/"]) {
     "modelresult",
     "anthropicmodelprovider",
     "anthropicmodelprovideroptions",
+    "checkspeculationintegration",
+    "speculate",
+    "recoverspeculation",
+    "speculationoptions",
   ]) {
-    test(`stable reference has no experimental warning (${locale}${name})`, async ({
+    test(`reference has no experimental badge or generated warning (${locale}${name})`, async ({
       page,
     }) => {
       await page.goto(`${locale}reference/${name}/`);
@@ -824,6 +851,9 @@ for (const locale of ["", "fr/"]) {
         page.locator(
           ".sl-markdown-content .bay-say > .starlight-aside--caution",
         ),
+      ).toHaveCount(0);
+      await expect(
+        page.locator(".docs-title .flask, [data-api-status]"),
       ).toHaveCount(0);
     });
   }
@@ -840,6 +870,7 @@ for (const locale of ["", "fr/"]) {
         await page.getByRole("button", { name: "Menu", exact: true }).click();
       const panel = page.locator(".reference-navigation");
       await expect(panel.locator("h2, details, summary")).toHaveCount(0);
+      await expect(panel.locator("[data-api-status]")).toHaveCount(0);
       await expect(
         panel.locator('a[href*="/reference/overview/"]'),
       ).toHaveCount(0);
@@ -919,7 +950,6 @@ for (const locale of ["", "fr/"]) {
         "guide/working-with-files/",
         "guide/harness-hooks/",
         "guide/host-process/",
-        "reference/speculate/",
         "guide/speculation/",
       ]) {
         await page.goto(`${locale}${route}`);
@@ -1115,6 +1145,54 @@ for (const locale of ["", "fr/"]) {
 
 for (const locale of ["", "fr/"]) {
   for (const width of [1440, 390]) {
+    test(`related contracts fill each row with at most three equal cells (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      for (const [index, slug] of [
+        "agentevent",
+        "agentauthentication",
+        "archiverecovery",
+        "agentconflictresolveroptions",
+        "artifacttaskoptions",
+        "createagent",
+      ].entries()) {
+        await page.goto(`${locale}reference/${slug}/`);
+        const cells = page.locator('.bay[data-role="related"] ul.cells');
+        const layout = await cells.evaluate((list) => ({
+          width: list.getBoundingClientRect().width,
+          left: list.getBoundingClientRect().left,
+          right: list.getBoundingClientRect().right,
+          items: [...list.children].map((item) => {
+            const rect = item.getBoundingClientRect();
+            return {
+              top: rect.top,
+              left: rect.left,
+              right: rect.right,
+              width: rect.width,
+            };
+          }),
+        }));
+        expect(layout.items).toHaveLength(index + 1);
+        const columns = width > 560 ? 3 : 1;
+        for (let start = 0; start < layout.items.length; start += columns) {
+          const row = layout.items.slice(start, start + columns);
+          expect(Math.abs(row[0].left - layout.left)).toBeLessThanOrEqual(1);
+          expect(Math.abs(row.at(-1).right - layout.right)).toBeLessThanOrEqual(
+            1,
+          );
+          for (const item of row) {
+            expect(
+              Math.abs(item.width - layout.width / row.length),
+            ).toBeLessThanOrEqual(1);
+            expect(Math.abs(item.top - row[0].top)).toBeLessThanOrEqual(1);
+          }
+          if (start)
+            expect(row[0].top).toBeGreaterThan(layout.items[start - 1].top);
+        }
+      }
+    });
+
     test(`guide card icons are visible (${locale || "en"}, ${width}px)`, async ({
       page,
     }) => {

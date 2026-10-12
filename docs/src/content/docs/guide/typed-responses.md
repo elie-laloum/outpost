@@ -81,6 +81,8 @@ Repairs need an agent that can continue its conversation; `dispatch()` refuses `
 
 Providing `response` appends final-answer instructions after the rendered brief and steering messages included at the start of a turn. They request exactly one final `<verdict>…</verdict>` block, with valid JSON and nothing after the closing tag. They override conflicting answer-format instructions, while preserving the task instructions. There is no switch to disable them.
 
+The API lists the [exact format and repair prompts](../../reference/responsespec/#outpost-instructions), their dynamic values and their customization limits.
+
 Outpost obtains the input JSON Schema automatically through [Standard JSON Schema](https://standardschema.dev/json-schema), supported directly by Zod 4.2+. It sends that schema with the instructions. The input schema describes what the agent must return; validation can transform that JSON into a different `result.value`.
 
 For a parsing function or a validator without a compatible converter, provide `jsonSchema` explicitly. An explicit schema takes precedence over automatic conversion. Definition fails with code `configuration` if the schema is missing, conversion fails or the schema contains values that cannot be preserved as JSON. Outpost snapshots the schema, excluding non-enumerable `~standard` protocol metadata, and does not resolve remote references.

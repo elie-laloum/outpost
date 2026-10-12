@@ -117,6 +117,8 @@ The first attempt after a pause receives `context.quota`: the captured conversat
 
 A continued turn sends a short resume instruction instead of the brief. Set `quotaResume: "restart"` on an agent or isolated task to send the original request again.
 
+See the API for the [exact quota-resume prompt](../../reference/quotaresumepolicy/#outpost-instructions), the conditions that select it and its response-tag variant. Its text is fixed.
+
 Claude Code, Codex, Copilot CLI and Kimi Code can continue. A [fallback agent](../fallback-agents/) restarts from its first candidate with the original brief.
 
 ## Pass the conversation to a queued handler

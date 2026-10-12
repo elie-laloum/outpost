@@ -7,10 +7,10 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom       | Type                  | Présence  | Rôle                                                                                                                                                            |
-| --------- | --------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tag`     | `string`              | Requis    | Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration.                          |
-| `repairs` | `number \| undefined` | Optionnel | Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation. |
+| Nom       | Type                  | Présence  | Rôle                                                                                                                                                                                                                                                         |
+| --------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tag`     | `string`              | Requis    | Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration.                                                                                                                       |
+| `repairs` | `number \| undefined` | Optionnel | Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation. [Texte exact injecté et limites de personnalisation](../responsespec/#outpost-instructions). |
 
 ## Signature
 

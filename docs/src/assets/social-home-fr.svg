@@ -2,10 +2,10 @@
 <rect width="1200" height="630" fill="#101722"/>
 <defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#273347"/></pattern></defs>
 <rect width="1200" height="630" fill="url(#grid)"/>
-<path d="M60 75 85 58l25 17v30H60Zm13 0h24L85 67ZM75 83v22h20V83Z" fill="#fb923c" fill-rule="evenodd"/>
+<image href="./outpost-symbol-white.png" x="60" y="54" width="56" height="56"/>
 <g font-family="DejaVu Sans, sans-serif"><text x="130" y="96" fill="#fff" font-size="32" font-weight="600">Outpost</text>
-<text x="60" y="220" fill="#fff" font-size="84" font-weight="600" letter-spacing="-3">Vos agents.</text><text x="60" y="320" fill="#a9b5c7" font-size="80" font-weight="600" letter-spacing="-3">Un workflow</text><text x="60" y="420" fill="#a9b5c7" font-size="80" font-weight="600" letter-spacing="-3">TypeScript.</text>
-<text x="60" y="558" fill="#a9b5c7" font-size="25">Agents de code · Sandboxes · Espaces Git</text></g>
+<text x="60" y="220" fill="#fff" font-size="84" font-weight="600" letter-spacing="-3">Vos agents.</text><text x="60" y="320" fill="#a9b5c7" font-size="80" font-weight="600" letter-spacing="-3">Vos outils.</text><text x="60" y="420" fill="#a9b5c7" font-size="80" font-weight="600" letter-spacing="-3">Vos workflows.</text>
+<text x="60" y="558" fill="#a9b5c7" font-size="25">Agents · Outils · Décisions · TypeScript et YAML</text></g>
 <path d="M60 495h1080" stroke="#344155"/>
 <path d="m1080 78 20 20-20 20m-36-20h56" stroke="#fb923c" stroke-width="3" fill="none"/>
 </svg>

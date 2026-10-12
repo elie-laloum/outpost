@@ -55,17 +55,6 @@ a[data-api-kind="constant"] {
   --api-symbol-icon: url("../assets/reference-constant.svg");
 }
 
-a[data-api-status="experimental"]::after {
-  content: "";
-  flex: 0 0 1em;
-  width: 1em;
-  height: 1em;
-  align-self: center;
-  margin-inline-start: auto;
-  background-color: var(--sl-color-text-accent);
-  mask: url("../assets/reference-experiment.svg") center / contain no-repeat;
-}
-
 .docs-navigation {
   padding: 1.5rem 1rem 3rem;
 }

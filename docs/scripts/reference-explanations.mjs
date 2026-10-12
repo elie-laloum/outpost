@@ -12,7 +12,8 @@ const readContent = async (name) =>
   );
 const symbols = await readContent("symbols");
 const fields = await readContent("fields");
-const used = { symbols: new Set(), fields: new Set() };
+const prompts = await readContent("prompts");
+const used = { symbols: new Set(), fields: new Set(), prompts: new Set() };
 const escape = (value) =>
   value.replaceAll("|", "\\|").replaceAll("\n", " ").replaceAll("`", "\\`");
 // Descriptions are prose: placeholders such as <name> must not become HTML.
@@ -104,6 +105,12 @@ export function explain(symbol, declaration, group, language, checker) {
         ),
       ].join(" · ") + "\n";
   }
+  if (prompts[symbol.name]) {
+    used.prompts.add(symbol.name);
+    output += '\n\n<span id="outpost-instructions"></span>\n\n';
+    output += `## ${fr ? "Instructions ajoutées par Outpost" : "Instructions added by Outpost"}\n\n`;
+    output += bilingual(prompts[symbol.name], symbol.name)[language];
+  }
   return output;
 }
 
@@ -112,5 +119,6 @@ export function unusedDescriptions() {
   return [
     ...Object.keys(symbols).filter((key) => !used.symbols.has(key)),
     ...Object.keys(fields).filter((key) => !used.fields.has(key)),
+    ...Object.keys(prompts).filter((key) => !used.prompts.has(key)),
   ];
 }

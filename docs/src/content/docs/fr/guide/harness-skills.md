@@ -30,7 +30,7 @@ Passez `instructions: ["Answer with evidence.", projectGuidance]`. Le résolveur
 
 ## Charger des compétences à la demande
 
-Une compétence regroupe des consignes et des outils que le modèle ne charge que lorsqu’il en a besoin. Ses instructions restent hors du prompt système jusque-là.
+Une compétence regroupe des consignes et des outils que le modèle ne charge que lorsqu’il en a besoin. Son nom et sa description figurent dans le prompt système ; ses instructions arrivent comme résultat d’outil lors du chargement.
 
 ```ts
 import {
@@ -61,6 +61,8 @@ Le script affiche `review [ 'git' ]` : le nom de la compétence et les outils qu
 3. Il suit ces instructions et peut utiliser les outils jusqu’à la fin de la conversation.
 
 Appeler un outil avant de charger son skill renvoie une erreur.
+
+L’API présente les [textes fixes du catalogue et du chargement des compétences](../../reference/defineharnessskill/#outpost-instructions). Vous définissez les noms, descriptions et instructions ; aucune option ne remplace le texte d’encadrement.
 
 Référence API : [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) et [HarnessSkillOptions](../../reference/harnessskilloptions/).
 

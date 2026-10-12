@@ -30,7 +30,7 @@ Pass `instructions: ["Answer with evidence.", projectGuidance]`. The resolver re
 
 ## Load skills on demand
 
-A skill is guidance and tools the model loads only when it needs them. Its instructions stay out of the system prompt until then.
+A skill is guidance and tools the model loads only when it needs them. Its name and description appear in the system prompt; its instructions arrive as a tool result when loaded.
 
 ```ts
 import {
@@ -61,6 +61,8 @@ The script prints `review [ 'git' ]`: the skill name and the tools it unlocks. P
 3. It follows those instructions and can use the tools for the rest of the conversation.
 
 Calling a skill tool before loading its skill returns an error.
+
+The API lists the [fixed skill catalog and loader texts](../../reference/defineharnessskill/#outpost-instructions). Names, descriptions and skill instructions are yours; the surrounding wording has no override option.
 
 API reference: [HarnessInstructionsOption](../../reference/harnessinstructionsoption/) and [HarnessSkillOptions](../../reference/harnessskilloptions/).
 

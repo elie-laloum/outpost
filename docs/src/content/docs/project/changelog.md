@@ -10,6 +10,15 @@ next: false
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 11.1.3
+
+This release refreshes the documentation and visual identity without changing the library's runtime behavior or public API.
+
+- Present five workflow scenarios on the English and French homepage: email, research, documents, customer requests and software. Link each step to the relevant Guide mechanisms, including System One typed decisions, while keeping the examples understandable on the page.
+- Make the API the complete reference for prompts added by Outpost: exact templates, injection points, dynamic values, customization options and fixed instructions. Link the relevant Guide pages to these contracts.
+- Make associated API contracts fill each row equally, with at most three columns. Remove experimental badges and generated maturity warnings from API pages; retain execution requirements, opt-in settings and live-validation limits in the contracts and guides.
+- Replace the logo across the site, README banner and bilingual sharing previews. Add light/dark logo variants, browser-theme favicons and an Apple touch icon, with reproducible asset generation during documentation builds.
+
 ## 11.1.2
 
 This release adds YAML workflow composition, terminal recipe dialogues and Git-free file workspaces while preserving existing Git APIs and defaults.

@@ -64,6 +64,8 @@ console.log(result.status, result.inputRequests[0]?.question);
 
 Le script affiche `waiting-input` et la première question de l’agent. Outpost ajoute lui-même le protocole de question à votre brief : le brief décrit seulement l’objectif et la forme du JSON final.
 
+L’API contient le [protocole de dialogue injecté complet](../../reference/defineinteractiveagenttask/#outpost-instructions), le préfixe des réponses humaines et le schéma de réponse. Le brief fournit votre objectif sans remplacer ce protocole.
+
 Référence API : [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/).
 
 Codex, Claude Code, Copilot CLI, Kimi Code et le [harness intégré](../harness/) sont acceptés. Antigravity et un harness créé avec `conversations: false` sont refusés dès la définition de la tâche : voir [Conversations](../conversations/).

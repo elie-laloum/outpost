@@ -620,8 +620,8 @@
     "Nom de la balise sans chevrons. Le dispatch demande automatiquement une seule réponse balisée finale ; le brief n’a pas besoin de contenir la balise."
   ],
   "ResponseSpec.repairs": [
-    "Correction turns allowed after an invalid answer, 0 unless the options set it. Each resumes the same conversation and asks only for the corrected tag.",
-    "Tours de correction autorisés après une réponse invalide, 0 sauf indication contraire dans les options. Chacun reprend la même conversation et ne demande que la balise corrigée."
+    "Correction turns allowed after an invalid answer, 0 unless the options set it. Each resumes the same conversation and asks only for the corrected tag. [Exact injected text and customization limits](../responsespec/#outpost-instructions).",
+    "Tours de correction autorisés après une réponse invalide, 0 sauf indication contraire dans les options. Chacun reprend la même conversation et ne demande que la balise corrigée. [Texte exact injecté et limites de personnalisation](../responsespec/#outpost-instructions)."
   ],
   "ResponseSpec.read": [
     "Extract the last complete <tag>…</tag> pair from a text, trim it and parse it. Rejects with ResponseError when no complete pair exists or its content is rejected.",
@@ -1426,8 +1426,8 @@
     "Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration."
   ],
   "TextResponseOptions.repairs": [
-    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation.",
-    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation."
+    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation. [Exact injected text and customization limits](../responsespec/#outpost-instructions).",
+    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation. [Texte exact injecté et limites de personnalisation](../responsespec/#outpost-instructions)."
   ],
   "JsonResponseOptions.tag": [
     "Tag name without angle brackets: a letter followed by letters, digits, _ or -. Another form fails with code configuration.",
@@ -1438,8 +1438,8 @@
     "Validateur Standard Schema ou fonction recevant le JSON analysé comme unknown et renvoyant la valeur typée, éventuellement transformée. Des problèmes signalés ou une erreur levée rejettent la réponse. La conversion automatique du schéma d’entrée exige Standard JSON Schema ; sinon jsonSchema est obligatoire."
   ],
   "JsonResponseOptions.repairs": [
-    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation.",
-    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation."
+    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation. [Exact injected text and customization limits](../responsespec/#outpost-instructions).",
+    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation. [Texte exact injecté et limites de personnalisation](../responsespec/#outpost-instructions)."
   ],
   "StandardValidator.~standard": [
     "Standard Schema entry point. Its validate returns { value } or { issues }, directly or as a promise; any issue rejects the answer.",
@@ -4224,8 +4224,8 @@
     "Signal d’annulation du tour."
   ],
   "HarnessContextInput.summarize": [
-    "Asks the agent model for a factual summary of the given messages. The request counts toward usage and budgets; an empty or cut-off summary fails with code response.",
-    "Demande au modèle de l’agent un résumé factuel des messages donnés. La requête compte dans l’usage et les budgets ; un résumé vide ou interrompu échoue avec le code response."
+    "Asks the agent model for a factual summary of the given messages. The request counts toward usage and budgets; an empty or cut-off summary fails with code response. [Exact injected text and customization limits](../summarizehistory/#outpost-instructions).",
+    "Demande au modèle de l’agent un résumé factuel des messages donnés. La requête compte dans l’usage et les budgets ; un résumé vide ou interrompu échoue avec le code response. [Texte exact injecté et limites de personnalisation](../summarizehistory/#outpost-instructions)."
   ],
   "TruncateToolResultsOptions.keepRecent": [
     "Number of most recent tool-result messages kept intact, default 4.",
@@ -4236,8 +4236,8 @@
     "Longueur à laquelle les anciens résultats d’outils sont coupés, 2000 caractères par défaut."
   ],
   "SummarizeHistoryOptions.triggerCharacters": [
-    "Length of the JSON-serialized history above which a summary is made, default 400000 characters.",
-    "Longueur de l’historique sérialisé en JSON au-delà de laquelle un résumé est produit, 400000 caractères par défaut."
+    "Length of the JSON-serialized history above which a summary is made, default 400000 characters. [Exact injected text and customization limits](../summarizehistory/#outpost-instructions).",
+    "Longueur de l’historique sérialisé en JSON au-delà de laquelle un résumé est produit, 400000 caractères par défaut. [Texte exact injecté et limites de personnalisation](../summarizehistory/#outpost-instructions)."
   ],
   "SummarizeHistoryOptions.keepRecentMessages": [
     "Minimum number of recent messages kept after the summary, default 6; the cut moves back to the previous assistant message.",
@@ -4313,8 +4313,8 @@
     "Discriminant de la définition : skill."
   ],
   "HarnessOptions.skills": [
-    "Skills listed in the system instructions and loaded on demand through the load_skill tool; duplicate skill names are rejected.",
-    "Skills listées dans les instructions système et chargées à la demande par l’outil load_skill ; les noms de skills en double sont refusés."
+    "Skills listed in the system instructions and loaded on demand through the load_skill tool; duplicate skill names are rejected. [Exact injected text and customization limits](../defineharnessskill/#outpost-instructions).",
+    "Skills listées dans les instructions système et chargées à la demande par l’outil load_skill ; les noms de skills en double sont refusés. [Texte exact injecté et limites de personnalisation](../defineharnessskill/#outpost-instructions)."
   ],
   "Harness.skills": [
     "Skills of the harness; their tools and load_skill are part of the tool list.",
@@ -5365,8 +5365,8 @@
     "Agent avec capture et reprise portables de la conversation ; sinon defineInteractiveAgentTask() lève une erreur de code configuration."
   ],
   "InteractiveAgentTaskOptions.brief": [
-    "Literal initial instructions; human replies are supplied separately on subsequent turns.",
-    "Instructions initiales littérales ; les réponses humaines sont fournies séparément aux tours suivants."
+    "Literal initial instructions; human replies are supplied separately on subsequent turns. [Exact injected text and customization limits](../defineinteractiveagenttask/#outpost-instructions).",
+    "Instructions initiales littérales ; les réponses humaines sont fournies séparément aux tours suivants. [Texte exact injecté et limites de personnalisation](../defineinteractiveagenttask/#outpost-instructions)."
   ],
   "InteractiveAgentTaskOptions.actors": [
     "Nonempty unique identifiers allowed to answer; the application must authenticate their users.",
@@ -7531,8 +7531,8 @@
     "Commande obligatoire non interactive exécutée après le commit de résolution combinée par l’agent, à la racine de la sandbox de résolution. Refuse les réglages directory, terminal et entrée en direct. Un statut non nul échoue avec le code process ; deadlineMs vaut 300000 par défaut et l’annulation de l’appelant est combinée au signal d’intégration."
   ],
   "AgentConflictResolverOptions.instructions": [
-    "Additional literal instructions appended to the built-in resolution brief. They guide the agent; verification, ancestry and diff guards are enforced independently.",
-    "Consignes littérales supplémentaires ajoutées au brief de résolution intégré. Elles guident l’agent ; vérification, ascendance et garde-fous de diff sont imposés indépendamment."
+    "Additional literal instructions appended to the built-in resolution brief. They guide the agent; verification, ancestry and diff guards are enforced independently. [Exact injected text and customization limits](../createagentconflictresolver/#outpost-instructions).",
+    "Consignes littérales supplémentaires ajoutées au brief de résolution intégré. Elles guident l’agent ; vérification, ascendance et garde-fous de diff sont imposés indépendamment. [Texte exact injecté et limites de personnalisation](../createagentconflictresolver/#outpost-instructions)."
   ],
   "AgentConflictResolverOptions.observe": [
     "Historical agent observation callback for the resolution dispatch. Failures are isolated by the normal dispatch observation path.",
