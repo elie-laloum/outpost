@@ -110,7 +110,7 @@ Acquisition waits for the firewall and proxy before starting the sandbox. Extern
 
 The regression fixture checks real HTTP/HTTPS, TCP/UDP, denial precedence, elevated commands, IPv4-mapped addresses, companion loss and cleanup. The [publication workflow](https://github.com/elie-laloum/outpost/actions/runs/38321177589) passed Docker and rootless Podman tests on GitHub-hosted Linux amd64/arm64 runners. Rootless Docker and Podman also passed in nested Linux test environments. Native macOS/Windows VM setups, standalone rootless Docker hosts and native IPv6 routing still require live validation; an OS name alone does not establish support. An engine that cannot install the firewall refuses acquisition. Image pulls and model requests made on the host remain outside this policy.
 
-The source example in `examples/73-container-egress/` runs two agents with the same Wikipedia task: one sandbox allows the site, the other is offline. It uses the shared host model configuration and makes real model requests; the Wikipedia tool runs inside each sandbox. The image publication procedure is in `images/egress/README.md`.
+The source example in `examples/73-container-egress/` runs two agents with the same Wikipedia task: one sandbox allows the site, the other is offline. It uses the shared host model configuration and makes real model requests; each agent writes a Node.js `fetch` command and runs it through the standard shell tool inside its sandbox. The image publication procedure is in `images/egress/README.md`.
 
 ## Run a container offline
 

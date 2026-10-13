@@ -1,5 +1,5 @@
 // Two agents read the same Wikipedia article through different sandbox policies.
-// The model runs on the host; each agent's Wikipedia tool runs in its own container.
+// The model runs on the host; each agent runs Node.js fetch through its sandbox shell.
 
 import { join } from "node:path";
 import { createWorkspace, defineTextResponse } from "@elie-laloum/outpost";
@@ -47,10 +47,11 @@ for (const allowed of [true, false]) {
     brief: { file: join(import.meta.dirname, "brief.md") },
     response: defineTextResponse({ tag: "resume", repairs: 1 }),
     observe(event) {
-      if (event.kind === "tool-result")
-        console.log(
-          `[${event.name}] ${event.isError ? "échec" : "page consultée"}`,
-        );
+      if (event.kind !== "tool-result") return;
+      console.log(
+        `[${event.name}] ${event.isError ? "échec de la commande" : "commande terminée"}`,
+      );
+      console.log(event.preview);
     },
   });
   console.log(result.value);

@@ -1,10 +1,10 @@
 import {
   createAgent,
   createHarness,
+  createHarnessShellTools,
   defineHarnessHook,
 } from "@elie-laloum/outpost";
 import type { AgentModel, ModelProvider } from "@elie-laloum/outpost";
-import { wikipedia } from "./wikipedia.ts";
 
 export function createWikipediaAgent(
   modelProvider: ModelProvider,
@@ -15,20 +15,23 @@ export function createWikipediaAgent(
     model,
     harness: createHarness({
       modelProvider,
-      tools: [wikipedia],
+      tools: [createHarnessShellTools({ deadlineMs: 15_000 })],
       limits: { maxSteps: 6, maxToolCalls: 2 },
       hooks: [
         defineHarnessHook({
           on: "after-tool",
           run({ call }) {
-            if (call.name === wikipedia.name) attempted = true;
+            if (call.name === "shell") attempted = true;
           },
         }),
         defineHarnessHook({
           on: "stop",
           run({ text }) {
             if (!attempted)
-              return { continue: "Call read_wikipedia before answering." };
+              return {
+                continue:
+                  "Use shell to run a Node.js fetch of Wikipedia before answering.",
+              };
             const summary = text.match(/<resume>([\s\S]*?)<\/resume>/)?.[1];
             const lines = summary?.trim().split(/\r?\n/);
             if (lines?.length !== 2 || lines.some((line) => !line.trim()))
