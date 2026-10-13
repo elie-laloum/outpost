@@ -1,9 +1,12 @@
-// Container egress — allow web domains and raw TCP/UDP destinations separately.
-// Run index.ts [docker|podman]; no agent or model credentials are required.
+// Two agents read the same Wikipedia article through different sandbox policies.
+// The model runs on the host; each agent's Wikipedia tool runs in its own container.
 
-import { createWorkspace } from "@elie-laloum/outpost";
+import { join } from "node:path";
+import { createWorkspace, defineTextResponse } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
+import { model, modelProvider } from "../shared/model.ts";
+import { createWikipediaAgent } from "./agent.ts";
 
 const factories = {
   docker: createDockerSandboxProvider,
@@ -15,50 +18,40 @@ if (engine !== "docker" && engine !== "podman")
     "Usage: node examples/73-container-egress/index.ts [docker|podman]",
   );
 
-await using workspace = await createWorkspace({
-  source: { kind: "ephemeral" },
-  runtime: { directory: "./.outpost", namespace: "egress-example" },
-});
-await using sandbox = await workspace.sandbox({
-  sandboxProvider: factories[engine]({
-    image:
-      process.env.OUTPOST_CONTAINER_IMAGE ?? "docker.io/library/node:24-slim",
-    ...(process.env.OUTPOST_EGRESS_IMAGE
-      ? { egressImage: process.env.OUTPOST_EGRESS_IMAGE }
-      : {}),
-    egress: {
-      mode: "allowlist",
-      domains: ["example.com"],
-      allowCidrs: ["1.1.1.1/32"],
-      denyCidrs: ["192.0.2.42/32"],
-    },
-  }),
-});
+for (const allowed of [true, false]) {
+  const label = allowed ? "Wikipédia autorisé" : "Wikipédia bloqué";
+  console.log(`\n=== ${label} ===`);
 
-const result = await sandbox.command({
-  executable: "node",
-  arguments: [
-    "-e",
-    `
-    (async () => {
-      const allowed = await fetch('https://example.com', { signal: AbortSignal.timeout(10000) });
-      console.log('Allowed HTTPS:', allowed.status);
-      try {
-        await fetch('https://example.org', { signal: AbortSignal.timeout(3000) });
-        throw new Error('Unexpected access to a denied domain');
-      } catch (error) {
-        if (error.message === 'Unexpected access to a denied domain') throw error;
-        console.log('Unlisted HTTPS: blocked');
-      }
-      const socket = require('net').connect(443, '1.1.1.1');
-      socket.setTimeout(3000, () => socket.destroy(new Error('TCP destination unavailable')));
-      socket.on('connect', () => { console.log('Allowed CIDR: TCP connected'); socket.destroy(); });
-      socket.on('error', error => { console.error(error.message); process.exitCode = 1; });
-    })().catch(error => { console.error(error.message); process.exitCode = 1; });
-  `,
-  ],
-  deadlineMs: 20_000,
-});
-process.stdout.write(result.stdout);
-if (result.status !== 0)
-  throw new Error(result.stderr || "Network example failed");
+  await using workspace = await createWorkspace({
+    source: { kind: "ephemeral" },
+    runtime: {
+      directory: join(import.meta.dirname, "../../.outpost"),
+      namespace: "egress-example",
+    },
+  });
+  await using sandbox = await workspace.sandbox({
+    sandboxProvider: factories[engine]({
+      image:
+        process.env.OUTPOST_CONTAINER_IMAGE ?? "docker.io/library/node:24-slim",
+      ...(allowed && process.env.OUTPOST_EGRESS_IMAGE
+        ? { egressImage: process.env.OUTPOST_EGRESS_IMAGE }
+        : {}),
+      egress: allowed
+        ? { mode: "allowlist", domains: ["fr.wikipedia.org"] }
+        : { mode: "deny-all" },
+    }),
+  });
+
+  const result = await sandbox.dispatch({
+    agent: createWikipediaAgent(modelProvider, model),
+    brief: { file: join(import.meta.dirname, "brief.md") },
+    response: defineTextResponse({ tag: "resume", repairs: 1 }),
+    observe(event) {
+      if (event.kind === "tool-result")
+        console.log(
+          `[${event.name}] ${event.isError ? "échec" : "page consultée"}`,
+        );
+    },
+  });
+  console.log(result.value);
+}
