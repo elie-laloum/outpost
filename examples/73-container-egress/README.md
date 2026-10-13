@@ -6,7 +6,7 @@ Run from this repository with Node.js 24+ and the chosen engine. No model creden
 bun install --frozen-lockfile
 bun run build
 docker pull docker.io/library/node:24-slim
-node exemples/container-egress/run.ts docker
+node examples/73-container-egress/index.ts docker
 ```
 
 For Podman, use `podman pull` and pass `podman` to the script. The engine automatically downloads the public companion image pinned by digest in Outpost, with Linux amd64 and arm64 variants. `OUTPOST_CONTAINER_IMAGE` and `OUTPOST_EGRESS_IMAGE` override the image references. To test a locally built companion, follow `images/egress/README.md` and set `OUTPOST_EGRESS_IMAGE=outpost-egress:dev`.

@@ -110,7 +110,7 @@ L’allocation attend le pare-feu et le proxy avant de démarrer la sandbox. Les
 
 Le test réel couvre HTTP/HTTPS, TCP/UDP, la priorité des interdictions, les commandes élevées, les adresses IPv4 mappées, la perte du service et le nettoyage. Le [workflow de publication](https://github.com/elie-laloum/outpost/actions/runs/38321177589) a validé Docker et Podman sans root sur les runners Linux amd64/arm64 hébergés par GitHub. Docker et Podman sans root ont aussi été validés dans des environnements Linux imbriqués. Les VM natives macOS/Windows, les hôtes Docker autonomes sans root et le routage IPv6 natif restent à valider en conditions réelles ; le nom du système seul ne démontre pas la prise en charge. Un moteur incapable d’installer le pare-feu refuse l’allocation. Les téléchargements d’images et les appels modèles faits sur l’hôte restent hors de cette politique.
 
-L’exemple source se trouve dans `exemples/container-egress/` et ne demande aucun identifiant de modèle. La publication de l’image est décrite dans `images/egress/README.md`.
+L’exemple source se trouve dans `examples/73-container-egress/` et ne demande aucun identifiant de modèle. La publication de l’image est décrite dans `images/egress/README.md`.
 
 ## Exécuter un conteneur hors ligne
 

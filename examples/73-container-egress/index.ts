@@ -1,6 +1,9 @@
-import { createWorkspace } from "../../src/index.ts";
-import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
-import { createPodmanSandboxProvider } from "../../src/providers/podman.ts";
+// Container egress — allow web domains and raw TCP/UDP destinations separately.
+// Run index.ts [docker|podman]; no agent or model credentials are required.
+
+import { createWorkspace } from "@elie-laloum/outpost";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 const factories = {
   docker: createDockerSandboxProvider,
@@ -9,7 +12,7 @@ const factories = {
 const engine = process.argv[2] ?? "docker";
 if (engine !== "docker" && engine !== "podman")
   throw new Error(
-    "Usage: node exemples/container-egress/run.ts [docker|podman]",
+    "Usage: node examples/73-container-egress/index.ts [docker|podman]",
   );
 
 await using workspace = await createWorkspace({

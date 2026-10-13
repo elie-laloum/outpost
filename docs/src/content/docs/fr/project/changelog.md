@@ -12,7 +12,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
-- Ajoute des conteneurs egress dédiés Docker/Podman pour les domaines HTTP/HTTPS et le filtrage CIDR TCP/UDP direct, avec priorité des interdictions, contrôle du nom TLS, expiration bornée des autorisations dans le noyau et récupération du conteneur associé. Maintient deny-all hors ligne et refuse les réseaux incompatibles. Ajoute `egressImage`, l’exemple source `exemples/container-egress/`, les guides bilingues et un workflow de publication de l’image testée. Enregistre l’image publique amd64/arm64 par digest vérifié après réussite des tests Docker et Podman sans root sur les runners Linux hébergés par GitHub. Les sandboxes avec allowlist la téléchargent automatiquement si nécessaire. Les VM natives macOS/Windows, les hôtes Docker autonomes sans root et le routage IPv6 natif restent à valider.
+- Ajoute des conteneurs egress dédiés Docker/Podman pour les domaines HTTP/HTTPS et le filtrage CIDR TCP/UDP direct, avec priorité des interdictions, contrôle du nom TLS, expiration bornée des autorisations dans le noyau et récupération du conteneur associé. Maintient deny-all hors ligne et refuse les réseaux incompatibles. Ajoute `egressImage`, l’exemple source `examples/73-container-egress/`, les guides bilingues et un workflow de publication de l’image testée. Enregistre l’image publique amd64/arm64 par digest vérifié après réussite des tests Docker et Podman sans root sur les runners Linux hébergés par GitHub. Les sandboxes avec allowlist la téléchargent automatiquement si nécessaire. Les VM natives macOS/Windows, les hôtes Docker autonomes sans root et le routage IPv6 natif restent à valider.
 
 ## 11.1.3
 

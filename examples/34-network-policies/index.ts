@@ -69,20 +69,5 @@ await dispatch({
   observe: createReporter({ label: "offline" }),
 });
 
-// 3. A policy the provider cannot enforce is refused before any sandbox starts:
-//    Docker isolates the network namespace, but cannot filter by domain.
-//    (Vercel and Daytona accept domain allowlists; local and Firecracker accept no policy.)
-try {
-  const filtered = createDockerSandboxProvider({
-    image: "outpost:sandbox",
-    egress: { mode: "allowlist", domains: ["registry.npmjs.org"] },
-  });
-
-  await using sandbox = await createSandbox({
-    repository,
-    sandboxProvider: filtered,
-  });
-  console.log("\nallowlist sur Docker → accepté ?!");
-} catch (error) {
-  console.log("\nallowlist sur Docker → refusé :", (error as Error).message);
-}
+// For domain allowlists and direct TCP/UDP CIDRs on Docker or Podman,
+// run examples/73-container-egress/index.ts.

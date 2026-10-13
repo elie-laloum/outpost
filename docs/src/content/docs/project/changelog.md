@@ -12,7 +12,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
-- Add dedicated Docker/Podman egress companions for HTTP/HTTPS domain policies and raw TCP/UDP CIDR filtering, with denial precedence, TLS server-name checks, bounded kernel heartbeat expiry and companion recovery. Keep deny-all offline and refuse conflicting networks. Add `egressImage`, the source example in `exemples/container-egress/`, bilingual guidance and a tested-image publication workflow. Register the public amd64/arm64 companion by verified digest after successful Docker and rootless Podman checks on GitHub-hosted Linux runners. Allowlisted sandboxes automatically download it when absent. Native macOS/Windows VM checks, standalone rootless Docker host checks and native IPv6 routing validation remain prerequisites.
+- Add dedicated Docker/Podman egress companions for HTTP/HTTPS domain policies and raw TCP/UDP CIDR filtering, with denial precedence, TLS server-name checks, bounded kernel heartbeat expiry and companion recovery. Keep deny-all offline and refuse conflicting networks. Add `egressImage`, the source example in `examples/73-container-egress/`, bilingual guidance and a tested-image publication workflow. Register the public amd64/arm64 companion by verified digest after successful Docker and rootless Podman checks on GitHub-hosted Linux runners. Allowlisted sandboxes automatically download it when absent. Native macOS/Windows VM checks, standalone rootless Docker host checks and native IPv6 routing validation remain prerequisites.
 
 ## 11.1.3
 
