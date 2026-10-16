@@ -1,3 +1,6 @@
+import { composedNativeHooks } from "../native-hooks.ts";
+import { kimiHookSchemas } from "./kimi-hooks.constants.ts";
+import { kimiHookPlan } from "./kimi-hook-plan.ts";
 import { rejectProfileTools } from "../profile-support.ts";
 import {
   createKimiConversations,
@@ -58,6 +61,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     kimiMcpLogins,
   );
   return Object.freeze({
+    ...(settings.hooks?.length ? { hooks: kimiHookPlan(settings.hooks) } : {}),
     usageInput: "uncached",
     name: "kimi",
     ...(credentials ? { credentials } : {}),
@@ -96,9 +100,19 @@ export function createKimiHarness(settings: KimiSettings = {}): CliHarness {
     "Kimi region selects account authentication; configure the API endpoint through variables for usage authentication",
   );
   const configured = configuredSettings(settings);
+  const hooks = composedNativeHooks(
+    "kimi",
+    kimiHookSchemas,
+    configured.profile?.hooks?.kimi,
+    settings.hooks,
+  );
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>
-      bindKimi({ ...configured, ...(model === undefined ? {} : { model }) }),
+      bindKimi({
+        ...configured,
+        hooks,
+        ...(model === undefined ? {} : { model }),
+      }),
   });
 }

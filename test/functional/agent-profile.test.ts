@@ -75,6 +75,20 @@ test(
             "shell:printf allowed",
             "shell:printf original",
           ],
+          hooks: {
+            outpost: [
+              defineHarnessHook({
+                on: "before-tool",
+                run(context) {
+                  if (
+                    context.call?.name === "shell" &&
+                    JSON.stringify(context.call.input).includes("original")
+                  )
+                    return { input: { command: "touch hook-forbidden" } };
+                },
+              }),
+            ],
+          },
         }),
         tools: [
           createHarnessFileTools(),
@@ -84,18 +98,6 @@ test(
         permissions: defineHarnessPermissions({
           rules: [{ effect: "deny", tools: ["write_file"] }],
         }),
-        hooks: [
-          defineHarnessHook({
-            on: "before-tool",
-            run(context) {
-              if (
-                context.call?.name === "shell" &&
-                JSON.stringify(context.call.input).includes("original")
-              )
-                return { input: { command: "touch hook-forbidden" } };
-            },
-          }),
-        ],
       }),
     });
     await using sandbox = await createSandbox({
@@ -211,4 +213,93 @@ test("a subagent applies its own portable profile inside the borrowed sandbox", 
     true,
   );
   await assert.rejects(stat(join(root, "child-forbidden")), { code: "ENOENT" });
+});
+
+test("profile transformations precede local hooks once per warm turn and preserve usage", async (t) => {
+  const root = await repository(t);
+  const seen: string[] = [];
+  const profile = defineAgentProfile({
+    hooks: {
+      outpost: [
+        defineHarnessHook({
+          on: "before-model",
+          run({ system }) {
+            seen.push("profile-before");
+            return { system: `${system ?? ""} profile` };
+          },
+        }),
+        defineHarnessHook({
+          on: "after-model",
+          run({ result }) {
+            seen.push("profile-after");
+            return { result: { text: `${result.text} profile` } };
+          },
+        }),
+      ],
+    },
+  });
+  const agent = createAgent({
+    model: "offline",
+    harness: createHarness({
+      profile,
+      modelProvider: {
+        name: "profile-hooks",
+        async request(request) {
+          assert.match(request.system ?? "", /profile local$/);
+          return {
+            text: "original",
+            usage: { input: 10, cached: 0, output: 5 },
+          };
+        },
+      },
+      hooks: [
+        defineHarnessHook({
+          on: "before-model",
+          run({ system }) {
+            seen.push("local-before");
+            assert.match(system ?? "", /profile$/);
+            return { system: `${system} local` };
+          },
+        }),
+        defineHarnessHook({
+          on: "after-model",
+          run({ result }) {
+            seen.push("local-after");
+            assert.equal(result.text, "original profile");
+            return {
+              result: { text: `${result.text} local <outpost>done</outpost>` },
+            };
+          },
+        }),
+      ],
+    }),
+  });
+  await using sandbox = await createSandbox({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    logging: false,
+  });
+  const first = await sandbox.dispatch({ agent, brief: { text: "Start." } });
+  assert.ok(first.conversation);
+  const second = await sandbox.dispatch({
+    agent,
+    continuation: { id: first.conversation },
+    brief: { text: "Continue." },
+  });
+  for (const result of [first, second]) {
+    assert.equal(result.completed, true);
+    assert.match(result.text, /original profile local/);
+    assert.equal(result.usage.input, 10);
+    assert.equal(result.usage.output, 5);
+  }
+  assert.deepEqual(seen, [
+    "profile-before",
+    "local-before",
+    "profile-after",
+    "local-after",
+    "profile-before",
+    "local-before",
+    "profile-after",
+    "local-after",
+  ]);
 });

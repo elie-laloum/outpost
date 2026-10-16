@@ -1,6 +1,7 @@
 import { SUMMARY_INSTRUCTIONS } from "../domain/context.constants.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { validateMessages } from "../domain/model-messages.ts";
+import { transformCompaction } from "./harness-hook-transforms.ts";
 import type { ModelContentBlock, ModelMessage } from "../domain/model.types.ts";
 import type {
   BlockRenderers,
@@ -25,7 +26,13 @@ export async function compact(
   const strategy = runtime.agent.harness.context;
   if (!strategy) return;
   const compacted = await strategy.compact({
-    messages: history.messages,
+    messages: await transformCompaction(
+      runtime,
+      "before-compaction",
+      history.messages,
+      strategy.name,
+      step,
+    ),
     step,
     model: runtime.agent.model,
     signal: runtime.signal,
@@ -34,7 +41,14 @@ export async function compact(
   runtime.signal.throwIfAborted();
   if (compacted === undefined) return;
   validateMessages(compacted);
-  const cleaned = compacted.map((message) => ({
+  const transformed = await transformCompaction(
+    runtime,
+    "after-compaction",
+    compacted,
+    strategy.name,
+    step,
+  );
+  const cleaned = transformed.map((message) => ({
     ...message,
     content: message.content.filter((block) => block.type !== "reasoning"),
   }));

@@ -1,3 +1,6 @@
+import { composedNativeHooks } from "../native-hooks.ts";
+import { copilotHookSchemas } from "./copilot-hooks.constants.ts";
+import { copilotHookPlan } from "./copilot-hook-plan.ts";
 import { rejectProfileTools } from "../profile-support.ts";
 import {
   createCopilotConversations,
@@ -51,6 +54,9 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     settings.mcpServers,
   );
   return Object.freeze({
+    ...(settings.hooks?.length
+      ? { hooks: copilotHookPlan(settings.hooks) }
+      : {}),
     name: "copilot",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
@@ -83,11 +89,18 @@ export function createCopilotHarness(
   harnessSettings(settings);
   conversationSettings(copilotLabel, copilotSessionProfile.format, settings);
   const configured = configuredSettings(settings);
+  const hooks = composedNativeHooks(
+    "copilot",
+    copilotHookSchemas,
+    configured.profile?.hooks?.copilot,
+    settings.hooks,
+  );
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>
       bindCopilot({
         ...configured,
+        hooks,
         ...(model === undefined ? {} : { model }),
       }),
   });

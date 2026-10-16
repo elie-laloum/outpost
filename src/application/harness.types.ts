@@ -17,6 +17,8 @@ import type { HarnessTool } from "../domain/tool.types.ts";
 import type { DispatchOptions, TurnContext } from "./execution.types.ts";
 
 export interface HarnessRuntime {
+  readonly responseInstructions?: string | undefined;
+  readonly startSource?: "start" | "resume" | "repair";
   readonly runtimeDirectory?: string;
   readonly observation?: ObservationHub | undefined;
   readonly verbose?: boolean;
@@ -60,6 +62,7 @@ export type ValidatedInput =
   { readonly value: unknown } | { readonly outcome: ToolOutcome };
 
 export interface ToolOutcome {
+  readonly status?: "success" | "denied" | "error";
   readonly content: string;
   readonly isError: boolean;
 }

@@ -1,3 +1,4 @@
+import { profileHooks } from "./agent-profile-hooks.ts";
 import type { McpServers } from "./mcp-server.types.ts";
 import { invariant } from "./errors.ts";
 import { mcpServers } from "./mcp-server.ts";
@@ -17,7 +18,7 @@ export function defineAgentProfile(options: AgentProfileOptions): AgentProfile {
   );
   invariant(
     Object.keys(options).every((key) => AGENT_PROFILE_FIELDS.has(key)),
-    "Agent profiles accept instructions, allowedTools and mcpServers",
+    "Agent profiles accept instructions, allowedTools, mcpServers and hooks",
   );
   invariant(
     options.instructions === undefined ||
@@ -44,6 +45,9 @@ export function defineAgentProfile(options: AgentProfileOptions): AgentProfile {
   );
   return Object.freeze({
     kind: "agent-profile",
+    ...(options.hooks === undefined
+      ? {}
+      : { hooks: profileHooks(options.hooks) }),
     ...(options.instructions === undefined
       ? {}
       : { instructions: options.instructions }),

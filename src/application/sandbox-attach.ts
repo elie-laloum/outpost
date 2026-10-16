@@ -1,5 +1,6 @@
 import { agentRequest } from "./agent-request.ts";
-import { invariant } from "../domain/errors.ts";
+import { openCliHooks } from "./cli-hooks.ts";
+import { invariant, recordRecovery } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/command.types.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
@@ -37,9 +38,12 @@ export async function attachInSandbox(
     "This adapter does not support automated fork",
   );
   const { selectAgent, restore } = agents;
-  const signal = settings.signal
-    ? AbortSignal.any([settings.signal, stop.signal])
-    : stop.signal;
+  const hookStop = new AbortController();
+  const signal = AbortSignal.any([
+    hookStop.signal,
+    stop.signal,
+    ...(settings.signal ? [settings.signal] : []),
+  ]);
   await context.readyHooks(signal);
   const { selected, adapter, executionLease } = await selectAgent(
     chosen,
@@ -79,18 +83,41 @@ export async function attachInSandbox(
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();
   let output: CommandResult;
+  const hooks = adapter.hooks?.handlers.length
+    ? await openCliHooks(adapter.hooks, executionLease, signal, (error) =>
+        hookStop.abort(error),
+      )
+    : undefined;
+  let failure: unknown;
   try {
     output = await executionLease.invoke({
-      ...command,
+      ...(hooks ? hooks.command(command) : command),
       ...(settings.terminal ? { terminal: settings.terminal } : {}),
       deadlineMs: executionDefaults.attachMs,
-      signal: settings.signal
-        ? AbortSignal.any([settings.signal, stop.signal])
-        : stop.signal,
+      signal,
     });
+    signal.throwIfAborted();
+  } catch (error) {
+    failure = error;
+    throw error;
   } finally {
     restoreTerminal();
-    await sync?.pull();
+    let cleanupFailure: unknown;
+    try {
+      await hooks?.close();
+    } catch (error) {
+      cleanupFailure = error;
+    }
+    try {
+      await sync?.pull();
+    } catch (error) {
+      cleanupFailure ??= error;
+    }
+    if (cleanupFailure) {
+      if (failure)
+        recordRecovery(failure, { hookCleanupError: cleanupFailure });
+      else throw cleanupFailure;
+    }
   }
   if (output.status === 0) await context.state.lease.checkGuard();
   return {

@@ -40,17 +40,7 @@ export function claudeProfileArguments(
       }),
     ),
   ];
-  const commands = profile.allowedTools
-    .filter((tool) => tool.startsWith("shell:"))
-    .map((tool) => tool.slice(6));
-  const script = [
-    `const tools = ${JSON.stringify(tools)};`,
-    `const commands = ${JSON.stringify(commands)};`,
-    `const shell = ${profile.allowedTools.includes("shell")};`,
-    `const servers = ${JSON.stringify(Object.keys(settings.mcpServers ?? {}))};`,
-    `const excluded = ${JSON.stringify(Object.entries(settings.mcpServers ?? {}).flatMap(([server, entry]) => (entry.tools?.exclude ?? []).map((tool) => `mcp__${server}__${tool}`)))};`,
-    CLAUDE_PROFILE_HOOK,
-  ].join("\n");
+  const script = claudeProfileScript(settings);
   return [
     ...instructions,
     `--tools=${tools.join(",")}`,
@@ -76,4 +66,28 @@ export function claudeProfileArguments(
       },
     }),
   ];
+}
+
+export function claudeProfileScript(settings: ClaudeSettings): string {
+  const tools = [
+    ...new Set(
+      settings.profile!.allowedTools!.flatMap((tool) => {
+        if (tool.startsWith("shell:")) return ["Bash"];
+        if (tool === "read" || tool === "edit" || tool === "shell")
+          return CLAUDE_PROFILE_TOOLS[tool];
+        return [];
+      }),
+    ),
+  ];
+  const commands = settings
+    .profile!.allowedTools!.filter((tool) => tool.startsWith("shell:"))
+    .map((tool) => tool.slice(6));
+  return [
+    `const tools = ${JSON.stringify(tools)};`,
+    `const commands = ${JSON.stringify(commands)};`,
+    `const shell = ${settings.profile!.allowedTools!.includes("shell")};`,
+    `const servers = ${JSON.stringify(Object.keys(settings.mcpServers ?? {}))};`,
+    `const excluded = ${JSON.stringify(Object.entries(settings.mcpServers ?? {}).flatMap(([server, entry]) => (entry.tools?.exclude ?? []).map((tool) => `mcp__${server}__${tool}`)))};`,
+    CLAUDE_PROFILE_HOOK,
+  ].join("\n");
 }

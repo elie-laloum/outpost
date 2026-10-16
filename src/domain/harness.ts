@@ -104,7 +104,10 @@ export function createHarness(options: HarnessOptions): Harness {
     skills,
     limits: limits(options.limits ?? {}),
     toolExecution: toolExecution(options.toolExecution ?? {}),
-    hooks: harnessHooks(options.hooks),
+    hooks: harnessHooks([
+      ...(profile?.hooks?.outpost ?? []),
+      ...harnessHooks(options.hooks),
+    ]),
     ...(options.permissions ? { permissions: options.permissions } : {}),
     ...(options.context ? { context: options.context } : {}),
     ...(options.conversations === undefined

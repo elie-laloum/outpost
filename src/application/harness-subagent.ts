@@ -1,7 +1,8 @@
 import { profilePermissions } from "../domain/agent-profile-permissions.ts";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { OutpostError, recordRecovery } from "../domain/errors.ts";
+import { invariant, OutpostError, recordRecovery } from "../domain/errors.ts";
+import { hooks, runHook } from "./harness-hooks.ts";
 import { MAX_DELEGATION_DEPTH } from "../domain/subagent.constants.ts";
 import type { HarnessSubagent } from "../domain/subagent.types.ts";
 import type { HarnessToolContext } from "../domain/tool.types.ts";
@@ -20,6 +21,7 @@ export async function runSubagent(
   tool: HarnessSubagent,
   input: unknown,
   context: HarnessToolContext,
+  step = 0,
 ): Promise<string> {
   const validated = await tool.validate(input);
   if ("issues" in validated)
@@ -34,6 +36,26 @@ export async function runSubagent(
   const agent = tool.subagent;
   const budget = harnessBudget(agent.harness.limits, runtime.budget);
   const id = randomUUID();
+  let prompt = validated.value.prompt;
+  const hookRuntime = {
+    ...runtime,
+    signal: context.signal,
+    sandbox: context.sandbox,
+  };
+  for (const hook of hooks(runtime, "before-subagent")) {
+    const decision = await runHook(
+      hookRuntime,
+      hook,
+      { id, name: tool.name, callId: context.callId, prompt },
+      step,
+    );
+    if (decision === undefined) continue;
+    invariant(
+      !("deny" in decision),
+      "deny" in decision ? decision.deny : "Subagent denied",
+    );
+    prompt = decision.prompt;
+  }
   const depth = runtime.depth + 1;
   const store = storageFor(agent);
   let transcript: TranscriptHandle | undefined;
@@ -84,6 +106,8 @@ export async function runSubagent(
         harnessLoop(
           {
             ...runtime,
+            startSource: "start",
+            responseInstructions: undefined,
             agent,
             observation: runtime.observation?.child({ subagentId: id }),
             mcp,
@@ -120,7 +144,7 @@ export async function runSubagent(
               runtime.emit({ ...event, subagentId: event.subagentId ?? id });
             },
           },
-          validated.value.prompt,
+          prompt,
           harnessHistory(transcript),
         ),
     );
@@ -153,6 +177,31 @@ export async function runSubagent(
   } finally {
     context.signal.removeEventListener("abort", aborted);
     await transcript?.close();
+  }
+  try {
+    for (const hook of hooks(runtime, "after-subagent")) {
+      const decision = await runHook(
+        hookRuntime,
+        hook,
+        {
+          id,
+          name: tool.name,
+          callId: context.callId,
+          ...(failure ? { error: failure } : { text }),
+          ...(transcript ? { conversation: transcript.id } : {}),
+        },
+        step,
+      );
+      if (decision === undefined) continue;
+      invariant(
+        !failure,
+        "after-subagent cannot replace a failed subagent result",
+      );
+      text = decision.text;
+    }
+  } catch (error) {
+    if (failure) recordRecovery(failure, { afterSubagentHookError: error });
+    failure ??= error;
   }
   if (failure) {
     if (!runtime.signal.aborted && !context.signal.aborted) lifecycle("failed");

@@ -1,4 +1,4 @@
-import { OutpostError } from "../domain/errors.ts";
+import { OutpostError, recordRecovery } from "../domain/errors.ts";
 import { responseInstructions } from "../domain/response-instructions.ts";
 import type { ResponseSpec } from "../domain/response.types.ts";
 import type {
@@ -17,20 +17,21 @@ import type {
   StopHandler,
 } from "./harness.types.ts";
 import { compact } from "./harness-context.ts";
-import {
-  afterModel,
-  beforeModel,
-  sessionInstructions,
-  stopRequest,
-} from "./harness-hooks.ts";
+import { each, sessionInstructions, stopRequest } from "./harness-hooks.ts";
 import { executeToolCalls } from "./tool-execution.ts";
 import { routeHarnessModel } from "./harness-routing.ts";
+import {
+  transformPrompt,
+  transformRequest,
+  transformResult,
+  reportModelError,
+} from "./harness-hook-transforms.ts";
 
 const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
   end: async (runtime, state, result, content) => {
     const message = await stopRequest(runtime, result.text, state.step);
     await state.history.append({ role: "assistant", content });
-    const instructions = steering(runtime);
+    const instructions = await steering(runtime, state.step);
     if (message === undefined && !instructions.length) return result.text;
     if (message !== undefined)
       runtime.emit({ kind: "stop-prevented", message });
@@ -77,7 +78,7 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
     );
     await state.history.append({
       role: "user",
-      content: [...results, ...steering(runtime)],
+      content: [...results, ...(await steering(runtime, state.step))],
     });
     return undefined;
   },
@@ -87,6 +88,65 @@ export async function harnessLoop(
   runtime: HarnessRuntime,
   prompt: string,
   history: HarnessHistory,
+  response?: ResponseSpec<unknown>,
+): Promise<string> {
+  let failure: unknown;
+  let failed = false;
+  let text: string | undefined;
+  let lastStep = 0;
+  try {
+    text = await loop(
+      runtime,
+      prompt,
+      history,
+      (step) => {
+        lastStep = step;
+      },
+      response,
+    );
+    return text;
+  } catch (error) {
+    failed = true;
+    failure = error;
+    throw error;
+  } finally {
+    let reason: "success" | "error" | "aborted" | "timeout" | "limit" = failed
+      ? "error"
+      : "success";
+    if (failure instanceof OutpostError && failure.code === "limit")
+      reason = "limit";
+    if (runtime.signal.aborted) reason = "aborted";
+    if (failure instanceof OutpostError && failure.code === "timeout")
+      reason = "timeout";
+    try {
+      await each(
+        {
+          ...runtime,
+          signal: new AbortController().signal,
+          emit: (event) => {
+            if (!runtime.signal.aborted) runtime.emit(event);
+          },
+        },
+        "run-end",
+        {
+          reason,
+          ...(text === undefined ? {} : { text }),
+          ...(failed ? { error: failure } : {}),
+        },
+        lastStep,
+      );
+    } catch (error) {
+      if (!failed) throw error;
+      recordRecovery(failure, { runEndHookError: error });
+    }
+  }
+}
+
+async function loop(
+  runtime: HarnessRuntime,
+  prompt: string,
+  history: HarnessHistory,
+  progress: (step: number) => void,
   response?: ResponseSpec<unknown>,
 ): Promise<string> {
   const { harness } = runtime.agent;
@@ -101,9 +161,10 @@ export async function harnessLoop(
     description: tool.description,
     inputSchema: tool.inputSchema,
   }));
-  const pending = steering(runtime);
+  const initial = await transformPrompt(runtime, prompt, "initial", 0);
+  const pending = await steering(runtime, 0);
   const content: ModelContentBlock[] = [
-    { type: "text", text: prompt },
+    { type: "text", text: initial },
     ...pending,
   ];
   if (pending.length && response)
@@ -121,6 +182,7 @@ export async function harnessLoop(
         "maxSteps",
         `Harness reached ${harness.limits.maxSteps} steps without a final answer`,
       );
+    progress(step);
     runtime.budget.check();
     const newlyLoaded = [...loadedSkills(history.messages)].filter(
       (name) => !announcedSkills.has(name),
@@ -138,19 +200,30 @@ export async function harnessLoop(
       step,
     );
     runtime = { ...runtime, agent: { ...runtime.agent, model } };
-    await beforeModel(runtime, history.messages, step);
-    const result = await requestModel(runtime, {
-      model: model.name,
-      ...(model.reasoning === undefined ? {} : { reasoning: model.reasoning }),
-      ...(model.maxOutputTokens === undefined
-        ? {}
-        : { maxOutputTokens: model.maxOutputTokens }),
-      messages: history.messages,
-      ...(system ? { system } : {}),
-      ...(tools.length ? { tools } : {}),
-      ...(harness.cache ? { cache: true } : {}),
-    });
-    await afterModel(runtime, result, step);
+    const request = await transformRequest(
+      runtime,
+      { messages: history.messages, ...(system ? { system } : {}) },
+      step,
+    );
+    let received: ModelResult;
+    try {
+      received = await requestModel(runtime, {
+        model: model.name,
+        ...(model.reasoning === undefined
+          ? {}
+          : { reasoning: model.reasoning }),
+        ...(model.maxOutputTokens === undefined
+          ? {}
+          : { maxOutputTokens: model.maxOutputTokens }),
+        ...request,
+        ...(tools.length ? { tools } : {}),
+        ...(harness.cache ? { cache: true } : {}),
+      });
+    } catch (error) {
+      await reportModelError(runtime, error, step);
+      throw error;
+    }
+    const result = await transformResult(runtime, received, step);
     const content: readonly ModelContentBlock[] = result.content ?? [
       { type: "text", text: result.text },
     ];
@@ -193,11 +266,20 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
   return texts.filter((text) => text.trim()).join("\n\n");
 }
 
-function steering(runtime: HarnessRuntime): ModelContentBlock[] {
+async function steering(
+  runtime: HarnessRuntime,
+  step: number,
+): Promise<ModelContentBlock[]> {
   const texts = runtime.steering?.take(runtime.subagentId) ?? [];
   for (const text of texts)
     runtime.emit({ kind: "steer", text, mode: "injected" });
-  return texts.map((text) => ({ type: "text", text }));
+  const content: ModelContentBlock[] = [];
+  for (const text of texts)
+    content.push({
+      type: "text",
+      text: await transformPrompt(runtime, text, "steering", step),
+    });
+  return content;
 }
 
 function inferredStop(content: readonly ModelContentBlock[]): ModelStopReason {

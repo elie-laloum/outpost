@@ -1,3 +1,4 @@
+import { openCliHooks } from "./cli-hooks.ts";
 import { lstat, mkdir, readFile, rename, rm } from "node:fs/promises";
 import { dirname, basename, join, relative } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -803,31 +804,63 @@ export async function createFileSandbox(
           },
           lease.invoke,
         );
+        const hookStop = new AbortController();
+        const hookSignal = AbortSignal.any([
+          hookStop.signal,
+          signal,
+          ...(settings.signal ? [settings.signal] : []),
+        ]);
+        const hooks = agent.hooks?.handlers.length
+          ? await openCliHooks(agent.hooks, lease, hookSignal, (error) =>
+              hookStop.abort(error),
+            )
+          : undefined;
+        let hookFailure: unknown;
         try {
           const output = await settled(
             () =>
               lease.invoke({
-                ...command,
-                variables: {
-                  ...variables,
-                  ...credentials,
-                  ...command.variables,
-                },
-                signal: settings.signal
-                  ? AbortSignal.any([settings.signal, signal])
-                  : signal,
+                ...(hooks
+                  ? hooks.command({
+                      ...command,
+                      variables: {
+                        ...variables,
+                        ...credentials,
+                        ...command.variables,
+                      },
+                    })
+                  : {
+                      ...command,
+                      variables: {
+                        ...variables,
+                        ...credentials,
+                        ...command.variables,
+                      },
+                    }),
+                signal: hookSignal,
                 deadlineMs: executionDefaults.attachMs,
                 ...(settings.terminal ? { terminal: settings.terminal } : {}),
               }),
             settings.signal,
           );
+          hookSignal.throwIfAborted();
           return {
             ...output,
             workspaceInfo: state.record,
             directory: workspace.directory,
           };
+        } catch (error) {
+          hookFailure = error;
+          throw error;
         } finally {
           restoreTerminal();
+          try {
+            await hooks?.close();
+          } catch (error) {
+            if (hookFailure)
+              recordRecovery(hookFailure, { hookCleanupError: error });
+            else throw error;
+          }
         }
       });
     },

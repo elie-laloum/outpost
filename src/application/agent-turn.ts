@@ -10,7 +10,7 @@ import { customTurn } from "./custom-turn.ts";
 import { replayTurn } from "./replay-turn.ts";
 import type { Agent, AgentObservation } from "../domain/agent.types.ts";
 import { cliSteering } from "./cli-steering.ts";
-import { OutpostError } from "../domain/errors.ts";
+import { OutpostError, recordRecovery } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { agentOutput } from "./agent-output.ts";
@@ -23,6 +23,8 @@ import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
 import { steeringInterruption } from "./execution.constants.ts";
 import { modelUsage } from "../domain/usage.ts";
 import { notify } from "./observation.ts";
+import { openCliHooks } from "./cli-hooks.ts";
+import type { AgentHookInstallation } from "../domain/agent-hook.types.ts";
 
 export async function turn(
   lease: SandboxLease,
@@ -91,7 +93,14 @@ export async function turn(
   let status = 0;
   let interrupted = false;
   let commandCompleted = false;
+  let hooks: AgentHookInstallation | undefined;
+  let hookCleanupFailure: unknown;
+  let executionFailure: unknown;
   try {
+    if (agent.hooks?.handlers.length)
+      hooks = await openCliHooks(agent.hooks, lease, signal, (error) =>
+        controller.abort(error),
+      );
     if (agent.usage === "session")
       warnUsage(
         options,
@@ -134,7 +143,7 @@ export async function turn(
     );
     steering.start(request);
     const result = await lease.invoke({
-      ...steering.command(command),
+      ...steering.command(hooks ? hooks.command(command) : command),
       signal,
       deadlineMs: options.deadlineMs ?? executionDefaults.deadlineMs,
       observe(channel, chunk) {
@@ -152,17 +161,14 @@ export async function turn(
     commandCompleted = true;
     status = result.status;
     output.flush();
-    if (
-      controller.signal.reason instanceof OutpostError &&
-      controller.signal.reason.code === "stuck"
-    )
-      throw controller.signal.reason;
+    signal.throwIfAborted();
     if (status !== 0)
       throw new OutpostError("process", `Agent exited with status ${status}`, {
         ...result,
         conversation: output.conversation ?? preparedConversation,
       });
   } catch (cause) {
+    executionFailure = cause;
     const reason = stopReason(options.signal, controller.signal.reason, cause);
     if (reason)
       notify(options.observe, {
@@ -194,6 +200,13 @@ export async function turn(
         "Agent remained active after completion; its command was stopped and trailing output retained",
       );
   } finally {
+    try {
+      await hooks?.close();
+    } catch (error) {
+      hookCleanupFailure = error;
+      if (executionFailure)
+        recordRecovery(executionFailure, { hookCleanupError: error });
+    }
     steering.close();
     stderr.flush();
     watchdog.close();
@@ -212,6 +225,7 @@ export async function turn(
     );
   }
   options.signal?.throwIfAborted();
+  if (hookCleanupFailure) throw hookCleanupFailure;
   let outcome: ReturnType<typeof output.result>;
   try {
     outcome = interrupted ? output.partial() : output.result();

@@ -65,7 +65,7 @@ export async function executeToolCalls(
     await Promise.all(
       Array.from({ length: Math.min(limit, pending.length) }, async () => {
         for (let next = pending.shift(); next; next = pending.shift())
-          outcomes.set(next.call.id, await executeCall(runtime, next));
+          outcomes.set(next.call.id, await executeCall(runtime, next, step));
       }),
     );
   }
@@ -111,7 +111,11 @@ async function prepareCall(
   );
   if ("deny" in decision) return denied(runtime, call, decision.deny);
   if (decision.input === validated.value)
-    return { call, tool, input: validated.value };
+    return {
+      call: { ...call, input: validated.value },
+      tool,
+      input: validated.value,
+    };
   const revised = await validate(
     tool,
     decision.input,
@@ -120,7 +124,11 @@ async function prepareCall(
   if ("outcome" in revised) return { call, outcome: revised.outcome };
   const revisedPermission = permission(runtime, tool, revised.value);
   if (revisedPermission) return denied(runtime, call, revisedPermission);
-  return { call, tool, input: revised.value };
+  return {
+    call: { ...call, input: revised.value },
+    tool,
+    input: revised.value,
+  };
 }
 
 async function validate(
@@ -159,7 +167,10 @@ function denied(
     name: call.name,
     reason,
   });
-  return { call, outcome: failed(`Denied: ${reason}`) };
+  return {
+    call,
+    outcome: { ...failed(`Denied: ${reason}`), status: "denied" },
+  };
 }
 
 async function finish(
@@ -210,9 +221,10 @@ function batches(calls: readonly PreparedCall[]): readonly ToolCallBatch[] {
 async function executeCall(
   runtime: HarnessRuntime,
   prepared: PreparedCall,
+  step: number,
 ): Promise<ToolOutcome> {
   try {
-    return normalized(await runTool(runtime, prepared));
+    return normalized(await runTool(runtime, prepared, step));
   } catch (error) {
     runtime.signal.throwIfAborted();
     runtime.budget.check();
@@ -224,6 +236,7 @@ async function executeCall(
 async function runTool(
   runtime: HarnessRuntime,
   { call, tool, input }: PreparedCall,
+  step: number,
 ): Promise<ToolOutput> {
   const { deadlineMs } = runtime.agent.harness.toolExecution;
   const controller = new AbortController();
@@ -266,7 +279,9 @@ async function runTool(
       },
     };
     return isHarnessSubagent(tool!)
-      ? runtime.modelScope.track(runSubagent(runtime, tool!, input, context))
+      ? runtime.modelScope.track(
+          runSubagent(runtime, tool!, input, context, step),
+        )
       : tool!.execute(input, context);
   });
   execution.catch(() => undefined);

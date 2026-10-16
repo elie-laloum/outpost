@@ -1,3 +1,6 @@
+import { composedNativeHooks } from "../native-hooks.ts";
+import { codexHookSchemas } from "./codex-hooks.constants.ts";
+import { codexHookPlan } from "./codex-hook-plan.ts";
 import { rejectProfileTools } from "../profile-support.ts";
 import {
   createCodexConversations,
@@ -58,6 +61,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     codexMcpLogins,
   );
   return Object.freeze({
+    ...(settings.hooks?.length ? { hooks: codexHookPlan(settings.hooks) } : {}),
     name: "codex",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
@@ -80,9 +84,19 @@ export function createCodexHarness(settings: CodexSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings(codexLabel, codexConversationLayout.format, settings);
   const configured = configuredSettings(settings);
+  const hooks = composedNativeHooks(
+    "codex",
+    codexHookSchemas,
+    configured.profile?.hooks?.codex,
+    settings.hooks,
+  );
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>
-      bindCodex({ ...configured, ...(model === undefined ? {} : { model }) }),
+      bindCodex({
+        ...configured,
+        hooks,
+        ...(model === undefined ? {} : { model }),
+      }),
   });
 }

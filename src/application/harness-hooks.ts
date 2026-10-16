@@ -1,4 +1,7 @@
 import { OutpostError } from "../domain/errors.ts";
+import { validateHookDecision } from "../domain/hook-decision.ts";
+import { HOOK_TIMEOUT_MS } from "../domain/hook.constants.ts";
+import { hookSnapshot, hookSandbox, invokeHook } from "./hook-invocation.ts";
 import type {
   HarnessHook,
   HarnessHookContext,
@@ -7,11 +10,7 @@ import type {
   HarnessHookPhase,
   HarnessHookResult,
 } from "../domain/hook.types.ts";
-import type {
-  ModelMessage,
-  ModelResult,
-  ModelToolCallBlock,
-} from "../domain/model.types.ts";
+import type { ModelToolCallBlock } from "../domain/model.types.ts";
 import type { ToolOutput } from "../domain/tool.types.ts";
 import type {
   HarnessRuntime,
@@ -24,7 +23,12 @@ export async function sessionInstructions(
   prompt: string,
 ): Promise<readonly string[]> {
   const texts: string[] = [];
-  for (const decision of await each(runtime, "session-start", { prompt }, 0)) {
+  for (const decision of await each(
+    runtime,
+    "session-start",
+    { prompt, source: runtime.startSource ?? "start" },
+    0,
+  )) {
     if (decision === undefined) continue;
     expect(
       typeof decision.instructions === "string",
@@ -35,22 +39,6 @@ export async function sessionInstructions(
   return texts;
 }
 
-export async function beforeModel(
-  runtime: HarnessRuntime,
-  messages: readonly ModelMessage[],
-  step: number,
-): Promise<void> {
-  await each(runtime, "before-model", { messages }, step);
-}
-
-export async function afterModel(
-  runtime: HarnessRuntime,
-  result: ModelResult,
-  step: number,
-): Promise<void> {
-  await each(runtime, "after-model", { result }, step);
-}
-
 export async function beforeTool(
   runtime: HarnessRuntime,
   call: ModelToolCallBlock,
@@ -58,15 +46,7 @@ export async function beforeTool(
 ): Promise<ToolDenial | ModelToolCallBlock> {
   let current = call;
   for (const hook of hooks(runtime, "before-tool")) {
-    const decision = await hook.run({
-      call: current,
-      ...context(runtime, step),
-    });
-    runtime.emit({
-      kind: "hook",
-      phase: "before-tool",
-      changed: decision !== undefined,
-    });
+    const decision = await runHook(runtime, hook, { call: current }, step);
     if (decision === undefined) continue;
     expect(
       decision !== null && typeof decision === "object",
@@ -97,16 +77,16 @@ export async function afterTool(
 ): Promise<ToolOutcome> {
   let current = outcome;
   for (const hook of hooks(runtime, "after-tool")) {
-    const decision = await hook.run({
-      call,
-      result: current,
-      ...context(runtime, step),
-    });
-    runtime.emit({
-      kind: "hook",
-      phase: "after-tool",
-      changed: decision !== undefined,
-    });
+    const decision = await runHook(
+      runtime,
+      hook,
+      {
+        call,
+        result: current,
+        status: outcome.status ?? (outcome.isError ? "error" : "success"),
+      },
+      step,
+    );
     if (decision === undefined) continue;
     expect(
       decision !== null && typeof decision === "object" && "result" in decision,
@@ -123,12 +103,7 @@ export async function stopRequest(
   step: number,
 ): Promise<string | undefined> {
   for (const hook of hooks(runtime, "stop")) {
-    const decision = await hook.run({ text, ...context(runtime, step) });
-    runtime.emit({
-      kind: "hook",
-      phase: "stop",
-      changed: decision !== undefined,
-    });
+    const decision = await runHook(runtime, hook, { text }, step);
     if (decision === undefined) continue;
     expect(
       decision !== null &&
@@ -142,7 +117,7 @@ export async function stopRequest(
   return undefined;
 }
 
-async function each<Phase extends HarnessHookPhase>(
+export async function each<Phase extends HarnessHookPhase>(
   runtime: HarnessRuntime,
   phase: Phase,
   event: HarnessHookEvents[Phase],
@@ -150,22 +125,13 @@ async function each<Phase extends HarnessHookPhase>(
 ): Promise<readonly HarnessHookResult<Phase>[]> {
   const decisions: HarnessHookResult<Phase>[] = [];
   for (const hook of hooks(runtime, phase)) {
-    const before = snapshot(event);
-    const decision = await hook.run({
-      ...event,
-      ...context(runtime, step),
-    } as HarnessHookInput<Phase>);
-    runtime.emit({
-      kind: "hook",
-      phase,
-      changed: decision !== undefined || before !== snapshot(event),
-    });
+    const decision = await runHook(runtime, hook, event, step);
     decisions.push(decision);
   }
   return decisions;
 }
 
-function hooks<Phase extends HarnessHookPhase>(
+export function hooks<Phase extends HarnessHookPhase>(
   runtime: HarnessRuntime,
   phase: Phase,
 ): readonly HarnessHook<Phase>[] {
@@ -181,17 +147,45 @@ function context(runtime: HarnessRuntime, step: number): HarnessHookContext {
     signal: runtime.signal,
     model: runtime.agent.model,
     step,
+    depth: runtime.depth,
+    ...(runtime.conversation ? { conversation: runtime.conversation } : {}),
+    ...(runtime.subagentId ? { subagentId: runtime.subagentId } : {}),
   };
+}
+
+export async function runHook<Phase extends HarnessHookPhase>(
+  runtime: HarnessRuntime,
+  hook: HarnessHook<Phase>,
+  event: HarnessHookEvents[Phase],
+  step: number,
+): Promise<HarnessHookResult<Phase>> {
+  const release = runtime.hold();
+  try {
+    const decision = await invokeHook(
+      hook.name,
+      hook.timeoutMs ?? HOOK_TIMEOUT_MS,
+      runtime.signal,
+      (signal) =>
+        hook.run({
+          ...hookSnapshot(event),
+          ...context(runtime, step),
+          model: hookSnapshot(runtime.agent.model),
+          sandbox: hookSandbox(runtime.sandbox, signal),
+          signal,
+        } as HarnessHookInput<Phase>),
+    );
+    validateHookDecision(hook.on, decision);
+    runtime.emit({
+      kind: "hook",
+      phase: hook.on,
+      changed: decision !== undefined,
+    });
+    return decision === undefined ? undefined : hookSnapshot(decision);
+  } finally {
+    release();
+  }
 }
 
 function expect(condition: unknown, message: string): asserts condition {
   if (!condition) throw new OutpostError("configuration", message);
-}
-
-function snapshot(value: unknown): string | undefined {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return undefined;
-  }
 }

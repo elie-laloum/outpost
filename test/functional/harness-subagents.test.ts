@@ -733,3 +733,58 @@ test("unknown model usage reaches synchronous accounting and observers", async (
     ),
   );
 });
+
+test("subagent hooks rewrite the delegated prompt and returned text with cumulative usage", async (t) => {
+  const root = await repository(t);
+  const phases: string[] = [];
+  const child = delegate(
+    provider([
+      (request) => {
+        assert.match(JSON.stringify(request.messages), /rewritten prompt/);
+        return done("child answer");
+      },
+    ]),
+  );
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    logging: false,
+    brief: { text: "delegate" },
+    agent: coder(
+      provider([
+        () => call("inspect"),
+        (request) => {
+          assert.equal(
+            JSON.parse(toolResults(request)[0]!.content).text,
+            "rewritten answer",
+          );
+          return done();
+        },
+      ]),
+      {
+        tools: [child],
+        hooks: [
+          defineHarnessHook({
+            on: "before-subagent",
+            run({ name, depth }) {
+              assert.equal(name, "inspect");
+              assert.equal(depth, 0);
+              phases.push("before");
+              return { prompt: "rewritten prompt" };
+            },
+          }),
+          defineHarnessHook({
+            on: "after-subagent",
+            run({ text }) {
+              assert.equal(text, "child answer");
+              phases.push("after");
+              return { text: "rewritten answer" };
+            },
+          }),
+        ],
+      },
+    ),
+  });
+  assert.deepEqual(phases, ["before", "after"]);
+  assert.equal(result.usage.output, 6);
+});

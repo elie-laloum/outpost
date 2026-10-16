@@ -215,6 +215,12 @@ try {
     assert.equal(api.createHarness({modelProvider,conversations:false,context:api.truncateToolResults()}).conversations,false);
     const permissions=api.defineHarnessPermissions({default:'deny',rules:[{effect:'allow',tools:['echo']}]});
     assert.deepEqual(permissions.evaluate('echo',{}),{allowed:true});
+    for (const name of ['Claude','Codex','Copilot','Kimi','Antigravity']) {
+      const on=name==='Copilot'?'sessionStart':'SessionStart';
+      const hook=api['define'+name+'Hook']({on,run:()=>undefined});
+      assert.equal(hook.kind,'native-hook');
+      assert.equal(api.createAgent({harness:api['create'+name+'Harness']({hooks:[hook]})}).hooks.handlers.length,1);
+    }
     const stop=api.defineHarnessHook({on:'stop',run:()=>undefined});
     const configured=api.createHarness({modelProvider,tools:[toolset],instructions:api.defineHarnessInstructions('Be brief.'),hooks:[stop],permissions});
     assert.equal(configured.tools[0].name,'echo');
@@ -286,6 +292,14 @@ try {
   writeFileSync(
     consumer,
     `import { createAgent as composeAgent,  dispatch, createCodexHarness, createClaudeHarness, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineJsonResponse, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost';
+import { defineClaudeHook, defineCodexHook, defineCopilotHook, defineKimiHook, defineAntigravityHook } from '@elie-laloum/outpost';
+createClaudeHarness({hooks:[defineClaudeHook({on:'PreToolUse',run:()=>({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny'}})})]});
+createCodexHarness({hooks:[defineCodexHook({on:'Stop',run:()=>({decision:'block',reason:'run tests'})})]});
+createCopilotHarness({hooks:[defineCopilotHook({on:'permissionRequest',run:()=>({behavior:'deny'})})]});
+createKimiHarness({hooks:[defineKimiHook({on:'UserPromptSubmit',run:()=> 'context'})]});
+createAntigravityHarness({hooks:[defineAntigravityHook({on:'PreToolUse',run:()=>({decision:'deny'})})]});
+// @ts-expect-error Native CLI hooks cannot be reused with a different protocol.
+createClaudeHarness({hooks:[defineCodexHook({on:'Stop',run:()=>undefined})]});
 import { defineDecision, decide, defineDecisionTask, defineHarnessModelRouting, createSystemOneDecisionProvider, type DecisionProvider } from '@elie-laloum/outpost';
 const routeDeclaration=defineDecision({questions:{route:{type:'choice',instructions:'Choose',criteria:{fast:'Routine',deep:'Reasoning'}}}});
 const router: DecisionProvider={name:'fixture',request:async()=>({model:'fixture',answers:{route:{type:'choice',choice:'fast',probabilities:{fast:0.9,deep:0.1},confidence:0.8}}})};
@@ -359,7 +373,11 @@ const jobOptions: WorkflowJobOptions = {checkpoint,start:jobStart,workflow:(inpu
 const jobHandler: QueueHandler = defineWorkflowJob(jobOptions);
 const triggerServer: ((options: TriggerServerOptions)=>Promise<TriggerServer>) = serveTriggers;
 void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,triggerServer,runSchedules];
-import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileTool } from '@elie-laloum/outpost';
+import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileHooks, type AgentProfileTool } from '@elie-laloum/outpost';
+const profileHooks: AgentProfileHooks = {claude:[defineClaudeHook({on:'PreToolUse',run:({event})=>{const tool:string=event.tool_name;void tool;}})],codex:[defineCodexHook({on:'Stop',run:()=>undefined})]};
+createClaudeHarness({profile:defineAgentProfile({hooks:profileHooks})});
+// @ts-expect-error Profile sections retain each CLI's own hook brand.
+defineAgentProfile({hooks:{claude:[defineCodexHook({on:'Stop',run:()=>undefined})]}});
 const portableTools: readonly AgentProfileTool[] = ['read','edit','shell:npm test'];
 const portableOptions: AgentProfileOptions = {instructions:'Never modify generated files.',allowedTools:portableTools};
 const portableProfile: AgentProfile = defineAgentProfile(portableOptions);

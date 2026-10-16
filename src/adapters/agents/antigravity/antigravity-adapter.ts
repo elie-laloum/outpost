@@ -1,3 +1,6 @@
+import { composedNativeHooks } from "../native-hooks.ts";
+import { antigravityHookSchemas } from "./antigravity-hooks.constants.ts";
+import { antigravityHookPlan } from "./antigravity-hook-plan.ts";
 import { rejectProfileTools } from "../profile-support.ts";
 import {
   mcpConfigurationPlanner,
@@ -45,6 +48,9 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     antigravityMcpFile,
   );
   return Object.freeze({
+    ...(settings.hooks?.length
+      ? { hooks: antigravityHookPlan(settings.hooks) }
+      : {}),
     name: "antigravity",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
@@ -76,11 +82,18 @@ export function createAntigravityHarness(
     "Antigravity has no portable conversation capture; conversations cannot be stored",
   );
   const configured = configuredSettings(settings);
+  const hooks = composedNativeHooks(
+    "antigravity",
+    antigravityHookSchemas,
+    configured.profile?.hooks?.antigravity,
+    settings.hooks,
+  );
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>
       bindAntigravity({
         ...configured,
+        hooks,
         ...(model === undefined ? {} : { model }),
       }),
   });

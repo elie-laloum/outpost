@@ -23,6 +23,7 @@
       "kind": "\"replay\"",
       "harness": "Harness",
       "model": "AgentModel",
+      "hooks": "import(\"./agent-hook.types.ts\").AgentHookPlan | undefined",
       "fork": "((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) | undefined",
       "credentials": "((variables: Variables) => CredentialPlan) | undefined",
       "configuration": "((variables: Variables) => AgentConfiguration) | undefined",
@@ -61,6 +62,7 @@
       "kind": "contract",
       "harness": "contract",
       "model": "contract",
+      "hooks": "extension",
       "fork": "contract",
       "credentials": "contract",
       "configuration": "contract",
@@ -94,6 +96,7 @@
   ".:AgentAdapter": {
     "signatures": [],
     "options": {
+      "hooks": "import(\"./agent-hook.types.ts\").AgentHookPlan | undefined",
       "fork": "((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) | undefined",
       "credentials": "((variables: Variables) => CredentialPlan) | undefined",
       "configuration": "((variables: Variables) => AgentConfiguration) | undefined",
@@ -123,6 +126,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "hooks": "extension",
       "fork": "contract",
       "credentials": "contract",
       "configuration": "contract",
@@ -357,6 +361,22 @@
       "bind": "contract"
     }
   },
+  ".:AgentHookContext": {
+    "signatures": [],
+    "options": {
+      "sandbox": "SandboxLease",
+      "signal": "AbortSignal"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "sandbox": "contract",
+      "signal": "contract"
+    }
+  },
   ".:AgentInput": {
     "signatures": [],
     "options": {
@@ -583,6 +603,7 @@
     "signatures": [],
     "options": {
       "kind": "\"agent-profile\"",
+      "hooks": "AgentProfileHooks | undefined",
       "instructions": "string | undefined",
       "allowedTools": "readonly AgentProfileTool[] | undefined",
       "mcpServers": "McpServers | undefined"
@@ -594,14 +615,40 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "kind": "contract",
+      "hooks": "contract",
       "instructions": "contract",
       "allowedTools": "contract",
       "mcpServers": "contract"
     }
   },
+  ".:AgentProfileHooks": {
+    "signatures": [],
+    "options": {
+      "claude": "readonly NativeHook<\"claude\", string>[] | undefined",
+      "codex": "readonly NativeHook<\"codex\", string>[] | undefined",
+      "copilot": "readonly NativeHook<\"copilot\", string>[] | undefined",
+      "kimi": "readonly NativeHook<\"kimi\", string>[] | undefined",
+      "antigravity": "readonly NativeHook<\"antigravity\", string>[] | undefined",
+      "outpost": "readonly HarnessHook<import(\"./hook.types.ts\").HarnessHookPhase>[] | undefined"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Per-harness typed hook collections are declared through TypeScript profiles; recipes consume them through explicit agent extensions.",
+    "optionCoverage": {
+      "claude": "contract",
+      "codex": "contract",
+      "copilot": "contract",
+      "kimi": "contract",
+      "antigravity": "contract",
+      "outpost": "contract"
+    }
+  },
   ".:AgentProfileOptions": {
     "signatures": [],
     "options": {
+      "hooks": "AgentProfileHooks | undefined",
       "instructions": "string | undefined",
       "allowedTools": "readonly AgentProfileTool[] | undefined",
       "mcpServers": "McpServers | undefined"
@@ -612,6 +659,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "instructions": "native",
       "allowedTools": "native",
       "mcpServers": "native"
@@ -685,9 +733,120 @@
       "maxResponseBytes": "native"
     }
   },
+  ".:AntigravityHook": {
+    "signatures": [],
+    "options": {
+      "kind": "\"native-hook\"",
+      "agent": "\"antigravity\"",
+      "on": "Phase",
+      "name": "string",
+      "timeoutMs": "number",
+      "command": "HookCommand | undefined",
+      "matcher": "string | undefined",
+      "run": "(event: unknown, context: AgentHookContext) => Promise<string>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "kind": "contract",
+      "agent": "contract",
+      "on": "contract",
+      "name": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "matcher": "contract",
+      "run": "contract"
+    }
+  },
+  ".:AntigravityHookDecisions": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "{ readonly injectSteps?: readonly { readonly systemMessage?: { readonly systemMessage?: string; readonly metadata?: Readonly<Record<string, unknown>>; }; readonly userMessage?: string; readonly ephemeralMessage?: string; readonly toolCall?: Readonly<Record<string, unknown>>; }[]; }",
+      "PreToolUse": "{ readonly decision: \"allow\" | \"auto_approve\" | \"deny\" | \"ask\" | \"force_ask\" | \"deny_unless_prior_grant\"; readonly reason?: string; readonly overwrite?: Readonly<Record<string, unknown>>; readonly permissionOverrides?: readonly string[]; }",
+      "PostToolUse": "{}",
+      "PreInvocation": "{ readonly injectSteps?: readonly { readonly systemMessage?: { readonly systemMessage?: string; readonly metadata?: Readonly<Record<string, unknown>>; }; readonly userMessage?: string; readonly ephemeralMessage?: string; readonly toolCall?: Readonly<Record<string, unknown>>; }[]; }",
+      "PostInvocation": "{ readonly injectSteps?: readonly { readonly systemMessage?: { readonly systemMessage?: string; readonly metadata?: Readonly<Record<string, unknown>>; }; readonly userMessage?: string; readonly ephemeralMessage?: string; readonly toolCall?: Readonly<Record<string, unknown>>; }[]; readonly terminationBehavior?: \"force_continue\" | \"terminate\" | \"\"; }",
+      "Stop": "{ readonly decision: string; readonly reason?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "PreToolUse": "contract",
+      "PostToolUse": "contract",
+      "PreInvocation": "contract",
+      "PostInvocation": "contract",
+      "Stop": "contract"
+    }
+  },
+  ".:AntigravityHookEvents": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; }",
+      "PreToolUse": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; readonly toolCall?: { readonly name: string; readonly args: Readonly<Record<string, unknown>>; }; readonly stepIdx?: number; }",
+      "PostToolUse": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; readonly toolCall?: { readonly name: string; readonly args: Readonly<Record<string, unknown>>; }; readonly stepIdx?: number; readonly error?: string; }",
+      "PreInvocation": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; readonly invocationNum?: number; readonly initialNumSteps?: number; }",
+      "PostInvocation": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; readonly invocationNum?: number; readonly initialNumSteps?: number; }",
+      "Stop": "{ readonly conversationId: string; readonly workspacePaths: readonly string[]; readonly transcriptPath?: string; readonly artifactDirectoryPath?: string; readonly modelName?: string; readonly executionNum?: number; readonly terminationReason?: string; readonly error?: string; readonly fullyIdle?: boolean; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "PreToolUse": "contract",
+      "PostToolUse": "contract",
+      "PreInvocation": "contract",
+      "PostInvocation": "contract",
+      "Stop": "contract"
+    }
+  },
+  ".:AntigravityHookOptions": {
+    "signatures": [],
+    "options": {
+      "on": "Phase",
+      "name": "string | undefined",
+      "matcher": "string | undefined",
+      "timeoutMs": "number | undefined",
+      "command": "undefined",
+      "run": "(context: AgentHookContext & { readonly event: import(\"./antigravity/antigravity-hooks.types.js\").AntigravityHookEvents[Phase]; }) => void | import(\"./antigravity/antigravity-hooks.types.js\").AntigravityHookDecisions[Phase] | Promise<void | import(\"./antigravity/antigravity-hooks.types.js\").AntigravityHookDecisions[Phase]>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "on": "contract",
+      "name": "contract",
+      "matcher": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
+    }
+  },
+  ".:AntigravityHookPhase": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {}
+  },
   ".:AntigravitySettings": {
     "signatures": [],
     "options": {
+      "hooks": "readonly import(\"./antigravity-hooks.types.ts\").AntigravityHook<keyof import(\"./antigravity-hooks.types.ts\").AntigravityHookEvents>[] | undefined",
       "authentication": "AgentAuthentication | undefined",
       "variables": "Readonly<Record<string, string>> | undefined",
       "mcpServers": "McpServers | undefined",
@@ -700,6 +859,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "authentication": "native",
       "variables": "native",
       "mcpServers": "native",
@@ -1111,9 +1271,228 @@
       "criteria": "contract"
     }
   },
+  ".:ClaudeHook": {
+    "signatures": [],
+    "options": {
+      "kind": "\"native-hook\"",
+      "agent": "\"claude\"",
+      "on": "Phase",
+      "name": "string",
+      "timeoutMs": "number",
+      "command": "HookCommand | undefined",
+      "matcher": "string | undefined",
+      "run": "(event: unknown, context: AgentHookContext) => Promise<string>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "kind": "contract",
+      "agent": "contract",
+      "on": "contract",
+      "name": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "matcher": "contract",
+      "run": "contract"
+    }
+  },
+  ".:ClaudeHookDecisions": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "string | { readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"SessionStart\"; readonly additionalContext?: string; readonly initialUserMessage?: string; readonly sessionTitle?: string; readonly watchPaths?: readonly string[]; readonly reloadSkills?: boolean; }; readonly terminalSequence?: string; }",
+      "Setup": "{ readonly terminalSequence?: string; }",
+      "UserPromptSubmit": "string | { readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"UserPromptSubmit\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "UserPromptExpansion": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"UserPromptExpansion\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "PreToolUse": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PreToolUse\"; readonly permissionDecision?: \"allow\" | \"deny\" | \"ask\" | \"defer\"; readonly permissionDecisionReason?: string; readonly updatedInput?: Readonly<Record<string, unknown>>; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "PermissionRequest": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PermissionRequest\"; readonly decision?: { readonly behavior: \"allow\" | \"deny\"; readonly updatedInput?: Readonly<Record<string, unknown>>; readonly updatedPermissions?: readonly unknown[]; readonly message?: string; readonly interrupt?: boolean; }; }; readonly terminalSequence?: string; }",
+      "PermissionDenied": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PermissionDenied\"; readonly retry?: boolean; }; readonly terminalSequence?: string; }",
+      "PostToolUse": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PostToolUse\"; readonly additionalContext?: string; readonly classifierContext?: string; readonly updatedToolOutput?: unknown; readonly updatedMCPToolOutput?: unknown; }; readonly terminalSequence?: string; }",
+      "PostToolUseFailure": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PostToolUseFailure\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "PostToolBatch": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PostToolBatch\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "Notification": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"Notification\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "MessageDisplay": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"MessageDisplay\"; readonly displayContent?: string; }; readonly terminalSequence?: string; }",
+      "SubagentStart": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"SubagentStart\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "SubagentStop": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"SubagentStop\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "TaskCreated": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly terminalSequence?: string; }",
+      "TaskCompleted": "{ readonly continue?: boolean; readonly stopReason?: string; readonly terminalSequence?: string; }",
+      "Stop": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"Stop\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "StopFailure": "{ readonly terminalSequence?: string; }",
+      "TeammateIdle": "{ readonly continue?: boolean; readonly stopReason?: string; readonly terminalSequence?: string; }",
+      "InstructionsLoaded": "{ readonly terminalSequence?: string; }",
+      "ConfigChange": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly terminalSequence?: string; }",
+      "CwdChanged": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"CwdChanged\"; readonly watchPaths?: readonly string[]; }; readonly terminalSequence?: string; }",
+      "DirectoryAdded": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "FileChanged": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"FileChanged\"; readonly watchPaths?: readonly string[]; }; readonly terminalSequence?: string; }",
+      "WorktreeCreate": "string",
+      "WorktreeRemove": "{ readonly terminalSequence?: string; }",
+      "PreCompact": "{ readonly decision?: \"block\"; readonly reason?: string; readonly terminalSequence?: string; }",
+      "PostCompact": "{ readonly terminalSequence?: string; }",
+      "PreModelSwitch": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PreModelSwitch\"; readonly permissionDecision?: \"allow\" | \"deny\" | \"ask\"; readonly permissionDecisionReason?: string; }; readonly terminalSequence?: string; }",
+      "PostModelSwitch": "string | { readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PostModelSwitch\"; readonly additionalContext?: string; }; readonly terminalSequence?: string; }",
+      "Elicitation": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"Elicitation\"; readonly action?: \"accept\" | \"decline\" | \"cancel\"; readonly content?: Readonly<Record<string, unknown>>; }; readonly decision?: \"block\"; readonly terminalSequence?: string; }",
+      "ElicitationResult": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"ElicitationResult\"; readonly action?: \"accept\" | \"decline\" | \"cancel\"; readonly content?: Readonly<Record<string, unknown>>; }; readonly decision?: \"block\"; readonly terminalSequence?: string; }",
+      "SessionEnd": "{ readonly terminalSequence?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "Setup": "contract",
+      "UserPromptSubmit": "contract",
+      "UserPromptExpansion": "contract",
+      "PreToolUse": "contract",
+      "PermissionRequest": "contract",
+      "PermissionDenied": "contract",
+      "PostToolUse": "contract",
+      "PostToolUseFailure": "contract",
+      "PostToolBatch": "contract",
+      "Notification": "contract",
+      "MessageDisplay": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "TaskCreated": "contract",
+      "TaskCompleted": "contract",
+      "Stop": "contract",
+      "StopFailure": "contract",
+      "TeammateIdle": "contract",
+      "InstructionsLoaded": "contract",
+      "ConfigChange": "contract",
+      "CwdChanged": "contract",
+      "DirectoryAdded": "contract",
+      "FileChanged": "contract",
+      "WorktreeCreate": "contract",
+      "WorktreeRemove": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "PreModelSwitch": "contract",
+      "PostModelSwitch": "contract",
+      "Elicitation": "contract",
+      "ElicitationResult": "contract",
+      "SessionEnd": "contract"
+    }
+  },
+  ".:ClaudeHookEvents": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"SessionStart\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly source?: string; readonly model?: string; readonly session_title?: string; }",
+      "Setup": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"Setup\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly trigger?: string; }",
+      "UserPromptSubmit": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"UserPromptSubmit\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly prompt: string; readonly session_title?: string; }",
+      "UserPromptExpansion": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"UserPromptExpansion\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly prompt: string; readonly expansion_type?: string; readonly command_name?: string; readonly command_args?: string; readonly command_source?: string; }",
+      "PreToolUse": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PreToolUse\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PermissionRequest": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PermissionRequest\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly permission_suggestions?: readonly unknown[]; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PermissionDenied": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PermissionDenied\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly reason?: string; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PostToolUse": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PostToolUse\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly tool_response?: unknown; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PostToolUseFailure": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PostToolUseFailure\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly error?: string; readonly is_interrupt?: boolean; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PostToolBatch": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PostToolBatch\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly tool_calls?: readonly { readonly tool_name?: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_use_id?: string; readonly tool_response?: unknown; }[]; }",
+      "Notification": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"Notification\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly message?: string; readonly title?: string; readonly notification_type?: string; }",
+      "MessageDisplay": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"MessageDisplay\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly delta: string; readonly turn_id?: string; readonly message_id?: string; readonly index?: number; readonly final?: boolean; }",
+      "SubagentStart": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"SubagentStart\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; }",
+      "SubagentStop": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"SubagentStop\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly agent_transcript_path?: string; readonly last_assistant_message?: string; readonly stop_hook_active?: boolean; }",
+      "TaskCreated": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"TaskCreated\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly task_id?: string; readonly task_subject?: string; readonly task_description?: string; }",
+      "TaskCompleted": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"TaskCompleted\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly task_id?: string; readonly task_subject?: string; readonly task_description?: string; readonly teammate_name?: string; readonly team_name?: string; }",
+      "Stop": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"Stop\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly stop_hook_active?: boolean; readonly last_assistant_message?: string; }",
+      "StopFailure": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"StopFailure\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly error?: string; readonly error_details?: string; readonly last_assistant_message?: string; }",
+      "TeammateIdle": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"TeammateIdle\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly teammate_name?: string; readonly team_name?: string; }",
+      "InstructionsLoaded": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"InstructionsLoaded\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly file_path?: string; readonly memory_type?: string; readonly load_reason?: string; readonly globs?: readonly string[]; readonly trigger_file_path?: string; readonly parent_file_path?: string; }",
+      "ConfigChange": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"ConfigChange\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly source?: string; readonly file_path?: string; }",
+      "CwdChanged": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"CwdChanged\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly old_cwd?: string; readonly new_cwd?: string; }",
+      "DirectoryAdded": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"DirectoryAdded\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly directory?: string; readonly source?: \"slash_command\" | \"register_repo_root\"; }",
+      "FileChanged": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"FileChanged\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly file_path?: string; readonly event?: string; }",
+      "WorktreeCreate": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"WorktreeCreate\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly name?: string; }",
+      "WorktreeRemove": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"WorktreeRemove\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly worktree_path?: string; }",
+      "PreCompact": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PreCompact\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly trigger?: string; readonly custom_instructions?: string | null; }",
+      "PostCompact": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PostCompact\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly trigger?: string; readonly compact_summary?: string; }",
+      "PreModelSwitch": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PreModelSwitch\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly from_model?: string; readonly to_model?: string; readonly requested_model?: string | null; readonly source?: string; readonly context_tokens?: number; readonly prompt_cache_warm?: boolean; readonly cache_ttl?: string; readonly estimated_cache_write_usd?: number; readonly pricing?: string; }",
+      "PostModelSwitch": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"PostModelSwitch\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly from_model?: string; readonly to_model?: string; readonly requested_model?: string | null; readonly source?: string; readonly context_tokens?: number; readonly prompt_cache_warm?: boolean; readonly cache_ttl?: string; readonly estimated_cache_write_usd?: number; readonly pricing?: string; }",
+      "Elicitation": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"Elicitation\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly mcp_server_name?: string; readonly message?: string; readonly mode?: string; readonly requested_schema?: Readonly<Record<string, unknown>>; readonly elicitation_id?: string; readonly url?: string; }",
+      "ElicitationResult": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"ElicitationResult\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly mcp_server_name?: string; readonly action?: string; readonly content?: Readonly<Record<string, unknown>>; }",
+      "SessionEnd": "{ readonly session_id: string; readonly transcript_path?: string; readonly cwd: string; readonly hook_event_name: \"SessionEnd\"; readonly permission_mode?: string; readonly prompt_id?: string; readonly scratchpad_dir?: string; readonly agent_id?: string; readonly agent_type?: string; readonly effort?: { readonly level: string; }; readonly reason?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "Setup": "contract",
+      "UserPromptSubmit": "contract",
+      "UserPromptExpansion": "contract",
+      "PreToolUse": "contract",
+      "PermissionRequest": "contract",
+      "PermissionDenied": "contract",
+      "PostToolUse": "contract",
+      "PostToolUseFailure": "contract",
+      "PostToolBatch": "contract",
+      "Notification": "contract",
+      "MessageDisplay": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "TaskCreated": "contract",
+      "TaskCompleted": "contract",
+      "Stop": "contract",
+      "StopFailure": "contract",
+      "TeammateIdle": "contract",
+      "InstructionsLoaded": "contract",
+      "ConfigChange": "contract",
+      "CwdChanged": "contract",
+      "DirectoryAdded": "contract",
+      "FileChanged": "contract",
+      "WorktreeCreate": "contract",
+      "WorktreeRemove": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "PreModelSwitch": "contract",
+      "PostModelSwitch": "contract",
+      "Elicitation": "contract",
+      "ElicitationResult": "contract",
+      "SessionEnd": "contract"
+    }
+  },
+  ".:ClaudeHookOptions": {
+    "signatures": [],
+    "options": {
+      "on": "Phase",
+      "name": "string | undefined",
+      "matcher": "string | undefined",
+      "timeoutMs": "number | undefined",
+      "command": "undefined",
+      "run": "(context: AgentHookContext & { readonly event: import(\"./claude/claude-hooks.types.js\").ClaudeHookEvents[Phase]; }) => void | import(\"./claude/claude-hooks.types.js\").ClaudeHookDecisions[Phase] | Promise<void | import(\"./claude/claude-hooks.types.js\").ClaudeHookDecisions[Phase]>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "on": "contract",
+      "name": "contract",
+      "matcher": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
+    }
+  },
+  ".:ClaudeHookPhase": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {}
+  },
   ".:ClaudeSettings": {
     "signatures": [],
     "options": {
+      "hooks": "readonly import(\"./claude/claude-hooks.types.ts\").ClaudeHook<keyof import(\"./claude/claude-hooks.types.ts\").ClaudeHookEvents>[] | undefined",
       "partialMessages": "boolean | undefined",
       "permissions": "\"plan\" | \"default\" | \"acceptEdits\" | \"auto\" | \"dontAsk\" | \"bypassPermissions\" | undefined",
       "authentication": "AgentAuthentication | undefined",
@@ -1129,6 +1508,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "partialMessages": "native",
       "permissions": "native",
       "authentication": "native",
@@ -1145,6 +1525,7 @@
       "kind": "\"cli\"",
       "harness": "CliHarness",
       "model": "AgentModel | undefined",
+      "hooks": "import(\"./agent-hook.types.ts\").AgentHookPlan | undefined",
       "fork": "((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) | undefined",
       "credentials": "((variables: Variables) => CredentialPlan) | undefined",
       "configuration": "((variables: Variables) => AgentConfiguration) | undefined",
@@ -1177,6 +1558,7 @@
       "kind": "contract",
       "harness": "contract",
       "model": "contract",
+      "hooks": "extension",
       "fork": "contract",
       "credentials": "contract",
       "configuration": "contract",
@@ -1217,6 +1599,140 @@
       "bind": "contract"
     }
   },
+  ".:CodexHook": {
+    "signatures": [],
+    "options": {
+      "kind": "\"native-hook\"",
+      "agent": "\"codex\"",
+      "on": "Phase",
+      "name": "string",
+      "timeoutMs": "number",
+      "command": "HookCommand | undefined",
+      "matcher": "string | undefined",
+      "run": "(event: unknown, context: AgentHookContext) => Promise<string>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "kind": "contract",
+      "agent": "contract",
+      "on": "contract",
+      "name": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "matcher": "contract",
+      "run": "contract"
+    }
+  },
+  ".:CodexHookDecisions": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "string | { readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"SessionStart\"; readonly additionalContext?: string; }; readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "SessionEnd": "never",
+      "UserPromptSubmit": "string | { readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"UserPromptSubmit\"; readonly additionalContext?: string; }; readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "PreToolUse": "{ readonly systemMessage?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PreToolUse\"; readonly permissionDecision?: \"allow\" | \"deny\"; readonly permissionDecisionReason?: string; readonly updatedInput?: Readonly<Record<string, unknown>>; readonly additionalContext?: string; }; }",
+      "PermissionRequest": "{ readonly systemMessage?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PermissionRequest\"; readonly decision?: { readonly behavior: \"allow\" | \"deny\"; readonly message?: string; }; }; }",
+      "PostToolUse": "{ readonly systemMessage?: string; readonly continue?: boolean; readonly stopReason?: string; readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"PostToolUse\"; readonly additionalContext?: string; }; }",
+      "PreCompact": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "PostCompact": "{ readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "SubagentStart": "string | { readonly decision?: \"block\"; readonly reason?: string; readonly hookSpecificOutput?: { readonly hookEventName: \"SubagentStart\"; readonly additionalContext?: string; }; readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "SubagentStop": "{ readonly decision?: \"block\"; readonly reason?: string; readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "Stop": "{ readonly decision?: \"block\"; readonly reason?: string; readonly continue?: boolean; readonly stopReason?: string; readonly suppressOutput?: boolean; readonly systemMessage?: string; readonly terminalSequence?: string; }",
+      "Interrupt": "{ readonly systemMessage?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "SessionEnd": "contract",
+      "UserPromptSubmit": "contract",
+      "PreToolUse": "contract",
+      "PermissionRequest": "contract",
+      "PostToolUse": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "Stop": "contract",
+      "Interrupt": "contract"
+    }
+  },
+  ".:CodexHookEvents": {
+    "signatures": [],
+    "options": {
+      "SessionStart": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"SessionStart\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly source?: string; readonly agent_type?: string; readonly session_title?: string; }",
+      "SessionEnd": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"SessionEnd\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly reason?: string; }",
+      "UserPromptSubmit": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"UserPromptSubmit\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly prompt: string; readonly session_title?: string; }",
+      "PreToolUse": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"PreToolUse\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly tool_name: string; readonly tool_input?: unknown; readonly tool_use_id?: string; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PermissionRequest": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"PermissionRequest\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly tool_name: string; readonly tool_input?: unknown; readonly tool_use_id?: string; readonly permission_suggestions?: readonly unknown[]; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PostToolUse": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"PostToolUse\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly tool_name: string; readonly tool_input?: unknown; readonly tool_use_id?: string; readonly tool_response?: unknown; readonly mcp_server?: Readonly<Record<string, unknown>>; }",
+      "PreCompact": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"PreCompact\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly trigger?: \"manual\" | \"auto\"; }",
+      "PostCompact": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"PostCompact\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly trigger?: \"manual\" | \"auto\"; }",
+      "SubagentStart": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"SubagentStart\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly agent_id?: string; readonly agent_type?: string; }",
+      "SubagentStop": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"SubagentStop\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly agent_id?: string; readonly agent_type?: string; readonly agent_transcript_path?: string | null; readonly last_assistant_message?: string | null; readonly stop_hook_active?: boolean; }",
+      "Stop": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"Stop\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; readonly stop_hook_active?: boolean; readonly last_assistant_message?: string | null; }",
+      "Interrupt": "{ readonly session_id: string; readonly transcript_path?: string | null; readonly cwd: string; readonly hook_event_name: \"Interrupt\"; readonly model?: string; readonly turn_id?: string; readonly permission_mode?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "SessionStart": "contract",
+      "SessionEnd": "contract",
+      "UserPromptSubmit": "contract",
+      "PreToolUse": "contract",
+      "PermissionRequest": "contract",
+      "PostToolUse": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "Stop": "contract",
+      "Interrupt": "contract"
+    }
+  },
+  ".:CodexHookOptions": {
+    "signatures": [],
+    "options": {
+      "on": "Phase",
+      "name": "string | undefined",
+      "matcher": "string | undefined",
+      "timeoutMs": "number | undefined",
+      "command": "undefined",
+      "run": "(context: AgentHookContext & { readonly event: import(\"./codex/codex-hooks.types.js\").CodexHookEvents[Phase]; }) => void | import(\"./codex/codex-hooks.types.js\").CodexHookDecisions[Phase] | Promise<void | import(\"./codex/codex-hooks.types.js\").CodexHookDecisions[Phase]>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "on": "contract",
+      "name": "contract",
+      "matcher": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
+    }
+  },
+  ".:CodexHookPhase": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {}
+  },
   ".:CodexModelProvider": {
     "signatures": [],
     "options": {
@@ -1236,6 +1752,7 @@
   ".:CodexSettings": {
     "signatures": [],
     "options": {
+      "hooks": "readonly import(\"./codex/codex-hooks.types.ts\").CodexHook<keyof import(\"./codex/codex-hooks.types.ts\").CodexHookEvents>[] | undefined",
       "modelProvider": "CodexModelProvider | undefined",
       "approvalReviewer": "\"user\" | \"auto_review\" | undefined",
       "authentication": "AgentAuthentication | undefined",
@@ -1251,6 +1768,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "modelProvider": "native",
       "approvalReviewer": "native",
       "authentication": "native",
@@ -1625,9 +2143,152 @@
       "restore": "contract"
     }
   },
+  ".:CopilotHook": {
+    "signatures": [],
+    "options": {
+      "kind": "\"native-hook\"",
+      "agent": "\"copilot\"",
+      "on": "Phase",
+      "name": "string",
+      "timeoutMs": "number",
+      "command": "HookCommand | undefined",
+      "matcher": "string | undefined",
+      "run": "(event: unknown, context: AgentHookContext) => Promise<string>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "kind": "contract",
+      "agent": "contract",
+      "on": "contract",
+      "name": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "matcher": "contract",
+      "run": "contract"
+    }
+  },
+  ".:CopilotHookDecisions": {
+    "signatures": [],
+    "options": {
+      "sessionStart": "{ readonly additionalContext?: string; }",
+      "sessionEnd": "never",
+      "userPromptSubmitted": "never",
+      "userPromptTransformed": "{ readonly modifiedTransformedPrompt?: string; }",
+      "preToolUse": "{ readonly permissionDecision?: \"allow\" | \"deny\" | \"ask\"; readonly permissionDecisionReason?: string; readonly modifiedArgs?: Readonly<Record<string, unknown>>; readonly additionalContext?: string; }",
+      "postToolUse": "{ readonly modifiedResult?: { readonly resultType: \"success\" | \"failure\"; readonly textResultForLlm: string; }; readonly additionalContext?: string; }",
+      "postToolUseFailure": "{ readonly additionalContext?: string; }",
+      "permissionRequest": "{ readonly behavior?: \"allow\" | \"deny\"; readonly message?: string; readonly interrupt?: boolean; }",
+      "agentStop": "{ readonly decision?: \"block\" | \"allow\"; readonly reason?: string; }",
+      "subagentStart": "{ readonly additionalContext?: string; }",
+      "subagentStop": "{ readonly decision?: \"block\" | \"allow\"; readonly reason?: string; readonly modifiedResponse?: string; }",
+      "preCompact": "never",
+      "notification": "{ readonly additionalContext?: string; }",
+      "errorOccurred": "never"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "sessionStart": "contract",
+      "sessionEnd": "contract",
+      "userPromptSubmitted": "contract",
+      "userPromptTransformed": "contract",
+      "preToolUse": "contract",
+      "postToolUse": "contract",
+      "postToolUseFailure": "contract",
+      "permissionRequest": "contract",
+      "agentStop": "contract",
+      "subagentStart": "contract",
+      "subagentStop": "contract",
+      "preCompact": "contract",
+      "notification": "contract",
+      "errorOccurred": "contract"
+    }
+  },
+  ".:CopilotHookEvents": {
+    "signatures": [],
+    "options": {
+      "sessionStart": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly source?: string; readonly initialPrompt?: string; }",
+      "sessionEnd": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly reason?: string; }",
+      "userPromptSubmitted": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly prompt: string; }",
+      "userPromptTransformed": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly prompt: string; readonly transformedPrompt?: string; }",
+      "preToolUse": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly toolName: string; readonly toolArgs?: unknown; }",
+      "postToolUse": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly toolName: string; readonly toolArgs?: unknown; readonly toolResult?: unknown; }",
+      "postToolUseFailure": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly toolName: string; readonly toolArgs?: unknown; readonly error?: unknown; }",
+      "permissionRequest": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly toolName: string; readonly toolArgs?: unknown; }",
+      "agentStop": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly stop_hook_active?: boolean; readonly transcriptPath?: string; readonly stopReason?: \"end_turn\"; }",
+      "subagentStart": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly agentName?: string; readonly transcriptPath?: string; readonly agentDisplayName?: string; readonly agentDescription?: string; }",
+      "subagentStop": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly agentName?: string; readonly agentId?: string; readonly agentType?: string; readonly transcriptPath?: string; readonly agentDisplayName?: string; readonly response?: string; readonly stopReason?: \"end_turn\"; }",
+      "preCompact": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly trigger?: \"manual\" | \"auto\"; readonly transcriptPath?: string; readonly customInstructions?: string; }",
+      "notification": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly notification_type?: string; readonly message?: string; }",
+      "errorOccurred": "{ readonly sessionId: string; readonly timestamp: number; readonly cwd: string; readonly error?: { readonly message: string; readonly name: string; readonly stack?: string; }; readonly errorContext?: \"model_call\" | \"tool_execution\" | \"system\" | \"user_input\"; readonly recoverable?: boolean; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "sessionStart": "contract",
+      "sessionEnd": "contract",
+      "userPromptSubmitted": "contract",
+      "userPromptTransformed": "contract",
+      "preToolUse": "contract",
+      "postToolUse": "contract",
+      "postToolUseFailure": "contract",
+      "permissionRequest": "contract",
+      "agentStop": "contract",
+      "subagentStart": "contract",
+      "subagentStop": "contract",
+      "preCompact": "contract",
+      "notification": "contract",
+      "errorOccurred": "contract"
+    }
+  },
+  ".:CopilotHookOptions": {
+    "signatures": [],
+    "options": {
+      "on": "Phase",
+      "name": "string | undefined",
+      "matcher": "string | undefined",
+      "timeoutMs": "number | undefined",
+      "command": "undefined",
+      "run": "(context: AgentHookContext & { readonly event: import(\"./copilot/copilot-hooks.types.js\").CopilotHookEvents[Phase]; }) => void | import(\"./copilot/copilot-hooks.types.js\").CopilotHookDecisions[Phase] | Promise<void | import(\"./copilot/copilot-hooks.types.js\").CopilotHookDecisions[Phase]>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "on": "contract",
+      "name": "contract",
+      "matcher": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
+    }
+  },
+  ".:CopilotHookPhase": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {}
+  },
   ".:CopilotSettings": {
     "signatures": [],
     "options": {
+      "hooks": "readonly import(\"./copilot-hooks.types.ts\").CopilotHook<keyof import(\"./copilot-hooks.types.ts\").CopilotHookEvents>[] | undefined",
       "authentication": "AgentAuthentication | undefined",
       "variables": "Readonly<Record<string, string>> | undefined",
       "conversations": "ConversationStore | undefined",
@@ -1640,6 +2301,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "authentication": "native",
       "variables": "native",
       "conversations": "native",
@@ -2604,6 +3266,18 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:defineAntigravityHook": {
+    "signatures": [
+      "<Phase extends AntigravityHookPhase>(options: AntigravityHookOptions<Phase>): AntigravityHook<Phase>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/cli-hooks.test.ts",
+    "reason": "Native lifecycle hooks are composed in TypeScript with their CLI harness through local agent extensions; native event decisions are not portable YAML declarations.",
+    "optionCoverage": {}
+  },
   ".:defineApprovalTask": {
     "signatures": [
       "(options: WorkflowGateOptions): Task<WorkflowDecisionRecord>"
@@ -2640,6 +3314,30 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:defineClaudeHook": {
+    "signatures": [
+      "<Phase extends ClaudeHookPhase>(options: ClaudeHookOptions<Phase>): ClaudeHook<Phase>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/cli-hooks.test.ts",
+    "reason": "Native lifecycle hooks are composed in TypeScript with their CLI harness through local agent extensions; native event decisions are not portable YAML declarations.",
+    "optionCoverage": {}
+  },
+  ".:defineCodexHook": {
+    "signatures": [
+      "<Phase extends CodexHookPhase>(options: CodexHookOptions<Phase>): CodexHook<Phase>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/cli-hooks.test.ts",
+    "reason": "Native lifecycle hooks are composed in TypeScript with their CLI harness through local agent extensions; native event decisions are not portable YAML declarations.",
+    "optionCoverage": {}
+  },
   ".:defineCommandTask": {
     "signatures": [
       "(options: Omit<TaskOptions<CommandResult>, \"perform\"> & CommandTaskOptions): Task<CommandResult>"
@@ -2650,6 +3348,18 @@
     "status": "implemented",
     "test": "test/functional/recipe-workflow.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
+    "optionCoverage": {}
+  },
+  ".:defineCopilotHook": {
+    "signatures": [
+      "<Phase extends CopilotHookPhase>(options: CopilotHookOptions<Phase>): CopilotHook<Phase>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/cli-hooks.test.ts",
+    "reason": "Native lifecycle hooks are composed in TypeScript with their CLI harness through local agent extensions; native event decisions are not portable YAML declarations.",
     "optionCoverage": {}
   },
   ".:defineDecision": {
@@ -2831,6 +3541,18 @@
     "status": "implemented",
     "test": "test/functional/recipe-harness.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
+    "optionCoverage": {}
+  },
+  ".:defineKimiHook": {
+    "signatures": [
+      "<Phase extends KimiHookPhase>(options: KimiHookOptions<Phase>): KimiHook<Phase>"
+    ],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/cli-hooks.test.ts",
+    "reason": "Native lifecycle hooks are composed in TypeScript with their CLI harness through local agent extensions; native event decisions are not portable YAML declarations.",
     "optionCoverage": {}
   },
   ".:defineLoopTask": {
@@ -3033,6 +3755,7 @@
       "kind": "\"fallback\"",
       "harness": "Harness",
       "model": "AgentModel",
+      "hooks": "import(\"./agent-hook.types.ts\").AgentHookPlan | undefined",
       "fork": "((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) | undefined",
       "credentials": "((variables: Variables) => CredentialPlan) | undefined",
       "configuration": "((variables: Variables) => AgentConfiguration) | undefined",
@@ -3073,6 +3796,7 @@
       "kind": "contract",
       "harness": "contract",
       "model": "contract",
+      "hooks": "extension",
       "fork": "contract",
       "credentials": "contract",
       "configuration": "contract",
@@ -3839,8 +4563,8 @@
       "version": "2",
       "workspaceInfo": "import(\"./file-workspace.types.ts\").FileWorkspaceRecord",
       "fileOutputs": "readonly import(\"./file-workspace.types.ts\").WorkspacePublication[]",
-      "usage": "Usage",
       "text": "string",
+      "usage": "Usage",
       "completed": "boolean",
       "cost": "UsageCost | null",
       "durationMs": "number",
@@ -3857,8 +4581,8 @@
       "version": "contract",
       "workspaceInfo": "contract",
       "fileOutputs": "contract",
-      "usage": "contract",
       "text": "contract",
+      "usage": "contract",
       "completed": "contract",
       "cost": "contract",
       "durationMs": "contract",
@@ -4687,6 +5411,7 @@
       "kind": "\"hook\"",
       "on": "Phase",
       "name": "string",
+      "timeoutMs": "number | undefined",
       "run": "(input: HarnessHookInput<Phase>) => HarnessHookResult<Phase> | Promise<HarnessHookResult<Phase>>"
     },
     "category": "contract",
@@ -4698,6 +5423,7 @@
       "kind": "contract",
       "on": "contract",
       "name": "contract",
+      "timeoutMs": "contract",
       "run": "contract"
     }
   },
@@ -4707,7 +5433,10 @@
       "sandbox": "SandboxLease",
       "signal": "AbortSignal",
       "model": "AgentModel",
-      "step": "number"
+      "step": "number",
+      "conversation": "string | undefined",
+      "subagentId": "string | undefined",
+      "depth": "number | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -4718,15 +5447,25 @@
       "sandbox": "contract",
       "signal": "contract",
       "model": "contract",
-      "step": "contract"
+      "step": "contract",
+      "conversation": "contract",
+      "subagentId": "contract",
+      "depth": "contract"
     }
   },
   ".:HarnessHookDecisions": {
     "signatures": [],
     "options": {
       "session-start": "{ readonly instructions: string; }",
-      "before-model": "never",
-      "after-model": "never",
+      "before-prompt": "{ readonly prompt: string; } | { readonly deny: string; }",
+      "before-model": "{ readonly messages?: readonly ModelMessage[]; readonly system?: string; }",
+      "after-model": "{ readonly result: Pick<ModelResult, \"text\" | \"content\"> & { readonly usage?: never; readonly stopReason?: never; }; }",
+      "model-error": "never",
+      "before-compaction": "{ readonly messages: readonly ModelMessage[]; }",
+      "after-compaction": "{ readonly messages: readonly ModelMessage[]; }",
+      "before-subagent": "{ readonly prompt: string; } | { readonly deny: string; }",
+      "after-subagent": "{ readonly text: string; }",
+      "run-end": "never",
       "before-tool": "{ readonly deny: string; } | { readonly input: unknown; }",
       "after-tool": "{ readonly result: ToolOutput; }",
       "stop": "{ readonly continue: string; }"
@@ -4738,8 +5477,15 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "session-start": "contract",
+      "before-prompt": "contract",
       "before-model": "contract",
       "after-model": "contract",
+      "model-error": "contract",
+      "before-compaction": "contract",
+      "after-compaction": "contract",
+      "before-subagent": "contract",
+      "after-subagent": "contract",
+      "run-end": "contract",
       "before-tool": "contract",
       "after-tool": "contract",
       "stop": "contract"
@@ -4748,11 +5494,18 @@
   ".:HarnessHookEvents": {
     "signatures": [],
     "options": {
-      "session-start": "{ readonly prompt: string; }",
-      "before-model": "{ readonly messages: readonly ModelMessage[]; }",
+      "session-start": "{ readonly prompt: string; readonly source?: \"start\" | \"resume\" | \"repair\"; }",
+      "before-prompt": "{ readonly prompt: string; readonly source: \"initial\" | \"steering\"; }",
+      "before-model": "{ readonly messages: readonly ModelMessage[]; readonly system?: string; }",
       "after-model": "{ readonly result: ModelResult; }",
+      "model-error": "{ readonly error: unknown; }",
+      "before-compaction": "{ readonly messages: readonly ModelMessage[]; readonly strategy: string; }",
+      "after-compaction": "{ readonly messages: readonly ModelMessage[]; readonly strategy: string; }",
+      "before-subagent": "{ readonly id: string; readonly name: string; readonly callId: string; readonly prompt: string; }",
+      "after-subagent": "{ readonly id: string; readonly name: string; readonly callId: string; readonly text?: string; readonly error?: unknown; readonly conversation?: string; }",
+      "run-end": "{ readonly reason: \"success\" | \"error\" | \"aborted\" | \"timeout\" | \"limit\"; readonly text?: string; readonly error?: unknown; }",
       "before-tool": "{ readonly call: ModelToolCallBlock; }",
-      "after-tool": "{ readonly call: ModelToolCallBlock; readonly result: HarnessToolResultView; }",
+      "after-tool": "{ readonly call: ModelToolCallBlock; readonly result: HarnessToolResultView; readonly status?: \"success\" | \"denied\" | \"error\"; }",
       "stop": "{ readonly text: string; }"
     },
     "category": "contract",
@@ -4762,8 +5515,15 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "session-start": "contract",
+      "before-prompt": "contract",
       "before-model": "contract",
       "after-model": "contract",
+      "model-error": "contract",
+      "before-compaction": "contract",
+      "after-compaction": "contract",
+      "before-subagent": "contract",
+      "after-subagent": "contract",
+      "run-end": "contract",
       "before-tool": "contract",
       "after-tool": "contract",
       "stop": "contract"
@@ -4775,7 +5535,10 @@
       "sandbox": "SandboxLease",
       "signal": "AbortSignal",
       "model": "AgentModel",
-      "step": "number"
+      "step": "number",
+      "conversation": "string | undefined",
+      "subagentId": "string | undefined",
+      "depth": "number | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -4786,7 +5549,10 @@
       "sandbox": "contract",
       "signal": "contract",
       "model": "contract",
-      "step": "contract"
+      "step": "contract",
+      "conversation": "contract",
+      "subagentId": "contract",
+      "depth": "contract"
     }
   },
   ".:HarnessHookOptions": {
@@ -4794,7 +5560,9 @@
     "options": {
       "on": "Phase",
       "name": "string | undefined",
-      "run": "(input: HarnessHookInput<Phase>) => HarnessHookResult<Phase> | Promise<HarnessHookResult<Phase>>"
+      "timeoutMs": "number | undefined",
+      "command": "HookCommand",
+      "run": "undefined"
     },
     "category": "native",
     "lot": 3,
@@ -4804,7 +5572,9 @@
     "optionCoverage": {
       "on": "native",
       "name": "native",
-      "run": "extension"
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
     }
   },
   ".:HarnessHookPhase": {
@@ -5385,6 +6155,26 @@
       "tools": "native"
     }
   },
+  ".:HookCommand": {
+    "signatures": [],
+    "options": {
+      "executable": "string",
+      "arguments": "readonly string[] | undefined",
+      "directory": "string | undefined",
+      "variables": "Readonly<Record<string, string>> | undefined"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "executable": "contract",
+      "arguments": "contract",
+      "directory": "contract",
+      "variables": "contract"
+    }
+  },
   ".:HostConfiguration": {
     "signatures": [],
     "options": {
@@ -5583,9 +6373,176 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {}
   },
+  ".:KimiHook": {
+    "signatures": [],
+    "options": {
+      "kind": "\"native-hook\"",
+      "agent": "\"kimi\"",
+      "on": "Phase",
+      "name": "string",
+      "timeoutMs": "number",
+      "command": "HookCommand | undefined",
+      "matcher": "string | undefined",
+      "run": "(event: unknown, context: AgentHookContext) => Promise<string>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "kind": "contract",
+      "agent": "contract",
+      "on": "contract",
+      "name": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "matcher": "contract",
+      "run": "contract"
+    }
+  },
+  ".:KimiHookDecisions": {
+    "signatures": [],
+    "options": {
+      "UserPromptSubmit": "string | { readonly hookSpecificOutput?: { readonly permissionDecision: \"deny\"; readonly permissionDecisionReason?: string; }; }",
+      "UserPromptQueued": "never",
+      "PreToolUse": "string | { readonly hookSpecificOutput?: { readonly permissionDecision: \"deny\"; readonly permissionDecisionReason?: string; }; }",
+      "Stop": "string | { readonly hookSpecificOutput?: { readonly permissionDecision: \"deny\"; readonly permissionDecisionReason?: string; }; }",
+      "TurnStarted": "never",
+      "PostToolUse": "never",
+      "PostToolUseFailure": "never",
+      "PermissionRequest": "never",
+      "PermissionResult": "never",
+      "SessionStart": "never",
+      "SessionEnd": "never",
+      "SessionHeartbeat": "never",
+      "SubagentStart": "never",
+      "SubagentStop": "never",
+      "TaskStarted": "never",
+      "StopFailure": "never",
+      "Interrupt": "never",
+      "PreCompact": "never",
+      "PostCompact": "never",
+      "Notification": "never"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "UserPromptSubmit": "contract",
+      "UserPromptQueued": "contract",
+      "PreToolUse": "contract",
+      "Stop": "contract",
+      "TurnStarted": "contract",
+      "PostToolUse": "contract",
+      "PostToolUseFailure": "contract",
+      "PermissionRequest": "contract",
+      "PermissionResult": "contract",
+      "SessionStart": "contract",
+      "SessionEnd": "contract",
+      "SessionHeartbeat": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "TaskStarted": "contract",
+      "StopFailure": "contract",
+      "Interrupt": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "Notification": "contract"
+    }
+  },
+  ".:KimiHookEvents": {
+    "signatures": [],
+    "options": {
+      "UserPromptSubmit": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"UserPromptSubmit\"; readonly prompt: string; }",
+      "UserPromptQueued": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"UserPromptQueued\"; readonly prompt_id?: string; readonly prompt: string; readonly queue_length?: number; }",
+      "PreToolUse": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PreToolUse\"; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_call_id?: string; }",
+      "Stop": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"Stop\"; readonly stop_hook_active?: boolean; }",
+      "TurnStarted": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"TurnStarted\"; readonly turn_id?: string; readonly origin_kind?: string; readonly origin_name?: string; readonly prompt: string; }",
+      "PostToolUse": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PostToolUse\"; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly tool_output?: unknown; }",
+      "PostToolUseFailure": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PostToolUseFailure\"; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly error?: string; }",
+      "PermissionRequest": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PermissionRequest\"; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; }",
+      "PermissionResult": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PermissionResult\"; readonly tool_name: string; readonly tool_input?: Readonly<Record<string, unknown>>; readonly decision?: string; }",
+      "SessionStart": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"SessionStart\"; readonly source?: string; readonly model?: string; readonly profile?: string; }",
+      "SessionEnd": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"SessionEnd\"; readonly reason?: string; }",
+      "SessionHeartbeat": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"SessionHeartbeat\"; readonly uptime_ms?: number; }",
+      "SubagentStart": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"SubagentStart\"; readonly agent_name?: string; readonly prompt: string; }",
+      "SubagentStop": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"SubagentStop\"; readonly agent_name?: string; readonly response?: string; }",
+      "TaskStarted": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"TaskStarted\"; readonly task_id?: string; readonly description?: string; readonly detached?: boolean; }",
+      "StopFailure": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"StopFailure\"; readonly error_type?: string; readonly error_message?: string; }",
+      "Interrupt": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"Interrupt\"; readonly reason?: string; }",
+      "PreCompact": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PreCompact\"; readonly trigger?: string; }",
+      "PostCompact": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"PostCompact\"; readonly trigger?: string; }",
+      "Notification": "{ readonly session_id: string; readonly session_title?: string; readonly client_type?: string; readonly cwd: string; readonly hook_event_name: \"Notification\"; readonly notification_type?: string; readonly title?: string; readonly body?: string; }"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "UserPromptSubmit": "contract",
+      "UserPromptQueued": "contract",
+      "PreToolUse": "contract",
+      "Stop": "contract",
+      "TurnStarted": "contract",
+      "PostToolUse": "contract",
+      "PostToolUseFailure": "contract",
+      "PermissionRequest": "contract",
+      "PermissionResult": "contract",
+      "SessionStart": "contract",
+      "SessionEnd": "contract",
+      "SessionHeartbeat": "contract",
+      "SubagentStart": "contract",
+      "SubagentStop": "contract",
+      "TaskStarted": "contract",
+      "StopFailure": "contract",
+      "Interrupt": "contract",
+      "PreCompact": "contract",
+      "PostCompact": "contract",
+      "Notification": "contract"
+    }
+  },
+  ".:KimiHookOptions": {
+    "signatures": [],
+    "options": {
+      "on": "Phase",
+      "name": "string | undefined",
+      "matcher": "string | undefined",
+      "timeoutMs": "number | undefined",
+      "command": "undefined",
+      "run": "(context: AgentHookContext & { readonly event: import(\"./kimi/kimi-hooks.types.js\").KimiHookEvents[Phase]; }) => void | import(\"./kimi/kimi-hooks.types.js\").KimiHookDecisions[Phase] | Promise<void | import(\"./kimi/kimi-hooks.types.js\").KimiHookDecisions[Phase]>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {
+      "on": "contract",
+      "name": "contract",
+      "matcher": "contract",
+      "timeoutMs": "contract",
+      "command": "contract",
+      "run": "contract"
+    }
+  },
+  ".:KimiHookPhase": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Native lifecycle type contract consumed through its owning harness API.",
+    "optionCoverage": {}
+  },
   ".:KimiSettings": {
     "signatures": [],
     "options": {
+      "hooks": "readonly import(\"./kimi-hooks.types.ts\").KimiHook<keyof import(\"./kimi-hooks.types.ts\").KimiHookEvents>[] | undefined",
       "region": "\"mainland-cn\" | \"global\" | undefined",
       "authentication": "AgentAuthentication | undefined",
       "variables": "Readonly<Record<string, string>> | undefined",
@@ -5599,6 +6556,7 @@
     "test": "test/functional/recipe-components.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {
+      "hooks": "extension",
       "region": "native",
       "authentication": "native",
       "variables": "native",
@@ -9561,7 +10519,7 @@
       "id": "string",
       "baseline": "string",
       "host": "{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }",
-      "status": "\"quota\" | \"aborted\" | \"winner\" | \"no-winner\" | \"budget-exhausted\"",
+      "status": "\"aborted\" | \"quota\" | \"winner\" | \"no-winner\" | \"budget-exhausted\"",
       "quota": "QuotaFault | undefined",
       "winner": "SpeculativeCandidateResult<T> | undefined",
       "candidates": "readonly SpeculativeCandidateResult<T>[]",
@@ -9666,9 +10624,9 @@
   ".:SpeculativeOutput": {
     "signatures": [],
     "options": {
-      "usage": "Usage",
       "text": "string",
       "conversation": "string | undefined",
+      "usage": "Usage",
       "fallback": "FallbackRecord | undefined",
       "branch": "string",
       "observerErrors": "readonly unknown[] | undefined",
@@ -9689,9 +10647,9 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
-      "usage": "contract",
       "text": "contract",
       "conversation": "contract",
+      "usage": "contract",
       "fallback": "contract",
       "branch": "contract",
       "observerErrors": "contract",
@@ -11120,9 +12078,9 @@
     "options": {
       "resume": "<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>",
       "fork": "<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>",
-      "usage": "Usage",
       "text": "string",
       "conversation": "string | undefined",
+      "usage": "Usage",
       "fallback": "FallbackRecord | undefined",
       "branch": "string",
       "report": "(options?: RunReportOptions) => string",
@@ -11146,9 +12104,9 @@
     "optionCoverage": {
       "resume": "contract",
       "fork": "contract",
-      "usage": "contract",
       "text": "contract",
       "conversation": "contract",
+      "usage": "contract",
       "fallback": "contract",
       "branch": "contract",
       "report": "contract",
@@ -11590,7 +12548,7 @@
       "executionId": "string",
       "workflow": "string",
       "timestamp": "string",
-      "type": "\"usage\" | \"quota\" | \"decision\" | \"resume\" | \"gate\" | \"retry\" | \"cache\" | \"input-request\" | \"input-answer\" | \"loop\" | \"start\" | \"task\" | \"attempt\" | \"finish\" | \"checkpoint\" | \"budget-exceeded\"",
+      "type": "\"start\" | \"resume\" | \"usage\" | \"quota\" | \"decision\" | \"gate\" | \"retry\" | \"cache\" | \"input-request\" | \"input-answer\" | \"loop\" | \"task\" | \"attempt\" | \"finish\" | \"checkpoint\" | \"budget-exceeded\"",
       "cache": "TaskCacheOutcome | undefined",
       "error": "string | undefined",
       "resetAt": "string | undefined",

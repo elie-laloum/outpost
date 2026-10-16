@@ -20,6 +20,7 @@ export interface ConversationSettings {
 }
 
 export interface ClaudeSettings extends CommonAgentSettings {
+  readonly hooks?: readonly import("./claude/claude-hooks.types.ts").ClaudeHook[];
   readonly partialMessages?: boolean;
   readonly permissions?:
     | "default"
@@ -36,6 +37,7 @@ export interface CodexModelProvider {
 }
 
 export interface CodexSettings extends CommonAgentSettings {
+  readonly hooks?: readonly import("./codex/codex-hooks.types.ts").CodexHook[];
   readonly modelProvider?: CodexModelProvider;
   readonly approvalReviewer?: "user" | "auto_review";
 }

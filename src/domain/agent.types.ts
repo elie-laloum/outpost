@@ -209,6 +209,7 @@ export interface AgentFeatures {
 }
 
 export interface AgentAdapter extends AgentFeatures {
+  readonly hooks?: import("./agent-hook.types.ts").AgentHookPlan;
   fork?(
     id: string,
     invoke: (command: Command) => Promise<CommandResult>,

@@ -1,3 +1,6 @@
+import { composedNativeHooks } from "../native-hooks.ts";
+import { claudeHookSchemas } from "./claude-hooks.constants.ts";
+import { claudeHookPlan } from "./claude-hook-plan.ts";
 import { supportClaudeProfile } from "./claude-profile.ts";
 import {
   createClaudeConversations,
@@ -68,6 +71,9 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     claudeMcpLogins,
   );
   return Object.freeze({
+    ...(settings.hooks?.length
+      ? { hooks: claudeHookPlan(settings.hooks, settings) }
+      : {}),
     usageInput: "uncached",
     name: "claude",
     ...(credentials ? { credentials } : {}),
@@ -101,11 +107,18 @@ export function createClaudeHarness(settings: ClaudeSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings(claudeLabel, claudeConversationLayout.format, settings);
   const configured = configuredSettings(settings);
+  const hooks = composedNativeHooks(
+    "claude",
+    claudeHookSchemas,
+    configured.profile?.hooks?.claude,
+    settings.hooks,
+  );
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>
       bindClaude({
         ...configured,
+        hooks,
         ...(model === undefined ? {} : { model }),
       }),
   });

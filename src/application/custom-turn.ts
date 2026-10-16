@@ -1,3 +1,4 @@
+import { responseInstructions } from "../domain/response-instructions.ts";
 import { profilePermissions } from "../domain/agent-profile-permissions.ts";
 import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
 import type { ModelResult } from "../domain/model.types.ts";
@@ -169,6 +170,14 @@ export async function customTurn(
       harnessLoop(
         {
           agent,
+          ...(options.response
+            ? { responseInstructions: responseInstructions(options.response) }
+            : {}),
+          startSource: context.repair
+            ? "repair"
+            : context.continuation
+              ? "resume"
+              : "start",
           observation: options.observation?.child({ pass }),
           repository: context.repository,
           ...(context.runtimeDirectory

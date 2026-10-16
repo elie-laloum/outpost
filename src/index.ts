@@ -8,6 +8,7 @@ export { defineAgentProfile } from "./domain/agent-profile.ts";
 export type {
   AgentProfile,
   AgentProfileOptions,
+  AgentProfileHooks,
   AgentProfileTool,
 } from "./domain/agent-profile.types.ts";
 export { createAgent } from "./domain/agent.ts";
@@ -842,6 +843,49 @@ export type {
   FileWorkspaceInspectionOptions,
   FileWorkspaceRecoveryOptions,
 } from "./application/file-workspace-recovery.types.ts";
+
+export type { HookCommand } from "./domain/hook-command.types.ts";
+export type { AgentHookContext } from "./domain/agent-hook.types.ts";
+export { defineClaudeHook } from "./adapters/agents/claude/claude-hooks.ts";
+export type {
+  ClaudeHook,
+  ClaudeHookOptions,
+  ClaudeHookPhase,
+  ClaudeHookEvents,
+  ClaudeHookDecisions,
+} from "./adapters/agents/claude/claude-hooks.types.ts";
+export { defineCodexHook } from "./adapters/agents/codex/codex-hooks.ts";
+export type {
+  CodexHook,
+  CodexHookOptions,
+  CodexHookPhase,
+  CodexHookEvents,
+  CodexHookDecisions,
+} from "./adapters/agents/codex/codex-hooks.types.ts";
+export { defineCopilotHook } from "./adapters/agents/copilot/copilot-hooks.ts";
+export type {
+  CopilotHook,
+  CopilotHookOptions,
+  CopilotHookPhase,
+  CopilotHookEvents,
+  CopilotHookDecisions,
+} from "./adapters/agents/copilot/copilot-hooks.types.ts";
+export { defineKimiHook } from "./adapters/agents/kimi/kimi-hooks.ts";
+export type {
+  KimiHook,
+  KimiHookOptions,
+  KimiHookPhase,
+  KimiHookEvents,
+  KimiHookDecisions,
+} from "./adapters/agents/kimi/kimi-hooks.types.ts";
+export { defineAntigravityHook } from "./adapters/agents/antigravity/antigravity-hooks.ts";
+export type {
+  AntigravityHook,
+  AntigravityHookOptions,
+  AntigravityHookPhase,
+  AntigravityHookEvents,
+  AntigravityHookDecisions,
+} from "./adapters/agents/antigravity/antigravity-hooks.types.ts";
 
 export {
   inspectStorageReservations,

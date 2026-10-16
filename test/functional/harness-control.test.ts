@@ -3,6 +3,8 @@ import { test } from "node:test";
 import {
   createAgent,
   defineHarnessHook,
+  defineTextResponse,
+  defineHarnessContextStrategy,
   defineHarnessPermissions,
   defineHarnessTool,
   dispatch,
@@ -279,5 +281,319 @@ test("hook failures and invalid decisions fail the turn", async (t) => {
         permissions: { rules: [] },
       }),
     /defineHarnessPermissions/,
+  );
+});
+
+test("model transformations compose without changing billed usage or response instructions", async (t) => {
+  const phases: string[] = [];
+  const { result } = await run(
+    t,
+    [
+      (request) => {
+        const last = request.messages!.at(-1)!.content.at(-1)!;
+        assert.equal(last.type, "text");
+        if (last.type === "text")
+          assert.match(last.text, /Final response format:/);
+        assert.equal(request.system, "rewritten system");
+        return {
+          text: "original",
+          stopReason: "end",
+          usage: { input: 7, cached: 0, output: 3 },
+        };
+      },
+    ],
+    {
+      hooks: [
+        defineHarnessHook({
+          on: "before-prompt",
+          run: ({ prompt }) => ({ prompt: `rewritten ${prompt}` }),
+        }),
+        defineHarnessHook({
+          on: "before-model",
+          run({ messages }) {
+            assert.ok(Object.isFrozen(messages));
+            return {
+              system: "rewritten system",
+              messages: [
+                {
+                  role: "user",
+                  content: [{ type: "text", text: "replace everything" }],
+                },
+              ],
+            };
+          },
+        }),
+        defineHarnessHook({
+          on: "after-model",
+          run({ result }) {
+            assert.equal(result.usage!.output, 3);
+            return { result: { text: "intermediate" } };
+          },
+        }),
+        defineHarnessHook({
+          on: "after-model",
+          run({ result }) {
+            assert.equal(result.text, "intermediate");
+            return { result: { text: done } };
+          },
+        }),
+        defineHarnessHook({
+          on: "run-end",
+          run({ reason, step, text }) {
+            phases.push(reason);
+            assert.equal(step, 1);
+            assert.equal(text, done);
+          },
+        }),
+      ],
+    },
+    { response: defineTextResponse({ tag: "outpost" }) },
+  );
+  assert.equal(result.completed, true, JSON.stringify(result));
+  assert.equal(result.usage.input, 7);
+  assert.equal(result.usage.output, 3);
+  assert.deepEqual(phases, ["success"]);
+});
+
+test("model hooks cannot forge accounting or erase a refusal", async (t) => {
+  await assert.rejects(
+    run(t, [answer()], {
+      hooks: [
+        defineHarnessHook({
+          on: "after-model",
+          run: () => ({ result: { text: done, usage: { input: 0 } } }) as never,
+        }),
+      ],
+    }),
+    /unsupported fields/,
+  );
+  await assert.rejects(
+    run(t, [() => ({ text: "no", stopReason: "refusal" })], {
+      hooks: [
+        defineHarnessHook({
+          on: "after-model",
+          run: () => ({ result: { text: done } }),
+        }),
+      ],
+    }),
+    /refused/,
+  );
+});
+
+test("model errors retain their cause and run-end executes once even if reporting hooks fail", async (t) => {
+  const phases: string[] = [];
+  await assert.rejects(
+    run(
+      t,
+      [
+        () => {
+          throw new Error("provider failed");
+        },
+      ],
+      {
+        hooks: [
+          defineHarnessHook({
+            on: "model-error",
+            run({ error }) {
+              assert.match(String(error), /provider failed/);
+              phases.push("model-error");
+              throw new Error("reporter failed");
+            },
+          }),
+          defineHarnessHook({
+            on: "run-end",
+            run({ reason }) {
+              phases.push(reason);
+              throw new Error("cleanup failed");
+            },
+          }),
+        ],
+      },
+    ),
+    /provider failed/,
+  );
+  assert.deepEqual(phases, ["model-error", "error"]);
+});
+
+test("hook deadlines close borrowed capabilities and still report run-end", async (t) => {
+  const phases: string[] = [];
+  let borrowed:
+    import("../../src/domain/sandbox.types.ts").SandboxLease | undefined;
+  await assert.rejects(
+    run(t, [], {
+      hooks: [
+        defineHarnessHook({
+          on: "before-prompt",
+          timeoutMs: 20,
+          run({ sandbox }) {
+            borrowed = sandbox;
+            return new Promise(() => {});
+          },
+        }),
+        defineHarnessHook({
+          on: "run-end",
+          run({ reason }) {
+            phases.push(reason);
+          },
+        }),
+      ],
+    }),
+    /exceeded 20 ms/,
+  );
+  assert.deepEqual(phases, ["timeout"]);
+  assert.throws(
+    () => borrowed!.invoke({ executable: "node" }),
+    /exceeded 20 ms/,
+  );
+  await assert.rejects(borrowed!.release(), /does not own/);
+});
+
+test("harness command hooks receive JSON and transform their own phase", async (t) => {
+  const { requests } = await run(t, [answer()], {
+    hooks: [
+      defineHarnessHook({
+        on: "before-prompt",
+        command: {
+          executable: process.execPath,
+          arguments: [
+            "-e",
+            "let input='';process.stdin.on('data',c=>input+=c);process.stdin.on('end',()=>process.stdout.write(JSON.stringify({prompt:'command:'+JSON.parse(input).prompt})))",
+          ],
+        },
+      }),
+    ],
+  });
+  const first = requests[0]!.messages![0]!.content[0]!;
+  assert.equal(first.type, "text");
+  if (first.type === "text") assert.match(first.text, /^command:/);
+});
+
+test("after-model generated tool calls still pass permission checks", async (t) => {
+  executed.length = 0;
+  let changed = false;
+  const { requests } = await run(t, [answer(), answer()], {
+    permissions: defineHarnessPermissions({ default: "deny", rules: [] }),
+    hooks: [
+      defineHarnessHook({
+        on: "after-model",
+        run() {
+          if (changed) return;
+          changed = true;
+          return {
+            result: {
+              text: "",
+              content: [
+                {
+                  type: "tool-call",
+                  id: "injected",
+                  name: "write_file",
+                  input: { path: "secret" },
+                },
+              ],
+            },
+          };
+        },
+      }),
+    ],
+  });
+  assert.deepEqual(executed, []);
+  assert.match(String(results(requests[1])[0]), /Denied/);
+});
+
+test("compaction hooks compose around strategy evaluation", async (t) => {
+  const phases: string[] = [];
+  await run(
+    t,
+    [
+      (request) => {
+        assert.equal(
+          JSON.stringify(request.messages),
+          JSON.stringify([
+            {
+              role: "user",
+              content: [{ type: "text", text: "after compaction" }],
+            },
+          ]),
+        );
+        return { text: done };
+      },
+    ],
+    {
+      context: defineHarnessContextStrategy({
+        name: "test",
+        compact({ messages }) {
+          phases.push("strategy");
+          assert.match(JSON.stringify(messages), /before compaction/);
+          return [
+            { role: "user", content: [{ type: "text", text: "compacted" }] },
+          ];
+        },
+      }),
+      hooks: [
+        defineHarnessHook({
+          on: "before-compaction",
+          run: () => {
+            phases.push("before");
+            return {
+              messages: [
+                {
+                  role: "user",
+                  content: [{ type: "text", text: "before compaction" }],
+                },
+              ],
+            };
+          },
+        }),
+        defineHarnessHook({
+          on: "after-compaction",
+          run: ({ messages }) => {
+            phases.push("after");
+            assert.match(JSON.stringify(messages), /compacted/);
+            return {
+              messages: [
+                {
+                  role: "user",
+                  content: [{ type: "text", text: "after compaction" }],
+                },
+              ],
+            };
+          },
+        }),
+      ],
+    },
+  );
+  assert.deepEqual(phases, ["before", "strategy", "after"]);
+});
+
+test("model transformations reject altered replayable reasoning", async (t) => {
+  await assert.rejects(
+    run(
+      t,
+      [
+        () => ({
+          text: done,
+          content: [
+            {
+              type: "reasoning",
+              provider: "test",
+              model: "m",
+              data: { signature: "signed" },
+            },
+            { type: "text", text: done },
+          ],
+        }),
+      ],
+      {
+        hooks: [
+          defineHarnessHook({
+            on: "after-model",
+            run: () => ({
+              result: { text: done, content: [{ type: "text", text: done }] },
+            }),
+          }),
+        ],
+      },
+    ),
+    /replayable reasoning/,
   );
 });
