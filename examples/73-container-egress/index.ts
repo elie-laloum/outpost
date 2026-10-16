@@ -29,6 +29,7 @@ for (const allowed of [true, false]) {
       namespace: "egress-example",
     },
   });
+
   await using sandbox = await workspace.sandbox({
     sandboxProvider: factories[engine]({
       image:
