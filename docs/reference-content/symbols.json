@@ -292,8 +292,8 @@
     "Définit des instructions système à partir d’un texte ou d’un résolveur appelé au début de chaque tour avec la sandbox, le signal, le modèle et le contexte MCP. Le texte résolu n’est pas stocké dans la conversation."
   ],
   "defineHarnessHook": [
-    "Define control code that runs at one point of the built-in harness loop: session-start, before-model, after-model, before-tool, after-tool or stop. Unlike observers, a hook can add instructions, deny or rewrite a tool call, replace its result or refuse to stop; an exception from a hook fails the turn.",
-    "Définit du code de contrôle exécuté à un point de la boucle du harness intégré : session-start, before-model, after-model, before-tool, after-tool ou stop. Contrairement aux observateurs, un hook peut ajouter des instructions, refuser ou réécrire un appel d’outil, remplacer son résultat ou refuser l’arrêt ; une exception d’un hook fait échouer le tour."
+    "Declare a callback or sandbox command for one of the 13 Outpost loop phases. Hooks run in declaration order; invalid decisions and callback failures fail the turn. Model transformations preserve original usage, refusal and output limits. Rewritten tool calls still pass schema and permission checks.",
+    "Déclare un callback ou une commande du sandbox pour une des 13 phases de la boucle Outpost. Les hooks suivent l’ordre de déclaration ; une décision invalide ou une erreur fait échouer le tour. Les transformations conservent l’usage original, les refus et les limites de sortie. Les appels d’outils réécrits repassent les contrôles de schéma et de permissions."
   ],
   "defineHarnessPermissions": [
     "Define ordered allow and deny rules over tool names, command patterns and repository paths. The harness evaluates them before before-tool hooks, and again after a hook rewrites the input; the first matching rule wins. Permissions are not a security boundary: the sandbox isolates.",
@@ -728,8 +728,8 @@
     "Cycle de vie de la projection : en cours, abandon présumé ou résultat terminé/suspendu du workflow ou dispatch. Abandoned est déduit à la lecture et n’autorise aucune récupération."
   ],
   "defineAgentProfile": [
-    "Declare a CLI-independent, frozen agent profile without executing anything. Validate literal instructions, built-in tool allowlists and MCP declarations; copy nested lists and server configuration so later caller edits cannot change the profile. Each harness projects the declaration and refuses unsupported capabilities.\n\nClaude appends system instructions and native MCP JSON; Codex uses developer_instructions and MCP TOML configuration overrides, including app-server. Copilot, Kimi and Antigravity prepend literal instructions to each request, including repairs and resumes, before final-answer instructions. Profiles do not write instructions into the repository or modify host credential files.\n\nClaude allowlists use native tool selection, dontAsk and a PreToolUse command hook, with inherited user/project/local settings and MCP configuration disabled for the request. Conflicting permission modes fail at composition; command hooks require Node.js and a CLI able to execute them inside the sandbox.",
-    "Déclare un profil d’agent figé indépendant des CLI sans rien exécuter. Valide les instructions littérales, listes d’outils intégrés autorisés et déclarations MCP ; copie les listes imbriquées et configurations de serveur pour que les modifications ultérieures de l’appelant ne changent pas le profil. Chaque harness traduit la déclaration et refuse les capacités non prises en charge.\n\nClaude ajoute des instructions système et du JSON MCP natif ; Codex utilise developer_instructions et les surcharges TOML MCP, y compris en mode app-server. Copilot, Kimi et Antigravity ajoutent les instructions littérales avant chaque demande, corrections et reprises comprises, avant les instructions de réponse finale. Les profils n’écrivent pas les instructions dans le dépôt et ne modifient pas les identifiants de l’hôte. Les listes Claude utilisent la sélection native d’outils, dontAsk et un hook PreToolUse, avec les réglages utilisateur/projet/local et le MCP hérités désactivés pour la demande. Un mode de permission incompatible échoue à la composition ; les hooks exigent Node.js et une CLI capable de les exécuter dans la sandbox."
+    "Declare reusable instructions, tool restrictions, MCP servers and hooks grouped by harness. Validation copies and freezes declarations without allocating a sandbox or reading credentials. Each harness uses only its hook section, before its local hooks.",
+    "Déclare des instructions réutilisables, des restrictions d’outils, des serveurs MCP et des hooks regroupés par harness. La validation copie et fige les déclarations sans allouer de sandbox ni lire de credentials. Chaque harness utilise uniquement sa section de hooks, avant ses hooks locaux."
   ],
   "AgentProfileTool": [
     "Portable built-in tool capability: read, edit, unrestricted shell, or shell:<exact command>. Exact commands compare the entire string, including whitespace and shell syntax; no wildcard or prefix expansion occurs.",
@@ -862,5 +862,45 @@
   "pruneS3Tombstones": [
     "Physically remove tombstone objects under one explicit S3 prefix after every writer has stopped. Refuse missing writersStopped authorization, preserve live empty objects, and return the removed count. This is offline maintenance, not concurrent retention; compatible stores may ignore conditional deletion.",
     "Supprime physiquement les tombstones sous un préfixe S3 explicite après arrêt de tous les écrivains. Refuse l’absence de writersStopped, conserve les objets vivants vides et renvoie le nombre supprimé. Maintenance hors ligne uniquement : les stores compatibles peuvent ignorer une suppression conditionnelle."
+  ],
+  "defineClaudeHook": [
+    "Declare a native Claude lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery.",
+    "Déclare un hook natif du lifecycle de Claude pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement."
+  ],
+  "ClaudeHookPhase": [
+    "Native events accepted by defineClaudeHook, independently of Outpost loop phases. [Native reference](https://code.claude.com/docs/en/hooks), reviewed on 2026-10-13.",
+    "Événements natifs acceptés par defineClaudeHook, indépendants des phases de la boucle Outpost. [Documentation native](https://code.claude.com/docs/en/hooks), vérifiée le 13 octobre 2026."
+  ],
+  "defineCodexHook": [
+    "Declare a native Codex lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery. Only generated commands receive trust fingerprints. SessionEnd and Interrupt have a native three-second limit.",
+    "Déclare un hook natif du lifecycle de Codex pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement. Seules les commandes générées reçoivent des empreintes de confiance. SessionEnd et Interrupt ont une limite native de trois secondes."
+  ],
+  "CodexHookPhase": [
+    "Native events accepted by defineCodexHook, independently of Outpost loop phases. [Native reference](https://learn.chatgpt.com/docs/hooks), reviewed on 2026-10-13.",
+    "Événements natifs acceptés par defineCodexHook, indépendants des phases de la boucle Outpost. [Documentation native](https://learn.chatgpt.com/docs/hooks), vérifiée le 13 octobre 2026."
+  ],
+  "defineCopilotHook": [
+    "Declare a native Copilot lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery. COPILOT_HOME must match the sandbox home. userPromptSubmitted command output is ignored; use userPromptTransformed to rewrite the prompt.",
+    "Déclare un hook natif du lifecycle de Copilot pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement. COPILOT_HOME doit correspondre au répertoire personnel du sandbox. La sortie de commande userPromptSubmitted est ignorée ; utilisez userPromptTransformed pour réécrire le prompt."
+  ],
+  "CopilotHookPhase": [
+    "Native events accepted by defineCopilotHook, independently of Outpost loop phases. [Native reference](https://docs.github.com/en/copilot/reference/hooks-reference), reviewed on 2026-10-13.",
+    "Événements natifs acceptés par defineCopilotHook, indépendants des phases de la boucle Outpost. [Documentation native](https://docs.github.com/en/copilot/reference/hooks-reference), vérifiée le 13 octobre 2026."
+  ],
+  "defineKimiHook": [
+    "Declare a native Kimi lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery. Existing hooks must use [[hooks]] TOML tables; inline hooks arrays are refused before editing. KIMI_CODE_HOME must match the sandbox home. Only PreToolUse, Stop and UserPromptSubmit process decisions; command exit 2 blocks them, while other command failures can fail open.",
+    "Déclare un hook natif du lifecycle de Kimi pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement. Les hooks existants doivent utiliser les tables TOML [[hooks]] ; les tableaux inline sont refusés avant modification. KIMI_CODE_HOME doit correspondre au répertoire personnel du sandbox. Seuls PreToolUse, Stop et UserPromptSubmit traitent les décisions ; le code de sortie 2 les bloque, tandis que d’autres erreurs de commande peuvent laisser continuer."
+  ],
+  "KimiHookPhase": [
+    "Native events accepted by defineKimiHook, independently of Outpost loop phases. [Native reference](https://moonshotai.github.io/kimi-code/en/customization/hooks), reviewed on 2026-10-13.",
+    "Événements natifs acceptés par defineKimiHook, indépendants des phases de la boucle Outpost. [Documentation native](https://moonshotai.github.io/kimi-code/en/customization/hooks), vérifiée le 13 octobre 2026."
+  ],
+  "defineAntigravityHook": [
+    "Declare a native Antigravity lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery.",
+    "Déclare un hook natif du lifecycle de Antigravity pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement."
+  ],
+  "AntigravityHookPhase": [
+    "Native events accepted by defineAntigravityHook, independently of Outpost loop phases. [Native reference](https://antigravity.google/docs/hooks), reviewed on 2026-10-13.",
+    "Événements natifs acceptés par defineAntigravityHook, indépendants des phases de la boucle Outpost. [Documentation native](https://antigravity.google/docs/hooks), vérifiée le 13 octobre 2026."
   ]
 }

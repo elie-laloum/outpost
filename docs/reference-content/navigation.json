@@ -1338,6 +1338,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/agentprofilehooks",
+        "label": "AgentProfileHooks",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/cliagent",
         "label": "CliAgent",
         "attrs": { "data-api-kind": "interface" }
@@ -1382,6 +1387,31 @@
   {
     "title": ["Harness", "Harness"],
     "items": [
+      {
+        "slug": "reference/defineclaudehook",
+        "label": "defineClaudeHook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definecodexhook",
+        "label": "defineCodexHook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definecopilothook",
+        "label": "defineCopilotHook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definekimihook",
+        "label": "defineKimiHook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineantigravityhook",
+        "label": "defineAntigravityHook",
+        "attrs": { "data-api-kind": "function" }
+      },
       {
         "slug": "reference/createharness",
         "label": "createHarness",
@@ -1493,6 +1523,81 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/claudehook",
+        "label": "ClaudeHook",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/claudehookoptions",
+        "label": "ClaudeHookOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/claudehookphase",
+        "label": "ClaudeHookPhase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/codexhook",
+        "label": "CodexHook",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/codexhookoptions",
+        "label": "CodexHookOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/codexhookphase",
+        "label": "CodexHookPhase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/copilothook",
+        "label": "CopilotHook",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/copilothookoptions",
+        "label": "CopilotHookOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/copilothookphase",
+        "label": "CopilotHookPhase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/kimihook",
+        "label": "KimiHook",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/kimihookoptions",
+        "label": "KimiHookOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/kimihookphase",
+        "label": "KimiHookPhase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/antigravityhook",
+        "label": "AntigravityHook",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/antigravityhookoptions",
+        "label": "AntigravityHookOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/antigravityhookphase",
+        "label": "AntigravityHookPhase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/harness",
         "label": "AgentHarness",
         "attrs": { "data-api-kind": "type" }
@@ -1530,6 +1635,11 @@
       {
         "slug": "reference/harnesshookinput",
         "label": "HarnessHookInput",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/harnesshookoptions",
+        "label": "HarnessHookOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -1586,6 +1696,66 @@
         "slug": "reference/agentversions",
         "label": "agentVersions",
         "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/claudehookevents",
+        "label": "ClaudeHookEvents",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/claudehookdecisions",
+        "label": "ClaudeHookDecisions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/codexhookevents",
+        "label": "CodexHookEvents",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/codexhookdecisions",
+        "label": "CodexHookDecisions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/copilothookevents",
+        "label": "CopilotHookEvents",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/copilothookdecisions",
+        "label": "CopilotHookDecisions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/kimihookevents",
+        "label": "KimiHookEvents",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/kimihookdecisions",
+        "label": "KimiHookDecisions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/antigravityhookevents",
+        "label": "AntigravityHookEvents",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/antigravityhookdecisions",
+        "label": "AntigravityHookDecisions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agenthookcontext",
+        "label": "AgentHookContext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/hookcommand",
+        "label": "HookCommand",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesssubagent",
@@ -1695,11 +1865,6 @@
       {
         "slug": "reference/harnesshookevents",
         "label": "HarnessHookEvents",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
-        "slug": "reference/harnesshookoptions",
-        "label": "HarnessHookOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {

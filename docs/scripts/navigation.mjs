@@ -84,6 +84,7 @@ export const chapters = [
       "guide/copilot-cli",
       "guide/kimi-code",
       "guide/antigravity",
+      "guide/cli-hooks",
       "guide/mcp-servers",
       "guide/mcp-oauth",
       "guide/fallback-agents",

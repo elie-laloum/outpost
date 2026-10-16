@@ -26,5 +26,12 @@ export type HarnessHookPhase =
   | "after-model"
   | "before-tool"
   | "after-tool"
+  | "before-prompt"
+  | "model-error"
+  | "before-compaction"
+  | "after-compaction"
+  | "before-subagent"
+  | "after-subagent"
+  | "run-end"
   | "stop";
 ```

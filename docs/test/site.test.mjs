@@ -221,6 +221,9 @@ for (const [locale, title, reference] of [
     });
     await agents.locator("summary").click();
     await expect(agents.getByRole("link", { name: /Codex/ })).toBeVisible();
+    await expect(
+      agents.locator(`a[href$="/${locale}guide/cli-hooks/"]`),
+    ).toBeVisible();
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");
     await spaces.getByRole("link", { name: reference, exact: true }).click();

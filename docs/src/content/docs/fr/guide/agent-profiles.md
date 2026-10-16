@@ -41,6 +41,41 @@ export const codex = createAgent({
 
 Le harness applique les instructions à chaque demande, y compris les corrections et reprises, sans les écrire dans votre dépôt ni modifier les identifiants de l’hôte. [defineAgentProfile](../../reference/defineagentprofile/) détaille leur traduction pour chaque CLI ; la [configuration MCP](../mcp-servers/) explique la fusion des réglages.
 
+## Partager les hooks
+
+Déclarez les hooks par harness dans `hooks` : `claude`, `codex`, `copilot`, `kimi`, `antigravity` ou `outpost`. Cet exemple observe les outils de Claude et la fin d’une boucle Outpost.
+
+```ts title="hook-profile.ts"
+import {
+  defineAgentProfile,
+  defineClaudeHook,
+  defineHarnessHook,
+} from "@elie-laloum/outpost";
+
+export const lifecycleProfile = defineAgentProfile({
+  hooks: {
+    claude: [
+      defineClaudeHook({
+        on: "PreToolUse",
+        run({ event }) {
+          console.log(event.tool_name);
+        },
+      }),
+    ],
+    outpost: [
+      defineHarnessHook({
+        on: "run-end",
+        run({ reason }) {
+          console.log(reason);
+        },
+      }),
+    ],
+  },
+});
+```
+
+Passez `profile: lifecycleProfile` au harness. Il prend sa section, puis ajoute ses hooks locaux ; les autres sections sont ignorées. `hooks: []` conserve les hooks du profil. Les CLI gardent leur ordre d’exécution natif. Voir les [hooks CLI](../cli-hooks/) et [Outpost](../harness-hooks/).
+
 ## Restreindre les outils intégrés
 
 Enregistrez `restricted-profile.ts` à côté du premier fichier. Ce profil autorise la lecture et l’édition de fichiers et uniquement la commande shell exacte `npm test`. L’absence de restriction conserve le comportement du harness ; une liste vide refuse les outils intégrés d’action. Dans le harness intégré, `load_skill` reste disponible, mais charger un skill n’autorise jamais ses outils. Les déclarations explicites de serveurs MCP accordent leurs propres outils, restreints séparément par les filtres de chaque serveur, ainsi que l’accès à leurs ressources et prompts. Les permissions supplémentaires du harness restent applicables.

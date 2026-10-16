@@ -62,3 +62,28 @@ Les hooks d’une même phase s’exécutent dans l’ordre de déclaration. Pou
 :::caution
 Un hook qui lève une exception, ou renvoie une valeur que sa phase n’accepte pas, fait échouer le tour. Les [observateurs de progression](../progress/) ne peuvent pas changer le résultat ; les hooks, si.
 :::
+
+## Phases du lifecycle
+
+Vous pouvez aussi intervenir sur le prompt, le modèle, la compaction et les sous-agents. Les [13 phases](../../reference/harnesshookphase/) et leurs [décisions](../../reference/harnesshookdecisions/) sont décrites dans l’API.
+
+Pour ajouter une consigne à chaque requête modèle, ajoutez ce hook à votre liste. Les transformations de réponse via `after-model` conservent l’usage facturé et les permissions ; elles ne modifient pas les deltas déjà diffusés en streaming.
+
+```ts title="model-hook.ts"
+import { defineHarnessHook } from "@elie-laloum/outpost";
+
+export const modelHook = defineHarnessHook({
+  on: "before-model",
+  run: ({ system }) => ({
+    system: `${system ?? ""}\nExplain your changes briefly.`,
+  }),
+});
+```
+
+Les callbacks reçoivent des données figées et doivent respecter `signal`. Pour un script, utilisez `command` à la place de `run` : contexte JSON sur stdin, décision JSON ou sortie vide sur stdout. Voir [HarnessHookOptions](../../reference/harnesshookoptions/) pour les délais et les limites.
+
+Pour partager ces hooks, déclarez-les dans [`defineAgentProfile({ hooks })`](../agent-profiles/#partager-les-hooks). Le harness sélectionne sa section du profil avant d’ajouter ses hooks locaux.
+
+## Exécuter l’exemple
+
+Après compilation du package, lancez `node examples/74-lifecycle-hooks/index.ts`. L’[exemple complet](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/74-lifecycle-hooks) vérifie les transformations et l’usage sans compte ni appel payant. Pour Claude, Codex et les autres CLI, consultez les [hooks natifs](../cli-hooks/).

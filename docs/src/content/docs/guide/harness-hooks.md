@@ -62,3 +62,28 @@ Hooks of the same phase run in declaration order. For `stop`, the first hook tha
 :::caution
 A hook that throws, or returns a value its phase does not accept, fails the turn. [Progress observers](../progress/) cannot change the outcome; hooks can.
 :::
+
+## Lifecycle phases
+
+Hooks also cover prompts, model calls, compaction and subagents. The API describes the [13 phases](../../reference/harnesshookphase/) and their [decisions](../../reference/harnesshookdecisions/).
+
+Add this hook to your list to append an instruction to each model request. Response transformations through `after-model` preserve accounted usage and permissions; they cannot change streaming deltas already delivered.
+
+```ts title="model-hook.ts"
+import { defineHarnessHook } from "@elie-laloum/outpost";
+
+export const modelHook = defineHarnessHook({
+  on: "before-model",
+  run: ({ system }) => ({
+    system: `${system ?? ""}\nExplain your changes briefly.`,
+  }),
+});
+```
+
+Callbacks receive frozen data and must honor `signal`. For a script, replace `run` with `command`: JSON context on stdin, a JSON decision or empty stdout. See [HarnessHookOptions](../../reference/harnesshookoptions/) for deadlines and limits.
+
+To share these hooks, declare them in [`defineAgentProfile({ hooks })`](../agent-profiles/#share-hooks). The harness selects its profile section before appending local hooks.
+
+## Run the example
+
+After building the package, run `node examples/74-lifecycle-hooks/index.ts`. The [complete example](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/74-lifecycle-hooks) checks transformations and usage without an account or paid call. For Claude, Codex and the other CLIs, see [native hooks](../cli-hooks/).

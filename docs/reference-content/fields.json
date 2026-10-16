@@ -4015,12 +4015,12 @@
     "Renvoyez { instructions } pour ajouter du texte aux instructions système du tour."
   ],
   "HarnessHookDecisions.before-model": [
-    "No decision: any return value is ignored; throw to fail the turn.",
-    "Aucune décision : toute valeur renvoyée est ignorée ; levez une erreur pour faire échouer le tour."
+    "Replace messages or system instructions for this request. Message validation preserves replayable reasoning; typed response instructions remain final.",
+    "Remplace les messages ou instructions système de cette requête. La validation conserve le raisonnement rejouable ; les instructions de réponse typée restent finales."
   ],
   "HarnessHookDecisions.after-model": [
-    "No decision: any return value is ignored; throw to fail the turn.",
-    "Aucune décision : toute valeur renvoyée est ignorée ; levez une erreur pour faire échouer le tour."
+    "Replace text and optionally content passed to the loop. Original usage, refusals and output limits remain effective; injected tool calls still require permissions.",
+    "Remplace le texte et éventuellement le contenu transmis à la boucle. Usage original, refus et limites de sortie restent effectifs ; les outils injectés exigent toujours leurs permissions."
   ],
   "HarnessHookDecisions.before-tool": [
     "Return { deny } with a nonempty reason to refuse the call and skip later hooks, or { input } to pass a replacement to the next hook. The final input is validated and checked against permissions again.",
@@ -8119,8 +8119,8 @@
     "Fiche cumulative du budget à cet événement, incluant tokens restaurés, tentatives et coût optionnel."
   ],
   "defineAgentProfile.options": [
-    "Literal instructions, portable built-in tool allowlist and MCP server declarations to validate and freeze; unknown fields fail with code configuration.",
-    "Instructions littérales, liste portable d’outils intégrés autorisés et déclarations de serveurs MCP à valider et figer ; les champs inconnus échouent avec le code configuration."
+    "Literal instructions, portable built-in tool allowlist, MCP servers and per-harness hook declarations to validate and freeze; unknown fields fail with code configuration.",
+    "Instructions littérales, liste portable d’outils autorisés, serveurs MCP et hooks propres à chaque harness à valider et figer ; les champs inconnus échouent avec le code configuration."
   ],
   "AgentProfile.kind": [
     "Stable agent-profile discriminator checked by harness composition; obtain it from defineAgentProfile().",
@@ -10097,5 +10097,1353 @@
   "pruneS3Tombstones.options": [
     "Explicit S3 prefix and stopped-writer authorization for offline marker deletion.",
     "Préfixe S3 explicite et autorisation après arrêt des écrivains pour la suppression hors ligne des marqueurs."
+  ],
+  "ClaudeHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "ClaudeHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "ClaudeHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "ClaudeHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "ClaudeHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "ClaudeHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "ClaudeHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "ClaudeHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "ClaudeHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "ClaudeHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "ClaudeHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "ClaudeHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "ClaudeHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "ClaudeHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "ClaudeSettings.hooks": [
+    "Native Claude hooks declared with defineClaudeHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.",
+    "Hooks natifs de Claude déclarés avec defineClaudeHook. La liste est copiée à la composition ; les callbacks nécessitent une entrée de processus dynamique sur le lease du sandbox."
+  ],
+  "ClaudeHookEvents.SessionStart": [
+    "Native SessionStart payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionStart fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.SessionStart": [
+    "Accepted native output for SessionStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.Setup": [
+    "Native Setup payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Setup fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.Setup": [
+    "Accepted native output for Setup; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Setup ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.UserPromptSubmit": [
+    "Native UserPromptSubmit payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de UserPromptSubmit fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.UserPromptSubmit": [
+    "Accepted native output for UserPromptSubmit; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour UserPromptSubmit ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.UserPromptExpansion": [
+    "Native UserPromptExpansion payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de UserPromptExpansion fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.UserPromptExpansion": [
+    "Accepted native output for UserPromptExpansion; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour UserPromptExpansion ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PreToolUse": [
+    "Native PreToolUse payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreToolUse fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PreToolUse": [
+    "Accepted native output for PreToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PermissionRequest": [
+    "Native PermissionRequest payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PermissionRequest fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PermissionRequest": [
+    "Accepted native output for PermissionRequest; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PermissionRequest ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PermissionDenied": [
+    "Native PermissionDenied payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PermissionDenied fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PermissionDenied": [
+    "Accepted native output for PermissionDenied; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PermissionDenied ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PostToolUse": [
+    "Native PostToolUse payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUse fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PostToolUse": [
+    "Accepted native output for PostToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PostToolUseFailure": [
+    "Native PostToolUseFailure payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUseFailure fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PostToolUseFailure": [
+    "Accepted native output for PostToolUseFailure; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUseFailure ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PostToolBatch": [
+    "Native PostToolBatch payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolBatch fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PostToolBatch": [
+    "Accepted native output for PostToolBatch; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolBatch ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.Notification": [
+    "Native Notification payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Notification fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.Notification": [
+    "Accepted native output for Notification; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Notification ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.MessageDisplay": [
+    "Native MessageDisplay payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de MessageDisplay fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.MessageDisplay": [
+    "Accepted native output for MessageDisplay; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour MessageDisplay ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.SubagentStart": [
+    "Native SubagentStart payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStart fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.SubagentStart": [
+    "Accepted native output for SubagentStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.SubagentStop": [
+    "Native SubagentStop payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStop fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.SubagentStop": [
+    "Accepted native output for SubagentStop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.TaskCreated": [
+    "Native TaskCreated payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de TaskCreated fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.TaskCreated": [
+    "Accepted native output for TaskCreated; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour TaskCreated ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.TaskCompleted": [
+    "Native TaskCompleted payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de TaskCompleted fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.TaskCompleted": [
+    "Accepted native output for TaskCompleted; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour TaskCompleted ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.Stop": [
+    "Native Stop payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Stop fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.Stop": [
+    "Accepted native output for Stop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Stop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.StopFailure": [
+    "Native StopFailure payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de StopFailure fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.StopFailure": [
+    "Accepted native output for StopFailure; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour StopFailure ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.TeammateIdle": [
+    "Native TeammateIdle payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de TeammateIdle fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.TeammateIdle": [
+    "Accepted native output for TeammateIdle; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour TeammateIdle ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.InstructionsLoaded": [
+    "Native InstructionsLoaded payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de InstructionsLoaded fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.InstructionsLoaded": [
+    "Accepted native output for InstructionsLoaded; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour InstructionsLoaded ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.ConfigChange": [
+    "Native ConfigChange payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de ConfigChange fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.ConfigChange": [
+    "Accepted native output for ConfigChange; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour ConfigChange ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.CwdChanged": [
+    "Native CwdChanged payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de CwdChanged fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.CwdChanged": [
+    "Accepted native output for CwdChanged; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour CwdChanged ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.DirectoryAdded": [
+    "Native DirectoryAdded payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de DirectoryAdded fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.DirectoryAdded": [
+    "Accepted native output for DirectoryAdded; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour DirectoryAdded ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.FileChanged": [
+    "Native FileChanged payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de FileChanged fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.FileChanged": [
+    "Accepted native output for FileChanged; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour FileChanged ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.WorktreeCreate": [
+    "Native WorktreeCreate payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de WorktreeCreate fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.WorktreeCreate": [
+    "Accepted native output for WorktreeCreate; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour WorktreeCreate ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.WorktreeRemove": [
+    "Native WorktreeRemove payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de WorktreeRemove fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.WorktreeRemove": [
+    "Accepted native output for WorktreeRemove; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour WorktreeRemove ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PreCompact": [
+    "Native PreCompact payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreCompact fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PreCompact": [
+    "Accepted native output for PreCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PostCompact": [
+    "Native PostCompact payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostCompact fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PostCompact": [
+    "Accepted native output for PostCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PreModelSwitch": [
+    "Native PreModelSwitch payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreModelSwitch fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PreModelSwitch": [
+    "Accepted native output for PreModelSwitch; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreModelSwitch ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.PostModelSwitch": [
+    "Native PostModelSwitch payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostModelSwitch fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.PostModelSwitch": [
+    "Accepted native output for PostModelSwitch; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostModelSwitch ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.Elicitation": [
+    "Native Elicitation payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Elicitation fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.Elicitation": [
+    "Accepted native output for Elicitation; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Elicitation ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.ElicitationResult": [
+    "Native ElicitationResult payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de ElicitationResult fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.ElicitationResult": [
+    "Accepted native output for ElicitationResult; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour ElicitationResult ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "ClaudeHookEvents.SessionEnd": [
+    "Native SessionEnd payload from Claude, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionEnd fourni par Claude, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "ClaudeHookDecisions.SessionEnd": [
+    "Accepted native output for SessionEnd; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionEnd ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "CodexHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "CodexHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "CodexHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "CodexHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "CodexHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "CodexHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "CodexHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "CodexHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "CodexHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "CodexHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "CodexHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "CodexHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "CodexHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "CodexSettings.hooks": [
+    "Native Codex hooks declared with defineCodexHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.",
+    "Hooks natifs de Codex déclarés avec defineCodexHook. La liste est copiée à la composition ; les callbacks nécessitent une entrée de processus dynamique sur le lease du sandbox."
+  ],
+  "CodexHookEvents.SessionStart": [
+    "Native SessionStart payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionStart fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.SessionStart": [
+    "Accepted native output for SessionStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.SessionEnd": [
+    "Native SessionEnd payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionEnd fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.SessionEnd": [
+    "Accepted native output for SessionEnd; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionEnd ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.UserPromptSubmit": [
+    "Native UserPromptSubmit payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de UserPromptSubmit fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.UserPromptSubmit": [
+    "Accepted native output for UserPromptSubmit; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour UserPromptSubmit ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.PreToolUse": [
+    "Native PreToolUse payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreToolUse fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.PreToolUse": [
+    "Accepted native output for PreToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.PermissionRequest": [
+    "Native PermissionRequest payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PermissionRequest fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.PermissionRequest": [
+    "Accepted native output for PermissionRequest; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PermissionRequest ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.PostToolUse": [
+    "Native PostToolUse payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUse fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.PostToolUse": [
+    "Accepted native output for PostToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.PreCompact": [
+    "Native PreCompact payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreCompact fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.PreCompact": [
+    "Accepted native output for PreCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.PostCompact": [
+    "Native PostCompact payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostCompact fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.PostCompact": [
+    "Accepted native output for PostCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.SubagentStart": [
+    "Native SubagentStart payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStart fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.SubagentStart": [
+    "Accepted native output for SubagentStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.SubagentStop": [
+    "Native SubagentStop payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStop fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.SubagentStop": [
+    "Accepted native output for SubagentStop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.Stop": [
+    "Native Stop payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Stop fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.Stop": [
+    "Accepted native output for Stop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Stop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CodexHookEvents.Interrupt": [
+    "Native Interrupt payload from Codex, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Interrupt fourni par Codex, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CodexHookDecisions.Interrupt": [
+    "Accepted native output for Interrupt; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Interrupt ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "CopilotHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "CopilotHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "CopilotHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "CopilotHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "CopilotHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "CopilotHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "CopilotHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "CopilotHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "CopilotHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "CopilotHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "CopilotHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "CopilotHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "CopilotHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "CopilotSettings.hooks": [
+    "Native Copilot hooks declared with defineCopilotHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.",
+    "Hooks natifs de Copilot déclarés avec defineCopilotHook. La liste est copiée à la composition ; les callbacks nécessitent une entrée de processus dynamique sur le lease du sandbox."
+  ],
+  "CopilotHookEvents.sessionStart": [
+    "Native sessionStart payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de sessionStart fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.sessionStart": [
+    "Accepted native output for sessionStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour sessionStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.sessionEnd": [
+    "Native sessionEnd payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de sessionEnd fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.sessionEnd": [
+    "Accepted native output for sessionEnd; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour sessionEnd ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.userPromptSubmitted": [
+    "Native userPromptSubmitted payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de userPromptSubmitted fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.userPromptSubmitted": [
+    "Accepted native output for userPromptSubmitted; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour userPromptSubmitted ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.userPromptTransformed": [
+    "Native userPromptTransformed payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de userPromptTransformed fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.userPromptTransformed": [
+    "Accepted native output for userPromptTransformed; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour userPromptTransformed ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.preToolUse": [
+    "Native preToolUse payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de preToolUse fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.preToolUse": [
+    "Accepted native output for preToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour preToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.postToolUse": [
+    "Native postToolUse payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de postToolUse fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.postToolUse": [
+    "Accepted native output for postToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour postToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.postToolUseFailure": [
+    "Native postToolUseFailure payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de postToolUseFailure fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.postToolUseFailure": [
+    "Accepted native output for postToolUseFailure; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour postToolUseFailure ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.permissionRequest": [
+    "Native permissionRequest payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de permissionRequest fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.permissionRequest": [
+    "Accepted native output for permissionRequest; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour permissionRequest ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.agentStop": [
+    "Native agentStop payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de agentStop fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.agentStop": [
+    "Accepted native output for agentStop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour agentStop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.subagentStart": [
+    "Native subagentStart payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de subagentStart fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.subagentStart": [
+    "Accepted native output for subagentStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour subagentStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.subagentStop": [
+    "Native subagentStop payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de subagentStop fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.subagentStop": [
+    "Accepted native output for subagentStop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour subagentStop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.preCompact": [
+    "Native preCompact payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de preCompact fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.preCompact": [
+    "Accepted native output for preCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour preCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.notification": [
+    "Native notification payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de notification fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.notification": [
+    "Accepted native output for notification; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour notification ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "CopilotHookEvents.errorOccurred": [
+    "Native errorOccurred payload from Copilot, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de errorOccurred fourni par Copilot, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "CopilotHookDecisions.errorOccurred": [
+    "Accepted native output for errorOccurred; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour errorOccurred ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "KimiHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "KimiHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "KimiHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "KimiHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "KimiHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "KimiHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "KimiHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "KimiHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "KimiHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "KimiHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "KimiHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "KimiHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "KimiHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "KimiSettings.hooks": [
+    "Native Kimi hooks declared with defineKimiHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.",
+    "Hooks natifs de Kimi déclarés avec defineKimiHook. La liste est copiée à la composition ; les callbacks nécessitent une entrée de processus dynamique sur le lease du sandbox."
+  ],
+  "KimiHookEvents.UserPromptSubmit": [
+    "Native UserPromptSubmit payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de UserPromptSubmit fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.UserPromptSubmit": [
+    "Accepted native output for UserPromptSubmit; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour UserPromptSubmit ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.UserPromptQueued": [
+    "Native UserPromptQueued payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de UserPromptQueued fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.UserPromptQueued": [
+    "Accepted native output for UserPromptQueued; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour UserPromptQueued ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PreToolUse": [
+    "Native PreToolUse payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreToolUse fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PreToolUse": [
+    "Accepted native output for PreToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.Stop": [
+    "Native Stop payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Stop fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.Stop": [
+    "Accepted native output for Stop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Stop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.TurnStarted": [
+    "Native TurnStarted payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de TurnStarted fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.TurnStarted": [
+    "Accepted native output for TurnStarted; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour TurnStarted ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PostToolUse": [
+    "Native PostToolUse payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUse fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PostToolUse": [
+    "Accepted native output for PostToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PostToolUseFailure": [
+    "Native PostToolUseFailure payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUseFailure fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PostToolUseFailure": [
+    "Accepted native output for PostToolUseFailure; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUseFailure ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PermissionRequest": [
+    "Native PermissionRequest payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PermissionRequest fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PermissionRequest": [
+    "Accepted native output for PermissionRequest; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PermissionRequest ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PermissionResult": [
+    "Native PermissionResult payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PermissionResult fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PermissionResult": [
+    "Accepted native output for PermissionResult; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PermissionResult ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.SessionStart": [
+    "Native SessionStart payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionStart fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.SessionStart": [
+    "Accepted native output for SessionStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.SessionEnd": [
+    "Native SessionEnd payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionEnd fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.SessionEnd": [
+    "Accepted native output for SessionEnd; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionEnd ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.SessionHeartbeat": [
+    "Native SessionHeartbeat payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionHeartbeat fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.SessionHeartbeat": [
+    "Accepted native output for SessionHeartbeat; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionHeartbeat ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.SubagentStart": [
+    "Native SubagentStart payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStart fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.SubagentStart": [
+    "Accepted native output for SubagentStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.SubagentStop": [
+    "Native SubagentStop payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SubagentStop fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.SubagentStop": [
+    "Accepted native output for SubagentStop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SubagentStop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.TaskStarted": [
+    "Native TaskStarted payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de TaskStarted fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.TaskStarted": [
+    "Accepted native output for TaskStarted; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour TaskStarted ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.StopFailure": [
+    "Native StopFailure payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de StopFailure fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.StopFailure": [
+    "Accepted native output for StopFailure; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour StopFailure ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.Interrupt": [
+    "Native Interrupt payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Interrupt fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.Interrupt": [
+    "Accepted native output for Interrupt; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Interrupt ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PreCompact": [
+    "Native PreCompact payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreCompact fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PreCompact": [
+    "Accepted native output for PreCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.PostCompact": [
+    "Native PostCompact payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostCompact fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.PostCompact": [
+    "Accepted native output for PostCompact; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostCompact ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "KimiHookEvents.Notification": [
+    "Native Notification payload from Kimi, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Notification fourni par Kimi, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "KimiHookDecisions.Notification": [
+    "Accepted native output for Notification; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Notification ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "AntigravityHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "AntigravityHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "AntigravityHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "AntigravityHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "AntigravityHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "AntigravityHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "AntigravityHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "AntigravityHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "AntigravityHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "AntigravityHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "AntigravityHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "AntigravityHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "AntigravityHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "AntigravitySettings.hooks": [
+    "Native Antigravity hooks declared with defineAntigravityHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.",
+    "Hooks natifs de Antigravity déclarés avec defineAntigravityHook. La liste est copiée à la composition ; les callbacks nécessitent une entrée de processus dynamique sur le lease du sandbox."
+  ],
+  "AntigravityHookEvents.SessionStart": [
+    "Native SessionStart payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de SessionStart fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.SessionStart": [
+    "Accepted native output for SessionStart; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour SessionStart ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHookEvents.PreToolUse": [
+    "Native PreToolUse payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreToolUse fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.PreToolUse": [
+    "Accepted native output for PreToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHookEvents.PostToolUse": [
+    "Native PostToolUse payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostToolUse fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.PostToolUse": [
+    "Accepted native output for PostToolUse; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostToolUse ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHookEvents.PreInvocation": [
+    "Native PreInvocation payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PreInvocation fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.PreInvocation": [
+    "Accepted native output for PreInvocation; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PreInvocation ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHookEvents.PostInvocation": [
+    "Native PostInvocation payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de PostInvocation fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.PostInvocation": [
+    "Accepted native output for PostInvocation; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour PostInvocation ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AntigravityHookEvents.Stop": [
+    "Native Stop payload from Antigravity, retained with its original field names. Unknown additional native fields are tolerated at runtime.",
+    "Contenu natif de Stop fourni par Antigravity, avec ses noms de champs d’origine. Les champs natifs supplémentaires sont tolérés à l’exécution."
+  ],
+  "AntigravityHookDecisions.Stop": [
+    "Accepted native output for Stop; never means this event accepts no callback decision. Returning nothing preserves the native flow.",
+    "Sortie native acceptée pour Stop ; never indique que cet événement n’accepte aucune décision de callback. Un retour vide conserve le déroulement natif."
+  ],
+  "AgentHookContext.sandbox": [
+    "Borrowed execution sandbox. Operations inherit the callback deadline; releasing the lease is refused.",
+    "Sandbox d’exécution emprunté. Les opérations héritent du délai du callback ; la libération du lease est refusée."
+  ],
+  "AgentHookContext.signal": [
+    "Cancellation signal for this callback, aborted when it finishes or its deadline expires.",
+    "Signal d’annulation du callback, annulé à sa fin ou à expiration du délai."
+  ],
+  "HookCommand.executable": [
+    "Program to execute inside the sandbox, without implicit shell expansion.",
+    "Programme à exécuter dans le sandbox, sans expansion shell implicite."
+  ],
+  "HookCommand.arguments": [
+    "Literal program arguments.",
+    "Arguments littéraux du programme."
+  ],
+  "HookCommand.directory": [
+    "Working directory in the sandbox; defaults to the invoking context.",
+    "Répertoire de travail dans le sandbox ; celui du contexte appelant par défaut."
+  ],
+  "HookCommand.variables": [
+    "Explicit environment variables for the hook command.",
+    "Variables d’environnement explicites de la commande du hook."
+  ],
+  "AgentAdapter.hooks": [
+    "Optional native lifecycle installation plan owned by this adapter. Outpost opens and closes it around each CLI process.",
+    "Plan optionnel d’installation du lifecycle natif propre à cet adaptateur. Outpost l’ouvre et le ferme autour de chaque processus CLI."
+  ],
+  "HarnessHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000. Callbacks must honor signal for host work.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut. Les callbacks doivent respecter signal pour les opérations hôte."
+  ],
+  "HarnessHookOptions.command": [
+    "Sandbox program receiving the serializable hook context as JSON on stdin. Return a phase-specific JSON decision or empty stdout. Nonzero exit, invalid output or stdout over 1 MiB fails the turn. Mutually exclusive with run.",
+    "Programme du sandbox recevant le contexte sérialisable du hook en JSON sur stdin. Renvoie une décision JSON propre à la phase ou une sortie vide. Un code non nul, une sortie invalide ou dépassant 1 Mio fait échouer le tour. Exclusif avec run."
+  ],
+  "HarnessHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000. Callbacks must honor signal for host work.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut. Les callbacks doivent respecter signal pour les opérations hôte."
+  ],
+  "HarnessHookContext.conversation": [
+    "Current harness conversation identifier when captured.",
+    "Identifiant de conversation du harness lorsqu’elle est capturée."
+  ],
+  "HarnessHookContext.subagentId": [
+    "Current subagent run identifier, absent in the main loop.",
+    "Identifiant d’exécution du sous-agent, absent de la boucle principale."
+  ],
+  "HarnessHookContext.depth": [
+    "Delegation depth; zero for the main loop.",
+    "Profondeur de délégation ; zéro pour la boucle principale."
+  ],
+  "HarnessHookEvents.before-prompt": [
+    "Context supplied at before-prompt; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase before-prompt ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.before-prompt": [
+    "Only the explicit before-prompt transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de before-prompt décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.model-error": [
+    "Context supplied at model-error; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase model-error ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.model-error": [
+    "Only the explicit model-error transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de model-error décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.before-compaction": [
+    "Context supplied at before-compaction; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase before-compaction ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.before-compaction": [
+    "Only the explicit before-compaction transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de before-compaction décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.after-compaction": [
+    "Context supplied at after-compaction; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase after-compaction ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.after-compaction": [
+    "Only the explicit after-compaction transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de after-compaction décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.before-subagent": [
+    "Context supplied at before-subagent; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase before-subagent ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.before-subagent": [
+    "Only the explicit before-subagent transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de before-subagent décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.after-subagent": [
+    "Context supplied at after-subagent; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase after-subagent ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.after-subagent": [
+    "Only the explicit after-subagent transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de after-subagent décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "HarnessHookEvents.run-end": [
+    "Context supplied at run-end; values are copied and frozen before callback delivery.",
+    "Contexte fourni à la phase run-end ; les valeurs sont copiées et figées avant leur transmission au callback."
+  ],
+  "HarnessHookDecisions.run-end": [
+    "Only the explicit run-end transformation shown in this type is accepted. never forbids a decision; throwing fails execution except while reporting an existing failure.",
+    "Seule la transformation explicite de run-end décrite par ce type est acceptée. never interdit une décision ; une exception fait échouer l’exécution sauf pendant le signalement d’un échec existant."
+  ],
+  "defineClaudeHook.options": [
+    "Native Claude event, optional matcher and deadline, and exactly one host callback or sandbox command.",
+    "Événement natif Claude, filtre et délai optionnels, et exactement un callback hôte ou une commande dans le sandbox."
+  ],
+  "defineCodexHook.options": [
+    "Native Codex event, optional matcher and deadline, and exactly one host callback or sandbox command.",
+    "Événement natif Codex, filtre et délai optionnels, et exactement un callback hôte ou une commande dans le sandbox."
+  ],
+  "defineCopilotHook.options": [
+    "Native Copilot event, optional matcher and deadline, and exactly one host callback or sandbox command.",
+    "Événement natif Copilot, filtre et délai optionnels, et exactement un callback hôte ou une commande dans le sandbox."
+  ],
+  "defineKimiHook.options": [
+    "Native Kimi event, optional matcher and deadline, and exactly one host callback or sandbox command.",
+    "Événement natif Kimi, filtre et délai optionnels, et exactement un callback hôte ou une commande dans le sandbox."
+  ],
+  "defineAntigravityHook.options": [
+    "Native Antigravity event, optional matcher and deadline, and exactly one host callback or sandbox command.",
+    "Événement natif Antigravity, filtre et délai optionnels, et exactement un callback hôte ou une commande dans le sandbox."
+  ],
+  "HarnessHookInput.conversation": [
+    "Current harness conversation identifier when captured.",
+    "Identifiant de conversation du harness lorsqu’elle est capturée."
+  ],
+  "HarnessHookInput.subagentId": [
+    "Current subagent run identifier, absent in the main loop.",
+    "Identifiant d’exécution du sous-agent, absent de la boucle principale."
+  ],
+  "HarnessHookInput.depth": [
+    "Delegation depth; zero for the main loop.",
+    "Profondeur de délégation ; zéro pour la boucle principale."
+  ],
+  "defineClaudeHook.options.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "defineClaudeHook.options.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "defineClaudeHook.options.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "defineClaudeHook.options.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "defineClaudeHook.options.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "defineClaudeHook.options.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "defineCodexHook.options.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "defineCodexHook.options.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "defineCodexHook.options.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "defineCodexHook.options.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "defineCodexHook.options.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "defineCodexHook.options.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "defineCopilotHook.options.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "defineCopilotHook.options.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "defineCopilotHook.options.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "defineCopilotHook.options.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "defineCopilotHook.options.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "defineCopilotHook.options.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "defineKimiHook.options.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "defineKimiHook.options.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "defineKimiHook.options.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "defineKimiHook.options.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "defineKimiHook.options.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "defineKimiHook.options.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "defineAntigravityHook.options.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "defineAntigravityHook.options.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "defineAntigravityHook.options.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "defineAntigravityHook.options.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "defineAntigravityHook.options.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "defineAntigravityHook.options.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "NativeHookOptions.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "NativeHookOptions.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "NativeHookOptions.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "NativeHookOptions.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "NativeHookOptions.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "NativeHookOptions.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "NativeHook.kind": [
+    "Factory discriminator identifying a native CLI hook.",
+    "Discriminant identifiant un hook CLI natif."
+  ],
+  "NativeHook.agent": [
+    "CLI protocol owning this hook; another CLI harness refuses it.",
+    "Protocole CLI propriétaire de ce hook ; un autre harness CLI le refuse."
+  ],
+  "NativeHook.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "NativeHook.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "NativeHook.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "NativeHook.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "NativeHook.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "NativeHook.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "AgentHookHandler.on": [
+    "Native event name; determines the event payload and permitted response.",
+    "Nom natif de l’événement ; détermine son contenu et les réponses acceptées."
+  ],
+  "AgentHookHandler.name": [
+    "Optional diagnostic name; defaults to the native event name.",
+    "Nom de diagnostic optionnel ; utilise par défaut le nom natif de l’événement."
+  ],
+  "AgentHookHandler.matcher": [
+    "Native matcher, interpreted by the selected CLI. Omit it to receive every occurrence supported by that event.",
+    "Filtre natif interprété par la CLI sélectionnée. Omettez-le pour recevoir toutes les occurrences prises en charge par cet événement."
+  ],
+  "AgentHookHandler.timeoutMs": [
+    "Positive callback or command deadline in milliseconds; defaults to 30000, at most 600000. Native event time limits still apply.",
+    "Délai positif du callback ou de la commande en millisecondes ; 30000 par défaut, 600000 au maximum. Les limites natives de l’événement restent applicables."
+  ],
+  "AgentHookHandler.run": [
+    "Host callback receiving the native event, a borrowed sandbox and cancellation signal. Return nothing to preserve native behavior; return only decisions supported by this event. Mutually exclusive with command.",
+    "Callback hôte recevant l’événement natif, un sandbox emprunté et un signal d’annulation. Sans retour, conserve le comportement natif ; les décisions doivent être prises en charge par cet événement. Exclusif avec command."
+  ],
+  "AgentHookHandler.command": [
+    "Executable invoked inside the sandbox with native JSON on stdin. Stdout, stderr and exit status retain the CLI’s native meaning. Mutually exclusive with run.",
+    "Exécutable lancé dans le sandbox avec le JSON natif sur stdin. Stdout, stderr et le code de sortie conservent leur sens natif. Exclusif avec run."
+  ],
+  "AgentProfileOptions.hooks": [
+    "Hooks grouped by harness. Each harness selects its own section and prepends it to locally declared hooks; other sections are ignored. An empty local list keeps profile hooks. Outpost executes the combined list in declaration order; CLI scheduling remains native.",
+    "Hooks regroupés par harness. Chaque harness sélectionne sa section et la place avant les hooks locaux ; les autres sections sont ignorées. Une liste locale vide conserve les hooks du profil. Outpost suit l’ordre de déclaration ; les CLI conservent leur ordonnancement natif."
+  ],
+  "AgentProfileHooks.claude": [
+    "Claude hooks declared with defineClaudeHook. Only the matching CLI harness selects this frozen list; its adapter validates native event names when composing the harness.",
+    "Hooks Claude déclarés avec defineClaudeHook. Seul le harness CLI correspondant sélectionne cette liste figée ; son adaptateur valide les événements natifs à la composition."
+  ],
+  "AgentProfileHooks.codex": [
+    "Codex hooks declared with defineCodexHook. Only the matching CLI harness selects this frozen list; its adapter validates native event names when composing the harness.",
+    "Hooks Codex déclarés avec defineCodexHook. Seul le harness CLI correspondant sélectionne cette liste figée ; son adaptateur valide les événements natifs à la composition."
+  ],
+  "AgentProfileHooks.copilot": [
+    "Copilot hooks declared with defineCopilotHook. Only the matching CLI harness selects this frozen list; its adapter validates native event names when composing the harness.",
+    "Hooks Copilot déclarés avec defineCopilotHook. Seul le harness CLI correspondant sélectionne cette liste figée ; son adaptateur valide les événements natifs à la composition."
+  ],
+  "AgentProfileHooks.kimi": [
+    "Kimi hooks declared with defineKimiHook. Only the matching CLI harness selects this frozen list; its adapter validates native event names when composing the harness.",
+    "Hooks Kimi déclarés avec defineKimiHook. Seul le harness CLI correspondant sélectionne cette liste figée ; son adaptateur valide les événements natifs à la composition."
+  ],
+  "AgentProfileHooks.antigravity": [
+    "Antigravity hooks declared with defineAntigravityHook. Only the matching CLI harness selects this frozen list; its adapter validates native event names when composing the harness.",
+    "Hooks Antigravity déclarés avec defineAntigravityHook. Seul le harness CLI correspondant sélectionne cette liste figée ; son adaptateur valide les événements natifs à la composition."
+  ],
+  "AgentProfileHooks.outpost": [
+    "Built-in loop hooks declared with defineHarnessHook; executed before local hooks of the same phase. They do not propagate to subagents unless the child explicitly uses this profile.",
+    "Hooks de la boucle intégrée déclarés avec defineHarnessHook ; exécutés avant les hooks locaux de la même phase. Ils ne se propagent pas aux sous-agents, sauf si l’enfant utilise explicitement ce profil."
   ]
 }

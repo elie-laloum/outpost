@@ -13,12 +13,15 @@ import type { HarnessHookInput } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type           | Présence | Rôle                                                                                    |
-| --------- | -------------- | -------- | --------------------------------------------------------------------------------------- |
-| `sandbox` | `SandboxLease` | Requis   | Sandbox empruntée du tour ; les hooks peuvent inspecter le dépôt par son intermédiaire. |
-| `signal`  | `AbortSignal`  | Requis   | Signal d’annulation du tour ; les hooks asynchrones doivent le respecter.               |
-| `model`   | `AgentModel`   | Requis   | Modèle normalisé de l’agent qui exécute le tour.                                        |
-| `step`    | `number`       | Requis   | Numéro de l’étape en cours ; 0 pendant session-start.                                   |
+| Nom            | Type                  | Présence  | Rôle                                                                                    |
+| -------------- | --------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `sandbox`      | `SandboxLease`        | Requis    | Sandbox empruntée du tour ; les hooks peuvent inspecter le dépôt par son intermédiaire. |
+| `signal`       | `AbortSignal`         | Requis    | Signal d’annulation du tour ; les hooks asynchrones doivent le respecter.               |
+| `model`        | `AgentModel`          | Requis    | Modèle normalisé de l’agent qui exécute le tour.                                        |
+| `step`         | `number`              | Requis    | Numéro de l’étape en cours ; 0 pendant session-start.                                   |
+| `conversation` | `string \| undefined` | Optionnel | Identifiant de conversation du harness lorsqu’elle est capturée.                        |
+| `subagentId`   | `string \| undefined` | Optionnel | Identifiant d’exécution du sous-agent, absent de la boucle principale.                  |
+| `depth`        | `number \| undefined` | Optionnel | Profondeur de délégation ; zéro pour la boucle principale.                              |
 
 ## Signature
 

@@ -41,6 +41,41 @@ export const codex = createAgent({
 
 The harness applies instructions to every request, including repairs and resumes, without writing them into your repository or changing host credentials. See [defineAgentProfile](../../reference/defineagentprofile/) for each CLI’s projection and [MCP configuration](../mcp-servers/) for configuration merging.
 
+## Share hooks
+
+Group hooks by harness under `hooks`: `claude`, `codex`, `copilot`, `kimi`, `antigravity` or `outpost`. This example observes Claude tools and the end of an Outpost loop.
+
+```ts title="hook-profile.ts"
+import {
+  defineAgentProfile,
+  defineClaudeHook,
+  defineHarnessHook,
+} from "@elie-laloum/outpost";
+
+export const lifecycleProfile = defineAgentProfile({
+  hooks: {
+    claude: [
+      defineClaudeHook({
+        on: "PreToolUse",
+        run({ event }) {
+          console.log(event.tool_name);
+        },
+      }),
+    ],
+    outpost: [
+      defineHarnessHook({
+        on: "run-end",
+        run({ reason }) {
+          console.log(reason);
+        },
+      }),
+    ],
+  },
+});
+```
+
+Pass `profile: lifecycleProfile` to the harness. It selects its section, then appends its local hooks; other sections are ignored. `hooks: []` keeps profile hooks. CLI execution order remains native. See [CLI hooks](../cli-hooks/) and [Outpost hooks](../harness-hooks/).
+
 ## Restrict the built-in tools
 
 Save `restricted-profile.ts` beside the first file. This profile permits file reading, file edits and only the exact shell command `npm test`. Omitted tool restrictions preserve the harness's existing behavior; an empty list denies built-in action tools. In the built-in harness, `load_skill` remains available, but loading a skill never grants permission for its tools. Explicit MCP server declarations grant their own tools, restricted separately by each server's filters, and access to their resources and prompts. Additional harness permissions still apply.

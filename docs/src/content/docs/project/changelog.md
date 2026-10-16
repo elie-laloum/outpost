@@ -12,6 +12,10 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Allow `defineAgentProfile({ hooks })` to group typed CLI and Outpost hooks. Select only the matching harness section and compose profile declarations before local hooks; keep native CLI scheduling and permissions intact.
+
+- Add separate typed native lifecycle hooks for the five CLI harnesses, with host callbacks and sandbox commands. Extend Outpost loop phases and validated transformations while preserving usage and tool permissions. Document the native inventory and remaining live-validation requirements.
+
 - Complete the audit follow-up: preserve stateless encrypted reasoning and cumulative usage, refuse unsupported local Codex usage login, bound retry delays and Kimi prompts, protect cloud cancellation and staged credentials, normalize durable request identity, clean failed archives, and add explicit offline S3 tombstone pruning. Improve CLI diagnostics, portable transport keys, MCP environment selection and release verification; clarify intentional recovery, scheduling and workspace contracts.
 - Add `createScriptedAgent()` while keeping `scriptedAgent()` as a deprecated compatibility alias.
 

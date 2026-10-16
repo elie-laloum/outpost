@@ -15,6 +15,7 @@ import type { ClaudeSettings } from "@elie-laloum/outpost";
 
 | Name                | Type                                                                                              | Presence | Meaning                                                                                                                                                                                                                                                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hooks`             | `readonly ClaudeHook<keyof ClaudeHookEvents>[] \| undefined`                                      | Optional | Native Claude hooks declared with defineClaudeHook. The collection is copied at composition; callbacks require live process input on the sandbox lease.                                                                                                                                                                             |
 | `partialMessages`   | `boolean \| undefined`                                                                            | Optional | Pass --include-partial-messages to headless runs so the stream emits text-delta events. Interactive sessions are unchanged.                                                                                                                                                                                                         |
 | `permissions`       | `"plan" \| "default" \| "acceptEdits" \| "auto" \| "dontAsk" \| "bypassPermissions" \| undefined` | Optional | Claude Code permission mode passed with --permission-mode. Without it, headless runs pass --dangerously-skip-permissions; interactive sessions keep the CLI’s approval prompts.                                                                                                                                                     |
 | `authentication`    | `AgentAuthentication \| undefined`                                                                | Optional | Credential selection: "account" (subscription login), "usage" (API key), { account: { file \| key \| variable } } or { usage: { key \| variable } }. Codex rejects account key and variable and accepts only usage with modelProvider; unsupported forms fail when the agent is composed. Omitted, Outpost installs no credentials. |
@@ -28,6 +29,7 @@ import type { ClaudeSettings } from "@elie-laloum/outpost";
 
 ```ts
 export interface ClaudeSettings extends CommonAgentSettings {
+  readonly hooks?: readonly ClaudeHook[];
   readonly partialMessages?: boolean;
   readonly permissions?:
     | "default"

@@ -12,6 +12,10 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Permettre à `defineAgentProfile({ hooks })` de regrouper les hooks typés des CLI et d’Outpost. Chaque harness sélectionne sa section et place les déclarations du profil avant ses hooks locaux, sans changer l’ordonnancement natif ni les permissions.
+
+- Ajouter des hooks de lifecycle natifs typés distincts pour les cinq harness CLI, avec callbacks hôte et commandes dans le sandbox. Étendre les phases et transformations validées de la boucle Outpost en conservant l’usage et les permissions. Documenter l’inventaire natif et les validations réelles restantes.
+
 - Termine le suivi de l’audit : conserve le raisonnement chiffré sans état et l’usage cumulé, refuse la connexion Codex usage locale non prise en charge, borne les attentes de retry et prompts Kimi, protège l’annulation cloud et les identifiants préparés, normalise l’identité des requêtes durables, nettoie les archives échouées et ajoute la purge explicite des tombstones S3 hors ligne. Améliore les diagnostics CLI, clés Transport portables, variables MCP et vérifications de publication ; précise les contrats de récupération, planification et workspaces.
 - Ajoute `createScriptedAgent()` et conserve `scriptedAgent()` comme alias de compatibilité déprécié.
 
