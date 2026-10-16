@@ -202,6 +202,7 @@ export async function createFileSandbox(
     ? AbortSignal.any([options.signal, stop.signal])
     : stop.signal;
   const staging = join(workspace.runtime.directory, "staging", workspace.id);
+  const conversationHome = join(workspace.runtime.directory, "conversations");
   let runtime;
   let activity: ResourceActivity | undefined;
   const recoveryTransport =
@@ -563,12 +564,13 @@ export async function createFileSandbox(
                         await storage.locate(
                           settings.continuation.id,
                           workspace.runtime.directory,
-                          undefined,
+                          conversationHome,
                           workspace.runtime.directory,
                         ),
                         {
                           repository: workspace.runtime.directory,
                           runtimeDirectory: workspace.runtime.directory,
+                          home: conversationHome,
                           staging,
                           sandbox: executionLease,
                           local: options.sandboxProvider.placement === "host",
@@ -604,6 +606,7 @@ export async function createFileSandbox(
                             {
                               repository: workspace.runtime.directory,
                               runtimeDirectory: workspace.runtime.directory,
+                              home: conversationHome,
                               staging,
                               sandbox: executionLease,
                               local:
@@ -769,12 +772,13 @@ export async function createFileSandbox(
             await storage.locate(
               settings.continuation.id,
               workspace.runtime.directory,
-              undefined,
+              conversationHome,
               workspace.runtime.directory,
             ),
             {
               repository: workspace.runtime.directory,
               runtimeDirectory: workspace.runtime.directory,
+              home: conversationHome,
               staging,
               sandbox: lease,
               local: options.sandboxProvider.placement === "host",

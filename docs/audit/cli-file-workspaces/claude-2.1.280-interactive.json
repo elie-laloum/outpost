@@ -1,0 +1,102 @@
+{
+  "agent": "claude",
+  "pinnedVersion": "2.1.280",
+  "image": "outpost:claude",
+  "model": "claude-haiku-4-5-20251001",
+  "authentication": "account-token",
+  "variant": "native-default-with-onboarding-preferences",
+  "mode": "live",
+  "suite": "interactive",
+  "startedAt": "2026-10-16T16:04:34.094Z",
+  "status": "passed",
+  "phase": "mount-write/interactive",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["2.1.280"],
+      "checks": [
+        "prepared-onboarding-preferences",
+        "trusted-owned-workspace",
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "copy",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["2.1.280"],
+      "checks": [
+        "prepared-onboarding-preferences",
+        "trusted-owned-workspace",
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["2.1.280"],
+      "checks": [
+        "prepared-onboarding-preferences",
+        "trusted-owned-workspace",
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["2.1.280"],
+      "checks": [
+        "prepared-onboarding-preferences",
+        "trusted-owned-workspace",
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:05:33.810Z"
+}

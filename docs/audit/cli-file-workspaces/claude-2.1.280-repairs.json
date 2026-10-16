@@ -1,0 +1,117 @@
+{
+  "agent": "claude",
+  "pinnedVersion": "2.1.280",
+  "image": "outpost:claude",
+  "model": "claude-haiku-4-5-20251001",
+  "authentication": "account-token",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "repairs",
+  "startedAt": "2026-10-16T15:23:55.929Z",
+  "status": "passed",
+  "phase": "mount-write/repairs",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["2.1.280"],
+      "checks": [
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 44,
+        "cached": 105591,
+        "output": 614,
+        "cacheCreated": 1084
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 44,
+        "cached": 106133,
+        "output": 879,
+        "cacheCreated": 1406
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 52,
+        "cached": 128759,
+        "output": 1147,
+        "cacheCreated": 1735
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 44,
+        "cached": 107079,
+        "output": 1433,
+        "cacheCreated": 2063
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T15:25:23.236Z"
+}

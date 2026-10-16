@@ -1,0 +1,109 @@
+{
+  "agent": "claude",
+  "pinnedVersion": "2.1.280",
+  "image": "outpost:claude",
+  "model": "claude-haiku-4-5-20251001",
+  "authentication": "account-token",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "dispatch",
+  "startedAt": "2026-10-16T15:22:32.121Z",
+  "status": "passed",
+  "phase": "mount-write/dispatch",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["2.1.280"],
+      "checks": [
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 26,
+        "cached": 62652,
+        "output": 532,
+        "cacheCreated": 651
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 34,
+        "cached": 81333,
+        "output": 1044,
+        "cacheCreated": 4503
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 34,
+        "cached": 80929,
+        "output": 887,
+        "cacheCreated": 4301
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.280"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 34,
+        "cached": 81257,
+        "output": 1279,
+        "cacheCreated": 4731
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T15:23:45.617Z"
+}

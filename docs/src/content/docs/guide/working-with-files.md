@@ -94,6 +94,26 @@ Host-wide locks coordinate overlapping sources and publication destinations acro
 
 File dispatch supports the Outpost harness and compatible custom/scripted adapters. Native CLI dispatch, interactive attachment, continuation, repairs and live input require a declared, validated capability for the pinned adapter variant. Undemonstrated native variants are refused. Cloud and Firecracker live validation remains separate. Isolated container/cloud providers do not acquire an automatic abandoned-allocation recovery capability merely because files can be restored.
 
+### Native CLI validation status
+
+Live Docker validation covers all four bindings: ephemeral workspaces, directory copies, read-only source mounts and writable source mounts. The declarations below belong to each pinned adapter; no wrapper around `harness.bind` is needed. Git-workspace support and a successful container preflight do not establish file-mode support.
+
+Claude used `claude-haiku-4-5-20251001` with account-token authentication. Codex used `gpt-5.6-luna` with an environment API key through its existing custom Responses-provider variant. Copilot, Kimi (global region) and Antigravity used their local account sessions and native default model selection. These runs do not validate every authentication, model or provider combination.
+
+Interactive validation uses a real terminal with native confirmations. Claude's onboarding preferences and Claude/Codex trust for the temporary directory are prepared in the private home. Fresh homes can still show native setup dialogs; capability declarations do not complete them. Kimi starts interactive sessions without an initial brief, so its first request is typed in the terminal. Antigravity's terminal attempts timed out before the first required file was produced, so interactive attachment remains refused.
+
+| Agent          | Pinned CLI | Dispatch | Repairs  | Continuation | Live input | Interactive |
+| -------------- | ---------- | -------- | -------- | ------------ | ---------- | ----------- |
+| Claude Code    | 2.1.280    | Declared | Declared | Declared     | Declared   | Declared    |
+| Codex          | 0.156.1    | Declared | Declared | Declared     | Declared   | Declared    |
+| GitHub Copilot | 1.0.88     | Declared | Declared | Declared     | Refused    | Declared    |
+| Kimi Code      | 2.1.1      | Declared | Declared | Declared     | Refused    | Declared    |
+| Antigravity    | 1.2.12     | Declared | Declared | Refused      | Refused    | Refused     |
+
+Contributors can use `scripts/cli-file-live.mjs` from the repository to validate one pinned CLI in Docker. Its `--preflight` mode checks the installed version and file bindings without model calls. Its explicit `--live` mode makes paid requests using selected environment credentials or explicitly authorized local account sessions; it is excluded from routine tests and CI. Run dispatch before repairs when validating another variant. A passing preflight or a simulated protocol test is not live capability evidence. See the [validation procedure](https://gitlab.elielaloum.com/elielaloum/outpost/-/blob/main/docs/audit/cli-file-workspaces.md) before running it.
+
+File dispatch captures native conversations under its runtime directory and restores them into the new sandbox's native session location. Synthetic tests cover runtime containment; Claude, Codex and Kimi also demonstrated warm resume and fork, then restore and fork in fresh containers. Copilot demonstrated warm and cold resume; automated fork is unsupported. Antigravity demonstrated warm resume only and has no portable capture, so the general continuation capability remains refused. Copilot, Kimi and Antigravity expose no native live-input protocol; their terminal support does not imply live input during dispatch.
+
 Branches, commits, Git guards, integration, conflict resolution and speculation remain Git features. File results use `workspaceInfo` and `fileOutputs`; Git results keep mandatory `branch` and `commits`. File agent reports use version 2, while Git reports retain version 1. Use filesystem listing/search explicitly with `createHarnessFileTools({ selection: "filesystem" })` and `createHarnessSearchTools({ selection: "filesystem" })`; existing tool calls default to Git selection.
 
 ## Next steps

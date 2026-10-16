@@ -9,8 +9,17 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createWorkspace, createSandbox, changed } from "../src/index.ts";
+import { join, relative } from "node:path";
+import {
+  createWorkspace,
+  createSandbox,
+  createAgent,
+  createLocalTransport,
+  dispatch,
+  changed,
+} from "../src/index.ts";
+import type { AgentEvent } from "../src/domain/agent.types.ts";
+import { createClaudeConversations } from "../src/adapters/agents/claude/claude-conversations.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 
@@ -20,6 +29,91 @@ const factory =
     ? createPodmanSandboxProvider
     : createDockerSandboxProvider;
 const image = process.env.OUTPOST_FILE_CONTAINER_IMAGE ?? "node:24-slim";
+
+test(
+  "real file containers capture native transcripts and cold-resume without host Git",
+  { skip: !engine },
+  async () => {
+    const root = await mkdtemp(join(tmpdir(), "outpost-file-conversation-"));
+    try {
+      await using workspace = await createWorkspace({
+        source: { kind: "ephemeral" },
+        runtime: {
+          directory: join(root, "runtime"),
+          namespace: "native-session",
+        },
+        retention: {
+          policy: "portable",
+          transporter: createLocalTransport({
+            directory: join(root, "archive"),
+          }),
+        },
+      });
+      const native = createClaudeConversations();
+      const agent = createAgent({
+        harness: {
+          kind: "cli",
+          bind: () => ({
+            name: "native-session-fixture",
+            resumable: true,
+            fileWorkspaces: { dispatch: true, continuation: true },
+            storage: {
+              ...native,
+              capture: (id, context) =>
+                native.capture(id, {
+                  ...context,
+                  home: context.home ?? join(root, "host-home"),
+                }),
+            },
+            request(input) {
+              return {
+                executable: "node",
+                arguments: [
+                  "-e",
+                  `const fs=require('node:fs'), path=require('node:path');
+if(fs.existsSync('.git'))process.exit(4);
+const id='native-file-session';
+const file=path.join(process.env.HOME,'.claude','projects',process.cwd().replace(/[^a-zA-Z0-9]/g,'-'),id+'.jsonl');
+const count=${Boolean(input.continuation)} ? JSON.parse(fs.readFileSync(file,'utf8')).count+1 : 1;
+fs.mkdirSync(path.dirname(file),{recursive:true});
+fs.writeFileSync(file,JSON.stringify({cwd:process.cwd(),count}));
+console.log(JSON.stringify({kind:'conversation',id}));
+console.log(JSON.stringify({kind:'text',text:'count='+count+' DONE'}));`,
+                ],
+              };
+            },
+            events: (line): AgentEvent[] => [JSON.parse(line)],
+          }),
+        },
+      });
+      const first = await dispatch({
+        workspace,
+        sandboxProvider: factory({ image, networks: "none" }),
+        agent,
+        brief: { text: "Start synthetic session" },
+        until: "DONE",
+        logging: false,
+      });
+      assert.match(first.text, /count=1/);
+      assert.ok(first.transcript);
+      assert.ok(
+        !relative(workspace.runtime.directory, first.transcript).startsWith(
+          "..",
+        ),
+      );
+      assert.equal(first.workspaceInfo.conversations?.length, 1);
+      const second = await first.resume({
+        brief: { text: "Restore synthetic session" },
+        until: "DONE",
+        logging: false,
+      });
+      assert.match(second.text, /count=2/);
+      assert.equal(JSON.parse(second.report()).version, 2);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
 
 test(
   "real file container runs without Git, transfers binary files and reuses after cancellation",

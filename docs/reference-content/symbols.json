@@ -847,22 +847,6 @@
     "Claims an inspected abandoned file workspace after explicit stopped-process authorization and verified allocation release. File or mounted-source adoption is separate and explicit.",
     "Revendique un workspace de fichiers abandonné inspecté après autorisation explicite d’arrêt des processus et vérification de fermeture de l’allocation. L’adoption de fichiers ou de source montée est distincte et explicite."
   ],
-  "inspectStorageReservations": [
-    "Read and validate a Transport reservation ledger, returning its revision and entries with available owner metadata. An absent ledger returns no revision and no entries; legacy entries retain their byte count without inventing an owner. This operation makes no liveness decision and changes nothing.",
-    "Lit et valide le registre de réservations d’un Transport, puis renvoie sa révision et les entrées avec les métadonnées de propriétaire disponibles. Un registre absent renvoie des entrées vides sans révision ; les anciennes entrées conservent leur taille sans propriétaire inventé. Cette opération ne déduit aucune activité et ne modifie rien."
-  ],
-  "recoverStorageReservation": [
-    "Remove one inspected reservation after explicit confirmation that its owner stopped. Require the exact ledger revision and use a conditional write; concurrent changes reject with TransportConflict. Other entries remain intact. Legacy entries require stopping all potential owners because their identity is unknown. Never infer remote liveness from a PID.",
-    "Retire une réservation inspectée après confirmation explicite de l’arrêt de son propriétaire. Exige la révision exacte du registre et une écriture conditionnelle ; une modification concurrente rejette avec TransportConflict. Les autres entrées restent intactes. Les anciennes entrées exigent l’arrêt de tous les propriétaires potentiels car leur identité est inconnue. Ne déduit jamais l’activité distante d’un PID."
-  ],
-  "createScriptedAgent": [
-    "Create a CLI-shaped test agent that consumes a snapshot of turns in declaration order, including retries, passes and response repairs. It emits predefined events and complete zero usage by default; turns exhausted throws code process. Use createMemorySandboxProvider explicitly. Conversation IDs support repairs and resume only in the same open sandbox; capture, cold resume, fork, terminals and live input are unavailable. Each independent test needs a fresh agent.",
-    "Crée un agent de test au contrat CLI qui consomme une copie des tours dans leur ordre de déclaration, y compris retries, passes et réparations de réponse. Il émet les événements prédéfinis et un usage nul complet par défaut ; épuiser les tours lève le code process. Utilisez explicitement createMemorySandboxProvider. Les identifiants de conversation permettent les réparations et reprises dans la même sandbox ouverte uniquement ; capture, reprise à froid, fork, terminal et entrée en direct sont indisponibles. Chaque test indépendant nécessite un nouvel agent."
-  ],
-  "pruneS3Tombstones": [
-    "Physically remove tombstone objects under one explicit S3 prefix after every writer has stopped. Refuse missing writersStopped authorization, preserve live empty objects, and return the removed count. This is offline maintenance, not concurrent retention; compatible stores may ignore conditional deletion.",
-    "Supprime physiquement les tombstones sous un préfixe S3 explicite après arrêt de tous les écrivains. Refuse l’absence de writersStopped, conserve les objets vivants vides et renvoie le nombre supprimé. Maintenance hors ligne uniquement : les stores compatibles peuvent ignorer une suppression conditionnelle."
-  ],
   "defineClaudeHook": [
     "Declare a native Claude lifecycle hook for its CLI harness. Select a documented event and supply either a host callback or a sandbox command. Callback results are checked against that event’s native schema before delivery.",
     "Déclare un hook natif du lifecycle de Claude pour son harness CLI. Sélectionnez un événement documenté et fournissez un callback hôte ou une commande dans le sandbox. La réponse du callback est validée selon le schéma natif de cet événement."
@@ -902,5 +886,21 @@
   "AntigravityHookPhase": [
     "Native events accepted by defineAntigravityHook, independently of Outpost loop phases. [Native reference](https://antigravity.google/docs/hooks), reviewed on 2026-10-13.",
     "Événements natifs acceptés par defineAntigravityHook, indépendants des phases de la boucle Outpost. [Documentation native](https://antigravity.google/docs/hooks), vérifiée le 13 octobre 2026."
+  ],
+  "createScriptedAgent": [
+    "Create a CLI-shaped test agent that consumes a snapshot of turns in declaration order, including retries, passes and response repairs. It emits predefined events and complete zero usage by default; turns exhausted throws code process. Use createMemorySandboxProvider explicitly. Conversation IDs support repairs and resume only in the same open sandbox; capture, cold resume, fork, terminals and live input are unavailable. Each independent test needs a fresh agent.",
+    "Crée un agent de test au contrat CLI qui consomme une copie des tours dans leur ordre de déclaration, y compris retries, passes et réparations de réponse. Il émet les événements prédéfinis et un usage nul complet par défaut ; épuiser les tours lève le code process. Utilisez explicitement createMemorySandboxProvider. Les identifiants de conversation permettent les réparations et reprises dans la même sandbox ouverte uniquement ; capture, reprise à froid, fork, terminal et entrée en direct sont indisponibles. Chaque test indépendant nécessite un nouvel agent."
+  ],
+  "pruneS3Tombstones": [
+    "Physically remove tombstone objects under one explicit S3 prefix after every writer has stopped. Refuse missing writersStopped authorization, preserve live empty objects, and return the removed count. This is offline maintenance, not concurrent retention; compatible stores may ignore conditional deletion.",
+    "Supprime physiquement les tombstones sous un préfixe S3 explicite après arrêt de tous les écrivains. Refuse l’absence de writersStopped, conserve les objets vivants vides et renvoie le nombre supprimé. Maintenance hors ligne uniquement : les stores compatibles peuvent ignorer une suppression conditionnelle."
+  ],
+  "recoverStorageReservation": [
+    "Remove one inspected reservation after explicit confirmation that its owner stopped. Require the exact ledger revision and use a conditional write; concurrent changes reject with TransportConflict. Other entries remain intact. Legacy entries require stopping all potential owners because their identity is unknown. Never infer remote liveness from a PID.",
+    "Retire une réservation inspectée après confirmation explicite de l’arrêt de son propriétaire. Exige la révision exacte du registre et une écriture conditionnelle ; une modification concurrente rejette avec TransportConflict. Les autres entrées restent intactes. Les anciennes entrées exigent l’arrêt de tous les propriétaires potentiels car leur identité est inconnue. Ne déduit jamais l’activité distante d’un PID."
+  ],
+  "inspectStorageReservations": [
+    "Read and validate a Transport reservation ledger, returning its revision and entries with available owner metadata. An absent ledger returns no revision and no entries; legacy entries retain their byte count without inventing an owner. This operation makes no liveness decision and changes nothing.",
+    "Lit et valide le registre de réservations d’un Transport, puis renvoie sa révision et les entrées avec les métadonnées de propriétaire disponibles. Un registre absent renvoie des entrées vides sans révision ; les anciennes entrées conservent leur taille sans propriétaire inventé. Cette opération ne déduit aucune activité et ne modifie rien."
   ]
 }

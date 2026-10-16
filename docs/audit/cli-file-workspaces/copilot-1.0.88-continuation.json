@@ -1,0 +1,74 @@
+{
+  "agent": "copilot",
+  "pinnedVersion": "1.0.88",
+  "image": "outpost-catalog:copilot",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "continuation",
+  "startedAt": "2026-10-16T16:23:19.037Z",
+  "status": "passed",
+  "phase": "mount-write/continuation",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-continuation",
+      "versions": ["1.0.88", "1.0.88"],
+      "checks": [
+        "warm-continuation",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore"
+      ],
+      "turns": 3
+    },
+    {
+      "binding": "copy",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-continuation",
+      "versions": ["1.0.88", "1.0.88"],
+      "checks": [
+        "warm-continuation",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore"
+      ],
+      "turns": 3
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-continuation",
+      "versions": ["1.0.88", "1.0.88"],
+      "checks": [
+        "warm-continuation",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore"
+      ],
+      "turns": 3
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-continuation",
+      "versions": ["1.0.88", "1.0.88"],
+      "checks": [
+        "warm-continuation",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore"
+      ],
+      "turns": 3
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:25:39.717Z"
+}

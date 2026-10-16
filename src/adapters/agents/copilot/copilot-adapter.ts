@@ -62,6 +62,12 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     ...(configuration ? { configuration } : {}),
     bootstrap: "copilot",
     resumable: true,
+    fileWorkspaces: Object.freeze({
+      dispatch: true,
+      repairs: true,
+      continuation: true,
+      interactive: true,
+    }),
     forkable: false,
     ...conversationStorage(settings, createCopilotConversations),
     requiresFinishedEvent: true,

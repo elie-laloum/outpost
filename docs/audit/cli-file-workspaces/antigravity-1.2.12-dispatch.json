@@ -1,0 +1,111 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "dispatch",
+  "status": "passed",
+  "temporaryCapabilityOverride": true,
+  "cleanup": true,
+  "aggregation": "independent-bindings",
+  "campaigns": [
+    "antigravity-1.2.12-dispatch-ephemeral.json",
+    "antigravity-1.2.12-dispatch-copy.json",
+    "antigravity-1.2.12-dispatch-mount-readonly.json",
+    "antigravity-1.2.12-dispatch-mount-write.json"
+  ],
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["1.2.12"],
+      "checks": [
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 93443,
+        "cached": 0,
+        "output": 3113
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 54487,
+        "cached": 0,
+        "output": 2908
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 125115,
+        "cached": 0,
+        "output": 3039
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 55657,
+        "cached": 0,
+        "output": 3003
+      }
+    }
+  ],
+  "startedAt": "2026-10-16T16:21:48.294Z",
+  "finishedAt": "2026-10-16T16:28:33.901Z"
+}

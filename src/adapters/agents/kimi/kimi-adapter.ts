@@ -68,6 +68,12 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     ...(configuration ? { configuration } : {}),
     bootstrap: "kimi",
     resumable: true,
+    fileWorkspaces: Object.freeze({
+      dispatch: true,
+      repairs: true,
+      continuation: true,
+      interactive: true,
+    }),
     forkable: true,
     fork: forkKimi,
     ...conversationStorage(settings, createKimiConversations),

@@ -1,0 +1,52 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "dispatch",
+  "startedAt": "2026-10-16T16:20:39.434Z",
+  "status": "failed",
+  "phase": "copy/dispatch",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["1.2.12"],
+      "checks": [
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 80878,
+        "cached": 0,
+        "output": 2741
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "dispatch",
+      "status": "failed",
+      "step": "dispatch",
+      "versions": ["1.2.12"],
+      "checks": [],
+      "turns": 0
+    }
+  ],
+  "cleanup": true,
+  "failure": {
+    "kind": "execution",
+    "reason": "unclassified"
+  },
+  "finishedAt": "2026-10-16T16:21:15.541Z"
+}

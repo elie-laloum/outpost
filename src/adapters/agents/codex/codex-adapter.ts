@@ -68,6 +68,13 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     bootstrap: "codex",
     ...conversationStorage(settings, createCodexConversations),
     resumable: true,
+    fileWorkspaces: Object.freeze({
+      dispatch: true,
+      repairs: true,
+      continuation: true,
+      liveInput: true,
+      interactive: true,
+    }),
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
     request: (input) => codexRequest(settings, input),

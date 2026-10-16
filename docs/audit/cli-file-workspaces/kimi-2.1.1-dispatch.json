@@ -1,0 +1,110 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "dispatch",
+  "startedAt": "2026-10-16T16:26:48.501Z",
+  "status": "passed",
+  "phase": "mount-write/dispatch",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["2.1.1"],
+      "checks": [
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 1413,
+        "cached": 38912,
+        "output": 232,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.1"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 2026,
+        "cached": 59136,
+        "output": 387,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.1"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 1576,
+        "cached": 59648,
+        "output": 373,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["2.1.1"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 1428,
+        "cached": 60160,
+        "output": 769,
+        "cacheCreated": 0
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:27:55.796Z"
+}

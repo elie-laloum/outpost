@@ -1,0 +1,113 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "repairs",
+  "startedAt": "2026-10-16T16:27:50.973Z",
+  "status": "passed",
+  "phase": "mount-write/repairs",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-result-and-publications",
+      "versions": ["1.2.12"],
+      "checks": [
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 174076,
+        "cached": 0,
+        "output": 4767
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 124667,
+        "cached": 0,
+        "output": 7726
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 265922,
+        "cached": 0,
+        "output": 6659
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "repairs",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "forced-response-repair",
+        "same-conversation",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 2,
+      "usage": {
+        "input": 420167,
+        "cached": 0,
+        "output": 7733
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:31:04.203Z"
+}

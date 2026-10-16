@@ -1,0 +1,83 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "continuation",
+  "startedAt": "2026-10-16T16:28:08.561Z",
+  "status": "passed",
+  "phase": "mount-write/continuation",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-fork",
+      "versions": ["2.1.1", "2.1.1", "2.1.1"],
+      "checks": [
+        "warm-continuation",
+        "warm-fork",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore",
+        "fresh-container-fork"
+      ],
+      "turns": 5
+    },
+    {
+      "binding": "copy",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-fork",
+      "versions": ["2.1.1", "2.1.1", "2.1.1"],
+      "checks": [
+        "warm-continuation",
+        "warm-fork",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore",
+        "fresh-container-fork"
+      ],
+      "turns": 5
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-fork",
+      "versions": ["2.1.1", "2.1.1", "2.1.1"],
+      "checks": [
+        "warm-continuation",
+        "warm-fork",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore",
+        "fresh-container-fork"
+      ],
+      "turns": 5
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "continuation",
+      "status": "passed",
+      "step": "cold-fork",
+      "versions": ["2.1.1", "2.1.1", "2.1.1"],
+      "checks": [
+        "warm-continuation",
+        "warm-fork",
+        "native-capture",
+        "portable-archive",
+        "fresh-container-restore",
+        "fresh-container-fork"
+      ],
+      "turns": 5
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:31:38.803Z"
+}

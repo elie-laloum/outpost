@@ -1,0 +1,40 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "dispatch",
+  "startedAt": "2026-10-16T16:25:21.878Z",
+  "status": "passed",
+  "phase": "mount-readonly/dispatch",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "mount-readonly",
+      "scenario": "dispatch",
+      "status": "passed",
+      "step": "verify-source-read",
+      "versions": ["1.2.12"],
+      "checks": [
+        "source-read",
+        "typed-json",
+        "created-file",
+        "edited-file",
+        "fileOutputs",
+        "report-v2",
+        "source-effects"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 125115,
+        "cached": 0,
+        "output": 3039
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-16T16:26:01.675Z"
+}

@@ -1,0 +1,35 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default-terminal",
+  "mode": "live",
+  "suite": "interactive",
+  "startedAt": "2026-10-16T16:28:09.917Z",
+  "status": "failed",
+  "phase": "ephemeral/interactive",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "interactive",
+      "status": "failed",
+      "step": "terminal-initial-prompt",
+      "versions": ["2.1.1"],
+      "checks": [],
+      "turns": 0
+    }
+  ],
+  "cleanup": true,
+  "failure": {
+    "kind": "execution",
+    "code": "configuration",
+    "reason": "unclassified",
+    "signals": [],
+    "origin": "src/domain/errors.ts:54:25"
+  },
+  "finishedAt": "2026-10-16T16:28:14.120Z"
+}

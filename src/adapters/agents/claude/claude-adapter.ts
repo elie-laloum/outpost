@@ -81,6 +81,13 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     bootstrap: "claude",
     ...conversationStorage(settings, createClaudeConversations),
     resumable: true,
+    fileWorkspaces: Object.freeze({
+      dispatch: true,
+      repairs: true,
+      continuation: true,
+      liveInput: true,
+      interactive: true,
+    }),
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({
       ...settings.variables,
