@@ -5,6 +5,8 @@ description: "Run checks before merging and retain rejected work for review."
 
 Use this guide after [running work on a branch](../git-workspaces/). Your repository needs a test command and its dependencies in the sandbox. Integration changes the local checkout; Outpost does not push to a remote.
 
+Integration acquires the same host-checkout lock as a `current` workspace. If that workspace is still open, integration fails with code `conflict` and retains the candidate worktree. Close the current workspace before retrying the integration.
+
 ## Gate integration on a check
 
 `dispatch()` and `workspace.dispatch()` merge an `integrate` branch as soon as the agent succeeds. To run your own check first, open the workspace yourself and work in a [sandbox session](../sandbox-sessions/).

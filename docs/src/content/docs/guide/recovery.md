@@ -203,3 +203,19 @@ For directory and ephemeral resources, inspect `recovery inspect --runtime-direc
 - An archive holds recovery files, not the repository: restoring still needs the source repository.
 
 API: [recoveryDetails](../../reference/recoverydetails/) · [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [archiveRecovery](../../reference/archiverecovery/) · [materializeRecoveryArchive](../../reference/materializerecoveryarchive/).
+
+## Recover an abandoned local lock
+
+An empty lock, an orphan `.reclaim` file, or an owner whose identity cannot be established on macOS or Windows requires explicit recovery. First stop every process using that lock directory, including other recovery commands. The operation does not stop processes for you. Inspect one filename from the lock inventory:
+
+```sh
+npx outpost recovery unlock --directory /projects/app/.outpost/locks --lock 0123456789abcdef0123.json --json
+```
+
+Use the returned revision to apply recovery. Changed files and confirmed active owners are refused. For an orphan reclamation guard, inspect and recover the `.json.reclaim` filename first, then inspect the main lock again. Empty or malformed files can be recovered through the same flow. Recovery removes only that lock file and retains workspaces and branches.
+
+```sh
+npx outpost recovery unlock --directory /projects/app/.outpost/locks --lock 0123456789abcdef0123.json --revision INSPECTED_REVISION --processes-stopped --apply
+```
+
+Local Transport locks use the same command with `--directory /projects/app/.outpost/storage/.outpost/locks`, or the corresponding custom Transport directory. Recovery is an offline operation: filesystem unlink is not a compare-and-swap operation, so the inspected revision does not replace the requirement to stop all writers and serialize recovery. Automatic acquisition still refuses unknown ownership.

@@ -7,6 +7,7 @@ import {
   TOOL_LIMITS,
 } from "./tools.constants.ts";
 import type { GitInput } from "./tools.types.ts";
+import { posix, win32 } from "node:path";
 
 export function createHarnessGitTools(): HarnessToolset {
   return defineHarnessToolset({
@@ -31,12 +32,30 @@ export function createHarnessGitTools(): HarnessToolset {
           command: ["git", input.command, ...(input.arguments ?? [])].join(" "),
         }),
         async execute(input: GitInput, context) {
-          const blocked = (input.arguments ?? []).find((argument) =>
-            GIT_BLOCKED_OPTIONS.some((option) => argument.startsWith(option)),
-          );
+          const blocked = (input.arguments ?? []).find((argument) => {
+            const name = argument.split("=", 1)[0]!;
+            return GIT_BLOCKED_OPTIONS.some(
+              (option) =>
+                argument.startsWith(option) ||
+                (name.startsWith("--") &&
+                  name.length > 2 &&
+                  option.startsWith(name)),
+            );
+          });
           if (blocked)
             return {
               content: `Unsupported Git option: ${blocked}`,
+              isError: true,
+            };
+          const outside = (input.arguments ?? []).find(
+            (argument) =>
+              posix.isAbsolute(argument) ||
+              Boolean(win32.parse(argument).root) ||
+              argument.split(/[\\/]/).includes(".."),
+          );
+          if (outside)
+            return {
+              content: `Unsupported Git path: ${outside}`,
               isError: true,
             };
           const result = await context.sandbox.invoke({

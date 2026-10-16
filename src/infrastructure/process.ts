@@ -13,7 +13,16 @@ import { restoreTerminal } from "./terminal.ts";
 
 export type { Executor } from "./process.types.ts";
 
-export const executeProcess: Executor = (command) => {
+export const executeProcess: Executor = (command) =>
+  executeProcessWithEnvironment(command, {
+    ...process.env,
+    ...command.variables,
+  });
+
+export const executeProcessWithEnvironment = (
+  command: Command,
+  environment: NodeJS.ProcessEnv,
+): Promise<CommandResult> => {
   command.signal?.throwIfAborted();
   const deadline = command.deadlineMs ?? processDefaults.deadlineMs;
   positive(deadline, "deadlineMs");
@@ -23,7 +32,7 @@ export const executeProcess: Executor = (command) => {
     const interactive = command.interactive === true;
     const child = spawn(command.executable, [...(command.arguments ?? [])], {
       cwd: command.directory,
-      env: { ...process.env, ...command.variables },
+      env: environment,
       shell: false,
       windowsHide: true,
       detached: !interactive && process.platform !== "win32",
@@ -35,6 +44,11 @@ export const executeProcess: Executor = (command) => {
       stderr: new StringDecoder("utf8"),
     };
     const output = { stdout: "", stderr: "" };
+    let settled = false,
+      exited = false,
+      closed = false,
+      status: number | null = null,
+      drainage: ReturnType<typeof setTimeout> | undefined;
     let failed = false,
       reason: unknown,
       escalation: ReturnType<typeof setTimeout> | undefined;
@@ -65,11 +79,15 @@ export const executeProcess: Executor = (command) => {
       }
     }
     function interrupt(error: unknown): void {
-      if (failed) return;
+      if (failed || settled) return;
       failed = true;
       reason = error;
       kill(false);
-      escalation = setTimeout(() => kill(true), processDefaults.killGraceMs);
+      escalation = setTimeout(() => {
+        escalation = undefined;
+        kill(true);
+        if (closed) finish();
+      }, processDefaults.killGraceMs);
     }
     const abort = () =>
       interrupt(
@@ -86,6 +104,7 @@ export const executeProcess: Executor = (command) => {
       deadline,
     );
     const consume = (channel: Channel, text: string) => {
+      if (settled) return;
       output[channel] = (output[channel] + text).slice(-limit);
       try {
         command.observe?.(channel, text);
@@ -108,21 +127,46 @@ export const executeProcess: Executor = (command) => {
     });
     command.signal?.addEventListener("abort", abort, { once: true });
     if (command.signal?.aborted) abort();
-    child.on("close", (status) => {
-      if (interactive) restoreTerminal();
+    function disconnectInput(): void {
       if (child.stdin) {
         command.terminal?.input?.unpipe(child.stdin);
         command.input?.unpipe(child.stdin);
+        child.stdin.destroy();
       }
+    }
+    function finish(): void {
+      if (settled || escalation) return;
+      if (interactive) restoreTerminal();
+      disconnectInput();
       clearTimeout(timer);
-      clearTimeout(escalation);
+      clearTimeout(drainage);
       command.signal?.removeEventListener("abort", abort);
       for (const channel of outputChannels) {
         const tail = decoder[channel].end();
         if (tail) consume(channel, tail);
       }
+      if (escalation) return;
+      settled = true;
+      child.stdout?.destroy();
+      child.stderr?.destroy();
       if (failed) reject(reason);
       else resolve({ status: status ?? 1, ...output });
+    }
+    child.on("exit", (code) => {
+      exited = true;
+      status = code;
+      clearTimeout(timer);
+      command.signal?.removeEventListener("abort", abort);
+      disconnectInput();
+      drainage = setTimeout(() => {
+        closed = true;
+        finish();
+      }, processDefaults.outputDrainMs);
+    });
+    child.on("close", (code) => {
+      closed = true;
+      if (!exited) status = code;
+      finish();
     });
     connectStdin(child.stdin, command);
     if (child.stdout && command.terminal?.output)

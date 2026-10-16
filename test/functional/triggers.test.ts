@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 import { createHmac, randomBytes } from "node:crypto";
+import { request } from "node:http";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -120,6 +121,24 @@ function issueRoute(events: TriggerEvent[] = []): TriggerRoute {
   };
 }
 
+test("malformed request targets return 400 and leave the trigger server available", async (t) => {
+  const { server, post } = await fixture(t, [issueRoute()]);
+  const status = await new Promise<number | undefined>((resolve, reject) => {
+    const call = request(
+      server.url,
+      { method: "POST", path: "//[" },
+      (response) => {
+        response.resume();
+        response.on("end", () => resolve(response.statusCode));
+      },
+    );
+    call.on("error", reject);
+    call.end();
+  });
+  assert.equal(status, 400);
+  assert.equal((await post("/github", labeled, github(labeled))).status, 202);
+});
+
 test("GitHub deliveries are verified, normalized and published once", async (t) => {
   const events: TriggerEvent[] = [];
   const { queue, post, failures } = await fixture(t, [issueRoute(events)]);
@@ -165,7 +184,7 @@ test("GitHub deliveries are verified, normalized and published once", async (t) 
   const tampered = labeled.replace("42", "43");
   assert.equal((await post("/github", tampered, github(labeled))).status, 401);
   const { "x-github-delivery": _, ...missing } = github(labeled);
-  assert.equal((await post("/github", labeled, missing)).status, 401);
+  assert.equal((await post("/github", labeled, missing)).status, 400);
   assert.equal(
     (
       await post("/github", labeled, {
@@ -177,7 +196,7 @@ test("GitHub deliveries are verified, normalized and published once", async (t) 
   );
   assert.deepEqual(
     failures.map((entry) => entry.failure.stage),
-    ["verify", "verify", "verify"],
+    ["verify", "decode", "verify"],
   );
   assert.ok(failures.every((entry) => !entry.error.includes(githubSecret)));
 });
@@ -326,7 +345,7 @@ test("Slack commands and interactions are signed and acknowledged with 200", asy
   const stale = slack(command, Math.floor(Date.now() / 1000) - 3_600);
   assert.equal((await post("/slack", command, stale)).status, 401);
   const noTrigger = new URLSearchParams({ command: "/outpost" }).toString();
-  assert.equal((await post("/slack", noTrigger, slack(noTrigger))).status, 401);
+  assert.equal((await post("/slack", noTrigger, slack(noTrigger))).status, 400);
 });
 
 test("Standard Webhooks sources verify any compliant sender", async (t) => {
@@ -439,4 +458,28 @@ test("observer failures do not change responses and options are validated", asyn
   await assert.rejects(
     serveTriggers({ queue, routes: [issueRoute()], maxBytes: 0 }),
   );
+});
+
+test("verified malformed payloads report decoding failures rather than bad signatures", async (t) => {
+  const { post, failures } = await fixture(t, [
+    {
+      path: "/github",
+      source: createGithubWebhook({ secret: githubSecret }),
+      on: () => assert.fail("invalid payload must not reach routing"),
+    },
+  ]);
+  const body = "{broken";
+  assert.equal((await post("/github", body, github(body))).status, 400);
+  assert.equal(failures[0]?.failure.stage, "decode");
+  assert.ok(!failures[0]?.error.includes(body));
+  assert.equal(
+    (
+      await post("/github", body, {
+        ...github(body),
+        "x-hub-signature-256": "invalid",
+      })
+    ).status,
+    401,
+  );
+  assert.equal(failures[1]?.failure.stage, "verify");
 });

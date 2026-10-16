@@ -114,6 +114,7 @@ test("vendor exception bodies, causes and cancellation reasons stay out of publi
   const privateValue = "fixture-credential-never-print";
   for (const thrown of [
     Error(privateValue),
+    new OutpostError("configuration", privateValue),
     new OutpostError(
       "provider",
       privateValue,
@@ -134,7 +135,10 @@ test("vendor exception bodies, causes and cancellation reasons stay out of publi
       (error) => {
         assert.equal(inspect(error).includes(privateValue), false);
         assert.ok(error instanceof OutpostError);
-        assert.equal(error.code, "provider");
+        assert.equal(
+          error.code,
+          thrown instanceof OutpostError ? thrown.code : "provider",
+        );
         assert.equal(error.cause, undefined);
         return true;
       },
@@ -293,6 +297,14 @@ test("GCP decodes bytes and REST base64, selects exact versions and refuses abse
   assert.deepEqual(read.mock.calls[0]?.arguments, [
     { name: "projects/demo/secrets/api/versions/latest" },
   ]);
+  await assert.rejects(
+    fromSecrets(fixture, ["MISSING"]),
+    /Missing secret reference: MISSING/,
+  );
+  response = { payload: { data: "not base64!!" } };
+  await assert.rejects(fromSecrets(fixture, ["KEY"]), /must be valid base64/);
+  response = { payload: { data: Buffer.from([255]).toString("base64") } };
+  await assert.rejects(fromSecrets(fixture, ["KEY"]), /must be UTF-8 text/);
   response = { payload: { data: Buffer.from("other").toString("base64") } };
   assert.deepEqual(await fromSecrets(fixture, ["KEY"]), { KEY: "other" });
   for (const next of [

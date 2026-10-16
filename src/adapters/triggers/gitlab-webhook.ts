@@ -1,3 +1,4 @@
+import { decodeTriggerPayload } from "../../domain/trigger-payload.ts";
 import { triggerDefaultToleranceMs } from "../../domain/trigger.constants.ts";
 import { payloadString, triggerEvent } from "../../domain/trigger.ts";
 import type {
@@ -52,21 +53,23 @@ export function createGitlabWebhook(
     name: "gitlab",
     async verify(request: TriggerHttpRequest, now: number) {
       const id = await delivery(request, now);
-      const payload = jsonBody(textBody(request.body));
-      const action = payloadString(payload, "object_attributes", "action");
-      const username =
-        payloadString(payload, "user", "username") ??
-        payloadString(payload, "user_username");
-      return triggerEvent({
-        source: "gitlab",
-        delivery: id,
-        kind:
-          payloadString(payload, "object_kind") ??
-          header(request.headers, "x-gitlab-event"),
-        ...(action ? { action } : {}),
-        ...(username ? { actor: `gitlab:${username}` } : {}),
-        payload,
-        receivedAt: new Date(now).toISOString(),
+      return decodeTriggerPayload(() => {
+        const payload = jsonBody(textBody(request.body));
+        const action = payloadString(payload, "object_attributes", "action");
+        const username =
+          payloadString(payload, "user", "username") ??
+          payloadString(payload, "user_username");
+        return triggerEvent({
+          source: "gitlab",
+          delivery: id,
+          kind:
+            payloadString(payload, "object_kind") ??
+            header(request.headers, "x-gitlab-event"),
+          ...(action ? { action } : {}),
+          ...(username ? { actor: `gitlab:${username}` } : {}),
+          payload,
+          receivedAt: new Date(now).toISOString(),
+        });
       });
     },
   });

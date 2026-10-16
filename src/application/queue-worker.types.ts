@@ -20,4 +20,5 @@ export interface QueueWorkerOptions {
   readonly signal: AbortSignal;
   readonly leaseMs?: number;
   readonly pollMs?: number;
+  readonly onError?: (error: unknown) => void;
 }

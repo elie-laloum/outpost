@@ -51,6 +51,7 @@ export async function diagnoseSandbox(
           remedy: `Install ${executable} in this sandbox.`,
         },
         invoke,
+        deadlineMs,
       ),
     );
   }
@@ -89,6 +90,7 @@ export async function diagnoseSandbox(
         remedy: "Check the lease home directory and its permissions.",
       },
       invoke,
+      deadlineMs,
     ),
   );
   if (options.agent) {
@@ -100,10 +102,13 @@ export async function diagnoseSandbox(
         remedy: "Install the agent explicitly; diagnostics never bootstrap it.",
       },
       invoke,
+      deadlineMs,
     );
     checks.push(version);
     if (version.status !== "fail")
-      checks.push(...(await diagnoseAgentCli(options.agent, invoke)));
+      checks.push(
+        ...(await diagnoseAgentCli(options.agent, invoke, deadlineMs)),
+      );
   }
   if (options.transfers === true)
     checks.push(

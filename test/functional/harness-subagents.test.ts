@@ -378,6 +378,7 @@ test("child request cancellation reaches its provider and leaves a warm sandbox 
 test("child tool deadlines abort model calls and cannot produce a late parent result", async (t) => {
   const root = await repository(t);
   let cancelled = false;
+  const events: AgentObservation[] = [];
   const child = delegate(
     provider([
       (request) =>
@@ -409,8 +410,20 @@ test("child tool deadlines abort model calls and cannot produce a late parent re
     sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "test" },
     logging: false,
+    observe: (event) => events.push(event),
   });
   assert.equal(cancelled, true);
+  const failed = events.findIndex(
+    (event) => event.kind === "subagent" && event.status === "failed",
+  );
+  const result = events.findIndex((event) => event.kind === "tool-result");
+  assert.ok(failed >= 0 && result > failed);
+  assert.equal(
+    events.filter(
+      (event) => event.kind === "subagent" && event.status !== "started",
+    ).length,
+    1,
+  );
 });
 
 test("subagent configuration rejects CLI agents, invalid prompts and duplicate names", async () => {

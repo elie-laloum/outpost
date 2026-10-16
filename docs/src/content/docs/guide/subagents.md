@@ -147,3 +147,5 @@ To send an instruction to a running child, pass its `id` as `subagent` to `steer
 - A child cannot release the shared sandbox.
 
 API: [defineHarnessSubagent](../../reference/defineharnesssubagent/) · [HarnessSubagentOptions](../../reference/harnesssubagentoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [AgentEvent](../../reference/agentevent/).
+
+A delegated agent is also a parent tool call. The parent’s `toolExecution.deadlineMs` bounds the entire delegation, including model requests; the default is five minutes. Increase that parent limit for longer child work, alongside the child’s step and token limits. On a delegation deadline, its failure event precedes the tool result; late child completion does not emit another terminal lifecycle event.

@@ -4,15 +4,23 @@ import { daytonaOutputPrefix } from "./daytona-command.constants.ts";
 export function daytonaOutput(emit: (text: string) => void) {
   const decoder = new StringDecoder("utf8");
   let pending = "";
+  let raw = false;
   return {
     write(chunk: string) {
       pending += chunk;
       while (pending) {
+        if (raw) {
+          const end = pending.indexOf("\n");
+          const length = end === -1 ? pending.length : end + 1;
+          emit(pending.slice(0, length));
+          pending = pending.slice(length);
+          raw = end === -1;
+          continue;
+        }
         if (daytonaOutputPrefix.startsWith(pending)) return;
         if (!pending.startsWith(daytonaOutputPrefix)) {
-          emit(pending);
-          pending = "";
-          return;
+          raw = true;
+          continue;
         }
         const end = pending.indexOf("\n");
         if (end === -1) return;

@@ -1,3 +1,5 @@
+import { containerMounts } from "../../src/providers/container-mounts.ts";
+import { mkdir } from "node:fs/promises";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -244,3 +246,32 @@ test("failed recovery registration prevents container creation", async (t) => {
   );
   assert.equal(created, false);
 });
+
+test(
+  "labelled mount paths reject colons with an actionable alternative",
+  { skip: process.platform === "win32" },
+  async (t) => {
+    const repositoryRoot = await repository(t);
+    const directory = join(repositoryRoot, "with:colon");
+    await mkdir(directory);
+    const context = {
+      repository: repositoryRoot,
+      directory,
+      gitDirectories: [],
+      variables: {},
+    };
+    await assert.rejects(
+      containerMounts(context, {}, "linux", "/workspace", "/home/agent"),
+      /label: false/,
+    );
+    const mounts = await containerMounts(
+      context,
+      { label: false },
+      "linux",
+      "/workspace",
+      "/home/agent",
+    );
+    assert.ok(mounts.volumes.includes("--mount"));
+    assert.ok(mounts.volumes.some((value) => value.includes(directory)));
+  },
+);

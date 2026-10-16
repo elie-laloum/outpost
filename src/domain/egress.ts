@@ -83,5 +83,10 @@ export function validateEgress(value: unknown): EgressPolicy | undefined {
     domains.length + allowCidrs.length > 0,
     "egress allowlist requires an allowed domain or CIDR; use deny-all to block everything",
   );
-  return { mode: "allowlist", domains, allowCidrs, denyCidrs };
+  return {
+    mode: "allowlist",
+    domains: [...new Set(domains.map((name) => name.toLowerCase()))],
+    allowCidrs,
+    denyCidrs,
+  };
 }

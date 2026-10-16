@@ -10,9 +10,9 @@ Importez le kit depuis `@elie-laloum/outpost/testing` et passez explicitement so
 Enregistrez la fixture d’agent dans `coder.ts`. Sa première requête émet la réponse et crée le commit déclaré ; une seconde requête échoue car le script est épuisé. Créez un nouvel agent pour chaque test indépendant.
 
 ```ts title="coder.ts"
-import { scriptedAgent } from "@elie-laloum/outpost/testing";
+import { createScriptedAgent } from "@elie-laloum/outpost/testing";
 
-export const coder = scriptedAgent({
+export const coder = createScriptedAgent({
   turns: [
     {
       text: "Done",
@@ -65,9 +65,9 @@ Donnez un statut non nul à un tour en échec, suivi d’un tour réussi. La pol
 Cet agent échoue une fois puis renvoie la réponse demandée. Les dispatchs dans une sandbox réutilisée et les nouvelles sandboxes consomment la même séquence de l’agent ; les réparations de réponse consomment aussi des tours. Réparations et reprises de conversation fonctionnent dans la même sandbox ouverte. Capture de conversation, reprise à froid et fork sont indisponibles.
 
 ```ts
-import { scriptedAgent } from "@elie-laloum/outpost/testing";
+import { createScriptedAgent } from "@elie-laloum/outpost/testing";
 
-const agent = scriptedAgent({
+const agent = createScriptedAgent({
   turns: [
     { status: 7, stderr: "Simulated failure\n" },
     { text: "Done", usage: { input: 10, cached: 0, output: 5 } },
@@ -99,7 +99,7 @@ Le fournisseur ne lance jamais de commandes arbitraires. Les hooks hôte et les 
 
 Lancez l’exemple complet du dépôt avec `node examples/62-workflow-testing/index.ts` depuis un checkout Outpost compilé. Il crée et supprime son propre dépôt temporaire, vérifie un retry et un commit réel, et simule la vérification sans appel payant.
 
-API : [scriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
+API : [createScriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
 
 ## Workspaces de fichiers
 

@@ -1,4 +1,7 @@
-import { CONTEXT_DEFAULTS } from "./context.constants.ts";
+import {
+  CONTEXT_DEFAULTS,
+  TOOL_TRUNCATION_SUFFIX,
+} from "./context.constants.ts";
 import type {
   HarnessContextInput,
   HarnessContextStrategy,
@@ -56,6 +59,13 @@ export function truncateToolResults(
             if (
               block.type !== "tool-result" ||
               block.content.length <= maxCharacters
+            )
+              return block;
+            const prior = TOOL_TRUNCATION_SUFFIX.exec(block.content);
+            if (
+              prior &&
+              prior.index <= maxCharacters &&
+              Number(prior[1]) > prior.index
             )
               return block;
             changed = true;

@@ -68,7 +68,7 @@ A command that exits resolves with `status`, `stdout` and `stderr`, whatever its
 | `signal` aborts                       | Rejects with the signal’s reason.                                                               |
 | The sandbox closes during the command | Rejects; the process is stopped.                                                                |
 
-The result waits for the process to exit, not for its output to close. Read `status` rather than guessing success from `stdout`. Error codes are listed in [Errors](../error-handling/).
+The result waits for the process to exit, even if its output closes earlier. Host processes drain remaining output for at most 500 ms after exit, then close their readers if descendants still hold the pipes. The original exit status is preserved; late descendant output is not collected. For non-interactive host commands, cancellation and deadlines still stop the process group, including descendants that ignore the first termination signal. Read `status` rather than guessing success from `stdout`. Error codes are listed in [Errors](../error-handling/).
 
 ## Stream a long command
 
@@ -188,3 +188,5 @@ result.unwrap();
 ```
 
 `test` runs `npm test` on the agent’s edits. A nonzero exit status fails the task.
+
+Host, container and Firecracker process cancellation allow 500 ms after SIGTERM before escalating to SIGKILL. Cleanup remains bounded; this grace period is not a guarantee that a non-cooperative program can finish saving its work.

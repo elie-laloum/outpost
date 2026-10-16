@@ -73,13 +73,12 @@ test("invalid prices, currencies and model counters fail explicitly", () => {
         models: { a: { input: rate, output: 1 } },
       }),
     );
-  assert.throws(
-    () =>
-      calculateUsageCost(
-        modelUsage({ input: 1, cached: 2, output: 0 }, "a"),
-        prices,
-      ),
-    /included/,
+  assert.deepEqual(
+    calculateUsageCost(
+      modelUsage({ input: 1, cached: 2, output: 0 }, "a"),
+      prices,
+    ),
+    { amount: 0, complete: false, currency: prices.currency },
   );
   for (const malformed of [
     null,

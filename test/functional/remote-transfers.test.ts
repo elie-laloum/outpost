@@ -19,6 +19,55 @@ import { fileBatches } from "../../src/providers/file-batches.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 
+test("batch synchronization retains incoming bytes and reports a conflict after a host deletion", async (t) => {
+  const root = await repository(t);
+  const workspace = await openWorkspace({ repository: root });
+  t.after(() => workspace.close({ preserve: true }));
+  const remote = join(root, ".outpost", "recovery", "remote");
+  await mkdir(remote, { recursive: true });
+  const local = await createLocalSandboxProvider().acquire({
+    repository: remote,
+    directory: remote,
+    gitDirectories: [],
+    variables: {},
+  });
+  t.after(() => local.release());
+  const sync = await seedRemote(workspace, {
+    ...local,
+    fileTransfers: fileBatches(local),
+  });
+  t.after(() => sync.close());
+  await writeFile(join(remote, "extra.txt"), "remote work");
+  await sync.pull();
+  await rm(join(root, "extra.txt"));
+  let recovery = "";
+  await assert.rejects(sync.pull(), (error: unknown) => {
+    assert.ok(error instanceof OutpostError);
+    assert.ok(error.cause instanceof OutpostError);
+    assert.equal(error.cause.code, "conflict");
+    assert.match(error.cause.message, /Host workspace changed/);
+    assert.equal(typeof error.details.recovery, "string");
+    recovery = String(error.details.recovery);
+    return true;
+  });
+  await sync.close();
+  await assert.rejects(lstat(join(root, "extra.txt")), { code: "ENOENT" });
+  assert.equal(
+    await readFile(join(recovery, "incoming", "extra.txt"), "utf8"),
+    "remote work",
+  );
+  const result = await local.invoke({
+    executable: "node",
+    arguments: [
+      "-e",
+      "process.stdout.write(require('node:fs').readFileSync('extra.txt'))",
+    ],
+    directory: remote,
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout, "remote work");
+});
+
 test("incremental remote batches reuse verified bytes and preserve binary, mode, links, deletions and type changes", async (t) => {
   const root = await repository(t);
   const workspace = await openWorkspace({

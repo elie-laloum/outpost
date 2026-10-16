@@ -1,3 +1,4 @@
+import { decodeTriggerPayload } from "../../domain/trigger-payload.ts";
 import { payloadString, triggerEvent } from "../../domain/trigger.ts";
 import type {
   TriggerHttpRequest,
@@ -38,17 +39,19 @@ export function createGithubWebhook(
         !signatureMatches(await secrets(), [request.body], [digest])
       )
         throw new Error("GitHub signature mismatch");
-      const payload = githubPayload(request);
-      const action = payloadString(payload, "action");
-      const login = payloadString(payload, "sender", "login");
-      return triggerEvent({
-        source: "github",
-        delivery: header(request.headers, "x-github-delivery"),
-        kind: header(request.headers, "x-github-event"),
-        ...(action ? { action } : {}),
-        ...(login ? { actor: `github:${login}` } : {}),
-        payload,
-        receivedAt: new Date(now).toISOString(),
+      return decodeTriggerPayload(() => {
+        const payload = githubPayload(request);
+        const action = payloadString(payload, "action");
+        const login = payloadString(payload, "sender", "login");
+        return triggerEvent({
+          source: "github",
+          delivery: header(request.headers, "x-github-delivery"),
+          kind: header(request.headers, "x-github-event"),
+          ...(action ? { action } : {}),
+          ...(login ? { actor: `github:${login}` } : {}),
+          payload,
+          receivedAt: new Date(now).toISOString(),
+        });
       });
     },
   });

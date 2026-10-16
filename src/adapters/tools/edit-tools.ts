@@ -9,7 +9,7 @@ import {
   digest,
   downloadFile,
   repositoryPath,
-  sandboxPath,
+  checkedSandboxPath,
   withStaging,
 } from "./sandbox-files.ts";
 import type { EditFileInput, WriteFileInput } from "./tools.types.ts";
@@ -103,8 +103,16 @@ function editFileTool() {
   });
 }
 
-function upload(context: HarnessToolContext, staged: string, path: string) {
-  return context.sandbox.upload(staged, sandboxPath(context, path), {
-    signal: context.signal,
-  });
+async function upload(
+  context: HarnessToolContext,
+  staged: string,
+  path: string,
+) {
+  return context.sandbox.upload(
+    staged,
+    await checkedSandboxPath(context, path),
+    {
+      signal: context.signal,
+    },
+  );
 }

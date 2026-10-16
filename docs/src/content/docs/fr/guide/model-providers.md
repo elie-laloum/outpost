@@ -79,7 +79,7 @@ Les deux fournisseurs diffusent en streaming. Le harness émet des événements 
 
 ## Limiter la durée des requêtes
 
-Par exemple, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` refuse une requête après trente secondes sans progrès. En streaming, chaque fragment reçu renouvelle ce délai. Ajoutez un `deadlineMs` au dispatch pour limiter aussi un flux qui continue à produire du texte.
+Par exemple, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` refuse une requête après trente secondes sans progrès. En streaming, chaque événement de données complet autre qu’un heartbeat renouvelle ce délai ; les commentaires, trames partielles et pings ne le renouvellent pas. Ajoutez un `deadlineMs` au dispatch pour limiter aussi un flux qui continue à produire du texte.
 
 Référence API : [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) et [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
@@ -103,6 +103,8 @@ Un fournisseur envoie chaque requête une seule fois. Quand le service répond H
 
 Les limites de débit échouent avec le code `quota` ; surcharges, erreurs 5xx et échecs de connexion sont marqués indisponibles pour les [agents de repli](../fallback-agents/). [Pauses de quota](../quota-pauses/) détaille ce qui compte comme un quota.
 
+Les échecs HTTP inspectent au plus 64 Kio de JSON, ou la limite `maxResponseBytes` configurée si elle est inférieure. Les types et codes d’erreur reconnus complètent le statut HTTP ; les messages bruts, prompts et champs arbitraires sont exclus des diagnostics. Un corps mal formé ou trop volumineux conserve la classification fondée sur le statut. Les messages Anthropic de crédit insuffisant ou de plafond de dépense sont reconnus comme des erreurs de quota même avec HTTP 400 ; les autres requêtes invalides restent des erreurs de provider. Cette inspection bornée s’applique aussi aux providers de décision System One. Ces cas sont couverts par des serveurs HTTP de test locaux, sans appel API payant.
+
 ## Connecter une autre API
 
 Implémentez [`ModelProvider`](../../reference/modelprovider/) : `request()` renvoie un résultat, `stream()` et `validate()` sont facultatifs.
@@ -114,3 +116,5 @@ Implémentez [`ModelProvider`](../../reference/modelprovider/) : `request()` ren
 - Les réponses Anthropic contenant autre chose que du texte, des appels d’outils et de la réflexion échouent avec `response`.
 
 API : [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) · [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/) · [ModelProvider](../../reference/modelprovider/) · [AgentModel](../../reference/agentmodel/).
+
+La validation à la composition vérifie les paramètres du protocole Outpost, pas un catalogue en ligne des capacités des modèles. Anthropic `reasoning: "none"` signifie `thinking: { type: "disabled" }` : choisissez uniquement un modèle capable de désactiver la réflexion. Opus 5.5 le refuse, par exemple. Un effort faible est un autre réglage et ne le remplace jamais silencieusement. Voir [les capacités de réflexion Anthropic](https://platform.claude.com/docs/en/build-with-claude/thinking). OpenAI accepte `max` au niveau du protocole, sous réserve du modèle choisi. Les requêtes Responses sans stockage demandent explicitement le raisonnement chiffré ; seuls les éléments contenant ce contenu chiffré sont rejoués.

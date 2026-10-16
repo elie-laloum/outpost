@@ -1,10 +1,13 @@
-import { basename, join, posix } from "node:path";
+import { join, posix } from "node:path";
 import type { NativeConversationStore } from "../../../domain/conversation.types.ts";
 import type { TranscriptConversationLayout } from "../../../infrastructure/conversations/layout.types.ts";
 import { createTranscriptConversations } from "../../../infrastructure/conversations/transcript-store.ts";
+import { CODEX_ROLLOUT_DATE } from "./codex-conversations.constants.ts";
 
-function datePath(): string[] {
-  return new Date().toISOString().slice(0, 10).split("-");
+function rolloutPath(original: string): string[] {
+  const file = posix.basename(original.replaceAll("\\", "/"));
+  const date = CODEX_ROLLOUT_DATE.exec(file);
+  return [...(date ? date.slice(1) : []), file];
 }
 
 export const codexConversationLayout: TranscriptConversationLayout = {
@@ -16,21 +19,9 @@ export const codexConversationLayout: TranscriptConversationLayout = {
   pattern: (id) => `*-${id}.jsonl`,
   matches: (file, id) => file.endsWith(`-${id}.jsonl`),
   capturePath: (_id, _repository, home, original) =>
-    join(
-      home,
-      ".codex",
-      "sessions",
-      ...datePath(),
-      posix.basename(original.replaceAll("\\", "/")),
-    ),
+    join(home, ".codex", "sessions", ...rolloutPath(original)),
   remotePath: (_id, lease, original) =>
-    posix.join(
-      lease.home,
-      ".codex",
-      "sessions",
-      ...datePath(),
-      basename(original),
-    ),
+    posix.join(lease.home, ".codex", "sessions", ...rolloutPath(original)),
 };
 
 /** Creates the native store for Codex rollouts under ~/.codex/sessions. */

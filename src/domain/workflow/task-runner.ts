@@ -46,9 +46,10 @@ export async function runTask(
       finish(item, "skipped");
       return;
     }
-    const cache = item.cache
-      ? await lookupTaskCache(item, item.cache, runtime)
-      : undefined;
+    const cache =
+      item.cache && state.attempts === 0 && state.rounds === undefined
+        ? await lookupTaskCache(item, item.cache, runtime)
+        : undefined;
     if (cache?.hit) {
       values.set(item, cache.value);
       state.cacheHit = true;
@@ -94,6 +95,10 @@ async function complete(
   cache: TaskCacheLookup | undefined,
   value: unknown,
 ): Promise<void> {
+  if (runtime.options.checkpoint) {
+    checkpointValue(value);
+    value = structuredClone(value);
+  }
   if (item.cache && cache && !cache.hit)
     await storeTaskCache(item, item.cache, runtime, cache.fingerprint, value);
   runtime.values.set(item, value);
@@ -145,7 +150,6 @@ async function perform(
       taskSignal.throwIfAborted();
       value = await item.perform(context(item, attempt, taskSignal));
       taskSignal.throwIfAborted();
-      if (options.checkpoint) checkpointValue(value);
       completed = true;
     } catch (error) {
       runtime.closeAttempt(item);

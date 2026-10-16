@@ -91,6 +91,8 @@ try {
 
 API reference: [BullMQTaskQueueOptions](../../reference/bullmqtaskqueueoptions/).
 
+Once a connection is established, its default reconnect policy keeps trying after a Redis outage, with delays capped at one second. Initial connection attempts remain bounded. Individual operations can still fail during an outage; `runQueueWorker()` retries queue operations, and expired leases remain fenced. Reconnection does not authorize replaying completed effects or restore data lost by Redis. An explicit `connection.retryStrategy` overrides this policy. Call `close()` when finished to stop reconnection and release the queue’s connections.
+
 ## Connect producers and workers
 
 Every producer and worker must use the same `name`, `prefix`, Redis database and server. A difference in any of them silently gives it a separate, empty queue.

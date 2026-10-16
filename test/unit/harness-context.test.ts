@@ -25,6 +25,47 @@ const user: ModelMessage = {
   content: [{ type: "text", text: "go" }],
 };
 
+test("tool result truncation is stable after transcript serialization", async () => {
+  const strategy = truncateToolResults({ keepRecent: 1, maxCharacters: 10 });
+  const messages: ModelMessage[] = [
+    {
+      role: "user",
+      content: [
+        { type: "tool-result", callId: "old", content: "x".repeat(100) },
+      ],
+    },
+    {
+      role: "user",
+      content: [{ type: "tool-result", callId: "new", content: "recent" }],
+    },
+  ];
+  const input = {
+    messages,
+    step: 1,
+    model: { name: "m" },
+    signal: new AbortController().signal,
+    summarize: async () => "unused",
+  };
+  const compacted = await strategy.compact(input);
+  assert.ok(compacted);
+  assert.equal(
+    await strategy.compact({
+      ...input,
+      messages: JSON.parse(JSON.stringify(compacted)),
+      step: 2,
+    }),
+    undefined,
+  );
+  assert.equal(messages[0]!.content[0]!.type, "tool-result");
+  assert.deepEqual(compacted[1], messages[1]);
+  assert.ok(
+    await truncateToolResults({ keepRecent: 1, maxCharacters: 5 }).compact({
+      ...input,
+      messages: compacted,
+    }),
+  );
+});
+
 test("transcripts fold messages and compactions and reject unknown content", () => {
   const records = parseTranscript(
     [

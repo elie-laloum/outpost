@@ -97,6 +97,12 @@ export async function containerMounts(
       !source.includes(",") && !target.includes(","),
       "Mount paths cannot contain commas",
     );
+    invariant(
+      config.label === false ||
+        platform !== "linux" ||
+        (!source.includes(":") && !target.includes(":")),
+      "SELinux-labelled mount paths cannot contain colons; use label: false for --mount syntax",
+    );
     if (config.label === false || platform !== "linux")
       volumes.push(
         "--mount",

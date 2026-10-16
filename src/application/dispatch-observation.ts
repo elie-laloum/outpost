@@ -44,6 +44,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
   const root = options.observation ?? createObservationHub();
   const failures: unknown[] = [];
   let log: Journal | undefined;
+  let finishing = false;
   let session: DispatchTelemetrySession | undefined;
   const initialized = (async () => {
     try {
@@ -74,6 +75,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
           });
         },
         async flush() {
+          if (!finishing) return;
           await initialized;
           await log?.close();
         },
@@ -252,6 +254,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
     throw error;
   }
   async function finish(): Promise<void> {
+    finishing = true;
     await observation.close();
     active.delete(observation);
   }

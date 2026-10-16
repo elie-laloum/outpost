@@ -293,3 +293,31 @@ test("the harness streams text deltas to observers but not to non-verbose journa
   assert.doesNotMatch(journal, /"kind":"text-delta"/);
   assert.match(journal, /"kind":"tool-result"/);
 });
+
+test("model stream heartbeats do not extend the inactivity deadline", async (t) => {
+  const { baseUrl } = await serve(t, [
+    async (response) => {
+      response.writeHead(200, { "content-type": "text/event-stream" });
+      for (let count = 0; count < 30 && !response.destroyed; count++) {
+        response.write(': keepalive\n\ndata: {"type":"ping"}\n\n');
+        await delay(25);
+      }
+      response.end();
+    },
+  ]);
+  const provider = createAnthropicModelProvider({
+    baseUrl,
+    apiKey: "fixture",
+    timeoutMs: 150,
+  });
+  await assert.rejects(
+    collect(
+      provider.stream!({
+        model: "fixture",
+        prompt: "hello",
+        maxOutputTokens: 5,
+      }),
+    ),
+    { code: "timeout" },
+  );
+});

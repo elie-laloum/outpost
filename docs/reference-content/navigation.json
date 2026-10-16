@@ -558,8 +558,8 @@
     "title": ["Workflow testing", "Tests de workflows"],
     "items": [
       {
-        "slug": "reference/scriptedagent",
-        "label": "scriptedAgent",
+        "slug": "reference/createscriptedagent",
+        "label": "createScriptedAgent",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -813,6 +813,11 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/prunes3tombstones",
+        "label": "pruneS3Tombstones",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createartifactstore",
         "label": "createArtifactStore",
         "attrs": { "data-api-kind": "function" }
@@ -856,6 +861,11 @@
         "slug": "reference/transportconflict",
         "label": "TransportConflict",
         "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/s3tombstonepruneoptions",
+        "label": "S3TombstonePruneOptions",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transport",
@@ -2828,6 +2838,16 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/inspectstoragereservations",
+        "label": "inspectStorageReservations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverstoragereservation",
+        "label": "recoverStorageReservation",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/recoverystoragereservationoptions",
         "label": "RecoveryStorageReservationOptions",
         "attrs": { "data-api-kind": "interface" }
@@ -2840,6 +2860,21 @@
       {
         "slug": "reference/storagereservationoptions",
         "label": "StorageReservationOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/storagereservationrecord",
+        "label": "StorageReservationRecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/storagereservationinspection",
+        "label": "StorageReservationInspection",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/storagereservationrecoveryoptions",
+        "label": "StorageReservationRecoveryOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

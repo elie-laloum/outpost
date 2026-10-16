@@ -73,6 +73,8 @@ Cet agent de revue lit, recherche et consulte l’historique, mais ne peut modif
 
 Les chemins restent à l’intérieur du dépôt. Pour configurer les limites des commandes, consultez [createHarnessShellTools](../../reference/createharnessshelltools/).
 
+L’outil Git refuse `--no-index`, les abréviations des options interdites, les arguments de chemin absolu ou qualifié par une lettre de lecteur et les traversées vers un répertoire parent. Ces contrôles empêchent les comparaisons de fichiers hors du workspace ; ils ne font pas du provider local un environnement d’exécution isolé.
+
 <span id="définir-un-outil"></span>
 <span id="regrouper-des-outils"></span>
 
@@ -93,3 +95,5 @@ Listing et recherche sélectionnent Git par défaut pour les appels existants. C
 - Un résultat de plus de 100 000 caractères est tronqué avant d’atteindre le modèle.
 
 API : [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/) · [ToolOutput](../../reference/tooloutput/) · [ToolResources](../../reference/toolresources/) · [createHarnessFileTools](../../reference/createharnessfiletools/) · [createHarnessSearchTools](../../reference/createharnesssearchtools/) · [createHarnessGitTools](../../reference/createharnessgittools/) · [createHarnessEditTools](../../reference/createharnessedittools/) · [createHarnessShellTools](../../reference/createharnessshelltools/).
+
+Un serveur MCP stdio du harness intégré reçoit uniquement ses variables déclarées (y compris les entrées `environment` explicites) et l’environnement de base du processus (PATH, HOME, utilisateur, répertoires temporaires et locale). Son processus enfant n’hérite pas des autres secrets du provider. Ce filtrage n’est pas une frontière de sécurité contre du code exécuté dans la même sandbox.

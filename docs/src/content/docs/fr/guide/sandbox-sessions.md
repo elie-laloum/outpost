@@ -68,7 +68,7 @@ Une commande qui se termine résout avec `status`, `stdout` et `stderr`, quel qu
 | `signal` est déclenché                   | Rejette avec la raison du signal.                                                                   |
 | La sandbox se ferme pendant la commande  | Rejette ; le processus est arrêté.                                                                  |
 
-Le résultat attend la sortie du processus, pas la fermeture de ses flux. Lisez `status` plutôt que de déduire la réussite de `stdout`. Les codes d’erreur sont listés dans [Erreurs](../error-handling/).
+Le résultat attend la sortie du processus, même si ses flux se ferment avant. Les processus hôtes drainent les sorties restantes pendant au plus 500 ms après leur fin, puis ferment leurs lecteurs si des descendants gardent les tuyaux ouverts. Le code de sortie initial est conservé ; les sorties ultérieures des descendants ne sont plus collectées. Pour les commandes hôtes non interactives, une annulation ou un dépassement de délai arrête toujours le groupe de processus, y compris les descendants qui ignorent le premier signal de terminaison. Lisez `status` plutôt que de déduire la réussite de `stdout`. Les codes d’erreur sont listés dans [Erreurs](../error-handling/).
 
 ## Suivre une commande longue
 
@@ -190,3 +190,5 @@ result.unwrap();
 ```
 
 `test` lance `npm test` sur les modifications de l’agent. Un code de sortie non nul fait échouer la tâche.
+
+L’annulation des processus hôtes, conteneurs et Firecracker laisse 500 ms après SIGTERM avant SIGKILL. Le nettoyage reste borné ; ce délai ne garantit pas qu’un programme non coopératif pourra finir de sauvegarder son travail.

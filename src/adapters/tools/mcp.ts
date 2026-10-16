@@ -77,6 +77,7 @@ function launch(
         command: server.command,
         arguments: server.arguments ?? [],
         variables: server.variables ?? [],
+        environmentNames: Object.keys(server.environment ?? {}),
       }
     : {
         server: name,

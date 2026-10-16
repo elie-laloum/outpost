@@ -46,6 +46,8 @@ A copy that `.gitignore` excludes travels one way: the agent’s edits to it sta
 
 ## When synchronization stops
 
+Untracked nested Git repositories cannot be synchronized. Move the nested repository outside the workspace, or ignore it if its contents should remain local. Host detection fails before seeding with code `conflict` and `details.file`; detection in the sandbox stops the pull with code `workspace`, retaining a `conflict` cause that names the path and the recovery directory. Neither case recursively copies or deletes the nested repository.
+
 Outpost never overwrites work it cannot back up. It stops with an error of code `workspace` whose `details.recovery` names the directory under `.outpost/recovery` holding the downloaded changes and the backup. Inspect it with [Recover work](../recovery/).
 
 | Cause                                                                        | Fix                                                                 |

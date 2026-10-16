@@ -1,4 +1,4 @@
-import { readFile, rm } from "node:fs/promises";
+import { lstat, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { prepareHistoryValidation } from "./remote-history.ts";
 import { verificationGit } from "../infrastructure/git/verification-command.ts";
@@ -10,6 +10,7 @@ import type {
 } from "./remote-workspace.types.ts";
 import { remoteSyncLimits } from "./remote-workspace.constants.ts";
 import { digest } from "./workspace-fingerprint.ts";
+import { validateRemotePaths } from "./remote-paths.ts";
 
 export async function validateChanges(
   context: RemoteWorkspaceContext,
@@ -29,10 +30,50 @@ export async function validateChanges(
     initialIndex,
   } = context;
   const { head, patch, incoming } = changes;
+  const changed = new Set([
+    ...(await run(["diff", "--name-only", "--no-renames", "-z", originalHead]))
+      .split("\0")
+      .filter(Boolean),
+    ...incoming,
+    ...(head === synchronized
+      ? []
+      : (
+          await verificationGit(join(transfer, "validation"), [
+            "diff",
+            "--name-only",
+            "--no-renames",
+            "-z",
+            synchronized,
+            head,
+          ])
+        )
+          .split("\0")
+          .filter(Boolean)),
+  ]);
+  validateRemotePaths(changed);
+  const candidates = new Set(changed);
+  for (const path of changed) {
+    const parts = path.split("/");
+    for (let length = 1; length < parts.length; length++) {
+      const ancestor = parts.slice(0, length).join("/");
+      const info = await lstat(join(workspace.directory, ancestor)).catch(
+        (error: NodeJS.ErrnoException) => {
+          if (error.code === "ENOENT" || error.code === "ENOTDIR")
+            return undefined;
+          throw error;
+        },
+      );
+      if (info && !info.isDirectory()) {
+        candidates.add(ancestor);
+        break;
+      }
+    }
+  }
+  const paths = [...candidates];
   const ignoredOverlaps: string[] = [];
   for (
     let offset = 0;
-    offset < incoming.length;
+    offset < paths.length;
     offset += remoteSyncLimits.pathspecs
   ) {
     ignoredOverlaps.push(
@@ -44,7 +85,7 @@ export async function validateChanges(
           "--exclude-standard",
           "-z",
           "--",
-          ...incoming
+          ...paths
             .slice(offset, offset + remoteSyncLimits.pathspecs)
             .map((path) => `:(literal)${path}`),
         ])
@@ -60,12 +101,6 @@ export async function validateChanges(
       { files: ignoredOverlaps, recovery: transfer },
     );
   if (protectedFiles.length) {
-    const changed = new Set([
-      ...(await run(["diff", "--name-only", "-z", originalHead]))
-        .split("\0")
-        .filter(Boolean),
-      ...incoming,
-    ]);
     const overlaps = protectedFiles.filter((file) =>
       [...changed].some(
         (path) =>

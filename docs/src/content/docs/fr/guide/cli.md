@@ -42,7 +42,7 @@ Dans un projet qui dépend de `@elie-laloum/outpost`, lancez `npx outpost <comma
 Vérifiez les outils de la machine et le fournisseur de sandbox choisi. Ajoutez `--image` pour vérifier aussi une image locale d’agent dans un conteneur temporaire.
 
 ```sh
-outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--json]
+outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]
 ```
 
 | Option               | Par défaut | Valeurs et effet                                                                           |

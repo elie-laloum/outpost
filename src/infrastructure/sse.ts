@@ -24,7 +24,6 @@ export async function* serverSentEvents(
     for (;;) {
       const { done, value } = await reader.read();
       if (!done) {
-        onChunk();
         size += value.byteLength;
         if (size > maxBytes)
           throw new OutpostError(
@@ -44,7 +43,10 @@ export async function* serverSentEvents(
       for (const line of lines) {
         if (line === "") {
           const complete = dispatch();
-          if (complete) yield complete;
+          if (complete) {
+            onChunk();
+            yield complete;
+          }
           continue;
         }
         if (line.startsWith(":")) continue;
@@ -57,7 +59,10 @@ export async function* serverSentEvents(
       }
       if (!done) continue;
       const complete = dispatch();
-      if (complete) yield complete;
+      if (complete) {
+        onChunk();
+        yield complete;
+      }
       return;
     }
   } finally {

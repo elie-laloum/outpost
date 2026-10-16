@@ -110,7 +110,7 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      - run: node src/cli/main.ts init --yes --sandbox-provider ${{ matrix.engine }} --image outpost-ci:latest --build
+      - run: node src/cli/main.ts init --yes --directory "$RUNNER_TEMP/outpost-agent-image" --repository "$GITHUB_WORKSPACE" --sandbox-provider ${{ matrix.engine }} --image outpost-ci:latest --build
       - run: ${{ matrix.engine }} pull docker.io/library/node:24-slim
       - run: bun run build
       - run: ${{ matrix.engine }} build -t outpost-egress:ci -f images/egress/Dockerfile .
@@ -118,7 +118,7 @@ jobs:
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
           OUTPOST_EGRESS_IMAGE: outpost-egress:ci
-      - run: node --test test/container.test.ts
+      - run: bun run test:container
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
           OUTPOST_FILE_CONTAINER_IMAGE: docker.io/library/node:24-slim

@@ -76,6 +76,8 @@ Le pont HTTP de la sandbox obtient le jeton lui-même : le secret y reste et les
 2. Demandez un token `client_credentials` avec cette URL comme `resource`. Utilisez `client_secret_basic`, ou `client_secret_post` si le serveur n’annonce que cette méthode.
 3. Réutilisez le token jusqu’à expiration. Sur une réponse `401`, refaites la découverte, obtenez un nouveau token et réessayez une seule fois.
 
+Les identifiants client exigent HTTPS pour l’URL MCP, les métadonnées et le point d’accès aux jetons. Avant d’envoyer les identifiants, le pont vérifie que `resource` correspond à l’URL MCP et que l’`issuer` des métadonnées d’autorisation correspond exactement à l’émetteur découvert, conformément aux [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728.html#section-3.3) et [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html#section-3.3). Il refuse les redirections et un changement d’émetteur pendant la session. Configurez un serveur MCP de confiance : ces contrôles n’authentifient pas le choix initial d’un serveur d’autorisation par un serveur malveillant. Des fixtures HTTPS locales couvrent ces contrôles ; votre déploiement reste à valider avec son fournisseur d’identité réel.
+
 ## Limites
 
 - `oauth` concerne uniquement les serveurs HTTP et ne se combine ni avec `bearerTokenVariable` ni avec un en-tête `Authorization`.

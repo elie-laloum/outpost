@@ -3,4 +3,5 @@ import type { DependencyCache } from "./container-cache.types.ts";
 
 export interface CloudDependencyCache extends DependencyCache {
   readonly transport: Transport;
+  readonly timeoutMs?: number;
 }

@@ -7794,6 +7794,19 @@ export const nativeRecipeSchemas: Readonly<
       leaseMs: {
         type: "number",
       },
+      onError: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "service.worker.onError",
+      },
     },
     required: ["queue", "worker", "handlers"],
     additionalProperties: false,
@@ -9798,6 +9811,9 @@ export const nativeRecipeSchemas: Readonly<
             ],
           },
           maxDelayMs: {
+            type: "number",
+          },
+          maxRetryAfterMs: {
             type: "number",
           },
           jitter: {
@@ -17087,6 +17103,9 @@ export const nativeRecipeSchemas: Readonly<
               additionalProperties: false,
               component: "transport",
             },
+            timeoutMs: {
+              type: "number",
+            },
             name: {
               type: "string",
             },
@@ -21620,6 +21639,9 @@ export const nativeRecipeSchemas: Readonly<
               required: ["$ref"],
               additionalProperties: false,
               component: "transport",
+            },
+            timeoutMs: {
+              type: "number",
             },
             name: {
               type: "string",

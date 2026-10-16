@@ -1,4 +1,6 @@
 export const referenceRedirects = {
+  "/reference/scriptedagent/": "/reference/createscriptedagent/",
+  "/fr/reference/scriptedagent/": "/fr/reference/createscriptedagent/",
   "/fr/reference/fileworkflowcheckpointoptions/":
     "/fr/reference/transportstoreoptions/",
   "/reference/fileworkflowcheckpointoptions/":

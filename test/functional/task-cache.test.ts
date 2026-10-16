@@ -9,6 +9,7 @@ import {
   planRecoveryRetention,
   pruneRecoveryRetention,
   defineTask,
+  defineLoopTask,
   createTaskCacheStore,
   defineWorkflow,
   createWorkflowCheckpointStore,
@@ -182,6 +183,70 @@ function memory() {
     },
   };
 }
+
+test("resumed attempts bypass a newly populated cache and retain valid checkpoints", async (t) => {
+  const transporter = await storage(t);
+  const store = createTaskCacheStore({ transporter });
+  const saved = memory();
+  const checkpoint = { store: saved.store, runId: "retry", version: "1" };
+  let calls = 0;
+  const task = defineTask({
+    key: "work",
+    cache: { store, version: "1", key: () => "shared" },
+    perform() {
+      if (++calls === 1) throw new Error("First attempt failed");
+      return calls;
+    },
+  });
+  const workflow = defineWorkflow("resumed-cache", [task]);
+  await workflow.start({ checkpoint });
+  (await workflow.start()).unwrap();
+  const resumed = await workflow.start({
+    checkpoint: { ...checkpoint, resume: "retry-incomplete" },
+  });
+  resumed.unwrap();
+  assert.equal(resumed.value(task), 3);
+  assert.equal(saved.read().records[0]?.attempts, 2);
+  assert.equal(saved.read().records[0]?.cacheHit, undefined);
+  const restored = await workflow.start({ checkpoint });
+  restored.unwrap();
+  assert.equal(restored.value(task), 3);
+  assert.equal(calls, 3);
+});
+
+test("resumed loop checks preserve rounds instead of substituting a cache hit", async (t) => {
+  const transporter = await storage(t);
+  const saved = memory();
+  const checkpoint = { store: saved.store, runId: "loop", version: "1" };
+  let attempts = 0,
+    checks = 0;
+  const task = defineLoopTask({
+    key: "loop",
+    maxRounds: 2,
+    cache: {
+      store: createTaskCacheStore({ transporter }),
+      version: "1",
+      key: () => "shared",
+    },
+    attempt: () => ++attempts,
+    check() {
+      if (++checks === 1) throw new Error("Interrupted check");
+      return { done: true };
+    },
+  });
+  const workflow = defineWorkflow("resumed-loop-cache", [task]);
+  await workflow.start({ checkpoint });
+  (await workflow.start()).unwrap();
+  const resumed = await workflow.start({
+    checkpoint: { ...checkpoint, resume: "retry-incomplete" },
+  });
+  resumed.unwrap();
+  assert.equal(resumed.value(task), 1);
+  assert.equal(attempts, 2);
+  assert.equal(checks, 3);
+  assert.equal(saved.read().records[0]?.cacheHit, undefined);
+  (await workflow.start({ checkpoint })).unwrap();
+});
 
 test("checkpoints persist cache hits and reject inconsistent hit records", async (t) => {
   const transporter = await storage(t);

@@ -10,9 +10,9 @@ Import the test kit from `@elie-laloum/outpost/testing` and pass its sandbox pro
 Save the agent fixture as `coder.ts`. Its first request emits the answer and creates the declared commit; a second request fails because the script is exhausted. Create a fresh agent for each independent test.
 
 ```ts title="coder.ts"
-import { scriptedAgent } from "@elie-laloum/outpost/testing";
+import { createScriptedAgent } from "@elie-laloum/outpost/testing";
 
-export const coder = scriptedAgent({
+export const coder = createScriptedAgent({
   turns: [
     {
       text: "Done",
@@ -65,9 +65,9 @@ Give a failing turn a nonzero status, followed by a successful turn. Your existi
 This agent fails once, then returns the requested answer. Both warm dispatches and new sandboxes consume the same agent's sequence; response repairs also consume turns. Repairs and conversation resume work inside the same open sandbox. Conversation capture, cold resume and fork are unavailable.
 
 ```ts
-import { scriptedAgent } from "@elie-laloum/outpost/testing";
+import { createScriptedAgent } from "@elie-laloum/outpost/testing";
 
-const agent = scriptedAgent({
+const agent = createScriptedAgent({
   turns: [
     { status: 7, stderr: "Simulated failure\n" },
     { text: "Done", usage: { input: 10, cached: 0, output: 5 } },
@@ -99,7 +99,7 @@ The provider never launches arbitrary commands. Host hooks and prompt command ex
 
 Run the complete repository example with `node examples/62-workflow-testing/index.ts` from a built Outpost checkout. It creates and removes its own temporary repository, checks one retry and a real commit, and simulates verification without paid calls.
 
-API: [scriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
+API: [createScriptedAgent](../../reference/scriptedagent/) · [ScriptedTurn](../../reference/scriptedturn/) · [ScriptedCommit](../../reference/scriptedcommit/) · [createMemorySandboxProvider](../../reference/creatememorysandboxprovider/) · [MemoryCommand](../../reference/memorycommand/).
 
 ## File workspaces
 

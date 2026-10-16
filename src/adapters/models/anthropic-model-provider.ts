@@ -4,6 +4,7 @@ import type { AnthropicModelProviderOptions } from "./anthropic-model-provider.t
 import {
   ANTHROPIC_BASE_URL,
   ANTHROPIC_VERSION,
+  ANTHROPIC_SPEND_LIMIT_MESSAGES,
 } from "./anthropic-model-provider.constants.ts";
 import { anthropicBody, supportedReasoning } from "./anthropic-request.ts";
 import { readAnthropicResponse } from "./anthropic-response.ts";
@@ -43,6 +44,16 @@ export function createAnthropicModelProvider(
     { ...options, baseUrl: options.baseUrl ?? ANTHROPIC_BASE_URL },
     {
       path: "messages",
+      quotaError(error) {
+        const message = error.message;
+        return (
+          error.type === "invalid_request_error" &&
+          typeof message === "string" &&
+          ANTHROPIC_SPEND_LIMIT_MESSAGES.some((pattern) =>
+            pattern.test(message),
+          )
+        );
+      },
       validate(model) {
         invariant(
           model.maxOutputTokens !== undefined,

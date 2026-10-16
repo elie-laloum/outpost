@@ -4,6 +4,7 @@ import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { interruptible } from "../infrastructure/abort.ts";
 import { quote } from "../infrastructure/process.ts";
+import { reportInputFailure } from "../infrastructure/input-failure.ts";
 import { cloudDefaults } from "./cloud.constants.ts";
 import {
   cloudInputFeed,
@@ -36,10 +37,8 @@ export function daytonaCommand(
     const pid = `/tmp/${id}.pid`;
     const live = command.input;
     const staged = live ? cloudInputFrames(command.stdin) : command.stdin;
-    if (staged !== undefined)
-      await sandbox.fs.uploadFile(Buffer.from(staged), input);
-    const failure = new AbortController();
-    const stopped = AbortSignal.any([signal, failure.signal]);
+    const stopped = signal;
+    let inputFailure: OutpostError | undefined;
     const variables = { ...context.variables, ...command.variables };
     const quoted = [
       ...(command.elevated ? ["sudo", "-n", "--"] : []),
@@ -51,24 +50,30 @@ export function daytonaCommand(
     const program = live ? cloudInputProgram(input, quoted) : quoted;
     const redirect =
       !live && command.stdin !== undefined ? ` < ${quote(input)}` : "";
-    const script = `cd ${quote(command.directory ?? root)} && env ${Object.entries(
-      variables,
-    )
-      .map(([key, value]) => quote(`${key}=${value}`))
-      .join(
-        " ",
-      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec node -e ${quote(daytonaCommandScript)} -- ${program}${redirect}`)}`;
+    const secrets = `/tmp/${id}.secrets`;
+    const environment = `${secrets}/environment.json`;
+    const script = `cd ${quote(command.directory ?? root)} && setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec node -e ${quote(daytonaCommandScript)} -- ${quote(environment)} ${program}${redirect}`)}`;
     const output = { stdout: "", stderr: "" };
     let feed: CloudInputFeed | undefined;
     let cancellation: Promise<unknown> | undefined;
     const cancel = () => {
       cancellation ??= sandbox.process.executeCommand(
-        `touch ${quote(pid + ".cancel")}; if [ -f ${quote(pid)} ]; then kill -KILL -$(cat ${quote(pid)}) 2>/dev/null || true; fi`,
+        `touch ${quote(pid + ".cancel")}; if [ -f ${quote(pid)} ]; then ${command.elevated ? "sudo -n -- " : ""}kill -KILL -$(cat ${quote(pid)}) 2>/dev/null || true; fi`,
       );
       void cancellation.catch(() => undefined);
     };
-    await sandbox.process.createSession(id);
+    let sessionCreated = false;
     try {
+      await sandbox.fs.createFolder(secrets, "700");
+      await sandbox.fs.uploadFile(
+        Buffer.from(JSON.stringify(variables)),
+        environment,
+      );
+      if (staged !== undefined)
+        await sandbox.fs.uploadFile(Buffer.from(staged), input);
+      stopped.throwIfAborted();
+      await sandbox.process.createSession(id);
+      sessionCreated = true;
       stopped.addEventListener("abort", cancel, { once: true });
       if (stopped.aborted) cancel();
       stopped.throwIfAborted();
@@ -89,8 +94,9 @@ export function daytonaCommand(
         feed = cloudInputFeed(
           live,
           async (line) => {
+            await sandbox.fs.uploadFile(Buffer.from(line), input + ".chunk");
             const appended = await sandbox.process.executeCommand(
-              `printf '%s' ${quote(line)} >> ${quote(input)}`,
+              `cat ${quote(input + ".chunk")} >> ${quote(input)}`,
             );
             if (appended.exitCode !== 0)
               throw new OutpostError(
@@ -98,7 +104,19 @@ export function daytonaCommand(
                 "Cloud live input could not be appended",
               );
           },
-          (cause) => failure.abort(cause),
+          (cause) => {
+            if (!reportInputFailure(live, cause))
+              inputFailure = new OutpostError(
+                "steering",
+                "Cloud live input delivery failed",
+                {},
+                cause,
+              );
+          },
+          () =>
+            sandbox.fs
+              .uploadFile(Buffer.alloc(0), input + ".closed")
+              .then(() => undefined),
         );
       const consume = (channel: "stdout" | "stderr") => (chunk: string) => {
         output[channel] = (output[channel] + chunk).slice(
@@ -126,13 +144,17 @@ export function daytonaCommand(
           sandbox.process.getSessionCommand(id, commandId),
           stopped,
         );
-        if (result.exitCode !== undefined)
+        if (result.exitCode !== undefined) {
+          await feed?.finish();
+          if (inputFailure) throw inputFailure;
           return { status: result.exitCode, ...output };
+        }
         await setTimeout(cloudDefaults.pollMs, undefined, {
           signal: stopped,
         });
       }
     } catch (cause) {
+      if (inputFailure && cause === inputFailure) throw cause;
       cancel();
       try {
         await interruptible(
@@ -149,10 +171,15 @@ export function daytonaCommand(
     } finally {
       stopped.removeEventListener("abort", cancel);
       await feed?.finish();
-      await sandbox.process.deleteSession(id);
-      await sandbox.process
-        .executeCommand(`rm -f ${quote(input)} ${quote(pid)}`)
-        .catch(() => undefined);
+      try {
+        if (sessionCreated) await sandbox.process.deleteSession(id);
+      } finally {
+        await sandbox.process
+          .executeCommand(
+            `rm -f ${quote(input)} ${quote(input + ".chunk")} ${quote(input + ".closed")} ${quote(pid)} ${quote(pid + ".cancel")}; rm -rf ${quote(secrets)}`,
+          )
+          .catch(() => undefined);
+      }
     }
   };
 }

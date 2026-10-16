@@ -1,3 +1,4 @@
+import { OutpostError } from "../domain/errors.ts";
 import { inspectTransportRecovery } from "./transport-inspection.ts";
 import { inspectResourceActivity } from "../infrastructure/resource-activity-inspection.ts";
 import { inspectLocks } from "../infrastructure/git/lock-inspection.ts";
@@ -17,7 +18,18 @@ export async function inspectRecovery(
   if (options.transporter) return inspectTransportRecovery(options);
   const requested = await directory(options.repository);
   const repository = await directory(
-    (await git(requested, ["rev-parse", "--show-toplevel"])).trim(),
+    (
+      await git(requested, ["rev-parse", "--show-toplevel"]).catch(
+        (cause: unknown) => {
+          throw new OutpostError(
+            "configuration",
+            "Recovery inspection requires a Git repository; select a checkout with --repository or use the file-workspace recovery commands",
+            { directory: requested },
+            cause,
+          );
+        },
+      )
+    ).trim(),
   );
   const inventory = await storageInventory(
     join(repository, ".outpost"),

@@ -26,9 +26,11 @@ import {
   createSteering,
   createKimiHarness,
   createHarness,
+  createHarnessFileTools,
+  createHarnessEditTools,
   defineMcpPrompt,
 } from "../src/index.ts";
-import type { ModelRequest } from "../src/index.ts";
+import type { ModelRequest, HarnessToolContext } from "../src/index.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { conversationStore, repository, scripted } from "./helpers.ts";
@@ -45,6 +47,183 @@ import { imageRecipe } from "../src/cli/scaffold.constants.ts";
 
 const containerImage =
   process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
+
+test(
+  "container tmpfs homes are private and writable by the configured user",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    for (const mounted of [false, true]) {
+      const lease = await factory({
+        image: containerImage,
+        networks: "none",
+        user: { uid: 1234, gid: 5678 },
+        ...(mounted
+          ? {
+              volumes: [
+                {
+                  source: join(root, "base.txt"),
+                  target: "~/.config/source",
+                  readOnly: true,
+                },
+              ],
+            }
+          : {}),
+      }).acquire({
+        repository: root,
+        directory: root,
+        gitDirectories: [],
+        variables: {},
+      });
+      try {
+        const result = await lease.invoke({
+          executable: "sh",
+          arguments: [
+            "-c",
+            'test "$(stat -c %a /home/agent)" = 700 && test "$(stat -c %u:%g /home/agent)" = "$(id -u):$(id -g)" && touch /home/agent/private-file',
+          ],
+        });
+        assert.equal(result.status, 0, result.stderr);
+      } finally {
+        await lease.release();
+      }
+    }
+  },
+);
+
+test(
+  "container archives honor transfer deadlines longer than the default",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    const lease = await factory({
+      image: containerImage,
+      networks: "none",
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    t.after(() => lease.release());
+    const bytes = Buffer.alloc(256_000, 0xab);
+    const source = join(root, "deadline.bin");
+    await writeFile(source, bytes);
+    const timeout = globalThis.setTimeout;
+    const timer = t.mock.method(
+      globalThis,
+      "setTimeout",
+      (
+        callback: (...args: unknown[]) => void,
+        ms?: number,
+        ...args: unknown[]
+      ) => timeout(callback, ms === 120_000 ? 1 : ms, ...args),
+    );
+    try {
+      await lease.upload(source, "/home/agent/deadline.bin", {
+        deadlineMs: 600_000,
+      });
+      const inside = await lease.invoke({
+        executable: "node",
+        arguments: [
+          "-e",
+          "const b=require('node:fs').readFileSync('/home/agent/deadline.bin');if(b.length!==256000||!b.every(v=>v===0xab))process.exit(7)",
+        ],
+      });
+      assert.equal(inside.status, 0, inside.stderr);
+      const destination = join(root, "download.bin");
+      await lease.download("/home/agent/deadline.bin", destination, {
+        deadlineMs: 600_000,
+      });
+      assert.deepEqual(await readFile(destination), bytes);
+    } finally {
+      timer.mock.restore();
+    }
+  },
+);
+
+test(
+  "harness file tools reject container directory links before transfer",
+  {
+    skip: !process.env.OUTPOST_CONTAINER_ENGINE,
+  },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    const lease = await factory({
+      image: containerImage,
+      networks: "none",
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    t.after(() => lease.release());
+    const setup = await lease.invoke({
+      executable: "node",
+      arguments: [
+        "-e",
+        `
+    const fs = require('node:fs');
+    fs.mkdirSync('/tmp/outpost-tool-outside');
+    fs.writeFileSync('/tmp/outpost-tool-outside/value.txt', 'original');
+    fs.symlinkSync('/tmp/outpost-tool-outside', 'alias');
+  `,
+      ],
+    });
+    assert.equal(setup.status, 0, setup.stderr);
+    const context: HarnessToolContext = {
+      sandbox: lease,
+      signal: new AbortController().signal,
+      callId: "path-test",
+      model: { name: "fixture" },
+      observe() {},
+    };
+    const tools = [
+      ...createHarnessFileTools().tools,
+      ...createHarnessEditTools().tools,
+    ];
+    for (const [name, input] of [
+      ["read_file", { path: "alias/value.txt" }],
+      ["write_file", { path: "alias/new.txt", content: "escaped" }],
+      [
+        "edit_file",
+        { path: "alias/value.txt", old_text: "original", new_text: "changed" },
+      ],
+    ] as const) {
+      const tool = tools.find((tool) => tool.name === name)!;
+      await assert.rejects(
+        Promise.resolve(tool.execute(input, context)),
+        /symbolic link/,
+      );
+    }
+    const verified = await lease.invoke({
+      executable: "node",
+      arguments: [
+        "-e",
+        `
+    const fs = require('node:fs');
+    if (fs.existsSync('/tmp/outpost-tool-outside/new.txt')) process.exit(2);
+    process.stdout.write(fs.readFileSync('/tmp/outpost-tool-outside/value.txt'));
+  `,
+      ],
+    });
+    assert.equal(verified.status, 0, verified.stderr);
+    assert.equal(verified.stdout, "original");
+  },
+);
 
 test(
   "real container supports Git, native CLIs, transfers, cancellation and warm reuse",
@@ -630,7 +809,12 @@ test(
     }
     let name = "";
     const checks = await diagnoseImage(
-      { sandboxProvider: engine, agent: "codex", image: containerImage },
+      {
+        sandboxProvider: engine,
+        agent: "codex",
+        image: containerImage,
+        deadlineMs: 5000,
+      },
       async (command) => {
         const args = command.arguments ?? [];
         if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
@@ -702,6 +886,56 @@ test(
     const [status] = await closed;
     assert.equal(interrupted, true, error);
     assert.equal(status, 143, error);
+    assert.ok(name);
+    await assertContainerRemoved(engine, name);
+  },
+);
+
+test(
+  "host interruption cancels an active command before removing its container",
+  {
+    skip: !process.env.OUTPOST_CONTAINER_ENGINE || process.platform === "win32",
+  },
+  async (t) => {
+    const root = await repository(t);
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const child = spawn(
+      process.execPath,
+      ["test/fixtures/container-interruption.ts", root],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    const closed = once(child, "close");
+    let output = "",
+      error = "",
+      name = "",
+      interrupted = false;
+    child.stderr.on("data", (data: Buffer) => {
+      error += data.toString();
+    });
+    child.stdout.on("data", (data: Buffer) => {
+      output += data.toString();
+      name = /container=(outpost-[\w-]+)/.exec(output)?.[1] ?? name;
+      if (!interrupted && output.includes("ready")) {
+        interrupted = true;
+        child.kill("SIGINT");
+      }
+    });
+    const timeout = setTimeout(() => child.kill("SIGKILL"), 30_000);
+    t.after(async () => {
+      clearTimeout(timeout);
+      child.kill("SIGKILL");
+      if (name)
+        await executeProcess({
+          executable: engine,
+          arguments: ["rm", "--force", name],
+        });
+    });
+    const [status] = await closed;
+    assert.equal(interrupted, true, error);
+    assert.equal(status, 130, error);
+    assert.match(output, /fault=aborted/);
+    assert.doesNotMatch(output, /completed=/);
     assert.ok(name);
     await assertContainerRemoved(engine, name);
   },
@@ -1637,3 +1871,68 @@ for (const repositoryMode of ["mounted", "isolated"] as const) {
     },
   );
 }
+
+test(
+  "container relative uploads and downloads use the workspace root in mounted and isolated modes",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    const source = join(root, "transfer-source");
+    await mkdir(source);
+    await writeFile(join(source, "binary"), Buffer.from([0, 255, 128]));
+    for (const repositoryMode of ["mounted", "isolated"] as const) {
+      const lease = await factory({
+        image: containerImage,
+        networks: "none",
+        repositoryMode,
+      }).acquire({
+        repository: root,
+        directory: root,
+        gitDirectories: [],
+        variables: {},
+      });
+      try {
+        assert.equal(
+          (
+            await lease.invoke({
+              executable: "mkdir",
+              arguments: ["-p", "relative-existing"],
+            })
+          ).status,
+          0,
+        );
+        await lease.upload(source, "relative-existing");
+        await lease.upload(source + "/.", "relative-existing");
+        const inspected = await lease.invoke({
+          executable: "node",
+          arguments: [
+            "-e",
+            "const fs=require('node:fs');for(const p of ['relative-existing/transfer-source/binary','relative-existing/binary']){if(fs.readFileSync(p).toString('hex')!=='00ff80')process.exit(7)}",
+          ],
+        });
+        assert.equal(inspected.status, 0, inspected.stderr);
+        const destination = join(root, `relative-download-${repositoryMode}`);
+        await mkdir(destination);
+        await lease.download("relative-existing/transfer-source", destination);
+        await lease.download(
+          "relative-existing/transfer-source/.",
+          destination,
+        );
+        assert.deepEqual(
+          await readFile(join(destination, "transfer-source", "binary")),
+          Buffer.from([0, 255, 128]),
+        );
+        assert.deepEqual(
+          await readFile(join(destination, "binary")),
+          Buffer.from([0, 255, 128]),
+        );
+      } finally {
+        await lease.release();
+      }
+    }
+  },
+);

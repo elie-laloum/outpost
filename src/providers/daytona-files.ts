@@ -28,18 +28,18 @@ export function daytonaFiles(
               throw new OutpostError("provider", "Symlink upload failed");
           },
           async (path, directory, mode) => {
-            if (directory)
+            if (directory) {
               await sandbox.fs.createFolder(path, mode.toString(8));
-            else {
-              const result = await sandbox.process.executeCommand(
-                `chmod ${mode.toString(8)} ${quote(path)}`,
-              );
-              if (result.exitCode !== 0)
-                throw new OutpostError(
-                  "provider",
-                  "Transfer permissions could not be set",
-                );
+              return;
             }
+            const result = await sandbox.process.executeCommand(
+              `chmod ${mode.toString(8)} ${quote(path)}`,
+            );
+            if (result.exitCode !== 0)
+              throw new OutpostError(
+                "provider",
+                "Transfer permissions could not be set",
+              );
           },
           signal,
         );

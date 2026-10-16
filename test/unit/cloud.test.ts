@@ -12,6 +12,8 @@ import {
   manifestScript,
   uploadTree,
 } from "../../src/providers/cloud-files.ts";
+import { observeInputFailure } from "../../src/infrastructure/input-failure.ts";
+import { OutpostError } from "../../src/domain/errors.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository } from "../helpers.ts";
 
@@ -100,6 +102,24 @@ test("Vercel contract streams bounded output, stages stdin and transfers files",
   await assert.rejects(lease.invoke({ executable: "false" }), /disconnected/);
   assert.equal(killed, 1);
   await assert.rejects(
+    lease.invoke({
+      executable: "false",
+      elevated: true,
+      input: Readable.from([]),
+    }),
+    /disconnected/,
+  );
+  assert.ok(
+    invocations.some(
+      (value) =>
+        Array.isArray(value) &&
+        value[0] &&
+        typeof value[0] === "object" &&
+        value[0].sudo === true &&
+        value[0].args?.some((arg: string) => arg.includes("kill -KILL")),
+    ),
+  );
+  await assert.rejects(
     lease.invoke({ executable: "node", interactive: true }),
     /Interactive/,
   );
@@ -182,15 +202,28 @@ test("Daytona contract isolates commands, preserves streams and cancels without 
     stderr: "derr",
   });
   assert.equal(sessions, 0);
+  assert.ok(commands.every((command) => !command.includes("value with")));
+  assert.ok(
+    [...files.values()].some((bytes) =>
+      bytes.toString().includes("value with"),
+    ),
+  );
   await lease.upload(join(root, "base.txt"), "/remote/base");
   await lease.download("/remote/base", join(root, "download"));
   assert.equal(await readFile(join(root, "download"), "utf8"), "base\n");
   wait = true;
   await assert.rejects(
-    lease.invoke({ executable: "sleep", deadlineMs: 20 }),
+    lease.invoke({ executable: "sleep", elevated: true, deadlineMs: 20 }),
     /timeout|aborted/i,
   );
-  assert.ok(commands.some((command) => command.includes("kill -KILL")));
+  assert.ok(
+    commands.some((command) => command.includes("sudo -n -- kill -KILL")),
+  );
+  assert.ok(
+    commands.some(
+      (command) => command.includes(".cancel") && command.startsWith("rm -f"),
+    ),
+  );
   assert.equal(deleted, 0);
   assert.equal(sessions, 0);
   wait = false;
@@ -208,6 +241,8 @@ test("cloud transfers preserve directories and refuse manifest traversal", async
     target = join(root, "target"),
     uploaded = new Map<string, Buffer>();
   await mkdir(join(source, "empty"), { recursive: true });
+  await mkdir(join(source, ".git"));
+  await writeFile(join(source, ".git", "config"), "dependency checkout");
   await writeFile(join(source, "file.txt"), "contents");
   const directories: string[] = [];
   await uploadTree(
@@ -230,6 +265,10 @@ test("cloud transfers preserve directories and refuse manifest traversal", async
     uploaded.get(path)!,
   );
   assert.equal(await readFile(join(target, "file.txt"), "utf8"), "contents");
+  assert.equal(
+    await readFile(join(target, ".git", "config"), "utf8"),
+    "dependency checkout",
+  );
   await assert.rejects(
     downloadTree(
       "/input",
@@ -245,152 +284,182 @@ test("cloud transfers preserve directories and refuse manifest traversal", async
   );
 });
 
-function appendedLine(script: string): string | undefined {
-  return /^printf '%s' '([A-Za-z0-9+/=]*\n)' >> /.exec(script)?.[1];
-}
-
-async function liveInvocation(
-  invoke: (input: PassThrough) => Promise<unknown>,
-  lines: readonly string[],
-): Promise<void> {
-  const input = new PassThrough();
-  const pending = invoke(input);
-  input.write("steer\n");
-  input.end();
-  await pending;
-  assert.deepEqual(lines, [
-    `${Buffer.from("steer\n").toString("base64")}\n`,
-    "\n",
-  ]);
-}
-
-test("Vercel and Daytona stage framed stdin and append live input until the end frame", async (t) => {
+test("cloud live input transfers large frames and reports append failures without killing the turn", async (t) => {
   const root = await repository(t);
   for (const name of ["vercel", "daytona"] as const) {
-    const files = new Map<string, Buffer>();
-    const lines: string[] = [];
-    const scripts: string[] = [];
-    let ended!: () => void;
-    const finished = new Promise<void>((resolve) => (ended = resolve));
-    const append = (script: string) => {
-      const line = appendedLine(script);
-      if (line === undefined) return;
-      lines.push(line);
-      if (line === "\n") ended();
-    };
-    const lease =
-      name === "vercel"
-        ? await createVercelSandboxProvider(
-            {},
-            async () =>
-              ({
-                mkDir: async () => {},
-                stop: async () => {},
-                writeFiles: async (
-                  entries: { path: string; content: Buffer }[],
-                ) => {
-                  for (const item of entries)
-                    files.set(item.path, item.content);
-                },
-                runCommand: async (
-                  input: string | { cmd: string; args: string[] },
-                  args?: string[],
-                ) => {
-                  if (typeof input === "string") {
-                    append(args?.[1] ?? "");
-                    return { exitCode: 0, stdout: async () => "/home/test\n" };
-                  }
-                  scripts.push([input.cmd, ...input.args].join(" "));
-                  return {
-                    async *logs() {
-                      await finished;
-                      yield { stream: "stdout", data: "done" };
-                    },
-                    wait: async () => ({ exitCode: 0 }),
-                    kill: async () => {},
-                  };
-                },
-              }) as unknown as VercelSandbox,
-          ).acquire({
-            repository: root,
-            directory: root,
-            gitDirectories: [],
-            variables: {},
-          })
-        : await createDaytonaSandboxProvider(
-            {},
-            async () =>
-              ({
-                create: async () => ({
-                  getUserHomeDir: async () => "/home/test",
-                  fs: {
-                    createFolder: async () => {},
-                    uploadFile: async (data: Buffer, path: string) => {
-                      files.set(path, data);
-                    },
+    for (const mode of [
+      "success",
+      "managed-failure",
+      "direct-failure",
+    ] as const) {
+      const files = new Map<string, Buffer>();
+      const lines: string[] = [];
+      const scripts: string[] = [];
+      let ended!: () => void;
+      const finished = new Promise<void>((resolve) => (ended = resolve));
+      let killed = 0;
+      let failed!: () => void;
+      const failure = new Promise<void>((resolve) => (failed = resolve));
+      const storeFile = (path: string, data: Buffer) => {
+        files.set(path, data);
+        if (path.endsWith(".closed")) ended();
+      };
+      const append = (script: string) => {
+        assert.ok(script.length < 10_000, "input must not be embedded in argv");
+        if (script.includes("kill -KILL")) killed++;
+        const path = /^cat '([^']+)' >> /.exec(script)?.[1];
+        if (!path) return;
+        if (mode !== "success") {
+          failed();
+          throw new Error("append disconnected");
+        }
+        lines.push(files.get(path)!.toString());
+      };
+      const lease =
+        name === "vercel"
+          ? await createVercelSandboxProvider(
+              {},
+              async () =>
+                ({
+                  mkDir: async () => {},
+                  stop: async () => {},
+                  writeFiles: async (
+                    entries: { path: string; content: Buffer }[],
+                  ) => {
+                    for (const item of entries)
+                      storeFile(item.path, item.content);
                   },
-                  process: {
-                    createSession: async () => {},
-                    deleteSession: async () => {},
-                    executeCommand: async (script: string) => {
-                      append(script);
-                      return { exitCode: 0, result: "" };
-                    },
-                    executeSessionCommand: async (
-                      _id: string,
-                      options: { command: string },
-                    ) => {
-                      scripts.push(options.command);
-                      return { cmdId: "command" };
-                    },
-                    getSessionCommandLogs: async (
-                      _id: string,
-                      _cmd: string,
-                      stdout: (chunk: string) => void,
-                    ) => {
-                      await finished;
-                      stdout("done");
-                    },
-                    getSessionCommand: async () => ({ exitCode: 0 }),
+                  runCommand: async (
+                    input: string | { cmd: string; args: string[] },
+                    args?: string[],
+                  ) => {
+                    if (typeof input === "string") {
+                      append(args?.[1] ?? "");
+                      return {
+                        exitCode: 0,
+                        stdout: async () => "/home/test\n",
+                      };
+                    }
+                    scripts.push([input.cmd, ...input.args].join(" "));
+                    return {
+                      async *logs() {
+                        await finished;
+                        yield { stream: "stdout", data: "done" };
+                      },
+                      wait: async () => ({ exitCode: 7 }),
+                      kill: async () => {
+                        killed++;
+                      },
+                    };
                   },
-                }),
-                delete: async () => {},
-              }) as unknown as Pick<Daytona, "create" | "delete">,
-          ).acquire({
-            repository: root,
-            directory: root,
-            gitDirectories: [],
-            variables: {},
-          });
-    try {
-      assert.equal(lease.liveInput, true);
-      await liveInvocation(
-        (input) =>
-          lease.invoke({
-            executable: "claude",
-            arguments: ["--print"],
-            stdin: "prompt\n",
-            input,
-          }),
-        lines,
-      );
-      assert.ok(
-        [...files.values()].some(
-          (value) =>
-            value.toString() ===
-            `${Buffer.from("prompt\n").toString("base64")}\n`,
-        ),
-        name,
-      );
-      const script = scripts.at(-1)!;
-      assert.ok(script.includes("fs.readFileSync(file)"), name);
-      assert.ok(
-        script.indexOf("claude") > script.indexOf("readFileSync"),
-        name,
-      );
-      assert.doesNotMatch(script, / < /);
-    } finally {
-      await lease.release();
+                }) as unknown as VercelSandbox,
+            ).acquire({
+              repository: root,
+              directory: root,
+              gitDirectories: [],
+              variables: {},
+            })
+          : await createDaytonaSandboxProvider(
+              {},
+              async () =>
+                ({
+                  create: async () => ({
+                    getUserHomeDir: async () => "/home/test",
+                    fs: {
+                      createFolder: async () => {},
+                      uploadFile: async (data: Buffer, path: string) => {
+                        storeFile(path, data);
+                      },
+                    },
+                    process: {
+                      createSession: async () => {},
+                      deleteSession: async () => {},
+                      executeCommand: async (script: string) => {
+                        append(script);
+                        return { exitCode: 0, result: "" };
+                      },
+                      executeSessionCommand: async (
+                        _id: string,
+                        options: { command: string },
+                      ) => {
+                        scripts.push(options.command);
+                        return { cmdId: "command" };
+                      },
+                      getSessionCommandLogs: async (
+                        _id: string,
+                        _cmd: string,
+                        stdout: (chunk: string) => void,
+                      ) => {
+                        await finished;
+                        stdout("done");
+                      },
+                      getSessionCommand: async () => ({ exitCode: 7 }),
+                    },
+                  }),
+                  delete: async () => {},
+                }) as unknown as Pick<Daytona, "create" | "delete">,
+            ).acquire({
+              repository: root,
+              directory: root,
+              gitDirectories: [],
+              variables: {},
+            });
+      try {
+        assert.equal(lease.liveInput, true);
+        const input = new PassThrough();
+        const failures: OutpostError[] = [];
+        const unobserve =
+          mode === "managed-failure"
+            ? observeInputFailure(input, (error) => failures.push(error))
+            : () => {};
+        const pending = lease.invoke({
+          executable: "claude",
+          arguments: ["--print"],
+          stdin: "prompt\n",
+          input,
+        });
+        const payload = "steer".repeat(30_000) + "\n";
+        input.write(payload);
+        if (mode !== "success") {
+          await failure;
+          await new Promise((resolve) => setImmediate(resolve));
+          assert.equal(killed, 0, name);
+        }
+        input.end();
+        if (mode === "direct-failure")
+          await assert.rejects(
+            pending,
+            (error) =>
+              error instanceof OutpostError && error.code === "steering",
+          );
+        else assert.equal((await pending).status, 7);
+        unobserve();
+        assert.equal(killed, 0, name);
+        if (mode === "managed-failure")
+          assert.equal(failures[0]?.code, "steering");
+        if (mode === "success")
+          assert.deepEqual(lines, [
+            Buffer.from(payload).toString("base64") + "\n",
+          ]);
+        assert.equal((await lease.invoke({ executable: "true" })).status, 7);
+        assert.ok(
+          [...files.values()].some(
+            (value) =>
+              value.toString() ===
+              `${Buffer.from("prompt\n").toString("base64")}\n`,
+          ),
+          name,
+        );
+        const script = scripts[0]!;
+        assert.ok(script.includes("fs.readFileSync(file)"), name);
+        assert.ok(
+          script.indexOf("claude") > script.indexOf("readFileSync"),
+          name,
+        );
+        assert.doesNotMatch(script, / < /);
+      } finally {
+        await lease.release();
+      }
     }
   }
 });

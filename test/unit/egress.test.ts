@@ -69,7 +69,7 @@ test("egress policies reject malformed, ambiguous and unrestricted domain patter
     }),
     {
       mode: "allowlist",
-      domains: ["*.example.com", "EXAMPLE.com"],
+      domains: ["*.example.com", "example.com"],
       allowCidrs: ["10.0.0.0/8", "2001:db8::/32"],
       denyCidrs: ["10.1.0.0/16"],
     },

@@ -1,3 +1,4 @@
+import { recoveryUnlockCommand } from "./recovery-unlock-command.ts";
 import { recoveryRestoreCommand } from "./recovery-restore-command.ts";
 import { recoveryPruneCommand } from "./recovery-prune-command.ts";
 import { recoveryVerifyCommand } from "./recovery-verify-command.ts";
@@ -18,6 +19,8 @@ export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "unlock")
+    return recoveryUnlockCommand({ values, positionals });
   if (positionals[1] === "registry") {
     const action = positionals[2];
     invariant(

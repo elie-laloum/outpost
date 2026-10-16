@@ -91,7 +91,7 @@ export function firecrackerCommand(
         {
           ...firecrackerSsh(
             runtime.options,
-            `umask 077; touch ${quote(id + ".cancel")}; if [ -f ${quote(id)} ]; then node -e ${quote("const fs=require('node:fs');const pid=Number(fs.readFileSync(process.argv[1],'utf8'));if(!Number.isSafeInteger(pid)||pid<2)process.exit(1);const kill=s=>{try{process.kill(-pid,s)}catch(e){if(e.code!=='ESRCH')throw e}};kill('SIGTERM');setTimeout(()=>kill('SIGKILL'),100)")} ${quote(id)}; fi`,
+            `umask 077; touch ${quote(id + ".cancel")}; if [ -f ${quote(id)} ]; then node -e ${quote("const fs=require('node:fs');const pid=Number(fs.readFileSync(process.argv[1],'utf8'));if(!Number.isSafeInteger(pid)||pid<2)process.exit(1);const kill=s=>{try{process.kill(-pid,s)}catch(e){if(e.code!=='ESRCH')throw e}};kill('SIGTERM');setTimeout(()=>kill('SIGKILL'),500)")} ${quote(id)}; fi`,
           ),
           deadlineMs: firecrackerDefaults.cleanupMs,
         },
@@ -107,7 +107,6 @@ export function firecrackerCommand(
         ),
       deadlineMs,
     );
-    let interrupted = false;
     try {
       const {
         directory: _directory,
@@ -130,13 +129,24 @@ export function firecrackerCommand(
         signal,
         ...firecrackerSsh(
           runtime.options,
-          `setsid --wait sh -c ${quote(wrapper)}`,
+          `setsid --wait sh -c ${quote(wrapper)}; status=$?; printf '%s' "$status" > ${quote(id + ".status")}; exit "$status"`,
         ),
       });
       signal.throwIfAborted();
+      if (result.status === 255) {
+        const status = await executeProcess({
+          ...firecrackerSsh(runtime.options, `cat ${quote(id + ".status")}`),
+          deadlineMs: firecrackerDefaults.cleanupMs,
+        });
+        if (status.status !== 0 || status.stdout.trim() !== "255")
+          throw new OutpostError(
+            "provider",
+            "Guest SSH connection failed before command completion",
+            { unavailable: "SSH connection failure" },
+          );
+      }
       return result;
     } catch (cause) {
-      interrupted = true;
       try {
         cancel();
         await cancellation;
@@ -150,9 +160,12 @@ export function firecrackerCommand(
     } finally {
       clearTimeout(timer);
       signal.removeEventListener("abort", cancel);
-      if (!interrupted && !runtime.isClosed())
+      if (!runtime.isClosed())
         await executeProcess({
-          ...firecrackerSsh(runtime.options, `rm -f -- ${quote(id)}`),
+          ...firecrackerSsh(
+            runtime.options,
+            `rm -f -- ${quote(id)} ${quote(id + ".cancel")} ${quote(id + ".status")}`,
+          ),
           deadlineMs: firecrackerDefaults.cleanupMs,
         }).catch(() => undefined);
     }

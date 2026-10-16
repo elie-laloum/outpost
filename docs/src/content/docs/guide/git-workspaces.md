@@ -90,3 +90,5 @@ API: [dispatch](../../reference/dispatch/) · [openWorkspace](../../reference/op
 ## Next steps
 
 - [Check before integrating changes](../integrating-changes/)
+
+Reopening a named workspace refreshes its branch from `origin` when available and fast-forwards local history when safe. This can access the network and change the baseline. A failed fetch is tolerated, but can wait until the Git deadline. Existing local commits and divergent history are preserved.

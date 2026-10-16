@@ -78,3 +78,5 @@ Sans `mode`, les exécutions non interactives passent `--dangerously-skip-permis
 - Le bootstrap réutilise un `agy` déjà présent dans le PATH sans vérifier sa version ni son empreinte.
 
 API : [createAntigravityHarness](../../reference/createantigravityharness/) · [AntigravitySettings](../../reference/antigravitysettings/) · [agentVersions](../../reference/agentversions/).
+
+Avec le provider local, `usage` transmet uniquement `GEMINI_API_KEY`. Outpost n’installe pas `settings.json` dans le home hôte : configurez vous-même le provider Gemini de la CLI native, ou choisissez une sandbox isolée dont Outpost peut préparer le home privé.

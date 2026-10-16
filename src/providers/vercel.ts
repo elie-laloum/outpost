@@ -54,17 +54,19 @@ export function createVercelSandboxProvider(
       let saveCaches: () => Promise<void> = async () => {};
       let unregister = () => {};
       const release = () =>
-        (releasing ??= releaseCloudSandbox(
-          () => saveCaches(),
-          async () => {
-            await sandbox.stop();
-            closed = true;
-            unregister();
-          },
-        ).catch((error) => {
-          if (!closed) releasing = undefined;
-          throw error;
-        }));
+        closed
+          ? Promise.resolve()
+          : (releasing ??= releaseCloudSandbox(
+              () => saveCaches(),
+              async () => {
+                await sandbox.stop();
+                closed = true;
+                unregister();
+              },
+            ).catch((error) => {
+              if (!closed) releasing = undefined;
+              throw error;
+            }));
       unregister = registerCleanup(release);
       let home: string;
       try {

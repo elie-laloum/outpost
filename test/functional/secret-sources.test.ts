@@ -154,6 +154,8 @@ test("Vault refuses malformed, oversized, redirected and failed reads without ec
     await assert.rejects(fromSecrets(source, ["KEY"]), (error) => {
       assert.ok(error instanceof OutpostError);
       assert.equal(error.code, "provider");
+      if (mode === "denied")
+        assert.equal(error.message, "Vault read failed with HTTP 403");
       assert.equal(String(error).includes("private-token"), false);
       assert.equal(error.cause, undefined);
       return true;

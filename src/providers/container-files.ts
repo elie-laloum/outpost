@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, mkdtemp } from "node:fs/promises";
+import { mkdir, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, posix, resolve } from "node:path";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -9,8 +9,10 @@ import {
   copyTransfer,
   removeTransferDirectory,
   transferDestination,
+  transferTarget,
 } from "../infrastructure/transfer-copy.ts";
 import { transfer } from "../infrastructure/transfer.ts";
+import { transferDefaults } from "../infrastructure/transfer.constants.ts";
 import { containerArchive } from "./container-archive.ts";
 import type { ContainerRuntime } from "./container.types.ts";
 
@@ -25,6 +27,7 @@ export function containerFiles(
         if (runtime.isClosed())
           throw new OutpostError("provider", "Container sandbox is closed");
         const absolute = resolve(source);
+        const target = posix.resolve(runtime.root, destination);
         const scratch = `/tmp/outpost-transfer-${randomUUID()}`;
         const entry = basename(absolute);
         invariant(entry, "Upload a directory's contents using a non-root path");
@@ -35,10 +38,12 @@ export function containerFiles(
             runtime,
             {
               executable: "tar",
+              deadlineMs: options.deadlineMs ?? transferDefaults.deadlineMs,
               arguments: ["-cf", "-", "-C", dirname(absolute), "--", entry],
             },
             {
               executable: "tar",
+              deadlineMs: options.deadlineMs ?? transferDefaults.deadlineMs,
               arguments: [
                 "-xpf",
                 "-",
@@ -57,7 +62,7 @@ export function containerFiles(
               name,
               "sh",
               "-c",
-              `mkdir -p ${quote(posix.dirname(destination))} && cp -a -- ${quote(posix.join(scratch, entry) + (contents ? "/." : ""))} ${quote(destination)}`,
+              `mkdir -p ${quote(posix.dirname(target))} && cp -a -- ${quote(posix.join(scratch, entry) + (contents ? "/." : ""))} ${quote(target)}`,
             ],
             { signal },
           );
@@ -89,6 +94,7 @@ export function containerFiles(
             runtime,
             {
               executable: "tar",
+              deadlineMs: options.deadlineMs ?? transferDefaults.deadlineMs,
               arguments: [
                 "-xpf",
                 "-",
@@ -100,6 +106,7 @@ export function containerFiles(
             },
             {
               executable: "tar",
+              deadlineMs: options.deadlineMs ?? transferDefaults.deadlineMs,
               arguments: [
                 "-cf",
                 "-",
@@ -112,16 +119,11 @@ export function containerFiles(
             false,
             signal,
           );
-          const existing = await lstat(destination).catch(
-            (cause: NodeJS.ErrnoException) => {
-              if (cause.code === "ENOENT") return undefined;
-              throw cause;
-            },
+          const target = await transferTarget(
+            entry,
+            destination,
+            source.endsWith("/."),
           );
-          const target =
-            existing?.isDirectory() && !source.endsWith("/.")
-              ? join(destination, entry)
-              : destination;
           await mkdir(dirname(target), { recursive: true });
           await copyTransfer(join(scratch, entry), target, signal);
         } finally {

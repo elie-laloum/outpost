@@ -51,8 +51,8 @@ Le conteneur monte le checkout de la tâche sur `/workspace` et les métadonnée
 
 <!-- features -->
 
-- **Répertoire personnel privé** : `/home/agent` est un tmpfs, supprimé avec le conteneur. Le harness y copie les [identifiants](../authentication/) de l’agent.
-- **Privilèges réduits** : Les capacités Linux sont retirées (`CHOWN` reste quand les caches, les montages de fichiers ou le Git privé en ont besoin) et `no-new-privileges` est activé.
+- **Répertoire personnel privé** : `/home/agent` est un tmpfs en mode `0700`, appartenant à l’utilisateur configuré et supprimé avec le conteneur. Le harness y copie les [identifiants](../authentication/) de l’agent.
+- **Privilèges réduits** : Les capacités Linux sont retirées (`CHOWN` reste pour attribuer le répertoire personnel Podman, ou quand les caches, les montages de fichiers ou le Git privé en ont besoin) et `no-new-privileges` est activé.
 - **Aucun accès au moteur** : Le socket Docker ou Podman n’est jamais monté.
 
 Pour exposer d’autres chemins hôte, ajoutez des `volumes`. Une `source` relative part du dépôt ; une `target` qui commence par `~/` arrive dans le répertoire personnel de l’agent, toute autre `target` relative sous `/workspace`.

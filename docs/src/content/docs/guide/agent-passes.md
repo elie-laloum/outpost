@@ -28,7 +28,7 @@ console.log(result.completed, result.completion);
 // Example output: true READY_FOR_REVIEW
 ```
 
-Each pass starts a new conversation on the same branch, so it sees the previous commits. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.
+Each pass starts a new conversation and sees the commits retained or integrated by the preceding pass. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.
 
 API reference: [DispatchResult](../../reference/dispatchresult/).
 
@@ -37,3 +37,5 @@ A marker is the agent’s declaration, not proof. Run your tests before relying 
 :::
 
 If the agent writes its marker but keeps running, Outpost stops it `settleMs` after its last output. The result is kept and `warn` receives a message.
+
+With top-level `dispatch()`, each pass allocates a fresh sandbox and runs its preparation hooks. A named branch keeps its commits across passes; `integrate` creates and integrates a separate branch for each pass. With `sandbox.dispatch()`, passes reuse the open sandbox and workspace. Choose that form when preparation must run only once.

@@ -1,4 +1,5 @@
-import { invariant, OutpostError, positive } from "../../domain/errors.ts";
+import { secretFault } from "../../domain/secret-fault.ts";
+import { invariant, positive } from "../../domain/errors.ts";
 import { secretNames, secretValue } from "../../domain/secrets.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
 import { secretText } from "./secret-source.ts";
@@ -24,7 +25,7 @@ export function createVaultSecretSource(
   try {
     base = new URL(options.address);
   } catch {
-    throw new OutpostError(
+    throw secretFault(
       "configuration",
       "Vault address must be an absolute HTTP(S) URL",
     );
@@ -68,7 +69,7 @@ export function createVaultSecretSource(
       });
       if (!response.ok) {
         await response.body?.cancel();
-        throw new OutpostError(
+        throw secretFault(
           "provider",
           `Vault read failed with HTTP ${response.status}`,
         );

@@ -108,3 +108,5 @@ Docker et Podman avec un checkout monté n’installent jamais de CLI : l’imag
 - `outpost image` construit et supprime des images locales ; il ne les pousse pas vers un registre.
 
 API : [agentVersions](../../reference/agentversions/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [SandboxOptions](../../reference/sandboxoptions/).
+
+Les UID/GID zéro sont acceptés pour les images choisies explicitement avec root. Root dispose de davantage de privilèges dans le conteneur ; choisissez un UID non nul pour le travail habituel des agents. Cette option ne transforme pas les métadonnées Git montées en frontière de sécurité. Les projets conteneur générés incluent un `.dockerignore` excluant identifiants, état d’exécution et dépendances ; un fichier existant est conservé.

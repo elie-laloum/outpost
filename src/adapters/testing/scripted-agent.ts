@@ -9,7 +9,7 @@ import { scriptedExecutable } from "../../infrastructure/scripted-turn.constants
 import { readScriptedRecipe } from "../../infrastructure/scripted-turn.ts";
 import type { ScriptedAgentOptions } from "./scripted-agent.types.ts";
 
-export function scriptedAgent(options: ScriptedAgentOptions): CliAgent {
+export function createScriptedAgent(options: ScriptedAgentOptions): CliAgent {
   invariant(
     options.turns.length > 0,
     "Scripted agents require at least one turn",
@@ -98,3 +98,6 @@ export function scriptedAgent(options: ScriptedAgentOptions): CliAgent {
   };
   return adapter;
 }
+
+/** @deprecated Use createScriptedAgent. */
+export const scriptedAgent = createScriptedAgent;

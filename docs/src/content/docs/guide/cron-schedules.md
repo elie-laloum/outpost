@@ -147,3 +147,5 @@ A file recipe uses the same schedule-to-queue contract: a timer only publishes i
 - A schedule `name` is unique and uses letters, digits, `.`, `_` and `-` (128 characters at most). A `runId` has at most 256 characters.
 
 API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+
+Wall-clock deduplication also applies to wildcard expressions such as `0 * * * *`: the repeated local hour at the autumn DST transition fires once, leaving a two-hour real-time gap. Use UTC for a constant hourly cadence. Time zones are interpreted by `Intl`, including its accepted aliases; prefer explicit IANA regions rather than abbreviations such as `EST`. `maxLateMs` must be positive. A slow queue publication counts as lateness too: only the latest eligible slot is published after it finishes, and intermediate slots are intentionally coalesced. `onError` reports publication failures, not these coalesced slots.

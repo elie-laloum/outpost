@@ -1,3 +1,4 @@
+import { validateContainerImage } from "../domain/container-image.ts";
 import { recoverContainer } from "./container-recovery.ts";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -46,6 +47,7 @@ export function containerProvider(
   executor: Executor = executeProcess,
   platform: NodeJS.Platform = process.platform,
 ): SandboxProvider {
+  if (options.image !== undefined) validateContainerImage(options.image);
   const policy = validateEgress(options.egress);
   const config = {
     ...options,
@@ -232,7 +234,7 @@ export function containerProvider(
             "-c",
             `mkdir -p ${quote(parent)} && chown ${user.uid}:${user.gid} ${quote(parent)}`,
           ]);
-        if (fileParents.size)
+        if (engine === "podman" || fileParents.size)
           await call([
             "exec",
             "--user",
@@ -274,7 +276,7 @@ export function containerProvider(
         throw cause;
       }
       unregister = registerCleanup(release, () => {
-        if (!closed)
+        if (attempted)
           execFileSync(
             engine,
             ["rm", "--force", name, ...(egress ? [egress.name] : [])],

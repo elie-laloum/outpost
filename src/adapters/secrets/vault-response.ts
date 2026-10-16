@@ -1,9 +1,9 @@
-import { OutpostError } from "../../domain/errors.ts";
+import { secretFault } from "../../domain/secret-fault.ts";
 import { VAULT_RESPONSE_BYTES } from "./vault.constants.ts";
 
 export async function readVaultDocument(response: Response): Promise<object> {
   const reader = response.body?.getReader();
-  if (!reader) throw new OutpostError("provider", "Vault response has no body");
+  if (!reader) throw secretFault("provider", "Vault response has no body");
   const chunks: Uint8Array[] = [];
   let size = 0;
   try {
@@ -12,7 +12,7 @@ export async function readVaultDocument(response: Response): Promise<object> {
       if (chunk.done) break;
       size += chunk.value.byteLength;
       if (size > VAULT_RESPONSE_BYTES)
-        throw new OutpostError("provider", "Vault response exceeds 2 MiB");
+        throw secretFault("provider", "Vault response exceeds 2 MiB");
       chunks.push(chunk.value);
     }
   } finally {
@@ -25,7 +25,7 @@ export async function readVaultDocument(response: Response): Promise<object> {
       new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)),
     );
   } catch {
-    throw new OutpostError("provider", "Vault response must be UTF-8 JSON");
+    throw secretFault("provider", "Vault response must be UTF-8 JSON");
   }
   if (
     !value ||
@@ -38,9 +38,6 @@ export async function readVaultDocument(response: Response): Promise<object> {
     typeof value.data.data !== "object" ||
     Array.isArray(value.data.data)
   )
-    throw new OutpostError(
-      "provider",
-      "Vault response is not a KV v2 document",
-    );
+    throw secretFault("provider", "Vault response is not a KV v2 document");
   return value.data.data;
 }

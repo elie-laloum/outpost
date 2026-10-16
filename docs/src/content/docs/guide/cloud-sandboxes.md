@@ -123,3 +123,5 @@ API: [SandboxOptions](../../reference/sandboxoptions/) · [EgressPolicy](../../r
 <span id="choose-the-branch"></span>
 <span id="send-files-git-does-not-have"></span>
 <span id="when-synchronization-stops"></span>
+
+Daytona’s `create.autoStopInterval` is measured in minutes; `0` disables auto-stop. The SDK documents 15 minutes by default, with different auto-pause defaults for sandbox classes that support pausing. Set the policy explicitly for long tasks; Outpost command deadlines do not override service auto-stop. Elevated command cancellation uses the same privilege as execution. These SDK paths have offline regression coverage; validating descendant termination against a live cloud sandbox remains a separate check.

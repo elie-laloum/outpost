@@ -92,7 +92,7 @@ The identity uses the same hash recipe as container caches: canonical host repos
 
 A cloud sandbox receives its own snapshot. The first run to publish against the revision it restored wins; a stale concurrent publisher keeps the newer snapshot and discards its update. The cache is not a merged filesystem. Missing caches start empty. Other transport, archive or transfer failures fail acquisition or closing; closing still attempts sandbox disposal and reports both failures if necessary.
 
-Archives preserve files, binary bytes, permissions and symlinks; empty directories are recreated by the package manager. The existing archive limits apply: 1 GiB of payload, 100,000 files and a 16 MiB manifest. Restoration and each cache save have a 60-second deadline. Commands create `/outpost/cache/<name>` and assign it to the sandbox user; non-root images must permit elevated setup.
+Archives preserve files, binary bytes, permissions and symlinks, including dependency checkouts containing `.git`; empty directories are recreated by the package manager. The existing archive limits apply: 1 GiB of payload, 100,000 files and a 16 MiB manifest. Restoration and each cache save have a 60-second deadline. Commands create `/outpost/cache/<name>` and assign it to the sandbox user; non-root images must permit elevated setup.
 
 Objects live under `dependency-caches/` in the transport. Immutable snapshots, including superseded or unpublished snapshots, remain until you remove them. Remove a cache’s entire prefix only after stopping every reader and writer; deleting chunks used by an active restoration makes it fail. No snapshot pruning is automatic. A killed runner or an expired cloud sandbox may leave the latest downloads unsaved. Deterministic SDK fixtures cover the behavior; live Vercel, Daytona and S3 validation remains pending.
 
@@ -108,3 +108,5 @@ docker volume rm $(docker volume ls -q --filter label=io.outpost.cache=true)
 ```
 
 Podman accepts the same commands with `podman`.
+
+Cloud cache transfers use the provider file APIs and may make one request per file. Each cache can set `timeoutMs` (60 seconds by default); restoration shares the largest declared timeout, while each save gets its own deadline. Increase this limit for many small files or a slow service. Cache-save failures are reported even when sandbox disposal succeeds; subsequent disposal calls remain idempotent.

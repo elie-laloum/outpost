@@ -40,6 +40,7 @@ export function responsesBody(
       : {}),
     stream: false,
     store: false,
+    include: ["reasoning.encrypted_content"],
     ...(request.maxOutputTokens === undefined
       ? {}
       : { max_output_tokens: request.maxOutputTokens }),
@@ -137,6 +138,12 @@ function functionCall(item: Record<string, unknown>): ModelContentBlock {
 function responseItems(message: ModelMessage, context: ProtocolContext) {
   return message.content
     .filter((block) => replayable(block, context.identity, context.model))
+    .filter(
+      (block) =>
+        block.type !== "reasoning" ||
+        (typeof object(block.data).encrypted_content === "string" &&
+          object(block.data).encrypted_content !== ""),
+    )
     .toSorted((left, right) => order(message, left) - order(message, right))
     .map((block) => itemEncoders[block.type](block as never, message.role));
 }

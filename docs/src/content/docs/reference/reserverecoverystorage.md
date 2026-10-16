@@ -13,7 +13,7 @@ import { reserveRecoveryStorage } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Record reserveBytes in the repository's reservation ledger when observed usage, active reservations and the request fit within maxBytes, and return the reservation. Refusal, an incomplete inventory, invalid options or a malformed ledger reject with code configuration. The entry counts until release() and never expires; Outpost has no call to clear an abandoned one.
+Record reserveBytes in the repository's reservation ledger when observed usage, active reservations and the request fit within maxBytes, and return the reservation. Refusal, an incomplete inventory, invalid options or a malformed ledger reject with code configuration. The entry counts until release() and never expires; inspectStorageReservations() exposes owner metadata and recoverStorageReservation() conditionally clears an explicitly stopped owner’s entry.
 
 [Complete example and detailed rules](../../guide/retention/).
 

@@ -13,7 +13,7 @@ import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un WorkflowCheckpointStore qui conserve le checkpoint et le propriétaire de chaque exécution dans un seul objet, checkpoints/&lt;SHA-256 du runId>.json. acquire() échoue tant qu’un propriétaire est enregistré, et la libération conserve la progression. La propriété n’expire jamais : après un crash, arrêtez l’ancien exécuteur et appelez recoverWorkflowCheckpoint().
+Crée un WorkflowCheckpointStore qui conserve le checkpoint et le propriétaire de chaque exécution dans un seul objet, checkpoints/&lt;SHA-256 du runId>.json. acquire() échoue tant qu’un propriétaire est enregistré. La libération conserve la progression et retente une fois une erreur de stockage en vérifiant le propriétaire et la révision d’origine ; les conflits et erreurs persistantes restent refusés. La propriété n’expire jamais : après un crash, arrêtez l’ancien exécuteur et appelez recoverWorkflowCheckpoint().
 
 [Exemple complet et règles détaillées](../../guide/durable-runs/).
 

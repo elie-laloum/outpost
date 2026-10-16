@@ -105,7 +105,7 @@ test("image diagnostics use an isolated temporary workspace, pinned image and cl
     assert.ok(create.arguments?.includes("--tmpfs"));
     assert.ok(!create.arguments?.includes("--env"));
     assert.ok(!create.arguments?.some((arg) => arg.includes(process.cwd())));
-    assert.ok(runtime.calls.every((command) => command.deadlineMs! <= 5_000));
+    assert.ok(runtime.calls.every((command) => command.deadlineMs! <= 15_000));
     assert.ok(
       runtime.calls.some(
         (command) =>
@@ -306,4 +306,58 @@ test("CLI help failures affect the JSON result and exit code while cleanup still
   );
   assert.doesNotMatch(output, /private detail/);
   await assert.rejects(access(runtime.directory()));
+});
+
+test("doctor timeout applies to host, image lifecycle and CLI help before allocation", async () => {
+  const runtime = fixture();
+  await doctorCommand(
+    {
+      positionals: ["doctor"],
+      values: { image: "outpost:test", timeout: "23456" },
+    },
+    runtime.execute,
+    () => {},
+  );
+  assert.ok(runtime.calls.length > 10);
+  assert.ok(runtime.calls.every((call) => call.deadlineMs === 23456));
+  for (const timeout of ["0", "-1", "NaN", "Infinity", "60001", "1.5", ""]) {
+    await assert.rejects(
+      doctorCommand(
+        { positionals: ["doctor"], values: { timeout } },
+        async () => {
+          assert.fail("must validate before probing");
+        },
+      ),
+      /timeout must be an integer/,
+    );
+  }
+  await assert.rejects(
+    diagnoseImage(
+      {
+        sandboxProvider: "docker",
+        agent: "codex",
+        image: "outpost:test",
+        deadlineMs: 0,
+      },
+      async () => {
+        assert.fail("must validate before allocating");
+      },
+    ),
+    /timeout must be an integer/,
+  );
+  const check = await diagnosticProbe(
+    {
+      id: "agent.sandbox",
+      command: { executable: "copilot" },
+      failureStatus: "fail",
+      remedy: "Install copilot.",
+    },
+    async (command) => {
+      assert.equal(command.deadlineMs, 23456);
+      throw new OutpostError("timeout", "slow startup");
+    },
+    23456,
+  );
+  assert.match(check.message, /23456 ms.*diagnostic timeout/);
+  assert.doesNotMatch(check.message, /Install/);
 });

@@ -14,7 +14,7 @@ export interface TriggerRoute {
 
 export interface TriggerFailure {
   readonly path: string;
-  readonly stage: "verify" | "route" | "enqueue";
+  readonly stage: "verify" | "decode" | "route" | "enqueue";
   readonly delivery?: string;
 }
 

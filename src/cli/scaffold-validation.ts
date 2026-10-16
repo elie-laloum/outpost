@@ -1,3 +1,4 @@
+import { validateContainerImage } from "../domain/container-image.ts";
 import { createAgent as composeAgent } from "../domain/agent.ts";
 import { invariant } from "../domain/errors.ts";
 import { builtInAgent, builtInAgentList } from "../adapters/agents/catalog.ts";
@@ -9,6 +10,7 @@ import { supportedProviders } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
 
 export function validateInitialization(options: InitOptions): void {
+  if (options.image !== undefined) validateContainerImage(options.image);
   const agent = options.agent ?? "codex",
     sandboxProvider = options.sandboxProvider ?? "docker";
   const descriptor = builtInAgent(agent);

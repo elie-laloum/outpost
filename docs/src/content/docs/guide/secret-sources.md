@@ -157,7 +157,7 @@ Only the selected names are passed to `getSecret()`. See [Azure's JavaScript qui
 
 ## Bound startup and refresh explicitly
 
-`fromSecrets()` defaults to a 30-second deadline for the complete resolution. Set `timeoutMs` and pass an `AbortSignal` for another startup policy. A cancelled resolution rejects with code `aborted`, a deadline with `timeout`, a read failure or invalid value with `provider`, and invalid declarations with `configuration`. Vendor exceptions and their causes are discarded to avoid exposing credentials through diagnostics.
+`fromSecrets()` defaults to a 30-second deadline for the complete resolution. Set `timeoutMs` and pass an `AbortSignal` for another startup policy. A cancelled resolution rejects with code `aborted`, a deadline with `timeout`, a read failure or invalid value with `provider`, and invalid declarations with `configuration`. Vendor exceptions and their causes are discarded to avoid exposing credentials through diagnostics. Outpost preserves explicitly trusted internal diagnostics, including Vault HTTP status, missing declared references and invalid GCP base64. Arbitrary custom-source errors remain sanitized, even when they are `OutpostError` instances.
 
 Vault HTTP, AWS and Azure receive the cancellation signal. For 1Password, GCP and Infisical, cancellation stops waiting and prevents subsequent reads, but an already-started SDK request may finish in the background. Authentication you perform before `fromSecrets()` has its own SDK timeout policy. You own all injected clients; Outpost never closes them.
 

@@ -1,3 +1,4 @@
+import { secretReferencePattern } from "./onepassword.constants.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
 import { mappedSecretSource, secretText } from "./secret-source.ts";
@@ -15,7 +16,7 @@ export function createOnePasswordSecretSource(
   for (const ref of Object.values(options.secrets)) {
     secretText(ref, "1Password secret reference");
     invariant(
-      /^op:\/\/[^/]+\/[^/]+\/(?:[^/]+\/)?[^/?#]+$/.test(ref),
+      secretReferencePattern.test(ref),
       "1Password secret reference must use op://vault/item/field or op://vault/item/section/field",
     );
   }

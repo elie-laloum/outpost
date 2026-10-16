@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { invariant } from "../domain/errors.ts";
 import { managerLocks, supportedManagers } from "./scaffold.constants.ts";
@@ -12,6 +12,14 @@ export async function projectSettings(
   root: string,
   options: InitOptions,
 ): Promise<ProjectSettings> {
+  const rootInfo = await stat(root).catch((cause: NodeJS.ErrnoException) => {
+    if (cause.code === "ENOENT") return undefined;
+    throw cause;
+  });
+  invariant(
+    !rootInfo || rootInfo.isDirectory(),
+    "Initialization directory must be a directory",
+  );
   let pkg: PackageManifest = {};
   let hasPackage = true;
   try {

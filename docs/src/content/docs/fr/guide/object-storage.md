@@ -115,6 +115,8 @@ Supprimer une clé écrit un marqueur de suppression par PUT conditionnel. Les l
 
 Chaque marqueur reste dans le bucket comme un objet facturé de 1 Kio. Créer une clé ajoute une requête HEAD, et lister ajoute une requête HEAD par objet.
 
+Après un passage à `conditional`, les marqueurs hérités restent masqués et peuvent être remplacés par une création vérifiant leur révision. Ce mode utilise aussi HEAD lors de la création d’une clé et lors du listing des objets dont la taille peut désigner une valeur vide ou un marqueur ; les objets ordinaires non vides n’exigent aucune requête de listing supplémentaire. Les anciens marqueurs ne sont pas purgés automatiquement.
+
 :::caution
 Tous les processus d’écriture d’un même préfixe doivent utiliser le même `deleteMode` : arrêtez-les tous avant d’en changer. N’expirez ni ne purgez jamais les marqueurs tant qu’un processus d’écriture peut tourner : une purge peut effacer une recréation concurrente.
 :::
@@ -126,3 +128,5 @@ Tous les processus d’écriture d’un même préfixe doivent utiliser le même
 - **Fichiers locaux maintenus** : Les worktrees Git, la préparation de l’exécution et les conversations natives exigent toujours un système de fichiers local ([Où vivent les données](../storage/)).
 
 API : [createS3Transport](../../reference/creates3transport/) · [S3TransportOptions](../../reference/s3transportoptions/) · [Transport](../../reference/transport/).
+
+Les tombstones s’accumulent, y compris pour les activités de ressources closes, et leur découverte exige des requêtes HEAD. Pour une maintenance hors ligne, arrêtez tous les écrivains partageant le préfixe puis appelez `pruneS3Tombstones({ client, bucket, prefix, writersStopped: true })` depuis `/transports/s3`. La fonction ne supprime que les objets identifiés par leurs métadonnées de tombstone, conserve les objets vivants vides et renvoie le nombre supprimé. Gardez les écrivains arrêtés jusqu’à la fin : cette opération utilise une suppression physique pour les services S3 compatibles sans DELETE conditionnel. Ne l’automatisez pas en parallèle des exécutions.

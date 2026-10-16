@@ -7,6 +7,7 @@ import type { CommandResult } from "../../domain/command.types.ts";
 import type { HarnessToolContext } from "../../domain/tool.types.ts";
 import { TOOL_LIMITS } from "./tools.constants.ts";
 import type { SandboxFile } from "./tools.types.ts";
+import { sandboxFilePathScript } from "./sandbox-files.constants.ts";
 
 export function repositoryPath(path: string): string {
   const normalized = normalizeResourcePath(path);
@@ -20,6 +21,22 @@ export function sandboxPath(context: HarnessToolContext, path: string): string {
   return normalized
     ? posix.join(context.sandbox.root, normalized)
     : context.sandbox.root;
+}
+
+export async function checkedSandboxPath(
+  context: HarnessToolContext,
+  path: string,
+): Promise<string> {
+  const normalized = repositoryPath(path);
+  const result = await context.sandbox.invoke({
+    executable: "node",
+    arguments: ["-e", sandboxFilePathScript, context.sandbox.root, normalized],
+    signal: context.signal,
+    retain: TOOL_LIMITS.commandCharacters,
+  });
+  if (result.status !== 0)
+    throw new Error(result.stderr || `Cannot validate sandbox path: ${path}`);
+  return sandboxPath(context, normalized);
 }
 
 export async function withStaging<T>(
@@ -38,9 +55,13 @@ export async function downloadFile(
   path: string,
   staged: string,
 ): Promise<SandboxFile> {
-  await context.sandbox.download(sandboxPath(context, path), staged, {
-    signal: context.signal,
-  });
+  await context.sandbox.download(
+    await checkedSandboxPath(context, path),
+    staged,
+    {
+      signal: context.signal,
+    },
+  );
   const info = await lstat(staged);
   if (info.isSymbolicLink())
     throw new Error(`${path} is a symbolic link; links are not followed`);

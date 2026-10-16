@@ -13,7 +13,7 @@ import { createHarnessGitTools } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create the git toolset: git runs a status, diff, log or show command and refuses --output, --ext-diff, --textconv and --open-files-in-pager. It is read-only and declares the command line git &lt;command> &lt;arguments> for permission rules.
+Create the git toolset: git runs a status, diff, log or show command and refuses --no-index, --output, --ext-diff, --textconv, --open-files-in-pager and their abbreviations. Absolute or drive-qualified path arguments and parent-directory traversal are refused. It is read-only and declares the command line git &lt;command> &lt;arguments> for permission rules.
 
 [Complete example and detailed rules](../../guide/harness-tools/).
 

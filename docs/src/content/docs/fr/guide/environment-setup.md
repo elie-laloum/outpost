@@ -64,3 +64,5 @@ Pour cette étape, suivez [Réutiliser les téléchargements de dépendances](..
 - Toute sandbox qui monte un cache peut en modifier le contenu, et les sandboxes suivantes le lisent. Gardez les identifiants hors des caches ([Sécurité](../security/)).
 
 API : [dispatch](../../reference/dispatch/) · [createSandbox](../../reference/createsandbox/) · [openWorkspace](../../reference/openworkspace/) · [LifecycleHooks](../../reference/lifecyclehooks/) · [Command](../../reference/command/) · [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).
+
+`dispatch({ passes })` au niveau supérieur alloue une sandbox par passe : la préparation inconditionnelle est donc répétée. Les passes d’une sandbox déjà ouverte réutilisent sa préparation.

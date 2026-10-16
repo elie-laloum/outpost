@@ -1,5 +1,12 @@
 export const MCP_SERVER_NAME_PATTERN = /^[A-Za-z0-9_-]{1,32}$/;
 
+export const MCP_CAPABILITY_TOOLS = Object.freeze({
+  listResources: "mcp_list_resources",
+  readResource: "mcp_read_resource",
+  listPrompts: "mcp_list_prompts",
+  getPrompt: "mcp_get_prompt",
+});
+
 export const MCP_VARIABLE_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 export const MCP_HEADER_PATTERN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;

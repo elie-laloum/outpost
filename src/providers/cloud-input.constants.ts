@@ -1,4 +1,4 @@
-/** Runs argv[2..] with stdin fed from base64 lines appended to argv[1]; an empty line ends stdin. */
+/** Runs argv[2..] with stdin fed from base64 lines appended to argv[1]; an empty line or closed marker ends stdin. */
 export const cloudInputScript = `const fs=require("node:fs");
 const {spawn}=require("node:child_process");
 const {constants}=require("node:os");
@@ -16,6 +16,7 @@ const line=pending.slice(0,end);pending=pending.slice(end+1);
 if(!line){ended=true;child.stdin.end();return}
 child.stdin.write(Buffer.from(line,"base64"));
 }
+if(fs.existsSync(file+".closed")){ended=true;child.stdin.end();return}
 setTimeout(poll,50);
 };
 poll();

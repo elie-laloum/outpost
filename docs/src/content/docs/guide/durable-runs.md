@@ -45,6 +45,8 @@ A resumed run keeps its `executionId` and each task’s `context.idempotencyKey`
 
 A checkpointed task must return `undefined` or a value that survives JSON serialization without losing information. Otherwise the attempt fails. Convert dates to strings and return only the fields you need.
 
+A serialization failure marks the task failed without repeating its completed effects through `retry`. A later `resume: "retry-incomplete"` still explicitly authorizes replay. Durable results are copied on completion, and each `context.value()` call returns a separate copy, so a producer or consumer cannot mutate another task’s saved output. Workflows without checkpoints keep their existing object-sharing behavior.
+
 A dispatch result carries methods such as `resume()`. Project it in a `defineTask`, as shown below:
 
 ```ts
@@ -185,6 +187,8 @@ A different `input` changes the checkpoint version and the job fails. To replay 
 
 The store accepts any `Transport`. Use an S3 or R2 transport so that workers on several machines share runs: see [Where data lives](../storage/).
 
+Releasing a checkpoint retries a storage failure once, checking the same owner and revision before each attempt. Completed tasks are not replayed. A revision conflict stops immediately; a persistent failure or an unconfirmed write still rejects `start()`. Inspect the saved run before explicitly recovering any remaining ownership.
+
 ## Limits
 
 - One `start()` at a time per `runId`. A second one rejects while the first runs.
@@ -192,3 +196,5 @@ The store accepts any `Transport`. Use an S3 or R2 transport so that workers on 
 - Replay repeats side effects that an interrupted task already made. Deduplicate them with `context.idempotencyKey`: see [Job queues and workers](../job-queues/).
 
 API: [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [WorkflowCheckpointOptions](../../reference/workflowcheckpointoptions/) · [recoverWorkflowCheckpoint](../../reference/recoverworkflowcheckpoint/) · [WorkflowCheckpoint](../../reference/workflowcheckpoint/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+
+A failed checkpoint write stops further persistence for that execution. Outpost does not recover the write chain and publish a later success over an uncertain state. Inspect the stored checkpoint before recovery. Even an initial checkpoint whose tasks are all `waiting` with zero attempts requires `resume: "retry-incomplete"` after interruption. `recoverWorkflowCheckpoint()` itself is explicit recovery authorization: stop the previous runner first; a revision check cannot prove that its external effects have stopped. Interaction identities normalize declaration key order for new saves. Resume older checkpoints once with the original declaration order before changing that order.

@@ -2522,9 +2522,13 @@
     "Lease duration in milliseconds, default 30000, from 30 to 300000; renewed at every third of it.",
     "Durée du bail en millisecondes, 30000 par défaut, de 30 à 300000 ; renouvelé à chaque tiers de cette durée."
   ],
+  "QueueWorkerOptions.onError": [
+    "Receives claim, lease-renewal and result-publication errors. Throwing from this callback does not stop the worker; queue retries wait pollMs and remain cancellable.",
+    "Reçoit les erreurs de prise de job, de renouvellement du bail et de publication du résultat. Une exception du callback n’arrête pas le worker ; les nouvelles tentatives attendent pollMs et restent annulables."
+  ],
   "QueueWorkerOptions.pollMs": [
-    "Wait in milliseconds after finding no eligible job, default 250; must be positive.",
-    "Attente en millisecondes quand aucun job n’est éligible, 250 par défaut ; doit être positive."
+    "Wait in milliseconds after finding no eligible job or before retrying a failed queue operation, default 250; must be positive.",
+    "Attente en millisecondes quand aucun job n’est éligible ou avant de retenter une opération de file échouée, 250 par défaut ; doit être positive."
   ],
   "QueueHandler.input": [
     "JSON input from the job’s request.",
@@ -4126,13 +4130,17 @@
     "Command line the call runs, for command permission rules.",
     "Ligne de commande exécutée par l’appel, pour les règles de permission sur les commandes."
   ],
+  "ToolResources.mcpServer": [
+    "Declared MCP server selected by a resource or prompt tool. Built-in profile permissions check this name, including inherited parent profiles; it does not grant access by itself or add a declarative permission rule.",
+    "Serveur MCP déclaré sélectionné par un outil de ressource ou de prompt. Les permissions des profils intégrés vérifient ce nom, y compris les profils parents hérités ; ce champ n’accorde aucun accès par lui-même et n’ajoute aucune règle de permission déclarative."
+  ],
   "HarnessToolOptions.resources": [
-    "Describe the paths and command of a validated input so permission rules can match them. Custom tools without it only match by name.",
-    "Décrit les chemins et la commande d’une entrée validée pour que les règles de permission puissent les comparer. Un outil sans cette fonction n’est comparé que par son nom."
+    "Describe the paths, command or selected MCP server of a validated input for permission checks. Custom tools without it only match by name.",
+    "Décrit les chemins, la commande ou le serveur MCP sélectionné par une entrée validée pour les contrôles de permission. Un outil sans cette fonction n’est comparé que par son nom."
   ],
   "HarnessTool.resources": [
-    "Paths and command of a validated input; empty when the tool declares none.",
-    "Chemins et commande d’une entrée validée ; vide si l’outil n’en déclare pas."
+    "Paths, command or selected MCP server of a validated input; empty when the tool declares none.",
+    "Chemins, commande ou serveur MCP sélectionné par une entrée validée ; vide si l’outil n’en déclare pas."
   ],
   "HarnessOptions.hooks": [
     "Hooks from defineHarnessHook, run in declaration order within each phase.",
@@ -4485,8 +4493,8 @@
     "Déploiement du compte Kimi : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com, qui sélectionne le fichier OAuth et les endpoints de connexion. Le définir avec l’authentification usage échoue dès la création du harness."
   ],
   "S3TransportOptions.deleteMode": [
-    "How remove() works: \"conditional\" (default) sends a conditional DELETE; \"tombstone\", for R2, overwrites the object with a hidden 1 KiB marker and makes list() send one HEAD per object. Every writer of a prefix must use the same mode; purge markers only after stopping them all.",
-    "Fonctionnement de remove() : \"conditional\" (défaut) envoie un DELETE conditionnel ; \"tombstone\", pour R2, remplace l’objet par un marqueur masqué de 1 Kio et fait envoyer à list() un HEAD par objet. Tous les écrivains d’un préfixe doivent utiliser le même mode ; ne purgez les marqueurs qu’après les avoir tous arrêtés."
+    "How remove() works: \"conditional\" (default) sends a conditional DELETE; \"tombstone\", for R2, overwrites the object with a hidden 1 KiB marker and makes list() send one HEAD per object. Both modes hide and conditionally replace inherited markers; conditional listings use HEAD for 1 KiB entries only. Creating a key uses HEAD in both modes. Every writer of a prefix must use the same mode; switch modes or purge markers only after stopping them all.",
+    "Fonctionnement de remove() : \"conditional\" (défaut) envoie un DELETE conditionnel ; \"tombstone\", pour R2, remplace l’objet par un marqueur masqué de 1 Kio et fait envoyer à list() un HEAD par objet. Les deux modes masquent et remplacent conditionnellement les marqueurs hérités ; les listings conditionnels utilisent HEAD seulement pour les entrées de 1 Kio. Créer une clé utilise HEAD dans les deux modes. Tous les écrivains d’un préfixe doivent utiliser le même mode ; ne changez de mode ou ne purgez les marqueurs qu’après les avoir tous arrêtés."
   ],
   "FirecrackerOptions.jailer": [
     "Launch through the Firecracker jailer: root-owned binary and paths, a dedicated cgroup v2 parent with cpu, memory and pids controllers enabled, non-root uid and gid, cpuQuotaUs per 100000 microseconds (at least 1000), memoryMaxMb above guest memory and processes (at least 16). Outpost must already run as root and never calls sudo; without jailer, Firecracker runs as the calling user.",
@@ -6775,8 +6783,8 @@
     "Délai de démarrage du serveur en millisecondes, de 1 à 2147483647 ; 60000 par défaut dans le harness intégré. Codex et Kimi l’appliquent par serveur, Claude Code via un seul MCP_TIMEOUT qui doit être identique sur chaque serveur qui le définit, et Copilot et Antigravity le refusent."
   ],
   "McpHttpServer.oauth": [
-    "\"login\" copies the MCP OAuth login that Claude Code, Codex or Kimi stored on the host; client credentials work only in the built-in harness, which requests the token from the sandbox. Excludes bearerTokenVariable and an Authorization header.",
-    "\"login\" copie la connexion OAuth MCP que Claude Code, Codex ou Kimi ont enregistrée sur l’hôte ; les identifiants client fonctionnent uniquement dans le harness intégré, qui demande le jeton depuis la sandbox. Exclut bearerTokenVariable et un en-tête Authorization."
+    "\"login\" copies the MCP OAuth login that Claude Code, Codex or Kimi stored on the host; client credentials work only in the built-in harness, which requests the token from the sandbox over HTTPS, validates resource and issuer identities, refuses redirects and retains the issuer during refresh. Client credentials require a trusted HTTPS MCP URL without a fragment. Excludes bearerTokenVariable and an Authorization header.",
+    "\"login\" copie la connexion OAuth MCP que Claude Code, Codex ou Kimi ont enregistrée sur l’hôte ; les identifiants client fonctionnent uniquement dans le harness intégré, qui demande le jeton depuis la sandbox en HTTPS, vérifie les identités de ressource et d’émetteur, refuse les redirections et conserve l’émetteur lors du renouvellement. Les identifiants client exigent une URL MCP HTTPS de confiance sans fragment. Exclut bearerTokenVariable et un en-tête Authorization."
   ],
   "McpClientCredentials.clientIdVariable": [
     "Declared variable holding the OAuth client ID.",
@@ -8123,8 +8131,8 @@
     "Instructions littérales non vides, sans NUL. Configuration système/développeur native pour Claude/Codex, préfixe de demande pour les autres CLI et instructions système avant les ajouts du harness pour la boucle intégrée ; aucune expansion de variable ou commande. Les demandes interactives Kimi refusent ce champ."
   ],
   "AgentProfileOptions.allowedTools": [
-    "Distinct read, edit, shell or shell:<exact command> capabilities for built-in tools only. Omitted preserves existing behavior; [] denies all built-in tools. Explicit MCP declarations grant tools separately. Enforced by the built-in loop and Claude command hooks; Codex, Copilot, Kimi and Antigravity refuse any list at createAgent().",
-    "Capacités distinctes read, edit, shell ou shell:<commande exacte> pour les outils intégrés uniquement. L’absence conserve le comportement existant ; [] refuse tous les outils intégrés. Les déclarations MCP explicites accordent leurs outils séparément. Contrôlée par la boucle intégrée et les hooks de commande Claude ; Codex, Copilot, Kimi et Antigravity refusent toute liste à createAgent()."
+    "Distinct read, edit, shell or shell:<exact command> capabilities. Omitted preserves existing behavior; [] denies built-in action tools. The built-in loop still permits load_skill and declared MCP tools, resources and prompts, subject to additional permissions. Loading a skill never grants its tools. Enforced by the built-in loop and Claude command hooks; Codex, Copilot, Kimi and Antigravity refuse any list at createAgent().",
+    "Capacités distinctes read, edit, shell ou shell:<commande exacte>. L’absence conserve le comportement existant ; [] refuse les outils intégrés d’action. La boucle intégrée autorise toujours load_skill et les outils, ressources et prompts MCP déclarés, sous réserve des permissions supplémentaires. Charger un skill n’autorise jamais ses outils. Contrôlée par la boucle intégrée et les hooks de commande Claude ; Codex, Copilot, Kimi et Antigravity refusent toute liste à createAgent()."
   ],
   "AgentProfileOptions.mcpServers": [
     "MCP servers granted by this profile, validated and deeply copied with secret variable references and per-server filters. Merged with harness servers by name; a duplicate name fails at harness creation and unsupported adapter options fail at composition.",
@@ -8354,7 +8362,7 @@
     "Opt-in download caches under /outpost/cache/<name>, restored on acquire and saved before deletion through each cache’s required transport. Identity includes the canonical host repository, Daytona image/snapshot, sandbox UID/GID, name and key. Non-root images must permit elevated cache-directory setup.",
     "Caches de téléchargements optionnels sous /outpost/cache/<name>, restaurés à l’acquisition et sauvegardés avant suppression via le transport obligatoire de chaque cache. L’identité inclut le dépôt hôte canonique, l’image/snapshot Daytona, les UID/GID, le nom et la clé. Les images non root doivent permettre la préparation privilégiée des répertoires de cache."
   ],
-  "scriptedAgent.options": [
+  "createScriptedAgent.options": [
     "Snapshot of the name and ordered turns for one test agent. No sandbox is allocated until dispatch or createSandbox.",
     "Copie du nom et des tours ordonnés d’un agent de test. Aucune sandbox n’est allouée avant dispatch ou createSandbox."
   ],
@@ -10013,5 +10021,81 @@
   "ContainerOptions.egressImage": [
     "Override the trusted companion image for an allowlist. Use an immutable digest in production. The engine downloads a missing image. Omitting this option uses the public amd64/arm64 image pinned by verified digest in Outpost. Build images/egress and set this explicitly to test a local companion. The image must implement the matching Outpost egress runtime protocol.",
     "Remplace l’image de confiance du conteneur de filtrage pour une allowlist. Utilisez un digest immuable en production. Le moteur télécharge une image absente. Omettre cette option utilise l’image publique amd64/arm64 épinglée par digest vérifié dans Outpost. Construisez images/egress et renseignez cette option pour tester un conteneur de filtrage local. L’image doit implémenter le protocole du runtime egress Outpost correspondant."
+  ],
+  "inspectStorageReservations.transporter": [
+    "Transport holding the reservations/ledger object; the caller owns its lifetime.",
+    "Transport contenant l’objet reservations/ledger ; l’appelant gère sa durée de vie."
+  ],
+  "recoverStorageReservation.transporter": [
+    "The same Transport used to inspect the reservation ledger.",
+    "Le même Transport que celui utilisé pour inspecter le registre de réservations."
+  ],
+  "recoverStorageReservation.options": [
+    "Reservation identity, inspected ledger revision and explicit stopped-owner authorization.",
+    "Identifiant de réservation, révision inspectée du registre et autorisation explicite après arrêt du propriétaire."
+  ],
+  "StorageReservationRecord.bytes": [
+    "Bytes still claimed by this reservation, including legacy entries.",
+    "Octets encore réservés par cette entrée, y compris les anciennes entrées."
+  ],
+  "StorageReservationRecord.owner": [
+    "Process instance ID, host name, PID, reservation creation time and repository, plus Linux process identity when available. Absent for legacy entries; these fields identify an owner but do not prove remote liveness.",
+    "Identifiant d’instance du processus, nom d’hôte, PID, date de création de réservation et dépôt, avec l’identité du processus Linux si disponible. Absent pour les anciennes entrées ; ces champs identifient un propriétaire sans prouver son activité distante."
+  ],
+  "StorageReservationInspection.revision": [
+    "Opaque revision of the entire inspected ledger, required for conditional recovery. Absent when no ledger exists.",
+    "Révision opaque du registre entier inspecté, exigée pour la récupération conditionnelle. Absente si aucun registre n’existe."
+  ],
+  "StorageReservationInspection.reservations": [
+    "Reservation IDs mapped to their byte claims and available owner records.",
+    "Identifiants de réservation associés aux octets réservés et aux propriétaires disponibles."
+  ],
+  "StorageReservationRecoveryOptions.id": [
+    "Exact reservation ID selected from the inspection.",
+    "Identifiant exact de réservation choisi dans l’inspection."
+  ],
+  "StorageReservationRecoveryOptions.revision": [
+    "Exact ledger revision returned by inspection; any intervening mutation invalidates it.",
+    "Révision exacte du registre renvoyée par l’inspection ; toute mutation intermédiaire l’invalide."
+  ],
+  "StorageReservationRecoveryOptions.processesStopped": [
+    "Explicit confirmation that the selected owner stopped; for legacy entries, stop all potential writers before recovery.",
+    "Confirmation explicite de l’arrêt du propriétaire sélectionné ; pour les anciennes entrées, arrêter tous les écrivains potentiels avant récupération."
+  ],
+  "Retry.maxRetryAfterMs": [
+    "Maximum accepted server Retry-After delay; defaults to 24 hours. A larger advertised delay propagates the original error instead of waiting or retrying early.",
+    "Délai Retry-After maximal accepté ; 24 heures par défaut. Un délai annoncé supérieur propage l’erreur originale, sans attente ni nouvelle tentative prématurée."
+  ],
+  "CloudDependencyCache.timeoutMs": [
+    "Cache transfer deadline in milliseconds, default 60000. Restoration shares the largest declared timeout; each save has its own deadline.",
+    "Délai des transferts de cache en millisecondes, 60000 par défaut. La restauration partage le plus grand délai déclaré ; chaque sauvegarde a son propre délai."
+  ],
+  "CredentialPlan.requiresSandbox": [
+    "Refuse host placement when authentication requires a private sandbox home.",
+    "Refuse l’exécution hôte lorsque l’authentification exige un home privé de sandbox."
+  ],
+  "S3TombstonePruneOptions.client": [
+    "Caller-owned S3 client.",
+    "Client S3 appartenant à l’appelant."
+  ],
+  "S3TombstonePruneOptions.bucket": [
+    "Bucket containing the transport prefix.",
+    "Bucket contenant le préfixe du transport."
+  ],
+  "S3TombstonePruneOptions.prefix": [
+    "Nonempty transport prefix; deletion is restricted to its descendants.",
+    "Préfixe de transport non vide ; la suppression est limitée à ses descendants."
+  ],
+  "S3TombstonePruneOptions.writersStopped": [
+    "Required true after stopping every writer sharing the prefix; keep them stopped until pruning ends.",
+    "Vaut obligatoirement true après arrêt de tous les écrivains du préfixe ; gardez-les arrêtés jusqu’à la fin."
+  ],
+  "S3TombstonePruneOptions.signal": [
+    "Optional cancellation signal; completed deletions remain applied.",
+    "Signal d’annulation facultatif ; les suppressions déjà effectuées restent appliquées."
+  ],
+  "pruneS3Tombstones.options": [
+    "Explicit S3 prefix and stopped-writer authorization for offline marker deletion.",
+    "Préfixe S3 explicite et autorisation après arrêt des écrivains pour la suppression hors ligne des marqueurs."
   ]
 }

@@ -70,6 +70,21 @@ for (const file of files) {
           fail(node, `${layer} cannot depend on ${target}`);
       }
     }
+    if (
+      ts.isImportTypeNode(node) &&
+      ts.isLiteralTypeNode(node.argument) &&
+      ts.isStringLiteral(node.argument.literal)
+    ) {
+      const specifier = node.argument.literal.text;
+      if (specifier.startsWith(".") && dependencies[layer]) {
+        const target = relative(
+          root,
+          resolve(dirname(absolute), specifier),
+        ).split(/[\\/]/)[0];
+        if (!dependencies[layer].includes(target))
+          fail(node, `${layer} cannot depend on ${target}`);
+      }
+    }
     ts.forEachChild(node, visit);
   }
   visit(source);

@@ -1,3 +1,4 @@
+import { decodeTriggerPayload } from "../../domain/trigger-payload.ts";
 import { triggerDefaultToleranceMs } from "../../domain/trigger.constants.ts";
 import {
   payloadString,
@@ -65,13 +66,15 @@ export function createStandardWebhook(
     name: source,
     async verify(request: TriggerHttpRequest, now: number) {
       const delivery = await verify(request, now);
-      const payload = jsonBody(textBody(request.body));
-      return triggerEvent({
-        source,
-        delivery,
-        kind: payloadString(payload, "type") ?? "webhook",
-        payload,
-        receivedAt: new Date(now).toISOString(),
+      return decodeTriggerPayload(() => {
+        const payload = jsonBody(textBody(request.body));
+        return triggerEvent({
+          source,
+          delivery,
+          kind: payloadString(payload, "type") ?? "webhook",
+          payload,
+          receivedAt: new Date(now).toISOString(),
+        });
       });
     },
   });

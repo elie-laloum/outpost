@@ -25,6 +25,11 @@ export const cliOptions = {
     type: "string",
     description: "Stable effect key retained when publishing a new job ID",
   },
+  timeout: {
+    type: "string",
+    description:
+      "Per-check doctor timeout in milliseconds (1–60000; default 5000 on host, 15000 in image)",
+  },
   deadline: {
     type: "string",
     description: "Absolute queue deadline as epoch milliseconds",
@@ -119,6 +124,10 @@ export const cliOptions = {
   },
   namespace: { type: "string", description: "Runtime namespace" },
   "workspace-id": { type: "string", description: "File workspace identity" },
+  lock: {
+    type: "string",
+    description: "Inspected lock filename, including .json or .json.reclaim",
+  },
   revision: {
     type: "string",
     description: "Inspected resource revision to recover explicitly",
@@ -292,7 +301,14 @@ export const commandOptions = {
   },
   doctor: {
     description: "Diagnose host and sandbox prerequisites",
-    options: ["sandboxProvider", "agent", "image", "workspace-kind", "json"],
+    options: [
+      "sandboxProvider",
+      "agent",
+      "image",
+      "workspace-kind",
+      "timeout",
+      "json",
+    ],
   },
   "image build": {
     description: "Build a container image",
@@ -301,6 +317,17 @@ export const commandOptions = {
   "image remove": {
     description: "Remove a container image",
     options: ["directory", "engine", "image"],
+  },
+  "recovery unlock": {
+    description: "Inspect or explicitly recover a stopped local lock owner",
+    options: [
+      "directory",
+      "lock",
+      "revision",
+      "processes-stopped",
+      "apply",
+      "json",
+    ],
   },
   "recovery inspect": {
     description: "Inspect recovery inventory",

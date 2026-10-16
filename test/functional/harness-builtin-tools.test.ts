@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
-import { chmod, stat, symlink, writeFile } from "node:fs/promises";
+import { chmod, stat, symlink, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
@@ -21,6 +21,36 @@ import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 
 const posixShell = process.platform !== "win32";
+
+test("file tools refuse directory links for reads, writes and edits", async (t) => {
+  const outside = await repository(t);
+  const [results] = await exercise(
+    t,
+    [
+      [
+        ["read_file", { path: "alias/value.txt" }],
+        ["write_file", { path: "alias/new.txt", content: "escape" }],
+        [
+          "edit_file",
+          {
+            path: "alias/value.txt",
+            old_text: "original",
+            new_text: "changed",
+          },
+        ],
+      ],
+    ],
+    async (root) => {
+      await writeFile(join(outside, "value.txt"), "original");
+      await symlink(outside, join(root, "alias"), "junction");
+    },
+  );
+  assert.equal(results?.length, 3);
+  for (const result of results ?? [])
+    assert.match(result, /error:.*symbolic link/s);
+  assert.equal(await readFile(join(outside, "value.txt"), "utf8"), "original");
+  await assert.rejects(readFile(join(outside, "new.txt")), { code: "ENOENT" });
+});
 type Step = readonly [name: string, input: unknown][];
 
 async function exercise(
@@ -273,6 +303,28 @@ test("search and git tools inspect the repository without side effects", async (
   );
   assert.match(results?.[6] ?? "", /--- stdout ---\nInitial/);
   assert.equal(results?.[7], "error: Unsupported Git option: --output=/tmp/x");
+});
+
+test("Git tools refuse explicit and implicit no-index reads outside the workspace", async (t) => {
+  const outside = await repository(t);
+  const secret = join(outside, "private.txt");
+  await writeFile(secret, "PRIVATE_OUTSIDE_CONTENT");
+  const argumentsList = [
+    ["--no-index", secret, "base.txt"],
+    ["--no-ind", secret, "base.txt"],
+    [secret, "base.txt"],
+    ["../private.txt", "base.txt"],
+    ["C:\\private.txt", "base.txt"],
+    ["C:..\\private.txt", "base.txt"],
+  ];
+  const [results] = await exercise(t, [
+    argumentsList.map((args) => ["git", { command: "diff", arguments: args }]),
+  ]);
+  assert.equal(results?.length, argumentsList.length);
+  for (const result of results ?? []) {
+    assert.match(result, /^error: Unsupported Git (option|path):/);
+    assert.doesNotMatch(result, /PRIVATE_OUTSIDE_CONTENT/);
+  }
 });
 
 test(

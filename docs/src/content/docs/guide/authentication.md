@@ -92,3 +92,5 @@ Three kinds of credentials serve three different clients. A Vercel or S3 key nev
 - An unsupported form fails when you call `createAgent()`. A missing file or variable fails at dispatch with the `configuration` code and names the login command.
 
 API: [AgentAuthentication](../../reference/agentauthentication/) · [AccountCredential](../../reference/accountcredential/) · [UsageCredential](../../reference/usagecredential/).
+
+Built-in Codex `usage` authentication requires a private sandbox home: Outpost must run `codex login --with-api-key` there. Host placement refuses this mode instead of silently using an existing account. For local execution, explicitly configure a compatible Responses `modelProvider` with an environment API key, or use the CLI’s existing account session. Outpost never performs login or writes authentication files in your host home. See [Codex authentication](https://learn.chatgpt.com/docs/auth).

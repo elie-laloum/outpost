@@ -14,8 +14,10 @@ function context(files: (string | Buffer)[], uploads: string[] = []) {
   const sandbox: SandboxLease = {
     root: "/workspace",
     home: "/home/agent",
-    async invoke() {
-      throw new Error("unexpected command");
+    async invoke(command) {
+      assert.equal(command.executable, "node");
+      assert.equal(command.arguments?.[0], "-e");
+      return { status: 0, stdout: "", stderr: "" };
     },
     async download(source, destination) {
       assert.match(source, /^\/workspace\//);

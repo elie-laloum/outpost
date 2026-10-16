@@ -5,6 +5,8 @@ description: "Exécuter les vérifications avant la fusion et conserver le trava
 
 Partez d’un travail effectué sur une [branche séparée](../git-workspaces/). La sandbox doit disposer de la commande de test du projet et de ses dépendances. L’intégration modifie le dépôt local ; Outpost ne pousse rien vers un dépôt distant.
 
+L’intégration acquiert le même verrou du checkout hôte qu’un workspace `current`. Si celui-ci est encore ouvert, l’intégration échoue avec le code `conflict` et conserve le worktree candidat. Fermez le workspace courant avant de retenter l’intégration.
+
 ## Conditionner l’intégration à une vérification
 
 `dispatch()` et `workspace.dispatch()` fusionnent une branche `integrate` dès que l’agent réussit. Pour lancer d’abord votre propre vérification, ouvrez le workspace vous-même et travaillez dans une [session de sandbox](../sandbox-sessions/).

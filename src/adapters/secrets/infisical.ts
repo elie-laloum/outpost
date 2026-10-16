@@ -1,4 +1,5 @@
-import { invariant, OutpostError } from "../../domain/errors.ts";
+import { secretFault } from "../../domain/secret-fault.ts";
+import { invariant } from "../../domain/errors.ts";
 import { secretNames, secretValue } from "../../domain/secrets.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
 import { secretText } from "./secret-source.ts";
@@ -43,10 +44,7 @@ export function createInfisicalSecretSource(
         });
         settings.signal?.throwIfAborted();
         if (secret.secretValueHidden)
-          throw new OutpostError(
-            "provider",
-            "Infisical secret value is hidden",
-          );
+          throw secretFault("provider", "Infisical secret value is hidden");
         entries.push([name, secretValue(secret.secretValue)]);
       }
       return Object.freeze(Object.fromEntries(entries));

@@ -22,6 +22,84 @@ async function temporary(t: TestContext) {
   return directory;
 }
 
+test("invalid durable outputs do not retry completed task effects", async (t) => {
+  const directory = await temporary(t);
+  let effects = 0;
+  const task = defineTask({
+    key: "effect",
+    retry: { attempts: 3, delayMs: 0 },
+    perform() {
+      effects++;
+      return new Date();
+    },
+  });
+  const result = await defineWorkflow("invalid-output", [task]).start({
+    checkpoint: {
+      store: createWorkflowCheckpointStore({
+        transporter: createLocalTransport({ directory }),
+      }),
+      runId: "invalid-output",
+      version: "1",
+    },
+  });
+  assert.equal(result.status, "failed");
+  assert.match(result.tasks[0]!.error!, /plain JSON/);
+  assert.equal(effects, 1);
+  assert.equal(result.tasks[0]!.attempts, 1);
+});
+
+test("workflows without checkpoints preserve shared non-JSON task values", async () => {
+  const value = new Date();
+  const source = defineTask({ key: "source", perform: () => value });
+  const consumer = defineTask({
+    key: "consumer",
+    after: [source],
+    perform(context) {
+      assert.equal(context.value(source), value);
+      return context.value(source);
+    },
+  });
+  const result = await defineWorkflow("shared-values", [
+    source,
+    consumer,
+  ]).start();
+  result.unwrap();
+  assert.equal(result.value(consumer), value);
+});
+
+test("durable dependency values isolate producer and consumer mutations across resume", async (t) => {
+  const directory = await temporary(t);
+  const produced = { nested: { value: 1 } };
+  const source = defineTask({ key: "source", perform: () => produced });
+  const consumer = defineTask({
+    key: "consumer",
+    after: [source],
+    perform(context) {
+      produced.nested.value = 9;
+      const received = context.value(source);
+      assert.equal(received.nested.value, 1);
+      received.nested.value = 99;
+      assert.equal(context.value(source).nested.value, 1);
+      return received;
+    },
+  });
+  const graph = defineWorkflow("isolated-values", [source, consumer]);
+  const checkpoint = {
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
+    }),
+    runId: "isolated-values",
+    version: "1",
+  };
+  const first = await graph.start({ checkpoint });
+  first.unwrap();
+  assert.deepEqual(first.value(source), { nested: { value: 1 } });
+  assert.deepEqual(first.value(consumer), { nested: { value: 99 } });
+  const resumed = await graph.start({ checkpoint });
+  resumed.unwrap();
+  assert.deepEqual(resumed.value(source), { nested: { value: 1 } });
+});
+
 test("checkpoints restore typed JSON and undefined across new task definitions", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
@@ -594,10 +672,46 @@ test("checkpoint identity includes retry backoff, jitter and cap", async (t) => 
     { attempts: 2, backoff: "exponential" as const },
     { attempts: 2, jitter: "full" as const },
     { attempts: 2, maxDelayMs: 100 },
+    { attempts: 2, maxRetryAfterMs: 100 },
   ])
     await assert.rejects(
       definition(retry).start({ checkpoint }),
       /incompatible/,
     );
   (await definition({ attempts: 2 }).start({ checkpoint })).unwrap();
+});
+
+test("interaction declaration key order does not invalidate a settled checkpoint", async (t) => {
+  const directory = await temporary(t);
+  const checkpoint = {
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
+    }),
+    runId: "interaction-order",
+    version: "1",
+  };
+  let calls = 0;
+  const first = defineTask({
+    key: "dialogue",
+    interaction: { identity: "v1", actors: ["owner"] },
+    perform() {
+      calls++;
+      return 1;
+    },
+  });
+  (await defineWorkflow("stable", [first]).start({ checkpoint })).unwrap();
+  const reordered = defineTask({
+    key: "dialogue",
+    interaction: { actors: ["owner"], identity: "v1" },
+    perform() {
+      calls++;
+      return 2;
+    },
+  });
+  const result = await defineWorkflow("stable", [reordered]).start({
+    checkpoint,
+  });
+  result.unwrap();
+  assert.equal(result.value(reordered), 1);
+  assert.equal(calls, 1);
 });

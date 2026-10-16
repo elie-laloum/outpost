@@ -90,3 +90,5 @@ API : [dispatch](../../reference/dispatch/) · [openWorkspace](../../reference/o
 ## Pour continuer
 
 - [Vérifier avant d’intégrer les changements](../integrating-changes/)
+
+Rouvrir un workspace nommé rafraîchit sa branche depuis `origin` lorsqu’il est disponible et avance l’historique local par fast-forward lorsque c’est possible. Cela peut accéder au réseau et changer la base de travail. Un fetch échoué est toléré, mais peut attendre le délai Git. Les commits locaux et les historiques divergents sont conservés.

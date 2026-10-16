@@ -52,6 +52,12 @@ L’agent travaille dans le répertoire fixé par votre [politique de branche](.
 
 Les workflows, les conversations et les [sessions de sandbox](../sandbox-sessions/) fonctionnent sans changement.
 
+## Transférer des fichiers
+
+Les transferts locaux, Docker et Podman suivent les mêmes règles de chemins : une destination d’upload ou une source de download relative est résolue depuis la racine de la sandbox. Les chemins côté hôte sont relatifs au répertoire courant de l’appelant. Un répertoire de destination existant reçoit la source sous son nom ; utilisez `source/.` pour y copier directement le contenu d’un répertoire. Une destination absente devient elle-même le fichier ou répertoire copié.
+
+Les fichiers conservent leurs octets binaires et permissions ; les liens symboliques sources restent des liens. Les transferts locaux et les downloads conteneurs refusent les chemins de destination qui traversent des liens symboliques. Les transferts locaux respectent aussi `signal` et `deadlineMs`. Le fournisseur local reste sans isolation : ces contrôles ne limitent pas l’accès hôte au workspace.
+
 ## Limites
 
 - Passer `egress` lève une erreur : utilisez un conteneur ou une sandbox cloud pour les [restrictions réseau](../network-restrictions/).

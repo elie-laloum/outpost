@@ -7,17 +7,19 @@ sidebar:
 
 ## Parameters and properties
 
-| Name        | Type                               | Presence | Meaning                                                                                                                                                   |
-| ----------- | ---------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `variables` | `Readonly<Record<string, string>>` | Required | Environment variables forwarded to every command of the agent, including on the local provider.                                                           |
-| `host`      | `readonly HostCredential[]`        | Required | Host credential files to read and install in the private sandbox home or expose as variables; skipped on the local provider.                              |
-| `files`     | `readonly GeneratedCredential[]`   | Required | Fixed files written with mode 0600 in the private sandbox home, such as the Antigravity settings selecting the Gemini API; skipped on the local provider. |
-| `commands`  | `readonly Command[]`               | Required | Login commands run in the sandbox after file installation, with secrets passed on stdin; skipped on the local provider.                                   |
+| Name              | Type                               | Presence | Meaning                                                                                                                                                   |
+| ----------------- | ---------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `requiresSandbox` | `boolean \| undefined`             | Optional | Refuse host placement when authentication requires a private sandbox home.                                                                                |
+| `variables`       | `Readonly<Record<string, string>>` | Required | Environment variables forwarded to every command of the agent, including on the local provider.                                                           |
+| `host`            | `readonly HostCredential[]`        | Required | Host credential files to read and install in the private sandbox home or expose as variables; skipped on the local provider.                              |
+| `files`           | `readonly GeneratedCredential[]`   | Required | Fixed files written with mode 0600 in the private sandbox home, such as the Antigravity settings selecting the Gemini API; skipped on the local provider. |
+| `commands`        | `readonly Command[]`               | Required | Login commands run in the sandbox after file installation, with secrets passed on stdin; skipped on the local provider.                                   |
 
 ## Signature
 
 ```ts
 export interface CredentialPlan {
+  readonly requiresSandbox?: boolean;
   readonly variables: Variables;
   readonly host: readonly HostCredential[];
   readonly files: readonly GeneratedCredential[];

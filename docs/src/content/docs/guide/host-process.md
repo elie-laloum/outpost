@@ -52,6 +52,12 @@ The agent works in the directory set by your [branch policy](../workspaces/). Wi
 
 Workflows, conversations and [sandbox sessions](../sandbox-sessions/) work unchanged.
 
+## Transfer files
+
+Local, Docker and Podman transfers use the same path rules: a relative upload destination or download source resolves against the sandbox root. Host-side paths resolve against the caller’s working directory. An existing destination directory receives the source under its basename; use `source/.` to copy a directory’s contents directly into it. A missing destination becomes the copied file or directory itself.
+
+Files retain binary content and permissions, and source symlinks remain links. Local transfers and container downloads refuse destination paths that traverse symlinks. Local transfers also honor `signal` and `deadlineMs`. The local provider remains unisolated; these checks do not confine host access to the workspace.
+
 ## Limits
 
 - Passing `egress` throws: use a container or a cloud sandbox for [network restrictions](../network-restrictions/).

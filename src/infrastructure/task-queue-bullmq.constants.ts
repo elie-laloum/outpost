@@ -4,12 +4,13 @@ export const bullMQClaimBatchSize = 100;
 export const bullMQConnectionTimeoutMs = 10_000;
 export const bullMQConnectionRetries = 3;
 export const bullMQRetryDelayMs = 100;
+export const bullMQMaxRetryDelayMs = 1000;
 
 export const bullMQStateScript = `
 local operation = ARGV[1]
 local request = redis.call('HGET', KEYS[1], 'request')
 if operation == 'enqueue' then
-  if request and request ~= ARGV[2] then
+  if request and request ~= ARGV[2] and request ~= ARGV[4] then
     return redis.error_reply('Queue identity already has a different request')
   end
   if not request then

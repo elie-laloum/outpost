@@ -21,6 +21,10 @@ Copilot et Kimi conservent une session sous forme de dossier : Outpost la regrou
 
 La restauration réécrit les chemins du dépôt enregistrés dans la conversation vers ceux de la nouvelle sandbox. Pour doter une CLI que vous ajoutez de son propre stockage, voir [Formats de conversation natifs](../conversation-formats/).
 
+Codex conserve la date inscrite dans le nom du rollout d’origine lors de la capture et de la restauration. Si plusieurs transcriptions correspondent à la même conversation sans chemin natif préféré, la recherche et la capture échouent explicitement. Inspectez et réconciliez ces copies avant de reprendre ; Outpost ne choisit plus selon l’ordre de parcours des fichiers.
+
+La capture locale laisse intacts la transcription d’origine du CLI et les fichiers de ses sous-agents. Si la destination est ce même fichier et que `redact` est activé, `result.transcript` pointe vers une copie masquée sous `.outpost/conversations/native/` ; la continuation native dans ce workspace utilise toujours l’original. Une destination distincte, y compris la copie hôte relocalisée pour un autre worktree, un `conversationHome` explicite ou un transport, reçoit toujours la copie capturée et éventuellement masquée.
+
 ## Archiver et partager via un transport
 
 `createTransportConversations()` enveloppe le stockage d’un agent et archive en plus chaque capture via un [transport](../storage/). Une conversation reprend alors sur une autre machine, ou après suppression du dossier `.outpost` du dépôt.

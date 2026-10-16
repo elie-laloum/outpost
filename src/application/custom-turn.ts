@@ -199,6 +199,7 @@ export async function customTurn(
         },
         prompt,
         harnessHistory(transcript),
+        options.response,
       );
     // Repairs keep read-only tools but still start MCP servers for prompt instructions.
     const text = await withMcpTools(

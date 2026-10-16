@@ -1991,6 +1991,7 @@
     "options": {
       "caches": "native",
       "caches[].transport": "native",
+      "caches[].timeoutMs": "native",
       "caches[].name": "native",
       "caches[].key": "native",
       "repositoryMode": "native",
@@ -2207,6 +2208,7 @@
     "options": {
       "caches": "native",
       "caches[].transport": "native",
+      "caches[].timeoutMs": "native",
       "caches[].name": "native",
       "caches[].key": "native",
       "repositoryMode": "native",
@@ -2649,7 +2651,8 @@
       "worker": "native",
       "handlers": "native",
       "handlers.*": "native",
-      "leaseMs": "native"
+      "leaseMs": "native",
+      "onError": "extension"
     },
     "test": "test/functional/recipe-services.test.ts"
   },
@@ -2961,6 +2964,7 @@
       "retry.delayMs": "native",
       "retry.backoff": "native",
       "retry.maxDelayMs": "native",
+      "retry.maxRetryAfterMs": "native",
       "retry.jitter": "native",
       "retry.accepts": "extension",
       "timeoutMs": "native",

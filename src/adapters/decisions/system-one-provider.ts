@@ -1,22 +1,21 @@
+import { httpTransportFailure } from "../../infrastructure/http-transport.ts";
 import { invariant, OutpostError, positive } from "../../domain/errors.ts";
 import {
   defineDecision,
   validateDecisionState,
 } from "../../domain/decision.ts";
-import { resetTimestamp } from "../../domain/quota.ts";
 import type {
   DecisionProvider,
   DecisionRequest,
 } from "../../domain/decision.types.ts";
 import { modelJson } from "../models/model-http.ts";
-import { retryAfterMs } from "../models/retry-after.ts";
+import { httpFailure } from "../models/http-failure.ts";
 import { readSystemOneResponse } from "./system-one-response.ts";
 import type { SystemOneDecisionProviderOptions } from "./system-one-provider.types.ts";
 import {
   DECISION_TIMEOUT_MS,
   DECISION_RESPONSE_BYTES,
   DECISION_MAX_TIMEOUT_MS,
-  DECISION_UNAVAILABLE_STATUSES,
   SYSTEM_ONE_PROVIDER_FIELDS,
 } from "./system-one-provider.constants.ts";
 
@@ -52,7 +51,7 @@ export function createSystemOneDecisionProvider(
     options.apiKey === false ||
       (typeof options.apiKey === "string" &&
         options.apiKey.trim() &&
-        !/[\r\n]/.test(options.apiKey)),
+        !/[^\x21-\x7e]/.test(options.apiKey)),
     "Decision apiKey must be nonempty or false",
   );
   const endpoint = `${base.href.replace(/\/+$/, "")}/systemone`;
@@ -79,13 +78,13 @@ export function createSystemOneDecisionProvider(
       );
       const decision = defineDecision({ questions: request.questions });
       validateDecisionState(request.state);
-      request.signal?.throwIfAborted();
       const deadline = new AbortController();
       const signal = request.signal
         ? AbortSignal.any([request.signal, deadline.signal])
         : deadline.signal;
       const timer = setTimeout(() => deadline.abort(), timeoutMs);
       try {
+        signal.throwIfAborted();
         const response = await fetch(endpoint, {
           method: "POST",
           redirect: "error",
@@ -100,26 +99,8 @@ export function createSystemOneDecisionProvider(
           }),
           signal,
         });
-        if (!response.ok) {
-          const retryAfter = retryAfterMs(response.headers.get("Retry-After"));
-          await response.body?.cancel();
-          const resetAt =
-            response.status === 429 && retryAfter !== undefined
-              ? resetTimestamp(retryAfter)
-              : undefined;
-          throw new OutpostError(
-            response.status === 429 ? "quota" : "provider",
-            `Decision request failed with HTTP ${response.status}`,
-            {
-              status: response.status,
-              ...(retryAfter === undefined ? {} : { retryAfterMs: retryAfter }),
-              ...(resetAt === undefined ? {} : { resetAt }),
-              ...(DECISION_UNAVAILABLE_STATUSES.has(response.status)
-                ? { unavailable: `HTTP ${response.status}` }
-                : {}),
-            },
-          );
-        }
+        if (!response.ok)
+          throw await httpFailure(response, maxBytes, "Decision");
         const value = await modelJson(response, maxBytes);
         signal.throwIfAborted();
         return readSystemOneResponse(value);
@@ -135,7 +116,7 @@ export function createSystemOneDecisionProvider(
         throw new OutpostError(
           "provider",
           "Decision request failed during HTTP transport",
-          { unavailable: "HTTP transport failure" },
+          httpTransportFailure(error),
         );
       } finally {
         clearTimeout(timer);

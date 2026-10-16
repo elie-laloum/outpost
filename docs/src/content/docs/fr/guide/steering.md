@@ -39,7 +39,9 @@ const result = await running;
 | [Codex](../codex/)                                                                         | `injected` | Un dispatch avec `steering` lance `codex app-server`. `turn/steer` ajoute le texte au tour actif, ou démarre le suivant.            |
 | [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost arrête le processus dès que sa conversation est connue, puis la reprend avec le texte dans la même sandbox.                 |
 
-Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les fournisseurs de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne coûte une commande du fournisseur et arrive avec un léger délai.
+Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les fournisseurs de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne utilise un transfert de fichier et une commande du fournisseur, avec un léger délai.
+
+Pour une entrée CLI en direct, `send()` se résout après l’accusé de réception du protocole natif. Un échec de transfert ou d’ajout au fichier cloud rejette les envois non confirmés avec le code `steering`, sans annuler le tour en cours. Les envois suivants de ce tour sont rejetés ; la livraison peut être incertaine, donc Outpost ne les retente pas automatiquement. Les grandes consignes passent par transfert de fichier plutôt que par les arguments du shell. Le tour conserve ses règles d’annulation et de délai.
 
 ## Selon le moment de l’envoi
 
@@ -97,3 +99,5 @@ Une remise `resumed` termine le tour interrompu par un événement `stopped` de 
 - Les sous-agents des agents CLI ne sont pas adressables : une consigne avec `subagent` est rejetée dès qu’un tour CLI la voit.
 
 API : [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
+
+Copilot et Kimi peuvent n’exposer l’identifiant de conversation qu’à la fin du tour. Tant que cet identifiant manque, le steering attend : il ne peut interrompre puis reprendre une conversation non identifiée. Ne supposez pas une livraison en cours de tour avec ces adaptateurs natifs.

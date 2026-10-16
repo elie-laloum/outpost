@@ -39,7 +39,10 @@ export async function runSubagent(
   let transcript: TranscriptHandle | undefined;
   let failure: unknown;
   let text = "";
-  const lifecycle = (status: "started" | "finished" | "failed") =>
+  let lifecycleSettled = false;
+  const lifecycle = (status: "started" | "finished" | "failed") => {
+    if (lifecycleSettled) return;
+    if (status !== "started") lifecycleSettled = true;
     runtime.emit({
       kind: "subagent",
       id,
@@ -48,6 +51,10 @@ export async function runSubagent(
       status,
       ...(transcript ? { conversation: transcript.id } : {}),
     });
+  };
+  const aborted = () => {
+    if (!runtime.signal.aborted) lifecycle("failed");
+  };
   try {
     transcript = store
       ? await openTranscript({
@@ -66,6 +73,8 @@ export async function runSubagent(
         })
       : undefined;
     lifecycle("started");
+    context.signal.addEventListener("abort", aborted, { once: true });
+    if (context.signal.aborted) aborted();
     text = await withMcpTools(
       agent.harness,
       context.sandbox,
@@ -142,10 +151,11 @@ export async function runSubagent(
       });
     failure ??= error;
   } finally {
+    context.signal.removeEventListener("abort", aborted);
     await transcript?.close();
   }
   if (failure) {
-    if (!runtime.signal.aborted) lifecycle("failed");
+    if (!runtime.signal.aborted && !context.signal.aborted) lifecycle("failed");
     throw failure;
   }
   context.signal.throwIfAborted();

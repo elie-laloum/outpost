@@ -1,4 +1,6 @@
 import { OutpostError } from "../domain/errors.ts";
+import { responseInstructions } from "../domain/response-instructions.ts";
+import type { ResponseSpec } from "../domain/response.types.ts";
 import type {
   ModelContentBlock,
   ModelRequest,
@@ -85,6 +87,7 @@ export async function harnessLoop(
   runtime: HarnessRuntime,
   prompt: string,
   history: HarnessHistory,
+  response?: ResponseSpec<unknown>,
 ): Promise<string> {
   const { harness } = runtime.agent;
   const system = [
@@ -98,9 +101,16 @@ export async function harnessLoop(
     description: tool.description,
     inputSchema: tool.inputSchema,
   }));
+  const pending = steering(runtime);
+  const content: ModelContentBlock[] = [
+    { type: "text", text: prompt },
+    ...pending,
+  ];
+  if (pending.length && response)
+    content.push({ type: "text", text: responseInstructions(response) });
   await history.append({
     role: "user",
-    content: [{ type: "text", text: prompt }, ...steering(runtime)],
+    content,
   });
   let toolCalls = 0;
   const announcedSkills = new Set<string>();
@@ -152,6 +162,11 @@ export async function harnessLoop(
     }
     const state: LoopState = { history, step, toolCalls };
     const reason = result.stopReason ?? inferredStop(content);
+    if (typeof reason !== "string" || !Object.hasOwn(stopHandlers, reason))
+      throw new OutpostError(
+        "response",
+        "Model returned an unsupported stop reason",
+      );
     const answer = await stopHandlers[reason](runtime, state, result, content);
     toolCalls = state.toolCalls;
     runtime.budget.check();

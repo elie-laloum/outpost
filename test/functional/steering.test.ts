@@ -10,6 +10,7 @@ import {
   createSteering,
   defineHarnessSubagent,
   defineHarnessTool,
+  defineTextResponse,
   dispatch,
   createHarness,
   OutpostError,
@@ -28,6 +29,38 @@ import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
+
+test("steering received during harness startup precedes final response instructions", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const requests: ModelRequest[] = [];
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
+      model: "m",
+      harness: createHarness({
+        modelProvider: provider([answer("<answer>ok</answer>")], requests),
+      }),
+    }),
+    brief: { text: "Review the code" },
+    response: defineTextResponse({ tag: "answer" }),
+    steering,
+    logging: false,
+    observe(event) {
+      if (event.kind === "conversation" && !delivery)
+        delivery = steering.send("Also check docs/");
+    },
+  });
+  assert.ok(delivery);
+  assert.deepEqual(await delivery, { mode: "injected" });
+  const texts = lastUser(requests[0]);
+  assert.match(texts[0]!, /Review the code/);
+  assert.equal(texts[1], "Also check docs/");
+  assert.match(texts.at(-1)!, /Final response format/);
+  assert.equal(result.value, "ok");
+});
 type Reply = (request: ModelRequest) => ModelResult;
 
 const provider = (

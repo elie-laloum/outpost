@@ -28,7 +28,7 @@ console.log(result.completed, result.completion);
 // Example output: true READY_FOR_REVIEW
 ```
 
-Chaque passe démarre une nouvelle conversation sur la même branche : elle voit donc les commits précédents. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.
+Chaque passe démarre une nouvelle conversation et voit les commits conservés ou intégrés par la passe précédente. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.
 
 Référence API : [DispatchResult](../../reference/dispatchresult/).
 
@@ -37,3 +37,5 @@ Un marqueur est une déclaration de l’agent, pas une preuve. Lancez vos tests 
 :::
 
 Si l’agent écrit son marqueur mais continue de tourner, Outpost l’arrête `settleMs` après sa dernière sortie. Le résultat est conservé et `warn` reçoit un message.
+
+Avec `dispatch()` au niveau supérieur, chaque passe alloue une nouvelle sandbox et exécute ses hooks de préparation. Une branche nommée conserve ses commits ; `integrate` crée et intègre une branche distincte par passe. Avec `sandbox.dispatch()`, les passes réutilisent la sandbox et le workspace ouverts. Choisissez cette forme pour ne préparer l’environnement qu’une fois.

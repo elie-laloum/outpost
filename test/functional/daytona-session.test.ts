@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import type { Daytona } from "@daytona/sdk";
 import type { CommandResult } from "../../src/domain/command.types.ts";
 import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
@@ -18,6 +18,7 @@ test(
     const sandbox = {
       getUserHomeDir: async () => directory,
       fs: {
+        uploadFile: async (data: Buffer, path: string) => writeFile(path, data),
         createFolder: async (path: string) => {
           await mkdir(path, { recursive: true });
         },

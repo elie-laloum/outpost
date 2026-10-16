@@ -244,6 +244,7 @@ test("Responses tool conversations replay encrypted reasoning before calls", asy
   });
   const first = await converse(provider, "gpt");
   assert.equal(first.content?.[0]?.type, "reasoning");
+  assert.deepEqual(bodies[0]?.include, ["reasoning.encrypted_content"]);
   assert.deepEqual(bodies[1]?.input, [
     { role: "user", content: "What is in README?" },
     reasoning,

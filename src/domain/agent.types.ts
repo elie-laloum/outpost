@@ -336,6 +336,7 @@ export interface AgentConfiguration {
 }
 
 export interface CredentialPlan {
+  readonly requiresSandbox?: boolean;
   readonly variables: Variables;
   readonly host: readonly HostCredential[];
   readonly files: readonly GeneratedCredential[];

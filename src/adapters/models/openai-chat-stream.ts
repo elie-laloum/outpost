@@ -3,7 +3,7 @@ import type {
   StreamDecoder,
 } from "./model-protocol.types.ts";
 import { object, requireResponse } from "./model-response.ts";
-import { eventData } from "./stream-events.ts";
+import { eventData, streamFailure } from "./stream-events.ts";
 
 export function chatStream(): StreamDecoder {
   let content: string | undefined;
@@ -16,6 +16,7 @@ export function chatStream(): StreamDecoder {
     push(event) {
       if (event.data === "[DONE]") return undefined;
       const data = eventData(event);
+      if (data.error != null) streamFailure(data);
       chunks++;
       if (data.usage != null) usage = data.usage;
       if (!Array.isArray(data.choices) || data.choices.length === 0)

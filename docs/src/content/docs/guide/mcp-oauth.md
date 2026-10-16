@@ -76,6 +76,8 @@ The HTTP bridge in the sandbox obtains the token itself, so the secret stays the
 2. Request a `client_credentials` token with that URL as `resource`. Use `client_secret_basic`, or `client_secret_post` if the server advertises only that method.
 3. Reuse the token until expiry. On a `401`, rediscover the server, obtain a new token and retry once.
 
+Client credentials require HTTPS for the MCP URL, metadata and token endpoint. Before sending credentials, the bridge checks that `resource` matches the MCP URL and that the authorization metadata's `issuer` exactly matches the discovered issuer, as required by [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728.html#section-3.3) and [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414.html#section-3.3). It refuses redirects and an issuer change during the session. Configure a trusted MCP server: these checks do not authenticate a malicious server's initial choice of authorization server. Local HTTPS fixtures cover these checks; live identity-provider validation remains required for your deployment.
+
 ## Limits
 
 - `oauth` is for HTTP servers only and cannot be combined with `bearerTokenVariable` or an `Authorization` header.

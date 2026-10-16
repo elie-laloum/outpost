@@ -64,3 +64,5 @@ For this step, follow [Reuse dependency downloads](../dependency-caches/).
 - Every sandbox that mounts a cache can change its content, and later sandboxes read it. Keep credentials out of caches ([Security](../security/)).
 
 API: [dispatch](../../reference/dispatch/) · [createSandbox](../../reference/createsandbox/) · [openWorkspace](../../reference/openworkspace/) · [LifecycleHooks](../../reference/lifecyclehooks/) · [Command](../../reference/command/) · [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).
+
+Top-level `dispatch({ passes })` allocates once per pass, so unconditional preparation runs for every pass. Passes on an already open sandbox reuse its preparation.

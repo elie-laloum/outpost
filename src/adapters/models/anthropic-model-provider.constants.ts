@@ -17,3 +17,7 @@ export const ANTHROPIC_REASONING: Readonly<
   },
   max: { thinking: { type: "adaptive" }, output_config: { effort: "max" } },
 };
+export const ANTHROPIC_SPEND_LIMIT_MESSAGES = [
+  /^You have reached your specified (?:workspace )?API usage limits\b/,
+  /^Your credit balance is too low to access the Anthropic API\./,
+];

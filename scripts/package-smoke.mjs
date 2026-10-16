@@ -570,7 +570,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {dispatch, createSandbox, defineRecipe, type RecipeBindings, type RecipeConfiguration} from '@elie-laloum/outpost';
 import {createRecipeRegistry, defineRecipeComponent, validateRecipeProject, createRecipeRuntime} from '@elie-laloum/outpost/recipes';
-import {scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
+import {createScriptedAgent, scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
 const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
 try {
   const git = (...args: string[]) => execFileSync('git',args,{cwd:repository});
@@ -585,7 +585,7 @@ try {
   const options: ScriptedAgentOptions = {turns:[turn]};
   const command: MemoryCommand = {executable:'verify',status:0};
   const memory: MemorySandboxOptions = {commands:[command]};
-  const result = await dispatch({repository,agent:scriptedAgent(options),sandboxProvider:createMemorySandboxProvider(memory),brief:{text:'Fix'},logging:false});
+  const result = await dispatch({repository,agent:createScriptedAgent(options),sandboxProvider:createMemorySandboxProvider(memory),brief:{text:'Fix'},logging:false});
   assert.equal(result.text,'Done');
   assert.equal(result.commits.length,1);
   await using sandbox = await createSandbox({repository,sandboxProvider:createMemorySandboxProvider(memory),logging:false});

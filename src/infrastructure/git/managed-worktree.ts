@@ -4,7 +4,6 @@ import { mkdir, rename, stat } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { OutpostError } from "../../domain/errors.ts";
 import { directory, inside } from "../files.ts";
-import { executeProcess } from "../process.ts";
 import { git } from "./command.ts";
 import { refreshWorktree } from "./refresh-worktree.ts";
 import type {
@@ -80,11 +79,15 @@ export async function managedWorktree(
   await mkdir(join(repository, ".outpost", "workspaces"), {
     recursive: true,
   });
-  const branchExists = await executeProcess({
-    executable: "git",
-    arguments: ["show-ref", "--verify", "--quiet", `refs/heads/${branch}`],
-    directory: repository,
-  });
+  const branchExists = (
+    await git(
+      repository,
+      ["for-each-ref", "--format=%(refname)", `refs/heads/${branch}`],
+      options.limits?.gitMs,
+    )
+  )
+    .split("\n")
+    .includes(`refs/heads/${branch}`);
   const from = policy.from ?? "HEAD";
   const oid = (
     await git(repository, [
@@ -101,9 +104,9 @@ export async function managedWorktree(
       "branch.autoSetupMerge=false",
       "worktree",
       "add",
-      ...(branchExists.status === 0 ? [] : ["-b", branch]),
+      ...(branchExists ? [] : ["-b", branch]),
       expected,
-      branchExists.status === 0 ? branch : oid,
+      branchExists ? branch : oid,
     ],
     options.limits?.gitMs,
   );

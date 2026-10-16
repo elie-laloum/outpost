@@ -70,3 +70,32 @@ test("the cloud input feed appends in order and stops after its first failure", 
   assert.deepEqual(lines, [`${Buffer.from("one").toString("base64")}\n`]);
   assert.equal(failures.length, 1);
 });
+
+test("failed cloud input still closes stdin without delivering an incomplete frame", async (t) => {
+  const file = join(await repository(t), "input");
+  await writeFile(file, cloudInputFrames("first\n"));
+  let failed = 0;
+  const input = new PassThrough();
+  const feed = cloudInputFeed(
+    input,
+    async (line) => {
+      await appendFile(file, line.slice(0, 3));
+      throw new Error("partial append");
+    },
+    () => {
+      failed++;
+    },
+    () => writeFile(file + ".closed", ""),
+  );
+  input.end("must not reach child\n");
+  await new Promise((resolve) => input.once("end", resolve));
+  await feed.finish();
+  const result = await executeProcess({
+    executable: process.execPath,
+    arguments: ["-e", cloudInputScript, file, process.execPath, "-e", echo],
+    deadlineMs: 5000,
+  });
+  assert.equal(failed, 1);
+  assert.equal(result.status, 4);
+  assert.equal(result.stdout, "got:first\neof\n");
+});

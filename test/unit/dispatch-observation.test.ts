@@ -1,8 +1,48 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { observeDispatch } from "../../src/application/dispatch-observation.ts";
-import { createObservationHub } from "../../src/index.ts";
-import type { DispatchTelemetryOutcome } from "../../src/index.ts";
+import {
+  createObservationHub,
+  createLocalTransport,
+  readJournal,
+} from "../../src/index.ts";
+import { repository } from "../helpers.ts";
+import { join } from "node:path";
+import type {
+  DispatchTelemetryOutcome,
+  TransportReference,
+} from "../../src/index.ts";
+
+test("flushing a running dispatch preserves subsequent journal events", async (t) => {
+  const root = await repository(t);
+  const transporter = createLocalTransport({ directory: join(root, "logs") });
+  const observation = createObservationHub();
+  const result = await observeDispatch(
+    {
+      brief: { text: "test" },
+      observation,
+      logging: { transporter },
+    },
+    async (options) => {
+      options.observation!.emit("agent", { kind: "text", text: "before" });
+      await observation.flush();
+      options.observation!.emit("agent", { kind: "text", text: "after" });
+      return { completed: true, usage: { input: 0, cached: 0, output: 0 } };
+    },
+    root,
+  );
+  let reference: TransportReference | undefined;
+  for await (const entry of transporter.list("logs/"))
+    if (entry.key.endsWith("/index")) reference = entry;
+  assert.ok(reference);
+  const entries = await readJournal({ transporter, reference });
+  const text = JSON.stringify(entries);
+  assert.match(text, /before/);
+  assert.match(text, /after/);
+  assert.match(text, /dispatch-finished/);
+  assert.equal(result.completed, true);
+  assert.equal(observation.errors.length, 0);
+});
 
 test("failure usage replaces streamed totals with authoritative summaries across repeated pass numbers", async () => {
   const outcomes: DispatchTelemetryOutcome[] = [];

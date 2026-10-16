@@ -24,6 +24,8 @@ Les producteurs publient un nom de traitement et une entrée JSON dans une file.
 
 Lancez le worker dans son propre processus. Il interroge la file et exécute un job à la fois jusqu’à l’annulation de son signal.
 
+Les erreurs de file sont signalées par le callback facultatif `onError(error)`. Une prise de job échouée est retentée après `pollMs` ; la publication du résultat est retentée tant que le bail reste valide, sans réexécuter le traitement. Un bail révoqué termine le traitement de ce job et laisse le worker disponible pour le suivant. Un échec de renouvellement annule le traitement actif ; ses effets externes exigent toujours une clé d’idempotence. Le signal du worker interrompt les attentes entre tentatives, et une erreur levée par `onError` n’arrête pas le worker.
+
 ```ts title="worker.ts"
 import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 

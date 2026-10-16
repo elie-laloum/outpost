@@ -203,3 +203,19 @@ Pour les ressources de dossier et éphémères, utiliser `recovery inspect --run
 - Une archive contient les fichiers de récupération, pas le dépôt : la restauration exige toujours le dépôt source.
 
 API : [recoveryDetails](../../reference/recoverydetails/) · [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [archiveRecovery](../../reference/archiverecovery/) · [materializeRecoveryArchive](../../reference/materializerecoveryarchive/).
+
+## Récupérer un verrou local abandonné
+
+Un verrou vide, un fichier `.reclaim` orphelin ou un propriétaire dont l’identité ne peut être établie sur macOS ou Windows exige une récupération explicite. Arrêtez d’abord tous les processus utilisant ce dossier de verrous, y compris les autres commandes de récupération. L’opération n’arrête aucun processus à votre place. Inspectez un nom de fichier provenant de l’inventaire :
+
+```sh
+npx outpost recovery unlock --directory /projects/app/.outpost/locks --lock 0123456789abcdef0123.json --json
+```
+
+Utilisez la révision renvoyée pour appliquer la récupération. Les fichiers modifiés et les propriétaires confirmés actifs sont refusés. Pour un garde de réclamation orphelin, inspectez et récupérez d’abord le fichier `.json.reclaim`, puis inspectez à nouveau le verrou principal. Le même parcours traite les fichiers vides ou malformés. La récupération retire uniquement le verrou et conserve les workspaces et branches.
+
+```sh
+npx outpost recovery unlock --directory /projects/app/.outpost/locks --lock 0123456789abcdef0123.json --revision INSPECTED_REVISION --processes-stopped --apply
+```
+
+Les verrous du Transport local utilisent la même commande avec `--directory /projects/app/.outpost/storage/.outpost/locks`, ou le dossier du Transport personnalisé. La récupération s’effectue hors activité : la suppression d’un fichier n’est pas une opération compare-and-swap, donc la révision inspectée ne remplace pas l’arrêt de tous les écrivains et la sérialisation des récupérations. L’acquisition automatique continue de refuser un propriétaire inconnu.

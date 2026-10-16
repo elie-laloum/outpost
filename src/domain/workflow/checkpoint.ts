@@ -30,6 +30,9 @@ export async function openCheckpoint(
       delayMs: item.retry?.delayMs,
       backoff: item.retry?.backoff,
       maxDelayMs: item.retry?.maxDelayMs,
+      ...(item.retry?.maxRetryAfterMs === undefined
+        ? {}
+        : { maxRetryAfterMs: item.retry.maxRetryAfterMs }),
       jitter: item.retry?.jitter,
       condition: !!item.condition,
       accepts: !!item.retry?.accepts,
@@ -38,22 +41,41 @@ export async function openCheckpoint(
       if (a.key === b.key) return 0;
       return a.key < b.key ? -1 : 1;
     });
-  const identity = createHash("sha256")
-    .update(
-      JSON.stringify({
-        name,
-        version: options.version,
-        graph,
-        ...(options.workspaces ? { workspaceFormat: 1 } : {}),
-      }),
-    )
-    .digest("hex");
+  const identify = () =>
+    createHash("sha256")
+      .update(
+        JSON.stringify({
+          name,
+          version: options.version,
+          graph,
+          ...(options.workspaces ? { workspaceFormat: 1 } : {}),
+        }),
+      )
+      .digest("hex");
+  const legacyIdentity = identify();
+  for (const item of graph) {
+    if (item.interaction)
+      item.interaction = {
+        actors: item.interaction.actors,
+        identity: item.interaction.identity,
+      };
+  }
+  const identity = identify();
   const lease = await options.store.acquire(options.runId);
   try {
     const saved = await lease.read();
     let initial: WorkflowCheckpoint | undefined;
     if (saved !== undefined) {
-      validateCheckpoint(saved, identity, tasks);
+      validateCheckpoint(
+        saved,
+        saved !== null &&
+          typeof saved === "object" &&
+          "identity" in saved &&
+          saved.identity === legacyIdentity
+          ? legacyIdentity
+          : identity,
+        tasks,
+      );
       initial = saved;
       if (options.workspaces && !saved.workspaces)
         throw new Error(

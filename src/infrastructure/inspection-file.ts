@@ -27,19 +27,37 @@ export async function readInspectionFile(
   maxBytes: number,
   expected?: Stats,
 ): Promise<Buffer> {
+  return inspectFile(path, maxBytes, false, expected);
+}
+
+export async function readInspectionPrefix(
+  path: string,
+  maxBytes: number,
+  expected: Stats,
+): Promise<Buffer> {
+  return inspectFile(path, maxBytes, true, expected);
+}
+
+async function inspectFile(
+  path: string,
+  maxBytes: number,
+  prefix: boolean,
+  expected?: Stats,
+): Promise<Buffer> {
   positive(maxBytes, "maxBytes");
   const before = await lstat(path);
   if (expected && !unchanged(expected, before))
     throw new InspectionFileChanged();
   if (!before.isFile() || !(await isDirectInspectionPath(path)))
     throw new Error("Inspection path changed");
-  if (before.size > maxBytes) throw new Error("Inspection file is too large");
+  if (!prefix && before.size > maxBytes)
+    throw new Error("Inspection file is too large");
   const file = await open(path, inspectionFileFlags);
   try {
     const opened = await file.stat();
     if (!opened.isFile() || !unchanged(before, opened))
       throw new InspectionFileChanged();
-    const buffer = Buffer.alloc(maxBytes + 1);
+    const buffer = Buffer.alloc(prefix ? maxBytes : maxBytes + 1);
     let length = 0;
     while (length < buffer.length) {
       const { bytesRead } = await file.read(

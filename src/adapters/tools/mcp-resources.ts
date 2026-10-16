@@ -6,7 +6,7 @@ import {
   renderContentBlock,
   renderResourceContents,
 } from "./mcp-content.ts";
-import { MCP_CAPABILITY_TOOLS } from "./mcp.constants.ts";
+import { MCP_CAPABILITY_TOOLS } from "../../domain/mcp-server.constants.ts";
 import type {
   McpGetPromptInput,
   McpListInput,
@@ -66,6 +66,7 @@ function resourceTools(sessions: ReadonlyMap<string, McpSession>) {
   return [
     defineHarnessTool({
       name: MCP_CAPABILITY_TOOLS.listResources,
+      resources: (input: McpListInput) => ({ mcpServer: input.server }),
       description:
         "List the resources and resource templates of an MCP server. Pass nextCursor back as cursor for the next page.",
       readOnly: true,
@@ -100,6 +101,7 @@ function resourceTools(sessions: ReadonlyMap<string, McpSession>) {
     }),
     defineHarnessTool({
       name: MCP_CAPABILITY_TOOLS.readResource,
+      resources: (input: McpReadResourceInput) => ({ mcpServer: input.server }),
       description:
         "Read a resource of an MCP server by URI, including a URI expanded from a resource template.",
       readOnly: true,
@@ -136,6 +138,7 @@ function promptTools(sessions: ReadonlyMap<string, McpSession>) {
   return [
     defineHarnessTool({
       name: MCP_CAPABILITY_TOOLS.listPrompts,
+      resources: (input: McpListInput) => ({ mcpServer: input.server }),
       description:
         "List the prompts of an MCP server with their arguments. Pass nextCursor back as cursor for the next page.",
       readOnly: true,
@@ -164,6 +167,7 @@ function promptTools(sessions: ReadonlyMap<string, McpSession>) {
     }),
     defineHarnessTool({
       name: MCP_CAPABILITY_TOOLS.getPrompt,
+      resources: (input: McpGetPromptInput) => ({ mcpServer: input.server }),
       description:
         "Render a prompt of an MCP server with string arguments and return its messages.",
       readOnly: true,

@@ -47,7 +47,9 @@ import { reserveTransportStorage } from "../../src/infrastructure/transport-rese
 import { captureRecoveryChecksums } from "../../src/application/recovery-checksum-capture.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { s3Fixture } from "../fixtures/s3-transport-server.ts";
+import { createS3Transport } from "../../src/infrastructure/s3-transport.ts";
 import { repository, scripted, emit } from "../helpers.ts";
+import { transportDefaults } from "../../src/infrastructure/transport.constants.ts";
 
 async function temporary(t: TestContext) {
   const root = await realpath(
@@ -68,11 +70,176 @@ const adapters = {
       })
     ).transporter,
 };
+
+test("S3 conditional mode hides and safely replaces inherited tombstones", async (t) => {
+  const { transporter: tombstones, client } = await s3Fixture(t, {
+    deleteMode: "tombstone",
+  });
+  const conditional = createS3Transport({
+    client,
+    bucket: "bucket",
+    prefix: "project",
+    deleteMode: "conditional",
+  });
+  const key = "objects/deleted";
+  const initial = await tombstones.write(key, Buffer.from("old"), {
+    ifRevision: null,
+  });
+  await tombstones.remove(key, { ifRevision: initial.revision });
+  const empty = await conditional.write("objects/empty", new Uint8Array(), {
+    ifRevision: null,
+  });
+  assert.equal(await conditional.read(key), undefined);
+  const keys: string[] = [];
+  for await (const entry of conditional.list()) keys.push(entry.key);
+  assert.deepEqual(keys, [empty.key]);
+  const outcomes = await Promise.allSettled([
+    conditional.write(key, Buffer.from("first"), { ifRevision: null }),
+    conditional.write(key, Buffer.from("second"), { ifRevision: null }),
+  ]);
+  assert.equal(
+    outcomes.filter((outcome) => outcome.status === "fulfilled").length,
+    1,
+  );
+  const rejected = outcomes.find((outcome) => outcome.status === "rejected");
+  assert.ok(
+    rejected?.status === "rejected" &&
+      rejected.reason instanceof TransportConflict,
+  );
+  await assert.rejects(
+    conditional.write(key, Buffer.from("stale"), {
+      ifRevision: initial.revision,
+    }),
+    TransportConflict,
+  );
+  const current = await conditional.read(key);
+  assert.ok(current);
+  await conditional.remove(key, { ifRevision: current.revision });
+  assert.equal(await tombstones.read(key), undefined);
+});
+
+test("checkpoint release retries a transient failure without replaying a completed task", async (t) => {
+  const base = await adapters.local(t);
+  let releases = 0,
+    calls = 0;
+  const transporter: Transport = {
+    ...base,
+    async write(key, bytes, options) {
+      const value = JSON.parse(Buffer.from(bytes).toString());
+      if (
+        key.startsWith("checkpoints/") &&
+        value.owner === null &&
+        ++releases === 1
+      )
+        throw new Error("Transient release failure");
+      return base.write(key, bytes, options);
+    },
+  };
+  const task = defineTask({ key: "effect", perform: () => ++calls });
+  const workflow = defineWorkflow("release-retry", [task]);
+  const checkpoint = {
+    store: createWorkflowCheckpointStore({ transporter }),
+    runId: "release-retry",
+    version: "1",
+  };
+  assert.equal((await workflow.start({ checkpoint })).value(task), 1);
+  assert.equal(releases, 2);
+  assert.equal((await workflow.start({ checkpoint })).value(task), 1);
+  assert.equal(calls, 1);
+});
+
+test("checkpoint release retries stay bounded and cannot clear a replacement owner", async (t) => {
+  for (const replace of [false, true]) {
+    const base = await adapters.local(t);
+    let attempts = 0;
+    let replacement:
+      | Awaited<
+          ReturnType<
+            ReturnType<typeof createWorkflowCheckpointStore>["acquire"]
+          >
+        >
+      | undefined;
+    const transporter: Transport = {
+      ...base,
+      async write(key, bytes, options) {
+        if (JSON.parse(Buffer.from(bytes).toString()).owner === null) {
+          attempts++;
+          if (replace) {
+            const current = await base.read(key);
+            assert.ok(current);
+            await recoverWorkflowCheckpoint({
+              transporter: base,
+              runId: "release-failure",
+              revision: current.revision,
+            });
+            replacement = await createWorkflowCheckpointStore({
+              transporter: base,
+            }).acquire("release-failure");
+          }
+          throw new Error("Release unavailable");
+        }
+        return base.write(key, bytes, options);
+      },
+    };
+    const store = createWorkflowCheckpointStore({ transporter });
+    const lease = await store.acquire("release-failure");
+    await assert.rejects(
+      lease.release(),
+      replace ? TransportConflict : /Release unavailable/,
+    );
+    assert.equal(attempts, replace ? 1 : 2);
+    await assert.rejects(store.acquire("release-failure"), /already in use/);
+    if (replacement) {
+      await replacement.read();
+      await replacement.release();
+    }
+  }
+});
 async function collect<T>(values: AsyncIterable<T>): Promise<T[]> {
   const result: T[] = [];
   for await (const value of values) result.push(value);
   return result;
 }
+
+test("local listings read only headers and reject truncated object bodies", async (t) => {
+  const directory = await temporary(t);
+  const transporter = createLocalTransport({ directory });
+  const key = "artifacts/large";
+  const entry = await transporter.write(
+    key,
+    Buffer.alloc(2 * 1024 * 1024, 42),
+    { ifRevision: null },
+  );
+  const target = join(directory, "objects", `${key}.object`);
+  const open = fs.open;
+  let bytesRead = 0;
+  t.mock.method(fs, "open", async (...args: Parameters<typeof open>) => {
+    const handle = await open(...args);
+    if (args[0] === target) {
+      const read = handle.read.bind(handle);
+      t.mock.method(
+        handle,
+        "read",
+        async (...parameters: Parameters<typeof read>) => {
+          const result = await read(...parameters);
+          bytesRead += result.bytesRead;
+          return result;
+        },
+      );
+    }
+    return handle;
+  });
+  syncBuiltinESMExports();
+  try {
+    assert.deepEqual(await collect(transporter.list()), [entry]);
+    assert.equal(bytesRead, transportDefaults.headerBytes);
+    await fs.truncate(target, transportDefaults.headerBytes + entry.size - 1);
+    await assert.rejects(collect(transporter.list()), /Invalid or oversized/);
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
+});
 const bytes = (value: string) => Buffer.from(value);
 
 test("local transport creates nested storage beneath an existing filesystem root", async (t) => {
@@ -615,6 +782,54 @@ test("transport failures preserve host recovery and do not apply incoming change
   );
 });
 
+test("journal retention can resume after a segment or index removal fails", async (t) => {
+  const transporter = await adapters.local(t);
+  const policy = {
+    version: 1 as const,
+    scopes: ["closed-logs" as const],
+    minAgeMs: 0,
+  };
+  for (const failure of ["segment", "index"]) {
+    const log = await journal("", { transporter });
+    log.record({ kind: "text", text: "one" });
+    log.record({ kind: "text", text: "two" });
+    await log.close();
+    const index = log.reference!.key;
+    let segments = 0;
+    const removed: string[] = [];
+    const failing: Transport = {
+      ...transporter,
+      async remove(key, options) {
+        if (key !== index) segments++;
+        if (
+          (failure === "index" && key === index) ||
+          (failure === "segment" && segments === 2)
+        )
+          throw new Error("temporary removal failure");
+        await transporter.remove(key, options);
+        removed.push(key);
+      },
+    };
+    const plan = await planRecoveryRetention({ transporter, policy });
+    const first = await pruneRecoveryRetention(plan, { transporter: failing });
+    assert.equal(first.removed.length, 0);
+    assert.equal(first.retained[0]?.reason, "REVALIDATION_OR_REMOVAL_FAILED");
+    assert.ok(
+      await transporter.read(index),
+      "the index must survive incomplete pruning",
+    );
+    assert.ok(
+      removed.length > 0,
+      "the failure must occur after partial deletion",
+    );
+    const next = await planRecoveryRetention({ transporter, policy });
+    assert.equal(next.entries.filter((entry) => entry.eligible).length, 1);
+    const complete = await pruneRecoveryRetention(next, { transporter });
+    assert.deepEqual(complete.removed, [index]);
+    assert.deepEqual(await collect(transporter.list("logs/")), []);
+  }
+});
+
 test("journal publication failure preserves the last committed prefix", async (t) => {
   const transporter = await adapters.local(t);
   let fail = false;
@@ -678,6 +893,7 @@ test("local object roots reject user symlinks, including ancestors, and archive 
       /symlink/,
     );
     await assert.rejects(alias.read(manifest.key), /changed/);
+    await assert.rejects(collect(alias.list()), /changed/);
     const nested = createLocalTransport({
       directory: join(root, "alias", "nested"),
     });
@@ -731,38 +947,48 @@ test("transport modes reject incompatible configuration and malformed state", as
   assert.equal((await inspectRecovery({ transporter })).complete, false);
 });
 
-test("local transport retries a growing replacement between size sampling and inspection without relaxing byte limits", async (t) => {
-  const directory = await temporary(t);
-  const transporter = createLocalTransport({ directory });
-  const key = "activity/owner";
-  const original = await transporter.write(key, Buffer.from("small"), {
-    ifRevision: null,
-  });
-  const replacement = Buffer.from("a larger replacement snapshot");
-  const target = join(directory, "objects", `${key}.object`);
-  const lstat = fs.lstat;
-  let replaced = false;
-  t.mock.method(fs, "lstat", async (...args: Parameters<typeof lstat>) => {
-    const info = await lstat(...args);
-    if (!replaced && args[0] === target) {
-      replaced = true;
-      await transporter.write(key, replacement, {
-        ifRevision: original.revision,
-      });
-    }
-    return info;
-  });
-  syncBuiltinESMExports();
-  try {
-    const read = await transporter.read(key, { maxBytes: replacement.length });
-    assert.equal(replaced, true);
-    assert.deepEqual(read?.bytes, replacement);
-    await assert.rejects(
-      transporter.read(key, { maxBytes: 5 }),
-      /too large|oversized/,
-    );
-  } finally {
-    t.mock.restoreAll();
+for (const operation of ["read", "list"] as const) {
+  test(`local transport retries a growing replacement during ${operation} without relaxing byte limits`, async (t) => {
+    const directory = await temporary(t);
+    const transporter = createLocalTransport({ directory });
+    const key = "activity/owner";
+    const original = await transporter.write(key, Buffer.from("small"), {
+      ifRevision: null,
+    });
+    const replacement = Buffer.from("a larger replacement snapshot");
+    const target = join(directory, "objects", `${key}.object`);
+    const lstat = fs.lstat;
+    let replaced = false;
+    t.mock.method(fs, "lstat", async (...args: Parameters<typeof lstat>) => {
+      const info = await lstat(...args);
+      if (!replaced && args[0] === target) {
+        replaced = true;
+        await transporter.write(key, replacement, {
+          ifRevision: original.revision,
+        });
+      }
+      return info;
+    });
     syncBuiltinESMExports();
-  }
-});
+    try {
+      if (operation === "list") {
+        const entries = await collect(transporter.list());
+        assert.equal(entries.length, 1);
+        assert.equal(entries[0]?.size, replacement.length);
+        assert.notEqual(entries[0]?.revision, original.revision);
+      }
+      const read = await transporter.read(key, {
+        maxBytes: replacement.length,
+      });
+      assert.equal(replaced, true);
+      assert.deepEqual(read?.bytes, replacement);
+      await assert.rejects(
+        transporter.read(key, { maxBytes: 5 }),
+        /too large|oversized/,
+      );
+    } finally {
+      t.mock.restoreAll();
+      syncBuiltinESMExports();
+    }
+  });
+}

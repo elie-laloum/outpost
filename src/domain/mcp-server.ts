@@ -150,6 +150,10 @@ function httpServer(name: string, server: object): McpHttpServer {
       `MCP server ${name} oauth must be "login" or client credentials`,
     );
     invariant(
+      value.oauth === "login" || (url.protocol === "https:" && !url.hash),
+      `MCP server ${name} OAuth client credentials require an HTTPS URL without a fragment`,
+    );
+    invariant(
       value.bearerTokenVariable === undefined &&
         Object.keys(headers).every(
           (key) => key.toLowerCase() !== "authorization",

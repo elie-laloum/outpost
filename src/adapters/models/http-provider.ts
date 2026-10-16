@@ -1,3 +1,4 @@
+import { httpTransportFailure } from "../../infrastructure/http-transport.ts";
 import { invariant, OutpostError, positive } from "../../domain/errors.ts";
 import type {
   ModelProvider,
@@ -11,14 +12,11 @@ import type {
 } from "./model-protocol.types.ts";
 import {
   MODEL_MAX_TIMEOUT_MS,
-  MODEL_QUOTA_STATUS,
-  MODEL_UNAVAILABLE_STATUSES,
   MODEL_RESPONSE_BYTES,
   MODEL_TIMEOUT_MS,
 } from "./model.constants.ts";
 import { validateModelRequest } from "./model-request.ts";
-import { retryAfterMs } from "./retry-after.ts";
-import { resetTimestamp } from "../../domain/quota.ts";
+import { httpFailure } from "./http-failure.ts";
 import { modelJson } from "./model-http.ts";
 
 export function httpModelProvider(
@@ -48,7 +46,7 @@ export function httpModelProvider(
     options.apiKey === false ||
       (typeof options.apiKey === "string" &&
         options.apiKey.trim() &&
-        !/[\r\n]/.test(options.apiKey)),
+        !/[^\x21-\x7e]/.test(options.apiKey)),
     "Model apiKey must be a nonempty key or false for unauthenticated endpoints",
   );
   const endpoint = `${base.href.replace(/\/+$/, "")}/${protocol.path}`;
@@ -75,25 +73,7 @@ export function httpModelProvider(
       signal,
     });
     if (response.ok) return response;
-    const retryAfter = retryAfterMs(response.headers.get("Retry-After"));
-    await response.body?.cancel();
-    const quota = response.status === MODEL_QUOTA_STATUS;
-    const resetAt =
-      quota && retryAfter !== undefined
-        ? resetTimestamp(retryAfter)
-        : undefined;
-    throw new OutpostError(
-      quota ? "quota" : "provider",
-      `Model request failed with HTTP ${response.status}`,
-      {
-        status: response.status,
-        ...(retryAfter === undefined ? {} : { retryAfterMs: retryAfter }),
-        ...(resetAt === undefined ? {} : { resetAt }),
-        ...(MODEL_UNAVAILABLE_STATUSES.has(response.status)
-          ? { unavailable: `HTTP ${response.status}` }
-          : {}),
-      },
-    );
+    throw await httpFailure(response, maxBytes, "Model", protocol.quotaError);
   };
   const failure = (
     error: unknown,
@@ -112,7 +92,7 @@ export function httpModelProvider(
     return new OutpostError(
       "provider",
       "Model request failed during HTTP transport",
-      { unavailable: "HTTP transport failure" },
+      httpTransportFailure(error),
     );
   };
   async function* stream(
@@ -138,13 +118,21 @@ export function httpModelProvider(
       if (!response.body)
         throw new OutpostError("response", "Model response has no body");
       const decoder = streaming.decoder();
-      for await (const event of serverSentEvents(
-        response.body,
-        maxBytes,
-        refresh,
-      )) {
+      for await (const event of serverSentEvents(response.body, maxBytes)) {
         signal.throwIfAborted();
         const text = decoder.push(event);
+        const payload: unknown =
+          event.data === "[DONE]" ? null : JSON.parse(event.data);
+        if (
+          event.event !== "ping" &&
+          !(
+            payload &&
+            typeof payload === "object" &&
+            "type" in payload &&
+            payload.type === "ping"
+          )
+        )
+          refresh();
         if (text) yield { type: "text-delta", text };
       }
       signal.throwIfAborted();

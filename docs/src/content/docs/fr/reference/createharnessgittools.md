@@ -13,7 +13,7 @@ import { createHarnessGitTools } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le jeu d’outils git : git exécute une commande status, diff, log ou show et refuse --output, --ext-diff, --textconv et --open-files-in-pager. Il est en lecture seule et déclare la ligne de commande git &lt;command> &lt;arguments> pour les règles de permission.
+Crée le jeu d’outils git : git exécute une commande status, diff, log ou show et refuse --no-index, --output, --ext-diff, --textconv, --open-files-in-pager et leurs abréviations. Les arguments de chemin absolu ou qualifié par une lettre de lecteur et les traversées vers un répertoire parent sont refusés. Il est en lecture seule et déclare la ligne de commande git &lt;command> &lt;arguments> pour les règles de permission.
 
 [Exemple complet et règles détaillées](../../guide/harness-tools/).
 

@@ -16,6 +16,7 @@ export interface HarnessPermissionsOptions {
 export interface ToolResources {
   readonly paths?: readonly string[];
   readonly command?: string;
+  readonly mcpServer?: string;
 }
 
 export type PermissionDecision =

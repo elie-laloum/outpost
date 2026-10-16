@@ -91,6 +91,8 @@ try {
 
 Référence API : [BullMQTaskQueueOptions](../../reference/bullmqtaskqueueoptions/).
 
+Une fois la connexion établie, la politique de reconnexion par défaut continue ses tentatives après une coupure Redis, avec un délai plafonné à une seconde. Les tentatives de connexion initiale restent bornées. Des opérations peuvent échouer pendant la coupure ; `runQueueWorker()` retente les opérations de file et les baux expirés restent invalides. La reconnexion n’autorise pas le rejeu des effets terminés et ne restaure pas les données perdues par Redis. Une option explicite `connection.retryStrategy` remplace cette politique. Appelez `close()` à la fin pour arrêter les reconnexions et libérer les connexions de la file.
+
 ## Connecter producteurs et workers
 
 Chaque producteur et chaque worker doit utiliser les mêmes `name`, `prefix`, base Redis et serveur. Une seule différence lui donne, sans erreur, une file séparée et vide.

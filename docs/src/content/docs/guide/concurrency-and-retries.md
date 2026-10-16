@@ -175,3 +175,5 @@ Agent, command and isolated tasks forward `context.signal` for you. In `defineTa
 - Retry settings, task timeouts and the presence of a condition are part of the checkpoint identity: changing them rejects an existing checkpoint (see [Durable runs](../durable-runs/)).
 
 API: [defineTask](../../reference/definetask/) · [Retry](../../reference/retry/) · [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [WorkflowResult](../../reference/workflowresult/) · [OutpostError](../../reference/outposterror/)
+
+A server delay above `retry.maxRetryAfterMs` is refused: the original error propagates, with no early retry. The default bound is 24 hours. Set a smaller bound for interactive work or a larger explicit value for long unattended workflows.

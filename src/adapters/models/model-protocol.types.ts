@@ -32,6 +32,7 @@ export interface ModelProtocol {
   readonly path: string;
   readonly stream?: StreamProtocol;
   validate?(model: AgentModel): void;
+  quotaError?(error: Readonly<Record<string, unknown>>): boolean;
   build(
     request: ModelRequest,
     context: ProtocolContext,

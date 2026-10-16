@@ -7,7 +7,7 @@ import {
 import {
   queueLeaseMs,
   queueNumber,
-  queueString,
+  queueClaim,
   queueResult,
 } from "../domain/task-queue.ts";
 import type { QueueWorkerOptions } from "./queue-worker.types.ts";
@@ -21,13 +21,25 @@ export async function runQueueWorker(
   const leaseMs = queueLeaseMs(options.leaseMs ?? queueDefaultLeaseMs);
   const pollMs = queueNumber(options.pollMs ?? queueDefaultPollMs);
   if (!pollMs) throw new Error("Worker poll interval must be positive");
+  if (options.onError !== undefined && typeof options.onError !== "function")
+    throw new Error("Worker onError must be a function");
   const handlers = new Map(Object.entries(options.handlers));
   if (
     !handlers.size ||
     [...handlers.values()].some((handler) => typeof handler !== "function")
   )
     throw new Error("Worker requires trusted handlers");
-  const worker = queueString(options.worker);
+  const claim = queueClaim({
+    worker: options.worker,
+    handlers: [...handlers.keys()],
+    leaseMs,
+  });
+  const worker = claim.worker;
+  function report(error: unknown) {
+    try {
+      options.onError?.(error);
+    } catch {}
+  }
   async function execute(job: QueueJob) {
     if (options.signal.aborted) return;
     const stop = new AbortController();
@@ -42,7 +54,10 @@ export async function runQueueWorker(
           await options.queue.renew(lease, leaseMs);
         }
       } catch (error) {
-        if (!signal.aborted) stop.abort(error);
+        if (!signal.aborted) {
+          report(error);
+          stop.abort(error);
+        }
       }
     })();
     try {
@@ -80,7 +95,30 @@ export async function runQueueWorker(
             : {}),
         };
       }
-      if (!signal.aborted) await options.queue.complete(lease, result);
+      while (!signal.aborted) {
+        try {
+          await options.queue.complete(lease, result);
+          return;
+        } catch (error) {
+          report(error);
+          try {
+            const current = await options.queue.get(job.id);
+            if (
+              !current ||
+              current.status !== "active" ||
+              current.worker !== worker ||
+              current.fence !== job.fence ||
+              (current.expires ?? 0) <= Date.now()
+            )
+              return;
+          } catch (error) {
+            report(error);
+          }
+          await delay(pollMs, undefined, { signal });
+        }
+      }
+    } catch (error) {
+      if (!signal.aborted) throw error;
     } finally {
       stop.abort();
       await heartbeat;
@@ -88,11 +126,12 @@ export async function runQueueWorker(
   }
   try {
     while (!options.signal.aborted) {
-      const job = await options.queue.claim({
-        worker,
-        handlers: [...handlers.keys()],
-        leaseMs,
-      });
+      let job: QueueJob | undefined;
+      try {
+        job = await options.queue.claim(claim);
+      } catch (error) {
+        if (!options.signal.aborted) report(error);
+      }
       if (job) {
         await execute(job);
         continue;

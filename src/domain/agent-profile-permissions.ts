@@ -2,6 +2,8 @@ import type { McpServers } from "./mcp-server.types.ts";
 import type { AgentProfile } from "./agent-profile.types.ts";
 import type { HarnessPermissions } from "./permissions.types.ts";
 import { PROFILE_HARNESS_TOOLS } from "./agent-profile.constants.ts";
+import { MCP_CAPABILITY_TOOLS } from "./mcp-server.constants.ts";
+import { SKILL_LOADER } from "./skill.constants.ts";
 
 export function profilePermissions(
   profile: AgentProfile | undefined,
@@ -19,6 +21,7 @@ export function profilePermissions(
     .filter((entry) => entry.startsWith("shell:"))
     .map((entry) => entry.slice(6));
   const servers = Object.keys(mcpServers ?? profile.mcpServers ?? {});
+  const capabilityTools = new Set<string>(Object.values(MCP_CAPABILITY_TOOLS));
   return [
     Object.freeze({
       kind: "permissions",
@@ -28,12 +31,22 @@ export function profilePermissions(
         const mcp = servers.some((server) =>
           tool.startsWith(`mcp__${server}__`),
         );
+        const capability =
+          capabilityTools.has(tool) &&
+          resources.mcpServer !== undefined &&
+          servers.includes(resources.mcpServer);
         const shell =
           tool === "shell" &&
           (entries.includes("shell") ||
             (resources.command !== undefined &&
               commands.includes(resources.command)));
-        if (mcp || shell || (tool !== "shell" && names.includes(tool)))
+        if (
+          tool === SKILL_LOADER ||
+          capability ||
+          mcp ||
+          shell ||
+          (tool !== "shell" && names.includes(tool))
+        )
           return { allowed: true };
         return {
           allowed: false,

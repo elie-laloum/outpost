@@ -7,6 +7,7 @@ import type { DiagnosticCheck, DiagnosticProbe } from "./doctor.types.ts";
 export async function diagnosticProbe(
   probe: DiagnosticProbe,
   execute: Executor = executeProcess,
+  deadlineMs: number = doctorDefaults.deadlineMs,
 ): Promise<DiagnosticCheck> {
   const failure = (reason: string): DiagnosticCheck => ({
     id: probe.id,
@@ -16,7 +17,7 @@ export async function diagnosticProbe(
   try {
     const result = await execute({
       ...probe.command,
-      deadlineMs: doctorDefaults.deadlineMs,
+      deadlineMs,
       retain: probe.command.retain ?? doctorDefaults.retain,
     });
     if (result.status !== 0)
@@ -50,7 +51,11 @@ export async function diagnosticProbe(
     };
   } catch (error) {
     if (error instanceof OutpostError && error.code === "timeout")
-      return failure("Check timed out");
+      return {
+        id: probe.id,
+        status: probe.failureStatus,
+        message: `Check timed out after ${deadlineMs} ms. Increase the diagnostic timeout or retry when the machine is less busy.`,
+      };
     if (
       error &&
       typeof error === "object" &&

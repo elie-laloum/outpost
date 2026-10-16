@@ -16,6 +16,41 @@ import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
+for (const withResolver of [false, true]) {
+  test(`integration respects an occupied current workspace (resolver: ${withResolver})`, async (t) => {
+    const root = await repository(t);
+    const current = await openWorkspace({ repository: root });
+    t.after(() => current.close());
+    const candidate = await openWorkspace({
+      repository: root,
+      branch: { mode: "integrate" },
+    });
+    t.after(() => candidate.close({ preserve: true }));
+    const before = await git(root, ["rev-parse", "HEAD"]);
+    await writeFile(join(candidate.directory, "new.txt"), "candidate");
+    await git(candidate.directory, ["add", "new.txt"]);
+    await git(candidate.directory, ["commit", "-m", "Candidate"]);
+    const integrate = () =>
+      withResolver
+        ? candidate.integrate({
+            onConflict: async () =>
+              assert.fail("clean merge needs no resolver"),
+          })
+        : candidate.integrate();
+    await assert.rejects(integrate(), { code: "conflict" });
+    assert.equal(await git(root, ["rev-parse", "HEAD"]), before);
+    assert.equal(
+      await readFile(join(candidate.directory, "new.txt"), "utf8"),
+      "candidate",
+    );
+    await current.close();
+    await integrate();
+    assert.equal(await readFile(join(root, "new.txt"), "utf8"), "candidate");
+    const reopened = await openWorkspace({ repository: root });
+    await reopened.close();
+  });
+}
+
 test("terminal attachment integrates successful commits and preserves failed work", async (t) => {
   const root = await repository(t);
   const success = scripted((input) => {

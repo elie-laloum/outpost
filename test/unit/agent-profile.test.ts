@@ -275,6 +275,18 @@ test("built-in profile permissions deny unknown tools and compare shell commands
   );
   const [empty] = profilePermissions(defineAgentProfile({ allowedTools: [] }));
   assert.equal(empty?.evaluate("read_file", {}).allowed, false);
+  assert.equal(empty?.evaluate("load_skill", {}).allowed, true);
+  for (const tool of [
+    "mcp_list_resources",
+    "mcp_read_resource",
+    "mcp_list_prompts",
+    "mcp_get_prompt",
+  ]) {
+    assert.equal(policy.evaluate(tool, { mcpServer: "docs" }).allowed, true);
+    assert.equal(policy.evaluate(tool, { mcpServer: "other" }).allowed, false);
+    assert.equal(policy.evaluate(tool, {}).allowed, false);
+    assert.equal(empty?.evaluate(tool, {}).allowed, false);
+  }
 });
 
 test(

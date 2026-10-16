@@ -1,3 +1,5 @@
+import { canonicalJson } from "../domain/workflow/canonical-json.ts";
+import { queueJson } from "../domain/task-queue.ts";
 import { randomUUID } from "node:crypto";
 import { openBullMQResources } from "./task-queue-bullmq-resources.ts";
 import {
@@ -95,9 +97,17 @@ export async function createBullMQTaskQueue(
     enqueue(input) {
       return perform(async () => {
         const request = queueRequest(input);
+        const encoded = canonicalJson(queueJson(request));
+        const existing = await state(request.id, "get");
+        const compatible =
+          existing &&
+          canonicalJson(queueJson(queueRequest(existing.job))) === encoded
+            ? existing.request
+            : "";
         await state(request.id, "enqueue", [
-          JSON.stringify(request),
+          encoded,
           request.deadline ?? "",
+          compatible,
         ]);
         const { queue } = await handlerQueue(request.handler);
         await queue.add(request.handler, request, {

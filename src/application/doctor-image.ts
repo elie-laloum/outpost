@@ -10,6 +10,7 @@ import { diagnosticContainer } from "../providers/diagnostic-container.ts";
 import { doctorAgents } from "./doctor-agent.constants.ts";
 import { agentVersionProbe, diagnoseAgentCli } from "./doctor-agent.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
+import { doctorDeadline } from "./doctor-deadline.ts";
 import { doctorDefaults } from "./doctor.constants.ts";
 import type { DiagnosticCheck, DoctorImageOptions } from "./doctor.types.ts";
 
@@ -17,8 +18,16 @@ export async function diagnoseImage(
   options: DoctorImageOptions,
   execute: Executor = executeProcess,
 ): Promise<readonly DiagnosticCheck[]> {
+  const deadlineMs = doctorDeadline(
+    options.deadlineMs,
+    doctorDefaults.imageDeadlineMs,
+  );
   const stop = new AbortController();
-  const pending = inspectImage(options, execute, stop.signal);
+  const pending = inspectImage(
+    { ...options, deadlineMs },
+    execute,
+    stop.signal,
+  );
   const unregister = registerCleanup(async () => {
     stop.abort(new OutpostError("aborted", "Image diagnostics interrupted"));
     await pending;
@@ -31,7 +40,13 @@ export async function diagnoseImage(
 }
 
 async function inspectImage(
-  { sandboxProvider, agent, image, workspaceKind = "git" }: DoctorImageOptions,
+  {
+    sandboxProvider,
+    agent,
+    image,
+    deadlineMs = doctorDefaults.imageDeadlineMs,
+    workspaceKind = "git",
+  }: DoctorImageOptions,
   execute: Executor,
   signal: AbortSignal,
 ): Promise<readonly DiagnosticCheck[]> {
@@ -51,7 +66,7 @@ async function inspectImage(
     lease = await diagnosticContainer(
       sandboxProvider,
       image,
-      doctorDefaults.deadlineMs,
+      deadlineMs,
       tracked,
     ).acquire({
       repository: directory,
@@ -82,6 +97,7 @@ async function inspectImage(
             remedy: `Install ${executable} in the image and rebuild it.`,
           },
           invoke,
+          deadlineMs,
         ),
       );
     }
@@ -98,6 +114,7 @@ async function inspectImage(
             "Check the image user and permissions of the private agent home.",
         },
         invoke,
+        deadlineMs,
       ),
     );
     const agentVersion = await diagnosticProbe(
@@ -108,6 +125,7 @@ async function inspectImage(
         remedy: `Install ${doctorAgents[agent].executable} in the image and rebuild it. This check does not bootstrap agents.`,
       },
       invoke,
+      deadlineMs,
     );
     checks.push(agentVersion);
     if (agentVersion.status === "fail")
@@ -116,7 +134,7 @@ async function inspectImage(
         status: "skipped",
         message: "CLI help checks require a successful agent version probe.",
       });
-    else checks.push(...(await diagnoseAgentCli(agent, invoke)));
+    else checks.push(...(await diagnoseAgentCli(agent, invoke, deadlineMs)));
   } catch (error) {
     retained = error instanceof AggregateError;
     checks.push({

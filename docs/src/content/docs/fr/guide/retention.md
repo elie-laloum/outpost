@@ -82,6 +82,8 @@ console.log(result.removed, result.retained);
 
 Pour des données conservées dans un [transport](../storage/) distant, passez `transporter` à `planRecoveryRetention()` et `{ transporter }` à `pruneRecoveryRetention()`. Seuls `closed-logs` et `task-cache` s’y appliquent.
 
+L’élagage Transport supprime les segments des journaux fermés avant leur index. Si une suppression échoue, créez un nouveau plan de rétention et réessayez ; l’index conservé maintient l’éligibilité des objets restants. Un journal partiellement supprimé ne fournit plus un historique lisible complet.
+
 ## Nettoyer ce que la rétention conserve
 
 <!-- features -->
@@ -115,9 +117,39 @@ Une réservation refusée rejette avec le code `configuration` ; un `assertRecov
 ## Limites
 
 - Les réservations coordonnent les processus d’écriture qui les utilisent. Ce n’est pas un quota du système de fichiers : tout autre processus peut encore écrire dans `.outpost`.
-- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Retirez son entrée seulement après avoir vérifié que son propriétaire s’est arrêté, par une écriture conditionnelle (`ifRevision`) dans le même transport.
+- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Utilisez `inspectStorageReservations()` pour identifier son propriétaire, puis `recoverStorageReservation()` avec la révision inspectée et `processesStopped: true` après son arrêt. Une modification concurrente exige une nouvelle inspection.
 - La rétention ne supprime jamais les branches, checkpoints, artefacts, conversations, transferts de récupération ni verrous.
 - Un transport distant ne peut pas utiliser le périmètre `clean-workspaces` ni `maxWorkspaces`.
 - Ne supprimez pas `.outpost` à la main : il peut contenir la seule copie d’un travail inachevé.
 
 API : [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).
+
+## Inspecter et récupérer les réservations
+
+Les nouvelles entrées enregistrent l’identifiant d’instance du processus, le nom d’hôte, le PID, la date de création et le dépôt, avec l’identité Linux si disponible. Ces informations identifient le propriétaire sans prouver son activité distante. Choisissez l’entrée exacte et arrêtez son propriétaire avant récupération. Une modification concurrente du registre refuse la récupération et exige une nouvelle inspection. L’exemple utilise le Transport par défaut du dépôt ; utilisez votre Transport d’origine si le stockage est personnalisé.
+
+```ts
+import {
+  createLocalTransport,
+  inspectStorageReservations,
+  recoverStorageReservation,
+} from "@elie-laloum/outpost";
+
+const transporter = createLocalTransport({
+  directory: "/projects/app/.outpost/storage",
+});
+const inspection = await inspectStorageReservations(transporter);
+console.log(inspection);
+
+// À exécuter seulement après confirmation de l’arrêt du propriétaire.
+export async function recoverStoppedOwner(id: string) {
+  if (!inspection.revision) throw new Error("No reservation ledger");
+  await recoverStorageReservation(transporter, {
+    id,
+    revision: inspection.revision,
+    processesStopped: true,
+  });
+}
+```
+
+Le registre écrit le format 2 et lit l’ancien format 1. Les réservations anciennes restent comptabilisées, sans métadonnées de propriétaire ; arrêtez tous les écrivains potentiels avant d’en récupérer une. Arrêtez les écrivains d’ancienne version avant la migration d’un registre partagé : ils ne peuvent pas lire le format 2. Ni la récupération ni la libération ne recréent une réservation retirée ; la récupération préserve les autres entrées par écriture conditionnelle.

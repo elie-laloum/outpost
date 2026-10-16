@@ -1,13 +1,9 @@
-import { cp, mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, resolve } from "node:path";
 import type { Command } from "../domain/command.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
-import type {
-  SandboxProvider,
-  TransferOptions,
-} from "../domain/sandbox.types.ts";
+import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import { executeProcess } from "../infrastructure/process.ts";
+import { localFiles } from "./local-files.ts";
 import type { LocalOptions } from "./local.types.ts";
 
 export function createLocalSandboxProvider(
@@ -26,25 +22,6 @@ export function createLocalSandboxProvider(
       const stop = new AbortController();
       const active = new Set<Promise<unknown>>();
       let disposed = false;
-      const copy = async (
-        source: string,
-        destination: string,
-        options: TransferOptions = {},
-      ) => {
-        options.signal?.throwIfAborted();
-        if (disposed)
-          throw new OutpostError("provider", "Local sandbox is closed");
-        if (resolve(source) === resolve(destination)) return;
-        await mkdir(dirname(destination), { recursive: true });
-        await cp(source, destination, {
-          recursive: true,
-          force: true,
-          filter: () => {
-            options.signal?.throwIfAborted();
-            return true;
-          },
-        });
-      };
       return {
         root: context.directory,
         home: homedir(),
@@ -70,8 +47,7 @@ export function createLocalSandboxProvider(
           );
           return pending;
         },
-        upload: copy,
-        download: copy,
+        ...localFiles(context.directory, () => disposed),
         async release() {
           if (disposed) return;
           disposed = true;

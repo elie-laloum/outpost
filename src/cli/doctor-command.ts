@@ -27,13 +27,18 @@ export async function doctorCommand(
 ): Promise<void> {
   invariant(
     positionals.length === 1,
-    "Usage: outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--json]",
+    "Usage: outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
-      ["sandboxProvider", "agent", "image", "workspace-kind", "json"].includes(
-        key,
-      ),
+      [
+        "sandboxProvider",
+        "agent",
+        "image",
+        "workspace-kind",
+        "timeout",
+        "json",
+      ].includes(key),
       `Unsupported doctor option: --${key}`,
     );
   const sandboxProvider =
@@ -59,6 +64,9 @@ export async function doctorCommand(
       sandboxProvider,
       agent,
       workspaceKind,
+      ...(values.timeout !== undefined
+        ? { deadlineMs: Number(values.timeout) }
+        : {}),
       ...(values.image !== undefined ? { image: values.image } : {}),
     },
     execute,

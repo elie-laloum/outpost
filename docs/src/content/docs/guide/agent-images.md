@@ -108,3 +108,5 @@ Docker and Podman with a mounted checkout never install a CLI: the image must co
 - `outpost image` builds and removes local images; it does not push them to a registry.
 
 API: [agentVersions](../../reference/agentversions/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [SandboxOptions](../../reference/sandboxoptions/).
+
+UID/GID zero are accepted for explicitly selected root images. Root has more privileges inside the container; choose a nonzero UID for normal agent work. This option does not turn mounted Git metadata into a security boundary. Generated container projects include a `.dockerignore` excluding credentials, runtime state and dependencies; an existing file is preserved.

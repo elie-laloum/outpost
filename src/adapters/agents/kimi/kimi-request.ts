@@ -1,3 +1,4 @@
+import { KIMI_PROMPT_MAX_BYTES } from "./kimi.constants.ts";
 import { profileText } from "../profile-support.ts";
 import { validId } from "../../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../../domain/agent.types.ts";
@@ -23,6 +24,10 @@ export function kimiRequest(
   invariant(
     !input.continuation?.fork,
     "Kimi Code requires native fork preparation in Outpost",
+  );
+  invariant(
+    Buffer.byteLength(text ?? "", "utf8") <= KIMI_PROMPT_MAX_BYTES,
+    "Kimi Code prompts must not exceed 65536 UTF-8 bytes, including profile instructions",
   );
   const args = [...modelOption(settings)];
   if (input.continuation) {

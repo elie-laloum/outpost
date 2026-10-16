@@ -10,6 +10,36 @@ import {
 import { OutpostError } from "../../src/domain/errors.ts";
 import type { AgentObservation } from "../../src/domain/agent.types.ts";
 import type { WatchdogOptions } from "../../src/index.ts";
+import { steeringInbox } from "../../src/domain/steering.ts";
+import { harnessSteering } from "../../src/application/harness-steering.ts";
+
+test("watchdog instructions stay with the loop whose activity repeated", async () => {
+  for (const subagentId of [undefined, "child"]) {
+    const steering = createSteering();
+    const delivery = harnessSteering(steeringInbox(steering)!);
+    const controller = new AbortController();
+    const watchdog = repetitionWatchdog({
+      brief: { text: "work" },
+      steering,
+      watchdog: {
+        repetition: { window: 3, maxRepeats: 3 },
+        onStuck: { instruction: "Change approach" },
+      },
+    });
+    for (let index = 0; index < 3; index++)
+      watchdog.observe(
+        { ...tool("ls"), ...(subagentId ? { subagentId } : {}) },
+        controller,
+      );
+    assert.deepEqual(delivery.take("other-child"), []);
+    if (subagentId) assert.deepEqual(delivery.take(undefined), []);
+    assert.deepEqual(delivery.take(subagentId), ["Change approach"]);
+    await Promise.resolve();
+    watchdog.finish();
+    assert.equal(controller.signal.aborted, false);
+    steering.close();
+  }
+});
 
 const tool = (
   input: unknown,

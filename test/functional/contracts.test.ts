@@ -347,9 +347,10 @@ test("custom conversation storage supports cold continuation and per-turn transc
   };
   const agent = {
     ...scripted(
-      `console.log(JSON.stringify({kind:'conversation',id:'custom-id'}));${emit("ok")}`,
+      `console.log(JSON.stringify({kind:'conversation',id:'custom-id'}));console.log(JSON.stringify({kind:'usage',tokens:{input:100,cached:20,output:5}}));${emit("ok")}`,
     ),
     storage,
+    transcriptUsage: () => ({ input: 1, cached: 0, output: 1 }),
   };
   const result = await dispatch({
     repository: root,
@@ -359,6 +360,8 @@ test("custom conversation storage supports cold continuation and per-turn transc
     logging: false,
   });
   assert.equal(result.turns[0]?.transcript, file);
+  assert.equal(result.usage.input, 100);
+  assert.equal(result.usage.output, 5);
   await result.resume({ brief: { text: "again" } });
   assert.equal(captures, 2);
   assert.ok(lookups >= 1);

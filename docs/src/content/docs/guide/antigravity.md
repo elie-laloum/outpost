@@ -78,3 +78,5 @@ Without `mode`, headless runs pass `--dangerously-skip-permissions`: the sandbox
 - Bootstrap reuses an `agy` already on the path without checking its version or checksum.
 
 API: [createAntigravityHarness](../../reference/createantigravityharness/) · [AntigravitySettings](../../reference/antigravitysettings/) · [agentVersions](../../reference/agentversions/).
+
+With the local provider, `usage` forwards `GEMINI_API_KEY` only. Outpost does not install `settings.json` in the host home: configure the native CLI’s Gemini provider yourself, or select an isolated sandbox where Outpost can provision the private home.

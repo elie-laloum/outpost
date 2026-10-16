@@ -4,12 +4,13 @@ import {
   mkdir,
   readdir,
   readFile,
+  readlink,
   symlink,
   writeFile,
 } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
-import { safeDestination } from "../infrastructure/files.ts";
+import { fileDestination } from "../infrastructure/files.ts";
 
 export { manifestScript } from "./cloud-files.constants.ts";
 
@@ -24,7 +25,6 @@ export async function uploadTree(
   signal?.throwIfAborted();
   const info = await lstat(source);
   if (info.isSymbolicLink()) {
-    const { readlink } = await import("node:fs/promises");
     await link(await readlink(source), destination);
     return;
   }
@@ -79,7 +79,7 @@ export async function downloadTree(
     )
       throw new OutpostError("provider", "Invalid transfer entry");
     const target = entry.path
-      ? await safeDestination(destination, entry.path)
+      ? await fileDestination(destination, entry.path)
       : destination;
     if ((await lstat(target).catch(() => undefined))?.isSymbolicLink())
       throw new OutpostError(

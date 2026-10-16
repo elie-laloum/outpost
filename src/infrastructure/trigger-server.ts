@@ -1,3 +1,4 @@
+import { TriggerPayloadError } from "../domain/trigger-payload.ts";
 import { createServer } from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { triggerQueueRequest } from "../domain/trigger-job.ts";
@@ -111,8 +112,9 @@ export async function serveTriggers(
     try {
       event = await route.source.verify(request, Date.now());
     } catch (error) {
-      report(error, { path: route.path, stage: "verify" });
-      return { status: 401 };
+      const payload = error instanceof TriggerPayloadError;
+      report(error, { path: route.path, stage: payload ? "decode" : "verify" });
+      return { status: payload ? 400 : 401 };
     }
     const failure = { path: route.path, delivery: event.delivery };
     const reply = (outcome: TriggerOutcome, job?: string) =>
@@ -144,14 +146,14 @@ export async function serveTriggers(
       maxHeaderSize: triggerHttpMaxHeaderBytes,
     },
     async (request, response) => {
-      const path = new URL(request.url ?? "/", "http://trigger").pathname;
-      const route = routes.get(path);
-      if (!route || request.method !== "POST") {
-        request.resume();
-        send(response, { status: route ? 405 : 404 });
-        return;
-      }
       try {
+        const path = new URL(request.url ?? "/", "http://trigger").pathname;
+        const route = routes.get(path);
+        if (!route || request.method !== "POST") {
+          request.resume();
+          send(response, { status: route ? 405 : 404 });
+          return;
+        }
         const content = await body(request, limit);
         send(
           response,
@@ -163,6 +165,7 @@ export async function serveTriggers(
           }),
         );
       } catch (error) {
+        request.resume();
         response.setHeader("connection", "close");
         send(response, {
           status: error instanceof RequestTooLarge ? 413 : 400,

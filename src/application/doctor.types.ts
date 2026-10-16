@@ -23,12 +23,14 @@ export interface DiagnosticCheck {
   readonly referenceVersion?: string;
 }
 export interface DoctorOptions {
+  readonly deadlineMs?: number;
   readonly workspaceKind?: "git" | "directory" | "ephemeral";
   readonly image?: string;
   readonly sandboxProvider: DoctorProvider;
   readonly agent: DoctorAgent;
 }
 export interface DoctorImageOptions {
+  readonly deadlineMs?: number;
   readonly workspaceKind?: "git" | "directory" | "ephemeral";
   readonly sandboxProvider: "docker" | "podman";
   readonly agent: DoctorAgent;

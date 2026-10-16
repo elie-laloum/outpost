@@ -79,7 +79,7 @@ Both providers stream. The harness emits `text-delta` events while the model wri
 
 ## Bound each request
 
-For example, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` fails a request after thirty seconds without progress. While streaming, each received chunk restarts that timer. Add `deadlineMs` to the dispatch to bound a stream that keeps producing text.
+For example, `createOpenAIModelProvider({ apiKey, timeoutMs: 30_000 })` fails a request after thirty seconds without progress. While streaming, each complete data event other than a heartbeat restarts that timer; comments, partial frames and ping events do not. Add `deadlineMs` to the dispatch to bound a stream that keeps producing text.
 
 API reference: [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) and [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/).
 
@@ -103,6 +103,8 @@ A provider sends each request once. When the service answers HTTP 429 with `Retr
 
 Rate limits fail with code `quota`; overloads, 5xx and connection failures are marked unavailable for [fallback agents](../fallback-agents/). [Quota pauses](../quota-pauses/) list what counts as a quota.
 
+HTTP failures inspect at most 64 KiB of JSON, or the configured `maxResponseBytes` if smaller. Recognized error types and codes supplement the HTTP status; raw messages, prompts and arbitrary fields are not included in diagnostics. Malformed or oversized bodies retain the status-based classification. Anthropic credit and spend-limit messages are recognized as quota failures even with HTTP 400; ordinary invalid requests remain provider errors. The same bounded error inspection applies to System One decision providers. These cases are covered by local HTTP fixtures, without paid API calls.
+
 ## Connect another API
 
 Implement [`ModelProvider`](../../reference/modelprovider/): `request()` returns a result, `stream()` and `validate()` are optional.
@@ -114,3 +116,5 @@ Implement [`ModelProvider`](../../reference/modelprovider/): `request()` returns
 - Anthropic responses with content other than text, tool calls and thinking fail with `response`.
 
 API: [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) · [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/) · [ModelProvider](../../reference/modelprovider/) · [AgentModel](../../reference/agentmodel/).
+
+Validation at composition checks Outpost’s protocol settings, not a live catalogue of model capabilities. Anthropic `reasoning: "none"` means `thinking: { type: "disabled" }`; use it only with a model that supports disabling thinking. Opus 5.5, for example, refuses it. Lower effort is a different setting and is never silently substituted. See [Anthropic thinking capabilities](https://platform.claude.com/docs/en/build-with-claude/thinking). OpenAI supports `max` at protocol level, subject to the selected model. Stateless Responses requests explicitly include encrypted reasoning; only reasoning with encrypted content is replayed.

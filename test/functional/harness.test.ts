@@ -10,9 +10,11 @@ import {
   createKimiHarness,
   defineHarnessInstructions,
   defineHarnessTool,
+  defineHarnessHook,
   dispatch,
   createSandbox,
   attach,
+  OutpostError,
   defineTextResponse,
   type AgentObservation,
   type HarnessOptions,
@@ -26,6 +28,32 @@ import { repository } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
 const usage = { input: 4, cached: 1, output: 2 };
+
+test("custom model stop reasons are validated before dispatching a handler", async (t) => {
+  const root = await repository(t);
+  for (const stopReason of ["stop", "constructor", "toString"]) {
+    const provider = scriptedProvider([
+      () => ({
+        text: "done",
+        usage,
+        // @ts-expect-error Custom JavaScript providers can violate the typed contract.
+        stopReason,
+      }),
+    ]);
+    await assert.rejects(
+      dispatch({
+        repository: root,
+        sandboxProvider: createLocalSandboxProvider(),
+        agent: developer(provider),
+        brief: { text: "Finish" },
+      }),
+      (error: unknown) =>
+        error instanceof OutpostError &&
+        error.code === "response" &&
+        /stop reason/i.test(error.message),
+    );
+  }
+});
 
 type Reply = (request: ModelRequest) => ModelResult | Promise<ModelResult>;
 
@@ -364,6 +392,63 @@ test("tool failures return to the model unless configured to fail the turn", asy
     }),
     /disk unavailable/,
   );
+});
+
+test("duplicate tool call identifiers fail before any tool or tool hook runs", async (t) => {
+  const root = await repository(t);
+  let effects = 0;
+  let hooks = 0;
+  const tool = defineHarnessTool({
+    name: "write",
+    description: "Record an effect.",
+    input: { type: "object" },
+    execute() {
+      effects++;
+      return "written";
+    },
+  });
+  const requests: ModelRequest[] = [];
+  await assert.rejects(
+    dispatch({
+      repository: root,
+      sandboxProvider: createLocalSandboxProvider(),
+      agent: developer(
+        scriptedProvider(
+          [
+            () => ({
+              text: "",
+              content: ["unique", "duplicate", "duplicate"].map((id) => ({
+                type: "tool-call" as const,
+                id,
+                name: "write",
+                input: {},
+              })),
+              stopReason: "tool-calls",
+              usage,
+            }),
+          ],
+          requests,
+        ),
+        [tool],
+        {
+          hooks: [
+            defineHarnessHook({
+              on: "before-tool",
+              run: () => {
+                hooks++;
+              },
+            }),
+          ],
+        },
+      ),
+      brief: { text: "Write once." },
+      logging: false,
+    }),
+    { code: "response", message: /Duplicate tool call identifier/ },
+  );
+  assert.equal(effects, 0);
+  assert.equal(hooks, 0);
+  assert.equal(requests.length, 1);
 });
 
 test("read-only calls run concurrently while mutating calls are serialized in call order", async (t) => {

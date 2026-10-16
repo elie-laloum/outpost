@@ -76,6 +76,37 @@ async function fixture() {
 }
 
 test(
+  "simulated SSH distinguishes a guest exit 255 from a lost connection",
+  { skip: process.platform !== "linux" },
+  async () => {
+    const f = await fixture();
+    try {
+      const invoke = firecrackerCommand(f.runtime);
+      assert.equal(
+        (await invoke({ executable: "sh", arguments: ["-c", "exit 255"] }))
+          .status,
+        255,
+      );
+      const disconnected = firecrackerCommand({
+        ...f.runtime,
+        executor: async () => ({
+          status: 255,
+          stdout: "",
+          stderr: "ssh: connection lost",
+        }),
+      });
+      await assert.rejects(disconnected({ executable: "true" }), {
+        code: "provider",
+        message: /SSH connection failed/,
+      });
+      assert.equal((await invoke({ executable: "true" })).status, 0);
+    } finally {
+      await f.cleanup();
+    }
+  },
+);
+
+test(
   "simulated SSH: completion, status, environment, cancellation and reuse",
   { skip: process.platform !== "linux" },
   async () => {

@@ -1,3 +1,4 @@
+import { OutpostError } from "../../src/domain/errors.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
@@ -323,4 +324,21 @@ test("managed detached workspaces survive reopening and stale paths are recovere
     "base\n",
   );
   await rebuilt.close();
+});
+
+test("detached host integration retains its workspace with conflict recovery details", async (t) => {
+  const root = await repository(t);
+  const workspace = await openWorkspace({
+    repository: root,
+    branch: { mode: "integrate" },
+  });
+  await git(root, ["checkout", "--detach"]);
+  await assert.rejects(workspace.integrate(), (error: unknown) => {
+    assert.ok(error instanceof OutpostError);
+    assert.equal(error.code, "conflict");
+    assert.equal(error.recovery.directory, workspace.directory);
+    return true;
+  });
+  await workspace.close();
+  assert.ok((await readdir(workspace.directory)).length > 0);
 });

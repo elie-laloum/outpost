@@ -121,3 +121,5 @@ API : [SandboxOptions](../../reference/sandboxoptions/) · [EgressPolicy](../../
 <span id="choisir-la-branche"></span>
 <span id="envoyer-des-fichiers-absents-de-git"></span>
 <span id="quand-la-synchronisation-sarrête"></span>
+
+`create.autoStopInterval` de Daytona est exprimé en minutes ; `0` désactive l’arrêt automatique. Le SDK documente 15 minutes par défaut, avec d’autres valeurs d’auto-pause pour les classes de sandbox compatibles. Définissez explicitement cette politique pour les tâches longues : les délais des commandes Outpost ne remplacent pas l’arrêt automatique du service. L’annulation d’une commande élevée utilise les mêmes privilèges que son exécution. Ces chemins SDK disposent de régressions hors ligne ; la terminaison des descendants dans une sandbox cloud réelle reste une vérification distincte.

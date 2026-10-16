@@ -16,11 +16,12 @@ export function cloudInputProgram(file: string, program: string): string {
   return `node -e ${quote(cloudInputScript)} -- ${quote(file)} ${program}`;
 }
 
-/** Appends each live chunk, then the end frame, in order; the first failure stops the feed. */
+/** Appends each live chunk, then the end frame, in order; the first failure stops data but still permits EOF. */
 export function cloudInputFeed(
   input: Readable,
   append: (line: string) => Promise<void>,
   fail: (cause: unknown) => void,
+  close: () => Promise<void> = () => append("\n"),
 ): CloudInputFeed {
   let queue = Promise.resolve();
   let failed = false;
@@ -36,7 +37,16 @@ export function cloudInputFeed(
     });
   };
   const data = (chunk: string | Buffer) => push(frame(chunk));
-  const end = () => push("\n");
+  const end = () => {
+    queue = queue.then(async () => {
+      try {
+        await close();
+      } catch (cause) {
+        if (!failed) fail(cause);
+        failed = true;
+      }
+    });
+  };
   input.on("data", data);
   input.once("end", end);
   return {

@@ -36,6 +36,7 @@ export function defineAgentProfile(options: AgentProfileOptions): AgentProfile {
             (AGENT_PROFILE_TOOLS.has(tool) ||
               (tool.startsWith("shell:") &&
                 tool.slice(6).trim().length > 0 &&
+                tool.slice(6) === tool.slice(6).trim() &&
                 !/[\r\n\0]/.test(tool))),
         ) &&
         new Set(tools).size === tools.length),

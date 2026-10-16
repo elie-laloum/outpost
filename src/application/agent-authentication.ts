@@ -7,6 +7,7 @@ import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import { readHostCredential } from "../infrastructure/host-credentials.ts";
 import { requireSuccess } from "../infrastructure/process.ts";
 import { credentialInstaller } from "./credential-installer.constants.ts";
+import { invariant } from "../domain/errors.ts";
 
 export async function authenticateAgent(
   adapter: AgentAdapter,
@@ -17,7 +18,13 @@ export async function authenticateAgent(
 ): Promise<Variables> {
   const plan = adapter.credentials?.(variables);
   if (!plan) return {};
-  if (placement === "host") return plan.variables;
+  if (placement === "host") {
+    invariant(
+      !plan.requiresSandbox,
+      "This authentication mode requires a private sandbox home; use a sandbox provider or configure an explicit compatible model provider for local execution",
+    );
+    return plan.variables;
+  }
   const files: GeneratedCredential[] = [...plan.files];
   const derived: Record<string, string> = {};
   for (const credential of plan.host) {

@@ -146,7 +146,7 @@ test("workflow retry events expose the selected server minimum", async () => {
 test("global timeout interrupts a server retry wait without another attempt", async () => {
   const item = defineTask({
     key: "busy",
-    retry: { attempts: 10 },
+    retry: { attempts: 10, maxRetryAfterMs: Number.MAX_SAFE_INTEGER },
     perform() {
       throw new OutpostError("provider", "busy", {
         retryAfterMs: Number.MAX_SAFE_INTEGER,
@@ -244,4 +244,21 @@ test("global timeout includes conditions and rejects invalid timer ranges before
     );
   const success = await defineWorkflow("empty", []).start({ timeoutMs: 1000 });
   success.unwrap();
+});
+
+test("excessive server retry waits preserve the original fault without another attempt", async () => {
+  const fault = new OutpostError("provider", "busy", { retryAfterMs: 100 });
+  let attempts = 0;
+  const item = defineTask({
+    key: "busy",
+    retry: { attempts: 3, maxRetryAfterMs: 10 },
+    perform() {
+      attempts++;
+      throw fault;
+    },
+  });
+  const result = await defineWorkflow("bounded-retry", [item]).start();
+  assert.equal(attempts, 1);
+  assert.equal(result.status, "failed");
+  assert.equal(result.errors[0], fault);
 });

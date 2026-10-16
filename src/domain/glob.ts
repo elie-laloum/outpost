@@ -7,7 +7,7 @@ const stars: Readonly<Record<GlobMode, string>> = {
 
 const tokens: Readonly<Record<string, (mode: GlobMode) => string>> = {
   "*": (mode) => stars[mode],
-  "?": () => "[^/]",
+  "?": (mode) => (mode === "text" ? "[^]" : "[^/]"),
 };
 
 export function glob(pattern: string, mode: GlobMode): RegExp {

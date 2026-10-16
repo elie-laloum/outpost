@@ -95,6 +95,7 @@ console.log(result.commits);
 | Read execution state by ID                          | [Execution state](https://elie-laloum.github.io/outpost/guide/run-state/)                        |
 | Test workflows without accounts or model calls      | [Workflow testing](https://elie-laloum.github.io/outpost/guide/testing-workflows/)               |
 | Create, share and run YAML recipes                  | [YAML recipes](https://elie-laloum.github.io/outpost/guide/yaml-recipes/)                        |
+| Select secrets from a host secret manager           | [Secret sources](https://elie-laloum.github.io/outpost/guide/secret-sources/)                    |
 | Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/recovery/)                        |
 
 The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.

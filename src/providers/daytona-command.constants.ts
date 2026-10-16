@@ -1,10 +1,13 @@
 export const daytonaOutputPrefix = "outpost-output:";
 export const daytonaCommandScript = `const {spawn}=require("node:child_process");
+const {readFileSync,unlinkSync}=require("node:fs");
+const variables=JSON.parse(readFileSync(process.argv[1],"utf8"));
+unlinkSync(process.argv[1]);
 const {constants}=require("node:os");
 const {Transform}=require("node:stream");
 const frame=data=>${JSON.stringify(daytonaOutputPrefix)}+data.toString("base64")+"\\n";
 const encode=()=>new Transform({transform(data,encoding,done){done(null,frame(data))}});
-const child=spawn(process.argv[1],process.argv.slice(2),{stdio:["inherit","pipe","pipe"]});
+const child=spawn(process.argv[2],process.argv.slice(3),{env:{...process.env,...variables},stdio:["inherit","pipe","pipe"]});
 let failed;
 child.stdout.pipe(encode()).pipe(process.stdout);
 child.stderr.pipe(encode()).pipe(process.stderr);

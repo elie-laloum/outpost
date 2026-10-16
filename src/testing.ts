@@ -1,4 +1,7 @@
-export { scriptedAgent } from "./adapters/testing/scripted-agent.ts";
+export {
+  createScriptedAgent,
+  scriptedAgent,
+} from "./adapters/testing/scripted-agent.ts";
 export type {
   ScriptedAgentOptions,
   ScriptedTurn,

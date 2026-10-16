@@ -13,7 +13,9 @@ if (config.url) bridge();
 else serve();
 
 function serve() {
-  const child = spawn(config.command, config.arguments, { stdio: "inherit" });
+  const names = ["PATH", "HOME", "USER", "LOGNAME", "SHELL", "TMPDIR", "TMP", "TEMP", "LANG", "LC_ALL", "SystemRoot", "SYSTEMROOT", "WINDIR", ...config.variables, ...config.environmentNames];
+  const env = Object.fromEntries(names.filter(name => process.env[name] !== undefined).map(name => [name, process.env[name]]));
+  const child = spawn(config.command, config.arguments, { stdio: "inherit", env });
   child.on("error", (error) => {
     process.stderr.write(error.message + "\\n");
     process.exit(127);
@@ -73,6 +75,7 @@ function bridge() {
           method: "POST",
           headers: { ...(await authorization.headers()), ...headers(), "content-type": "application/json", accept: "application/json, text/event-stream" },
           body: line,
+          ...(config.oauth ? { redirect: "error" } : {}),
         });
       let response = await send();
       if (await authorization.retry(response)) {
@@ -114,7 +117,7 @@ function bridge() {
     if (session)
       await authorization
         .headers()
-        .then((credentials) => fetch(config.url, { method: "DELETE", headers: { ...credentials, ...headers() } }))
+        .then((credentials) => fetch(config.url, { method: "DELETE", headers: { ...credentials, ...headers() }, ...(config.oauth ? { redirect: "error" } : {}) }))
         .catch(() => undefined);
     process.exit(0);
   });
@@ -139,8 +142,18 @@ function authorizer() {
   let endpoint;
   let methods;
   let challengeScope;
+  let discoveredIssuer;
+  const secureUrl = (value, label) => {
+    if (typeof value !== "string") throw new Error(label + " must be an HTTPS URL");
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password || url.hash)
+      throw new Error(label + " must be an HTTPS URL without credentials or a fragment");
+    return url;
+  };
+  secureUrl(config.url, "OAuth resource");
   const read = async (url) => {
-    const response = await fetch(url, { headers: { accept: "application/json" } });
+    secureUrl(url, "OAuth metadata URL");
+    const response = await fetch(url, { headers: { accept: "application/json" }, redirect: "error" });
     if (!response.ok) throw new Error("HTTP " + response.status + " from " + url);
     return response.json();
   };
@@ -165,12 +178,21 @@ function authorizer() {
     const protectedResource = await first(
       metadata ? [metadata] : wellKnown(config.url, ["oauth-protected-resource"]).filter((url) => !url.endsWith("openid-configuration")).concat(new URL(config.url).origin + "/.well-known/oauth-protected-resource"),
     );
-    const issuer = protectedResource.authorization_servers?.[0];
+    if (protectedResource?.resource !== resource) throw new Error("OAuth protected resource does not match the MCP URL");
+    if (!Array.isArray(protectedResource.authorization_servers)) throw new Error("Protected resource metadata names no authorization server");
+    const issuer = protectedResource.authorization_servers[0];
     if (typeof issuer !== "string") throw new Error("Protected resource metadata names no authorization server");
+    if (secureUrl(issuer, "OAuth issuer").search) throw new Error("OAuth issuer must not contain a query");
+    if (discoveredIssuer && discoveredIssuer !== issuer) throw new Error("OAuth authorization server changed during this session");
     const server = await first(wellKnown(issuer, ["oauth-authorization-server", "openid-configuration"]));
-    if (typeof server.token_endpoint !== "string") throw new Error("Authorization server metadata has no token_endpoint");
+    if (server?.issuer !== issuer) throw new Error("OAuth authorization server issuer does not match discovery");
+    secureUrl(server.token_endpoint, "OAuth token endpoint");
+    const supported = server.token_endpoint_auth_methods_supported ?? ["client_secret_basic"];
+    if (!Array.isArray(supported) || !supported.every((method) => typeof method === "string"))
+      throw new Error("OAuth token endpoint authentication methods must be an array of strings");
+    discoveredIssuer = issuer;
     endpoint = server.token_endpoint;
-    methods = server.token_endpoint_auth_methods_supported ?? ["client_secret_basic"];
+    methods = supported;
   }
   async function request(challenge) {
     if (!endpoint || challenge) await discover(challenge);
@@ -183,7 +205,7 @@ function authorizer() {
       body.set("client_id", id);
       body.set("client_secret", secret);
     } else throw new Error("The authorization server supports neither client_secret_basic nor client_secret_post");
-    const response = await fetch(endpoint, { method: "POST", headers, body });
+    const response = await fetch(endpoint, { method: "POST", headers, body, redirect: "error" });
     const text = await response.text();
     if (!response.ok) throw new Error("OAuth token request failed with HTTP " + response.status + ": " + text.slice(0, 300));
     const result = JSON.parse(text);

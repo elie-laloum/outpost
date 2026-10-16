@@ -147,3 +147,5 @@ Pour envoyer une instruction à un enfant en cours d’exécution, passez son `i
 - Un enfant ne peut pas libérer la sandbox partagée.
 
 API : [defineHarnessSubagent](../../reference/defineharnesssubagent/) · [HarnessSubagentOptions](../../reference/harnesssubagentoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [AgentEvent](../../reference/agentevent/).
+
+Un agent délégué est aussi un appel d’outil du parent. `toolExecution.deadlineMs` du parent borne toute la délégation, appels au modèle compris ; sa valeur par défaut est cinq minutes. Augmentez ce délai pour un travail enfant plus long, en complément de ses limites de pas et de tokens. À l’expiration, l’événement d’échec précède le résultat de l’outil ; une fin tardive de l’enfant n’émet pas un second événement terminal.

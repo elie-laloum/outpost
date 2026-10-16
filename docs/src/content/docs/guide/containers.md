@@ -51,8 +51,8 @@ The container mounts the task's checkout at `/workspace` and the repository's Gi
 
 <!-- features -->
 
-- **Private home**: `/home/agent` is a tmpfs, discarded with the container. The harness copies the agent's [credentials](../authentication/) there.
-- **Reduced privileges**: Linux capabilities are dropped (`CHOWN` stays when caches, file mounts or Private Git need it) and `no-new-privileges` is set.
+- **Private home**: `/home/agent` is a tmpfs with mode `0700`, owned by the configured user and discarded with the container. The harness copies the agent's [credentials](../authentication/) there.
+- **Reduced privileges**: Linux capabilities are dropped (`CHOWN` stays for Podman home ownership, or when caches, file mounts or Private Git need it) and `no-new-privileges` is set.
 - **No engine access**: The Docker or Podman socket is never mounted.
 
 To expose more host paths, add `volumes`. A relative `source` starts from the repository; a `target` starting with `~/` lands in the agent home, any other relative `target` under `/workspace`.

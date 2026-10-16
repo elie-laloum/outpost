@@ -39,7 +39,7 @@ export interface PendingSteeringMessage extends SteeringMessage {
 
 export interface SteeringInbox {
   count(accept?: SteeringFilter): number;
-  take(accept?: SteeringFilter): readonly SteeringMessage[];
+  take(accept?: SteeringFilter): readonly PendingSteeringMessage[];
   /** Rejects matching messages with a steering error describing why. */
   reject(accept: SteeringFilter, reason: string): void;
   subscribe(listener: () => void): () => void;

@@ -1,3 +1,5 @@
+import { canonicalJson } from "../domain/workflow/canonical-json.ts";
+import { queueJson } from "../domain/task-queue.ts";
 import { mkdirSync, chmodSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
@@ -25,7 +27,7 @@ export async function createSqliteTaskQueue(
   const db = new DatabaseSync(file);
   chmodSync(file, 0o600);
   db.exec(
-    "PRAGMA busy_timeout=5000; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS queue_jobs (id TEXT PRIMARY KEY, body TEXT NOT NULL, status TEXT NOT NULL, handler TEXT NOT NULL, expires INTEGER, deadline INTEGER); CREATE INDEX IF NOT EXISTS queue_eligible ON queue_jobs(status, handler, expires, deadline, id)",
+    "PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; CREATE TABLE IF NOT EXISTS queue_jobs (id TEXT PRIMARY KEY, body TEXT NOT NULL, status TEXT NOT NULL, handler TEXT NOT NULL, expires INTEGER, deadline INTEGER); CREATE INDEX IF NOT EXISTS queue_eligible ON queue_jobs(status, handler, expires, deadline, id)",
   );
   function read(id: string): QueueJob | undefined {
     const row = db.prepare("SELECT body FROM queue_jobs WHERE id = ?").get(id);
@@ -88,7 +90,8 @@ export async function createSqliteTaskQueue(
         const existing = read(request.id);
         if (existing) {
           if (
-            JSON.stringify(queueRequest(existing)) !== JSON.stringify(request)
+            canonicalJson(queueJson(queueRequest(existing))) !==
+            canonicalJson(queueJson(request))
           )
             throw new Error("Queue identity already has a different request");
           return expire(existing);
@@ -97,9 +100,17 @@ export async function createSqliteTaskQueue(
       });
     },
     async get(id) {
+      const job = read(queueString(id));
+      if (
+        !job ||
+        !["pending", "active"].includes(job.status) ||
+        job.deadline === undefined ||
+        job.deadline > Date.now()
+      )
+        return job;
       return transaction(() => {
-        const job = read(queueString(id));
-        return job ? expire(job) : undefined;
+        const current = read(queueString(id));
+        return current ? expire(current) : undefined;
       });
     },
     async claim(input) {

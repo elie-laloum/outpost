@@ -1,3 +1,4 @@
+import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { randomUUID } from "node:crypto";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -45,10 +46,24 @@ export function containerCommand(
     ];
     const wrapper = `${exports} echo $$ > ${quote(pidFile)}; test ! -f ${quote(pidFile + ".cancel")} || exit 130; exec "$@"`;
     const { directory: _directory, ...invocation } = command;
-    let interrupted = false;
+    const shutdown = new AbortController();
+    const signal = command.signal
+      ? AbortSignal.any([command.signal, shutdown.signal])
+      : shutdown.signal;
+    let settled!: () => void;
+    const completion = new Promise<void>((resolve) => {
+      settled = resolve;
+    });
+    const unregister = registerCleanup(async () => {
+      shutdown.abort(
+        new OutpostError("aborted", "Container command interrupted"),
+      );
+      await completion;
+    });
     try {
       return await executor({
         ...invocation,
+        signal,
         executable: engine,
         arguments: [
           ...flags,
@@ -67,7 +82,6 @@ export function containerCommand(
           command.retain ?? config.retain ?? containerDefaults.retainBytes,
       });
     } catch (cause) {
-      interrupted = true;
       try {
         await call([
           "exec",
@@ -75,7 +89,7 @@ export function containerCommand(
           name,
           "sh",
           "-c",
-          `touch ${quote(pidFile + ".cancel")}; if [ -f ${quote(pidFile)} ]; then p=$(cat ${quote(pidFile)}); kill -TERM -"$p" 2>/dev/null || true; sleep 0.1; kill -KILL -"$p" 2>/dev/null || true; fi`,
+          `touch ${quote(pidFile + ".cancel")}; if [ -f ${quote(pidFile)} ]; then p=$(cat ${quote(pidFile)}); kill -TERM -"$p" 2>/dev/null || true; sleep 0.5; kill -KILL -"$p" 2>/dev/null || true; fi`,
         ]);
       } catch (cleanup) {
         throw new AggregateError(
@@ -85,8 +99,20 @@ export function containerCommand(
       }
       throw cause;
     } finally {
-      if (!isClosed() && !interrupted)
-        await call(["exec", name, "rm", "-f", pidFile]).catch(() => undefined);
+      try {
+        if (!isClosed())
+          await call([
+            "exec",
+            name,
+            "rm",
+            "-f",
+            pidFile,
+            pidFile + ".cancel",
+          ]).catch(() => undefined);
+      } finally {
+        unregister();
+        settled();
+      }
     }
   };
 }

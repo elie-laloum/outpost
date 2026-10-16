@@ -8,16 +8,19 @@ export function redactValue<T>(value: T, patterns: readonly RegExp[]): T {
     return new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, "") + "g");
   });
   const seen = new WeakMap<object, unknown>();
-  function text(value: string): string {
-    const masked = rules.reduce(
+  function mask(value: string): string {
+    return rules.reduce(
       (result, pattern) => result.replace(pattern, () => redactionReplacement),
       value,
     );
-    if (masked !== value || !/^[\[{]/.test(value.trim())) return masked;
+  }
+  function text(value: string): string {
+    const masked = mask(value);
+    if (!/^[\[{]/.test(value.trim())) return masked;
     try {
       const parsed: unknown = JSON.parse(value);
       const cleaned = JSON.stringify(visit(parsed));
-      return cleaned === JSON.stringify(parsed) ? value : cleaned;
+      return cleaned === JSON.stringify(parsed) ? masked : mask(cleaned);
     } catch {
       return masked;
     }

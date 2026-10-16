@@ -115,6 +115,8 @@ Removing a key writes a deletion marker with a conditional PUT. Reads and listin
 
 Each marker stays in the bucket as a billed 1 KiB object. Creating a key adds one HEAD request, and listing adds one HEAD per object.
 
+After switching to `conditional`, inherited markers remain hidden and can be replaced by a revision-checked creation. This mode also uses HEAD when creating a key and when listing objects whose size could indicate an empty value or a marker; ordinary nonempty objects need no extra listing request. It does not automatically purge old markers.
+
 :::caution
 Every writer sharing a prefix must use the same `deleteMode`: stop them all before switching. Never expire or purge markers while a writer can run, since a purge can erase a concurrent recreation.
 :::
@@ -126,3 +128,5 @@ Every writer sharing a prefix must use the same `deleteMode`: stop them all befo
 - **Local files remain**: Git worktrees, execution staging and native conversations still need a local filesystem ([Where data lives](../storage/)).
 
 API: [createS3Transport](../../reference/creates3transport/) · [S3TransportOptions](../../reference/s3transportoptions/) · [Transport](../../reference/transport/).
+
+Tombstone markers accumulate, including closed resource activity records, and discovery requires HEAD requests. For offline maintenance, stop every writer sharing the prefix, then call `pruneS3Tombstones({ client, bucket, prefix, writersStopped: true })` from `/transports/s3`. It removes only objects identified by tombstone metadata, preserves empty live objects, and returns the number removed. Keep writers stopped until it finishes; this operation deliberately uses physical deletion for S3-compatible services without conditional DELETE. Do not automate it concurrently with runs.

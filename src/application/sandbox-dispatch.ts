@@ -138,9 +138,14 @@ export async function dispatchInSandbox<T>(
         if (!turn.conversation || !storage || selected.capture === false)
           return turn;
         const location = await session.save(turn.conversation);
-        const usage = selected.transcriptUsage?.(
-          await readFile(location.file, "utf8"),
-        );
+        const usage =
+          turn.usage.input +
+            turn.usage.output +
+            turn.usage.cached +
+            (turn.usage.cacheCreated ?? 0) >
+          0
+            ? undefined
+            : selected.transcriptUsage?.(await readFile(location.file, "utf8"));
         return {
           ...turn,
           transcript: location.file,

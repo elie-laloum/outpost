@@ -842,3 +842,13 @@ export type {
   FileWorkspaceInspectionOptions,
   FileWorkspaceRecoveryOptions,
 } from "./application/file-workspace-recovery.types.ts";
+
+export {
+  inspectStorageReservations,
+  recoverStorageReservation,
+} from "./infrastructure/reservation-recovery.ts";
+export type {
+  StorageReservationRecord,
+  StorageReservationInspection,
+  StorageReservationRecoveryOptions,
+} from "./infrastructure/transport-reservations.types.ts";

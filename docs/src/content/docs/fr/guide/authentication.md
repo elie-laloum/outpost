@@ -92,3 +92,5 @@ Trois types d’identifiants servent trois clients distincts. Une clé Vercel ou
 - Une forme non prise en charge échoue dès l’appel à `createAgent()`. Un fichier ou une variable manquants échouent au dispatch avec le code `configuration`, en indiquant la commande de connexion.
 
 API : [AgentAuthentication](../../reference/agentauthentication/) · [AccountCredential](../../reference/accountcredential/) · [UsageCredential](../../reference/usagecredential/).
+
+L’authentification Codex intégrée `usage` exige un home privé de sandbox : Outpost doit y exécuter `codex login --with-api-key`. L’exécution sur l’hôte refuse ce mode pour éviter d’utiliser silencieusement un compte existant. En local, configurez explicitement un `modelProvider` Responses compatible avec une clé par variable, ou utilisez la session de compte existante de la CLI. Outpost n’effectue aucune connexion et n’écrit aucun fichier d’authentification dans votre home hôte. Voir [l’authentification Codex](https://learn.chatgpt.com/docs/auth).

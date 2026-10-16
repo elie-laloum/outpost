@@ -63,23 +63,27 @@ export function workspaceLease(
         }
         return;
       }
-      const current = (
-        await git(repository, ["symbolic-ref", "--short", "HEAD"])
-      ).trim();
-      if (current !== baseBranch)
-        throw new OutpostError(
-          "conflict",
-          "Host branch changed during the job",
-          { expected: baseBranch, current, directory: workdir },
-        );
       const releaseMerge = await observedOperation(
         options.observation,
         "git",
         "integration.lock",
-        async () => lock(repository, `merge:${baseBranch}`),
-      );
+        async () => lock(repository, repository),
+      ).catch((error: unknown) => {
+        guardRefused = true;
+        recordRecovery(error, { branch, directory: workdir });
+        throw error;
+      });
       let snapshot: GuardSnapshot | undefined;
       try {
+        const current = (
+          await git(repository, ["symbolic-ref", "--short", "HEAD"])
+        ).trim();
+        if (current !== baseBranch)
+          throw new OutpostError(
+            "conflict",
+            "Host branch changed during the job",
+            { expected: baseBranch, current, directory: workdir },
+          );
         snapshot = await checkGuard();
         if (snapshot)
           await verifyGuardSnapshot(
@@ -109,12 +113,15 @@ export function workspaceLease(
           recordRecovery(error, { branch, directory: workdir });
           throw error;
         }
-        throw new OutpostError(
+        guardRefused = true;
+        const error = new OutpostError(
           "conflict",
           "Automatic integration failed; workspace retained",
           { directory: workdir, branch },
           cause,
         );
+        recordRecovery(error, { directory: workdir, branch });
+        throw error;
       } finally {
         await observedOperation(
           options.observation,

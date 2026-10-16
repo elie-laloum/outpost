@@ -3237,6 +3237,9 @@
                 "maxDelayMs": {
                   "type": "number"
                 },
+                "maxRetryAfterMs": {
+                  "type": "number"
+                },
                 "jitter": {
                   "anyOf": [
                     {
@@ -9271,6 +9274,9 @@
                       }
                     ]
                   },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
                   "name": {
                     "type": "string"
                   },
@@ -10500,6 +10506,9 @@
                         "$ref": "#/$defs/transport"
                       }
                     ]
+                  },
+                  "timeoutMs": {
+                    "type": "number"
                   },
                   "name": {
                     "type": "string"
@@ -17559,6 +17568,21 @@
             },
             "leaseMs": {
               "type": "number"
+            },
+            "onError": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "const": "worker"
@@ -33041,6 +33065,9 @@
                           }
                         ]
                       },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -34270,6 +34297,9 @@
                             "$ref": "#/$defs/transport"
                           }
                         ]
+                      },
+                      "timeoutMs": {
+                        "type": "number"
                       },
                       "name": {
                         "type": "string"
@@ -38885,6 +38915,9 @@
                           }
                         ]
                       },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
                       "name": {
                         "type": "string"
                       },
@@ -40114,6 +40147,9 @@
                             "$ref": "#/$defs/transport"
                           }
                         ]
+                      },
+                      "timeoutMs": {
+                        "type": "number"
                       },
                       "name": {
                         "type": "string"

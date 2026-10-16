@@ -25,7 +25,7 @@ export const groups = [
     title: ["Workflow testing", "Tests de workflows"],
     guide: "guide/testing-workflows",
     names:
-      "scriptedAgent createMemorySandboxProvider ScriptedAgentOptions ScriptedTurn ScriptedCommit MemorySandboxOptions MemoryCommand",
+      "createScriptedAgent createMemorySandboxProvider ScriptedAgentOptions ScriptedTurn ScriptedCommit MemorySandboxOptions MemoryCommand",
   },
   {
     id: "pricing",
@@ -46,7 +46,7 @@ export const groups = [
     title: ["Storage transports", "Transports de stockage"],
     guide: "guide/storage",
     names:
-      "createLocalTransport createS3Transport createArtifactStore createWorkflowCheckpointStore createTaskCacheStore recoverWorkflowCheckpoint readJournal createTransportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions TaskCacheStoreOptions",
+      "createLocalTransport createS3Transport pruneS3Tombstones S3TombstonePruneOptions createArtifactStore createWorkflowCheckpointStore createTaskCacheStore recoverWorkflowCheckpoint readJournal createTransportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions TaskCacheStoreOptions",
   },
   {
     id: "diagnostics",
@@ -157,7 +157,7 @@ export const groups = [
     title: ["Storage reservations", "Réservations de stockage"],
     guide: "guide/retention",
     names:
-      "reserveRecoveryStorage RecoveryStorageReservationOptions StorageReservation StorageReservationOptions",
+      "reserveRecoveryStorage inspectStorageReservations recoverStorageReservation RecoveryStorageReservationOptions StorageReservation StorageReservationOptions StorageReservationRecord StorageReservationInspection StorageReservationRecoveryOptions",
   },
   {
     id: "recovery-restoration",
@@ -236,7 +236,8 @@ const guidePages = {
 
   "durable-runs":
     "createWorkflowCheckpointStore recoverWorkflowCheckpoint CheckpointRecoveryOptions",
-  "object-storage": "createS3Transport S3TransportOptions",
+  "object-storage":
+    "createS3Transport pruneS3Tombstones S3TransportOptions S3TombstonePruneOptions",
   artifacts: "createArtifactStore ArtifactStoreOptions",
   "task-cache":
     "createTaskCacheStore TaskCacheStoreOptions repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",

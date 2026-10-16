@@ -111,7 +111,7 @@
     "format:check": "prettier --check .",
     "prepack": "bun run build",
     "test:package": "node scripts/package-smoke.mjs",
-    "test:container": "node --test test/container.test.ts",
+    "test:container": "node --test test/container.test.ts test/session-bundles-container.test.ts",
     "architecture": "node scripts/check-architecture.mjs",
     "docs:sync": "bun run build && node scripts/recipe-component-docs.mjs --write && node docs/scripts/sync-reference.mjs",
     "docs:check": "node scripts/recipe-component-docs.mjs && node docs/scripts/sync-reference.mjs --check && bun run --cwd docs check",

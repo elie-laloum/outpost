@@ -13,7 +13,7 @@ import { reserveRecoveryStorage } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Inscrit reserveBytes dans le registre de réservations du dépôt quand l’usage observé, les réservations actives et la demande tiennent dans maxBytes, puis renvoie la réservation. Un refus, un inventaire incomplet, des options invalides ou un registre malformé rejettent avec le code configuration. L’entrée compte jusqu’à release() et n’expire jamais ; Outpost ne fournit aucun appel pour effacer une réservation abandonnée.
+Inscrit reserveBytes dans le registre de réservations du dépôt quand l’usage observé, les réservations actives et la demande tiennent dans maxBytes, puis renvoie la réservation. Un refus, un inventaire incomplet, des options invalides ou un registre malformé rejettent avec le code configuration. L’entrée compte jusqu’à release() et n’expire jamais ; inspectStorageReservations() expose le propriétaire et recoverStorageReservation() retire conditionnellement l’entrée d’un propriétaire explicitement arrêté.
 
 [Exemple complet et règles détaillées](../../guide/retention/).
 

@@ -25,6 +25,7 @@ const file = hostFile({
 const key = variableCredential({
   variable: codexCredentialVariables.usage,
   expose: (secret) => ({
+    requiresSandbox: true,
     commands: [
       toolCommand("codex", ["login", "--with-api-key"], { stdin: secret }),
     ],

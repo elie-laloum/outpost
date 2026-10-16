@@ -21,6 +21,10 @@ Copilot and Kimi keep a session as a directory: Outpost packs it into one JSON b
 
 Restoring rewrites the repository paths recorded in the conversation to those of the new sandbox. To give a CLI you add its own store, see [Native conversation formats](../conversation-formats/).
 
+Codex keeps the date encoded in the original rollout filename when capturing and restoring it. If several transcripts match the same conversation without a preferred native path, lookup and capture fail explicitly. Inspect and reconcile those copies before resuming; Outpost does not choose one by filesystem traversal order.
+
+Local capture leaves the CLI’s original transcript and its subagent files intact. If the capture destination is that same file and `redact` is enabled, `result.transcript` points to a masked copy under `.outpost/conversations/native/`; native continuation in that workspace keeps using the original. A separate destination, including the relocated host copy for another worktree, an explicit `conversationHome` or a transport, still receives the captured and optionally masked copy.
+
 ## Archive and share through a transport
 
 `createTransportConversations()` wraps an agent’s store and also archives each capture through a [transport](../storage/). A conversation then resumes on another machine, or after the repository’s `.outpost` directory is deleted.

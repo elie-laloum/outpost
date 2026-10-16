@@ -265,7 +265,8 @@ export function workflowState(
           );
         if (!values.has(dependency))
           throw new Error(`${dependency.key} has no successful value`);
-        return values.get(dependency) as T;
+        const value = values.get(dependency) as T;
+        return checkpoint ? structuredClone(value) : value;
       },
     };
   }

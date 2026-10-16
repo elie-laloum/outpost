@@ -18,6 +18,7 @@ export function bullMQState(value: unknown) {
     throw new Error("Invalid BullMQ queue state");
   const meta = queueObject(JSON.parse(metadata));
   return {
+    request,
     job: queueJob({
       ...queueObject(JSON.parse(request)),
       ...meta,

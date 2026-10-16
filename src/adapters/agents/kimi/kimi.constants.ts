@@ -2,6 +2,8 @@ import type { McpCliSupport } from "../mcp-support.types.ts";
 import type { CliModelSupport } from "../settings.types.ts";
 import { connectionPatterns } from "../unavailable.constants.ts";
 
+export const KIMI_PROMPT_MAX_BYTES = 64 * 1024;
+
 export const kimiLabel = "Kimi Code";
 
 export const kimiCredentialVariables = Object.freeze({

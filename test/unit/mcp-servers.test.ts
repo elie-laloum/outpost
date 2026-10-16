@@ -172,6 +172,14 @@ test("OAuth client credentials name declared variables and valid scopes", () => 
     scopes: ["mcp:read", "offline_access"],
   };
   const servers = mcpServers({ a: { url: "https://example.com/mcp", oauth } });
+  for (const url of [
+    "http://example.com/mcp",
+    "https://example.com/mcp#fragment",
+  ])
+    assert.throws(
+      () => mcpServers({ a: { url, oauth } }),
+      /require an HTTPS URL without a fragment/,
+    );
   assert.deepEqual(servers.a, { url: "https://example.com/mcp", oauth });
   assert.deepEqual(mcpServerVariables(servers), [
     "MCP_CLIENT_ID",

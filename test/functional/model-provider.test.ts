@@ -145,6 +145,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       instructions: "instructions",
       stream: false,
       store: false,
+      include: ["reasoning.encrypted_content"],
       max_output_tokens: 8,
       reasoning: { effort: "none" },
     },
@@ -153,6 +154,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   assert.deepEqual(requests.at(-1)?.body, {
     model: "model",
     input: "minimal",
+    include: ["reasoning.encrypted_content"],
     stream: false,
     store: false,
   });

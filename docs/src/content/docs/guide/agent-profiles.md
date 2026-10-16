@@ -43,7 +43,7 @@ The harness applies instructions to every request, including repairs and resumes
 
 ## Restrict the built-in tools
 
-Save `restricted-profile.ts` beside the first file. This profile permits file reading, file edits and only the exact shell command `npm test`. Omitted tool restrictions preserve the harness's existing behavior; an empty list permits no built-in tools. Explicit MCP server declarations grant their own tools, restricted separately by each server's filters.
+Save `restricted-profile.ts` beside the first file. This profile permits file reading, file edits and only the exact shell command `npm test`. Omitted tool restrictions preserve the harness's existing behavior; an empty list denies built-in action tools. In the built-in harness, `load_skill` remains available, but loading a skill never grants permission for its tools. Explicit MCP server declarations grant their own tools, restricted separately by each server's filters, and access to their resources and prompts. Additional harness permissions still apply.
 
 ```ts title="restricted-profile.ts"
 import { defineAgentProfile } from "@elie-laloum/outpost";

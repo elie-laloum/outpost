@@ -1,3 +1,4 @@
+import { decodeTriggerPayload } from "../../domain/trigger-payload.ts";
 import { triggerDefaultToleranceMs } from "../../domain/trigger.constants.ts";
 import { payloadString, triggerEvent } from "../../domain/trigger.ts";
 import type {
@@ -57,13 +58,15 @@ export function createSlackSource(options: SlackRequestOptions): TriggerSource {
         )
       )
         throw new Error("Slack signature mismatch");
-      const { user, delivery, ...event } = slackPayload(request);
-      return triggerEvent({
-        source: "slack",
-        ...event,
-        delivery: delivery ?? "",
-        ...(user ? { actor: `slack:${user}` } : {}),
-        receivedAt: new Date(now).toISOString(),
+      return decodeTriggerPayload(() => {
+        const { user, delivery, ...event } = slackPayload(request);
+        return triggerEvent({
+          source: "slack",
+          ...event,
+          delivery: delivery ?? "",
+          ...(user ? { actor: `slack:${user}` } : {}),
+          receivedAt: new Date(now).toISOString(),
+        });
       });
     },
     /** Slack expects HTTP 200 within three seconds; an empty body sends no message. */

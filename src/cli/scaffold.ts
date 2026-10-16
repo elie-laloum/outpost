@@ -63,6 +63,8 @@ export async function initialize(
   );
   const ignore = files[".gitignore"]!;
   if (existingIgnore !== undefined) delete files[".gitignore"];
+  if (await lstat(join(root, ".dockerignore")).catch(() => undefined))
+    delete files[".dockerignore"];
   for (const name of Object.keys(files))
     if (
       await lstat(join(root, name))

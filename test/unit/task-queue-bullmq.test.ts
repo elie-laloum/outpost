@@ -2,6 +2,23 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createBullMQTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
 import { bullMQState } from "../../src/infrastructure/task-queue-bullmq-state.ts";
+import { createBullMQConnection } from "../../src/infrastructure/task-queue-bullmq-connection.ts";
+
+test("BullMQ bounds initial connection retries but keeps established connections recoverable", () => {
+  const connection = createBullMQConnection({ host: "127.0.0.1" });
+  assert.equal(connection.options.retryStrategy(4), null);
+  connection.connected();
+  assert.equal(connection.options.retryStrategy(4), 400);
+  assert.equal(connection.options.retryStrategy(10_000), 1000);
+  connection.close();
+  assert.equal(connection.options.retryStrategy(1), null);
+  const override = createBullMQConnection({ retryStrategy: () => null });
+  override.connected();
+  assert.equal(override.options.retryStrategy(4), null);
+  const disabled = createBullMQConnection({ retryStrategy: null });
+  disabled.connected();
+  assert.equal(disabled.options.retryStrategy(1), null);
+});
 
 test("BullMQ validates configuration before creating connections", async () => {
   const connection = { host: "127.0.0.1" };

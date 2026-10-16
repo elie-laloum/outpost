@@ -3,6 +3,8 @@ export const doctorDefaults = Object.freeze({
   sandboxProvider: "docker",
   agent: "codex",
   deadlineMs: 5_000,
+  imageDeadlineMs: 15_000,
+  maximumDeadlineMs: 60_000,
   retain: 4_096,
   minimumNodeMajor: 24,
 } as const);

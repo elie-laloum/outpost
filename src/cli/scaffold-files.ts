@@ -18,9 +18,12 @@ export async function scaffoldFiles(
     ".gitignore":
       "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n.outpost/storage/\n",
   };
-  if (sandboxProvider === "docker" || sandboxProvider === "podman")
+  if (sandboxProvider === "docker" || sandboxProvider === "podman") {
+    files[".dockerignore"] =
+      ".git/\n.outpost/\nnode_modules/\n.env\n.env.*\n!.env.example\n";
     files[sandboxProvider === "docker" ? "Dockerfile" : "Containerfile"] =
       imageRecipe;
+  }
 
   if (!hasPackage) {
     const manifest = JSON.parse(

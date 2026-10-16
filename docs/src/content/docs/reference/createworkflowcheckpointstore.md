@@ -13,7 +13,7 @@ import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a WorkflowCheckpointStore that keeps each run’s checkpoint and owner in one object, checkpoints/&lt;SHA-256 of runId>.json. acquire() rejects while an owner is recorded, and release keeps the saved progress. Ownership never expires: after a crash, stop the old runner and call recoverWorkflowCheckpoint().
+Create a WorkflowCheckpointStore that keeps each run’s checkpoint and owner in one object, checkpoints/&lt;SHA-256 of runId>.json. acquire() rejects while an owner is recorded. Release preserves progress and retries a storage failure once, checking the original owner and revision; conflicts and persistent failures still reject. Ownership never expires: after a crash, stop the old runner and call recoverWorkflowCheckpoint().
 
 [Complete example and detailed rules](../../guide/durable-runs/).
 

@@ -18,13 +18,38 @@ export async function transferDestination(destination: string): Promise<void> {
       if (cause.code === "ENOENT") return undefined;
       throw cause;
     });
-    if (info?.isSymbolicLink())
+    if (
+      info?.isSymbolicLink() &&
+      !(
+        process.platform === "darwin" &&
+        info.uid === 0 &&
+        ["/var", "/tmp", "/etc"].includes(path) &&
+        path !== absolute
+      )
+    )
       throw new OutpostError(
         "provider",
         "Transfer destination traverses a symlink",
         { destination },
       );
   }
+}
+
+export async function transferTarget(
+  entry: string,
+  destination: string,
+  contents: boolean,
+): Promise<string> {
+  await transferDestination(destination);
+  const existing = await lstat(destination).catch(
+    (cause: NodeJS.ErrnoException) => {
+      if (cause.code === "ENOENT") return undefined;
+      throw cause;
+    },
+  );
+  return existing?.isDirectory() && !contents
+    ? join(destination, entry)
+    : destination;
 }
 
 export async function copyTransfer(

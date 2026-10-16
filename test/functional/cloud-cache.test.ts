@@ -188,10 +188,7 @@ for (const name of ["vercel", "daytona"] as const) {
         lease.release(),
         /Cloud dependency cache save failed/,
       );
-      await assert.rejects(
-        lease.release(),
-        /Cloud dependency cache save failed/,
-      );
+      await assert.doesNotReject(lease.release());
       assert.equal(stopped, 2);
       await assert.rejects(lease.invoke({ executable: "true" }), /closed/);
     },

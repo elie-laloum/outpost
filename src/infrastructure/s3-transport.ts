@@ -103,7 +103,7 @@ export function createS3Transport(options: S3TransportOptions): Transport {
       settings.signal?.throwIfAborted();
       const { entry, data } = encodeObject(key, bytes);
       let revision = settings.ifRevision;
-      if (deleteMode === "tombstone" && revision === null) {
+      if (revision === null) {
         const current = await head(key, settings.signal);
         if (current?.Metadata?.[s3TombstoneMetadata] === "true") {
           if (!current.ETag) throw new Error("Missing S3 tombstone revision");
@@ -186,7 +186,10 @@ export function createS3Transport(options: S3TransportOptions): Transport {
           )
             throw new Error("Invalid S3 listing entry");
           const key = transportKey(item.Key.slice(prefix.length));
-          if (deleteMode === "tombstone") {
+          if (
+            deleteMode === "tombstone" ||
+            item.Size === transportDefaults.headerBytes
+          ) {
             const current = await head(key, settings.signal);
             if (!current || current.Metadata?.[s3TombstoneMetadata] === "true")
               continue;
@@ -220,3 +223,6 @@ export function createS3Transport(options: S3TransportOptions): Transport {
     },
   };
 }
+
+export { pruneS3Tombstones } from "./s3-tombstones.ts";
+export type { S3TombstonePruneOptions } from "./s3-tombstones.types.ts";

@@ -6,10 +6,8 @@ import type {
   BullMQHandlerQueue,
 } from "./task-queue-bullmq.types.ts";
 import { bullMQKey } from "./task-queue-bullmq-state.ts";
+import { createBullMQConnection } from "./task-queue-bullmq-connection.ts";
 import {
-  bullMQConnectionTimeoutMs,
-  bullMQConnectionRetries,
-  bullMQRetryDelayMs,
   bullMQDefaultPrefix,
   bullMQDefaultStalledIntervalMs,
 } from "./task-queue-bullmq.constants.ts";
@@ -26,16 +24,10 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
     throw new Error(
       "Use the BullMQ queue prefix instead of connection.keyPrefix",
     );
-  const connection = {
-    connectTimeout: bullMQConnectionTimeoutMs,
-    commandTimeout: bullMQConnectionTimeoutMs,
-    retryStrategy: (attempt: number) =>
-      attempt <= bullMQConnectionRetries ? attempt * bullMQRetryDelayMs : null,
-    ...options.connection,
-    maxRetriesPerRequest: 1,
-  };
+  const connection = createBullMQConnection(options.connection);
+  const connections = new Set([connection]);
   const root = new Queue<QueueRequest, QueueResult>(name, {
-    connection,
+    connection: connection.options,
     prefix,
   });
   const handlers = new Map<string, Promise<BullMQHandlerQueue>>();
@@ -51,12 +43,14 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
   root.on("error", report);
   try {
     await root.waitUntilReady();
+    connection.connected();
     const memory = await (await root.client).info();
     if (!/^maxmemory_policy:noeviction\r?$/m.test(memory))
       throw new Error(
         "Redis maxmemory-policy must be noeviction; change the database Data eviction policy in your Redis service settings",
       );
   } catch (error) {
+    connection.close();
     await root.close();
     throw error;
   }
@@ -70,15 +64,17 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
     const existing = handlers.get(handler);
     if (existing) return existing;
     const created = (async () => {
+      const connection = createBullMQConnection(options.connection);
+      connections.add(connection);
       const queue = new Queue<QueueRequest, QueueResult>(nativeName(handler), {
-        connection,
+        connection: connection.options,
         prefix,
       });
       const worker = new Worker<QueueRequest, QueueResult>(
         nativeName(handler),
         null,
         {
-          connection: { ...connection, maxRetriesPerRequest: null },
+          connection: { ...connection.options, maxRetriesPerRequest: null },
           prefix,
           autorun: false,
           skipLockRenewal: true,
@@ -90,9 +86,12 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
       worker.on("error", report);
       try {
         await Promise.all([queue.waitUntilReady(), worker.waitUntilReady()]);
+        connection.connected();
         await worker.startStalledCheckTimer();
         return { queue, worker };
       } catch (error) {
+        connection.close();
+        connections.delete(connection);
         await Promise.all([queue.close(), worker.close(true)]);
         throw error;
       }
@@ -126,13 +125,15 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
       closing ??= (async () => {
         await Promise.allSettled([...pending]);
         const opened = await Promise.allSettled([...handlers.values()]);
+        for (const connection of connections) connection.close();
         const resources = opened.flatMap((entry) =>
-          entry.status === "fulfilled"
-            ? [entry.value.worker, entry.value.queue]
-            : [],
+          entry.status === "fulfilled" ? [entry.value] : [],
         );
         const results = await Promise.allSettled(
-          resources.map((resource) => resource.close()),
+          resources.flatMap(({ worker, queue }) => [
+            worker.close(true),
+            queue.close(),
+          ]),
         );
         await root.close();
         const errors = results

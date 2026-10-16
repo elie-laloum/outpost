@@ -39,7 +39,7 @@ test("Daytona waits for nonzero process completion after output closes and remai
     deleted = 0;
   const sandbox = {
     getUserHomeDir: async () => "/home/test",
-    fs: { createFolder: async () => {} },
+    fs: { createFolder: async () => {}, uploadFile: async () => {} },
     process: {
       createSession: async () => {
         sessions++;

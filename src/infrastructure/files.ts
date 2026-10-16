@@ -1,6 +1,6 @@
 import { cp, lstat, mkdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, relative, resolve, sep, win32 } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 
 export function expandPath(value: string, base = process.cwd()): string {
@@ -40,12 +40,20 @@ export async function safeDestination(
   root: string,
   entry: string,
 ): Promise<string> {
+  if (entry.split(/[\\/]/).some((part) => part.toLowerCase() === ".git"))
+    throw new OutpostError("workspace", `Unsafe workspace path: ${entry}`);
+  return fileDestination(root, entry);
+}
+
+export async function fileDestination(
+  root: string,
+  entry: string,
+): Promise<string> {
   if (
     !entry ||
     isAbsolute(entry) ||
-    entry
-      .split(/[\\/]/)
-      .some((part) => part === ".." || part.toLowerCase() === ".git") ||
+    Boolean(win32.parse(entry).root) ||
+    entry.split(/[\\/]/).some((part) => part === "..") ||
     entry.includes("\0")
   )
     throw new OutpostError("workspace", `Unsafe workspace path: ${entry}`);

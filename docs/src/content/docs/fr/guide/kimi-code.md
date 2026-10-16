@@ -108,3 +108,7 @@ Une fois la CLI terminée, Outpost lit les entrées `usage.record` de la session
 - **Compteurs tardifs** : un budget de tokens ne voit l’usage d’un tour qu’après la fin de la CLI.
 
 API : [createKimiHarness](../../reference/createkimiharness/) · [KimiSettings](../../reference/kimisettings/) · [createKimiConversations](../../reference/createkimiconversations/) · [agentVersions](../../reference/agentversions/).
+
+Les prompts non interactifs passent dans un argument de CLI. Outpost refuse les prompts dépassant 65 536 octets UTF-8, instructions de profil et de réponse comprises, avant de créer le processus. Découpez les grandes demandes ou référencez des fichiers déjà présents dans le workspace.
+
+Le texte du prompt Kimi est visible dans les arguments du processus natif. Conservez les identifiants dans des variables déclarées ou des fichiers privés plutôt que dans le brief.

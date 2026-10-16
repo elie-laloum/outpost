@@ -27,10 +27,39 @@ export function decodeObject(
   maxBytes: number,
 ): TransportObject {
   const buffer = Buffer.from(data);
-  const value: unknown = JSON.parse(
-    buffer.subarray(0, transportDefaults.headerBytes).toString(),
-  );
   const bytes = buffer.subarray(transportDefaults.headerBytes);
+  return {
+    ...decodeObjectEntry(buffer, key, data.byteLength, maxBytes),
+    bytes,
+  };
+}
+
+export function decodeObjectEntry(
+  data: Uint8Array,
+  key: string,
+  fileSize: number,
+  maxBytes: number,
+): TransportEntry {
+  const size = fileSize - transportDefaults.headerBytes;
+  if (
+    !Number.isSafeInteger(size) ||
+    size < 0 ||
+    size > maxBytes ||
+    data.byteLength < transportDefaults.headerBytes
+  )
+    throw new Error("Invalid or oversized transport object");
+  const value: unknown = JSON.parse(
+    Buffer.from(data.subarray(0, transportDefaults.headerBytes)).toString(),
+  );
+  if (
+    value &&
+    typeof value === "object" &&
+    "key" in value &&
+    typeof value.key === "string" &&
+    value.key !== key &&
+    value.key.toLowerCase() === key.toLowerCase()
+  )
+    throw new Error("Transport key casing conflicts with the stored key");
   if (
     !value ||
     typeof value !== "object" ||
@@ -40,8 +69,7 @@ export function decodeObject(
     typeof value.revision !== "string" ||
     !value.revision ||
     !("size" in value) ||
-    value.size !== bytes.length ||
-    bytes.length > maxBytes ||
+    value.size !== size ||
     !("modifiedAt" in value) ||
     typeof value.modifiedAt !== "string" ||
     !Number.isFinite(Date.parse(value.modifiedAt))
@@ -50,9 +78,8 @@ export function decodeObject(
   return {
     key,
     revision: value.revision,
-    size: bytes.length,
+    size,
     modifiedAt: value.modifiedAt,
-    bytes,
   };
 }
 

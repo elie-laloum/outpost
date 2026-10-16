@@ -1,6 +1,8 @@
 import { cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
 import { downloadHistory } from "./remote-history.ts";
+import { validateRemotePaths } from "./remote-paths.ts";
+import { validateUntrackedFiles } from "./workspace-fingerprint.ts";
 import { OutpostError } from "../domain/errors.ts";
 import {
   fileManifest,
@@ -30,17 +32,9 @@ export async function downloadChanges(
   )
     .split("\0")
     .filter(Boolean);
+  validateRemotePaths(incoming);
+  validateUntrackedFiles(incoming);
   for (const file of incoming) {
-    if (
-      /^\.outpost\/(locks|recovery|workspaces|logs|conversations)(\/|$)/i.test(
-        file,
-      )
-    )
-      throw new OutpostError(
-        "workspace",
-        "Remote file overlaps Outpost runtime state",
-        { file },
-      );
     await safeDestination(join(transfer, "incoming"), file);
   }
   let manifest: readonly FileManifestEntry[] | undefined;
@@ -55,14 +49,22 @@ export async function downloadChanges(
     const changed: FileManifestEntry[] = [];
     for (const entry of manifest) {
       const previous = context.transferred?.get(entry.path);
-      if (
-        previous &&
-        sameFile(previous, entry) &&
-        sameLocalFile(
-          entry,
-          await fileManifest(workspace.directory, entry.path),
-        )
-      ) {
+      const local =
+        previous && sameFile(previous, entry)
+          ? await fileManifest(workspace.directory, entry.path).catch(
+              (error: unknown) => {
+                if (
+                  error &&
+                  typeof error === "object" &&
+                  "code" in error &&
+                  error.code === "ENOENT"
+                )
+                  return undefined;
+                throw error;
+              },
+            )
+          : undefined;
+      if (local && sameLocalFile(entry, local)) {
         const target = await safeDestination(
           join(transfer, "incoming"),
           entry.path,

@@ -314,6 +314,16 @@ test("System One HTTP provider uses the common Jev/Laya wire contract and bounds
   controller.abort();
   const before = requests.length;
   await assert.rejects(decide({ ...options, signal: controller.signal }));
+  await assert.rejects(
+    provider.request({
+      model: options.model,
+      state: options.state,
+      questions: decision.questions,
+      signal: controller.signal,
+    }),
+    (error: unknown) =>
+      error instanceof OutpostError && error.code === "aborted",
+  );
   assert.equal(requests.length, before);
   await observation.close();
   await verbose.close();

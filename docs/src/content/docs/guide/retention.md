@@ -82,6 +82,8 @@ console.log(result.removed, result.retained);
 
 For data kept in a remote [transport](../storage/), pass `transporter` to `planRecoveryRetention()` and `{ transporter }` to `pruneRecoveryRetention()`. Only `closed-logs` and `task-cache` apply there.
 
+Transport pruning removes closed journal segments before their index. If a deletion fails, create a fresh retention plan and retry; the retained index keeps the remaining objects eligible. A partially pruned journal no longer provides a complete readable history.
+
 ## Clean what retention keeps
 
 <!-- features -->
@@ -115,9 +117,39 @@ A refused reservation rejects with code `configuration`; a failed `assertRecover
 ## Limits
 
 - Reservations coordinate writers that use them. They are not a filesystem quota: any other process can still write to `.outpost`.
-- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Remove its entry only after checking that its owner stopped, with a conditional write (`ifRevision`) through the same transport.
+- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Use `inspectStorageReservations()` to identify its owner, then `recoverStorageReservation()` with the inspected revision and `processesStopped: true` after stopping that owner. A concurrent ledger change refuses recovery and requires fresh inspection.
 - Retention never removes branches, checkpoints, artifacts, conversations, recovery transfers or locks.
 - A remote transport cannot use the `clean-workspaces` scope or `maxWorkspaces`.
 - Do not delete `.outpost` by hand: it can hold the only copy of unfinished work.
 
 API: [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).
+
+## Inspect and recover reservations
+
+New reservation entries record a process instance ID, host name, PID, creation time and repository, with Linux process identity when available. These are owner identifiers, not proof of remote liveness. Select the exact entry and stop its owner before recovery. The example uses the default repository Transport; use your original Transport when storage is customized.
+
+```ts
+import {
+  createLocalTransport,
+  inspectStorageReservations,
+  recoverStorageReservation,
+} from "@elie-laloum/outpost";
+
+const transporter = createLocalTransport({
+  directory: "/projects/app/.outpost/storage",
+});
+const inspection = await inspectStorageReservations(transporter);
+console.log(inspection);
+
+// Run only after confirming that this entry's owner stopped.
+export async function recoverStoppedOwner(id: string) {
+  if (!inspection.revision) throw new Error("No reservation ledger");
+  await recoverStorageReservation(transporter, {
+    id,
+    revision: inspection.revision,
+    processesStopped: true,
+  });
+}
+```
+
+The ledger writes format 2 and reads legacy format 1. Existing legacy byte claims remain counted and have no owner metadata; stop every potential writer before recovering such an entry. Stop old-version writers before upgrading a shared ledger: older versions cannot read format 2. Neither recovery nor release recreates a removed reservation, and recovery preserves every other entry through a conditional write.

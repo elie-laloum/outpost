@@ -13,12 +13,13 @@ npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
 
 Each line shows a status (`PASS`, `WARN`, `FAIL`, `SKIPPED`), a check name and a remedy when something is missing. Fix every `FAIL` before your first dispatch, and read each `WARN`.
 
-| Flag                 | Default  | What it selects                                                         |
-| -------------------- | -------- | ----------------------------------------------------------------------- |
-| `--sandbox-provider` | `docker` | `docker`, `podman`, `local`, `vercel` or `daytona`.                     |
-| `--agent`            | `codex`  | `claude`, `codex`, `antigravity`, `copilot` or `kimi`.                  |
-| `--image`            | none     | A local image to test in a temporary container. Docker and Podman only. |
-| `--json`             | off      | Prints the report as JSON instead of text.                              |
+| Flag                 | Default      | What it selects                                                                    |
+| -------------------- | ------------ | ---------------------------------------------------------------------------------- |
+| `--sandbox-provider` | `docker`     | `docker`, `podman`, `local`, `vercel` or `daytona`.                                |
+| `--agent`            | `codex`      | `claude`, `codex`, `antigravity`, `copilot` or `kimi`.                             |
+| `--image`            | none         | A local image to test in a temporary container. Docker and Podman only.            |
+| `--timeout`          | 5000 / 15000 | Per-check timeout in milliseconds: host / image defaults; integer from 1 to 60000. |
+| `--json`             | off          | Prints the report as JSON instead of text.                                         |
 
 | Exit status | Meaning                                                                  |
 | ----------- | ------------------------------------------------------------------------ |
@@ -31,7 +32,7 @@ An interrupted run also removes its temporary container.
 
 ## What doctor checks
 
-Each probe has a five-second deadline. Host checks always run; image checks run only with `--image`.
+Host probes have a five-second deadline; image probes and image lifecycle commands have fifteen seconds each. `--timeout 30000` gives each command thirty seconds, rather than setting a total budget for the whole diagnosis. A timed-out CLI may simply be slow to start: the report suggests adjusting the timeout instead of reinstalling it. Host checks always run; image checks run only with `--image`.
 
 | Check                                   | What it verifies                                                            | If it fails                            |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------- |

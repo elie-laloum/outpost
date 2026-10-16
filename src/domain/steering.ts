@@ -101,6 +101,7 @@ export function createSteering(): Steering {
     close() {
       state = "closed";
       rejectPending("Steering was closed before the message was delivered");
+      for (const listener of [...listeners]) listener();
     },
   });
   channels.set(steering, {

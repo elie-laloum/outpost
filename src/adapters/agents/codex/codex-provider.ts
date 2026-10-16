@@ -1,4 +1,4 @@
-import { invariant } from "../../../domain/errors.ts";
+import { invariant, OutpostError } from "../../../domain/errors.ts";
 import type { Bound, CodexSettings } from "../settings.types.ts";
 
 export function codexProvider(
@@ -14,7 +14,10 @@ export function codexProvider(
   try {
     url = new URL(provider.baseUrl);
   } catch {
-    throw new Error("Model provider baseUrl must be an absolute HTTP(S) URL");
+    throw new OutpostError(
+      "configuration",
+      "Model provider baseUrl must be an absolute HTTP(S) URL",
+    );
   }
   invariant(
     ["http:", "https:"].includes(url.protocol) &&

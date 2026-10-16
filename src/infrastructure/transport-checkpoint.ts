@@ -3,7 +3,10 @@ import type { WorkflowCheckpointStore } from "../domain/workflow/checkpoint.type
 import type { TransportStoreOptions } from "../domain/transport.types.ts";
 import { TransportConflict } from "../domain/transport.ts";
 import { jsonBytes, jsonObject } from "./transport-json.ts";
-import { workflowCheckpointMaxBytes } from "./workflow-checkpoint.constants.ts";
+import {
+  workflowCheckpointMaxBytes,
+  workflowCheckpointReleaseAttempts,
+} from "./workflow-checkpoint.constants.ts";
 import type {
   CheckpointEnvelope,
   CheckpointRecoveryOptions,
@@ -101,13 +104,24 @@ export function createWorkflowCheckpointStore(
           closing ??= (async () => {
             await pending;
             if (released) return;
-            await owned();
-            await transporter.write(
-              target,
-              jsonBytes({ ...data, owner: null }),
-              { ifRevision: revision },
-            );
-            released = true;
+            for (let attempt = 1; ; attempt++) {
+              try {
+                await owned();
+                await transporter.write(
+                  target,
+                  jsonBytes({ ...data, owner: null }),
+                  { ifRevision: revision },
+                );
+                released = true;
+                return;
+              } catch (error) {
+                if (
+                  error instanceof TransportConflict ||
+                  attempt >= workflowCheckpointReleaseAttempts
+                )
+                  throw error;
+              }
+            }
           })();
           return closing;
         },

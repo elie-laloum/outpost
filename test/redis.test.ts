@@ -1,4 +1,5 @@
 import { verifyProcessRecovery } from "./fixtures/queue-process-recovery.ts";
+import { redisProxy } from "./fixtures/redis-proxy.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -19,12 +20,12 @@ const connection = {
 };
 const hash = (value: string) =>
   createHash("sha256").update(value).digest("hex");
-async function fixture(t: TestContext) {
+async function fixture(t: TestContext, queueConnection = connection) {
   const errors: Error[] = [];
   const options = {
     name: "test",
     prefix: `outpost-test-${randomUUID()}`,
-    connection,
+    connection: queueConnection,
     stalledIntervalMs: 50,
     onError(error: Error) {
       errors.push(error);
@@ -352,6 +353,67 @@ test("BullMQ rejects failed authentication and closes its initial connection", a
   );
 });
 
+test(
+  "BullMQ reconnects existing queues and workers after a sustained Redis disconnect",
+  { timeout: 30_000 },
+  async (t) => {
+    const proxy = await redisProxy(connection.host, connection.port);
+    const { first, second } = await fixture(t, proxy.connection).finally(() =>
+      t.after(() => proxy.close()),
+    );
+    await first.enqueue({ id: "reconnect", handler: "work", input: null });
+    const active = await claim(first, "initial", 20_000);
+    assert.ok(active);
+    await claim(second);
+    proxy.disconnect();
+    const interrupted = second
+      .claim({ worker: "during-outage", handlers: ["work"], leaseMs: 5000 })
+      .catch(() => undefined);
+    await delay(1800);
+    proxy.reconnect();
+    await interrupted;
+    const restored = await eventually(
+      () => first.get(active.id).catch(() => undefined),
+      10_000,
+    );
+    assert.equal(restored.status, "active");
+    assert.equal(restored.fence, active.fence);
+    await first.renew(lease(active), 5000);
+    await first.complete(lease(active), { value: "preserved" });
+    await second.enqueue({ id: "after-reconnect", handler: "work", input: 2 });
+    const next = await eventually(() => claim(second));
+    assert.equal(next.id, "after-reconnect");
+    await second.complete(lease(next), { value: "done" });
+    assert.equal((await first.get(next.id))?.status, "done");
+  },
+);
+
+test(
+  "BullMQ closes disconnected resources and refuses new operations",
+  { timeout: 15_000 },
+  async (t) => {
+    const proxy = await redisProxy(connection.host, connection.port);
+    const { first, second } = await fixture(t, proxy.connection).finally(() =>
+      t.after(() => proxy.close()),
+    );
+    await first.enqueue({ id: "offline-close", handler: "work", input: null });
+    await claim(first);
+    proxy.disconnect();
+    try {
+      await delay(800);
+      await first.close();
+      await first.close();
+      await assert.rejects(first.get("offline-close"), /closed/);
+    } finally {
+      proxy.reconnect();
+    }
+    const restored = await eventually(() =>
+      second.get("offline-close").catch(() => undefined),
+    );
+    assert.equal(restored.status, "active");
+  },
+);
+
 test("BullMQ close waits for admitted publication and is idempotent", async (t) => {
   const { first, second } = await fixture(t);
   const publish = Queue.prototype.add;
@@ -537,4 +599,45 @@ test("YAML BullMQ components publish and execute a checkpointed recipe through a
   assert.equal((await publisher.status("yaml-redis"))?.report?.status, "done");
   await worker.close();
   await serving;
+});
+
+test("BullMQ compares canonical requests without confusing arrays and objects", async (t) => {
+  const { first, second, inspector, options } = await fixture(t);
+  const request = {
+    id: "canonical",
+    handler: "work",
+    input: { b: [1, 2], a: { y: true, x: null } },
+  };
+  const result = await Promise.all([
+    first.enqueue(request),
+    second.enqueue({
+      ...request,
+      input: { a: { x: null, y: true }, b: [1, 2] },
+    }),
+  ]);
+  assert.deepEqual(result[0], result[1]);
+  const client = await inspector.client;
+  await client.hset(
+    `${options.prefix}:${hash(options.name)}:outpost:${hash(request.id)}`,
+    { request: JSON.stringify(request) },
+  );
+  assert.deepEqual(
+    await second.enqueue({
+      ...request,
+      input: { a: { x: null, y: true }, b: [1, 2] },
+    }),
+    result[0],
+  );
+  await assert.rejects(
+    second.enqueue({
+      ...request,
+      input: { b: [2, 1], a: { x: null, y: true } },
+    }),
+    /different request/,
+  );
+  await first.enqueue({ id: "empty", handler: "work", input: {} });
+  await assert.rejects(
+    second.enqueue({ id: "empty", handler: "work", input: [] }),
+    /different request/,
+  );
 });

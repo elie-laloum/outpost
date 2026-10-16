@@ -1,5 +1,6 @@
+import { secretFault } from "../../domain/secret-fault.ts";
 import { GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
-import { invariant, OutpostError } from "../../domain/errors.ts";
+import { invariant } from "../../domain/errors.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
 import { mappedSecretSource, secretText } from "./secret-source.ts";
 import type { AwsSecretSourceOptions } from "./aws.types.ts";
@@ -42,16 +43,13 @@ export function createAwsSecretSource(
         settings.signal ? { abortSignal: settings.signal } : {},
       );
       if (typeof response.SecretString !== "string")
-        throw new OutpostError(
-          "provider",
-          "AWS secret must contain SecretString",
-        );
+        throw secretFault("provider", "AWS secret must contain SecretString");
       if (reference.field === undefined) return response.SecretString;
       let document: unknown;
       try {
         document = JSON.parse(response.SecretString);
       } catch {
-        throw new OutpostError(
+        throw secretFault(
           "provider",
           "AWS secret field requires a JSON object",
         );
@@ -62,7 +60,7 @@ export function createAwsSecretSource(
         Array.isArray(document) ||
         !Object.hasOwn(document, reference.field)
       )
-        throw new OutpostError("provider", "AWS secret JSON field is missing");
+        throw secretFault("provider", "AWS secret JSON field is missing");
       return Reflect.get(document, reference.field);
     },
   );

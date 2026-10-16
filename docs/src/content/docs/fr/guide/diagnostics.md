@@ -13,12 +13,13 @@ npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
 
 Chaque ligne affiche un statut (`PASS`, `WARN`, `FAIL`, `SKIPPED`), le nom d’un contrôle et un remède quand quelque chose manque. Corrigez chaque `FAIL` avant votre premier dispatch et lisez chaque `WARN`.
 
-| Option               | Défaut    | Ce qu’elle sélectionne                                                               |
-| -------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `--sandbox-provider` | `docker`  | `docker`, `podman`, `local`, `vercel` ou `daytona`.                                  |
-| `--agent`            | `codex`   | `claude`, `codex`, `antigravity`, `copilot` ou `kimi`.                               |
-| `--image`            | aucune    | Une image locale à tester dans un conteneur temporaire. Docker et Podman uniquement. |
-| `--json`             | désactivé | Affiche le rapport en JSON au lieu de texte.                                         |
+| Option               | Défaut       | Ce qu’elle sélectionne                                                                  |
+| -------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| `--sandbox-provider` | `docker`     | `docker`, `podman`, `local`, `vercel` ou `daytona`.                                     |
+| `--agent`            | `codex`      | `claude`, `codex`, `antigravity`, `copilot` ou `kimi`.                                  |
+| `--image`            | aucune       | Une image locale à tester dans un conteneur temporaire. Docker et Podman uniquement.    |
+| `--timeout`          | 5000 / 15000 | Délai de chaque contrôle en millisecondes : valeurs hôte / image ; entier de 1 à 60000. |
+| `--json`             | désactivé    | Affiche le rapport en JSON au lieu de texte.                                            |
 
 | Code de sortie | Signification                                                                          |
 | -------------- | -------------------------------------------------------------------------------------- |
@@ -31,7 +32,7 @@ Une exécution interrompue supprime aussi son conteneur temporaire.
 
 ## Ce que vérifie doctor
 
-Chaque sonde a un délai de cinq secondes. Les contrôles de l’hôte s’exécutent toujours ; ceux de l’image seulement avec `--image`.
+Les sondes hôtes ont un délai de cinq secondes ; celles de l’image et ses commandes de cycle de vie disposent de quinze secondes chacune. `--timeout 30000` accorde trente secondes à chaque commande, sans fixer de budget total au diagnostic. Une CLI peut simplement démarrer lentement : le rapport conseille alors d’ajuster le délai au lieu de la réinstaller. Les contrôles de l’hôte s’exécutent toujours ; ceux de l’image seulement avec `--image`.
 
 | Contrôle                                | Ce qu’il vérifie                                                                | En cas d’échec                                |
 | --------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------- |

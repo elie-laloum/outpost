@@ -1,3 +1,4 @@
+import { secretFault } from "../../domain/secret-fault.ts";
 import { invariant } from "../../domain/errors.ts";
 import { secretNames, secretValue } from "../../domain/secrets.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
@@ -29,10 +30,11 @@ export function mappedSecretSource<T>(
     async resolve(names, options = {}) {
       const selected = secretNames(names);
       for (const key of selected)
-        invariant(
-          Object.hasOwn(mapping, key),
-          `Missing secret reference: ${key}`,
-        );
+        if (!Object.hasOwn(mapping, key))
+          throw secretFault(
+            "configuration",
+            `Missing secret reference: ${key}`,
+          );
       const entries: [string, string][] = [];
       for (const key of selected) {
         options.signal?.throwIfAborted();

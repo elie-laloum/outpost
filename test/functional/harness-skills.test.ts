@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   createAgent,
+  defineAgentProfile,
   defineHarnessSkill,
   defineHarnessTool,
   defineHarnessToolset,
@@ -59,6 +60,41 @@ const style = defineHarnessSkill({
   name: "style",
   description: "House writing style.",
   instructions: "Write short sentences.",
+});
+
+test("restrictive profiles allow loading skills without granting their tools", async (t) => {
+  const root = await repository(t);
+  const requests: ModelRequest[] = [];
+  const replies = [
+    call("load_skill", { name: "migrations" }),
+    call("migrate_schema", {}),
+    answer,
+  ];
+  await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
+      model: "m",
+      harness: createHarness({
+        profile: defineAgentProfile({ allowedTools: [] }),
+        skills: [migrations],
+        modelProvider: {
+          name: "fixture",
+          async request(request) {
+            requests.push(request);
+            return replies.shift()!(request);
+          },
+        },
+      }),
+    }),
+    brief: { text: "Load the migration instructions" },
+    logging: false,
+  });
+  assert.match(lastResult(requests[1])!, /^Always back up first/);
+  assert.match(
+    lastResult(requests[2])!,
+    /^error: Denied: Denied by agent profile/,
+  );
 });
 
 test("skills are listed, loaded on demand and gate their tools", async (t) => {

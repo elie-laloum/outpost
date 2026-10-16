@@ -92,7 +92,7 @@ L’identité utilise la même recette de hachage que les caches de conteneurs :
 
 Chaque sandbox cloud reçoit son propre snapshot. Le premier run qui publie avec la révision restaurée gagne ; un run concurrent devenu obsolète conserve le snapshot plus récent et abandonne sa mise à jour. Le cache ne fusionne pas les fichiers. Un cache absent commence vide. Les autres erreurs de transport, d’archive ou de transfert font échouer l’acquisition ou la fermeture ; la fermeture tente toujours de détruire le sandbox et rapporte les deux échecs si nécessaire.
 
-Les archives préservent fichiers, octets binaires, permissions et liens symboliques ; le gestionnaire recrée les répertoires vides. Les limites d’archive existantes s’appliquent : 1 Gio de contenu, 100 000 fichiers et un manifeste de 16 Mio. La restauration et chaque sauvegarde ont un délai de 60 secondes. Des commandes créent `/outpost/cache/<name>` et l’attribuent à l’utilisateur du sandbox ; les images non root doivent permettre cette préparation privilégiée.
+Les archives préservent fichiers, octets binaires, permissions et liens symboliques, y compris les checkouts de dépendances contenant `.git` ; le gestionnaire recrée les répertoires vides. Les limites d’archive existantes s’appliquent : 1 Gio de contenu, 100 000 fichiers et un manifeste de 16 Mio. La restauration et chaque sauvegarde ont un délai de 60 secondes. Des commandes créent `/outpost/cache/<name>` et l’attribuent à l’utilisateur du sandbox ; les images non root doivent permettre cette préparation privilégiée.
 
 Les objets vivent sous `dependency-caches/` dans le transport. Les snapshots immuables, y compris remplacés ou non publiés, restent jusqu’à leur suppression explicite. Supprimez tout le préfixe d’un cache uniquement après avoir arrêté chaque lecteur et chaque écrivain ; supprimer les fragments d’une restauration active la fait échouer. Aucun élagage n’est automatique. Un runner tué ou un sandbox cloud expiré peut perdre les derniers téléchargements. Les fixtures SDK déterministes couvrent le comportement ; la validation réelle Vercel, Daytona et S3 reste à effectuer.
 
@@ -108,3 +108,5 @@ docker volume rm $(docker volume ls -q --filter label=io.outpost.cache=true)
 ```
 
 Podman accepte les mêmes commandes avec `podman`.
+
+Les transferts de cache cloud utilisent les API de fichiers du provider et peuvent effectuer une requête par fichier. Chaque cache peut définir `timeoutMs` (60 secondes par défaut) ; la restauration partage le plus grand délai déclaré, tandis que chaque sauvegarde dispose de son propre délai. Augmentez-le pour de nombreux petits fichiers ou un service lent. Une erreur de sauvegarde reste signalée même si la suppression de la sandbox réussit ; les appels de suppression suivants restent idempotents.

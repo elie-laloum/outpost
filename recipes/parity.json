@@ -5433,6 +5433,18 @@
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
     "optionCoverage": {}
   },
+  ".:inspectStorageReservations": {
+    "signatures": [
+      "(transporter: Transport): Promise<StorageReservationInspection>"
+    ],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/audit-recovery.test.ts",
+    "reason": "Explicit Transport inspection and authorized recovery operation, composed through TypeScript rather than declarative YAML.",
+    "optionCoverage": {}
+  },
   ".:inspectWorkspacePathLocks": {
     "signatures": ["(): Promise<readonly WorkspacePathLock[]>"],
     "options": {},
@@ -7297,7 +7309,8 @@
       "handlers": "Readonly<Record<string, QueueHandler>>",
       "signal": "AbortSignal",
       "leaseMs": "number | undefined",
-      "pollMs": "number | undefined"
+      "pollMs": "number | undefined",
+      "onError": "((error: unknown) => void) | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -7310,7 +7323,8 @@
       "handlers": "contract",
       "signal": "contract",
       "leaseMs": "contract",
-      "pollMs": "contract"
+      "pollMs": "contract",
+      "onError": "contract"
     }
   },
   ".:quotaFault": {
@@ -7569,6 +7583,18 @@
     "status": "implemented",
     "test": null,
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  ".:recoverStorageReservation": {
+    "signatures": [
+      "(transporter: Transport, options: StorageReservationRecoveryOptions): Promise<void>"
+    ],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/audit-recovery.test.ts",
+    "reason": "Explicit Transport inspection and authorized recovery operation, composed through TypeScript rather than declarative YAML.",
     "optionCoverage": {}
   },
   ".:recoverWorkflowCheckpoint": {
@@ -8522,6 +8548,7 @@
       "delayMs": "number | undefined",
       "backoff": "\"fixed\" | \"exponential\" | undefined",
       "maxDelayMs": "number | undefined",
+      "maxRetryAfterMs": "number | undefined",
       "jitter": "\"none\" | \"full\" | undefined",
       "accepts": "((error: unknown, attempt: number) => boolean) | undefined"
     },
@@ -8535,6 +8562,7 @@
       "delayMs": "contract",
       "backoff": "contract",
       "maxDelayMs": "contract",
+      "maxRetryAfterMs": "native",
       "jitter": "contract",
       "accepts": "contract"
     }
@@ -9853,6 +9881,22 @@
       "[Symbol.asyncDispose]": "contract"
     }
   },
+  ".:StorageReservationInspection": {
+    "signatures": [],
+    "options": {
+      "revision": "string | undefined",
+      "reservations": "Readonly<Record<string, StorageReservationRecord>>"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/audit-recovery.test.ts",
+    "reason": "Explicit Transport inspection and authorized recovery operation, composed through TypeScript rather than declarative YAML.",
+    "optionCoverage": {
+      "revision": "contract",
+      "reservations": "contract"
+    }
+  },
   ".:StorageReservationOptions": {
     "signatures": [],
     "options": {
@@ -9873,6 +9917,40 @@
       "reserveBytes": "contract",
       "maxEntries": "contract",
       "signal": "contract"
+    }
+  },
+  ".:StorageReservationRecord": {
+    "signatures": [],
+    "options": {
+      "bytes": "number",
+      "owner": "{ readonly id: string; readonly host: string; readonly pid: number; readonly createdAt: string; readonly repository: string; readonly identity?: LocalProcessIdentity; } | undefined"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/audit-recovery.test.ts",
+    "reason": "Explicit Transport inspection and authorized recovery operation, composed through TypeScript rather than declarative YAML.",
+    "optionCoverage": {
+      "bytes": "contract",
+      "owner": "contract"
+    }
+  },
+  ".:StorageReservationRecoveryOptions": {
+    "signatures": [],
+    "options": {
+      "id": "string",
+      "revision": "string",
+      "processesStopped": "true"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/audit-recovery.test.ts",
+    "reason": "Explicit Transport inspection and authorized recovery operation, composed through TypeScript rather than declarative YAML.",
+    "optionCoverage": {
+      "id": "contract",
+      "revision": "contract",
+      "processesStopped": "contract"
     }
   },
   ".:StuckEvent": {
@@ -10337,7 +10415,8 @@
     "signatures": [],
     "options": {
       "paths": "readonly string[] | undefined",
-      "command": "string | undefined"
+      "command": "string | undefined",
+      "mcpServer": "string | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -10346,7 +10425,8 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "paths": "contract",
-      "command": "contract"
+      "command": "contract",
+      "mcpServer": "contract"
     }
   },
   ".:ToolValidation": {
@@ -10621,7 +10701,7 @@
     "signatures": [],
     "options": {
       "path": "string",
-      "stage": "\"verify\" | \"route\" | \"enqueue\"",
+      "stage": "\"verify\" | \"decode\" | \"route\" | \"enqueue\"",
       "delivery": "string | undefined"
     },
     "category": "contract",
@@ -12419,6 +12499,7 @@
     "signatures": [],
     "options": {
       "transport": "Transport",
+      "timeoutMs": "number | undefined",
       "name": "string",
       "key": "string"
     },
@@ -12429,6 +12510,7 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "transport": "contract",
+      "timeoutMs": "native",
       "name": "contract",
       "key": "contract"
     }
@@ -12741,6 +12823,7 @@
     "signatures": [],
     "options": {
       "transport": "Transport",
+      "timeoutMs": "number | undefined",
       "name": "string",
       "key": "string"
     },
@@ -12751,6 +12834,7 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "transport": "contract",
+      "timeoutMs": "native",
       "name": "contract",
       "key": "contract"
     }
@@ -13413,6 +13497,16 @@
     "reason": "Callable or caller-owned object supplied by a declared local extension; factories require static metadata.",
     "optionCoverage": {}
   },
+  "./testing:createScriptedAgent": {
+    "signatures": ["(options: ScriptedAgentOptions): CliAgent"],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/recipe-advanced.test.ts",
+    "reason": "Offline test agent supplied through an explicitly declared extension; compatibility alias remains available.",
+    "optionCoverage": {}
+  },
   "./testing:MemoryCommand": {
     "signatures": [],
     "options": {
@@ -13448,16 +13542,6 @@
     "optionCoverage": {
       "commands": "contract"
     }
-  },
-  "./testing:scriptedAgent": {
-    "signatures": ["(options: ScriptedAgentOptions): CliAgent"],
-    "options": {},
-    "category": "extension",
-    "lot": 7,
-    "status": "implemented",
-    "test": "test/functional/recipe-advanced.test.ts",
-    "reason": "Callable or caller-owned object supplied by a declared local extension; factories require static metadata.",
-    "optionCoverage": {}
   },
   "./testing:ScriptedAgentOptions": {
     "signatures": [],
@@ -13524,6 +13608,38 @@
     "test": "test/functional/recipe-durable.test.ts",
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
+  },
+  "./transports/s3:pruneS3Tombstones": {
+    "signatures": ["(options: S3TombstonePruneOptions): Promise<number>"],
+    "options": {},
+    "category": "extension",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/s3-tombstones.test.ts",
+    "reason": "Explicit offline storage maintenance with a caller-owned S3 client and stopped-writer authorization; not an automatic recipe lifecycle action.",
+    "optionCoverage": {}
+  },
+  "./transports/s3:S3TombstonePruneOptions": {
+    "signatures": [],
+    "options": {
+      "prefix": "string",
+      "writersStopped": "true",
+      "signal": "AbortSignal | undefined",
+      "client": "S3Client",
+      "bucket": "string"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/s3-tombstones.test.ts",
+    "reason": "Offline maintenance contract consumed through pruneS3Tombstones.",
+    "optionCoverage": {
+      "prefix": "contract",
+      "writersStopped": "contract",
+      "signal": "contract",
+      "client": "contract",
+      "bucket": "contract"
+    }
   },
   "./transports/s3:S3TransportOptions": {
     "signatures": [],

@@ -29,6 +29,7 @@ export function agentVersionProbe(
 export async function diagnoseAgentCli(
   agent: DoctorAgent,
   execute: Executor,
+  deadlineMs?: number,
 ): Promise<readonly DiagnosticCheck[]> {
   const checks: DiagnosticCheck[] = [];
   for (const plan of doctorAgents[agent].diagnostics()) {
@@ -46,6 +47,7 @@ export async function diagnoseAgentCli(
         help = stripVTControlCharacters(`${result.stdout}\n${result.stderr}`);
         return result;
       },
+      deadlineMs,
     );
     if (check.status !== "pass") {
       checks.push(check);

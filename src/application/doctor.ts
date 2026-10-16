@@ -1,8 +1,10 @@
+import { validateContainerImage } from "../domain/container-image.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import { agentVersionProbe } from "./doctor-agent.ts";
+import { doctorDeadline } from "./doctor-deadline.ts";
 import { diagnoseImage } from "./doctor-image.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
 import { doctorDefaults, providerDiagnostics } from "./doctor.constants.ts";
@@ -34,6 +36,10 @@ async function inspect(
   execute: Executor,
   signal: AbortSignal,
 ): Promise<DoctorReport> {
+  const deadlineMs = doctorDeadline(
+    options.deadlineMs,
+    doctorDefaults.deadlineMs,
+  );
   const probe: Executor = (command) => {
     signal.throwIfAborted();
     return execute({ ...command, signal });
@@ -44,12 +50,7 @@ async function inspect(
       sandboxProvider === "docker" || sandboxProvider === "podman",
       "--image requires docker or podman.",
     );
-    invariant(
-      image.length > 0 &&
-        !image.startsWith("-") &&
-        !/[\x00-\x20\x7f]/.test(image),
-      "Invalid diagnostic image name.",
-    );
+    validateContainerImage(image);
   }
   const capabilities = providerDiagnostics[sandboxProvider];
   const checks: DiagnosticCheck[] = [
@@ -75,6 +76,7 @@ async function inspect(
           readVersion: true,
         },
         probe,
+        deadlineMs,
       ),
     );
   if (capabilities.placement === "mounted") {
@@ -87,6 +89,7 @@ async function inspect(
         readVersion: true,
       },
       probe,
+      deadlineMs,
     );
     checks.push(engine);
     if (engine.status === "pass")
@@ -102,6 +105,7 @@ async function inspect(
             remedy: `Check ${sandboxProvider} is running and accessible to this user; on macOS, start its virtual machine.`,
           },
           probe,
+          deadlineMs,
         ),
       );
     checks.push(
@@ -113,6 +117,7 @@ async function inspect(
           remedy: "Install GNU tar or bsdtar for container transfers.",
         },
         probe,
+        deadlineMs,
       ),
     );
   }
@@ -133,6 +138,7 @@ async function inspect(
           "Host CLI is unavailable or unverified. A sandbox may have its own CLI; dispatch can bootstrap a missing agent.",
       },
       probe,
+      deadlineMs,
     ),
   );
   signal.throwIfAborted();
@@ -150,6 +156,9 @@ async function inspect(
             sandboxProvider,
             agent,
             image,
+            ...(options.deadlineMs !== undefined
+              ? { deadlineMs: options.deadlineMs }
+              : {}),
             ...(options.workspaceKind
               ? { workspaceKind: options.workspaceKind }
               : {}),

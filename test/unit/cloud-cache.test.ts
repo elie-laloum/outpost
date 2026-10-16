@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdir, cp, writeFile } from "node:fs/promises";
+import { mkdir, cp, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { SandboxLease, Transport } from "../../src/index.ts";
@@ -207,13 +207,26 @@ test("cloud cache snapshots preserve every configured cache and save on independ
     },
   };
   const source = join(root, "source");
-  await mkdir(source);
+  await mkdir(join(source, "dependency", ".git", "objects"), {
+    recursive: true,
+  });
+  await writeFile(
+    join(source, "dependency", ".git", "objects", "object"),
+    Buffer.from([0, 255, 42]),
+  );
+  let restored = 0;
   await writeFile(join(source, "download"), Buffer.from([0, 255]));
   const lease: SandboxLease = {
     root,
     home: root,
     invoke: async () => ({ status: 0, stdout: "1000:1000", stderr: "" }),
-    upload: async () => {},
+    upload: async (path) => {
+      assert.deepEqual(
+        await readFile(join(path, "dependency", ".git", "objects", "object")),
+        Buffer.from([0, 255, 42]),
+      );
+      restored++;
+    },
     download: async (_source, destination) =>
       cp(source, destination, { recursive: true }),
     release: async () => {},
@@ -233,13 +246,14 @@ test("cloud cache snapshots preserve every configured cache and save on independ
   controller.abort();
   await save();
   assert.equal(reads, 2);
-  assert.equal(writes, 6);
+  assert.equal(writes, 8);
   const next = await prepareCloudCaches(
     lease,
     caches,
     { ...context, signal: new AbortController().signal },
     "image",
   );
+  assert.equal(restored, 2);
   await next();
 });
 

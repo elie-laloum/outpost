@@ -1,4 +1,5 @@
-import { invariant, OutpostError } from "./errors.ts";
+import { secretFault } from "./secret-fault.ts";
+import { invariant } from "./errors.ts";
 import { SECRET_MAX_BYTES, SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
 
 export function secretNames(names: readonly string[]): readonly string[] {
@@ -24,7 +25,7 @@ export function secretValue(value: unknown): string {
     value.includes("\0") ||
     new TextEncoder().encode(value).byteLength > SECRET_MAX_BYTES
   )
-    throw new OutpostError(
+    throw secretFault(
       "provider",
       "Secret value must be nonempty text without NUL, at most 1 MiB",
     );

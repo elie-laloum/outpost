@@ -24,7 +24,14 @@ export function validateCloudCaches(
   caches: readonly CloudDependencyCache[],
 ): void {
   validateCacheDeclarations(caches);
-  for (const cache of caches)
+  for (const cache of caches) {
+    invariant(
+      cache.timeoutMs === undefined ||
+        (Number.isSafeInteger(cache.timeoutMs) &&
+          cache.timeoutMs > 0 &&
+          cache.timeoutMs <= 2 ** 31 - 1),
+      "Cloud cache timeoutMs must be a positive supported timer duration",
+    );
     invariant(
       cache.transport &&
         ["read", "write", "remove", "list"].every(
@@ -33,6 +40,7 @@ export function validateCloudCaches(
         ),
       "Cloud dependency caches require a Transport",
     );
+  }
 }
 
 function cancellableTransport(
@@ -61,12 +69,12 @@ export async function prepareCloudCaches(
   image: string,
 ): Promise<() => Promise<void>> {
   if (!caches.length) return async () => {};
+  const timeoutMs = Math.max(
+    ...caches.map((cache) => cache.timeoutMs ?? defaults.deadlineMs),
+  );
   const signal = context.signal
-    ? AbortSignal.any([
-        context.signal,
-        AbortSignal.timeout(defaults.deadlineMs),
-      ])
-    : AbortSignal.timeout(defaults.deadlineMs);
+    ? AbortSignal.any([context.signal, AbortSignal.timeout(timeoutMs)])
+    : AbortSignal.timeout(timeoutMs);
   const call = async (script: string, elevated = false) => {
     const result = await lease.invoke({
       executable: "sh",
@@ -124,7 +132,9 @@ export async function prepareCloudCaches(
       const staging = await mkdtemp(join(tmpdir(), "outpost-cache-"));
       try {
         const restored = join(staging, "restored");
-        await restoreArchiveFiles(transport, reference, restored);
+        await restoreArchiveFiles(transport, reference, restored, undefined, {
+          allowGitMetadata: true,
+        });
         await lease.upload(restored, mount.target, { signal });
       } finally {
         await rm(staging, { recursive: true, force: true });
@@ -132,7 +142,9 @@ export async function prepareCloudCaches(
     }
     saves.push(async () => {
       // Cleanup has its own deadline so an aborted run can still publish downloads.
-      const signal = AbortSignal.timeout(defaults.deadlineMs);
+      const signal = AbortSignal.timeout(
+        cache.timeoutMs ?? defaults.deadlineMs,
+      );
       const transport = cancellableTransport(cache.transport, signal);
       const staging = await mkdtemp(join(tmpdir(), "outpost-cache-"));
       try {
@@ -159,6 +171,8 @@ export async function prepareCloudCaches(
           downloaded,
           paths,
           `${prefix}/snapshots/${randomUUID()}`,
+          undefined,
+          { allowGitMetadata: true },
         );
         try {
           await transport.write(key, jsonBytes(reference), {

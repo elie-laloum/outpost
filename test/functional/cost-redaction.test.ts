@@ -29,6 +29,21 @@ const prices: ModelPriceTable = {
 };
 const tokens = { input: 100, cached: 0, output: 50 };
 
+test("redaction masks plain and escaped secrets in the same JSON string", () => {
+  const hub = createObservationHub({ redact: [/sk-[a-z0-9]{6}/] });
+  const source = '{"plain":"sk-abc123","escaped":"sk-\\u0061bc123"}';
+  assert.deepEqual(JSON.parse(hub.redact(source)), {
+    plain: "[REDACTED]",
+    escaped: "[REDACTED]",
+  });
+  const structural = createObservationHub({
+    redact: [/"plain"/, /sk-[a-z0-9]{6}/],
+  });
+  const masked = structural.redact(source);
+  assert.ok(!masked.includes('"plain"'));
+  assert.ok(!masked.includes("sk-"));
+});
+
 const agent = () =>
   createAgent({
     model: "demo",

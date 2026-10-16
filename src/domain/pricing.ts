@@ -51,8 +51,10 @@ export function calculateUsageCost(
     if (
       tokens.inputIncludesCache !== false &&
       tokens.cached + created > tokens.input
-    )
-      throw new Error("Cached tokens must be included in priced input usage");
+    ) {
+      complete = false;
+      continue;
+    }
     amount +=
       ((tokens.inputIncludesCache === false
         ? tokens.input

@@ -93,7 +93,7 @@ export async function integrateCandidate(
     options.observation,
     "git",
     "integration.lock",
-    () => lock(source.repository, `merge:${source.baseBranch}`),
+    () => lock(source.repository, source.repository),
   );
   try {
     await check();
@@ -131,7 +131,8 @@ export async function integrateCandidate(
     );
   } catch (cause) {
     const error =
-      cause instanceof OutpostError || signal.aborted
+      (cause instanceof OutpostError && cause.code !== "process") ||
+      signal.aborted
         ? cause
         : new OutpostError(
             "conflict",

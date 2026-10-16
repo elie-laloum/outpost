@@ -59,9 +59,20 @@ test("host placement forwards only credential variables and never writes files",
       authentication: { usage: { key: "sk-host" } },
     }),
   });
-  assert.deepEqual(await authenticateAgent(usage, {}, lease, "host", signal), {
-    OPENAI_API_KEY: "sk-host",
+  await assert.rejects(authenticateAgent(usage, {}, lease, "host", signal), {
+    code: "configuration",
   });
+  const compatible = createAgent({
+    model: "fixture",
+    harness: createCodexHarness({
+      authentication: { usage: { key: "sk-host" } },
+      modelProvider: { baseUrl: "https://example.test/v1" },
+    }),
+  });
+  assert.deepEqual(
+    await authenticateAgent(compatible, {}, lease, "host", signal),
+    { OPENAI_API_KEY: "sk-host" },
+  );
   assert.equal(calls.length, 0);
   assert.deepEqual(
     await authenticateAgent(

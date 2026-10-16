@@ -45,6 +45,8 @@ Une exécution reprise garde son `executionId` : `context.idempotencyKey` reste 
 
 Une tâche avec checkpoint doit renvoyer `undefined` ou une valeur qui peut être enregistrée et relue en JSON sans perdre d’information. Sinon, la tentative échoue. Convertissez les dates en chaînes et ne gardez que les champs utiles.
 
+Un échec de sérialisation marque la tâche en échec sans répéter ses effets terminés via `retry`. Un futur `resume: "retry-incomplete"` autorise toujours explicitement le rejeu. Les résultats durables sont copiés à la fin des tâches et chaque appel à `context.value()` renvoie une copie distincte : un producteur ou consommateur ne peut donc pas modifier la sortie enregistrée d’une autre tâche. Les workflows sans checkpoint conservent leur comportement de partage des objets.
+
 Un résultat de dispatch porte des méthodes comme `resume()`. Projetez-le dans une `defineTask`, comme dans l’exemple ci-dessous :
 
 ```ts
@@ -185,6 +187,8 @@ Une autre `input` change la version du checkpoint et le job échoue. Pour rejoue
 
 Le stockage accepte n’importe quel `Transport`. Utilisez un transport S3 ou R2 pour que des workers sur plusieurs machines partagent les exécutions : voir [Où vivent les données](../storage/).
 
+La libération d’un checkpoint retente une fois une erreur de stockage, en vérifiant le même propriétaire et la même révision avant chaque tentative. Les tâches terminées ne sont pas rejouées. Un conflit de révision arrête immédiatement la libération ; une erreur persistante ou une écriture non confirmée fait toujours échouer `start()`. Inspectez l’exécution sauvegardée avant de récupérer explicitement une propriété encore présente.
+
 ## Limites
 
 - Un seul `start()` à la fois par `runId`. Un second est refusé tant que le premier s’exécute.
@@ -192,3 +196,5 @@ Le stockage accepte n’importe quel `Transport`. Utilisez un transport S3 ou R2
 - Le rejeu répète les effets de bord qu’une tâche interrompue a déjà produits. Dédupliquez-les avec `context.idempotencyKey` : voir [Files de jobs et workers](../job-queues/).
 
 API : [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [WorkflowCheckpointOptions](../../reference/workflowcheckpointoptions/) · [recoverWorkflowCheckpoint](../../reference/recoverworkflowcheckpoint/) · [WorkflowCheckpoint](../../reference/workflowcheckpoint/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+
+Une écriture de checkpoint échouée arrête la persistance de cette exécution. Outpost ne rétablit pas la chaîne d’écriture pour publier ensuite une réussite sur un état incertain. Inspectez le checkpoint avant récupération. Même un checkpoint initial dont toutes les tâches sont `waiting` avec zéro tentative exige `resume: "retry-incomplete"` après interruption. L’appel à `recoverWorkflowCheckpoint()` autorise explicitement la récupération : arrêtez d’abord l’ancien runner ; une révision ne prouve pas l’arrêt de ses effets externes. Les nouvelles sauvegardes normalisent l’ordre des clés des déclarations d’interaction. Reprenez une fois les anciens checkpoints avec l’ordre original avant de le modifier.

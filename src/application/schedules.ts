@@ -48,6 +48,7 @@ export async function runSchedulesWithClock(
 ): Promise<void> {
   const schedules = validSchedules(options.schedules);
   const maxLateMs = queueNumber(options.maxLateMs ?? scheduleDefaultMaxLateMs);
+  if (maxLateMs === 0) throw new Error("maxLateMs must be positive");
   const stop = new AbortController();
   const signal = AbortSignal.any([options.signal, stop.signal]);
   async function publish(schedule: TriggerSchedule, slot: Date) {

@@ -1,7 +1,11 @@
 import timers from "node:timers/promises";
 import { OutpostError } from "../errors.ts";
 import type { Retry } from "../workflow.types.ts";
-import { defaultMaxRetryDelayMs, maxTimerMs } from "./retry.constants.ts";
+import {
+  defaultMaxRetryDelayMs,
+  defaultMaxRetryAfterMs,
+  maxTimerMs,
+} from "./retry.constants.ts";
 import { positive } from "./validation.ts";
 
 export function validateRetry(retry: Retry): void {
@@ -9,6 +13,7 @@ export function validateRetry(retry: Retry): void {
   for (const [name, value] of [
     ["delayMs", retry.delayMs],
     ["maxDelayMs", retry.maxDelayMs],
+    ["maxRetryAfterMs", retry.maxRetryAfterMs],
   ] as const) {
     if (
       value !== undefined &&
@@ -48,8 +53,11 @@ export function retryDelay(
     Number.isFinite(server) &&
     server >= 0 &&
     server <= Number.MAX_SAFE_INTEGER
-  )
+  ) {
+    if (server > (retry?.maxRetryAfterMs ?? defaultMaxRetryAfterMs))
+      throw error;
     duration = Math.max(duration, server);
+  }
   return Math.ceil(duration);
 }
 

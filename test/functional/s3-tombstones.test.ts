@@ -1,3 +1,4 @@
+import { pruneS3Tombstones } from "../../src/infrastructure/s3-transport.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
@@ -115,4 +116,57 @@ test("S3 tombstone discovery propagates HEAD failures", async (t) => {
     /head unavailable/,
   );
   await assert.rejects(collect(transporter.list()), /head unavailable/);
+});
+
+test("offline S3 pruning preserves empty live objects and refuses missing authorization", async (t) => {
+  const { transporter, client, objects } = await s3Fixture(t, {
+    deleteMode: "tombstone",
+    ignoreDeleteCondition: true,
+  });
+  const deleted = await transporter.write("deleted", Buffer.from("old"), {
+    ifRevision: null,
+  });
+  await transporter.remove("deleted", { ifRevision: deleted.revision });
+  const empty = await transporter.write("empty", Buffer.alloc(0), {
+    ifRevision: null,
+  });
+  const options = {
+    client,
+    bucket: "bucket",
+    prefix: "project",
+    writersStopped: true as const,
+  };
+  await assert.rejects(
+    pruneS3Tombstones({ ...options, writersStopped: undefined! }),
+    /writersStopped/,
+  );
+  assert.equal(await pruneS3Tombstones(options), 1);
+  assert.equal(objects.has("project/deleted"), false);
+  assert.equal((await transporter.read("empty"))?.revision, empty.revision);
+  assert.equal(await pruneS3Tombstones(options), 0);
+});
+
+test("offline pruning discovers all pages before deleting tombstones", async (t) => {
+  const { transporter, client, objects } = await s3Fixture(t, {
+    deleteMode: "tombstone",
+    ignoreDeleteCondition: true,
+  });
+  for (let index = 0; index < 7; index++) {
+    const entry = await transporter.write(
+      `entry-${index}`,
+      Buffer.from("value"),
+      { ifRevision: null },
+    );
+    await transporter.remove(entry.key, { ifRevision: entry.revision });
+  }
+  assert.equal(
+    await pruneS3Tombstones({
+      client,
+      bucket: "bucket",
+      prefix: "project",
+      writersStopped: true,
+    }),
+    7,
+  );
+  assert.equal(objects.size, 0);
 });

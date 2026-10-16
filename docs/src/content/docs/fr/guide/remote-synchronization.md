@@ -46,6 +46,8 @@ Une copie exclue par `.gitignore` voyage dans un seul sens : les modifications q
 
 ## Quand la synchronisation s’arrête
 
+Les dépôts Git imbriqués non suivis ne peuvent pas être synchronisés. Déplacez le dépôt imbriqué hors du workspace, ou ignorez-le si son contenu doit rester local. Sa détection sur l’hôte échoue avant l’envoi initial avec le code `conflict` et `details.file` ; sa détection dans la sandbox arrête le rapatriement avec le code `workspace`, une cause `conflict` indiquant le chemin et un répertoire de récupération. Aucun de ces cas ne copie récursivement ni ne supprime le dépôt imbriqué.
+
 Outpost n’écrase jamais un travail qu’il ne peut pas sauvegarder. Il s’arrête sur une erreur de code `workspace` dont `details.recovery` désigne le dossier de `.outpost/recovery` qui contient les changements téléchargés et la sauvegarde. Inspectez-le avec [Récupérer du travail](../recovery/).
 
 | Cause                                                                             | Solution                                                                   |

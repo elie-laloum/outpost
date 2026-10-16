@@ -39,7 +39,9 @@ const result = await running;
 | [Codex](../codex/)                                                                         | `injected` | A steered dispatch runs `codex app-server`. `turn/steer` adds the text to the active turn, or starts the next one.             |
 | [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost stops the process once its conversation is known, then resumes it with the text in the same sandbox.                   |
 
-With `resumed`, the action in progress is cut short, but files already changed stay in the workspace. Every sandbox provider carries live input; on Vercel and Daytona each instruction costs one provider command and arrives a moment later.
+With `resumed`, the action in progress is cut short, but files already changed stay in the workspace. Every sandbox provider carries live input; on Vercel and Daytona each instruction uses a file upload and one provider command and arrives a moment later.
+
+For live CLI input, `send()` resolves after the native protocol acknowledges the message. A cloud input upload or append failure rejects unconfirmed sends with code `steering` without cancelling the running turn. Further sends on that turn are rejected; delivery can be uncertain, so Outpost does not automatically retry them. Large instructions travel through file transfer rather than shell arguments. The turn still obeys its cancellation and deadline settings.
 
 ## When you send it
 
@@ -97,3 +99,5 @@ A `resumed` delivery ends the interrupted turn with a `stopped` event of reason 
 - Subagents of CLI agents cannot be addressed: an instruction with `subagent` is rejected as soon as a CLI turn sees it.
 
 API: [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
+
+Copilot and Kimi may expose their conversation identifier only at the end of a turn. Until that identifier is available, steering waits; it cannot interrupt and resume an unidentified conversation. Do not assume mid-turn delivery with these native adapters.

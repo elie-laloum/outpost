@@ -1,6 +1,6 @@
 ---
-title: "scriptedAgent"
-description: "scriptedAgent — Outpost API"
+title: "createScriptedAgent"
+description: "createScriptedAgent — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { scriptedAgent } from "@elie-laloum/outpost/testing";
+import { createScriptedAgent } from "@elie-laloum/outpost/testing";
 ```
 
 ## Purpose and behavior
@@ -32,7 +32,9 @@ Create a CLI-shaped test agent that consumes a snapshot of turns in declaration 
 ## Signature
 
 ```ts
-export declare function scriptedAgent(options: ScriptedAgentOptions): CliAgent;
+export declare function createScriptedAgent(
+  options: ScriptedAgentOptions,
+): CliAgent;
 ```
 
 ## Related contracts

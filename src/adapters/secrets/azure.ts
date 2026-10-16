@@ -1,3 +1,4 @@
+import { secretReferencePattern } from "./azure.constants.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { SecretSource } from "../../domain/secrets.types.ts";
 import { mappedSecretSource, secretText } from "./secret-source.ts";
@@ -19,7 +20,7 @@ export function createAzureSecretSource(
     Object.entries(options.secrets).map(([key, ref]) => {
       secretText(ref.name, "Azure secret name");
       invariant(
-        /^[A-Za-z0-9-]+$/.test(ref.name),
+        secretReferencePattern.test(ref.name),
         "Azure secret name must use letters, digits or hyphens",
       );
       if (ref.version !== undefined)

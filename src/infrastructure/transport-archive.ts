@@ -7,7 +7,7 @@ import type {
   TransportReference,
 } from "../domain/transport.types.ts";
 import { invariant, positive } from "../domain/errors.ts";
-import { safeDestination } from "./files.ts";
+import { fileDestination, safeDestination } from "./files.ts";
 import {
   jsonBytes,
   jsonObject,
@@ -18,6 +18,7 @@ import type {
   ArchiveManifest,
   ArchiveFile,
   ArchiveChunk,
+  ArchivePathOptions,
 } from "./transport-archive.types.ts";
 import { archiveDefaults as defaults } from "./transport-archive.constants.ts";
 
@@ -30,73 +31,109 @@ export async function archiveFiles(
   paths: readonly string[],
   prefix: string,
   maxBytes = defaults.maxBytes,
+  options: ArchivePathOptions = {},
 ): Promise<TransportReference> {
+  const destination = options.allowGitMetadata
+    ? fileDestination
+    : safeDestination;
   positive(maxBytes, "maxBytes");
   invariant(
     paths.length <= defaults.maxFiles && new Set(paths).size === paths.length,
     "Invalid archive path count",
   );
   const files: ArchiveFile[] = [];
+  const published: TransportReference[] = [];
   let total = 0;
-  for (const path of paths) {
-    const source = await safeDestination(root, path);
-    const info = await lstat(source);
-    invariant(
-      info.isFile() || info.isSymbolicLink(),
-      "Unsupported archive entry",
-    );
-    const chunks: ArchiveChunk[] = [];
-    let size = 0;
-    const publish = async (bytes: Uint8Array) => {
-      total += bytes.length;
-      size += bytes.length;
-      invariant(total <= maxBytes, "Archive exceeds byte limit");
-      const reference = await transporter.write(
-        `${prefix}/files/${files.length}/${chunks.length}`,
-        bytes,
-        { ifRevision: null },
+  try {
+    for (const path of paths) {
+      const source = await destination(root, path);
+      const info = await lstat(source);
+      invariant(
+        info.isFile() || info.isSymbolicLink(),
+        "Unsupported archive entry",
       );
-      chunks.push({ reference, sha256: digest(bytes), size: bytes.length });
-    };
-    if (info.isSymbolicLink())
-      await publish(Buffer.from(await readlink(source)));
-    if (info.isFile()) {
-      const file = await open(source, inspectionFileFlags);
-      try {
-        const buffer = Buffer.alloc(defaults.chunkBytes);
-        for (;;) {
-          const { bytesRead } = await file.read(buffer, 0, buffer.length, null);
-          if (!bytesRead) break;
-          await publish(Buffer.from(buffer.subarray(0, bytesRead)));
-        }
-        const after = await file.stat();
-        invariant(
-          info.ino === after.ino &&
-            info.dev === after.dev &&
-            info.size === size &&
-            info.mtimeMs === after.mtimeMs &&
-            info.ctimeMs === after.ctimeMs,
-          "Archive source changed",
+      const chunks: ArchiveChunk[] = [];
+      let size = 0;
+      const publish = async (bytes: Uint8Array) => {
+        total += bytes.length;
+        size += bytes.length;
+        invariant(total <= maxBytes, "Archive exceeds byte limit");
+        const reference = await transporter.write(
+          `${prefix}/files/${files.length}/${chunks.length}`,
+          bytes,
+          { ifRevision: null },
         );
-      } finally {
-        await file.close();
+        published.push(reference);
+        chunks.push({ reference, sha256: digest(bytes), size: bytes.length });
+      };
+      if (info.isSymbolicLink())
+        await publish(Buffer.from(await readlink(source)));
+      if (info.isFile()) {
+        const file = await open(source, inspectionFileFlags);
+        try {
+          const buffer = Buffer.alloc(defaults.chunkBytes);
+          for (;;) {
+            const { bytesRead } = await file.read(
+              buffer,
+              0,
+              buffer.length,
+              null,
+            );
+            if (!bytesRead) break;
+            await publish(Buffer.from(buffer.subarray(0, bytesRead)));
+          }
+          const after = await file.stat();
+          invariant(
+            info.ino === after.ino &&
+              info.dev === after.dev &&
+              info.size === size &&
+              info.mtimeMs === after.mtimeMs &&
+              info.ctimeMs === after.ctimeMs,
+            "Archive source changed",
+          );
+        } finally {
+          await file.close();
+        }
       }
+      files.push({
+        path,
+        kind: info.isSymbolicLink() ? "symlink" : "file",
+        mode: info.mode & 0o777,
+        size,
+        chunks,
+      });
     }
-    files.push({
-      path,
-      kind: info.isSymbolicLink() ? "symlink" : "file",
-      mode: info.mode & 0o777,
-      size,
-      chunks,
+    const manifest: ArchiveManifest = { format: 1, files };
+    const bytes = jsonBytes(manifest);
+    invariant(
+      bytes.length <= defaults.manifestBytes,
+      "Archive manifest exceeds byte limit",
+    );
+    return await transporter.write(`${prefix}/manifest`, bytes, {
+      ifRevision: null,
     });
+  } catch (cause) {
+    // Preserve chunks if publication may have succeeded before its acknowledgement failed.
+    const manifest = await transporter
+      .read(`${prefix}/manifest`)
+      .catch(() => true);
+    if (!manifest) {
+      const cleanup = await Promise.allSettled(
+        published.map((reference) =>
+          transporter.remove(reference.key, { ifRevision: reference.revision }),
+        ),
+      );
+      const failures = cleanup.flatMap((result) =>
+        result.status === "rejected" ? [result.reason] : [],
+      );
+      if (failures.length)
+        throw new AggregateError(
+          [cause, ...failures],
+          "Archive publication and cleanup failed",
+        );
+    }
+    throw cause;
   }
-  const manifest: ArchiveManifest = { format: 1, files };
-  const bytes = jsonBytes(manifest);
-  invariant(
-    bytes.length <= defaults.manifestBytes,
-    "Archive manifest exceeds byte limit",
-  );
-  return transporter.write(`${prefix}/manifest`, bytes, { ifRevision: null });
 }
 
 export function archiveManifest(value: unknown): ArchiveManifest {
@@ -176,7 +213,9 @@ export async function restoreArchiveFiles(
   reference: TransportReference,
   destination: string,
   maxBytes = defaults.maxBytes,
+  options: ArchivePathOptions = {},
 ): Promise<void> {
+  const path = options.allowGitMetadata ? fileDestination : safeDestination;
   positive(maxBytes, "maxBytes");
   const manifest = archiveManifest(
     jsonObject(
@@ -188,11 +227,10 @@ export async function restoreArchiveFiles(
     Number.isSafeInteger(total) && total <= maxBytes,
     "Archive exceeds byte limit",
   );
-  for (const file of manifest.files)
-    await safeDestination(destination, file.path);
+  for (const file of manifest.files) await path(destination, file.path);
   await mkdir(destination, { mode: 0o700 });
   for (const entry of manifest.files) {
-    const target = await safeDestination(destination, entry.path);
+    const target = await path(destination, entry.path);
     await mkdir(dirname(target), { recursive: true, mode: 0o700 });
     const data = async (chunk: ArchiveChunk) => {
       const value = await readReference(

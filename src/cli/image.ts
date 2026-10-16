@@ -1,3 +1,4 @@
+import { validateContainerImage } from "../domain/container-image.ts";
 import { resolve } from "node:path";
 import { invariant } from "../domain/errors.ts";
 import { requireSuccess } from "../infrastructure/process.ts";
@@ -18,6 +19,7 @@ export async function manageImage(
     engine === "docker" || engine === "podman",
     "Image engine must be docker or podman",
   );
+  validateContainerImage(image);
   const uid = options.uid ?? process.getuid?.() ?? imageDefaults.uid,
     gid = options.gid ?? process.getgid?.() ?? imageDefaults.gid;
   invariant(

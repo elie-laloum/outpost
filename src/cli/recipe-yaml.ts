@@ -30,11 +30,14 @@ export async function recipeYamlCommand(
     throw new Error(`Recipe ${action} requires --run-id`);
   const interactive = recipeInteractiveMode(values);
   const controller = new AbortController();
+  let settled = false;
   const interrupt = () => {
+    if (settled) return;
     process.exitCode = 130;
     controller.abort();
   };
   const terminate = () => {
+    if (settled) return;
     process.exitCode = 143;
     controller.abort();
   };
@@ -69,11 +72,13 @@ export async function recipeYamlCommand(
           : {}),
         ...(values.deadline ? { deadline: Number(values.deadline) } : {}),
       });
+      settled = true;
       if (values.json) process.stdout.write(`${JSON.stringify(job)}\n`);
       return;
     }
     if (action === "status") {
       const status = await runtime.status(runId!);
+      settled = true;
       process.stdout.write(
         values.json
           ? `${JSON.stringify(status ?? null)}\n`
@@ -137,6 +142,7 @@ export async function recipeYamlCommand(
           if (!controller.signal.aborted) interrupt();
         },
       });
+    settled = true;
     publishRecipeReport(
       report,
       project.reports,

@@ -1,4 +1,7 @@
 import type { TransportReference } from "../domain/transport.types.ts";
+export interface ArchivePathOptions {
+  readonly allowGitMetadata?: boolean;
+}
 export interface ArchiveChunk {
   readonly reference: TransportReference;
   readonly sha256: string;

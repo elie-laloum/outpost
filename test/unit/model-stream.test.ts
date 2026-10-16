@@ -34,6 +34,34 @@ function feed(decoder: StreamDecoder, events: unknown[]) {
     .join("");
 }
 
+test("Chat Completions stream errors retain quota and outage classification", () => {
+  for (const [error, expected] of [
+    [
+      { code: "insufficient_quota" },
+      { code: "quota", details: { code: "insufficient_quota" } },
+    ],
+    [
+      { type: "rate_limit_error" },
+      { code: "quota", details: { type: "rate_limit_error" } },
+    ],
+    [
+      { type: "server_error" },
+      {
+        code: "provider",
+        details: { type: "server_error", unavailable: "server_error" },
+      },
+    ],
+    [
+      { message: "private upstream diagnostic" },
+      { code: "provider", details: {} },
+    ],
+  ] as const) {
+    const decoder = chatStream();
+    feed(decoder, [{ choices: [{ delta: { content: "partial" } }] }]);
+    assert.throws(() => feed(decoder, [{ error }]), expected);
+  }
+});
+
 test("server-sent events handle split frames, comments and line endings", async () => {
   let chunks = 0;
   assert.deepEqual(

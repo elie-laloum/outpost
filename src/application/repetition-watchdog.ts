@@ -102,10 +102,9 @@ export function repetitionWatchdog(
       }
       interventions++;
       pending = true;
-      const delivery = options.steering!.send(
-        instruction!.instruction,
-        event.subagentId ? { subagent: event.subagentId } : {},
-      );
+      const delivery = options.steering!.send(instruction!.instruction, {
+        subagent: event.subagentId ?? null,
+      });
       void delivery.then(
         () => {
           pending = false;

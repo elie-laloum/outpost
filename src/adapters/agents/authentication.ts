@@ -21,6 +21,7 @@ export function credentialPlan(
   plan: Partial<CredentialPlan> = {},
 ): CredentialPlan {
   return Object.freeze({
+    ...(plan.requiresSandbox ? { requiresSandbox: true } : {}),
     variables: Object.freeze({ ...plan.variables }),
     host: Object.freeze([...(plan.host ?? [])]),
     files: Object.freeze([...(plan.files ?? [])]),

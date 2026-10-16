@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
+import { createServer as createHttpsServer } from "node:https";
+import { tmpdir } from "node:os";
 import type { AddressInfo } from "node:net";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -9,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import {
   createAgent,
   createHarness,
+  defineAgentProfile,
   defineHarnessPermissions,
   defineHarnessSubagent,
   defineHarnessTool,
@@ -24,6 +27,9 @@ import {
 } from "../../src/index.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
+import { profilePermissions } from "../../src/domain/agent-profile-permissions.ts";
+import { oauthTls } from "../fixtures/oauth-tls.constants.ts";
+import type { McpOAuthFixtureOptions } from "../fixtures/mcp-oauth.types.ts";
 
 const server = fileURLToPath(
   new URL("../fixtures/mcp-server.mjs", import.meta.url),
@@ -97,7 +103,7 @@ const run = (
   options: Omit<HarnessOptions, "modelProvider">,
   requests: ModelRequest[] = [],
   sandboxProvider: SandboxProvider = createLocalSandboxProvider({
-    variables: { MCP_SECRET: "fixture-secret" },
+    variables: { MCP_SECRET: "fixture-secret", UNDECLARED_SECRET: "hidden" },
   }),
   observe?: (event: AgentObservation) => void,
 ) =>
@@ -156,6 +162,7 @@ test("the built-in harness exposes MCP server tools running inside the sandbox",
           ["mcp__fixture__env", { name: "MCP_SECRET" }],
           ["mcp__fixture__invalid", {}],
           [names[7]!, {}],
+          ["mcp__fixture__env", { name: "UNDECLARED_SECRET" }],
           ["mcp__fixture__echo", "not an object"],
         )(request);
       },
@@ -184,9 +191,10 @@ test("the built-in harness exposes MCP server tools running inside the sandbox",
     "fixture-secret",
     "error:MCP server fixture returned error -32602: bad arguments",
     "long",
-    results(requests[1])[7],
+    "unset",
+    results(requests[1])[8],
   ]);
-  assert.match(results(requests[1])[7]!, /^error:.*Expected an object/);
+  assert.match(results(requests[1])[8]!, /^error:.*Expected an object/);
   const log_ = await entries(log);
   assert.deepEqual(
     log_.filter((entry) => entry.reply).map((entry) => entry.reply),
@@ -517,7 +525,7 @@ test("MCP tool filters limit the tools offered to the model and catch unknown na
   );
 });
 
-test("resource and prompt tools and MCP prompt instructions reach the model", async (t) => {
+test("resource and prompt tools remain available with a restrictive profile for declared servers only", async (t) => {
   const root = await repository(t);
   const log = join(root, "mcp.log");
   const requests: ModelRequest[] = [];
@@ -566,6 +574,7 @@ test("resource and prompt tools and MCP prompt instructions reach the model", as
     ],
     {
       mcpServers: rich,
+      profile: defineAgentProfile({ allowedTools: [] }),
       instructions: [
         defineMcpPrompt({
           server: "fixture",
@@ -601,6 +610,41 @@ test("resource and prompt tools and MCP prompt instructions reach the model", as
   assert.match(outputs[8]!, /^error:.*server/);
 });
 
+test("MCP resource and prompt calls cannot bypass inherited server restrictions", async (t) => {
+  const root = await repository(t);
+  const requests: ModelRequest[] = [];
+  const [inherited] = profilePermissions(
+    defineAgentProfile({
+      allowedTools: [],
+      mcpServers: { parent: { command: "parent-server" } },
+    }),
+  );
+  assert.ok(inherited);
+  await run(
+    root,
+    [
+      call(
+        ["mcp_list_resources", { server: "fixture" }],
+        ["mcp_read_resource", { server: "fixture", uri: "file:///readme.md" }],
+        ["mcp_list_prompts", { server: "fixture" }],
+        ["mcp_get_prompt", { server: "fixture", name: "review" }],
+      ),
+      () => done,
+    ],
+    {
+      mcpServers: fixture(join(root, "mcp.log"), {
+        arguments: [server, "rich"],
+      }),
+      profile: defineAgentProfile({ allowedTools: [] }),
+      permissions: inherited,
+    },
+    requests,
+  );
+  assert.equal(results(requests[1]).length, 4);
+  for (const result of results(requests[1]))
+    assert.match(result, /^error:Denied: Denied by agent profile/);
+});
+
 test("MCP prompt instructions need a running server that offers prompts", async (t) => {
   const root = await repository(t);
   const log = join(root, "mcp.log");
@@ -630,30 +674,45 @@ test("MCP prompt instructions need a running server that offers prompts", async 
 async function oauthMcpServer(
   t: import("node:test").TestContext,
   method: "client_secret_basic" | "client_secret_post",
+  options: McpOAuthFixtureOptions = {},
 ) {
+  const directory = await mkdtemp(join(tmpdir(), "outpost-oauth-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const certificate = join(directory, "ca.pem");
+  await writeFile(certificate, oauthTls.cert);
   const tokens: URLSearchParams[] = [];
   const clients: string[] = [];
+  const requests: string[] = [];
   const valid = new Set<string>();
   let initialize: Record<string, unknown> | undefined;
   let revoked = false;
-  const server = createServer(async (request, response) => {
+  const server = createHttpsServer(oauthTls, async (request, response) => {
     let text = "";
     for await (const chunk of request) text += chunk;
     const url = new URL(request.url!, base);
+    requests.push(url.pathname);
     const json = (status: number, value: unknown, headers = {}) =>
       response
         .writeHead(status, { "content-type": "application/json", ...headers })
         .end(JSON.stringify(value));
-    if (url.pathname === "/.well-known/oauth-protected-resource/mcp")
+    if (url.pathname === "/.well-known/oauth-protected-resource/mcp") {
+      if (options.metadataRedirect)
+        return response
+          .writeHead(307, { location: `${base}/redirected` })
+          .end();
       return json(200, {
-        resource: `${base}/mcp`,
-        authorization_servers: [`${base}/tenant`],
+        resource: options.resource ?? `${base}/mcp`,
+        authorization_servers: options.authorizationServers ?? [
+          `${base}/${options.changedIssuer && revoked ? "other-tenant" : "tenant"}`,
+        ],
       });
+    }
     if (url.pathname === "/.well-known/oauth-authorization-server/tenant")
       return json(200, {
-        issuer: `${base}/tenant`,
-        token_endpoint: `${base}/token`,
-        token_endpoint_auth_methods_supported: [method],
+        issuer: options.issuer ?? `${base}/tenant`,
+        token_endpoint: options.tokenEndpoint ?? `${base}/token`,
+        token_endpoint_auth_methods_supported:
+          options.authenticationMethods ?? [method],
       });
     if (url.pathname === "/token") {
       const body = new URLSearchParams(text);
@@ -663,6 +722,10 @@ async function oauthMcpServer(
         ? Buffer.from(basic, "base64").toString()
         : `${body.get("client_id")}:${body.get("client_secret")}`;
       clients.push(client);
+      if (options.tokenRedirect)
+        return response
+          .writeHead(307, { location: `${base}/redirected` })
+          .end();
       if (client !== "outpost-client:outpost-secret")
         return json(401, { error: "invalid_client" });
       const token = `token-${tokens.length}`;
@@ -677,7 +740,7 @@ async function oauthMcpServer(
     if (!token || !valid.has(token))
       return response
         .writeHead(401, {
-          "www-authenticate": `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp", scope="mcp:read"`,
+          "www-authenticate": `Bearer resource_metadata="${options.challengeMetadata ?? `${base}/.well-known/oauth-protected-resource/mcp`}", scope="mcp:read"`,
         })
         .end();
     const body = JSON.parse(text);
@@ -704,12 +767,17 @@ async function oauthMcpServer(
   });
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
-  t.after(() => server.close());
-  const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  t.after(() => {
+    server.closeAllConnections();
+    server.close();
+  });
+  const base = `https://127.0.0.1:${(server.address() as AddressInfo).port}`;
   return {
     url: `${base}/mcp`,
     tokens,
     clients,
+    requests,
+    variables: { NODE_EXTRA_CA_CERTS: certificate },
     initialize: () => initialize,
   };
 }
@@ -736,7 +804,9 @@ test("HTTP MCP servers obtain OAuth client credentials tokens inside the sandbox
       ],
       { mcpServers: { docs: { url: http.url, oauth } } },
       requests,
-      createLocalSandboxProvider({ variables }),
+      createLocalSandboxProvider({
+        variables: { ...variables, ...http.variables },
+      }),
     );
     assert.deepEqual(results(requests[1]), ["token-1"]);
     assert.deepEqual(results(requests[2]), ["token-2"]);
@@ -771,7 +841,11 @@ test("HTTP MCP servers obtain OAuth client credentials tokens inside the sandbox
       },
       [],
       createLocalSandboxProvider({
-        variables: { ...variables, MCP_CLIENT_SECRET: "wrong" },
+        variables: {
+          ...variables,
+          ...http.variables,
+          MCP_CLIENT_SECRET: "wrong",
+        },
       }),
     ),
     { code: "response", message: /OAuth token request failed with HTTP 401/ },
@@ -781,4 +855,102 @@ test("HTTP MCP servers obtain OAuth client credentials tokens inside the sandbox
     run(root, [], { mcpServers: { docs: { url: http.url, oauth } } }),
     { code: "configuration", message: /Missing MCP_CLIENT_ID/ },
   );
+});
+
+test("MCP OAuth rejects invalid discovery before forwarding client credentials", async (t) => {
+  const root = await repository(t);
+  const scenarios: McpOAuthFixtureOptions[] = [
+    { resource: "https://other.example/mcp" },
+    { resource: 42 },
+    { authorizationServers: "https://other.example" },
+    { authorizationServers: ["http://127.0.0.1/tenant"] },
+    { authorizationServers: ["https://auth.example/tenant?query"] },
+    { issuer: "https://other.example/tenant" },
+    { tokenEndpoint: "http://127.0.0.1/token" },
+    { tokenEndpoint: "https://user:password@other.example/token" },
+    { tokenEndpoint: "https://other.example/token#fragment" },
+    { authenticationMethods: "client_secret_post" },
+    { metadataRedirect: true },
+    { tokenRedirect: true },
+  ];
+  for (const options of scenarios) {
+    const http = await oauthMcpServer(t, "client_secret_post", options);
+    await assert.rejects(
+      run(
+        root,
+        [],
+        {
+          mcpServers: {
+            docs: {
+              url: http.url,
+              oauth: {
+                clientIdVariable: "MCP_CLIENT_ID",
+                clientSecretVariable: "MCP_CLIENT_SECRET",
+              },
+            },
+          },
+        },
+        [],
+        createLocalSandboxProvider({
+          variables: {
+            ...http.variables,
+            MCP_CLIENT_ID: "outpost-client",
+            MCP_CLIENT_SECRET: "outpost-secret",
+          },
+        }),
+      ),
+      { code: "response" },
+    );
+    assert.equal(
+      http.clients.length,
+      options.tokenRedirect ? 1 : 0,
+      JSON.stringify(options),
+    );
+    assert.ok(!http.requests.includes("/redirected"));
+  }
+});
+
+test("MCP OAuth revalidates challenges and keeps its original authorization server", async (t) => {
+  const root = await repository(t);
+  for (const options of [
+    { challengeMetadata: "http://127.0.0.1/metadata" },
+    { changedIssuer: true },
+  ]) {
+    const http = await oauthMcpServer(t, "client_secret_basic", options);
+    const requests: ModelRequest[] = [];
+    await run(
+      root,
+      [
+        call(["mcp__docs__whoami", {}]),
+        call(["mcp__docs__whoami", {}]),
+        () => done,
+      ],
+      {
+        mcpServers: {
+          docs: {
+            url: http.url,
+            oauth: {
+              clientIdVariable: "MCP_CLIENT_ID",
+              clientSecretVariable: "MCP_CLIENT_SECRET",
+            },
+          },
+        },
+      },
+      requests,
+      createLocalSandboxProvider({
+        variables: {
+          ...http.variables,
+          MCP_CLIENT_ID: "outpost-client",
+          MCP_CLIENT_SECRET: "outpost-secret",
+        },
+      }),
+    );
+    assert.deepEqual(results(requests[1]), ["token-1"]);
+    assert.match(
+      results(requests[2])[0]!,
+      /error:.*(?:metadata was not found|authorization server changed)/,
+    );
+    assert.equal(http.clients.length, 1);
+    assert.ok(!http.requests.some((path) => path.includes("other-tenant")));
+  }
 });

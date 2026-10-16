@@ -13,14 +13,15 @@ import type { Retry } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                                                          | Presence | Meaning                                                                                                                                                                                   |
-| ------------ | ------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `attempts`   | `number`                                                      | Required | Maximum attempts, the first included; a positive integer. The count restarts when the task runs again after a quota pause or a checkpoint resume.                                         |
-| `delayMs`    | `number \| undefined`                                         | Optional | Wait in milliseconds before each retry, default 0.                                                                                                                                        |
-| `backoff`    | `"fixed" \| "exponential" \| undefined`                       | Optional | Delay strategy: fixed (default) keeps delayMs; exponential doubles it after each failed attempt.                                                                                          |
-| `maxDelayMs` | `number \| undefined`                                         | Optional | Nonnegative local delay cap, applied before jitter. Defaults to 30000 ms for exponential backoff; fixed delays have no additional cap. A valid server retryAfterMs minimum can exceed it. |
-| `jitter`     | `"none" \| "full" \| undefined`                               | Optional | Randomization: none by default; full samples uniformly from zero to the capped local delay. The server retry minimum is applied afterwards and the result rounded up to milliseconds.     |
-| `accepts`    | `((error: unknown, attempt: number) => boolean) \| undefined` | Optional | Receives the error and the attempt number; returning false fails the task without further retries.                                                                                        |
+| Name              | Type                                                          | Presence | Meaning                                                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `attempts`        | `number`                                                      | Required | Maximum attempts, the first included; a positive integer. The count restarts when the task runs again after a quota pause or a checkpoint resume.                                         |
+| `delayMs`         | `number \| undefined`                                         | Optional | Wait in milliseconds before each retry, default 0.                                                                                                                                        |
+| `backoff`         | `"fixed" \| "exponential" \| undefined`                       | Optional | Delay strategy: fixed (default) keeps delayMs; exponential doubles it after each failed attempt.                                                                                          |
+| `maxDelayMs`      | `number \| undefined`                                         | Optional | Nonnegative local delay cap, applied before jitter. Defaults to 30000 ms for exponential backoff; fixed delays have no additional cap. A valid server retryAfterMs minimum can exceed it. |
+| `maxRetryAfterMs` | `number \| undefined`                                         | Optional | Maximum accepted server Retry-After delay; defaults to 24 hours. A larger advertised delay propagates the original error instead of waiting or retrying early.                            |
+| `jitter`          | `"none" \| "full" \| undefined`                               | Optional | Randomization: none by default; full samples uniformly from zero to the capped local delay. The server retry minimum is applied afterwards and the result rounded up to milliseconds.     |
+| `accepts`         | `((error: unknown, attempt: number) => boolean) \| undefined` | Optional | Receives the error and the attempt number; returning false fails the task without further retries.                                                                                        |
 
 ## Signature
 
@@ -30,6 +31,7 @@ export interface Retry {
   readonly delayMs?: number;
   readonly backoff?: "fixed" | "exponential";
   readonly maxDelayMs?: number;
+  readonly maxRetryAfterMs?: number;
   readonly jitter?: "none" | "full";
   readonly accepts?: (error: unknown, attempt: number) => boolean;
 }

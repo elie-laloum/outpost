@@ -31,6 +31,7 @@ export async function seedRemote(
   options: RemoteSyncOptions = {},
 ): Promise<RemoteSync> {
   options.signal?.throwIfAborted();
+  const untracked = await extras(workspace.directory);
   const recovery = join(
     workspace.repository,
     ".outpost",
@@ -38,6 +39,36 @@ export async function seedRemote(
     randomUUID(),
   );
   await mkdir(recovery, { recursive: true });
+  try {
+    return await initializeRemote(
+      workspace,
+      lease,
+      options,
+      recovery,
+      untracked,
+    );
+  } catch (cause) {
+    try {
+      await rm(recovery, { recursive: true, force: true });
+    } catch (cleanup) {
+      throw new OutpostError(
+        "workspace",
+        "Remote initialization failed and its temporary files could not be removed",
+        { recovery },
+        new AggregateError([cause, cleanup]),
+      );
+    }
+    throw cause;
+  }
+}
+
+async function initializeRemote(
+  workspace: WorkspaceRecord,
+  lease: SandboxLease,
+  options: RemoteSyncOptions,
+  recovery: string,
+  untracked: readonly string[],
+): Promise<RemoteSync> {
   // The root's parent may be read-only for the sandbox user; its own .git is writable.
   const remoteBundle = posix.join(
     lease.root.replaceAll("\\", "/"),
@@ -109,7 +140,7 @@ export async function seedRemote(
         )
           .split("\0")
           .filter(Boolean),
-        ...(await extras(workspace.directory)),
+        ...untracked,
       ];
   const originalHead = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
@@ -121,7 +152,7 @@ export async function seedRemote(
   await uploadFiles(
     lease,
     workspace.directory,
-    options.includeUncommitted ? await extras(workspace.directory) : [],
+    options.includeUncommitted ? untracked : [],
     { ...(options.signal ? { signal: options.signal } : {}) },
   );
   let synchronized = (await run(["rev-parse", "HEAD"])).trim();

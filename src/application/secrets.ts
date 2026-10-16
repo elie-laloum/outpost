@@ -1,3 +1,4 @@
+import { safeSecretFault } from "../domain/secret-fault.ts";
 import { invariant, OutpostError, positive } from "../domain/errors.ts";
 import { secretNames, secretValue } from "../domain/secrets.ts";
 import {
@@ -58,6 +59,8 @@ export async function fromSecrets(
           ? "Secret resolution was cancelled"
           : "Secret resolution timed out",
       );
+    const diagnostic = safeSecretFault(error);
+    if (diagnostic) throw diagnostic;
     // Vendor exceptions can contain tokens, request headers or secret payloads.
     if (error instanceof OutpostError && error.code === "configuration")
       throw new OutpostError(

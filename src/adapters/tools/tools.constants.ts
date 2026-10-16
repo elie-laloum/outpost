@@ -11,6 +11,7 @@ export const TOOL_LIMITS = {
 export const GIT_READ_COMMANDS = ["status", "diff", "log", "show"] as const;
 
 export const GIT_BLOCKED_OPTIONS = [
+  "--no-index",
   "--output",
   "--ext-diff",
   "--textconv",

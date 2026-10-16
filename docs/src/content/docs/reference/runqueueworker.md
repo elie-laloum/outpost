@@ -19,15 +19,16 @@ Claim jobs for the registered handlers and run them one at a time until signal a
 
 ## Parameters and properties
 
-| Name               | Type                                     | Presence | Meaning                                                                                                                             |
-| ------------------ | ---------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `options`          | `QueueWorkerOptions`                     | Required | Queue, worker name, handlers, stop signal, and lease and polling timings.                                                           |
-| `options.queue`    | `TaskQueue`                              | Required | Queue the worker claims jobs from and reports results to.                                                                           |
-| `options.worker`   | `string`                                 | Required | Worker name recorded on each claimed job, 1 to 512 characters; give each process its own.                                           |
-| `options.handlers` | `Readonly<Record<string, QueueHandler>>` | Required | Handlers by name, 1 to 100; the worker claims only jobs whose handler is listed here.                                               |
-| `options.signal`   | `AbortSignal`                            | Required | Stops the worker: runQueueWorker() resolves and the running handler’s signal aborts. That job stays active until its lease expires. |
-| `options.leaseMs`  | `number \| undefined`                    | Optional | Lease duration in milliseconds, default 30000, from 30 to 300000; renewed at every third of it.                                     |
-| `options.pollMs`   | `number \| undefined`                    | Optional | Wait in milliseconds after finding no eligible job, default 250; must be positive.                                                  |
+| Name               | Type                                      | Presence | Meaning                                                                                                                                                              |
+| ------------------ | ----------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`          | `QueueWorkerOptions`                      | Required | Queue, worker name, handlers, stop signal, and lease and polling timings.                                                                                            |
+| `options.queue`    | `TaskQueue`                               | Required | Queue the worker claims jobs from and reports results to.                                                                                                            |
+| `options.worker`   | `string`                                  | Required | Worker name recorded on each claimed job, 1 to 512 characters; give each process its own.                                                                            |
+| `options.handlers` | `Readonly<Record<string, QueueHandler>>`  | Required | Handlers by name, 1 to 100; the worker claims only jobs whose handler is listed here.                                                                                |
+| `options.signal`   | `AbortSignal`                             | Required | Stops the worker: runQueueWorker() resolves and the running handler’s signal aborts. That job stays active until its lease expires.                                  |
+| `options.leaseMs`  | `number \| undefined`                     | Optional | Lease duration in milliseconds, default 30000, from 30 to 300000; renewed at every third of it.                                                                      |
+| `options.pollMs`   | `number \| undefined`                     | Optional | Wait in milliseconds after finding no eligible job or before retrying a failed queue operation, default 250; must be positive.                                       |
+| `options.onError`  | `((error: unknown) => void) \| undefined` | Optional | Receives claim, lease-renewal and result-publication errors. Throwing from this callback does not stop the worker; queue retries wait pollMs and remain cancellable. |
 
 ## Returns
 

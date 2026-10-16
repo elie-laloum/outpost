@@ -73,6 +73,8 @@ This reviewer reads, searches and inspects history, but cannot change a file. Ev
 
 Paths must stay inside the repository. To configure command limits, see [createHarnessShellTools](../../reference/createharnessshelltools/).
 
+The Git tool refuses `--no-index`, abbreviations of blocked options, absolute or drive-qualified path arguments and parent-directory traversal. These checks prevent file comparisons outside the workspace; they do not make the local provider an isolated execution environment.
+
 <span id="define-a-tool"></span>
 <span id="group-tools-into-a-toolset"></span>
 
@@ -93,3 +95,5 @@ Listing and search default to Git selection for existing calls. Select `filesyst
 - A result longer than 100,000 characters is truncated before it reaches the model.
 
 API: [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/) · [ToolOutput](../../reference/tooloutput/) · [ToolResources](../../reference/toolresources/) · [createHarnessFileTools](../../reference/createharnessfiletools/) · [createHarnessSearchTools](../../reference/createharnesssearchtools/) · [createHarnessGitTools](../../reference/createharnessgittools/) · [createHarnessEditTools](../../reference/createharnessedittools/) · [createHarnessShellTools](../../reference/createharnessshelltools/).
+
+A built-in harness stdio MCP server receives only its declared variables (including explicit `environment` entries) and the basic process environment (PATH, HOME, user, temporary-directory and locale variables). Other provider secrets are not inherited by its child process. This filtering is not a security boundary against code running in the same sandbox.

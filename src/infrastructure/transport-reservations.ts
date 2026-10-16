@@ -8,36 +8,13 @@ import type {
   StorageReservation,
   StorageReservationOptions,
 } from "./storage-reservations.types.ts";
-import type { ReservationLedger } from "./transport-reservations.types.ts";
+import { reservationLedger } from "./reservation-ledger.ts";
+import { reservationLedgerKey as key } from "./transport-reservations.constants.ts";
+import { localProcessIdentity } from "./git/process-identity.ts";
+import { hostname } from "node:os";
+export { reservationLedger } from "./reservation-ledger.ts";
 
-const key = "reservations/ledger";
-
-export function reservationLedger(value: unknown): ReservationLedger {
-  if (value === undefined) return { format: 1, reservations: {} };
-  invariant(
-    value &&
-      typeof value === "object" &&
-      "format" in value &&
-      value.format === 1 &&
-      "reservations" in value &&
-      value.reservations &&
-      typeof value.reservations === "object" &&
-      !Array.isArray(value.reservations),
-    "Invalid reservation ledger",
-  );
-  const entries = Object.entries(value.reservations);
-  invariant(
-    entries.every(
-      ([id, bytes]) =>
-        /^[a-f0-9-]{36}$/.test(id) &&
-        typeof bytes === "number" &&
-        Number.isSafeInteger(bytes) &&
-        bytes >= 0,
-    ),
-    "Invalid reservation entry",
-  );
-  return { format: 1, reservations: Object.fromEntries(entries) };
-}
+const ownerId = randomUUID();
 
 async function payloadUsage(
   transporter: Transport,
@@ -67,6 +44,15 @@ export async function reserveTransportStorage(
     "Invalid reservation byte limit",
   );
   const id = randomUUID();
+  const identity = await localProcessIdentity();
+  const owner = {
+    id: ownerId,
+    host: hostname(),
+    pid: process.pid,
+    createdAt: new Date().toISOString(),
+    repository,
+    ...(identity ? { identity } : {}),
+  };
   const maxEntries = options.maxEntries ?? transportDefaults.maxEntries;
   invariant(
     Number.isSafeInteger(maxEntries) && maxEntries > 0,
@@ -88,17 +74,17 @@ export async function reserveTransportStorage(
           ? await measureUsage()
           : await payloadUsage(transporter, maxEntries, options.signal);
         const reserved = Object.values(reservations).reduce(
-          (sum, value) => sum + value,
+          (sum, value) => sum + value.bytes,
           0,
         );
         invariant(
           usage + reserved + options.reserveBytes <= options.maxBytes,
           "Outpost storage reservation admission refused",
         );
-        reservations[id] = options.reserveBytes;
+        reservations[id] = { bytes: options.reserveBytes, owner };
       }
       try {
-        await transporter.write(key, jsonBytes({ format: 1, reservations }), {
+        await transporter.write(key, jsonBytes({ format: 2, reservations }), {
           ifRevision: current?.revision ?? null,
           ...(!release && options.signal ? { signal: options.signal } : {}),
         });

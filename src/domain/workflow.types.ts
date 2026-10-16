@@ -54,6 +54,7 @@ export interface Retry {
   readonly delayMs?: number;
   readonly backoff?: "fixed" | "exponential";
   readonly maxDelayMs?: number;
+  readonly maxRetryAfterMs?: number;
   readonly jitter?: "none" | "full";
   readonly accepts?: (error: unknown, attempt: number) => boolean;
 }

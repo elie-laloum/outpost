@@ -23,6 +23,119 @@ import { queueResult } from "../../src/domain/task-queue.ts";
 import type { TaskQueue, QueueHandler, QueueJob } from "../../src/index.ts";
 
 const token = "test-only-token-with-at-least-32-characters";
+
+test("cancelling an active job before its heartbeat does not stop the worker", async (t) => {
+  const { store: queue } = await fixture(t);
+  await queue.enqueue({ id: "first", handler: "work", input: null });
+  await queue.enqueue({ id: "second", handler: "work", input: null });
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 2_000);
+  t.after(() => {
+    clearTimeout(timer);
+    stop.abort();
+  });
+  await runQueueWorker({
+    queue,
+    worker: "w",
+    signal: stop.signal,
+    leaseMs: 30_000,
+    pollMs: 10,
+    handlers: {
+      async work(_, { job }) {
+        if (job.id === "first") await queue.cancel(job.id, job.fence);
+        if (job.id === "second") setTimeout(() => stop.abort(), 20);
+        return { value: job.id };
+      },
+    },
+  });
+  assert.equal((await queue.get("first"))?.status, "cancelled");
+  assert.equal((await queue.get("second"))?.status, "done");
+});
+
+test("queue failures retry without replaying a completed handler and observers are isolated", async (t) => {
+  const { store } = await fixture(t);
+  await store.enqueue({ id: "retry", handler: "work", input: null });
+  let claims = 0,
+    completions = 0,
+    runs = 0;
+  const failures: unknown[] = [];
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 2_000);
+  t.after(() => {
+    clearTimeout(timer);
+    stop.abort();
+  });
+  await runQueueWorker({
+    queue: {
+      ...store,
+      async claim(options) {
+        if (++claims === 1) throw new Error("Claim unavailable");
+        return store.claim(options);
+      },
+      async complete(lease, result) {
+        if (++completions === 1) throw new Error("Completion unavailable");
+        const completed = await store.complete(lease, result);
+        setTimeout(() => stop.abort(), 20);
+        return completed;
+      },
+    },
+    worker: "w",
+    signal: stop.signal,
+    leaseMs: 30_000,
+    pollMs: 10,
+    onError(error) {
+      failures.push(error);
+      throw new Error("Observer failed");
+    },
+    handlers: { work: () => ({ value: ++runs }) },
+  });
+  assert.equal(runs, 1);
+  assert.equal(completions, 2);
+  assert.equal(failures.length, 2);
+  assert.equal((await store.get("retry"))?.status, "done");
+});
+
+test("queue outage waits remain cancellable", async (t) => {
+  const { store } = await fixture(t);
+  const stop = new AbortController();
+  let claims = 0;
+  await runQueueWorker({
+    queue: {
+      ...store,
+      async claim() {
+        claims++;
+        throw new Error("Offline");
+      },
+    },
+    worker: "w",
+    signal: stop.signal,
+    pollMs: 30_000,
+    onError: () => stop.abort(),
+    handlers: { work: () => ({ value: null }) },
+  });
+  assert.equal(claims, 1);
+});
+
+test("invalid worker handler names fail before the queue retry loop", async (t) => {
+  const { store } = await fixture(t);
+  let claimed = false;
+  await assert.rejects(
+    runQueueWorker({
+      queue: {
+        ...store,
+        async claim() {
+          claimed = true;
+          return undefined;
+        },
+      },
+      worker: "w",
+      signal: new AbortController().signal,
+      handlers: { "": () => ({ value: null }) },
+    }),
+    /Invalid queue identifier/,
+  );
+  assert.equal(claimed, false);
+});
 async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-queue-"));
   const path = join(directory, "queue.sqlite");
@@ -770,5 +883,36 @@ test("queue results validate quota metadata", () => {
       quota: { resetAt: "2026-09-28T18:00:00.000Z", conversation: "c" },
     }).quota,
     { resetAt: "2026-09-28T18:00:00.000Z", conversation: "c" },
+  );
+});
+
+test("queue request identity ignores object key order and preserves JSON distinctions", async (t) => {
+  const { store: queue } = await fixture(t);
+  const request = {
+    id: "canonical",
+    handler: "work",
+    input: { b: [1, 2], a: { y: true, x: null } },
+  };
+  await queue.enqueue(request);
+  assert.equal(
+    (
+      await queue.enqueue({
+        ...request,
+        input: { a: { x: null, y: true }, b: [1, 2] },
+      })
+    ).id,
+    request.id,
+  );
+  await assert.rejects(
+    queue.enqueue({
+      ...request,
+      input: { a: { x: null, y: true }, b: [2, 1] },
+    }),
+    /different request/,
+  );
+  await queue.enqueue({ id: "empty", handler: "work", input: {} });
+  await assert.rejects(
+    queue.enqueue({ id: "empty", handler: "work", input: [] }),
+    /different request/,
   );
 });

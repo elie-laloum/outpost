@@ -2,7 +2,7 @@ import { redactTranscript } from "./redaction.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, posix, relative, resolve } from "node:path";
+import { basename, dirname, join, posix, relative, resolve } from "node:path";
 import type {
   ConversationContext,
   ConversationRecord,
@@ -10,7 +10,7 @@ import type {
 } from "../../domain/conversation.types.ts";
 import { invariant, OutpostError } from "../../domain/errors.ts";
 import type { SandboxLease } from "../../domain/sandbox.types.ts";
-import { safeDestination } from "../files.ts";
+import { inside, safeDestination } from "../files.ts";
 import { transcriptSearchBytes } from "./conversation.constants.ts";
 import { files } from "./files.ts";
 import { validId } from "./identity.ts";
@@ -28,15 +28,29 @@ async function locateTranscript(
   const expected = layout.preferredPath?.(id, repository, home);
   if (expected && (await stat(expected).catch(() => undefined))?.isFile())
     return { id, file: expected, format };
-  const found = (await files(layout.searchRoot(home))).find((file) =>
+  const matches = (await files(layout.searchRoot(home))).filter((file) =>
     layout.matches(file, id),
   );
+  const found = uniqueTranscript(matches, id);
   if (found) return { id, file: found, format };
   throw new OutpostError(
     "session",
     `Conversation ${id} was not found in native ${format} storage`,
     { id, repository },
   );
+}
+
+function uniqueTranscript(
+  matches: readonly string[],
+  id: string,
+): string | undefined {
+  if (matches.length > 1)
+    throw new OutpostError(
+      "session",
+      `Conversation ${id} has multiple native transcripts; select or reconcile the copies explicitly`,
+      { id, files: matches },
+    );
+  return matches[0];
 }
 
 async function captureSidecars(
@@ -117,14 +131,44 @@ async function captureTranscript(
         arguments: [search, "-type", "f", "-name", layout.pattern(id)],
         retain: transcriptSearchBytes,
       });
-  const remote = result.stdout.trim().split("\n").filter(Boolean)[0];
+  const matches = result.stdout.trim().split("\n").filter(Boolean);
+  const preferred = layout
+    .preferredPath?.(id, sandbox.root, sandbox.home)
+    ?.replaceAll("\\", "/");
+  const remote =
+    matches.find((file) => file.replaceAll("\\", "/") === preferred) ??
+    uniqueTranscript(matches, id);
   if (result.status !== 0 || !remote)
     throw new OutpostError(
       "session",
       `Agent emitted conversation ${id} but its transcript is unavailable`,
       { id, search },
     );
-  const file = layout.capturePath(id, repository, home, remote);
+  let file = layout.capturePath(id, repository, home, remote);
+  if (context.local) {
+    if (inside(layout.directory(repository, home), remote)) file = remote;
+    const [source, destination] = await Promise.all([
+      stat(remote),
+      stat(file).catch(() => undefined),
+    ]);
+    if (
+      resolve(file) === resolve(remote) ||
+      (destination &&
+        source.dev === destination.dev &&
+        source.ino === destination.ino)
+    ) {
+      if (!context.observation?.redacting)
+        return { id, file: remote, format: layout.format };
+      file = join(
+        context.runtimeDirectory ?? join(repository, ".outpost"),
+        "conversations",
+        "native",
+        encodeURIComponent(layout.format),
+        id,
+        basename(remote),
+      );
+    }
+  }
   await mkdir(staging, { recursive: true });
   const temporary = join(staging, `${randomUUID()}.jsonl`);
   await sandbox.download(remote, temporary);

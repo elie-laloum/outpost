@@ -201,15 +201,15 @@ export async function pruneTransportRetention(
     }
     try {
       invariant(entry.revision && entry.objects, "Missing entry revisions");
-      await options.transporter.remove(entry.path, {
-        ifRevision: entry.revision,
-      });
       for (const object of entry.objects) {
         if (object.key !== entry.path)
           await options.transporter.remove(object.key, {
             ifRevision: object.revision,
           });
       }
+      await options.transporter.remove(entry.path, {
+        ifRevision: entry.revision,
+      });
       removed.push(entry.path);
     } catch {
       retained.push({

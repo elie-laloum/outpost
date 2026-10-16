@@ -175,3 +175,5 @@ Les tâches d’agent, de commande et isolées transmettent `context.signal` pou
 - Les réglages de relance, les délais de tâche et la présence d’une condition font partie de l’identité du checkpoint : les modifier fait rejeter un checkpoint existant (voir [Exécutions durables](../durable-runs/)).
 
 API : [defineTask](../../reference/definetask/) · [Retry](../../reference/retry/) · [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [WorkflowResult](../../reference/workflowresult/) · [OutpostError](../../reference/outposterror/)
+
+Un délai serveur supérieur à `retry.maxRetryAfterMs` est refusé : l’erreur originale est propagée, sans nouvelle tentative prématurée. La borne par défaut est 24 heures. Réduisez-la pour le travail interactif ou augmentez-la explicitement pour les longs workflows autonomes.

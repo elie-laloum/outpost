@@ -5,5 +5,8 @@ export const CONTEXT_DEFAULTS = {
   keepRecentMessages: 6,
 } as const;
 
+export const TOOL_TRUNCATION_SUFFIX =
+  /\n\[earlier output truncated from (\d+) characters\]$/;
+
 export const SUMMARY_INSTRUCTIONS =
   "Summarize this earlier part of an agent conversation for the agent that will continue it. Keep the task, decisions, files and commands involved, results, errors and open questions. Be factual and concise.";

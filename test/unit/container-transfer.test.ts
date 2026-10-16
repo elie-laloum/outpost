@@ -40,6 +40,8 @@ test("container transfer plans use live archives and preserve copy destinations"
       signal.throwIfAborted();
       assert.equal(local.executable, "tar");
       assert.equal(remote.executable, "tar");
+      assert.equal(local.deadlineMs, 600_000);
+      assert.equal(remote.deadlineMs, 600_000);
       if (!upload) {
         const stage = local.arguments!.at(-1)!;
         await mkdir(join(stage, "tree"));
@@ -47,21 +49,22 @@ test("container transfer plans use live archives and preserve copy destinations"
       }
     },
   );
-  await files.upload(join(root, "base.txt"), "/home/agent/new name");
-  await files.upload(root + "/.", "/home/agent/existing");
+  const options = { deadlineMs: 600_000 };
+  await files.upload(join(root, "base.txt"), "/home/agent/new name", options);
+  await files.upload(root + "/.", "/home/agent/existing", options);
   assert.ok(calls.some((args) => args.some((arg) => arg.includes("rm -rf"))));
   assert.ok(!calls.some((args) => args[0] === "cp"));
-  await files.download("/home/agent/tree", join(root, "renamed"));
+  await files.download("/home/agent/tree", join(root, "renamed"), options);
   assert.equal(
     await readFile(join(root, "renamed", "file"), "utf8"),
     "content",
   );
-  await files.download("/home/agent/tree", join(root, "renamed"));
+  await files.download("/home/agent/tree", join(root, "renamed"), options);
   assert.equal(
     await readFile(join(root, "renamed", "tree", "file"), "utf8"),
     "content",
   );
-  await files.download("/home/agent/tree/.", join(root, "renamed"));
+  await files.download("/home/agent/tree/.", join(root, "renamed"), options);
   const failing = containerFiles(runtime, async () => {
     throw new Error("archive failure");
   });

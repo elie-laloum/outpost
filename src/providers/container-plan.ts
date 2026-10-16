@@ -29,7 +29,8 @@ export function containerPlan({
     config.repositoryMode === "isolated" ? "/" : root,
     "--cap-drop",
     "ALL",
-    ...(fileParents.size ||
+    ...(engine === "podman" ||
+    fileParents.size ||
     config.caches?.length ||
     config.repositoryMode === "isolated"
       ? ["--cap-add", "CHOWN"]
@@ -38,7 +39,7 @@ export function containerPlan({
     "no-new-privileges",
     "--tmpfs",
     engine === "podman"
-      ? "/home/agent:rw,mode=1777"
+      ? "/home/agent:rw,mode=0700"
       : `/home/agent:rw,uid=${fileParents.size ? 0 : user.uid},gid=${fileParents.size ? 0 : user.gid},mode=0700`,
     ...volumes,
     ...networks.flatMap((network) => ["--network", network]),

@@ -17,8 +17,14 @@ import { OutpostError } from "../domain/errors.ts";
 import {
   InspectionFileChanged,
   readInspectionFile,
+  readInspectionPrefix,
 } from "./inspection-file.ts";
-import { decodeObject, encodeObject, readLimit } from "./transport-envelope.ts";
+import {
+  decodeObject,
+  decodeObjectEntry,
+  encodeObject,
+  readLimit,
+} from "./transport-envelope.ts";
 import { transportDefaults } from "./transport.constants.ts";
 
 async function privateDirectory(path: string, target = true): Promise<void> {
@@ -63,21 +69,29 @@ export function createLocalTransport(
   const root = resolve(options.directory),
     objects = join(root, "objects");
   const path = (key: string) => join(objects, `${transportKey(key)}.object`);
-  const read: Transport["read"] = async (key, options = {}) => {
-    options.signal?.throwIfAborted();
-    const limit = readLimit(options.maxBytes);
+  async function inspect(
+    key: string,
+    limit: number,
+    signal?: AbortSignal,
+    headerOnly = false,
+  ) {
+    signal?.throwIfAborted();
     try {
       const target = path(key);
       for (let attempt = 1; ; attempt++) {
         const info = await lstat(target);
         try {
-          const data = await readInspectionFile(
+          const data = await (
+            headerOnly ? readInspectionPrefix : readInspectionFile
+          )(
             target,
-            Math.min(info.size, limit + transportDefaults.headerBytes) || 1,
+            headerOnly
+              ? transportDefaults.headerBytes
+              : Math.min(info.size, limit + transportDefaults.headerBytes) || 1,
             info,
           );
-          options.signal?.throwIfAborted();
-          return decodeObject(data, key, limit);
+          signal?.throwIfAborted();
+          return { data, size: info.size };
         } catch (error) {
           // Writers replace objects atomically; read the replacement instead.
           if (
@@ -97,6 +111,11 @@ export function createLocalTransport(
         return undefined;
       throw error;
     }
+  }
+  const read: Transport["read"] = async (key, options = {}) => {
+    const limit = readLimit(options.maxBytes);
+    const object = await inspect(key, limit, options.signal);
+    return object ? decodeObject(object.data, key, limit) : undefined;
   };
   async function mutate<T>(
     key: string,
@@ -196,13 +215,19 @@ export function createLocalTransport(
       }
       for await (const key of scan(objects, "")) {
         if (!key.startsWith(prefix)) continue;
-        const object = await read(
+        const object = await inspect(
           key,
-          options.signal ? { signal: options.signal } : {},
+          transportDefaults.maxBytes,
+          options.signal,
+          true,
         );
         if (object) {
-          const { bytes: _bytes, ...entry } = object;
-          yield entry;
+          yield decodeObjectEntry(
+            object.data,
+            key,
+            object.size,
+            transportDefaults.maxBytes,
+          );
         }
       }
     },

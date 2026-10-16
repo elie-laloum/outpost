@@ -34,6 +34,15 @@ export async function executeToolCalls(
   step: number,
   loaded: ReadonlySet<string>,
 ): Promise<readonly ModelToolResultBlock[]> {
+  const identifiers = new Set<string>();
+  for (const call of calls) {
+    if (identifiers.has(call.id))
+      throw new OutpostError("response", "Duplicate tool call identifier", {
+        callId: call.id,
+        step,
+      });
+    identifiers.add(call.id);
+  }
   const tools = new Map(runtime.tools.map((tool) => [tool.name, tool]));
   const owners = new Map(
     runtime.agent.harness.skills.flatMap((skill) =>

@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Complete the audit follow-up: preserve stateless encrypted reasoning and cumulative usage, refuse unsupported local Codex usage login, bound retry delays and Kimi prompts, protect cloud cancellation and staged credentials, normalize durable request identity, clean failed archives, and add explicit offline S3 tombstone pruning. Improve CLI diagnostics, portable transport keys, MCP environment selection and release verification; clarify intentional recovery, scheduling and workspace contracts.
+- Add `createScriptedAgent()` while keeping `scriptedAgent()` as a deprecated compatibility alias.
+
+- Preserve trusted secret-source diagnostics while sanitizing foreign exceptions, and distinguish invalid GCP base64 from invalid UTF-8. Add explicit revision-checked recovery for abandoned local locks, including empty files and orphan reclamation guards. Record reservation owners in version-2 ledgers, retain legacy byte claims, and expose inspection and conditional recovery after explicit owner shutdown.
+
+- Bound host output drainage after process exit without replacing the exit status with a timeout caused by inherited pipes; preserve cancellation escalation after the parent exits. Align local file transfers with container basename/content semantics, sandbox-relative paths, destination link checks and transfer deadlines. Resolve container upload destinations against the workspace root in isolated mode as well as mounted mode.
+
+- Transfer cloud live input through files, acknowledge steering only after native receipt, and reject input delivery failures without cancelling the active turn. Preserve Git metadata in cloud dependency cache archives while retaining path containment checks. Give doctor image checks fifteen seconds by default, add `--timeout` for per-command deadlines, and distinguish slow CLI startup from missing executables. Cloud regressions use SDK fixtures; live cloud validation remains separate.
+
+- Validate MCP OAuth resource and issuer identities, require HTTPS for client credentials, refuse redirects and retain the authorization server identity during token refresh. Keep Podman tmpfs homes private and owned by the configured user. Hide and conditionally replace inherited S3 deletion markers after switching delete modes. Decode Daytona output frames correctly when raw diagnostic lines share or split transport chunks. OAuth and S3 regressions use local service fixtures; cloud identity-provider validation remains separate.
+
+- Refuse explicit and implicit out-of-workspace comparisons in harness Git tools. Inspect bounded HTTP error bodies for recognized quota, outage and validation codes without exposing raw provider messages, including Anthropic credit and spend limits. Retry checkpoint release once after storage failures while fencing the original owner and revision, without replaying completed tasks.
+
+- Remove temporary recovery files after failed remote initialization and report host deletions during incremental synchronization as conflicts while retaining incoming data. List local transport objects from their headers without reading payloads, preserving size and concurrent replacement checks. Reject unknown custom model stop reasons explicitly, normalize pre-cancelled System One provider requests, and let text-mode `?` globs match slashes.
+
+- Keep watchdog interventions targeted to their originating loop and final response instructions after steering received during harness startup. Allow restricted profiles to load skills and access declared MCP resources and prompts without granting forbidden tools. Expose the selected MCP server through `ToolResources.mcpServer` so inherited profiles enforce their server grants. Keep closed journal indexes until segment pruning succeeds, run native session bundle tests in container CI, and require bilingual release entries with no pending Unreleased changes before extracting version-specific release notes.
+
+- Refuse untracked nested repositories with a path-specific conflict before synchronization, honor configured container archive transfer deadlines and reject duplicate tool-call identifiers before executing tools or their hooks. Restore established BullMQ connections after Redis outages while preserving bounded initial connection attempts and explicit closure.
+
+- Make integration respect occupied host checkouts and reject remote changes to `.outpost`. Preserve local native transcripts during masked capture, retain Codex rollout dates and refuse ambiguous duplicate transcripts. Keep durable task outputs isolated from caller mutations and avoid retrying completed effects after serialization failure. Classify Chat Completions stream errors and make tool-result truncation stable across repeated compaction.
+
+- Fix audit regressions in webhook URL handling, resumed task caches, ignored host-file protection during remote synchronization, harness file-tool symlink checks, queue worker recovery, JSON secret masking and journal flushing. Workers expose an optional `onError` callback and retry queue operations without replaying a completed handler while its lease remains valid.
+
 - Add dedicated Docker/Podman egress companions for HTTP/HTTPS domain policies and raw TCP/UDP CIDR filtering, with denial precedence, TLS server-name checks, bounded kernel heartbeat expiry and companion recovery. Keep deny-all offline and refuse conflicting networks. Add `egressImage`, the source example in `examples/73-container-egress/`, bilingual guidance and a tested-image publication workflow. Register the public amd64/arm64 companion by verified digest after successful Docker and rootless Podman checks on GitHub-hosted Linux runners. Allowlisted sandboxes automatically download it when absent. Native macOS/Windows VM checks, standalone rootless Docker host checks and native IPv6 routing validation remain prerequisites.
 
 ## 11.1.3

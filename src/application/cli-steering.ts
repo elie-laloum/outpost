@@ -1,4 +1,6 @@
 import { PassThrough } from "node:stream";
+import { OutpostError } from "../domain/errors.ts";
+import { observeInputFailure } from "../infrastructure/input-failure.ts";
 import type {
   AgentAdapter,
   AgentLiveInput,
@@ -6,7 +8,10 @@ import type {
 } from "../domain/agent.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { mainLoopSteering, steeringInbox } from "../domain/steering.ts";
-import type { SteeringInbox } from "../domain/steering.types.ts";
+import type {
+  PendingSteeringMessage,
+  SteeringInbox,
+} from "../domain/steering.types.ts";
 import type { CliSteering, CliTurnState } from "./cli-steering.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 import { deliverSteering, rejectSubagentSteering } from "./steering-scope.ts";
@@ -42,6 +47,29 @@ function liveSteering(
   pass: number,
 ): CliSteering {
   const input = new PassThrough();
+  const pending: PendingSteeringMessage[] = [];
+  let finished = false;
+  let failed: OutpostError | undefined;
+  const rejectMessage = (
+    message: PendingSteeringMessage,
+    error: OutpostError,
+  ) =>
+    message.reject(
+      new OutpostError(
+        "steering",
+        error.message,
+        { text: message.text },
+        error,
+      ),
+    );
+  const reject = (error: OutpostError) => {
+    for (const message of pending.splice(0)) rejectMessage(message, error);
+  };
+  const stopObserving = observeInputFailure(input, (error) => {
+    failed = error;
+    reject(error);
+    if (finished) end();
+  });
   let session: AgentLiveSession | undefined;
   let written = 1,
     consumed = 0,
@@ -56,12 +84,25 @@ function liveSteering(
     input.end();
   };
   const flush = () => {
+    if (options.steering?.state === "closed") {
+      reject(
+        new OutpostError(
+          "steering",
+          "Steering was closed before live input was acknowledged",
+        ),
+      );
+      return;
+    }
     rejectSubagentSteering(inbox);
     if (!open || !session) return;
     const messages = inbox.take(mainLoopSteering);
+    if (failed) {
+      for (const message of messages) rejectMessage(message, failed);
+      return;
+    }
+    pending.push(...messages);
     for (const message of messages) write(session.encode(message.text));
     written += messages.length;
-    deliverSteering(messages, "injected", pass, options.observe);
   };
   return {
     liveInput: true,
@@ -72,6 +113,7 @@ function liveSteering(
       flush();
     },
     observe(event) {
+      if (event.kind === "finished") finished = true;
       if (
         session &&
         event.kind === "raw" &&
@@ -79,15 +121,32 @@ function liveSteering(
         !event.truncated
       ) {
         const read = session.read(event.value);
+        const acknowledged = Math.max(
+          0,
+          consumed + read.consumed - Math.max(consumed, 1),
+        );
         consumed += read.consumed;
+        deliverSteering(
+          pending.splice(0, acknowledged),
+          "injected",
+          pass,
+          options.observe,
+        );
         for (const reply of read.replies) write(reply);
       }
       // The agent keeps reading stdin after a turn; close it once every message was consumed.
       if (event.kind === "failure") end();
-      if (event.kind === "finished" && consumed >= written) end();
+      if (event.kind === "finished" && (failed || consumed >= written)) end();
     },
     close() {
       unsubscribe();
+      stopObserving();
+      reject(
+        new OutpostError(
+          "steering",
+          "The turn ended before live input was acknowledged",
+        ),
+      );
       end();
     },
   };

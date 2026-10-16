@@ -42,7 +42,7 @@ In a project that depends on `@elie-laloum/outpost`, run `npx outpost <command>`
 Check the host tools and selected sandbox provider. Add `--image` to check a local agent image in a temporary container as well.
 
 ```sh
-outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--json]
+outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]
 ```
 
 | Flag                 | Default  | Values and effect                                                              |
