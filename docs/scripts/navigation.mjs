@@ -196,7 +196,6 @@ export const chapters = [
       "guide/plan-a-change",
       "guide/prepare-change-tests",
       "guide/development-workflow",
-      "guide/recipe-linear-development",
       "guide/review-on-label",
       "guide/nightly-maintenance",
       "guide/multi-repository-change",

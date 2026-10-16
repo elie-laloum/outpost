@@ -412,5 +412,7 @@
   "/guide/observe-and-recover/": "/guide/progress/",
   "/fr/guide/observe-and-recover/": "/fr/guide/progress/",
   "/guide/isolation/": "/guide/security/",
-  "/fr/guide/isolation/": "/fr/guide/security/"
+  "/fr/guide/isolation/": "/fr/guide/security/",
+  "/guide/recipe-linear-development/": "/guide/development-workflow/",
+  "/fr/guide/recipe-linear-development/": "/fr/guide/development-workflow/"
 }

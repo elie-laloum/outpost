@@ -96,8 +96,6 @@ L’exemple hors ligne dans `examples/72-recipe-cli-dialogue/` demande un préno
 
 Pour une automatisation ou un client HTTP, utilisez `--no-interactive` ou `--json`, lisez `inputRequests` dans le rapport puis soumettez `recipe answer --answer answer.json`. L’application HTTP authentifie son appelant et fournit un acteur autorisé ; un nom d’acteur soumis seul ne constitue pas une authentification. `--interactive --json` combine explicitement les questions sur stderr avec un seul rapport JSON final sur stdout.
 
-La [recette de développement Linear](../recipe-linear-development/) combine saisie du token sur l’hôte, sélection du ticket, approbation du plan, implémentation, tests obligatoires et résumé formaté.
-
 ## Conserver artefacts, caches et consommation
 
 Une action `artifact` sélectionne un magasin et un contrat nommés ; `data` construit sa valeur JSON. Un contrat JSON déclare `jsonSchema`, avec un validateur local facultatif. Un contrat `binary` utilise un callback local `produce`. Les sorties contiennent références et filiation, sans embarquer les octets dans les checkpoints. `examples/69-recipe-durability/` exécute hors ligne un scénario d’approbation et d’artefact entre processus.

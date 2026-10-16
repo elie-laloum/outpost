@@ -96,8 +96,6 @@ The offline example in `examples/72-recipe-cli-dialogue/` asks for a name and pa
 
 For automation or an HTTP client, use `--no-interactive` or `--json`, inspect `inputRequests` in the report and submit `recipe answer --answer answer.json`. The HTTP application authenticates its caller and supplies an authorized actor; a submitted actor name alone is not authentication. `--interactive --json` explicitly combines terminal questions on stderr with one final JSON report on stdout.
 
-The [Linear development recipe](../recipe-linear-development/) combines a host credential prompt, issue selection, plan approval, implementation, enforced tests and a formatted summary.
-
 ## Keep artifacts, caches and quota accounting
 
 An `artifact` action selects a named artifact store and contract; `data` builds its JSON value. JSON contracts declare `jsonSchema`, with an optional local validator. A `binary` contract uses a local `produce` callback. Outputs contain artifact references and lineage, so dependent tasks can retain provenance without embedding bytes in checkpoints. `examples/69-recipe-durability/` runs an offline approval and artifact scenario across processes.
