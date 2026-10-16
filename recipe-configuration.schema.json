@@ -19197,6 +19197,148 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "codex"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Interrupt"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "modelProvider": {
               "type": "object",
               "properties": {
@@ -19552,6 +19694,211 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "claude"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Setup"
+                      },
+                      {
+                        "const": "UserPromptExpansion"
+                      },
+                      {
+                        "const": "PermissionDenied"
+                      },
+                      {
+                        "const": "PostToolUseFailure"
+                      },
+                      {
+                        "const": "PostToolBatch"
+                      },
+                      {
+                        "const": "Notification"
+                      },
+                      {
+                        "const": "MessageDisplay"
+                      },
+                      {
+                        "const": "TaskCreated"
+                      },
+                      {
+                        "const": "TaskCompleted"
+                      },
+                      {
+                        "const": "StopFailure"
+                      },
+                      {
+                        "const": "TeammateIdle"
+                      },
+                      {
+                        "const": "InstructionsLoaded"
+                      },
+                      {
+                        "const": "ConfigChange"
+                      },
+                      {
+                        "const": "CwdChanged"
+                      },
+                      {
+                        "const": "DirectoryAdded"
+                      },
+                      {
+                        "const": "FileChanged"
+                      },
+                      {
+                        "const": "WorktreeCreate"
+                      },
+                      {
+                        "const": "WorktreeRemove"
+                      },
+                      {
+                        "const": "PreModelSwitch"
+                      },
+                      {
+                        "const": "PostModelSwitch"
+                      },
+                      {
+                        "const": "Elicitation"
+                      },
+                      {
+                        "const": "ElicitationResult"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "partialMessages": {
               "anyOf": [
                 {
@@ -19909,6 +20256,130 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "antigravity"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "PreInvocation"
+                      },
+                      {
+                        "const": "PostInvocation"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "authentication": {
               "anyOf": [
                 {
@@ -20216,6 +20687,154 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "copilot"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "sessionStart"
+                      },
+                      {
+                        "const": "sessionEnd"
+                      },
+                      {
+                        "const": "userPromptSubmitted"
+                      },
+                      {
+                        "const": "userPromptTransformed"
+                      },
+                      {
+                        "const": "preToolUse"
+                      },
+                      {
+                        "const": "postToolUse"
+                      },
+                      {
+                        "const": "postToolUseFailure"
+                      },
+                      {
+                        "const": "permissionRequest"
+                      },
+                      {
+                        "const": "agentStop"
+                      },
+                      {
+                        "const": "subagentStart"
+                      },
+                      {
+                        "const": "subagentStop"
+                      },
+                      {
+                        "const": "preCompact"
+                      },
+                      {
+                        "const": "notification"
+                      },
+                      {
+                        "const": "errorOccurred"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "authentication": {
               "anyOf": [
                 {
@@ -20531,6 +21150,172 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "kimi"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Interrupt"
+                      },
+                      {
+                        "const": "PostToolUseFailure"
+                      },
+                      {
+                        "const": "Notification"
+                      },
+                      {
+                        "const": "StopFailure"
+                      },
+                      {
+                        "const": "UserPromptQueued"
+                      },
+                      {
+                        "const": "TurnStarted"
+                      },
+                      {
+                        "const": "PermissionResult"
+                      },
+                      {
+                        "const": "SessionHeartbeat"
+                      },
+                      {
+                        "const": "TaskStarted"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "region": {
               "anyOf": [
                 {
@@ -21309,54 +22094,205 @@
     "hook": {
       "anyOf": [
         {
-          "type": "object",
-          "properties": {
-            "on": {
-              "anyOf": [
-                {
-                  "const": "stop"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "on": {
+                  "anyOf": [
+                    {
+                      "const": "model-error"
+                    },
+                    {
+                      "const": "stop"
+                    },
+                    {
+                      "const": "session-start"
+                    },
+                    {
+                      "const": "before-model"
+                    },
+                    {
+                      "const": "after-model"
+                    },
+                    {
+                      "const": "before-tool"
+                    },
+                    {
+                      "const": "after-tool"
+                    },
+                    {
+                      "const": "before-prompt"
+                    },
+                    {
+                      "const": "before-compaction"
+                    },
+                    {
+                      "const": "after-compaction"
+                    },
+                    {
+                      "const": "before-subagent"
+                    },
+                    {
+                      "const": "after-subagent"
+                    },
+                    {
+                      "const": "run-end"
+                    }
+                  ]
                 },
-                {
-                  "const": "session-start"
+                "name": {
+                  "type": "string"
                 },
-                {
-                  "const": "before-model"
+                "timeoutMs": {
+                  "type": "number"
                 },
-                {
-                  "const": "after-model"
+                "command": false,
+                "run": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
                 },
-                {
-                  "const": "before-tool"
-                },
-                {
-                  "const": "after-tool"
+                "type": {
+                  "const": "custom"
                 }
-              ]
+              },
+              "required": ["on", "run", "type"],
+              "additionalProperties": false
             },
-            "name": {
-              "type": "string"
-            },
-            "run": {
-              "anyOf": [
-                {
+            {
+              "type": "object",
+              "properties": {
+                "on": {
+                  "anyOf": [
+                    {
+                      "const": "model-error"
+                    },
+                    {
+                      "const": "stop"
+                    },
+                    {
+                      "const": "session-start"
+                    },
+                    {
+                      "const": "before-model"
+                    },
+                    {
+                      "const": "after-model"
+                    },
+                    {
+                      "const": "before-tool"
+                    },
+                    {
+                      "const": "after-tool"
+                    },
+                    {
+                      "const": "before-prompt"
+                    },
+                    {
+                      "const": "before-compaction"
+                    },
+                    {
+                      "const": "after-compaction"
+                    },
+                    {
+                      "const": "before-subagent"
+                    },
+                    {
+                      "const": "after-subagent"
+                    },
+                    {
+                      "const": "run-end"
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "timeoutMs": {
+                  "type": "number"
+                },
+                "command": {
                   "type": "object",
-                  "required": ["$ref"],
                   "properties": {
-                    "$ref": {
-                      "type": "string",
-                      "pattern": "\\S"
+                    "executable": {
+                      "type": "string"
+                    },
+                    "arguments": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "directory": {
+                      "type": "string"
+                    },
+                    "variables": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "required": ["$ref"],
+                              "properties": {
+                                "$ref": {
+                                  "type": "string",
+                                  "pattern": "\\S"
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            {
+                              "$ref": "#/$defs/variables"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "env": {
+                                    "type": "string",
+                                    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                  }
+                                },
+                                "required": ["env"],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        }
+                      ]
                     }
                   },
+                  "required": ["executable"],
                   "additionalProperties": false
+                },
+                "run": false,
+                "type": {
+                  "const": "custom"
                 }
-              ]
-            },
-            "type": {
-              "const": "custom"
+              },
+              "required": ["on", "command", "type"],
+              "additionalProperties": false
             }
-          },
-          "required": ["on", "run", "type"],
-          "additionalProperties": false
+          ]
         }
       ]
     },
@@ -22331,6 +23267,148 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "codex"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Interrupt"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "modelProvider": {
               "type": "object",
               "properties": {
@@ -22731,6 +23809,211 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "claude"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Setup"
+                      },
+                      {
+                        "const": "UserPromptExpansion"
+                      },
+                      {
+                        "const": "PermissionDenied"
+                      },
+                      {
+                        "const": "PostToolUseFailure"
+                      },
+                      {
+                        "const": "PostToolBatch"
+                      },
+                      {
+                        "const": "Notification"
+                      },
+                      {
+                        "const": "MessageDisplay"
+                      },
+                      {
+                        "const": "TaskCreated"
+                      },
+                      {
+                        "const": "TaskCompleted"
+                      },
+                      {
+                        "const": "StopFailure"
+                      },
+                      {
+                        "const": "TeammateIdle"
+                      },
+                      {
+                        "const": "InstructionsLoaded"
+                      },
+                      {
+                        "const": "ConfigChange"
+                      },
+                      {
+                        "const": "CwdChanged"
+                      },
+                      {
+                        "const": "DirectoryAdded"
+                      },
+                      {
+                        "const": "FileChanged"
+                      },
+                      {
+                        "const": "WorktreeCreate"
+                      },
+                      {
+                        "const": "WorktreeRemove"
+                      },
+                      {
+                        "const": "PreModelSwitch"
+                      },
+                      {
+                        "const": "PostModelSwitch"
+                      },
+                      {
+                        "const": "Elicitation"
+                      },
+                      {
+                        "const": "ElicitationResult"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "partialMessages": {
               "anyOf": [
                 {
@@ -23133,6 +24416,130 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "antigravity"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "PreInvocation"
+                      },
+                      {
+                        "const": "PostInvocation"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "authentication": {
               "anyOf": [
                 {
@@ -23485,6 +24892,154 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "copilot"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "sessionStart"
+                      },
+                      {
+                        "const": "sessionEnd"
+                      },
+                      {
+                        "const": "userPromptSubmitted"
+                      },
+                      {
+                        "const": "userPromptTransformed"
+                      },
+                      {
+                        "const": "preToolUse"
+                      },
+                      {
+                        "const": "postToolUse"
+                      },
+                      {
+                        "const": "postToolUseFailure"
+                      },
+                      {
+                        "const": "permissionRequest"
+                      },
+                      {
+                        "const": "agentStop"
+                      },
+                      {
+                        "const": "subagentStart"
+                      },
+                      {
+                        "const": "subagentStop"
+                      },
+                      {
+                        "const": "preCompact"
+                      },
+                      {
+                        "const": "notification"
+                      },
+                      {
+                        "const": "errorOccurred"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "authentication": {
               "anyOf": [
                 {
@@ -23845,6 +25400,172 @@
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "native-hook"
+                  },
+                  "agent": {
+                    "const": "kimi"
+                  },
+                  "on": {
+                    "anyOf": [
+                      {
+                        "const": "SessionStart"
+                      },
+                      {
+                        "const": "SessionEnd"
+                      },
+                      {
+                        "const": "UserPromptSubmit"
+                      },
+                      {
+                        "const": "PreToolUse"
+                      },
+                      {
+                        "const": "PermissionRequest"
+                      },
+                      {
+                        "const": "PostToolUse"
+                      },
+                      {
+                        "const": "PreCompact"
+                      },
+                      {
+                        "const": "PostCompact"
+                      },
+                      {
+                        "const": "SubagentStart"
+                      },
+                      {
+                        "const": "SubagentStop"
+                      },
+                      {
+                        "const": "Stop"
+                      },
+                      {
+                        "const": "Interrupt"
+                      },
+                      {
+                        "const": "PostToolUseFailure"
+                      },
+                      {
+                        "const": "Notification"
+                      },
+                      {
+                        "const": "StopFailure"
+                      },
+                      {
+                        "const": "UserPromptQueued"
+                      },
+                      {
+                        "const": "TurnStarted"
+                      },
+                      {
+                        "const": "PermissionResult"
+                      },
+                      {
+                        "const": "SessionHeartbeat"
+                      },
+                      {
+                        "const": "TaskStarted"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timeoutMs": {
+                    "type": "number"
+                  },
+                  "command": {
+                    "type": "object",
+                    "properties": {
+                      "executable": {
+                        "type": "string"
+                      },
+                      "arguments": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "directory": {
+                        "type": "string"
+                      },
+                      "variables": {
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": ["$ref"],
+                                "properties": {
+                                  "$ref": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "$ref": "#/$defs/variables"
+                              }
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "env": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                                    }
+                                  },
+                                  "required": ["env"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["executable"],
+                    "additionalProperties": false
+                  },
+                  "matcher": {
+                    "type": "string"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": ["kind", "agent", "on", "name", "timeoutMs", "run"],
+                "additionalProperties": false
+              }
+            },
             "region": {
               "anyOf": [
                 {
@@ -28623,11 +30344,365 @@
       ],
       "additionalProperties": false
     },
+    "profile.portable.option0": {
+      "type": "object",
+      "properties": {
+        "executable": {
+          "type": "string"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "directory": {
+          "type": "string"
+        },
+        "variables": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/variables"
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "env": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                      }
+                    },
+                    "required": ["env"],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "required": ["executable"],
+      "additionalProperties": false
+    },
     "profile": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
+            "hooks": {
+              "type": "object",
+              "properties": {
+                "claude": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "native-hook"
+                      },
+                      "agent": {
+                        "const": "claude"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
+                      "command": {
+                        "$ref": "#/$defs/profile.portable.option0"
+                      },
+                      "matcher": {
+                        "type": "string"
+                      },
+                      "run": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": ["$ref"],
+                            "properties": {
+                              "$ref": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "agent",
+                      "on",
+                      "name",
+                      "timeoutMs",
+                      "run"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "codex": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "native-hook"
+                      },
+                      "agent": {
+                        "const": "codex"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
+                      "command": {
+                        "$ref": "#/$defs/profile.portable.option0"
+                      },
+                      "matcher": {
+                        "type": "string"
+                      },
+                      "run": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": ["$ref"],
+                            "properties": {
+                              "$ref": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "agent",
+                      "on",
+                      "name",
+                      "timeoutMs",
+                      "run"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "copilot": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "native-hook"
+                      },
+                      "agent": {
+                        "const": "copilot"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
+                      "command": {
+                        "$ref": "#/$defs/profile.portable.option0"
+                      },
+                      "matcher": {
+                        "type": "string"
+                      },
+                      "run": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": ["$ref"],
+                            "properties": {
+                              "$ref": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "agent",
+                      "on",
+                      "name",
+                      "timeoutMs",
+                      "run"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "kimi": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "native-hook"
+                      },
+                      "agent": {
+                        "const": "kimi"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
+                      "command": {
+                        "$ref": "#/$defs/profile.portable.option0"
+                      },
+                      "matcher": {
+                        "type": "string"
+                      },
+                      "run": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": ["$ref"],
+                            "properties": {
+                              "$ref": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "agent",
+                      "on",
+                      "name",
+                      "timeoutMs",
+                      "run"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "antigravity": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "const": "native-hook"
+                      },
+                      "agent": {
+                        "const": "antigravity"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "timeoutMs": {
+                        "type": "number"
+                      },
+                      "command": {
+                        "$ref": "#/$defs/profile.portable.option0"
+                      },
+                      "matcher": {
+                        "type": "string"
+                      },
+                      "run": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "required": ["$ref"],
+                            "properties": {
+                              "$ref": {
+                                "type": "string",
+                                "pattern": "\\S"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "agent",
+                      "on",
+                      "name",
+                      "timeoutMs",
+                      "run"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "outpost": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": ["$ref"],
+                        "properties": {
+                          "$ref": {
+                            "type": "string",
+                            "pattern": "\\S"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "$ref": "#/$defs/hook"
+                      }
+                    ]
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
             "instructions": {
               "type": "string"
             },

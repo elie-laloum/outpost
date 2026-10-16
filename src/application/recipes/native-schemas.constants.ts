@@ -15457,49 +15457,192 @@ export const nativeRecipeSchemas: Readonly<
     additionalProperties: false,
   },
   "hook.custom": {
-    type: "object",
-    properties: {
-      on: {
-        anyOf: [
-          {
-            const: "stop",
-          },
-          {
-            const: "session-start",
-          },
-          {
-            const: "before-model",
-          },
-          {
-            const: "after-model",
-          },
-          {
-            const: "before-tool",
-          },
-          {
-            const: "after-tool",
-          },
-        ],
-      },
-      name: {
-        type: "string",
-      },
-      run: {
+    anyOf: [
+      {
         type: "object",
         properties: {
-          $ref: {
+          on: {
+            anyOf: [
+              {
+                const: "model-error",
+              },
+              {
+                const: "stop",
+              },
+              {
+                const: "session-start",
+              },
+              {
+                const: "before-model",
+              },
+              {
+                const: "after-model",
+              },
+              {
+                const: "before-tool",
+              },
+              {
+                const: "after-tool",
+              },
+              {
+                const: "before-prompt",
+              },
+              {
+                const: "before-compaction",
+              },
+              {
+                const: "after-compaction",
+              },
+              {
+                const: "before-subagent",
+              },
+              {
+                const: "after-subagent",
+              },
+              {
+                const: "run-end",
+              },
+            ],
+          },
+          name: {
             type: "string",
-            minLength: 1,
+          },
+          timeoutMs: {
+            type: "number",
+          },
+          command: false,
+          run: {
+            type: "object",
+            properties: {
+              $ref: {
+                type: "string",
+                minLength: 1,
+              },
+            },
+            required: ["$ref"],
+            additionalProperties: false,
+            component: "callback",
+            contract: "hook.custom.run",
           },
         },
-        required: ["$ref"],
+        required: ["on", "run"],
         additionalProperties: false,
-        component: "callback",
-        contract: "hook.custom.run",
       },
-    },
-    required: ["on", "run"],
-    additionalProperties: false,
+      {
+        type: "object",
+        properties: {
+          on: {
+            anyOf: [
+              {
+                const: "model-error",
+              },
+              {
+                const: "stop",
+              },
+              {
+                const: "session-start",
+              },
+              {
+                const: "before-model",
+              },
+              {
+                const: "after-model",
+              },
+              {
+                const: "before-tool",
+              },
+              {
+                const: "after-tool",
+              },
+              {
+                const: "before-prompt",
+              },
+              {
+                const: "before-compaction",
+              },
+              {
+                const: "after-compaction",
+              },
+              {
+                const: "before-subagent",
+              },
+              {
+                const: "after-subagent",
+              },
+              {
+                const: "run-end",
+              },
+            ],
+          },
+          name: {
+            type: "string",
+          },
+          timeoutMs: {
+            type: "number",
+          },
+          command: {
+            type: "object",
+            properties: {
+              executable: {
+                type: "string",
+              },
+              arguments: {
+                type: "array",
+                items: {
+                  type: "string",
+                },
+              },
+              directory: {
+                type: "string",
+              },
+              variables: {
+                anyOf: [
+                  {
+                    type: "object",
+                    properties: {
+                      $ref: {
+                        type: "string",
+                        minLength: 1,
+                      },
+                    },
+                    required: ["$ref"],
+                    additionalProperties: false,
+                    component: "variables",
+                  },
+                  {
+                    type: "object",
+                    additionalProperties: {
+                      anyOf: [
+                        {
+                          type: "string",
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            env: {
+                              type: "string",
+                              pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                            },
+                          },
+                          required: ["env"],
+                          additionalProperties: false,
+                          secret: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            required: ["executable"],
+            additionalProperties: false,
+          },
+          run: false,
+        },
+        required: ["on", "command"],
+        additionalProperties: false,
+      },
+    ],
   },
   "skill.custom": {
     type: "object",
@@ -22337,6 +22480,247 @@ export const nativeRecipeSchemas: Readonly<
   "profile.portable": {
     type: "object",
     properties: {
+      hooks: {
+        type: "object",
+        properties: {
+          claude: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: {
+                  const: "native-hook",
+                },
+                agent: {
+                  const: "claude",
+                },
+                on: {
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                },
+                timeoutMs: {
+                  type: "number",
+                },
+                command: {
+                  $ref: "#/$defs/option0",
+                },
+                matcher: {
+                  type: "string",
+                },
+                run: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "profile.portable.hooks.claude.*.run",
+                },
+              },
+              required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+              additionalProperties: false,
+            },
+          },
+          codex: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: {
+                  const: "native-hook",
+                },
+                agent: {
+                  const: "codex",
+                },
+                on: {
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                },
+                timeoutMs: {
+                  type: "number",
+                },
+                command: {
+                  $ref: "#/$defs/option0",
+                },
+                matcher: {
+                  type: "string",
+                },
+                run: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "profile.portable.hooks.codex.*.run",
+                },
+              },
+              required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+              additionalProperties: false,
+            },
+          },
+          copilot: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: {
+                  const: "native-hook",
+                },
+                agent: {
+                  const: "copilot",
+                },
+                on: {
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                },
+                timeoutMs: {
+                  type: "number",
+                },
+                command: {
+                  $ref: "#/$defs/option0",
+                },
+                matcher: {
+                  type: "string",
+                },
+                run: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "profile.portable.hooks.copilot.*.run",
+                },
+              },
+              required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+              additionalProperties: false,
+            },
+          },
+          kimi: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: {
+                  const: "native-hook",
+                },
+                agent: {
+                  const: "kimi",
+                },
+                on: {
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                },
+                timeoutMs: {
+                  type: "number",
+                },
+                command: {
+                  $ref: "#/$defs/option0",
+                },
+                matcher: {
+                  type: "string",
+                },
+                run: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "profile.portable.hooks.kimi.*.run",
+                },
+              },
+              required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+              additionalProperties: false,
+            },
+          },
+          antigravity: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: {
+                  const: "native-hook",
+                },
+                agent: {
+                  const: "antigravity",
+                },
+                on: {
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                },
+                timeoutMs: {
+                  type: "number",
+                },
+                command: {
+                  $ref: "#/$defs/option0",
+                },
+                matcher: {
+                  type: "string",
+                },
+                run: {
+                  type: "object",
+                  properties: {
+                    $ref: {
+                      type: "string",
+                      minLength: 1,
+                    },
+                  },
+                  required: ["$ref"],
+                  additionalProperties: false,
+                  component: "callback",
+                  contract: "profile.portable.hooks.antigravity.*.run",
+                },
+              },
+              required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+              additionalProperties: false,
+            },
+          },
+          outpost: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "hook",
+            },
+          },
+        },
+        additionalProperties: false,
+      },
       instructions: {
         type: "string",
       },
@@ -22486,6 +22870,65 @@ export const nativeRecipeSchemas: Readonly<
       },
     },
     additionalProperties: false,
+    $defs: {
+      option0: {
+        type: "object",
+        properties: {
+          executable: {
+            type: "string",
+          },
+          arguments: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          directory: {
+            type: "string",
+          },
+          variables: {
+            anyOf: [
+              {
+                type: "object",
+                properties: {
+                  $ref: {
+                    type: "string",
+                    minLength: 1,
+                  },
+                },
+                required: ["$ref"],
+                additionalProperties: false,
+                component: "variables",
+              },
+              {
+                type: "object",
+                additionalProperties: {
+                  anyOf: [
+                    {
+                      type: "string",
+                    },
+                    {
+                      type: "object",
+                      properties: {
+                        env: {
+                          type: "string",
+                          pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                        },
+                      },
+                      required: ["env"],
+                      additionalProperties: false,
+                      secret: true,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        required: ["executable"],
+        additionalProperties: false,
+      },
+    },
   },
   "secretSource.vault": {
     type: "object",
@@ -25032,6 +25475,141 @@ export const nativeRecipeSchemas: Readonly<
   "harness.codex": {
     type: "object",
     properties: {
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            kind: {
+              const: "native-hook",
+            },
+            agent: {
+              const: "codex",
+            },
+            on: {
+              anyOf: [
+                {
+                  const: "SessionStart",
+                },
+                {
+                  const: "SessionEnd",
+                },
+                {
+                  const: "UserPromptSubmit",
+                },
+                {
+                  const: "PreToolUse",
+                },
+                {
+                  const: "PermissionRequest",
+                },
+                {
+                  const: "PostToolUse",
+                },
+                {
+                  const: "PreCompact",
+                },
+                {
+                  const: "PostCompact",
+                },
+                {
+                  const: "SubagentStart",
+                },
+                {
+                  const: "SubagentStop",
+                },
+                {
+                  const: "Stop",
+                },
+                {
+                  const: "Interrupt",
+                },
+              ],
+            },
+            name: {
+              type: "string",
+            },
+            timeoutMs: {
+              type: "number",
+            },
+            command: {
+              type: "object",
+              properties: {
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+            matcher: {
+              type: "string",
+            },
+            run: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "callback",
+              contract: "harness.codex.hooks.*.run",
+            },
+          },
+          required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+          additionalProperties: false,
+        },
+      },
       modelProvider: {
         type: "object",
         properties: {
@@ -25366,6 +25944,204 @@ export const nativeRecipeSchemas: Readonly<
   "harness.claude": {
     type: "object",
     properties: {
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            kind: {
+              const: "native-hook",
+            },
+            agent: {
+              const: "claude",
+            },
+            on: {
+              anyOf: [
+                {
+                  const: "SessionStart",
+                },
+                {
+                  const: "SessionEnd",
+                },
+                {
+                  const: "UserPromptSubmit",
+                },
+                {
+                  const: "PreToolUse",
+                },
+                {
+                  const: "PermissionRequest",
+                },
+                {
+                  const: "PostToolUse",
+                },
+                {
+                  const: "PreCompact",
+                },
+                {
+                  const: "PostCompact",
+                },
+                {
+                  const: "SubagentStart",
+                },
+                {
+                  const: "SubagentStop",
+                },
+                {
+                  const: "Stop",
+                },
+                {
+                  const: "Setup",
+                },
+                {
+                  const: "UserPromptExpansion",
+                },
+                {
+                  const: "PermissionDenied",
+                },
+                {
+                  const: "PostToolUseFailure",
+                },
+                {
+                  const: "PostToolBatch",
+                },
+                {
+                  const: "Notification",
+                },
+                {
+                  const: "MessageDisplay",
+                },
+                {
+                  const: "TaskCreated",
+                },
+                {
+                  const: "TaskCompleted",
+                },
+                {
+                  const: "StopFailure",
+                },
+                {
+                  const: "TeammateIdle",
+                },
+                {
+                  const: "InstructionsLoaded",
+                },
+                {
+                  const: "ConfigChange",
+                },
+                {
+                  const: "CwdChanged",
+                },
+                {
+                  const: "DirectoryAdded",
+                },
+                {
+                  const: "FileChanged",
+                },
+                {
+                  const: "WorktreeCreate",
+                },
+                {
+                  const: "WorktreeRemove",
+                },
+                {
+                  const: "PreModelSwitch",
+                },
+                {
+                  const: "PostModelSwitch",
+                },
+                {
+                  const: "Elicitation",
+                },
+                {
+                  const: "ElicitationResult",
+                },
+              ],
+            },
+            name: {
+              type: "string",
+            },
+            timeoutMs: {
+              type: "number",
+            },
+            command: {
+              type: "object",
+              properties: {
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+            matcher: {
+              type: "string",
+            },
+            run: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "callback",
+              contract: "harness.claude.hooks.*.run",
+            },
+          },
+          required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+          additionalProperties: false,
+        },
+      },
       partialMessages: {
         anyOf: [
           {
@@ -25702,6 +26478,123 @@ export const nativeRecipeSchemas: Readonly<
   "harness.agy": {
     type: "object",
     properties: {
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            kind: {
+              const: "native-hook",
+            },
+            agent: {
+              const: "antigravity",
+            },
+            on: {
+              anyOf: [
+                {
+                  const: "SessionStart",
+                },
+                {
+                  const: "PreToolUse",
+                },
+                {
+                  const: "PostToolUse",
+                },
+                {
+                  const: "Stop",
+                },
+                {
+                  const: "PreInvocation",
+                },
+                {
+                  const: "PostInvocation",
+                },
+              ],
+            },
+            name: {
+              type: "string",
+            },
+            timeoutMs: {
+              type: "number",
+            },
+            command: {
+              type: "object",
+              properties: {
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+            matcher: {
+              type: "string",
+            },
+            run: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "callback",
+              contract: "harness.agy.hooks.*.run",
+            },
+          },
+          required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+          additionalProperties: false,
+        },
+      },
       authentication: {
         anyOf: [
           {
@@ -25994,6 +26887,147 @@ export const nativeRecipeSchemas: Readonly<
   "harness.copilot": {
     type: "object",
     properties: {
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            kind: {
+              const: "native-hook",
+            },
+            agent: {
+              const: "copilot",
+            },
+            on: {
+              anyOf: [
+                {
+                  const: "sessionStart",
+                },
+                {
+                  const: "sessionEnd",
+                },
+                {
+                  const: "userPromptSubmitted",
+                },
+                {
+                  const: "userPromptTransformed",
+                },
+                {
+                  const: "preToolUse",
+                },
+                {
+                  const: "postToolUse",
+                },
+                {
+                  const: "postToolUseFailure",
+                },
+                {
+                  const: "permissionRequest",
+                },
+                {
+                  const: "agentStop",
+                },
+                {
+                  const: "subagentStart",
+                },
+                {
+                  const: "subagentStop",
+                },
+                {
+                  const: "preCompact",
+                },
+                {
+                  const: "notification",
+                },
+                {
+                  const: "errorOccurred",
+                },
+              ],
+            },
+            name: {
+              type: "string",
+            },
+            timeoutMs: {
+              type: "number",
+            },
+            command: {
+              type: "object",
+              properties: {
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+            matcher: {
+              type: "string",
+            },
+            run: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "callback",
+              contract: "harness.copilot.hooks.*.run",
+            },
+          },
+          required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+          additionalProperties: false,
+        },
+      },
       authentication: {
         anyOf: [
           {
@@ -26288,6 +27322,165 @@ export const nativeRecipeSchemas: Readonly<
   "harness.kimi": {
     type: "object",
     properties: {
+      hooks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            kind: {
+              const: "native-hook",
+            },
+            agent: {
+              const: "kimi",
+            },
+            on: {
+              anyOf: [
+                {
+                  const: "SessionStart",
+                },
+                {
+                  const: "SessionEnd",
+                },
+                {
+                  const: "UserPromptSubmit",
+                },
+                {
+                  const: "PreToolUse",
+                },
+                {
+                  const: "PermissionRequest",
+                },
+                {
+                  const: "PostToolUse",
+                },
+                {
+                  const: "PreCompact",
+                },
+                {
+                  const: "PostCompact",
+                },
+                {
+                  const: "SubagentStart",
+                },
+                {
+                  const: "SubagentStop",
+                },
+                {
+                  const: "Stop",
+                },
+                {
+                  const: "Interrupt",
+                },
+                {
+                  const: "PostToolUseFailure",
+                },
+                {
+                  const: "Notification",
+                },
+                {
+                  const: "StopFailure",
+                },
+                {
+                  const: "UserPromptQueued",
+                },
+                {
+                  const: "TurnStarted",
+                },
+                {
+                  const: "PermissionResult",
+                },
+                {
+                  const: "SessionHeartbeat",
+                },
+                {
+                  const: "TaskStarted",
+                },
+              ],
+            },
+            name: {
+              type: "string",
+            },
+            timeoutMs: {
+              type: "number",
+            },
+            command: {
+              type: "object",
+              properties: {
+                executable: {
+                  type: "string",
+                },
+                arguments: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                  },
+                },
+                directory: {
+                  type: "string",
+                },
+                variables: {
+                  anyOf: [
+                    {
+                      type: "object",
+                      properties: {
+                        $ref: {
+                          type: "string",
+                          minLength: 1,
+                        },
+                      },
+                      required: ["$ref"],
+                      additionalProperties: false,
+                      component: "variables",
+                    },
+                    {
+                      type: "object",
+                      additionalProperties: {
+                        anyOf: [
+                          {
+                            type: "string",
+                          },
+                          {
+                            type: "object",
+                            properties: {
+                              env: {
+                                type: "string",
+                                pattern: "^[A-Za-z_][A-Za-z0-9_]*$",
+                              },
+                            },
+                            required: ["env"],
+                            additionalProperties: false,
+                            secret: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              required: ["executable"],
+              additionalProperties: false,
+            },
+            matcher: {
+              type: "string",
+            },
+            run: {
+              type: "object",
+              properties: {
+                $ref: {
+                  type: "string",
+                  minLength: 1,
+                },
+              },
+              required: ["$ref"],
+              additionalProperties: false,
+              component: "callback",
+              contract: "harness.kimi.hooks.*.run",
+            },
+          },
+          required: ["kind", "agent", "on", "name", "timeoutMs", "run"],
+          additionalProperties: false,
+        },
+      },
       region: {
         anyOf: [
           {
