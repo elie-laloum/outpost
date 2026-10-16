@@ -54,10 +54,15 @@ const event = {
   tool_name: "Bash",
   tool_input: { command: "echo test" },
 };
-const shell = (command: string) =>
-  process.platform === "win32"
-    ? { executable: "cmd.exe", arguments: ["/d", "/s", "/c", command] }
-    : { executable: "sh", arguments: ["-c", command] };
+// Native CLIs run hook command lines through the platform shell; cmd.exe needs verbatim quoting.
+const shell = (command: string) => ({
+  executable: process.execPath,
+  arguments: [
+    "-e",
+    "const r = require('node:child_process').spawnSync(process.argv[1], { shell: true, stdio: 'inherit' }); process.exit(r.status ?? 2)",
+    command,
+  ],
+});
 
 test("native callbacks cross the sandbox bridge concurrently and close idempotently", async (t) => {
   const sandbox = await lease(t);
