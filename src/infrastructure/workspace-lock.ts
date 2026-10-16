@@ -239,14 +239,25 @@ async function acquireWorkspacePath(
         )
       )
         continue;
+      if (!(writable || existing.writable)) continue;
+      // Recorded inodes count only while the locked path still resolves to them; deleted ones get reused.
+      const current = await pathIdentities(existing.directory);
+      const identity = containsIdentity(
+        current.identity ? [current.identity] : [],
+        existing.identity,
+      )
+        ? existing.identity
+        : undefined;
+      const ancestors = existing.ancestors?.filter((entry) =>
+        containsIdentity(current.ancestors, entry),
+      );
       invariant(
-        !(writable || existing.writable) ||
-          !(
-            inside(directory, existing.directory) ||
-            inside(existing.directory, directory) ||
-            containsIdentity(identities.ancestors, existing.identity) ||
-            containsIdentity(existing.ancestors, identities.identity)
-          ),
+        !(
+          inside(directory, existing.directory) ||
+          inside(existing.directory, directory) ||
+          containsIdentity(identities.ancestors, identity) ||
+          containsIdentity(ancestors, identities.identity)
+        ),
         "Workspace path overlaps an active writer",
       );
     }
