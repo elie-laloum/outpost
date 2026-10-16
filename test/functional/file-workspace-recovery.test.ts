@@ -12,7 +12,7 @@ import {
   symlink,
   writeFile,
 } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import {
   createWorkspace,
@@ -23,6 +23,8 @@ import {
   inspectFileWorkspace,
   recoverFileWorkspace,
   restoreFileWorkspace,
+  inspectWorkspacePathLocks,
+  recoverWorkspacePathLock,
   inspectWorkspacePublication,
   recoverWorkspacePublication,
   publishWorkspaceOutputs,
@@ -179,8 +181,8 @@ test("publication finish and rollback recover SIGKILL around every file mutation
     for (const timing of ["before", "after"]) {
       if (boundary === "complete" && timing === "after") continue;
       for (const action of ["finish", "rollback"] as const) {
-        const root = await mkdtemp(
-          join(tmpdir(), "outpost-publication-crash-"),
+        const root = await realpath(
+          await mkdtemp(join(tmpdir(), "outpost-publication-crash-")),
         );
         try {
           await mkdir(join(root, "source"));
@@ -195,6 +197,7 @@ test("publication finish and rollback recover SIGKILL around every file mutation
             ],
           });
           assert.notEqual(result.status, 0, `${boundary}/${timing}`);
+          assert.doesNotMatch(result.stderr, /Error:/, result.stderr);
           const { runtime, id } = JSON.parse(
             await readFile(join(root, "workspace.json"), "utf8"),
           );
@@ -228,6 +231,11 @@ test("publication finish and rollback recover SIGKILL around every file mutation
           });
           await workspace.close({ preserve: true });
         } finally {
+          for (const lock of await inspectWorkspacePathLocks())
+            if (lock.directory.startsWith(`${root}${sep}`))
+              await recoverWorkspacePathLock(lock.id, lock.directory, {
+                processesStopped: true,
+              });
           await rm(root, { recursive: true, force: true });
         }
       }

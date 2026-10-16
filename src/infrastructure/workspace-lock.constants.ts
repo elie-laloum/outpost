@@ -6,4 +6,4 @@ export const workspaceLocksDirectory = join(
   tmpdir(),
   `outpost-path-locks-${createHash("sha256").update(`${userInfo().username}:${homedir()}`).digest("hex").slice(0, 24)}`,
 );
-export const workspaceLockAttempts = 100;
+export const workspaceRegistryStaleMs = 10_000;

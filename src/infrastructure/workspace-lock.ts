@@ -13,8 +13,8 @@ import { setTimeout } from "node:timers/promises";
 import { invariant } from "../domain/errors.ts";
 import { inside } from "./files.ts";
 import {
-  workspaceLockAttempts,
   workspaceLocksDirectory,
+  workspaceRegistryStaleMs,
 } from "./workspace-lock.constants.ts";
 import type {
   WorkspacePathLock,
@@ -49,7 +49,9 @@ async function withRegistry<T>(action: () => Promise<T>): Promise<T> {
     "Unsafe workspace lock registry",
   );
   const gate = join(workspaceLocksDirectory, "gate");
-  for (let attempt = 0; attempt < workspaceLockAttempts; attempt++) {
+  let observed: string | undefined;
+  let since = Date.now();
+  for (;;) {
     try {
       await mkdir(gate, { mode: 0o700 });
     } catch (error) {
@@ -59,7 +61,15 @@ async function withRegistry<T>(action: () => Promise<T>): Promise<T> {
         error.code === "EEXIST"
       ))
         throw error;
-      await setTimeout(10);
+      // A gate that keeps changing belongs to live holders; only an unchanged one is reported.
+      const current = await gateInstance(gate);
+      if (current !== observed) since = Date.now();
+      observed = current;
+      if (current && Date.now() - since >= workspaceRegistryStaleMs)
+        throw new Error(
+          "Workspace lock registry is busy; inspect abandoned ownership before recovery",
+        );
+      await setTimeout(5 + Math.random() * 20);
       continue;
     }
     try {
@@ -68,9 +78,15 @@ async function withRegistry<T>(action: () => Promise<T>): Promise<T> {
       await rm(gate, { recursive: true });
     }
   }
-  throw new Error(
-    "Workspace lock registry is busy; inspect abandoned ownership before recovery",
-  );
+}
+
+async function gateInstance(gate: string): Promise<string | undefined> {
+  const info = await lstat(gate, { bigint: true }).catch((error) => {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT")
+      return undefined;
+    throw error;
+  });
+  return info && `${info.dev}:${info.ino}:${info.birthtimeNs}:${info.ctimeNs}`;
 }
 
 function parseLock(value: unknown): WorkspacePathLock {
