@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { test } from "node:test";
@@ -272,7 +272,9 @@ test("native file declarations retain passing evidence for each pinned CLI versi
 });
 
 test("file capture keeps native Claude transcripts in runtime storage and restores into a fresh home", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "outpost-cli-files-"));
+  const root = await realpath(
+    await mkdtemp(join(tmpdir(), "outpost-cli-files-")),
+  );
   t.after(() => rm(root, { recursive: true, force: true }));
   const native = createClaudeConversations();
   const hostHome = join(root, "host-home");
