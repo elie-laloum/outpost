@@ -152,7 +152,9 @@ test("Podman on macOS rejects an absent or stopped machine before image setup", 
 
 test("SELinux mount labels preserve readonly and writable combinations", async (t) => {
   const root = await repository(t);
-  for (const label of ["z", "Z", false] as const)
+  const labels: readonly ("z" | "Z" | false)[] =
+    process.platform === "win32" ? [false] : ["z", "Z", false];
+  for (const label of labels)
     for (const readOnly of [true, false]) {
       const calls: Command[] = [];
       const lease = await containerProvider(

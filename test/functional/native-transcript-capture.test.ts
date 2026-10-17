@@ -148,14 +148,16 @@ test("Codex captures and restores a rollout under its original date", async (t) 
     store.locate(id, root, capturedHome),
     /multiple|ambiguous/i,
   );
-  await assert.rejects(
-    store.capture(id, {
-      ...context,
-      local: false,
-      sandbox: { ...lease, home: capturedHome },
-    }),
-    /multiple|ambiguous/i,
-  );
+  // Remote capture searches with POSIX find, which a Windows host lease lacks.
+  if (process.platform !== "win32")
+    await assert.rejects(
+      store.capture(id, {
+        ...context,
+        local: false,
+        sandbox: { ...lease, home: capturedHome },
+      }),
+      /multiple|ambiguous/i,
+    );
 });
 
 test("local worktree capture preserves its live transcript and refreshes the relocated continuation", async (t) => {

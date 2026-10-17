@@ -11,7 +11,7 @@ import { daytonaNetworkPolicy } from "../../src/providers/daytona-network.ts";
 import type { Sandbox as DaytonaSandbox } from "@daytona/sdk";
 import type { DaytonaOptions } from "../../src/providers/daytona.types.ts";
 import type { Command } from "../../src/index.ts";
-import { repository } from "../helpers.ts";
+import { linuxHostMounts, repository } from "../helpers.ts";
 
 test("egress policies reject malformed, ambiguous and unrestricted domain patterns", () => {
   for (const policy of [
@@ -83,7 +83,7 @@ test("container deny-all is enforced at creation and survives caller mutation", 
     const networks = ["none"];
     const sandboxProvider = containerProvider(
       engine,
-      { egress: { mode: "deny-all" }, networks },
+      { egress: { mode: "deny-all" }, networks, ...linuxHostMounts },
       async (command) => {
         calls.push(command);
         return { status: 0, stdout: "", stderr: "" };

@@ -25,6 +25,10 @@ export function conversationStore(format: keyof typeof conversationStores) {
   return conversationStores[format]();
 }
 
+// A simulated Linux host cannot express Windows drive paths in SELinux --volume syntax.
+export const linuxHostMounts =
+  process.platform === "win32" ? { label: false as const } : {};
+
 export async function repository(t: TestContext): Promise<string> {
   const path = await mkdtemp(join(tmpdir(), "outpost-test-"));
   t.after(() => rm(path, { recursive: true, force: true, maxRetries: 5 }));

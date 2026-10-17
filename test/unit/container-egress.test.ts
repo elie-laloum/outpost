@@ -10,7 +10,7 @@ import { egressAccess } from "../../src/providers/egress/policy.ts";
 import { createEgressProxy } from "../../src/providers/egress/proxy.ts";
 import { tlsServerName } from "../../src/providers/egress/tls-hello.ts";
 import { egressCidr } from "../../src/providers/egress/address.ts";
-import { repository } from "../helpers.ts";
+import { linuxHostMounts, repository } from "../helpers.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 
 test("container allowlists reject unmanaged networks and invalid companion images", () => {
@@ -54,6 +54,7 @@ test("allowlists establish a private policy owner before creating the sandbox an
         image: "agent",
         ...(engine === "podman" ? { egressImage: "proxy" } : {}),
         egress: { mode: "allowlist", domains },
+        ...linuxHostMounts,
       },
       async (command) => {
         calls.push(command);

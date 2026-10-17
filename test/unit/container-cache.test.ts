@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { cacheMounts } from "../../src/providers/container-cache.ts";
 import { containerProvider } from "../../src/providers/container.ts";
 import type { Command } from "../../src/index.ts";
-import { repository } from "../helpers.ts";
+import { linuxHostMounts, repository } from "../helpers.ts";
 
 test("dependency caches require explicit safe names, keys and disjoint mounts", () => {
   for (const name of ["", "../.codex", "UPPER", "a/b", "a".repeat(49)])
@@ -96,7 +96,7 @@ test("engines mount only opted-in persistent caches and retain them after dispos
     const caches = [{ name: "npm", key: "lock-v1" }];
     const sandboxProvider = containerProvider(
       engine,
-      { caches, user: { uid: 1000, gid: 1000 } },
+      { caches, user: { uid: 1000, gid: 1000 }, ...linuxHostMounts },
       async (command) => {
         calls.push(command);
         return { status: 0, stdout: "1000:1000", stderr: "" };
@@ -204,6 +204,7 @@ test("Podman reuses an existing cache volume without recreating or deleting it",
     {
       caches: [{ name: "npm", key: "stable" }],
       user: { uid: 1000, gid: 1000 },
+      ...linuxHostMounts,
     },
     async (command) => {
       const args = command.arguments ?? [];
