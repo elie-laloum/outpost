@@ -14,6 +14,7 @@ import { invariant } from "../domain/errors.ts";
 import { inside } from "./files.ts";
 import {
   workspaceLocksDirectory,
+  workspaceRegistryPendingDeleteAttempts,
   workspaceRegistryStaleMs,
 } from "./workspace-lock.constants.ts";
 import type {
@@ -51,16 +52,25 @@ async function withRegistry<T>(action: () => Promise<T>): Promise<T> {
   const gate = join(workspaceLocksDirectory, "gate");
   let observed: string | undefined;
   let since = Date.now();
+  let pendingDeletes = 0;
   for (;;) {
     try {
       await mkdir(gate, { mode: 0o700 });
     } catch (error) {
+      if (
+        pendingDeletion(error) &&
+        ++pendingDeletes < workspaceRegistryPendingDeleteAttempts
+      ) {
+        await setTimeout(10);
+        continue;
+      }
       if (!(
         error instanceof Error &&
         "code" in error &&
         error.code === "EEXIST"
       ))
         throw error;
+      pendingDeletes = 0;
       // A gate that keeps changing belongs to live holders; only an unchanged one is reported.
       const current = await gateInstance(gate);
       if (current !== observed) since = Date.now();
@@ -75,18 +85,31 @@ async function withRegistry<T>(action: () => Promise<T>): Promise<T> {
     try {
       return await action();
     } finally {
-      await rm(gate, { recursive: true });
+      await rm(gate, { recursive: true, maxRetries: 5 });
     }
   }
 }
 
 async function gateInstance(gate: string): Promise<string | undefined> {
   const info = await lstat(gate, { bigint: true }).catch((error) => {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT")
+    if (
+      (error instanceof Error && "code" in error && error.code === "ENOENT") ||
+      pendingDeletion(error)
+    )
       return undefined;
     throw error;
   });
   return info && `${info.dev}:${info.ino}:${info.birthtimeNs}:${info.ctimeNs}`;
+}
+
+// Windows reports EPERM while a just-released gate is pending deletion.
+function pendingDeletion(error: unknown): boolean {
+  return (
+    process.platform === "win32" &&
+    error instanceof Error &&
+    "code" in error &&
+    error.code === "EPERM"
+  );
 }
 
 function parseLock(value: unknown): WorkspacePathLock {

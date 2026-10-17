@@ -7,3 +7,4 @@ export const workspaceLocksDirectory = join(
   `outpost-path-locks-${createHash("sha256").update(`${userInfo().username}:${homedir()}`).digest("hex").slice(0, 24)}`,
 );
 export const workspaceRegistryStaleMs = 10_000;
+export const workspaceRegistryPendingDeleteAttempts = 50;
