@@ -24,6 +24,7 @@ docs/test-results/
 docs/playwright-report/
 
 ARTIFACT.md
+AUDIT.md
 
 # Personal editor settings.
 .vscode/
