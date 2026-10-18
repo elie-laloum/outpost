@@ -1,6 +1,6 @@
 # Audit follow-up: final 60 findings
 
-This record reviews the remaining findings against the implementation. “Documented” preserves an intentional or compatibility-sensitive contract; it does not claim a new runtime capability. All changes are unreleased.
+This record reviews the remaining findings against the implementation. “Documented” preserves an intentional or compatibility-sensitive contract; it does not claim a new runtime capability. All changes shipped in 11.2.0.
 
 Disposition: 46 fixed, 12 documented, 1 not justified, 1 already covered.
 
@@ -90,4 +90,4 @@ Additional live validation on October 16, 2026 used private Docker sandboxes:
 - Daytona and Vercel rejected the configured credentials before allocation. Elevated cancellation, cloud cache behavior and staged environment transfer still require live checks with valid access.
 - Native macOS/Windows execution and a real Firecracker VM remain unvalidated. No test hosts or existing Firecracker configuration were available. Local KVM access alone does not validate the Firecracker provider or jailer.
 
-Successful native runs completed sandbox cleanup. Cloud SDK fixtures and simulated SSH regressions do not replace outstanding live checks. These changes remain unreleased.
+Successful native runs completed sandbox cleanup. Cloud SDK fixtures and simulated SSH regressions do not replace outstanding live checks. These changes shipped in 11.2.0; the live checks above remain outstanding.
