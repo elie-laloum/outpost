@@ -1582,8 +1582,10 @@ for (const locale of ["", "fr/"]) {
     await expect(article).toContainText("npm install @elie-laloum/outpost");
     await expect(article).toContainText("npm pkg set type=module");
     await expect(article).toContainText(
-      "--directory .outpost-image --image outpost:dev",
+      "outpost image eject --image codex --directory images/codex",
     );
+    await expect(article).toContainText("--tag outpost-codex:dev");
+    await expect(article).not.toContainText("outpost init");
     await expect(
       article.locator("pre").filter({ hasText: "export const coder" }),
     ).toHaveCount(1);
