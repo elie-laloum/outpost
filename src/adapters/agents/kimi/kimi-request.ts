@@ -7,6 +7,7 @@ import type { Command } from "../../../domain/command.types.ts";
 import { invariant } from "../../../domain/errors.ts";
 import type { KimiSettings } from "./kimi.types.ts";
 import type { Bound } from "../settings.types.ts";
+import { kimiServerBridge } from "./kimi-server.constants.ts";
 
 function modelOption(settings: Bound<KimiSettings>): readonly string[] {
   if (!settings.model) return [];
@@ -30,8 +31,18 @@ export function kimiRequest(
     "Kimi Code prompts must not exceed 65536 UTF-8 bytes, including profile instructions",
   );
   const args = [...modelOption(settings)];
+  if (input.continuation) validId(input.continuation.id);
+  if (input.liveInput && !input.interactive)
+    return {
+      executable: "node",
+      arguments: ["-e", kimiServerBridge],
+      stdin: `${JSON.stringify({
+        text: text ?? "",
+        model: modelOption(settings)[1],
+        session: input.continuation?.id,
+      })}\n`,
+    };
   if (input.continuation) {
-    validId(input.continuation.id);
     args.push("--session", input.continuation.id);
   }
   if (input.interactive) {

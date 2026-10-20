@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ajout du steering natif confirmé via le serveur RPC de Copilot et le serveur local authentifié de Kimi dans la sandbox. Les validations réelles Docker passent sur les quatre variantes de fichiers pour les deux CLI épinglées, ainsi que le steering par reprise pour Copilot, Kimi et Antigravity. Les configurations avec hooks natifs ou MCP conservent leur chemin print/reprise existant en attendant la validation serveur. Activation du terminal Antigravity en workspace fichiers après vérification réelle de l’accueil, des confirmations d’outils, du suivi, de la sortie, de l’annulation et de la réutilisation ; la reprise portable et l’injection native en cours de tour restent refusées.
+
 Cette version réorganise la CLI autour de la préparation des environnements et remplace l’image unique par une image par agent. Elle retire `outpost init` et exige donc une version majeure.
 
 - **Rupture :** Retrait de `outpost init` et des projets de workflow générés. Installez le paquet dans vos propres scripts, préparez une image avec `outpost image` et créez les fichiers de recette avec `outpost recipe init`.

@@ -32,12 +32,14 @@ const result = await running;
 
 ## Comment la consigne arrive à chaque agent
 
-| Agent                                                                                      | `mode`     | Ce qui se passe                                                                                                                     |
-| ------------------------------------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| [Harness intégré](../harness/)                                                             | `injected` | Ajoutée à la requête suivante au modèle, après les résultats d’outils en cours. Un modèle qui allait terminer continue.             |
-| [Claude Code](../claude-code/)                                                             | `injected` | Écrite sur son entrée stream-json. Elle rejoint le tour en cours, ou passe ensuite dans le même processus si Claude répondait déjà. |
-| [Codex](../codex/)                                                                         | `injected` | Un dispatch avec `steering` lance `codex app-server`. `turn/steer` ajoute le texte au tour actif, ou démarre le suivant.            |
-| [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost arrête le processus dès que sa conversation est connue, puis la reprend avec le texte dans la même sandbox.                 |
+| Agent                          | `mode`     | Ce qui se passe                                                                                                                     |
+| ------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [Harness intégré](../harness/) | `injected` | Ajoutée à la requête suivante au modèle, après les résultats d’outils en cours. Un modèle qui allait terminer continue.             |
+| [Claude Code](../claude-code/) | `injected` | Écrite sur son entrée stream-json. Elle rejoint le tour en cours, ou passe ensuite dans le même processus si Claude répondait déjà. |
+| [Codex](../codex/)             | `injected` | Un dispatch avec `steering` lance `codex app-server`. `turn/steer` ajoute le texte au tour actif, ou démarre le suivant.            |
+| [Copilot CLI](../copilot-cli/) | `injected` | Le serveur RPC natif accepte un message immédiat ; la livraison attend son événement de message utilisateur.                        |
+| [Kimi Code](../kimi-code/)     | `injected` | Le serveur authentifié dans la sandbox injecte le prompt en attente dans le tour actif et confirme sa consommation.                 |
+| [Antigravity](../antigravity/) | `resumed`  | Outpost arrête le processus dès que sa conversation est connue, puis la reprend avec le texte dans la même sandbox.                 |
 
 Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les fournisseurs de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne utilise un transfert de fichier et une commande du fournisseur, avec un léger délai.
 
@@ -100,4 +102,4 @@ Une remise `resumed` termine le tour interrompu par un événement `stopped` de 
 
 API : [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
 
-Copilot et Kimi peuvent n’exposer l’identifiant de conversation qu’à la fin du tour. Tant que cet identifiant manque, le steering attend : il ne peut interrompre puis reprendre une conversation non identifiée. Ne supposez pas une livraison en cours de tour avec ces adaptateurs natifs.
+Copilot et Kimi utilisent l’interruption/reprise lorsque des hooks natifs ou des serveurs MCP sont configurés, ou si la sandbox ne transmet pas l’entrée en direct. Dans ce cas, l’identifiant de conversation peut arriver seulement à la fin du tour ; la consigne attend alors. L’injection native a été validée dans Docker pour les versions CLI épinglées avec authentification de compte. Les autres combinaisons de fournisseurs et d’authentification restent à valider séparément.

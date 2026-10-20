@@ -56,7 +56,11 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     ...(configuration ? { configuration } : {}),
     bootstrap: "antigravity",
     resumable: true,
-    fileWorkspaces: Object.freeze({ dispatch: true, repairs: true }),
+    fileWorkspaces: Object.freeze({
+      dispatch: true,
+      repairs: true,
+      interactive: true,
+    }),
     forkable: false,
     capture: false,
     requiresFinishedEvent: true,

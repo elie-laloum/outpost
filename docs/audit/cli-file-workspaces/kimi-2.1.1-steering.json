@@ -1,0 +1,119 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "steering",
+  "startedAt": "2026-10-20T14:24:36.084Z",
+  "status": "passed",
+  "phase": "mount-write/steering",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 4171,
+        "cached": 97536,
+        "output": 568,
+        "complete": false,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 3998,
+        "cached": 97792,
+        "output": 563,
+        "complete": false,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 4151,
+        "cached": 98304,
+        "output": 760,
+        "complete": false,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 2131,
+        "cached": 99711,
+        "output": 590,
+        "complete": false,
+        "cacheCreated": 0
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-20T14:27:08.561Z"
+}

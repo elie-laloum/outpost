@@ -1,0 +1,32 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default-terminal",
+  "mode": "live",
+  "suite": "interactive",
+  "startedAt": "2026-10-20T14:32:12.504Z",
+  "status": "failed",
+  "phase": "ephemeral/interactive",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "interactive",
+      "status": "failed",
+      "step": "terminal-initial-prompt",
+      "versions": ["1.2.12"],
+      "checks": [],
+      "turns": 0
+    }
+  ],
+  "cleanup": true,
+  "failure": {
+    "kind": "execution",
+    "reason": "timeout",
+    "signals": ["timeout"]
+  },
+  "finishedAt": "2026-10-20T14:35:15.800Z"
+}

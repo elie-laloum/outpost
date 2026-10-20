@@ -6,6 +6,8 @@ import { invariant } from "../../../domain/errors.ts";
 import { copilotMcpArguments } from "./copilot-mcp.ts";
 import type { CopilotSettings } from "./copilot.types.ts";
 import type { Bound } from "../settings.types.ts";
+import { copilotRpcBridge } from "./copilot-rpc.constants.ts";
+import { copilotRpcInitialize } from "./copilot-rpc.ts";
 
 export function copilotRequest(
   settings: Bound<CopilotSettings>,
@@ -17,8 +19,25 @@ export function copilotRequest(
     "GitHub Copilot CLI does not support automated fork in Outpost",
   );
   const args: string[] = [...copilotMcpArguments(settings.mcpServers)];
+  if (input.continuation) validId(input.continuation.id);
+  if (input.liveInput && !input.interactive)
+    return {
+      executable: "node",
+      arguments: [
+        "-e",
+        copilotRpcBridge,
+        JSON.stringify([
+          ...args,
+          "--headless",
+          "--stdio",
+          "--no-auto-update",
+          "--allow-all",
+          "--no-ask-user",
+        ]),
+      ],
+      stdin: copilotRpcInitialize(settings, input),
+    };
   if (input.continuation) {
-    validId(input.continuation.id);
     args.push("--resume", input.continuation.id);
   }
   if (settings.model) args.push("--model", settings.model.name);

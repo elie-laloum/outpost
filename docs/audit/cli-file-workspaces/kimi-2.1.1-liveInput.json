@@ -1,0 +1,111 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "liveInput",
+  "startedAt": "2026-10-20T14:33:44.660Z",
+  "status": "passed",
+  "phase": "mount-write/liveInput",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "liveInput",
+      "status": "passed",
+      "step": "verify-live-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "native-live-injection",
+        "single-cli-turn",
+        "no-interrupt-or-resume",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 762,
+        "cached": 60516,
+        "output": 589,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "liveInput",
+      "status": "passed",
+      "step": "verify-live-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "native-live-injection",
+        "single-cli-turn",
+        "no-interrupt-or-resume",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 1045,
+        "cached": 59904,
+        "output": 420,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "liveInput",
+      "status": "passed",
+      "step": "verify-live-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "native-live-injection",
+        "single-cli-turn",
+        "no-interrupt-or-resume",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 931,
+        "cached": 59904,
+        "output": 334,
+        "cacheCreated": 0
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "liveInput",
+      "status": "passed",
+      "step": "verify-live-delivery",
+      "versions": ["2.1.1"],
+      "checks": [
+        "tool-triggered-input",
+        "native-live-injection",
+        "single-cli-turn",
+        "no-interrupt-or-resume",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 1,
+      "usage": {
+        "input": 967,
+        "cached": 60532,
+        "output": 687,
+        "cacheCreated": 0
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-20T14:36:21.343Z"
+}

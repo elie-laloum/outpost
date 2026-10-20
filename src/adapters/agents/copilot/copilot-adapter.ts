@@ -25,7 +25,11 @@ import {
 import { transientNoticePatterns } from "../unavailable.constants.ts";
 import { copilotUsage } from "./copilot-usage.ts";
 import { sessionUsageCommand, sessionUsageResult } from "../session-usage.ts";
-import type { AgentAdapter, CliHarness } from "../../../domain/agent.types.ts";
+import type {
+  AgentAdapter,
+  AgentInput,
+  CliHarness,
+} from "../../../domain/agent.types.ts";
 import type { AgentModel } from "../../../domain/model.types.ts";
 import { credentialPlanner } from "../authentication.ts";
 import { copilotCredentials } from "./copilot-authentication.ts";
@@ -38,6 +42,7 @@ import {
   supportModel,
 } from "../model-support.ts";
 import type { Bound } from "../settings.types.ts";
+import { copilotRpcSession } from "./copilot-rpc.ts";
 
 function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
   supportModel(copilotModelSupport, settings.model);
@@ -67,6 +72,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
       repairs: true,
       continuation: true,
       interactive: true,
+      liveInput: true,
     }),
     forkable: false,
     ...conversationStorage(settings, createCopilotConversations),
@@ -76,6 +82,13 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
       ...settings.variables,
     }),
     request: (input) => copilotRequest(settings, input),
+    ...(settings.hooks?.length || Object.keys(settings.mcpServers ?? {}).length
+      ? {}
+      : {
+          liveInput: Object.freeze({
+            open: (input: AgentInput) => copilotRpcSession(settings, input),
+          }),
+        }),
     events: copilotEvents,
     quota: textMatcher(copilotQuotaPatterns),
     unavailable: textMatcher(

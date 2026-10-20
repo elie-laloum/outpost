@@ -127,6 +127,21 @@ const timer = setInterval(() => {
   }
   const compact = screen.replace(/\s/g, "");
   if (
+    descriptor.name === "antigravity" &&
+    /TermsofService&DataUse/.test(compact) &&
+    /\[Done\]/.test(compact)
+  ) {
+    write(
+      `${/\[x\]Yes,Iagree/.test(compact) ? "\r" : ""}\u001b[B\u001b[C\r`,
+      "complete-onboarding-without-interaction-data",
+    );
+    return;
+  }
+  if (descriptor.name === "antigravity" && />1\.Yes,/.test(compact)) {
+    write("\r", "approve-owned-workspace-command-once");
+    return;
+  }
+  if (
     descriptor.name === "kimi" &&
     /approve/i.test(compact) &&
     /select/i.test(compact)
@@ -143,7 +158,7 @@ const timer = setInterval(() => {
     return;
   }
   if (/Yes,Itrust/i.test(compact)) {
-    if (/❯Yes,Itrust/i.test(compact)) {
+    if (/(?:❯|>)Yes,Itrust/i.test(compact)) {
       write("\r", "confirm-trust-owned-workspace");
       return;
     }

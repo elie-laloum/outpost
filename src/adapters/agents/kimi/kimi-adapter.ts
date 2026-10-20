@@ -36,6 +36,7 @@ import { credentialPlanner } from "../authentication.ts";
 import { kimiCredentials } from "./kimi-authentication.ts";
 import { kimiEvents } from "./kimi-events.ts";
 import { kimiRequest } from "./kimi-request.ts";
+import { kimiServerInput } from "./kimi-server.ts";
 import type { KimiSettings } from "./kimi.types.ts";
 import {
   configuredSettings,
@@ -67,12 +68,16 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
     bootstrap: "kimi",
+    ...(settings.hooks?.length || Object.keys(settings.mcpServers ?? {}).length
+      ? {}
+      : { liveInput: kimiServerInput }),
     resumable: true,
     fileWorkspaces: Object.freeze({
       dispatch: true,
       repairs: true,
       continuation: true,
       interactive: true,
+      liveInput: true,
     }),
     forkable: true,
     fork: forkKimi,

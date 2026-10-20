@@ -7,6 +7,7 @@ import { parseArgs } from "node:util";
 import {
   createAgent,
   createLocalTransport,
+  createSteering,
   createWorkspace,
   defineJsonResponse,
   dispatch,
@@ -16,12 +17,14 @@ import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { OutpostError } from "../src/domain/errors.ts";
 import { validateLiveInput } from "./cli-file-live-input.mjs";
 import { validateInteractive } from "./cli-file-interactive.mjs";
+import { validateSteering } from "./cli-file-steering.mjs";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     live: { type: "boolean", default: false },
     preflight: { type: "boolean", default: false },
+    "live-protocol": { type: "boolean", default: false },
     help: { type: "boolean", default: false },
     image: { type: "string" },
     model: { type: "string" },
@@ -35,10 +38,11 @@ const { values, positionals } = parseArgs({
 
 if (values.help) {
   console.log(`Usage: node scripts/cli-file-live.mjs <${builtInAgents.map((agent) => agent.name).join("|")}> --image IMAGE (--preflight | --live --model MODEL)
-  --suite dispatch|repairs|continuation|liveInput|interactive|all (default: repairs)
+  --suite dispatch|repairs|continuation|liveInput|steering|interactive|all (default: repairs)
   --auth usage|account-token|account (default: usage; account requires explicit permission to use host sessions)
   --region global|mainland-cn (Kimi account region)
   --binding all|ephemeral|copy|mount-readonly|mount-write (default: all)
+  --live-protocol (exercise dispatch, repairs or continuation through the live-input protocol)
   --report PATH (default: a unique /tmp/outpost-cli-file-*.json)
 Runs ephemeral, directory copy, read-only mount and writable mount sequentially.
 Preflight checks container CLI versions and workspaces only; it makes no model calls.
@@ -67,11 +71,17 @@ assert.ok(
     "repairs",
     "continuation",
     "liveInput",
+    "steering",
     "interactive",
     "all",
   ].includes(values.suite),
   "Unknown suite",
 );
+if (values["live-protocol"])
+  assert.ok(
+    ["dispatch", "repairs", "continuation"].includes(values.suite),
+    "--live-protocol requires dispatch, repairs or continuation",
+  );
 assert.ok(
   !values.live || values.model || values.auth === "account",
   "Environment-key live validation requires an explicit model",
@@ -121,6 +131,7 @@ const report = {
   status: "running",
   phase: "setup",
   temporaryCapabilityOverride: values.live,
+  ...(values["live-protocol"] ? { liveProtocol: true } : {}),
   cases: [],
   cleanup: false,
 };
@@ -165,11 +176,14 @@ function candidate() {
       bind(model) {
         return {
           ...harness.bind(model),
+          ...(values.suite === "steering" ? { liveInput: undefined } : {}),
           fileWorkspaces: {
             dispatch: true,
             ...(wantsRepair ? { repairs: true } : {}),
             ...(wantsContinuation ? { continuation: true } : {}),
-            ...(wantsLiveInput ? { liveInput: true } : {}),
+            ...(wantsLiveInput || values["live-protocol"]
+              ? { liveInput: true }
+              : {}),
             ...(wantsInteractive ? { interactive: true } : {}),
           },
         };
@@ -180,6 +194,11 @@ function candidate() {
   const variables = choice.variable
     ? { [choice.variable]: process.env[choice.variable] }
     : {};
+  if (values["live-protocol"])
+    assert.ok(
+      agent.liveInput,
+      "The selected adapter has no live-input protocol",
+    );
   if (choice.variable)
     assert.ok(variables[choice.variable], `Missing ${choice.variable}`);
   const plan = agent.credentials?.(variables);
@@ -338,8 +357,20 @@ async function validate(binding, scenario) {
     signal: controller.signal,
     deadlineMs: 180_000,
     idleMs: 60_000,
+    ...(values["live-protocol"] ? { steering: createSteering() } : {}),
   };
   const secret = randomUUID();
+  if (scenario === "steering") {
+    await validateSteering({
+      common,
+      workspace,
+      sandboxProvider,
+      record,
+      response,
+    });
+    record.status = "passed";
+    return;
+  }
   if (scenario === "liveInput") {
     await validateLiveInput({
       common,
@@ -515,6 +546,7 @@ try {
           ...(wantsRepair ? ["repairs"] : []),
           ...(wantsContinuation ? ["continuation"] : []),
           ...(wantsLiveInput ? ["liveInput"] : []),
+          ...(values.suite === "steering" ? ["steering"] : []),
           ...(wantsInteractive ? ["interactive"] : []),
         ];
     for (const scenario of scenarios) await validate(binding, scenario);

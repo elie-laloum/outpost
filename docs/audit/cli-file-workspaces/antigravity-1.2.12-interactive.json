@@ -1,0 +1,94 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default-terminal",
+  "mode": "live",
+  "suite": "interactive",
+  "startedAt": "2026-10-20T14:36:11.041Z",
+  "status": "passed",
+  "phase": "mount-write/interactive",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["1.2.12"],
+      "checks": [
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "copy",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["1.2.12"],
+      "checks": [
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["1.2.12"],
+      "checks": [
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "interactive",
+      "status": "passed",
+      "step": "terminal-cancellation",
+      "versions": ["1.2.12"],
+      "checks": [
+        "host-pty",
+        "container-tty",
+        "interactive-initial-prompt",
+        "terminal-followup-input",
+        "two-file-effects",
+        "clean-cli-exit",
+        "idle-cli-cancellation",
+        "warm-sandbox-reuse"
+      ],
+      "turns": 2,
+      "exitStatus": 0
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-20T14:40:21.120Z"
+}

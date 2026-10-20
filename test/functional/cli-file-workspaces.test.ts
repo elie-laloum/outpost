@@ -51,6 +51,17 @@ for (const descriptor of builtInAgents) {
       fileWorkspaces: { ...agent.fileWorkspaces, dispatch: true },
     };
     await validateFileAgent(candidate, { brief: { text: "Process files" } });
+    if (!agent.liveInput) {
+      const steering = createSteering();
+      try {
+        await validateFileAgent(candidate, {
+          brief: { text: "Process files" },
+          steering,
+        });
+      } finally {
+        steering.close();
+      }
+    }
     const continuation = {
       brief: { text: "Continue" },
       continuation: { id: "session" },

@@ -1,0 +1,110 @@
+{
+  "agent": "antigravity",
+  "pinnedVersion": "1.2.12",
+  "image": "outpost-catalog:antigravity",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "steering",
+  "startedAt": "2026-10-20T14:33:01.335Z",
+  "status": "passed",
+  "phase": "mount-write/steering",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.2.12"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 69437,
+        "cached": 0,
+        "output": 2914
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.2.12"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 69717,
+        "cached": 0,
+        "output": 3677
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.2.12"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 43746,
+        "cached": 95544,
+        "output": 11255
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.2.12"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 22220,
+        "cached": 62314,
+        "output": 11204
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-20T14:37:07.081Z"
+}

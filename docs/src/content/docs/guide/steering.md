@@ -32,12 +32,14 @@ const result = await running;
 
 ## How it reaches each agent
 
-| Agent                                                                                      | `mode`     | What happens                                                                                                                   |
-| ------------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [Built-in harness](../harness/)                                                            | `injected` | Added to the next model request, after the current tool results. A model about to finish continues instead.                    |
-| [Claude Code](../claude-code/)                                                             | `injected` | Written to its stream-json input. It joins the running turn, or runs next in the same process if Claude was already answering. |
-| [Codex](../codex/)                                                                         | `injected` | A steered dispatch runs `codex app-server`. `turn/steer` adds the text to the active turn, or starts the next one.             |
-| [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost stops the process once its conversation is known, then resumes it with the text in the same sandbox.                   |
+| Agent                           | `mode`     | What happens                                                                                                                   |
+| ------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [Built-in harness](../harness/) | `injected` | Added to the next model request, after the current tool results. A model about to finish continues instead.                    |
+| [Claude Code](../claude-code/)  | `injected` | Written to its stream-json input. It joins the running turn, or runs next in the same process if Claude was already answering. |
+| [Codex](../codex/)              | `injected` | A steered dispatch runs `codex app-server`. `turn/steer` adds the text to the active turn, or starts the next one.             |
+| [Copilot CLI](../copilot-cli/)  | `injected` | The native RPC server accepts an immediate message; delivery waits for its user-message event.                                 |
+| [Kimi Code](../kimi-code/)      | `injected` | The authenticated server inside the sandbox steers the queued prompt into the active turn and confirms consumption.            |
+| [Antigravity](../antigravity/)  | `resumed`  | Outpost stops the process once its conversation is known, then resumes it with the text in the same sandbox.                   |
 
 With `resumed`, the action in progress is cut short, but files already changed stay in the workspace. Every sandbox provider carries live input; on Vercel and Daytona each instruction uses a file upload and one provider command and arrives a moment later.
 
@@ -100,4 +102,4 @@ A `resumed` delivery ends the interrupted turn with a `stopped` event of reason 
 
 API: [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
 
-Copilot and Kimi may expose their conversation identifier only at the end of a turn. Until that identifier is available, steering waits; it cannot interrupt and resume an unidentified conversation. Do not assume mid-turn delivery with these native adapters.
+Copilot and Kimi use interruption/resume when native hooks or MCP servers are configured, or the sandbox lease lacks live input. In that fallback, the conversation identifier may arrive only at the end of the turn; the instruction then waits. Native injection has been validated in Docker for the pinned CLI versions with account authentication. Other provider/authentication combinations remain separate live checks.

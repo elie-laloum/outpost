@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add acknowledged native steering through the Copilot RPC server and the authenticated Kimi loopback server inside the sandbox. Live Docker checks pass all four file bindings for both pinned CLIs, and resume-based steering for Copilot, Kimi and Antigravity. Keep native hooks/MCP on their existing print-mode resume path until server combinations are validated. Enable Antigravity file-workspace terminals after real onboarding, tool-confirmation, follow-up, exit, cancellation and reuse checks; portable continuation and in-flight native injection remain refused.
+
 This release reorganizes the CLI around preparing environments and replaces the all-agent image with one image per agent. It removes `outpost init`, so it requires a major version.
 
 - **Breaking:** Remove `outpost init` and the generated workflow projects. Install the package in your own scripts, prepare an image with `outpost image`, and create recipe files with `outpost recipe init`.

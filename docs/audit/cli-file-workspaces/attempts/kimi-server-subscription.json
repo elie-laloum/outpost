@@ -1,0 +1,37 @@
+{
+  "agent": "kimi",
+  "pinnedVersion": "2.1.1",
+  "image": "outpost-catalog:kimi",
+  "model": null,
+  "authentication": "account",
+  "region": "global",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "continuation",
+  "startedAt": "2026-10-20T14:47:33.546Z",
+  "status": "failed",
+  "phase": "ephemeral/continuation",
+  "temporaryCapabilityOverride": true,
+  "liveProtocol": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "continuation",
+      "status": "failed",
+      "step": "warm-continuation",
+      "versions": ["2.1.1"],
+      "checks": [],
+      "turns": 0
+    }
+  ],
+  "cleanup": true,
+  "failure": {
+    "kind": "execution",
+    "code": "process",
+    "status": 1,
+    "reason": "unclassified",
+    "signals": [],
+    "origin": "src/application/agent-turn.ts:166:13"
+  },
+  "finishedAt": "2026-10-20T14:48:10.197Z"
+}

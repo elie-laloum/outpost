@@ -1,0 +1,118 @@
+{
+  "agent": "copilot",
+  "pinnedVersion": "1.0.88",
+  "image": "outpost-catalog:copilot",
+  "model": null,
+  "authentication": "account",
+  "variant": "native-default",
+  "mode": "live",
+  "suite": "steering",
+  "startedAt": "2026-10-20T14:20:57.982Z",
+  "status": "passed",
+  "phase": "mount-write/steering",
+  "temporaryCapabilityOverride": true,
+  "cases": [
+    {
+      "binding": "ephemeral",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.0.88"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 82030,
+        "cached": 65206,
+        "output": 302,
+        "complete": false,
+        "cacheCreated": 16809
+      }
+    },
+    {
+      "binding": "copy",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.0.88"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 82030,
+        "cached": 65223,
+        "output": 303,
+        "complete": false,
+        "cacheCreated": 16792
+      }
+    },
+    {
+      "binding": "mount-readonly",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.0.88"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 82044,
+        "cached": 65226,
+        "output": 289,
+        "complete": false,
+        "cacheCreated": 16803
+      }
+    },
+    {
+      "binding": "mount-write",
+      "scenario": "steering",
+      "status": "passed",
+      "step": "verify-resumed-delivery",
+      "versions": ["1.0.88"],
+      "checks": [
+        "tool-triggered-input",
+        "resumed-steering",
+        "same-conversation",
+        "same-sandbox",
+        "steered-file",
+        "typed-json",
+        "report-v2"
+      ],
+      "turns": 2,
+      "interrupted": true,
+      "usage": {
+        "input": 81980,
+        "cached": 65191,
+        "output": 258,
+        "complete": false,
+        "cacheCreated": 16774
+      }
+    }
+  ],
+  "cleanup": true,
+  "finishedAt": "2026-10-20T14:23:15.693Z"
+}

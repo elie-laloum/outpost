@@ -1,7 +1,8 @@
 import { toolResult } from "../tool-result.ts";
 import type { AgentEvent } from "../../../domain/agent.types.ts";
 import { decodeLine } from "../event-decoder.ts";
-import { asRecord } from "../protocol.ts";
+import { asRecord, decodeRecord } from "../protocol.ts";
+import { kimiServerEvents } from "./kimi-server.ts";
 import type { EventDecoders, ProtocolRecord } from "../protocol.types.ts";
 
 function toolInput(value: unknown): unknown {
@@ -47,6 +48,8 @@ const meta: EventDecoders = {
 };
 
 export function kimiEvents(line: string): AgentEvent[] {
+  const message = decodeRecord(line);
+  if (message?.role === "outpost-server") return kimiServerEvents(message);
   return decodeLine(
     line,
     {
