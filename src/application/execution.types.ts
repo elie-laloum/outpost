@@ -22,6 +22,7 @@ export type ExecutionWorkspace =
     };
 
 export interface DispatchOptions<T = undefined> {
+  readonly runId?: string;
   readonly watchdog?: WatchdogOptions;
   readonly prices?: ModelPriceTable;
   readonly redact?: readonly RegExp[];
@@ -91,6 +92,7 @@ export interface ActivityWatchdog {
 }
 
 export interface Execution<T> {
+  readonly runId?: string;
   readonly text: string;
   readonly turns: readonly Turn[];
   readonly usage: Usage;

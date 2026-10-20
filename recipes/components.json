@@ -270,6 +270,7 @@
       "continuation": "native",
       "continuation.id": "native",
       "continuation.fork": "native",
+      "runId": "native",
       "watchdog": "native",
       "watchdog.repetition": "native",
       "watchdog.repetition.window": "native",
@@ -994,6 +995,7 @@
       "continuation": "native",
       "continuation.id": "native",
       "continuation.fork": "native",
+      "runId": "native",
       "watchdog": "native",
       "watchdog.repetition": "native",
       "watchdog.repetition.window": "native",
@@ -1216,6 +1218,7 @@
       "start.budget.usage.cached": "native",
       "start.budget.usage.cacheCreated": "native",
       "start.budget.usage.output": "native",
+      "start.runId": "native",
       "start.redact": "native",
       "start.redact[].pattern": "native",
       "start.redact[].flags": "native",
@@ -1272,6 +1275,34 @@
       "maxResponseBytes": "native"
     },
     "test": "test/functional/recipe-harness.test.ts"
+  },
+  "observation.client": {
+    "kind": "observation",
+    "lot": 1,
+    "experimental": false,
+    "owned": true,
+    "options": {
+      "transporter": "native",
+      "heartbeatMs": "native",
+      "abandonAfterMs": "native",
+      "redact": "native",
+      "redact[].pattern": "native",
+      "redact[].flags": "native",
+      "sinks": "native",
+      "sinks[]": "native",
+      "scope": "native",
+      "scope.executionId": "native",
+      "scope.taskKey": "native",
+      "scope.attempt": "native",
+      "scope.dispatchId": "native",
+      "scope.pass": "native",
+      "scope.subagentId": "native",
+      "scope.candidate": "native",
+      "capacity": "native",
+      "deliveryTimeoutMs": "native",
+      "verbose": "native"
+    },
+    "test": "test/functional/recipe-runtime.test.ts"
   },
   "observation.hub": {
     "kind": "observation",
@@ -2668,10 +2699,10 @@
     "owned": false,
     "options": {
       "input": "extension",
+      "runId": "extension",
       "handler": "native",
       "name": "native",
-      "cron": "native",
-      "runId": "extension"
+      "cron": "native"
     },
     "test": "test/functional/recipe-services.test.ts"
   },
@@ -2941,6 +2972,7 @@
       "candidates[].agent": "native",
       "candidates[].request": "native",
       "candidates[].request.observation": "native",
+      "candidates[].request.runId": "native",
       "candidates[].request.watchdog": "native",
       "candidates[].request.watchdog.repetition": "native",
       "candidates[].request.watchdog.repetition.window": "native",
@@ -3325,6 +3357,7 @@
       "budget.usage.cached": "native",
       "budget.usage.cacheCreated": "native",
       "budget.usage.output": "native",
+      "runId": "native",
       "redact": "native",
       "redact[].pattern": "native",
       "redact[].flags": "native",

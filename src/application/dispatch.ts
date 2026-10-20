@@ -145,6 +145,7 @@ async function dispatchOperation<T>(
   }
   const sandbox = await createSandbox(options);
   const {
+    runId: _runId,
     brief: _brief,
     response: _response,
     continuation: _continuation,

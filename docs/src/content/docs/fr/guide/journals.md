@@ -82,10 +82,10 @@ Référence API : [ObservationEvent](../../reference/observationevent/) et [Agen
 Le [harness intégré](../harness/) n’émet `model-request` et `model-response` que sur un hub verbeux. Pour enregistrer les échanges complets avec le modèle, passez-en un avec un journal `verbose` :
 
 ```ts
-import { createObservationHub, dispatch } from "@elie-laloum/outpost";
+import { createObservation, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
-const observation = createObservationHub({ verbose: true });
+const observation = createObservation({ verbose: true });
 await dispatch({
   repository,
   sandboxProvider,
@@ -133,4 +133,4 @@ Les journaux restent dans leur transport jusqu’à ce que vous les supprimiez. 
 - Un journal est écrit par un récepteur du [hub d’observation](../observability/). Il partage la file limitée du hub (`capacity`, `deliveryTimeoutMs`) : si son transport échoue ou prend du retard, le journal peut manquer des événements, être désactivé pour le reste de l’exécution ou rester ouvert, et l’échec apparaît dans `result.observerErrors` (dans `recoveryDetails(error)` quand le dispatch échoue). `readJournal()` renvoie alors les événements écrits avant l’échec.
 - Les journaux contiennent les prompts, les messages de l’agent et les résultats d’outils, donc du contenu du dépôt. Stockez-les et partagez-les avec le même soin que le code ; `replayable` y ajoute les patchs de chaque commit.
 
-API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservationHub](../../reference/createobservationhub/).
+API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservation](../../reference/createobservation/).

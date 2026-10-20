@@ -1,5 +1,13 @@
 export const nativeRecipeTypes = [
   [
+    "observation.client",
+    "ObservationOptions",
+    "infrastructure/observation-client.types.ts",
+    null,
+    null,
+    1,
+  ],
+  [
     "observation.hub",
     "ObservationHubOptions",
     "domain/observation.types.ts",

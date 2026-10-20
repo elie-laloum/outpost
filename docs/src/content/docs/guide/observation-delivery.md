@@ -12,12 +12,12 @@ This offline example still returns `hello` when the sink rejects every event. Ru
 ```ts
 import assert from "node:assert/strict";
 import {
-  createObservationHub,
+  createObservation,
   defineTask,
   defineWorkflow,
 } from "@elie-laloum/outpost";
 
-const observation = createObservationHub({
+const observation = createObservation({
   sinks: [
     {
       observe() {
@@ -47,14 +47,14 @@ A sink that returns nothing runs during emission, so keep it fast. A sink that r
 | A delivery exceeds `deliveryTimeoutMs`.       | The sink is disabled. Its pending promise keeps running.                        |
 | A sink throws or rejects.                     | The error joins `errors` and the run’s `observerErrors`. The run is unaffected. |
 
-`dispatch()` and `start()` drain their deliveries before they return. `flush()` drains the hub at any time; `close()` drains it and stops accepting events.
+`dispatch()` and `start()` drain their deliveries before they return. `observation.flush()` drains current delivery, including active persisted sessions. `observation.close()` prevents new executions, waits for active sessions without cancelling them, then closes delivery. Sinks and transports remain borrowed.
 
 <!-- tabs -->
 
 ```ts title="slow-observer.ts"
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
-export const observation = createObservationHub({
+export const observation = createObservation({
   deliveryTimeoutMs: 2_000,
   sinks: [
     {
@@ -91,11 +91,15 @@ A single protocol line above 16 MiB stops a CLI agent. The hub and `observe` rec
 
 ## Handle agent events asynchronously
 
-`createCustomReporter()` builds an `observe` callback from handlers keyed by event kind. Handlers may be asynchronous; they run on a bounded queue like hub sinks.
+`createCustomReporter()` builds a sink from handlers keyed by agent event kind; it also remains callable as an `observe` callback. Handlers may be asynchronous; they run on a bounded queue like hub sinks.
 
 ```ts
 import { appendFile } from "node:fs/promises";
-import { createCustomReporter, dispatch } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createCustomReporter,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const report = createCustomReporter({
@@ -103,23 +107,26 @@ const report = createCustomReporter({
     await appendFile("tools.log", `${event.at} ${event.name}\n`);
   },
 });
+await using observation = createObservation({ sinks: [report] });
 await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
-  observe: report,
+  observation,
 });
 await report.flush();
 ```
 
 The dispatch waits for pending handlers before it returns and reports the first handler error in `result.observerErrors`. `report.flush()` rethrows that error. The second argument takes `onError`, called for each failure, plus the hub’s `capacity` and `deliveryTimeoutMs`.
 
+Owned run-receiver cleanup is also bounded by `deliveryTimeoutMs`. A stalled transport cannot hold the execution’s final cleanup indefinitely. Timing out does not abort a pending write on the borrowed transport; inspect observation errors and keep its owner responsible for outstanding I/O.
+
 ## Limits
 
-- The hub is a live, in-memory stream: it stores nothing, and a slow sink loses events. To read events after the run, use the dispatch’s [journal](../journals/), itself a sink with the same `capacity` and `deliveryTimeoutMs` bounds.
-- A disabled sink stays disabled for the hub’s lifetime, and `errors` keeps the first 100 errors.
-- A closed hub ignores new events. A hub reused across runs keeps its `errors` and `dropped` count, so each run’s `observerErrors` includes earlier errors.
+- Delivery uses bounded in-memory queues. Configure `transporter` on `createObservation()` to record [run state](../run-state/), or read the dispatch’s [journal](../journals/). Both persistence paths can lose events when their sinks fall behind.
+- A disabled sink stays disabled for its delivery session. Each hub bounds its error history to 100 entries; the client also retains bounded errors from completed persisted sessions.
+- Persisted executions have independent delivery sessions and event sequences. The client aggregates their errors and losses. Without persistence, the shared in-memory hub retains its counters and delivery state across runs. Closed hubs ignore emitted events; closed clients refuse new executions.
 - Events emitted on a remote [worker](../job-queues/) stay on that worker’s hub.
 
-API: [Delivery options](../../reference/observationhuboptions/) · [Hub lifecycle and counters](../../reference/observationhub/) · [Custom reporter](../../reference/createcustomreporter/).
+API: [Delivery options](../../reference/observationoptions/) · [Client lifecycle and counters](../../reference/observationclient/) · [Custom reporter](../../reference/createcustomreporter/).

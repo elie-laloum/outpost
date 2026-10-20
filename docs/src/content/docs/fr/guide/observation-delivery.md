@@ -12,12 +12,12 @@ Cet exemple hors ligne rend toujours `hello`, même si le récepteur refuse chaq
 ```ts
 import assert from "node:assert/strict";
 import {
-  createObservationHub,
+  createObservation,
   defineTask,
   defineWorkflow,
 } from "@elie-laloum/outpost";
 
-const observation = createObservationHub({
+const observation = createObservation({
   sinks: [
     {
       observe() {
@@ -47,14 +47,14 @@ Un récepteur qui ne renvoie rien s’exécute pendant l’émission : gardez-le
 | Une livraison dépasse `deliveryTimeoutMs`.                  | Le récepteur est désactivé. Sa promesse en cours continue de s’exécuter.                  |
 | Un récepteur lève une exception ou rejette.                 | L’erreur rejoint `errors` et les `observerErrors` de l’exécution, qui n’est pas affectée. |
 
-`dispatch()` et `start()` vident leurs livraisons avant de rendre la main. `flush()` vide le hub à tout moment ; `close()` le vide et cesse d’accepter des événements.
+`dispatch()` et `start()` vident leurs livraisons avant de rendre la main. `observation.flush()` vide les livraisons actuelles, y compris celles des suivis persistés actifs. `observation.close()` refuse les nouvelles exécutions, attend les suivis actifs sans les annuler, puis ferme la livraison. Sorties et transports restent empruntés.
 
 <!-- tabs -->
 
 ```ts title="slow-observer.ts"
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
-export const observation = createObservationHub({
+export const observation = createObservation({
   deliveryTimeoutMs: 2_000,
   sinks: [
     {
@@ -91,11 +91,15 @@ Une ligne de protocole de plus de 16 Mio arrête un agent CLI. Le hub et `observ
 
 ## Traiter les événements d’agent de façon asynchrone
 
-`createCustomReporter()` construit une fonction de rappel `observe` à partir de traitements indexés par type d’événement. Les traitements peuvent être asynchrones ; ils passent par une file limitée, comme les récepteurs du hub.
+`createCustomReporter()` construit une sortie à partir de traitements indexés par type d’événement d’agent ; il reste aussi appelable comme callback `observe`. Les traitements peuvent être asynchrones ; ils passent par une file limitée, comme les récepteurs du hub.
 
 ```ts
 import { appendFile } from "node:fs/promises";
-import { createCustomReporter, dispatch } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createCustomReporter,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const report = createCustomReporter({
@@ -103,23 +107,26 @@ const report = createCustomReporter({
     await appendFile("tools.log", `${event.at} ${event.name}\n`);
   },
 });
+await using observation = createObservation({ sinks: [report] });
 await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
-  observe: report,
+  observation,
 });
 await report.flush();
 ```
 
 Le dispatch attend les traitements en cours avant de rendre la main et signale la première erreur de traitement dans `result.observerErrors`. `report.flush()` relance cette erreur. Le second argument accepte `onError`, appelé à chaque échec, ainsi que `capacity` et `deliveryTimeoutMs` pour la file.
 
+La fermeture du destinataire d’exécution possédé est aussi bornée par `deliveryTimeoutMs`. Un transport bloqué ne retient pas indéfiniment le nettoyage final de l’exécution. Ce délai n’annule pas une écriture en cours sur le transport emprunté ; examinez les erreurs d’observation et laissez son propriétaire gérer les entrées-sorties restantes.
+
 ## Limites
 
-- Le hub est un flux en mémoire et en direct : il ne stocke rien, et un récepteur lent perd des événements. Pour relire les événements après l’exécution, utilisez le [journal](../journals/) du dispatch, lui-même un récepteur soumis aux mêmes limites `capacity` et `deliveryTimeoutMs`.
-- Un récepteur désactivé le reste pendant toute la vie du hub, et `errors` conserve les 100 premières erreurs.
-- Un hub fermé ignore les nouveaux événements. Un hub réutilisé entre plusieurs exécutions conserve ses `errors` et son compteur `dropped` : les `observerErrors` de chaque exécution incluent alors les erreurs précédentes.
+- La livraison utilise des files bornées en mémoire. Configurez `transporter` sur `createObservation()` pour enregistrer [l’état des exécutions](../run-state/), ou lisez le [journal](../journals/) du dispatch. Ces deux chemins de persistance peuvent perdre des événements si leurs destinataires prennent du retard.
+- Un destinataire désactivé le reste pendant sa session de livraison. Chaque hub limite son historique à 100 erreurs ; le client conserve aussi un historique borné des suivis persistés terminés.
+- Les exécutions persistées ont leurs propres sessions et séquences d’événements ; le client agrège leurs erreurs et pertes. Sans persistance, le hub partagé conserve ses compteurs et son état de livraison entre exécutions. Un hub fermé ignore les émissions ; un client fermé refuse les nouvelles exécutions.
 - Les événements émis sur un [worker](../job-queues/) distant restent sur le hub de ce worker.
 
-API : [Options de livraison](../../reference/observationhuboptions/) · [Cycle de vie et compteurs](../../reference/observationhub/) · [Reporter personnalisé](../../reference/createcustomreporter/).
+API : [Options de livraison](../../reference/observationoptions/) · [Cycle de vie et compteurs](../../reference/observationclient/) · [Reporter personnalisé](../../reference/createcustomreporter/).

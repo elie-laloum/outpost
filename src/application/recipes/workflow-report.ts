@@ -38,6 +38,7 @@ export function recipeWorkflowReport(
     ...(result
       ? {
           executionId: result.executionId,
+          ...(result.runId ? { observationId: result.runId } : {}),
           workflowStatus: result.status,
           usage: result.usage,
           inputRequests: result.inputRequests,

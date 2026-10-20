@@ -15,6 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Nom             | Type                                                             | Présence  | Rôle                                                                                                                                                                                                                                                                                                                      |
 | --------------- | ---------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runId`         | `string \| undefined`                                            | Optionnel | Identifiant d’observation d’un dispatch autonome utilisant createObservation() ; généré si omis. Avec un transport, la création refuse les doublons. Les dispatchs imbriqués rejoignent la projection du workflow. Une continuation constitue un nouveau dispatch et n’hérite pas de cet identifiant.                     |
 | `watchdog`      | `WatchdogOptions \| undefined`                                   | Optionnel | Détection optionnelle des répétitions d’appels d’outils et de changements de fichiers décodés. Désactivée en l’absence de l’option ; un arrêt rejette avec le code stuck, un avertissement laisse continuer, une consigne utilise le steering. Les agents de rejeu refusent cette option.                                 |
 | `prices`        | `ModelPriceTable \| undefined`                                   | Optionnel | Tarifs facultatifs activant l’attribution par modèle dans usage. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée.                                                                                                                   |
 | `redact`        | `readonly RegExp[] \| undefined`                                 | Optionnel | Expressions régulières remplaçant les chaînes correspondantes observées et sauvegardées par [REDACTED]. Ajoutées aux règles héritées du hub ; les prompts envoyés à l’agent et les résultats retournés restent intacts.                                                                                                   |
@@ -43,6 +44,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly runId?: string;
   readonly watchdog?: WatchdogOptions;
   readonly prices?: ModelPriceTable;
   readonly redact?: readonly RegExp[];

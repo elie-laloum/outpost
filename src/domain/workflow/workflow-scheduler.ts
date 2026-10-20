@@ -1,3 +1,6 @@
+import { randomUUID } from "node:crypto";
+import { openObservationSession } from "../observation-session.ts";
+import type { ObservationSession } from "../observation-session.types.ts";
 import { prepareAnswers, applyAnswers } from "./input.ts";
 import { OutpostError } from "../errors.ts";
 import { quotaResumes, validateQuotaPolicy } from "./quota-pause.ts";
@@ -62,20 +65,42 @@ export async function schedule(
     ? AbortSignal.any([options.signal, deadline.signal])
     : deadline.signal;
   let checkpoint: WorkflowCheckpointSession | undefined;
+  let observationSession: ObservationSession | undefined;
   try {
     checkpoint = options.checkpoint
       ? await openCheckpoint(name, tasks, options.checkpoint)
       : undefined;
-    return await scheduleRun(
+    const runId = options.runId ?? options.checkpoint?.runId ?? randomUUID();
+    observationSession = await openObservationSession(options.observation, {
+      id: runId,
+      kind: "workflow",
+      resume: !!checkpoint?.initial,
+      ...(checkpoint?.initial
+        ? { executionId: checkpoint.initial.executionId }
+        : {}),
+    });
+    const result = await scheduleRun(
       name,
       tasks,
-      { ...options, signal },
+      {
+        ...options,
+        signal,
+        ...(observationSession
+          ? { observation: observationSession.observation }
+          : {}),
+      },
       checkpoint,
       deadline.signal,
+      observationSession ? runId : undefined,
     );
+    return result;
   } finally {
     clearTimeout(timer);
-    await checkpoint?.release();
+    try {
+      await observationSession?.close();
+    } finally {
+      await checkpoint?.release();
+    }
   }
 }
 
@@ -85,6 +110,7 @@ async function scheduleRun(
   options: WorkflowOptions,
   checkpoint: WorkflowCheckpointSession | undefined,
   deadline: AbortSignal,
+  runId?: string,
 ): Promise<WorkflowResult> {
   const concurrency = options.concurrency ?? 1;
   positive(concurrency, "concurrency");
@@ -184,6 +210,7 @@ async function scheduleRun(
     await state.observation.close();
     observerErrors.push(...state.observation.errors);
     const result: WorkflowResult = Object.freeze({
+      ...(runId ? { runId } : {}),
       executionId,
       name,
       inputRequests: Object.freeze(

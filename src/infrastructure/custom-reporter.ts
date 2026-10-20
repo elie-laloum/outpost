@@ -39,6 +39,10 @@ export function createCustomReporter(
     hub.child({ pass: event.pass }).emit("agent", event);
   };
   return Object.assign(report, {
+    observe(value: import("../domain/observation.types.ts").Observation) {
+      const event = agentObservation(value);
+      if (event) report(event);
+    },
     async flush() {
       await hub.flush();
       if (hub.errors.length) throw hub.errors[0];

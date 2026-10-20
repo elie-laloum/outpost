@@ -10,9 +10,9 @@ Save the following files together and run `node redact.ts`. The observer prints 
 Create an observer to inspect the command output.
 
 ```ts title="events.ts"
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
-export const observation = createObservationHub({
+export const observation = createObservation({
   sinks: [
     {
       observe({ event }) {
@@ -23,7 +23,7 @@ export const observation = createObservationHub({
 });
 ```
 
-Pass `redact` to the workflow. Matching strings are masked before every local or inherited receiver, including journals and older observation callbacks. `dispatch()` and `createObservationHub()` accept the same policy.
+Pass `redact` to the workflow. Matching strings are masked before every local or inherited receiver, including journals and older observation callbacks. `dispatch()` and `createObservation()` accept the same policy.
 
 ```ts title="redact.ts"
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";

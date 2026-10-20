@@ -13,7 +13,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un callback observe qui transmet chaque observation d’agent au handler de son kind. Les handlers s’exécutent un par un sur une file bornée sans bloquer le dispatch ; flush() les attend et rejette avec le premier échec d’un handler. L’appelant possède les fichiers ou loggers qu’utilisent les handlers.
+Crée un callback observe qui transmet chaque observation d’agent au handler de son kind. Les handlers s’exécutent un par un sur une file bornée sans bloquer le dispatch ; flush() les attend et rejette avec le premier échec d’un handler. L’appelant possède les fichiers ou loggers qu’utilisent les handlers. La fonction renvoyée implémente aussi ObservationSink pour une composition directe via createObservation({ sinks }).
 
 [Exemple complet et règles détaillées](../../guide/observability/).
 

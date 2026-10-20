@@ -5,7 +5,13 @@ sandbox:
   provider: local
 branch:
   mode: integrate
+transports:
+  runs:
+    type: local
+    directory: ./.outpost/storage
 observation:
+  type: client
+  transporter: { $ref: transports.runs }
   sinks:
     - type: console
       format: json

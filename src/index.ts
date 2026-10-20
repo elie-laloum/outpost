@@ -896,3 +896,12 @@ export type {
   StorageReservationInspection,
   StorageReservationRecoveryOptions,
 } from "./infrastructure/transport-reservations.types.ts";
+
+export { createObservation } from "./infrastructure/observation-client.ts";
+export type {
+  ObservationClient,
+  ObservationOptions,
+  ObservationReadOptions,
+  ObservationWatchOptions,
+} from "./infrastructure/observation-client.types.ts";
+export type { ObservationReporter } from "./infrastructure/reporter.types.ts";

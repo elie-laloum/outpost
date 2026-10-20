@@ -11,6 +11,7 @@ import {
   createHarnessShellTools,
   createLocalTransport,
   createReporter,
+  createObservation,
   createWorkflowCheckpointStore,
   defineApprovalTask,
   defineTask,
@@ -20,6 +21,8 @@ import {
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({ sinks: [createReporter()] });
 
 const repository = demoRepository(import.meta.dirname);
 const state = join(import.meta.dirname, "state");
@@ -67,7 +70,7 @@ const publish = defineTask({
         file: join(import.meta.dirname, "publish.md"),
         values: { notes: context.value(draft) },
       },
-      observe: createReporter({ label: "publish" }),
+      ...(context.observation ? { observation: context.observation } : {}),
     });
 
     return result.text;
@@ -85,7 +88,7 @@ const checkpoint = {
 };
 
 // First start: the draft is written, then the workflow pauses.
-const paused = await plan.start({ checkpoint });
+const paused = await plan.start({ checkpoint, observation });
 const request = paused.tasks.find((record) => record.key === review.key)?.pause;
 
 console.log("statut :", paused.status); // "paused"
@@ -101,6 +104,7 @@ terminal.close();
 
 // Second start: submit the decision; the workflow resumes where it left off.
 const decided = await plan.start({
+  observation,
   checkpoint,
   decisions: [
     {

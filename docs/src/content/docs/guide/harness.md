@@ -137,7 +137,7 @@ export const agent = createAgent({
 ```
 
 ```ts title="observe-harness.ts"
-import { dispatch, createObservationHub } from "@elie-laloum/outpost";
+import { dispatch, createObservation } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./observed-agent.ts";
 
@@ -146,7 +146,7 @@ await dispatch({
   sandboxProvider,
   agent,
   brief: { text: "Explain how the build is configured." },
-  observation: createObservationHub({ verbose: true }),
+  observation: createObservation({ verbose: true }),
   observe(event) {
     if (event.kind === "tool") console.log(event.name, event.input);
     // Example output: read_file { path: "README.md" }
@@ -174,7 +174,7 @@ await dispatch({
 - Tool code runs in your process with your permissions. Only what it does through `context.sandbox` runs in the sandbox.
 - Model requests leave from your process, so the sandbox’s [network restrictions](../network-restrictions/) do not apply to them.
 
-API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservationHub](../../reference/createobservationhub/).
+API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservation](../../reference/createobservation/).
 
 ## Route each model step
 

@@ -13,7 +13,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create an observe callback that routes each agent observation to the handler for its kind. Handlers run one at a time on a bounded queue without blocking the dispatch; flush() waits for them and rejects with the first handler failure. The caller owns any files or loggers the handlers use.
+Create an observe callback that routes each agent observation to the handler for its kind. Handlers run one at a time on a bounded queue without blocking the dispatch; flush() waits for them and rejects with the first handler failure. The caller owns any files or loggers the handlers use. The returned callable also implements ObservationSink for direct composition through createObservation({ sinks }).
 
 [Complete example and detailed rules](../../guide/observability/).
 

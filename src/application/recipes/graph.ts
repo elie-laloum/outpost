@@ -210,7 +210,7 @@ export function recipeComponentGraph(
     const record = recipeRecord(source, name);
     const type =
       record.type ??
-      (kind === "observation" ? "hub" : undefined) ??
+      (kind === "observation" ? "client" : undefined) ??
       (kind.endsWith("Options") ? "options" : undefined);
     const definition = registry.get(
       `${kind}.${recipeString(type, `${name}.type`)}`,

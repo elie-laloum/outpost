@@ -8,7 +8,7 @@ import {
   createAgent,
   createHarness,
   createLocalTransport,
-  createObservationHub,
+  createObservation,
   createReporter,
   defineIsolatedTask,
   defineWorkflow,
@@ -43,8 +43,9 @@ const agent = createAgent({
 });
 const reporter = createReporter();
 const seen: unknown[] = [];
-const observation = createObservationHub({
+const observation = createObservation({
   sinks: [
+    reporter,
     {
       observe: (event) => {
         seen.push(event);
@@ -59,7 +60,6 @@ const task = defineIsolatedTask({
     sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { text: `Explain how to protect this dummy secret: ${dummySecret}` },
-    observe: reporter,
   }),
 });
 const prices = process.env.OUTPOST_PRICE_CATALOG

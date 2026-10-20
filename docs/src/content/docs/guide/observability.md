@@ -1,20 +1,20 @@
 ---
 title: "Collect events from a whole run"
-description: "Observe workflow, agent and resource activity through one hub."
+description: "Observe workflow, agent and resource activity through one observation object."
 ---
 
-For a single terminal session, start with [Follow progress](../progress/). Use a hub when several tasks and resource operations need a common execution scope. Save the named files below together and run `node observe-workflow.ts` using the [setup configuration](../setup/).
+For a single terminal session, start with [Follow progress](../progress/). Use an observation object when several tasks and resource operations need a common execution scope. Save the named files below together and run `node observe-workflow.ts` using the [setup configuration](../setup/).
 
 ## Observe a whole run
 
-Create an observation hub when you want workflow, agent and resource events in one place. Add sinks that receive the events, then pass the hub as `observation` to your run. Each event includes its execution scope.
+Create an observation object when you want workflow, agent and resource events in one place. Add sinks that receive the events, then pass it as `observation` to your run. Each event includes its execution scope.
 
 <!-- tabs -->
 
 ```ts title="events.ts"
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
-export const observation = createObservationHub({
+export const observation = createObservation({
   sinks: [
     {
       observe({ seq, source, scope, event }) {
@@ -109,7 +109,7 @@ API reference: [AgentEvent](../../reference/agentevent/).
 
 [Decision evaluations](../decisions/) emit lifecycle summaries with source `decision`. Routed harnesses emit `model-route` agent events identifying the effective model, selection reason and optional native confidence. Pass `observation` to `decide()` for a direct evaluation; decision tasks and harnesses propagate workflow, task, pass and subagent scopes. Full states and answers require a verbose hub. Valid decision usage is accounted synchronously, independently of sink delivery or failures.
 
-A hub is an in-memory event stream, not durable storage. Slow receivers can lose events and observer failures do not stop the run. See [delivery and failures](../observation-delivery/) before relying on a complete trace.
+Without a transporter, observation only distributes events in memory. With a transporter, the client also persists execution projections. Slow receivers can lose events and observer failures do not stop the run. See [delivery and failures](../observation-delivery/) before relying on a complete trace.
 
 ## Next steps
 
@@ -132,3 +132,9 @@ A hub is an in-memory event stream, not durable storage. Slow receivers can lose
 <span id="limits"></span>
 
 <span id="mask-secrets-before-saving-or-observing"></span>
+
+## One object for outputs and reading
+
+`createObservation()` composes sinks and, with `transporter`, automatically records executions started by `dispatch()` or `workflow.start()`. The engine owns tracking; the observation object starts no work. Share it between executions: each persisted execution has its own event sequence. `observation.readRun(id)` and `observation.watchRun(id)` read storage from this process or another; see [execution state](../run-state/).
+
+Pass objects from `createReporter()`, `createCustomReporter()` or `createOpenTelemetryObserver()` directly in `sinks`. Observation borrows them: it flushes delivery but their owner still closes them. Close observation after executions, then the OpenTelemetry observer and its SDK. `await using` waits for active sessions without cancelling work. Historical callbacks and `createObservationHub()` remain compatible.

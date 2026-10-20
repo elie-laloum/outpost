@@ -1,6 +1,105 @@
 export const nativeRecipeSchemas: Readonly<
   Record<string, Readonly<Record<string, unknown>>>
 > = {
+  "observation.client": {
+    type: "object",
+    properties: {
+      transporter: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "transport",
+      },
+      heartbeatMs: {
+        type: "number",
+      },
+      abandonAfterMs: {
+        type: "number",
+      },
+      redact: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            pattern: {
+              type: "string",
+            },
+            flags: {
+              type: "string",
+            },
+          },
+          required: ["pattern"],
+          additionalProperties: false,
+          regexp: true,
+        },
+      },
+      sinks: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            $ref: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+          required: ["$ref"],
+          additionalProperties: false,
+          component: "sink",
+        },
+      },
+      scope: {
+        type: "object",
+        properties: {
+          executionId: {
+            type: "string",
+          },
+          taskKey: {
+            type: "string",
+          },
+          attempt: {
+            type: "number",
+          },
+          dispatchId: {
+            type: "string",
+          },
+          pass: {
+            type: "number",
+          },
+          subagentId: {
+            type: "string",
+          },
+          candidate: {
+            type: "string",
+          },
+        },
+        additionalProperties: false,
+      },
+      capacity: {
+        type: "number",
+      },
+      deliveryTimeoutMs: {
+        type: "number",
+      },
+      verbose: {
+        anyOf: [
+          {
+            const: false,
+          },
+          {
+            const: true,
+          },
+        ],
+      },
+    },
+    additionalProperties: false,
+  },
   "observation.hub": {
     type: "object",
     properties: {
@@ -1135,6 +1234,9 @@ export const nativeRecipeSchemas: Readonly<
                   required: ["$ref"],
                   additionalProperties: false,
                   component: "observation",
+                },
+                runId: {
+                  type: "string",
                 },
                 watchdog: {
                   type: "object",
@@ -8139,6 +8241,9 @@ export const nativeRecipeSchemas: Readonly<
             },
             additionalProperties: false,
           },
+          runId: {
+            type: "string",
+          },
           redact: {
             type: "array",
             items: {
@@ -8316,6 +8421,19 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
+      runId: {
+        type: "object",
+        properties: {
+          $ref: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+        required: ["$ref"],
+        additionalProperties: false,
+        component: "callback",
+        contract: "schedule.cron.runId",
+      },
       handler: {
         type: "string",
       },
@@ -8333,19 +8451,6 @@ export const nativeRecipeSchemas: Readonly<
         required: ["$ref"],
         additionalProperties: false,
         component: "cron",
-      },
-      runId: {
-        type: "object",
-        properties: {
-          $ref: {
-            type: "string",
-            minLength: 1,
-          },
-        },
-        required: ["$ref"],
-        additionalProperties: false,
-        component: "callback",
-        contract: "schedule.cron.runId",
       },
     },
     required: ["handler", "name", "cron"],
@@ -9990,6 +10095,9 @@ export const nativeRecipeSchemas: Readonly<
         },
         additionalProperties: false,
       },
+      runId: {
+        type: "string",
+      },
       redact: {
         type: "array",
         items: {
@@ -10321,6 +10429,9 @@ export const nativeRecipeSchemas: Readonly<
             },
             required: ["id"],
             additionalProperties: false,
+          },
+          runId: {
+            type: "string",
           },
           watchdog: {
             $ref: "#/$defs/option21",
@@ -10850,6 +10961,9 @@ export const nativeRecipeSchemas: Readonly<
             component: "workspace",
           },
           workspaceSource: false,
+          runId: {
+            type: "string",
+          },
           watchdog: {
             $ref: "#/$defs/option21",
           },
@@ -11297,6 +11411,9 @@ export const nativeRecipeSchemas: Readonly<
             $ref: "#/$defs/option36",
           },
           workspace: false,
+          runId: {
+            type: "string",
+          },
           watchdog: {
             $ref: "#/$defs/option21",
           },
@@ -16477,6 +16594,9 @@ export const nativeRecipeSchemas: Readonly<
         },
         required: ["id"],
         additionalProperties: false,
+      },
+      runId: {
+        type: "string",
       },
       watchdog: {
         type: "object",

@@ -1,20 +1,20 @@
 ---
 title: "Regrouper les événements d’une exécution"
-description: "Observer l’activité des workflows, agents et ressources avec un même hub."
+description: "Observer l’activité des workflows, agents et ressources avec un même objet observation."
 ---
 
-Pour une session de terminal, commencez par [Suivre la progression](../progress/). Un hub devient utile pour réunir plusieurs tâches et opérations de ressources sous une même exécution. Enregistrez les fichiers nommés ensemble et lancez `node observe-workflow.ts` avec la [configuration initiale](../setup/).
+Pour une session de terminal, commencez par [Suivre la progression](../progress/). Un objet observation devient utile pour réunir plusieurs tâches et opérations de ressources sous une même exécution. Enregistrez les fichiers nommés ensemble et lancez `node observe-workflow.ts` avec la [configuration initiale](../setup/).
 
 ## Observer une exécution entière
 
-Créez un hub d’observation pour réunir les événements du workflow, des agents et des ressources. Ajoutez les fonctions qui recevront les événements, puis passez le hub dans l’option `observation`. Chaque événement contient son contexte d’exécution.
+Créez un objet observation pour réunir les événements du workflow, des agents et des ressources. Ajoutez les fonctions qui recevront les événements, puis passez cet objet dans l’option `observation`. Chaque événement contient son contexte d’exécution.
 
 <!-- tabs -->
 
 ```ts title="events.ts"
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
-export const observation = createObservationHub({
+export const observation = createObservation({
   sinks: [
     {
       observe({ seq, source, scope, event }) {
@@ -111,7 +111,7 @@ Référence API : [AgentEvent](../../reference/agentevent/).
 
 Les [évaluations de décision](../decisions/) émettent des résumés de cycle de vie avec la source `decision`. Les harnesses routés émettent des événements d’agent `model-route` indiquant modèle effectif, motif et confiance native facultative. Passez `observation` à `decide()` pour une évaluation directe ; tâches et harnesses propagent les scopes workflow, tâche, passage et sous-agent. Les états et réponses complets exigent un hub verbose. L’usage valide est compté de façon synchrone, indépendamment des livraisons et erreurs des récepteurs.
 
-Un hub diffuse des événements en mémoire ; il ne les conserve pas durablement. Un récepteur lent peut perdre des événements et une erreur d’observation n’arrête pas le workflow. Consultez [la livraison et ses erreurs](../observation-delivery/) avant de compter sur une trace complète.
+Sans transport, l’observation diffuse seulement les événements en mémoire. Avec un transport, le client persiste aussi les projections d’exécution. Un récepteur lent peut perdre des événements et une erreur d’observation n’arrête pas le workflow. Consultez [la livraison et ses erreurs](../observation-delivery/) avant de compter sur une trace complète.
 
 ## Pour continuer
 
@@ -132,3 +132,9 @@ Un hub diffuse des événements en mémoire ; il ne les conserve pas durablement
 <span id="limites"></span>
 
 <span id="masquer-les-secrets-avant-sauvegarde-ou-observation"></span>
+
+## Un seul objet pour les sorties et la lecture
+
+`createObservation()` compose les sorties et, avec `transporter`, enregistre automatiquement les exécutions lancées par `dispatch()` ou `workflow.start()`. Le moteur possède le suivi ; l’objet observation ne lance aucun travail. Partagez-le entre plusieurs exécutions : chaque exécution persistée possède sa séquence d’événements. `observation.readRun(id)` et `observation.watchRun(id)` consultent le stockage depuis ce processus ou un autre ; voir [l’état d’exécution](../run-state/).
+
+Placez directement les objets de `createReporter()`, `createCustomReporter()` ou `createOpenTelemetryObserver()` dans `sinks`. L’observation les emprunte : elle vide leurs livraisons mais leur fermeture reste à leur propriétaire. Fermez l’observation après les exécutions, puis l’observateur OpenTelemetry et son SDK. `await using` attend les suivis actifs sans annuler le travail. Les callbacks historiques et `createObservationHub()` restent compatibles.

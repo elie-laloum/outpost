@@ -88,6 +88,7 @@ A component marked “runtime” is closed by the runtime; “value” denotes c
 | `artifact.json`             | [YAML configuration](../recipe-configuration/)                      | value   | implemented |
 | `artifactStore.transport`   | [ArtifactStoreOptions](../../reference/artifactstoreoptions/)       | value   | implemented |
 | `checkpointStore.transport` | [TransportStoreOptions](../../reference/transportstoreoptions/)     | value   | implemented |
+| `observation.client`        | [ObservationOptions](../../reference/observationoptions/)           | runtime | implemented |
 | `observation.hub`           | [ObservationHubOptions](../../reference/observationhuboptions/)     | runtime | implemented |
 | `sink.console`              | [YAML configuration](../recipe-configuration/)                      | value   | implemented |
 | `sink.custom`               | [YAML configuration](../recipe-configuration/)                      | runtime | implemented |

@@ -17,6 +17,7 @@ import {
   createHarnessFileTools,
   createHarnessShellTools,
   createReporter,
+  createObservation,
   createSandbox,
 } from "@elie-laloum/outpost";
 import {
@@ -25,6 +26,10 @@ import {
 } from "@elie-laloum/outpost/providers/firecracker";
 import { model, modelProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({
+  sinks: [createReporter({ label: "firecracker" })],
+});
 
 const options: FirecrackerOptions = JSON.parse(
   readFileSync(process.env.OUTPOST_FIRECRACKER_CONFIG!, "utf8"),
@@ -83,7 +88,7 @@ const coder = createAgent({
 const result = await sandbox.dispatch({
   agent: coder,
   brief: { file: join(import.meta.dirname, "brief.md") },
-  observe: createReporter({ label: "firecracker" }),
+  observation,
 });
 
 console.log(

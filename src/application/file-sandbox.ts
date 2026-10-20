@@ -1,6 +1,6 @@
 import { openCliHooks } from "./cli-hooks.ts";
 import { lstat, mkdir, readFile, rename, rm } from "node:fs/promises";
-import { dirname, basename, join, relative } from "node:path";
+import { dirname, basename, join, relative, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   createFileRunReport,
@@ -908,6 +908,41 @@ export async function dispatchFiles<T>(
     record: import("../domain/file-workspace.types.ts").FileWorkspaceRecord,
   ) => Promise<void>,
 ): Promise<FileDispatchResult<T>> {
+  options.signal?.throwIfAborted();
+  const runtime =
+    options.workspace?.runtime.directory ??
+    resolve(
+      ("runtime" in options ? options.runtime?.directory : undefined) ??
+        ".outpost",
+    );
+  await mkdir(runtime, { recursive: true });
+  const logging =
+    options.logging === false || options.logging === "stdout"
+      ? options.logging
+      : {
+          ...options.logging,
+          transporter:
+            options.logging?.transporter ??
+            createLocalTransport({ directory: join(runtime, "storage") }),
+        };
+  return observeDispatch(
+    { ...options, logging },
+    (observed) =>
+      dispatchFileOperation(
+        { ...options, ...observed },
+        onSettled,
+        options.observation,
+      ),
+    runtime,
+  );
+}
+
+async function dispatchFileOperation<T>(
+  options: FileDispatchRequest<T>,
+  onSettled: Parameters<typeof dispatchFiles>[1],
+  continuationObservation:
+    import("../domain/observation.types.ts").ObservationHub | undefined,
+): Promise<FileDispatchResult<T>> {
   for (const agent of dispatchCandidates(options.agent))
     await validateFileAgent(agent, options);
   const owned = !options.workspace;
@@ -952,6 +987,9 @@ export async function dispatchFiles<T>(
           sandboxProvider: settings.sandboxProvider,
           agent: settings.agent,
           workspace: reopened,
+          ...(continuationObservation
+            ? { observation: continuationObservation }
+            : {}),
           ...(settings.variables ? { variables: settings.variables } : {}),
           ...next,
           continuation: {

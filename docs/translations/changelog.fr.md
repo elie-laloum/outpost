@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Ajout de `createObservation()` pour composer reporters et OpenTelemetry empruntés, ainsi qu’un état d’exécution optionnel persisté par Transport. Les moteurs possèdent les suivis ; `observation.readRun(id)` et `observation.watchRun(id)` les consultent sans lancer de travail. Conservation des hubs, observateurs et callbacks historiques.
+- Ajout de la sélection et du retour de `runId` d’observation pour les dispatchs et workflows, de séquences indépendantes en concurrence, de la fermeture automatique des heartbeats et de la continuation d’historiques de checkpoints stabilisés. Les lecteurs n’autorisent ni rejeu ni récupération ; après récupération explicite, une projection interrompue demande un nouvel identifiant d’observation.
+- Les reporters et observateurs OpenTelemetry s’utilisent directement comme sorties. L’observation YAML emploie le client par défaut, accepte un transport et des réglages de heartbeat, et expose les identifiants dans les rapports ; `type: hub` et `sink.run` restent compatibles. Mise à jour des schémas, classifications de parité, guides bilingues, référence API et exemples exécutables.
+- Validation par des régressions hors ligne d’exécution, de stockage, de checkpoint, de YAML et de télémétrie. Aucun appel payant à un modèle ni validation cloud réelle n’est impliqué.
+
 ## 12.0.1
 
 - Correction de la capture et de la restauration des conversations natives lors de l’exécution locale de Claude Code et Codex lorsque `CLAUDE_CONFIG_DIR` ou `CODEX_HOME` désigne un répertoire personnalisé. Un tour de recette réussi ne signale plus une conversation introuvable après l’enregistrement de sa transcription par la CLI.

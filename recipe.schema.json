@@ -979,6 +979,127 @@
         {
           "type": "object",
           "properties": {
+            "transporter": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/transport"
+                }
+              ]
+            },
+            "heartbeatMs": {
+              "type": "number"
+            },
+            "abandonAfterMs": {
+              "type": "number"
+            },
+            "redact": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["pattern"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "pattern": {
+                        "type": "string"
+                      },
+                      "flags": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "sinks": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "required": ["$ref"],
+                    "properties": {
+                      "$ref": {
+                        "type": "string",
+                        "pattern": "\\S"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "$ref": "#/$defs/sink"
+                  }
+                ]
+              }
+            },
+            "scope": {
+              "type": "object",
+              "properties": {
+                "executionId": {
+                  "type": "string"
+                },
+                "taskKey": {
+                  "type": "string"
+                },
+                "attempt": {
+                  "type": "number"
+                },
+                "dispatchId": {
+                  "type": "string"
+                },
+                "pass": {
+                  "type": "number"
+                },
+                "subagentId": {
+                  "type": "string"
+                },
+                "candidate": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "capacity": {
+              "type": "number"
+            },
+            "deliveryTimeoutMs": {
+              "type": "number"
+            },
+            "verbose": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": true
+                }
+              ]
+            },
+            "type": {
+              "const": "client"
+            }
+          },
+          "additionalProperties": false,
+          "required": []
+        },
+        {
+          "type": "object",
+          "properties": {
             "redact": {
               "type": "array",
               "items": {
@@ -1275,6 +1396,9 @@
                             "$ref": "#/$defs/observation"
                           }
                         ]
+                      },
+                      "runId": {
+                        "type": "string"
                       },
                       "watchdog": {
                         "type": "object",
@@ -3631,6 +3755,9 @@
                 }
               },
               "additionalProperties": false
+            },
+            "runId": {
+              "type": "string"
             },
             "redact": {
               "type": "array",
@@ -6816,6 +6943,9 @@
                   "required": ["id"],
                   "additionalProperties": false
                 },
+                "runId": {
+                  "type": "string"
+                },
                 "watchdog": {
                   "$ref": "#/$defs/isolatedOptions.options.option21"
                 },
@@ -7431,6 +7561,9 @@
                   ]
                 },
                 "workspaceSource": false,
+                "runId": {
+                  "type": "string"
+                },
                 "watchdog": {
                   "$ref": "#/$defs/isolatedOptions.options.option21"
                 },
@@ -7940,6 +8073,9 @@
                   "$ref": "#/$defs/isolatedOptions.options.option36"
                 },
                 "workspace": false,
+                "runId": {
+                  "type": "string"
+                },
                 "watchdog": {
                   "$ref": "#/$defs/isolatedOptions.options.option21"
                 },
@@ -18187,6 +18323,9 @@
                   },
                   "additionalProperties": false
                 },
+                "runId": {
+                  "type": "string"
+                },
                 "redact": {
                   "type": "array",
                   "items": {
@@ -18390,6 +18529,21 @@
                 }
               ]
             },
+            "runId": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "handler": {
               "type": "string"
             },
@@ -18411,21 +18565,6 @@
                 },
                 {
                   "$ref": "#/$defs/cron"
-                }
-              ]
-            },
-            "runId": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "required": ["$ref"],
-                  "properties": {
-                    "$ref": {
-                      "type": "string",
-                      "pattern": "\\S"
-                    }
-                  },
-                  "additionalProperties": false
                 }
               ]
             },
@@ -34880,6 +35019,9 @@
                               }
                             ]
                           },
+                          "runId": {
+                            "type": "string"
+                          },
                           "watchdog": {
                             "type": "object",
                             "properties": {
@@ -36930,6 +37072,9 @@
                   "required": ["id"],
                   "additionalProperties": false
                 },
+                "runId": {
+                  "type": "string"
+                },
                 "watchdog": {
                   "type": "object",
                   "properties": {
@@ -37600,6 +37745,9 @@
                       "required": ["id"],
                       "additionalProperties": false
                     },
+                    "runId": {
+                      "type": "string"
+                    },
                     "watchdog": {
                       "$ref": "#/$defs/isolated.options.option21"
                     },
@@ -38212,6 +38360,9 @@
                       ]
                     },
                     "workspaceSource": false,
+                    "runId": {
+                      "type": "string"
+                    },
                     "watchdog": {
                       "$ref": "#/$defs/isolated.options.option21"
                     },
@@ -38723,6 +38874,9 @@
                       "$ref": "#/$defs/isolated.options.option36"
                     },
                     "workspace": false,
+                    "runId": {
+                      "type": "string"
+                    },
                     "watchdog": {
                       "$ref": "#/$defs/isolated.options.option21"
                     },
@@ -40426,6 +40580,9 @@
                 }
               },
               "additionalProperties": false
+            },
+            "runId": {
+              "type": "string"
             },
             "redact": {
               "type": "array",

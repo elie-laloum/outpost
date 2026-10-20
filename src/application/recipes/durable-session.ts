@@ -64,7 +64,7 @@ export function recipeProjectIdentity(
     ...project.document,
     workflow: Object.fromEntries(
       Object.entries(project.document.workflow ?? {}).filter(
-        ([key]) => !["answers", "decisions"].includes(key),
+        ([key]) => !["answers", "decisions", "runId"].includes(key),
       ),
     ),
   };

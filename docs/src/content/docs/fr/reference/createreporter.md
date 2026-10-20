@@ -13,7 +13,7 @@ import { createReporter } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un callback observe qui affiche une ligne par événement : phases, appels d’outils, avertissements, échecs et le résumé de chaque passe avec ses compteurs de tokens. Il écrit sur process.stdout sauf si write est fourni, et ne modifie jamais l’exécution.
+Crée un callback observe qui affiche une ligne par événement : phases, appels d’outils, avertissements, échecs et le résumé de chaque passe avec ses compteurs de tokens. Il écrit sur process.stdout sauf si write est fourni, et ne modifie jamais l’exécution. La fonction renvoyée implémente aussi ObservationSink et se branche directement dans createObservation({ sinks }) ; chaque dispatch et passe conserve son propre état de flux texte.
 
 [Exemple complet et règles détaillées](../../guide/observability/).
 
@@ -29,18 +29,17 @@ Crée un callback observe qui affiche une ligne par événement : phases, appels
 
 ## Retour
 
-`(event: ObservationEvent & ReportPass) => void`
+`ObservationReporter`
 
 ## Signature
 
 ```ts
 export declare function createReporter(
   options?: ReporterOptions,
-): (event: ObservationEvent & ReportPass) => void;
+): ObservationReporter;
 ```
 
 ## Contrats associés
 
-- [ObservationEvent](../observationevent/)
+- [ObservationReporter](../observationreporter/)
 - [ReporterOptions](../reporteroptions/)
-- [ReportPass](../support-reportpass/)

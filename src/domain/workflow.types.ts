@@ -144,6 +144,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly runId?: string;
   readonly redact?: readonly RegExp[];
   readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
@@ -164,6 +165,7 @@ export type WorkflowTerminationCode =
   FaultCode | "failed" | "usage-unavailable";
 
 export interface WorkflowResult {
+  readonly runId?: string;
   readonly terminationCode?: WorkflowTerminationCode;
   readonly inputRequests: readonly WorkflowInputRequest[];
   readonly executionId: string;

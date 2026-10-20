@@ -1,3 +1,4 @@
+import { openObservationSession } from "../domain/observation-session.ts";
 import { performance } from "node:perf_hooks";
 import type { UsageCost } from "../domain/pricing.types.ts";
 import { calculateUsageCost } from "../domain/pricing.ts";
@@ -39,6 +40,28 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
 ): Promise<R> {
   if (options.observation && active.has(options.observation))
     return action(options);
+  const runId = options.runId ?? randomUUID();
+  const owned = await openObservationSession(options.observation, {
+    id: runId,
+    kind: "dispatch",
+  });
+  try {
+    const result = await dispatchObservation(
+      { ...options, ...(owned ? { observation: owned.observation } : {}) },
+      action,
+      repository,
+    );
+    return owned ? { ...result, runId } : result;
+  } finally {
+    await owned?.close();
+  }
+}
+
+async function dispatchObservation<T, R extends ObservedDispatchResult>(
+  options: DispatchOptions<T>,
+  action: (options: DispatchOptions<T>) => Promise<R>,
+  repository: string,
+): Promise<R> {
   const started = performance.now();
   const reportEvents = createRunReportEvents();
   const root = options.observation ?? createObservationHub();

@@ -8,6 +8,7 @@ import {
   createHarnessFileTools,
   createLocalTransport,
   createReporter,
+  createObservation,
   dispatch,
   readJournal,
 } from "@elie-laloum/outpost";
@@ -22,13 +23,14 @@ const reader = createAgent({
   harness: createHarness({ modelProvider, tools: [createHarnessFileTools()] }),
 });
 
-// 1. createReporter(): the ready-made terminal display.
+// 1. A terminal sink observes the dispatch.
+await using terminal = createObservation({ sinks: [createReporter()] });
 await dispatch({
   repository,
   sandboxProvider,
   agent: reader,
   brief,
-  observe: createReporter(),
+  observation: terminal,
 });
 
 // 2. createCustomReporter(): your own handlers, one per event type.
@@ -42,12 +44,13 @@ const report = createCustomReporter({
     ),
 });
 
+await using observation = createObservation({ sinks: [report] });
 const result = await dispatch({
   repository,
   sandboxProvider,
   agent: reader,
   brief,
-  observe: report,
+  observation,
 });
 
 await report.flush(); // wait for all handlers to finish

@@ -491,3 +491,37 @@ test("hub sink parents dispatch and operation spans and retains dispatch metric 
   assert.ok(names.includes("outpost.dispatch.executions"));
   assert.equal(hub.errors.length, 0);
 });
+
+test("the unified observation client accepts telemetry directly and exports one workflow span", async (t) => {
+  const { createObservation } = await import("../../src/index.ts");
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  await using observation = createObservation({ sinks: [sdk.observer] });
+  const task = defineTask({
+    key: "work",
+    perform(context) {
+      context.reportUsage({ input: 3, cached: 1, output: 2 });
+      return "ok";
+    },
+  });
+  const result = await defineWorkflow("observed", [task]).start({
+    observation,
+  });
+  result.unwrap();
+  assert.deepEqual(result.observerErrors, []);
+  await sdk.tracer.forceFlush();
+  const spans = sdk.spans.getFinishedSpans();
+  assert.equal(
+    spans.filter((span) => span.name === "outpost.workflow").length,
+    1,
+  );
+  assert.equal(spans.filter((span) => span.name === "outpost.task").length, 1);
+  assert.equal(
+    spans.filter((span) => span.name === "outpost.task.attempt").length,
+    1,
+  );
+});

@@ -82,10 +82,10 @@ API reference: [ObservationEvent](../../reference/observationevent/) and [AgentO
 The [built-in harness](../harness/) emits `model-request` and `model-response` only on a verbose hub. To record full model exchanges, pass one with `verbose` logging:
 
 ```ts
-import { createObservationHub, dispatch } from "@elie-laloum/outpost";
+import { createObservation, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
-const observation = createObservationHub({ verbose: true });
+const observation = createObservation({ verbose: true });
 await dispatch({
   repository,
   sandboxProvider,
@@ -133,4 +133,4 @@ Journals stay in their transport until you remove them. A retention policy with 
 - A journal is written by an [observation hub](../observability/) receiver. It shares the hub’s bounded queue (`capacity`, `deliveryTimeoutMs`): when its transport fails or falls behind, the journal can miss events, be disabled for the rest of the run or stay open, and the failure appears in `result.observerErrors` (in `recoveryDetails(error)` when the dispatch fails). `readJournal()` then returns the events written before the failure.
 - Journals hold prompts, agent messages and tool results, so they contain repository content. Store and share them like the code; `replayable` adds the patches of every commit.
 
-API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservationHub](../../reference/createobservationhub/).
+API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservation](../../reference/createobservation/).

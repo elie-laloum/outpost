@@ -9,6 +9,7 @@ sidebar:
 
 | Nom              | Type                                                                                                         | Présence  | Rôle                                                                                                                                                                                                                                                                                                |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `observationId`  | `string \| undefined`                                                                                        | Optionnel | Identifiant du suivi renvoyé par un workflow utilisant createObservation() ; à utiliser avec observation.readRun/watchRun. Distinct du runId durable utilisé par status et resume, notamment après récupération explicite avec un nouvel identifiant d’observation.                                 |
 | `workspaceInfo`  | `FileWorkspaceRecord \| undefined`                                                                           | Optionnel | Description versionnée du workspace conservant sa propriété, sa génération settled et ses références de récupération.                                                                                                                                                                               |
 | `fileOutputs`    | `readonly WorkspacePublication[] \| undefined`                                                               | Optionnel | Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche.                                                                                                                                                                                                          |
 | `integration`    | `ConflictResolution \| undefined`                                                                            | Optionnel | Commit de résolution, vérification et consommation de l’agent, rapportés séparément de la consommation du workflow lorsqu’une résolution est nécessaire.                                                                                                                                            |
@@ -29,6 +30,7 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly observationId?: string;
   readonly workspaceInfo?: FileWorkspaceRecord;
   readonly fileOutputs?: readonly WorkspacePublication[];
   readonly integration?: ConflictResolution;

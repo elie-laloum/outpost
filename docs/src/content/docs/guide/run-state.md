@@ -1,13 +1,13 @@
 ---
 title: "Read execution state"
-description: "Build an interface around a run ID, a persisted snapshot and a resumable event cursor."
+description: "Record an execution automatically and inspect it through observation.readRun() and observation.watchRun()."
 ---
 
-Use this when a dashboard or another process must inspect a running workflow. Both processes need access to the same transport and execution ID. A heartbeat is an observation of activity; its expiry does not authorize restarting an owner.
+Use `createObservation({ transporter })` when a terminal, dashboard or another process must inspect an execution. Pass the object to `dispatch()` or `workflow.start()`. The engine records that execution and closes its tracking session when it settles. The observation object can serve successive or concurrent executions.
 
 ## Record one execution
 
-Create a receiver with an application-selected ID and attach it to a fresh observation hub. Pass that hub to one `dispatch()` or workflow `start()`. The receiver stores a snapshot and redacted observations in your [transport](../storage/), independently of the execution journal. Save the transport in `storage.ts` so another process can read the same location.
+Save the following files together. The shared transport gives the runner and reader access to the same storage. Creating the observation object only configures it: no run record or heartbeat starts until an execution uses it.
 
 ```ts title="storage.ts"
 import { createLocalTransport } from "@elie-laloum/outpost";
@@ -17,96 +17,107 @@ export const transporter = createLocalTransport({
 });
 ```
 
-Save the receiver in `observation.ts`. Its caller owns disposal; the transport module can also be imported safely by independent readers.
+Create the observation object with the transport and any additional sinks. It borrows those sinks and the transport; their owner remains responsible for closing them when necessary.
 
 ```ts title="observation.ts"
-import { createRunObserver, createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
 
-export const receiver = await createRunObserver({
-  transporter,
-  id: "nightly_2026_10_07",
-  kind: "workflow",
-});
-export const observation = createObservationHub({ sinks: [receiver] });
+export const observation = createObservation({ transporter });
 ```
-
-Use `kind: "dispatch"` for a single request. Attach the receiver before starting. Its factory creates a running record even before the first event; the application chooses its ID, which is separate from the workflow's `executionId`. Duplicate IDs fail through a conditional transport write. Keep the receiver alive until the execution finishes, then close it to stop heartbeats. Closing an unfinished receiver leaves its record to expire.
-
-For a readable summary of one finished dispatch, use its [run report](../run-reports/). This projection serves readers following an execution by ID.
 
 ## Start a workflow
 
-A workflow records waiting tasks at startup, attempts, pauses, errors and cumulative consumption, including checkpointed usage on resume. Dispatches within its tasks retain their agent, current phase, branch, commits and consumption. Forward the workflow's observation scope when writing custom task dispatches; [isolated tasks](../multiple-repositories/) do this automatically.
+Save this as `start.ts` and run `node start.ts`. The workflow chooses the execution kind and owns the tracking session. Specify `runId` when another process needs to know the ID in advance. Otherwise the checkpoint’s run ID is used, or a new ID is generated and returned as `result.runId`.
 
 ```ts title="start.ts"
-import { observation, receiver } from "./observation.ts";
+import { observation } from "./observation.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-await using ownedReceiver = receiver;
+await using ownedObservation = observation;
 const check = defineTask({ key: "check", perform: () => "ok" });
-const workflow = defineWorkflow("nightly", [check]);
-const result = await workflow.start({ observation });
-await observation.close();
+const result = await defineWorkflow("nightly", [check]).start({
+  observation,
+  runId: "nightly_2026_10_21",
+});
+console.log(result.runId, result.status);
 result.unwrap();
 ```
 
-Save these files together and run `node start.ts`. The observation hub flushes delivery when the workflow settles. Failures in receivers appear in `observerErrors` and do not change the execution outcome. Inspect those errors and `receiver.errors`; heartbeat failures stop the receiver. [Redaction](../observability/) applies before persistence when configured on the hub or execution.
+`dispatch({ observation, runId, ... })` uses the same API for a single request. A nested dispatch receiving `context.observation` joins its workflow’s projection. Forward that scope in custom tasks; isolated tasks do it automatically. A standalone dispatch continuation is a new execution and needs a fresh ID.
+
+With a transport, duplicate IDs refuse creation before execution work begins. Storage failure while opening tracking also rejects startup. Once tracking is open, receiver failures appear in `observerErrors` and `observation.errors` and do not change the work’s outcome. The engine flushes its session and stops its heartbeat before returning. Closing the shared observation waits for active sessions without cancelling them; keep it open until all intended executions have started.
+
+## Record a dispatch
+
+With the [agent configuration](../setup/), save this additional file and run `node dispatch.ts`. The dispatch owns tracking and returns after its session closes. Use a fresh ID for another independent execution.
+
+```ts title="dispatch.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { observation } from "./observation.ts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await using ownedObservation = observation;
+const result = await dispatch({
+  runId: "review-123",
+  observation,
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/review-123" },
+  brief: { text: "Review the code without modifying files." },
+});
+console.log(result.runId, result.text);
+```
 
 ## Read from another process
 
-Give the reader the same transport location and ID. It reads a single atomically replaced snapshot without acquiring an execution lock. A missing ID returns `undefined`. With S3, instantiate the same bucket/prefix configuration in the reader; no host filesystem or PID lookup is required.
+Run this file after the execution has been registered. A missing ID returns `undefined`; readers neither create a record nor acquire execution ownership. With S3, use the same bucket and prefix in each process. Configure [redaction](../redacting-secrets/) on the producing observation or execution before anything is stored.
 
 ```ts title="snapshot.ts"
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
-import { readRun } from "@elie-laloum/outpost";
 
-export const run = await readRun({ transporter, id: "nightly_2026_10_07" });
+await using reader = createObservation({ transporter });
+export const run = await reader.readRun("nightly_2026_10_21");
 if (run) {
-  console.log(
-    run.status,
-    run.tasks.map((t) => `${t.key}: ${t.status}`),
-  );
-  console.log(run.dispatches, run.commits, run.usage, run.errors);
+  console.log(run.status, run.tasks, run.dispatches, run.usage);
 }
 ```
 
-Run `node snapshot.ts` in a second process to read the saved status. If prices are configured, `accounting.cost` contains the monetary estimate.
-
-`complete: false` signals a detected event gap or expired running record. `complete: true` means no gap was detected, but final events may still be lost. This view is independent of the checkpoint and never authorizes replay, integration or resource recovery.
-
-Tasks restored without previous observation history expose `usage.complete: false`; the workflow's cumulative total still comes from its checkpoint accounting.
+`complete: false` indicates a detected event gap or expired running record. `complete: true` means no gap was detected; final events can still be lost. This projection is separate from checkpoints, accounting and execution journals. It never authorizes replay, integration or recovery. A finished dispatch’s [run report](../run-reports/) provides its review summary.
 
 ## Follow a cursor
 
-First render the snapshot, then follow observations strictly after its `seq`. Events are written before the snapshot publishes their cursor, so a reader never follows an unpublished event. The persistent sequence continues across settled workflow resumes; it is distinct from each hub's `observationSeq`. The event payload is `unknown`, so an interface must validate it before inspecting fields.
+Read a snapshot, then follow observations after its `seq`. Save the last processed cursor to reconnect. Run this file after registration; it prints stored events followed by new ones until the execution settles or its heartbeat expires. The event payload is `unknown`, so validate it before reading its fields.
 
 ```ts title="watch.ts"
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
-import { run } from "./snapshot.ts";
-import { watchRun } from "@elie-laloum/outpost";
 
+await using reader = createObservation({ transporter });
+const run = await reader.readRun("nightly_2026_10_21");
+const controller = new AbortController();
 if (run) {
-  for await (const event of watchRun({
-    transporter,
-    id: run.id,
+  for await (const event of reader.watchRun(run.id, {
     from: run.seq,
+    signal: controller.signal,
   })) {
     console.log(event.seq, event.scope.taskKey, event.event);
   }
 }
 ```
 
-Run `node watch.ts` to read the snapshot and subsequent events. The reader polls storage until it has delivered the events of a settled or abandoned run. Save the last processed cursor to reconnect; heartbeat updates use no cursor. Cancel the reader with `signal` without stopping the run.
-
-Refresh your interface by reading the snapshot again. Missing segments, invalid records and cursors ahead of the snapshot fail explicitly. [Read limits](../../reference/watchrunoptions/) default to 8 MiB per object and can be lowered.
+Aborting the reader’s signal stops only the subscription. It never cancels the execution. Refresh the snapshot with `readRun()` when needed. Missing segments, malformed records and cursors ahead of the snapshot fail explicitly. Reads default to 8 MiB per object and can be bounded further through [ObservationReadOptions](../../reference/observationreadoptions/) and [ObservationWatchOptions](../../reference/observationwatchoptions/).
 
 ## Interpret heartbeats and resumes
 
-The receiver refreshes its heartbeat every five seconds by default. A running snapshot becomes `abandoned` on read after thirty seconds without an update. Readers never persist that status or change ownership. Slow storage, a network outage or a blocked event loop can also expire a heartbeat; this indicates suspected abandonment, not proof that a process stopped. Paused, waiting-input and finished workflows do not require heartbeats.
+The default heartbeat is five seconds, with suspected abandonment after thirty seconds. A slow transport or blocked event loop can also expire it. Reading an expired record reports `abandoned` without changing storage or granting recovery authorization. Settled workflows need no heartbeat.
 
-When explicitly resuming a settled workflow checkpoint, create a new receiver with the same ID, `kind: "workflow"` and `resume: true`, and attach a fresh hub. It preserves task consumption, dispatch history and cursors. The checkpoint's execution identity must match. Concurrent writers are fenced by revisions. An unsettled projection, even with an expired heartbeat, cannot be taken over: recover the execution explicitly and observe the recovered run under a new ID.
+When a workflow opens an existing checkpoint, observation resumes the settled projection under the selected run ID, preserving its persistent cursor and execution identity. A previously unobserved checkpoint can start a new projection. An unsettled projection cannot be taken over, even after heartbeat expiry: explicitly recover the execution and choose a new observation `runId`. A resumed watcher starts a new subscription, since subscriptions finish at each settled state.
 
-Run records live under `runs/<id>/` and remain protected by retention planning. Event storage grows with the run; the receiver stops and reports an error when a snapshot or event exceeds 8 MiB. Keep model/raw payload verbosity appropriate for your interface. Deterministic tests cover local storage and an HTTP S3 fixture; live AWS validation remains pending.
+Run records live under `runs/<id>/` and remain protected by retention planning. Event storage grows with the run. An event or snapshot over 8 MiB stops the receiver and reports an observation error. Deterministic tests cover local storage; existing low-level run tests also use an HTTP S3 fixture. Live AWS validation remains separate.
 
-The runnable [example 57](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/57-run-state) includes a separate reader process. API: [createRunObserver](../../reference/createrunobserver/) · [readRun](../../reference/readrun/) · [watchRun](../../reference/watchrun/) · [RunSnapshot](../../reference/runsnapshot/).
+`createObservationHub()`, `createRunObserver()`, standalone `readRun()`/`watchRun()` and historical callbacks remain available for specialized composition. They retain their explicit ownership contracts; the unified client does not close borrowed receivers for you.
+
+The runnable [example 57](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/57-run-state) includes a separate reader process. API: [createObservation](../../reference/createobservation/) · [ObservationClient](../../reference/observationclient/) · [ObservationOptions](../../reference/observationoptions/) · [RunSnapshot](../../reference/runsnapshot/).

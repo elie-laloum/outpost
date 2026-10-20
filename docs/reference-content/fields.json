@@ -2855,8 +2855,8 @@
     "Reçoit les erreurs levées par le tracer ou le meter pendant l’enregistrement des workflows et des dispatchs ; elles ne changent jamais le résultat d’une exécution. Les erreurs levées par onError sont ignorées."
   ],
   "OpenTelemetryObserver.observe": [
-    "Records a workflow event as spans and metrics; workflow.start() calls it when the observer is passed as telemetry.",
-    "Enregistre un événement de workflow sous forme de spans et de métriques ; workflow.start() l’appelle quand l’observateur est passé comme telemetry."
+    "Accept an Observation envelope as an ObservationSink, or a historical WorkflowEvent callback. Envelopes route workflow, dispatch and operation activity to spans and metrics. Wire only one delivery path per execution to avoid double counting.",
+    "Accepte une enveloppe Observation en tant qu’ObservationSink, ou un WorkflowEvent historique. Les enveloppes transforment l’activité des workflows, dispatchs et opérations en spans et métriques. Branchez un seul chemin de livraison par exécution pour éviter les doubles comptes."
   ],
   "OpenTelemetryObserver.close": [
     "Ends every open workflow, task, attempt, dispatch and operation span as cancelled or failed. It does not flush or shut down the SDK.",
@@ -11445,5 +11445,65 @@
   "S3TombstonePruneOptions.signal": [
     "Optional cancellation signal; completed deletions remain applied.",
     "Signal d’annulation facultatif ; les suppressions déjà effectuées restent appliquées."
+  ],
+  "DispatchOptions.runId": [
+    "Observation ID for a standalone dispatch using createObservation(); generated when omitted. With a transport, creation refuses duplicate IDs. Nested dispatches join their workflow projection. A continuation is a new dispatch and does not inherit this ID.",
+    "Identifiant d’observation d’un dispatch autonome utilisant createObservation() ; généré si omis. Avec un transport, la création refuse les doublons. Les dispatchs imbriqués rejoignent la projection du workflow. Une continuation constitue un nouveau dispatch et n’hérite pas de cet identifiant."
+  ],
+  "Execution.runId": [
+    "Tracking ID returned when createObservation() owns this dispatch session; absent for legacy hubs and nested dispatches. Read its persisted state through the observation client when a transport is configured.",
+    "Identifiant renvoyé lorsque createObservation() possède le suivi de ce dispatch ; absent avec un hub historique ou un dispatch imbriqué. Consultez son état via le client observation lorsqu’un transport est configuré."
+  ],
+  "WorkflowOptions.runId": [
+    "Observation ID when using createObservation(); defaults to checkpoint.runId, otherwise a generated ID. On checkpoint resume, a settled projection retains its cursor. After explicit execution recovery, choose a fresh observation ID if the old projection is unsettled. Does not change checkpoint ownership or authorize replay.",
+    "Identifiant d’observation avec createObservation() ; utilise checkpoint.runId par défaut, sinon un identifiant généré. Une reprise de checkpoint conserve le curseur d’une projection stabilisée. Après récupération explicite de l’exécution, choisissez un nouvel identifiant d’observation si l’ancienne projection est encore active. Ne modifie pas la propriété du checkpoint et n’autorise pas le rejeu."
+  ],
+  "WorkflowResult.runId": [
+    "Observation ID of this workflow when started with createObservation(). Independent of executionId and available without persistence; reading requires a configured transport.",
+    "Identifiant d’observation du workflow démarré avec createObservation(). Distinct d’executionId et disponible sans persistance ; sa lecture demande un transport configuré."
+  ],
+  "createObservation.options": [
+    "Optional delivery, redaction, sink and persistence settings. With no transport, only in-memory observation is enabled. Sinks and transport are borrowed; no run is started by construction.",
+    "Réglages optionnels de livraison, masquage, sorties et persistance. Sans transport, seule l’observation en mémoire est active. Sorties et transport sont empruntés ; la construction ne démarre aucune exécution."
+  ],
+  "ObservationOptions.transporter": [
+    "Optional caller-owned transport for run snapshots and events under runs/<id>/. Execution engines register and close tracking sessions; constructing a client or reading never creates records. Without it, readRun and watchRun refuse.",
+    "Transport optionnel appartenant à l’appelant, contenant états et événements sous runs/<id>/. Les moteurs enregistrent et ferment les suivis ; construire ou consulter le client ne crée aucun enregistrement. Sans lui, readRun et watchRun refusent la lecture."
+  ],
+  "ObservationOptions.heartbeatMs": [
+    "Tracking heartbeat interval in milliseconds, default 5000, a positive safe integer within the timer range. Applies only to recorded running executions.",
+    "Intervalle du heartbeat en millisecondes, 5000 par défaut, entier sûr positif dans la plage des minuteurs. Concerne seulement les exécutions actives enregistrées."
+  ],
+  "ObservationOptions.abandonAfterMs": [
+    "Heartbeat expiry delay in milliseconds, default 30000; must exceed heartbeatMs. Expiry reports suspected abandonment on read, never recovery authorization.",
+    "Délai d’expiration du heartbeat en millisecondes, 30000 par défaut ; doit dépasser heartbeatMs. L’expiration signale un abandon suspecté à la lecture, sans autoriser de récupération."
+  ],
+  "ObservationClient.readRun": [
+    "Read the snapshot for id with optional signal and maxBytes; returns undefined when absent. Requires the configured transport. Expired running snapshots are reported abandoned without modifying storage.",
+    "Lit l’état pour id avec signal et maxBytes optionnels ; renvoie undefined si absent. Demande le transport configuré. Les états actifs expirés sont signalés abandonnés sans modifier le stockage."
+  ],
+  "ObservationClient.watchRun": [
+    "Follow persisted events for id after options.from (default 0), polling until settled or expired. Supports signal, pollMs and maxBytes. Cancellation stops reading only. The record must exist; missing events and invalid cursors fail explicitly.",
+    "Suit les événements persistés pour id après options.from (0 par défaut), par lecture périodique jusqu’à stabilisation ou expiration. Accepte signal, pollMs et maxBytes. L’annulation arrête seulement la lecture. L’enregistrement doit exister ; événements absents et curseurs invalides échouent explicitement."
+  ],
+  "ObservationClient.[Symbol.asyncDispose]": [
+    "Await close(): stop accepting new executions, wait for active tracking sessions and flush delivery. Does not cancel executions or close borrowed sinks and transport.",
+    "Attend close() : refuse les nouvelles exécutions, attend les suivis actifs et vide les livraisons. N’annule pas les exécutions et ne ferme pas les sorties ou le transport empruntés."
+  ],
+  "ObservationReporter.event": [
+    "An observation event with optional pass number for the historical callable interface. For scoped delivery, pass the reporter directly as an ObservationSink.",
+    "Événement d’observation avec numéro de passe optionnel pour l’interface historique appelable. Pour les enveloppes contextualisées, passez directement le reporter comme ObservationSink."
+  ],
+  "ObservationClient.close": [
+    "Prevent new sessions, wait for active sessions owned by this client or its children, then flush and close in-memory delivery. Idempotent. Does not cancel execution or close borrowed sinks, transport or telemetry SDKs. Readers remain usable.",
+    "Refuse les nouveaux suivis, attend les suivis actifs de ce client et de ses enfants, puis vide et ferme les livraisons en mémoire. Idempotent. N’annule aucune exécution et ne ferme pas les sorties, le transport ou les SDK empruntés. Les lecteurs restent utilisables."
+  ],
+  "ObservationClient.flush": [
+    "Flush in-memory delivery and active tracking sessions without closing them. Delivery remains bounded; failures and dropped events remain observable.",
+    "Vide les livraisons en mémoire et celles des suivis actifs sans les fermer. La livraison reste bornée ; erreurs et pertes restent consultables."
+  ],
+  "RecipeReport.observationId": [
+    "Tracking ID returned by a workflow using createObservation(); use it with observation.readRun/watchRun. Distinct from the durable recipe runId used by status and resume, especially after explicit recovery selects a new observation ID.",
+    "Identifiant du suivi renvoyé par un workflow utilisant createObservation() ; à utiliser avec observation.readRun/watchRun. Distinct du runId durable utilisé par status et resume, notamment après récupération explicite avec un nouvel identifiant d’observation."
   ]
 }

@@ -1,11 +1,53 @@
 import type { FallbackCandidate } from "../domain/fallback-agent.types.ts";
 import type { ObservationEvent } from "../domain/observation.types.ts";
-import type { ReporterOptions, ReportPass } from "./reporter.types.ts";
+import type {
+  ReporterOptions,
+  ReportPass,
+  ObservationReporter,
+} from "./reporter.types.ts";
 
 export type { ReporterOptions } from "./reporter.types.ts";
 
 export function createReporter(
   options: ReporterOptions = {},
+): ObservationReporter {
+  const report = reporter(options);
+  const dispatches = new Map<
+    string,
+    Map<string, ReturnType<typeof reporter>>
+  >();
+  return Object.assign(report, {
+    observe(value: import("../domain/observation.types.ts").Observation) {
+      const dispatchId = value.scope.dispatchId ?? "";
+      if (value.event.kind === "dispatch-finished") {
+        dispatches.delete(dispatchId);
+        return;
+      }
+      if (value.event.kind === "workflow" || !dispatchId) {
+        report(value.event);
+        return;
+      }
+      let scopes = dispatches.get(dispatchId);
+      if (!scopes) {
+        scopes = new Map();
+        dispatches.set(dispatchId, scopes);
+      }
+      const key = JSON.stringify([value.scope.subagentId, value.scope.pass]);
+      let write = scopes.get(key);
+      if (!write) {
+        write = reporter(options);
+        scopes.set(key, write);
+      }
+      write({
+        ...value.event,
+        ...(value.scope.pass === undefined ? {} : { pass: value.scope.pass }),
+      });
+    },
+  });
+}
+
+function reporter(
+  options: ReporterOptions,
 ): (event: ObservationEvent & ReportPass) => void {
   const write = options.write ?? ((text) => process.stdout.write(text));
   let streamed = false;

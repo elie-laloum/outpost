@@ -88,6 +88,7 @@ Un composant indiqué « runtime » est fermé par le runtime ; « valeur » dé
 | `artifact.json`             | [Configuration YAML](../recipe-configuration/)                      | valeur    | implémenté |
 | `artifactStore.transport`   | [ArtifactStoreOptions](../../reference/artifactstoreoptions/)       | valeur    | implémenté |
 | `checkpointStore.transport` | [TransportStoreOptions](../../reference/transportstoreoptions/)     | valeur    | implémenté |
+| `observation.client`        | [ObservationOptions](../../reference/observationoptions/)           | runtime   | implémenté |
 | `observation.hub`           | [ObservationHubOptions](../../reference/observationhuboptions/)     | runtime   | implémenté |
 | `sink.console`              | [Configuration YAML](../recipe-configuration/)                      | valeur    | implémenté |
 | `sink.custom`               | [Configuration YAML](../recipe-configuration/)                      | runtime   | implémenté |

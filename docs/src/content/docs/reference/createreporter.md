@@ -13,7 +13,7 @@ import { createReporter } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create an observe callback that prints one line per event: phases, tool calls, warnings, failures and each pass summary with its token counts. It writes to process.stdout unless write is given and never changes execution.
+Create an observe callback that prints one line per event: phases, tool calls, warnings, failures and each pass summary with its token counts. It writes to process.stdout unless write is given and never changes execution. The returned callable also implements ObservationSink and can be passed directly to createObservation({ sinks }); each dispatch/pass has independent text-stream state.
 
 [Complete example and detailed rules](../../guide/observability/).
 
@@ -29,18 +29,17 @@ Create an observe callback that prints one line per event: phases, tool calls, w
 
 ## Returns
 
-`(event: ObservationEvent & ReportPass) => void`
+`ObservationReporter`
 
 ## Signature
 
 ```ts
 export declare function createReporter(
   options?: ReporterOptions,
-): (event: ObservationEvent & ReportPass) => void;
+): ObservationReporter;
 ```
 
 ## Related contracts
 
-- [ObservationEvent](../observationevent/)
+- [ObservationReporter](../observationreporter/)
 - [ReporterOptions](../reporteroptions/)
-- [ReportPass](../support-reportpass/)

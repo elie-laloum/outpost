@@ -14,7 +14,7 @@ A transport stores versioned bytes under keys. The stores built on it interpret 
 | [Checkpoints](../durable-runs/)             | `createWorkflowCheckpointStore({ transporter })`       | Required                     |
 | [Artifacts](../artifacts/)                  | `createArtifactStore({ transporter })`                 | Required                     |
 | [Task cache](../task-cache/)                | `createTaskCacheStore({ transporter })`                | Required                     |
-| [Execution state](../run-state/)            | `createRunObserver({ transporter, id, kind })`         | Required                     |
+| [Execution state](../run-state/)            | `createObservation({ transporter })`                   | Required                     |
 | [Durable speculation](../speculation/)      | `durability.transporter` on `speculate()`              | Required                     |
 | [Journals](../journals/)                    | `logging.transporter` on a dispatch or sandbox         | `.outpost/storage`           |
 | Resource activity                           | `activityTransport` on a dispatch or sandbox           | `.outpost/storage`           |

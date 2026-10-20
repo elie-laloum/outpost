@@ -14,6 +14,11 @@ export interface OpenTelemetryOptions {
 
 export interface OpenTelemetryObserver
   extends DispatchTelemetry, WorkflowTelemetry {
+  observe(
+    event:
+      | import("../domain/observation.types.ts").Observation
+      | import("../domain/workflow.types.ts").WorkflowEvent,
+  ): void;
   readonly sink: import("../domain/observation.types.ts").ObservationSink;
   close(): void;
 }

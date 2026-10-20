@@ -1,5 +1,5 @@
 // Observation hub — one stream for the whole run: workflow, agent and operations.
-// Every event carries a global number (seq), a source and its scope (task, attempt, dispatch…).
+// Every event carries a sequence number (seq), a source and its scope (task, attempt, dispatch…).
 // Sinks are isolated: a slow or broken one never makes the run fail.
 
 import { appendFile, mkdir, rm } from "node:fs/promises";
@@ -8,7 +8,7 @@ import {
   createAgent,
   createHarness,
   createHarnessFileTools,
-  createObservationHub,
+  createObservation,
   createSandbox,
   defineCommandTask,
   defineTask,
@@ -59,7 +59,7 @@ const broken: ObservationSink = {
   },
 };
 
-const observation = createObservationHub({
+const observation = createObservation({
   sinks: [terminal, journal, broken],
   capacity: 256, // waiting envelopes per asynchronous sink
   deliveryTimeoutMs: 2_000, // a sink slower than this is disabled
@@ -89,7 +89,7 @@ const summary = defineTask({
       agent: reader,
       brief: { file: join(import.meta.dirname, "brief.md") },
       signal: context.signal,
-      observation: context.observation,
+      ...(context.observation ? { observation: context.observation } : {}),
     });
 
     context.reportUsage(result.usage);

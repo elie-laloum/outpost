@@ -9,6 +9,7 @@ sidebar:
 
 | Name             | Type                                                                                                         | Presence | Meaning                                                                                                                                                                                                                                                          |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `observationId`  | `string \| undefined`                                                                                        | Optional | Tracking ID returned by a workflow using createObservation(); use it with observation.readRun/watchRun. Distinct from the durable recipe runId used by status and resume, especially after explicit recovery selects a new observation ID.                       |
 | `workspaceInfo`  | `FileWorkspaceRecord \| undefined`                                                                           | Optional | Versioned workspace description retaining ownership, settled generation and recovery references.                                                                                                                                                                 |
 | `fileOutputs`    | `readonly WorkspacePublication[] \| undefined`                                                               | Optional | Verified publication results, separate from Git commits and branch integration.                                                                                                                                                                                  |
 | `integration`    | `ConflictResolution \| undefined`                                                                            | Optional | Conflict resolution commit, verification and agent usage, reported separately from workflow usage when integration invokes a resolver.                                                                                                                           |
@@ -29,6 +30,7 @@ sidebar:
 
 ```ts
 export interface RecipeReport {
+  readonly observationId?: string;
   readonly workspaceInfo?: FileWorkspaceRecord;
   readonly fileOutputs?: readonly WorkspacePublication[];
   readonly integration?: ConflictResolution;

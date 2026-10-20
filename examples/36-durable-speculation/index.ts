@@ -13,7 +13,7 @@ import {
   createHarnessFileTools,
   createHarnessShellTools,
   createLocalTransport,
-  createObservationHub,
+  createObservation,
   recoverSpeculation,
   speculate,
   type ObservationHub,
@@ -47,10 +47,15 @@ function race(
     sandboxProvider, // mounted Docker: it knows how to find and clean up orphan sandboxes
     concurrency: 2,
     budget: { attempts: 4 }, // cumulative: the attempts of the crashed run count too
-    observation: options.observation,
+    ...(options.observation ? { observation: options.observation } : {}),
 
     // Where the race lives. Change `version` if agents, briefs or validation change.
-    durability: { transporter, runId, version: "1", resume: options.resume },
+    durability: {
+      transporter,
+      runId,
+      version: "1",
+      ...(options.resume ? { resume: options.resume } : {}),
+    },
 
     candidates: ["minimal", "regex"].map((key) => ({
       key,
@@ -71,7 +76,7 @@ function race(
 
 // ── Child process: the coordinator that crashes as soon as a candidate uses a tool.
 if (process.argv.includes("--coordinator")) {
-  const observation = createObservationHub({
+  const observation = createObservation({
     sinks: [
       {
         observe({ scope, event }) {

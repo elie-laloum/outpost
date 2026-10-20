@@ -13,6 +13,7 @@ export interface RecipeDiagnostic {
 }
 
 export interface RecipeReport {
+  readonly observationId?: string;
   readonly workspaceInfo?: import("../domain/file-workspace.types.ts").FileWorkspaceRecord;
   readonly fileOutputs?: readonly import("../domain/file-workspace.types.ts").WorkspacePublication[];
   readonly integration?: import("./conflict-resolution.types.ts").ConflictResolution;

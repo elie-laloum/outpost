@@ -11,18 +11,26 @@ description: "Recevez les événements des agents et des workflows pendant leur 
 
 Pour lire l’activité dans le terminal, commencez par le reporter ci-dessous. Pour votre interface, utilisez un callback `observe`. Pour réunir agents, commandes et workflow dans une même exécution, utilisez un [hub d’observation](../observability/).
 
-Passez `createReporter()` dans l’option `observe` de la tâche pour afficher sa progression dans le terminal. Vous verrez la préparation, l’activité de l’agent et le bilan de l’exécution.
+Branchez `createReporter()` dans les sorties de `createObservation()` puis passez cet objet au dispatch pour afficher sa progression dans le terminal. Vous verrez la préparation, l’activité de l’agent et le bilan de l’exécution.
 
 ```ts
-import { createReporter, dispatch } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createReporter,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await using observation = createObservation({
+  sinks: [createReporter({ label: "API review" })],
+});
 
 await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
-  observe: createReporter({ label: "API review" }),
+  observation,
 });
 ```
 
@@ -67,12 +75,12 @@ Pour des gestionnaires asynchrones associés à chaque type d’événement, con
 
 ## Suivre un workflow
 
-`start({ observe })` reçoit les événements du workflow : transitions de tâches, tentatives, reprises, consommation et fin de l’exécution. Les événements d’agent restent attachés à chaque tâche : passez `observe` dans sa requête.
+Passez un seul objet observation au workflow pour recevoir ses transitions de tâches et les événements de ses agents. Le reporter du terminal et votre traitement personnalisé sont des sorties de ce même objet. Les callbacks `observe` historiques restent disponibles pour des abonnements plus ciblés.
 
 <!-- tabs -->
 
 ```ts title="reported-review.ts"
-import { defineIsolatedTask, createReporter } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -82,20 +90,31 @@ export const review = defineIsolatedTask({
     sandboxProvider,
     agent: coder,
     brief: { text: "Summarize the public API without changing files." },
-    observe: createReporter({ label: "review" }),
   }),
 });
 ```
 
 ```ts title="report-workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createReporter,
+  defineWorkflow,
+} from "@elie-laloum/outpost";
 import { review } from "./reported-review.ts";
 
+await using observation = createObservation({
+  sinks: [
+    createReporter({ label: "review" }),
+    {
+      observe({ event }) {
+        if (event.kind === "workflow" && event.event.type === "task")
+          console.log(event.event.key, event.event.status);
+      },
+    },
+  ],
+});
 export const result = await defineWorkflow("review", [review]).start({
-  observe(event) {
-    if (event.type === "task") console.log(event.key, event.status);
-    // Example output: review done
-  },
+  observation,
 });
 console.log(result.status, result.observerErrors);
 // Example output: done []

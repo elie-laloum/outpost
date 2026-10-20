@@ -7,20 +7,20 @@ Use this guide after [collecting scoped events](../observability/) when you need
 
 ## Export to OpenTelemetry
 
-Install `@opentelemetry/api` and an OpenTelemetry SDK, then register the SDK and its exporters before you create the observer. Its `sink` turns hub events into linked spans and metrics.
+Install `@opentelemetry/api` and an OpenTelemetry SDK, then register the SDK and its exporters before you create the observer. Pass the observer directly to `createObservation({ sinks })` to turn events into linked spans and metrics. The `.sink` property remains available for compatibility.
 
 <!-- tabs -->
 
 ```ts title="telemetry.ts"
 import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 import { trace, metrics } from "@opentelemetry/api";
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
 export const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
   meter: metrics.getMeter("outpost"),
 });
-export const observation = createObservationHub({ sinks: [telemetry.sink] });
+export const observation = createObservation({ sinks: [telemetry] });
 ```
 
 ```ts title="telemetry-review.ts"
@@ -59,5 +59,5 @@ API reference: [createOpenTelemetryObserver](../../reference/createopentelemetry
 Pass the observer as `telemetry` to `start()` for workflow, task and attempt spans, or to `dispatch()` for a dispatch span. Operation spans need the hub.
 
 :::caution
-Wire the observer once per run: passing `telemetry` and a hub holding `telemetry.sink` to the same run duplicates its spans and metrics.
+Wire the observer once per run: passing `telemetry` and an observation client holding `telemetry` to the same run duplicates its spans and metrics.
 :::

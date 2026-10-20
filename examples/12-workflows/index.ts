@@ -9,6 +9,7 @@ import {
   createHarnessFileTools,
   createHarnessShellTools,
   createReporter,
+  createObservation,
   createSandbox,
   defineAgentTask,
   defineCommandTask,
@@ -17,6 +18,8 @@ import {
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({ sinks: [createReporter()] });
 
 await using sandbox = await createSandbox({
   repository: demoRepository(import.meta.dirname),
@@ -43,7 +46,6 @@ const fix = defineAgentTask({
   request: () => ({
     agent: coder,
     brief: { file: join(import.meta.dirname, "brief.md") },
-    observe: createReporter({ label: "fix" }),
   }),
 });
 
@@ -75,6 +77,7 @@ const plan = defineWorkflow("fix-and-verify", [fix, tests, report]);
 console.log(plan.diagram()); // the graph in Mermaid format
 
 const result = await plan.start({
+  observation,
   observe(event) {
     console.log(event.type + " - " + event.key + " - " + event.status);
   },

@@ -8,6 +8,7 @@ import {
   createHarness,
   createHarnessShellTools,
   createReporter,
+  createObservation,
   createSandbox,
   dispatch,
   type SandboxProvider,
@@ -15,6 +16,10 @@ import {
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { model, modelProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({
+  sinks: [createReporter({ label: "offline" })],
+});
 
 const repository = demoRepository(import.meta.dirname);
 
@@ -66,7 +71,7 @@ await dispatch({
   sandboxProvider: offline,
   agent: coder,
   brief: { file: join(import.meta.dirname, "brief.md") },
-  observe: createReporter({ label: "offline" }),
+  observation,
 });
 
 // For domain allowlists and direct TCP/UDP CIDRs on Docker or Podman,

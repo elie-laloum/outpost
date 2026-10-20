@@ -7,11 +7,14 @@ import {
   createAgent,
   createCodexHarness,
   createReporter,
+  createObservation,
   dispatch,
   fromSecrets,
 } from "@elie-laloum/outpost";
 import type { SecretSource } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+await using observation = createObservation({ sinks: [createReporter()] });
 
 function required(name: string): string {
   const value = process.env[name];
@@ -148,7 +151,7 @@ try {
       image: "outpost-codex:dev",
     }),
     branch: { mode: "named", name: `outpost/secrets-${randomUUID()}` },
-    observe: createReporter(),
+    observation,
     brief: {
       text: "Summarize this repository. Do not inspect or print credentials.",
     },

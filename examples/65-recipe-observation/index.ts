@@ -1,6 +1,7 @@
-// Observe a YAML recipe through allocation, task execution and cleanup using a local hub.
+// Observe a YAML recipe through allocation, task execution and cleanup using one observation client.
 // Build Outpost, then run with Node.js 24+ and Git; this example makes no model calls.
 
+import { createObservation, createLocalTransport } from "@elie-laloum/outpost";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFile } from "node:child_process";
@@ -41,6 +42,15 @@ test("declared observation reaches stderr and the final report reaches stdout", 
   ]);
   const report = JSON.parse(result.stdout);
   assert.equal(report.status, "done");
+  assert.ok(report.observationId);
+  await using reader = createObservation({
+    transporter: createLocalTransport({
+      directory: join(repository, ".outpost", "storage"),
+    }),
+  });
+  const recorded = await reader.readRun(report.observationId);
+  assert.equal(recorded?.status, "done");
+  assert.equal(recorded?.complete, true);
   assert.equal(report.outputs.hello.stdout, "Hello from the recipe\n");
   const events = result.stderr
     .trim()

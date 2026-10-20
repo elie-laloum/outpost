@@ -1,3 +1,4 @@
+import type { ObservationSink } from "../domain/observation.types.ts";
 import type { AgentObservation } from "../domain/agent.types.ts";
 
 export type ReporterHandlers = {
@@ -15,7 +16,7 @@ export interface CustomReporterOptions {
   ) => void | Promise<void>;
 }
 
-export interface CustomReporter {
+export interface CustomReporter extends ObservationSink {
   (event: AgentObservation): void;
   flush(): Promise<void>;
 }

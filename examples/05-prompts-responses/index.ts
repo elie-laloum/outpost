@@ -8,11 +8,14 @@ import {
   createHarness,
   createHarnessFileTools,
   createReporter,
+  createObservation,
   defineJsonResponse,
   dispatch,
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({ sinks: [createReporter()] });
 
 // Valibot validates the answer; the explicit JSON Schema describes its input.
 const Summary = v.object({
@@ -35,7 +38,7 @@ const result = await dispatch({
   repository: demoRepository(import.meta.dirname),
   sandboxProvider,
   agent: explorer,
-  observe: createReporter(),
+  observation,
 
   // The brief is a .md file; {{ audience }} is replaced with its value.
   brief: {

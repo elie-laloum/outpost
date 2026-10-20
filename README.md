@@ -101,6 +101,15 @@ console.log(result.commits);
 
 The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.
 
+## Observe executions
+
+Compose terminal reporting, optional OpenTelemetry and persisted run state through
+`createObservation()`. Pass it to `dispatch()` or `workflow.start()`; the engine
+owns each execution’s tracking session. With a transport, use
+`observation.readRun(id)` and `observation.watchRun(id)` from the same or another
+process. See [observation](https://elie-laloum.github.io/outpost/guide/observability/)
+and [run state](https://elie-laloum.github.io/outpost/guide/run-state/).
+
 ## Boundaries worth knowing
 
 Account login and API-key authentication are explicit choices with different billing. Outpost never reads a system keychain. Credentials are made available to the chosen agent in its execution environment.

@@ -13,7 +13,7 @@ import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry"
 
 ## Rôle et comportement
 
-Crée une instrumentation OpenTelemetry à partir de votre tracer et de votre meter. Attachez son sink au hub passé dans observation pour obtenir des spans de workflow, de tâche, de dispatch et d’opération reliés entre eux, ou passez l’observateur comme telemetry à workflow.start() ou dispatch(). Les erreurs d’instrumentation vont à onError ; close() termine les spans ouverts sans vider ni arrêter le SDK.
+Crée une instrumentation OpenTelemetry à partir de votre tracer et de votre meter. Attachez son sink au hub passé dans observation pour obtenir des spans de workflow, de tâche, de dispatch et d’opération reliés entre eux, ou passez l’observateur comme telemetry à workflow.start() ou dispatch(). Les erreurs d’instrumentation vont à onError ; close() termine les spans ouverts sans vider ni arrêter le SDK. Passez directement l’observateur comme sortie à createObservation() ; sa propriété .sink et ses callbacks historiques restent compatibles. L’appelant ferme l’observateur après l’observation et possède la fermeture du SDK.
 
 [Exemple complet et règles détaillées](../../guide/observability/).
 

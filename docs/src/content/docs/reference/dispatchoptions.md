@@ -15,6 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Name            | Type                                                             | Presence | Meaning                                                                                                                                                                                                                                                                                          |
 | --------------- | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `runId`         | `string \| undefined`                                            | Optional | Observation ID for a standalone dispatch using createObservation(); generated when omitted. With a transport, creation refuses duplicate IDs. Nested dispatches join their workflow projection. A continuation is a new dispatch and does not inherit this ID.                                   |
 | `watchdog`      | `WatchdogOptions \| undefined`                                   | Optional | Opt-in repetition detection for decoded tool calls and file changes. Disabled when omitted; a stop rejects with code stuck, a warning continues, and an instruction uses steering. Replay agents reject this option.                                                                             |
 | `prices`        | `ModelPriceTable \| undefined`                                   | Optional | Optional model rates that enable model attribution in usage. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.                                                                                                                         |
 | `redact`        | `readonly RegExp[] \| undefined`                                 | Optional | Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.                                                                                                                 |
@@ -43,6 +44,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly runId?: string;
   readonly watchdog?: WatchdogOptions;
   readonly prices?: ModelPriceTable;
   readonly redact?: readonly RegExp[];

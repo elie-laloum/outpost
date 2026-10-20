@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add `createObservation()` to compose borrowed reporters, OpenTelemetry and optional Transport-backed run state. Execution engines own tracking sessions; `observation.readRun(id)` and `observation.watchRun(id)` read them without starting execution. Preserve low-level hubs, observers and historical callbacks.
+- Add observation `runId` selection and result IDs for dispatches and workflows, independent concurrent event sequences, automatic heartbeat cleanup and settled checkpoint history continuation. Readers cannot authorize replay or recovery; interrupted projections require a fresh observation ID after explicit execution recovery.
+- Make reporters and OpenTelemetry observers directly usable as observation sinks. YAML observation defaults to the client, accepts a transport and heartbeat settings, and exposes observation IDs in reports; explicit `type: hub` and `sink.run` remain compatible. Update schemas, parity classifications, bilingual guides, API reference and runnable examples.
+- Validate with offline execution, storage, checkpoint, YAML and telemetry regressions. No paid model or live cloud validation is implied.
+
 ## 12.0.1
 
 - Fix native conversation capture and restoration during local Claude Code and Codex execution when `CLAUDE_CONFIG_DIR` or `CODEX_HOME` selects a custom CLI directory. This prevents successful recipe turns from failing with a conversation-not-found error after the CLI has saved its transcript.

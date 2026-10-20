@@ -124,8 +124,12 @@ export function createOpenTelemetryObserver(
   const observer: OpenTelemetryObserver = {
     sink,
     startDispatch: dispatches.startDispatch,
-    observe(event: WorkflowEvent) {
+    observe(
+      event:
+        WorkflowEvent | import("../domain/observation.types.ts").Observation,
+    ) {
       if (closed) return;
+      if ("seq" in event) return sink.observe(event);
       const at = Date.parse(event.timestamp);
       if (!Number.isFinite(at)) return;
       if (event.type === "start") {

@@ -44,6 +44,9 @@ export interface ConsoleSinkOptions {
 }
 
 export interface ObservationComponentOptions {
+  readonly transporter?: { readonly $ref: string };
+  readonly heartbeatMs?: number;
+  readonly abandonAfterMs?: number;
   readonly sinks?: readonly { readonly $ref: string }[];
   readonly redact?: readonly (
     string | { readonly pattern: string; readonly flags?: string }

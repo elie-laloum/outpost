@@ -115,7 +115,7 @@ export const groups = [
     title: ["Observability", "Observabilité"],
     guide: "guide/observability",
     names:
-      "createRunObserver readRun watchRun RunStatus RunTask RunPass RunDispatch RunError RunSnapshot RunEvent RunObserverOptions RunObserver ReadRunOptions WatchRunOptions createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage ModelUsage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
+      "createObservation ObservationClient ObservationOptions ObservationReadOptions ObservationWatchOptions ObservationReporter createRunObserver readRun watchRun RunStatus RunTask RunPass RunDispatch RunError RunSnapshot RunEvent RunObserverOptions RunObserver ReadRunOptions WatchRunOptions createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage ModelUsage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     id: "workflows",
@@ -279,7 +279,7 @@ const guidePages = {
   observability:
     "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub createCustomReporter CustomReporter ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver WorkflowTelemetry",
   "run-state":
-    "createRunObserver readRun watchRun RunStatus RunTask RunPass RunDispatch RunError RunSnapshot RunEvent RunObserverOptions RunObserver ReadRunOptions WatchRunOptions",
+    "createObservation ObservationClient ObservationOptions ObservationReadOptions ObservationWatchOptions ObservationReporter createRunObserver readRun watchRun RunStatus RunTask RunPass RunDispatch RunError RunSnapshot RunEvent RunObserverOptions RunObserver ReadRunOptions WatchRunOptions",
   "record-replay":
     "createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayDecisionEvent ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision",
   budgets:

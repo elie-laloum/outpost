@@ -11,18 +11,26 @@ description: "Receive agent and workflow events while work is running."
 
 For terminal output, start with the reporter below. For your own UI, use an `observe` callback. To combine agents, commands and workflow events in one execution, use an [observation hub](../observability/).
 
-Pass `createReporter()` as the dispatch’s `observe` callback to print progress in your terminal. Use it to see preparation, agent activity and the final execution summary.
+Pass `createReporter()` as a sink to `createObservation()`, then pass that object to the dispatch to print progress in your terminal. Use it to see preparation, agent activity and the final execution summary.
 
 ```ts
-import { createReporter, dispatch } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createReporter,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await using observation = createObservation({
+  sinks: [createReporter({ label: "API review" })],
+});
 
 await dispatch({
   repository,
   sandboxProvider,
   agent: coder,
   brief: { text: "Summarize the public API without changing files." },
-  observe: createReporter({ label: "API review" }),
+  observation,
 });
 ```
 
@@ -67,12 +75,12 @@ For asynchronous handlers keyed by kind, build the callback with [`createCustomR
 
 ## Follow a workflow
 
-`start({ observe })` receives workflow events: task transitions, attempts, retries, usage and the end of the run. Agent events stay on each task: pass `observe` in its request.
+Pass one observation object to the workflow to receive its task transitions and its nested agent events. The terminal reporter and your own event handler are sinks on that same object. Historical `observe` callbacks remain available for narrower subscriptions.
 
 <!-- tabs -->
 
 ```ts title="reported-review.ts"
-import { defineIsolatedTask, createReporter } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -82,20 +90,31 @@ export const review = defineIsolatedTask({
     sandboxProvider,
     agent: coder,
     brief: { text: "Summarize the public API without changing files." },
-    observe: createReporter({ label: "review" }),
   }),
 });
 ```
 
 ```ts title="report-workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createReporter,
+  defineWorkflow,
+} from "@elie-laloum/outpost";
 import { review } from "./reported-review.ts";
 
+await using observation = createObservation({
+  sinks: [
+    createReporter({ label: "review" }),
+    {
+      observe({ event }) {
+        if (event.kind === "workflow" && event.event.type === "task")
+          console.log(event.event.key, event.event.status);
+      },
+    },
+  ],
+});
 export const result = await defineWorkflow("review", [review]).start({
-  observe(event) {
-    if (event.type === "task") console.log(event.key, event.status);
-    // Example output: review done
-  },
+  observation,
 });
 console.log(result.status, result.observerErrors);
 // Example output: done []

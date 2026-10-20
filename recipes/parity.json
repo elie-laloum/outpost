@@ -1942,6 +1942,7 @@
   ".:ContinuationOptions": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "watchdog": "WatchdogOptions | undefined",
       "prices": "ModelPriceTable | undefined",
       "redact": "readonly RegExp[] | undefined",
@@ -1986,6 +1987,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runId": "contract",
       "watchdog": "contract",
       "prices": "contract",
       "redact": "contract",
@@ -2661,6 +2663,16 @@
     "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
     "optionCoverage": {}
   },
+  ".:createObservation": {
+    "signatures": ["(options?: ObservationOptions): ObservationClient"],
+    "options": {},
+    "category": "native",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Unified observation composition is native through observation.client; runtime read/watch, lifecycle and sink contracts remain TypeScript interfaces. YAML settings derive from ObservationOptions.",
+    "optionCoverage": {}
+  },
   ".:createObservationHub": {
     "signatures": ["(options?: ObservationHubOptions): ObservationHub"],
     "options": {},
@@ -2702,9 +2714,7 @@
     "optionCoverage": {}
   },
   ".:createReporter": {
-    "signatures": [
-      "(options?: ReporterOptions): (event: ObservationEvent & ReportPass) => void"
-    ],
+    "signatures": ["(options?: ReporterOptions): ObservationReporter"],
     "options": {},
     "category": "native",
     "lot": 7,
@@ -2937,7 +2947,8 @@
   ".:CustomReporter": {
     "signatures": ["(event: AgentObservation): void"],
     "options": {
-      "flush": "() => Promise<void>"
+      "flush": "() => Promise<void>",
+      "observe": "(observation: Observation) => void | Promise<void>"
     },
     "category": "extension",
     "lot": 7,
@@ -2945,7 +2956,8 @@
     "test": "test/functional/recipe-advanced.test.ts",
     "reason": "Callable or caller-owned object supplied by a declared local extension; factories require static metadata.",
     "optionCoverage": {
-      "flush": "extension"
+      "flush": "extension",
+      "observe": "contract"
     }
   },
   ".:CustomReporterOptions": {
@@ -3832,6 +3844,7 @@
   ".:DispatchOptions": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "watchdog": "WatchdogOptions | undefined",
       "prices": "ModelPriceTable | undefined",
       "redact": "readonly RegExp[] | undefined",
@@ -3862,6 +3875,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runId": "contract",
       "watchdog": "contract",
       "prices": "contract",
       "redact": "contract",
@@ -3902,6 +3916,7 @@
       "fallback": "FallbackRecord | undefined",
       "resume": "<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>",
       "fork": "<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>",
+      "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
       "usage": "Usage",
@@ -3928,6 +3943,7 @@
       "fallback": "contract",
       "resume": "contract",
       "fork": "contract",
+      "runId": "contract",
       "text": "contract",
       "turns": "contract",
       "usage": "contract",
@@ -4056,6 +4072,7 @@
   ".:Execution": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
       "usage": "Usage",
@@ -4070,6 +4087,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runId": "contract",
       "text": "contract",
       "turns": "contract",
       "usage": "contract",
@@ -4244,6 +4262,7 @@
       "variables": "Readonly<Record<string, string>> | undefined",
       "workspace": "undefined",
       "workspaceSource": "FileWorkspaceSource",
+      "runId": "string | undefined",
       "watchdog": "WatchdogOptions | undefined",
       "prices": "ModelPriceTable | undefined",
       "redact": "readonly RegExp[] | undefined",
@@ -4289,6 +4308,7 @@
       "variables": "native",
       "workspace": "contract",
       "workspaceSource": "native",
+      "runId": "contract",
       "watchdog": "contract",
       "prices": "contract",
       "redact": "contract",
@@ -4331,6 +4351,7 @@
       "report": "(options?: import(\"../domain/run-report.types.ts\").RunReportOptions) => string",
       "resume": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
       "fork": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
+      "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
       "usage": "Usage",
@@ -4356,6 +4377,7 @@
       "report": "contract",
       "resume": "contract",
       "fork": "contract",
+      "runId": "contract",
       "text": "contract",
       "turns": "contract",
       "usage": "contract",
@@ -5024,6 +5046,7 @@
       "observation": "ObservationHub | undefined",
       "limits": "StageLimits | undefined",
       "label": "string | undefined",
+      "runId": "string | undefined",
       "watchdog": "WatchdogOptions | undefined",
       "prices": "ModelPriceTable | undefined",
       "redact": "readonly RegExp[] | undefined",
@@ -5069,6 +5092,7 @@
       "observation": "contract",
       "limits": "contract",
       "label": "contract",
+      "runId": "contract",
       "watchdog": "contract",
       "prices": "contract",
       "redact": "contract",
@@ -7481,6 +7505,44 @@
       "event": "contract"
     }
   },
+  ".:ObservationClient": {
+    "signatures": [],
+    "options": {
+      "flush": "() => Promise<void>",
+      "close": "() => Promise<void>",
+      "readRun": "(id: string, options?: ObservationReadOptions) => Promise<RunSnapshot | undefined>",
+      "watchRun": "(id: string, options?: ObservationWatchOptions) => AsyncIterable<RunEvent>",
+      "[Symbol.asyncDispose]": "() => Promise<void>",
+      "redacting": "boolean",
+      "scope": "ObservationScope",
+      "errors": "readonly unknown[]",
+      "dropped": "number",
+      "verbose": "boolean",
+      "redact": "<T>(value: T) => T",
+      "emit": "(source: ObservationSource, event: ObservationEvent) => void",
+      "child": "(scope: ObservationScope, sinks?: readonly ObservationSink[], redact?: readonly RegExp[]) => ObservationHub"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Unified observation composition is native through observation.client; runtime read/watch, lifecycle and sink contracts remain TypeScript interfaces. YAML settings derive from ObservationOptions.",
+    "optionCoverage": {
+      "flush": "contract",
+      "close": "contract",
+      "readRun": "contract",
+      "watchRun": "contract",
+      "[Symbol.asyncDispose]": "contract",
+      "redacting": "contract",
+      "scope": "contract",
+      "errors": "contract",
+      "dropped": "contract",
+      "verbose": "contract",
+      "redact": "contract",
+      "emit": "contract",
+      "child": "contract"
+    }
+  },
   ".:ObservationEvent": {
     "signatures": [],
     "options": {
@@ -7667,6 +7729,68 @@
       "verbose": "contract"
     }
   },
+  ".:ObservationOptions": {
+    "signatures": [],
+    "options": {
+      "transporter": "Transport | undefined",
+      "heartbeatMs": "number | undefined",
+      "abandonAfterMs": "number | undefined",
+      "redact": "readonly RegExp[] | undefined",
+      "sinks": "readonly ObservationSink[] | undefined",
+      "scope": "ObservationScope | undefined",
+      "capacity": "number | undefined",
+      "deliveryTimeoutMs": "number | undefined",
+      "verbose": "boolean | undefined"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Unified observation composition is native through observation.client; runtime read/watch, lifecycle and sink contracts remain TypeScript interfaces. YAML settings derive from ObservationOptions.",
+    "optionCoverage": {
+      "transporter": "contract",
+      "heartbeatMs": "contract",
+      "abandonAfterMs": "contract",
+      "redact": "contract",
+      "sinks": "contract",
+      "scope": "contract",
+      "capacity": "contract",
+      "deliveryTimeoutMs": "contract",
+      "verbose": "contract"
+    }
+  },
+  ".:ObservationReadOptions": {
+    "signatures": [],
+    "options": {
+      "signal": "AbortSignal | undefined",
+      "maxBytes": "number | undefined"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Unified observation composition is native through observation.client; runtime read/watch, lifecycle and sink contracts remain TypeScript interfaces. YAML settings derive from ObservationOptions.",
+    "optionCoverage": {
+      "signal": "contract",
+      "maxBytes": "contract"
+    }
+  },
+  ".:ObservationReporter": {
+    "signatures": ["(event: ObservationEvent & ReportPass): void"],
+    "options": {
+      "observe": "(observation: Observation) => void | Promise<void>",
+      "flush": "(() => void | Promise<void>) | undefined"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Callable terminal reporter and ObservationSink; the native YAML sink.reporter component composes this behavior.",
+    "optionCoverage": {
+      "observe": "contract",
+      "flush": "contract"
+    }
+  },
   ".:ObservationScope": {
     "signatures": [],
     "options": {
@@ -7718,6 +7842,26 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {}
+  },
+  ".:ObservationWatchOptions": {
+    "signatures": [],
+    "options": {
+      "signal": "AbortSignal | undefined",
+      "maxBytes": "number | undefined",
+      "from": "number | undefined",
+      "pollMs": "number | undefined"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/observation-client.test.ts",
+    "reason": "Unified observation composition is native through observation.client; runtime read/watch, lifecycle and sink contracts remain TypeScript interfaces. YAML settings derive from ObservationOptions.",
+    "optionCoverage": {
+      "signal": "contract",
+      "maxBytes": "contract",
+      "from": "contract",
+      "pollMs": "contract"
+    }
   },
   ".:OpenAIModelProviderOptions": {
     "signatures": [],
@@ -10636,6 +10780,7 @@
       "transcriptReference": "TransportReference | undefined",
       "logReference": "TransportReference | undefined",
       "retainedDirectory": "string | undefined",
+      "runId": "string | undefined",
       "turns": "readonly Turn[]",
       "value": "T",
       "completed": "boolean",
@@ -10659,6 +10804,7 @@
       "transcriptReference": "contract",
       "logReference": "contract",
       "retainedDirectory": "contract",
+      "runId": "contract",
       "turns": "contract",
       "value": "contract",
       "completed": "contract",
@@ -12091,6 +12237,7 @@
       "transcriptReference": "TransportReference | undefined",
       "logReference": "TransportReference | undefined",
       "retainedDirectory": "string | undefined",
+      "runId": "string | undefined",
       "turns": "readonly Turn[]",
       "value": "T",
       "completed": "boolean",
@@ -12117,6 +12264,7 @@
       "transcriptReference": "contract",
       "logReference": "contract",
       "retainedDirectory": "contract",
+      "runId": "contract",
       "turns": "contract",
       "value": "contract",
       "completed": "contract",
@@ -12749,6 +12897,7 @@
     "signatures": [],
     "options": {
       "observation": "ObservationHub | undefined",
+      "runId": "string | undefined",
       "timeoutMs": "number | undefined",
       "redact": "readonly RegExp[] | undefined",
       "onQuota": "WorkflowQuotaPolicy | undefined",
@@ -12766,6 +12915,7 @@
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "observation": "contract",
+      "runId": "contract",
       "timeoutMs": "contract",
       "redact": "contract",
       "onQuota": "contract",
@@ -12790,6 +12940,7 @@
   ".:WorkflowOptions": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "redact": "readonly RegExp[] | undefined",
       "onQuota": "WorkflowQuotaPolicy | undefined",
       "answers": "readonly WorkflowAnswer[] | undefined",
@@ -12811,6 +12962,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runId": "contract",
       "redact": "contract",
       "onQuota": "contract",
       "answers": "contract",
@@ -12892,6 +13044,7 @@
   ".:WorkflowResult": {
     "signatures": [],
     "options": {
+      "runId": "string | undefined",
       "terminationCode": "WorkflowTerminationCode | undefined",
       "inputRequests": "readonly WorkflowInputRequest[]",
       "executionId": "string",
@@ -12910,6 +13063,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "runId": "contract",
       "terminationCode": "contract",
       "inputRequests": "contract",
       "executionId": "contract",
@@ -13418,10 +13572,10 @@
   "./opentelemetry:OpenTelemetryObserver": {
     "signatures": [],
     "options": {
+      "observe": "(event: import(\"../domain/observation.types.ts\").Observation | import(\"../domain/workflow.types.ts\").WorkflowEvent) => void",
       "sink": "ObservationSink",
       "close": "() => void",
-      "startDispatch": "() => DispatchTelemetrySession",
-      "observe": "(event: WorkflowEvent) => void"
+      "startDispatch": "() => DispatchTelemetrySession"
     },
     "category": "contract",
     "lot": 7,
@@ -13429,10 +13583,10 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "observe": "contract",
       "sink": "contract",
       "close": "contract",
-      "startDispatch": "contract",
-      "observe": "contract"
+      "startDispatch": "contract"
     }
   },
   "./opentelemetry:OpenTelemetryOptions": {

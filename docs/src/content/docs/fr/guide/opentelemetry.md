@@ -7,20 +7,20 @@ Après avoir [regroupé les événements](../observability/), reliez-les à votr
 
 ## Exporter vers OpenTelemetry
 
-Installez `@opentelemetry/api` et un SDK OpenTelemetry, puis enregistrez le SDK et ses exportateurs avant de créer l’observateur. Son `sink` transforme les événements du hub en spans liés et en métriques.
+Installez `@opentelemetry/api` et un SDK OpenTelemetry, puis enregistrez le SDK et ses exportateurs avant de créer l’observateur. Branchez directement cet observateur dans `createObservation({ sinks })` pour transformer les événements en spans liés et en métriques.
 
 <!-- tabs -->
 
 ```ts title="telemetry.ts"
 import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 import { trace, metrics } from "@opentelemetry/api";
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 
 export const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
   meter: metrics.getMeter("outpost"),
 });
-export const observation = createObservationHub({ sinks: [telemetry.sink] });
+export const observation = createObservation({ sinks: [telemetry] });
 ```
 
 ```ts title="telemetry-review.ts"
@@ -59,5 +59,7 @@ Référence API : [createOpenTelemetryObserver](../../reference/createopenteleme
 Passez l’observateur comme `telemetry` à `start()` pour les spans de workflow, de tâche et de tentative, ou à `dispatch()` pour un span de dispatch. Les spans d’opération nécessitent le hub.
 
 :::caution
-Branchez l’observateur une seule fois par exécution : passer à la même exécution `telemetry` et un hub contenant `telemetry.sink` duplique ses spans et ses métriques.
+Branchez l’observateur une seule fois par exécution : passer à la même exécution `telemetry` et un hub contenant `telemetry` duplique ses spans et ses métriques.
 :::
+
+Passez directement l’observateur dans `createObservation({ sinks: [telemetry] })`. La propriété `.sink` reste compatible. L’objet observation emprunte les sorties : fermez d’abord l’observation, puis `telemetry`, puis votre SDK.

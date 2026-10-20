@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { createLocalTransport, readRun, watchRun } from "@elie-laloum/outpost";
+import { createLocalTransport, createObservation } from "@elie-laloum/outpost";
 import { demoRepository } from "../shared/repository.ts";
 const id = process.argv[2];
 if (!id)
@@ -8,16 +8,15 @@ const repository = demoRepository(import.meta.dirname);
 const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),
 });
-const run = await readRun({ transporter, id });
+await using observation = createObservation({ transporter });
+const run = await observation.readRun(id);
 if (!run) throw new Error(`Unknown run: ${id}`);
 console.log(JSON.stringify(run, null, 2));
 if (process.argv.includes("--watch")) {
   const controller = new AbortController();
   process.once("SIGINT", () => controller.abort());
   try {
-    for await (const event of watchRun({
-      transporter,
-      id,
+    for await (const event of observation.watchRun(id, {
       from: run.seq,
       signal: controller.signal,
     }))

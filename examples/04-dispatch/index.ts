@@ -10,10 +10,13 @@ import {
   createHarnessFileTools,
   createHarnessShellTools,
   createReporter,
+  createObservation,
   dispatch,
 } from "@elie-laloum/outpost";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
+
+await using observation = createObservation({ sinks: [createReporter()] });
 
 const coder = createAgent({
   model,
@@ -36,7 +39,7 @@ const result = await dispatch({
   agent: coder,
   brief: { file: join(import.meta.dirname, "brief.md") },
   deadlineMs: 300_000,
-  observe: createReporter(),
+  observation,
 });
 
 console.log("marqueur de fin trouvé :", result.completed);

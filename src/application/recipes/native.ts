@@ -79,7 +79,10 @@ export const nativeRecipeGuards: Readonly<
   artifactStore: (value) => recipeMethods(value, ["put", "get"]),
   artifact: (value) => recipeMethods(value, ["encode", "decode"]),
   verifier: (value) => typeof value === "function",
-  sink: (value) => recipeMethods(value, ["observe"]),
+  sink: (value) =>
+    (recipeObject(value) || typeof value === "function") &&
+    "observe" in value &&
+    typeof value.observe === "function",
   sandboxProvider: (value) =>
     recipeMethods(value, ["acquire"]) &&
     recipeObject(value) &&

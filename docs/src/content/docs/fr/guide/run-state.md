@@ -1,13 +1,13 @@
 ---
 title: "Lire l’état d’une exécution"
-description: "Construire une interface autour d’un ID, d’une fiche persistée et d’un curseur reprenable."
+description: "Enregistrez automatiquement une exécution et consultez-la avec observation.readRun() et observation.watchRun()."
 ---
 
-Utilisez ce guide si un tableau de bord ou un autre processus doit consulter un workflow en cours. Les deux processus doivent accéder au même transport et au même ID. Un heartbeat observe l’activité ; son expiration n’autorise pas la reprise de propriété.
+Utilisez `createObservation({ transporter })` lorsqu’un terminal, une interface ou un autre processus doit consulter une exécution. Transmettez cet objet à `dispatch()` ou `workflow.start()`. Le moteur enregistre l’exécution et ferme son suivi lorsqu’elle se termine ou se met en attente. Le même objet peut servir à plusieurs exécutions successives ou concurrentes.
 
 ## Enregistrer une exécution
 
-Créez un récepteur avec un ID choisi par votre application et attachez-le à un nouveau hub d’observation. Passez ce hub à un seul `dispatch()` ou `start()` de workflow. Le récepteur conserve une fiche et les observations masquées dans votre [transport](../storage/), indépendamment du journal d’exécution. Enregistrez le transport dans `storage.ts` pour qu’un autre processus puisse lire le même emplacement.
+Enregistrez les fichiers suivants ensemble. Le transport partagé donne accès au même stockage depuis le programme d’exécution et le lecteur. Construire l’objet observation ne crée aucun enregistrement ni heartbeat : le suivi commence lorsqu’une exécution l’utilise.
 
 ```ts title="storage.ts"
 import { createLocalTransport } from "@elie-laloum/outpost";
@@ -17,96 +17,107 @@ export const transporter = createLocalTransport({
 });
 ```
 
-Enregistrez le récepteur dans `observation.ts`. L’appelant possède sa fermeture ; les lecteurs indépendants peuvent aussi importer le module de transport.
+Configurez l’objet avec ce transport et les sorties supplémentaires souhaitées. Il emprunte ses sorties et le transport ; leur propriétaire conserve la responsabilité de les fermer si nécessaire.
 
 ```ts title="observation.ts"
-import { createRunObserver, createObservationHub } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
 
-export const receiver = await createRunObserver({
-  transporter,
-  id: "nightly_2026_10_07",
-  kind: "workflow",
-});
-export const observation = createObservationHub({ sinks: [receiver] });
+export const observation = createObservation({ transporter });
 ```
-
-Utilisez `kind: "dispatch"` pour une requête unique. Attachez le récepteur avant le démarrage. Sa fabrique crée une fiche en cours avant le premier événement ; l’application choisit son ID, distinct de l’`executionId` du workflow. Un ID déjà utilisé échoue par écriture conditionnelle. Gardez le récepteur ouvert jusqu’à la fin, puis fermez-le pour arrêter les heartbeats. Fermer un récepteur inachevé laisse sa fiche expirer.
-
-Pour un résumé lisible d’un dispatch terminé, utilisez son [rapport de run](../run-reports/). Cette projection sert aux lecteurs qui suivent une exécution par ID.
 
 ## Démarrer un workflow
 
-Le workflow enregistre les tâches en attente dès le démarrage, les tentatives, pauses, erreurs et consommations cumulées, y compris celles du checkpoint à la reprise. Les dispatchs de ses tâches conservent l’agent, la phase courante, la branche, les commits et la consommation. Transmettez le contexte d’observation du workflow dans les dispatchs de tâches personnalisées ; les [tâches isolées](../multiple-repositories/) le font automatiquement.
+Enregistrez ce fichier sous `start.ts`, puis lancez `node start.ts`. Le workflow choisit le type d’exécution et possède son suivi. Précisez `runId` lorsqu’un autre processus doit connaître l’identifiant à l’avance. Sinon, l’identifiant du checkpoint est utilisé, ou un nouvel identifiant est généré et renvoyé dans `result.runId`.
 
 ```ts title="start.ts"
-import { observation, receiver } from "./observation.ts";
+import { observation } from "./observation.ts";
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-await using ownedReceiver = receiver;
+await using ownedObservation = observation;
 const check = defineTask({ key: "check", perform: () => "ok" });
-const workflow = defineWorkflow("nightly", [check]);
-const result = await workflow.start({ observation });
-await observation.close();
+const result = await defineWorkflow("nightly", [check]).start({
+  observation,
+  runId: "nightly_2026_10_21",
+});
+console.log(result.runId, result.status);
 result.unwrap();
 ```
 
-Enregistrez ces fichiers ensemble et exécutez `node start.ts`. Le hub vide les livraisons quand le workflow se termine ou se suspend. Les erreurs des récepteurs apparaissent dans `observerErrors` sans modifier le résultat. Inspectez ces erreurs et `receiver.errors` ; un échec de heartbeat arrête le récepteur. Le [masquage](../observability/) s’applique avant persistance lorsqu’il est configuré sur le hub ou l’exécution.
+`dispatch({ observation, runId, ... })` emploie la même API pour une requête. Un dispatch imbriqué recevant `context.observation` rejoint la projection du workflow. Transmettez ce contexte dans les tâches personnalisées ; les tâches isolées le font automatiquement. La continuation d’un dispatch autonome constitue une nouvelle exécution et demande un nouvel identifiant.
+
+Avec un transport, un identifiant déjà utilisé fait échouer l’ouverture avant le travail d’exécution. Une erreur de stockage à l’ouverture refuse aussi le démarrage. Une fois le suivi ouvert, les erreurs des destinataires figurent dans `observerErrors` et `observation.errors` sans changer le résultat du travail. Le moteur vide les livraisons et arrête le heartbeat avant de rendre la main. Fermer l’objet partagé attend les suivis actifs sans annuler leurs exécutions ; gardez-le ouvert jusqu’au démarrage de toutes les exécutions prévues.
+
+## Enregistrer un dispatch
+
+Avec la [configuration d’agent](../setup/), enregistrez aussi ce fichier puis lancez `node dispatch.ts`. Le dispatch possède son suivi et rend la main après sa fermeture. Utilisez un nouvel identifiant pour une autre exécution indépendante.
+
+```ts title="dispatch.ts"
+import { dispatch } from "@elie-laloum/outpost";
+import { observation } from "./observation.ts";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+await using ownedObservation = observation;
+const result = await dispatch({
+  runId: "review-123",
+  observation,
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/review-123" },
+  brief: { text: "Review the code without modifying files." },
+});
+console.log(result.runId, result.text);
+```
 
 ## Lire depuis un autre processus
 
-Donnez au lecteur le même emplacement de transport et le même ID. Il lit une fiche remplacée atomiquement sans prendre de verrou d’exécution. Un ID absent renvoie `undefined`. Avec S3, utilisez le même bucket et préfixe ; aucun accès au système de fichiers hôte ni recherche de PID n’est nécessaire.
+Lancez ce fichier après l’enregistrement de l’exécution. Un identifiant absent renvoie `undefined` ; le lecteur ne crée aucun enregistrement et ne prend aucun verrou d’exécution. Avec S3, utilisez le même bucket et le même préfixe dans chaque processus. Configurez le [masquage](../redacting-secrets/) sur l’observation productrice ou l’exécution avant la persistance.
 
 ```ts title="snapshot.ts"
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
-import { readRun } from "@elie-laloum/outpost";
 
-export const run = await readRun({ transporter, id: "nightly_2026_10_07" });
+await using reader = createObservation({ transporter });
+export const run = await reader.readRun("nightly_2026_10_21");
 if (run) {
-  console.log(
-    run.status,
-    run.tasks.map((t) => `${t.key}: ${t.status}`),
-  );
-  console.log(run.dispatches, run.commits, run.usage, run.errors);
+  console.log(run.status, run.tasks, run.dispatches, run.usage);
 }
 ```
 
-Lancez `node snapshot.ts` dans un second processus pour lire le statut enregistré. Si des tarifs sont configurés, `accounting.cost` contient l’estimation monétaire.
-
-`complete: false` signale un trou détecté dans les événements ou une fiche active expirée. `complete: true` signifie qu’aucun trou n’a été détecté, mais les derniers événements peuvent avoir été perdus. Cette vue est indépendante du checkpoint et n’autorise jamais de nouvelle tentative, d’intégration ou de récupération de ressources.
-
-Les tâches restaurées sans historique d’observation précédent exposent `usage.complete: false` ; le total cumulé du workflow provient toujours de la comptabilité du checkpoint.
+`complete: false` indique un trou détecté dans les événements ou un enregistrement actif expiré. `complete: true` signifie qu’aucun trou n’a été détecté ; les derniers événements peuvent néanmoins être perdus. Cette projection est distincte des checkpoints, des budgets et des journaux d’exécution. Elle n’autorise jamais un rejeu, une intégration ou une récupération. Le [rapport d’un dispatch](../run-reports/) terminé fournit son résumé de revue.
 
 ## Suivre un curseur
 
-Affichez d’abord la fiche, puis suivez les observations strictement après son `seq`. Les événements sont écrits avant que la fiche publie leur curseur : le lecteur ne suit jamais un événement non publié. La séquence persistée continue après une reprise de workflow suspendu ; elle est distincte de l’`observationSeq` de chaque hub. La charge de l’événement est `unknown` : validez-la avant d’inspecter ses champs dans une interface.
+Lisez un état, puis suivez les observations après son `seq`. Conservez le dernier curseur traité pour vous reconnecter. Lancez ce fichier après l’enregistrement : il affiche les événements sauvegardés puis les nouveaux jusqu’à la fin de l’exécution ou l’expiration du heartbeat. La charge utile est de type `unknown` ; validez-la avant d’accéder à ses champs.
 
 ```ts title="watch.ts"
+import { createObservation } from "@elie-laloum/outpost";
 import { transporter } from "./storage.ts";
-import { run } from "./snapshot.ts";
-import { watchRun } from "@elie-laloum/outpost";
 
+await using reader = createObservation({ transporter });
+const run = await reader.readRun("nightly_2026_10_21");
+const controller = new AbortController();
 if (run) {
-  for await (const event of watchRun({
-    transporter,
-    id: run.id,
+  for await (const event of reader.watchRun(run.id, {
     from: run.seq,
+    signal: controller.signal,
   })) {
     console.log(event.seq, event.scope.taskKey, event.event);
   }
 }
 ```
 
-Lancez `node watch.ts` pour lire la fiche puis les événements suivants. Le lecteur interroge le stockage jusqu’à avoir livré les événements d’une exécution terminée, suspendue ou abandonnée. Gardez le dernier curseur traité pour vous reconnecter ; les heartbeats ne consomment pas de curseur. Annulez le lecteur avec `signal` sans arrêter l’exécution.
+Annuler le signal du lecteur arrête seulement l’abonnement, jamais l’exécution. Actualisez l’état avec `readRun()` au besoin. Un segment absent, un enregistrement invalide ou un curseur en avance provoque une erreur explicite. La limite de lecture par objet est de 8 Mio ; [ObservationReadOptions](../../reference/observationreadoptions/) et [ObservationWatchOptions](../../reference/observationwatchoptions/) permettent de la réduire.
 
-Relisez la fiche pour actualiser votre interface. Les segments absents, fiches invalides et curseurs en avance sont refusés. Les [limites de lecture](../../reference/watchrunoptions/) sont de 8 Mio par objet par défaut et peuvent être réduites.
+## Comprendre les heartbeats et les reprises
 
-## Interpréter les heartbeats et les reprises
+Le heartbeat est émis toutes les cinq secondes par défaut, avec suspicion d’abandon après trente secondes. Un transport lent ou une boucle d’événements bloquée peut aussi provoquer cette expiration. La lecture renvoie alors `abandoned` sans modifier le stockage ni autoriser la récupération. Un workflow terminé ou en attente n’a pas besoin de heartbeat.
 
-Par défaut, le récepteur actualise son heartbeat toutes les cinq secondes. Une fiche en cours devient `abandoned` à la lecture après trente secondes sans actualisation. Les lecteurs ne persistent jamais ce statut et ne modifient aucune propriété. Un stockage lent, une panne réseau ou une boucle d’événements bloquée peut aussi faire expirer le heartbeat : il s’agit d’un abandon présumé, pas d’une preuve d’arrêt du processus. Un workflow suspendu, en attente d’entrée ou terminé n’a pas besoin de heartbeat.
+Lorsqu’un workflow ouvre un checkpoint existant, l’observation reprend sa projection stabilisée sous le `runId` choisi, en conservant le curseur persistant et l’identité d’exécution. Un checkpoint jusque-là non observé peut commencer une nouvelle projection. Une projection non stabilisée ne peut pas être reprise, même après expiration : récupérez explicitement l’exécution et choisissez un nouveau `runId` d’observation. Relancez également l’abonnement après une reprise, car il se termine à chaque état stabilisé.
 
-Pour reprendre explicitement un checkpoint de workflow terminé ou suspendu, créez un nouveau récepteur avec le même ID, `kind: "workflow"` et `resume: true`, puis attachez un nouveau hub. Consommation des tâches, historique des dispatchs et curseurs sont conservés. L’identité d’exécution du checkpoint doit correspondre. Les révisions empêchent les écritures concurrentes. Une projection encore en cours, même avec un heartbeat expiré, ne peut pas être reprise : récupérez explicitement l’exécution et observez la reprise sous un nouvel ID.
+Les données vivent sous `runs/<id>/` et restent protégées par la planification de rétention. Leur volume augmente avec l’exécution. Un événement ou un état dépassant 8 Mio arrête le destinataire et signale une erreur d’observation. Les tests déterministes couvrent le stockage local ; les tests des fonctions élémentaires utilisent aussi un serveur HTTP simulant S3. La validation sur AWS réel reste distincte.
 
-Les fiches vivent sous `runs/<id>/` et restent protégées par la rétention. Le stockage des événements croît avec l’exécution ; le récepteur s’arrête et signale une erreur lorsqu’une fiche ou un événement dépasse 8 Mio. Réglez la verbosité des charges brutes et des modèles selon votre interface. Les tests déterministes couvrent le stockage local et une fixture HTTP S3 ; la validation AWS réelle reste à effectuer.
+`createObservationHub()`, `createRunObserver()`, les fonctions indépendantes `readRun()`/`watchRun()` et les callbacks historiques restent disponibles pour les compositions spécialisées. Leurs règles de propriété explicites sont conservées ; le client unifié ne ferme pas les destinataires empruntés à votre place.
 
-L’[exemple 57](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/57-run-state) inclut un processus lecteur distinct. API : [createRunObserver](../../reference/createrunobserver/) · [readRun](../../reference/readrun/) · [watchRun](../../reference/watchrun/) · [RunSnapshot](../../reference/runsnapshot/).
+L’[exemple 57](https://gitlab.elielaloum.com/elielaloum/outpost/-/tree/main/examples/57-run-state) comprend un lecteur séparé. API : [createObservation](../../reference/createobservation/) · [ObservationClient](../../reference/observationclient/) · [ObservationOptions](../../reference/observationoptions/) · [RunSnapshot](../../reference/runsnapshot/).

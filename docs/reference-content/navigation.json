@@ -2168,6 +2168,11 @@
     "title": ["Observability", "Observabilité"],
     "items": [
       {
+        "slug": "reference/createobservation",
+        "label": "createObservation",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createrunobserver",
         "label": "createRunObserver",
         "attrs": { "data-api-kind": "function" }
@@ -2261,6 +2266,31 @@
         "slug": "reference/agentobservation",
         "label": "AgentObservation",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/observationclient",
+        "label": "ObservationClient",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationoptions",
+        "label": "ObservationOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationreadoptions",
+        "label": "ObservationReadOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationwatchoptions",
+        "label": "ObservationWatchOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationreporter",
+        "label": "ObservationReporter",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/runtask",

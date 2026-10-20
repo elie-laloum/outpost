@@ -9,13 +9,10 @@ import {
   createAgent,
   createHarness,
   createLocalTransport,
-  createObservationHub,
-  createRunObserver,
+  createObservation,
   defineIsolatedTask,
   defineTask,
   defineWorkflow,
-  readRun,
-  watchRun,
 } from "@elie-laloum/outpost";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
@@ -24,12 +21,7 @@ const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),
 });
 const id = `demo_${randomUUID()}`;
-await using receiver = await createRunObserver({
-  transporter,
-  id,
-  kind: "workflow",
-});
-const observation = createObservationHub({ sinks: [receiver] });
+await using observation = createObservation({ transporter });
 const agent = createAgent({
   model: "offline",
   harness: createHarness({
@@ -63,14 +55,17 @@ const verify = defineTask({
 });
 const execution = defineWorkflow("demo", [summary, verify]).start({
   observation,
+  runId: id,
 });
-const starting = await readRun({ transporter, id });
-assert.ok(starting);
+let starting = await observation.readRun(id);
+const startup = AbortSignal.timeout(30_000);
+while (!starting) {
+  await setTimeout(20, undefined, { signal: startup });
+  starting = await observation.readRun(id);
+}
 console.log("ID:", id, "Status:", starting.status);
 const following = (async () => {
-  for await (const event of watchRun({
-    transporter,
-    id,
+  for await (const event of observation.watchRun(id, {
     from: starting.seq,
     pollMs: 20,
   }))
@@ -79,7 +74,7 @@ const following = (async () => {
 await execution;
 await observation.close();
 await following;
-const run = await readRun({ transporter, id });
+const run = await observation.readRun(id);
 assert.ok(run);
 assert.equal(run.status, "done");
 assert.equal(run.complete, true);
