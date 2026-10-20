@@ -1,13 +1,13 @@
 ---
-title: "Composer des workflows YAML"
-description: "Transmettre des valeurs JSON, choisir des conditions et composer des tâches isolées avec le moteur existant."
+title: "Transmettre des données et composer les étapes"
+description: "Utiliser paramètres typés, résultats, conditions et un workspace par branche."
 ---
 
-Étendez [votre première recette](../yaml-recipes/) lorsque les étapes suivantes ont besoin de résultats structurés ou de conditions. Enregistrez le premier bloc dans `recipe.yaml`, passez le champ `version` à la racine de votre `outpost.yaml` à `2`, puis lancez `npx outpost recipe run --file recipe.yaml --config outpost.yaml --json`. Le résultat `envelope` contient les noms de fichiers sélectionnés.
+Gardez le `outpost.yaml` du [tutoriel local](../yaml-recipes/) et remplacez `recipe.yaml` par le premier exemple. Ces tâches transforment des données et n’allouent aucune sandbox.
 
-## Transmettre des valeurs structurées
+## Transmettre paramètres et résultats
 
-Le format de recette 3 et la configuration 2 étendent les [recettes YAML](../yaml-recipes/) avec des paramètres JSON et la composition de workflows. Conservez deux fichiers séparés. Objets, tableaux et null complètent les paramètres scalaires ; un `schema` JSON facultatif valide les valeurs imbriquées avant le chargement des extensions et l’allocation. Une valeur passée par `--input 'changes={"files":["a.ts"]}'` conserve son type.
+`$input` lit un paramètre typé ; `$step` lit une tâche terminée. Chaque tâche lue doit figurer directement dans `after`. Le schéma d’entrée vérifie l’objet avant exécution. `when` ignore `envelope` si la liste de fichiers est vide.
 
 ```yaml title="recipe.yaml"
 version: 3
@@ -17,77 +17,111 @@ inputs:
     type: object
     description: Files to inspect.
     default: { files: [src/index.ts] }
+    schema:
+      type: object
+      properties:
+        files: { type: array, items: { type: string } }
+      required: [files]
+      additionalProperties: false
 tasks:
   - key: select
     value: { $input: changes, path: [files] }
   - key: envelope
     after: [select]
+    when:
+      ne: [{ $step: select, path: [value] }, []]
     value:
       files: { $step: select, path: [value] }
-      source: community
 ```
 
-`value` construit un résultat JSON dans le champ `value` de l’étape. `$input` et `$step` renvoient des valeurs typées ; `path` sélectionne des propriétés propres ou des indices de tableau. `$select: { from: <expression>, path: [...] }` sélectionne une partie d’une autre expression. Les objets et tableaux ordinaires construisent de nouvelles valeurs. `$literal` garde toute sa valeur opaque, y compris les objets ressemblant à des références et les doubles accolades. Chaque étape référencée doit figurer directement dans `after`.
+Lancez avec une entrée JSON. Le champ `outputs.envelope.value.files` du rapport contient `["a.ts"]`.
 
-L’interpolation textuelle reste à passage unique et accepte seulement chaînes, nombres et booléens. Les commandes exposent `stdout`, `stderr` et `status`. Les résultats d’agents et de tâches isolées conservent leurs champs JSON, notamment `text`, `value`, `usage` et les références de conversation et de workspace ; les méthodes comme `resume()` ne sont pas sérialisées. Les formats 1 et 2 conservent leur comportement.
-
-Les références textuelles peuvent sélectionner des feuilles scalaires comme `{{ steps.select.value.count }}` ou `{{ inputs.changes.summary }}`. Les noms de tâches contenant des points se résolvent avec le nom déclaré le plus long.
-
-## Choisir une condition
-
-Ajoutez `when` pour ignorer une tâche lorsque sa condition est fausse. Ses dépendants suivent les règles existantes du workflow. Les comparaisons conservent les types JSON ; l’égalité d’objets ignore l’ordre des clés. Les comparaisons d’ordre demandent deux nombres ou deux chaînes. `in` attend un tableau à droite. `exists` teste un chemin sans transformer l’absence d’un champ en erreur d’exécution.
-
-```yaml title="recipe.yaml — condition d’une tâche"
-when:
-  all:
-    - exists: { $input: changes, path: [files] }
-    - ne: [{ $input: changes, path: [files] }, []]
+```sh
+npx outpost recipe run --file recipe.yaml --config outpost.yaml \
+  --input 'changes={"files":["a.ts"]}' --json
 ```
 
-Les opérateurs sont `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `exists`, `all`, `any` et `not`. Un callback local peut utiliser `options.condition`, avec son contrat de callback généré. Déclarez soit `when`, soit le callback.
+## Choisir le type de référence
 
-## Réutiliser les contrats TypeScript
+Utilisez les références typées dans les expressions de données et l’interpolation textuelle dans les briefs ou arguments de commandes. Les données interpolées ne sont développées qu’une fois.
 
-Les `options` d’une tâche suivent [TaskOptions](../../reference/taskoptions/), sans clé, objets de dépendances ni action. Le bloc `workflow` suit [WorkflowOptions](../../reference/workflowoptions/) ; le runtime fournit l’annulation et le hub d’observation commun. Retries, délais, budgets, politique d’erreur et callbacks conservent le comportement du moteur. Configurez le stockage pour [reprendre les recettes durables](../recipe-durability/) avec leurs workspaces d’origine.
+| Besoin                               | Exemple                               |
+| ------------------------------------ | ------------------------------------- |
+| Un paramètre typé                    | `{ $input: changes, path: [files] }`  |
+| La valeur JSON d’une tâche           | `{ $step: select, path: [value] }`    |
+| La sortie d’une commande comme texte | `"Output: {{ steps.check.stdout }}"`  |
+| La réponse finale d’un agent         | `"Review: {{ steps.review.text }}"`   |
+| Un objet littéral opaque             | `{ $literal: { $input: unchanged } }` |
 
-```yaml title="recipe.yaml — politique d’exécution"
+Les conditions acceptent `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `exists`, `all`, `any` et `not`. Le [schéma d’éditeur](../recipe-configuration/) propose leurs formes. Une référence transmet une donnée ; elle ne continue pas la conversation d’un agent.
+
+## Travailler sur des branches séparées
+
+Pour deux modifications indépendantes dans `./project`, utilisez ces fichiers complets. Préparez d’abord l’[image Codex et l’accès au compte](../setup/). Chaque tâche `isolated` possède son workspace et sa sandbox ; les branches restent séparées après exécution.
+
+```yaml title="recipe.yaml"
+version: 3
+name: parallel-changes
 workflow:
-  concurrency: 3
+  concurrency: 2
+tasks:
+  - key: docs
+    isolated:
+      repository: ./project
+      sandboxProvider: { $ref: sandboxProviders.container }
+      agent: { $ref: agents.coder }
+      branch: { mode: named, name: feature/docs, from: main }
+      brief: { text: Improve the README and commit the changes. }
+  - key: tests
+    isolated:
+      repository: ./project
+      sandboxProvider: { $ref: sandboxProviders.container }
+      agent: { $ref: agents.coder }
+      branch: { mode: named, name: feature/tests, from: main }
+      brief: { text: Add regression tests and commit the changes. }
+```
+
+La configuration locale fournit la déclaration de fournisseur partagée et l’agent. Le workspace à la racine sélectionne le mode Git ; ces tâches isolées n’allouent que leurs propres workspaces, avec le dépôt déclaré dans chaque tâche. Les chemins relatifs des dépôts partent de `outpost.yaml`.
+
+```yaml title="outpost.yaml"
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+  branch: { mode: named, name: orchestration, from: main }
+sandbox: { provider: local }
+sandboxProviders:
+  container:
+    type: docker
+    image: outpost-codex:dev
+agents:
+  coder:
+    harness: codex
+    authentication: account
+```
+
+Exécutez avec la même commande `recipe run`, sans `--input`. Utilisez des chemins de dépôt différents pour travailler sur plusieurs repositories. L’intégration, lorsqu’elle est demandée, reste indépendante pour chaque dépôt ; il n’existe aucune transaction Git commune.
+
+## Régler l’exécution
+
+Ajoutez ce bloc à la racine d’une recette dont les tâches peuvent s’exécuter en parallèle. Les `options` d’une tâche peuvent aussi fixer retries et délais ; voir [TaskOptions](../../reference/taskoptions/) et [WorkflowOptions](../../reference/workflowoptions/).
+
+```yaml title="recipe.yaml — workflow"
+workflow:
+  concurrency: 2
   stopOnError: false
   budget: { attempts: 10 }
 ```
 
-Les commandes et agents sur une sandbox partagée restent séquentiels par défaut. Si la concurrence peut faire chevaucher deux tâches partagées, la validation refuse la recette ; ordonnez-les avec des dépendances ou utilisez `isolated`. Les tâches de données, callbacks et décisions n’allouent aucune sandbox. Chaque requête isolée choisit son dépôt, fournisseur, agent et sa politique de branche via [defineIsolatedTask](../../reference/defineisolatedtask/). Les requêtes concurrentes sur un même workspace emprunté ou courant sont refusées.
+Les commandes et agents ordinaires partagent le workspace configuré. Ordonnez-les avec `after` ; la validation refuse leur utilisation concurrente de ce workspace. Utilisez des tâches isolées pour les travaux indépendants.
 
-```yaml title="recipe.yaml — tâche isolée"
-- key: update-library
-  isolated:
-    repository: ./library
-    sandboxProvider: { $ref: sandboxProviders.container }
-    agent: { $ref: agents.coder }
-    branch: { mode: integrate }
-    brief: { text: Update and commit the library documentation. }
-```
+Continuez avec les [callbacks et boucles](../recipe-callbacks/), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
 
-Les chemins des options natives se résolvent depuis le fichier de configuration locale. Chaque dépôt isolé s’intègre indépendamment, selon sa politique de branche ; aucune transaction ne couvre plusieurs dépôts.
+<!-- Retained section anchors for existing bookmarks. -->
 
+<span id="transmettre-des-valeurs-structurées"></span>
+<span id="choisir-une-condition"></span>
+<span id="réutiliser-les-contrats-typescript"></span>
+<span id="exécuter-lexemple-hors-ligne"></span>
+<span id="réutiliser-le-résultat-dune-étape"></span>
 <span id="déclarer-des-actions-locales"></span>
-
-Pour cette étape, suivez [Appeler des actions locales depuis YAML](../recipe-callbacks/).
-
-## Exécuter l’exemple hors ligne
-
-`examples/68-recipe-workflows` compose des paramètres structurés, une condition, une transformation locale et une boucle de deux tours. Après compilation d’Outpost, lancez `node --test examples/68-recipe-workflows/index.ts`. Cet exemple n’alloue aucune sandbox et n’appelle aucun modèle. Les tests fonctionnels comparent aussi la consommation YAML et TypeScript et exécutent des agents de test isolés sur deux vrais dépôts Git temporaires ; la validation cloud et les appels payants restent séparés.
-
-## Réutiliser le résultat d’une étape
-
-Un agent expose `text` ; une commande expose `stdout`, `stderr` et le nombre `status`. Ajoutez chaque étape référencée à `after`, même si une autre dépendance la suit déjà. Ajoutez cette tâche à [votre première recette YAML](../yaml-recipes/) pour résumer la revue :
-
-```yaml title="recipe.yaml — append to tasks"
-- key: summary
-  after: [review]
-  agent: coder
-  brief: "Summarize these findings without editing files: {{ steps.review.text }}"
-```
-
-Le moteur transmet le résultat réel à l’étape suivante. Les rapports CLI limitent chaque champ textuel retourné à 16 384 caractères avec un marqueur de troncature explicite. Les références transmettent des données, sans continuer une conversation ; les fichiers restent partagés dans le workspace de la sandbox.

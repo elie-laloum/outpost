@@ -1,90 +1,88 @@
 ---
 title: "Your first YAML recipe"
-description: "Run a command and an agent from two local YAML files."
+description: "Run two local commands in an ephemeral workspace, without Git, Docker or an agent account."
 ---
 
-<!-- Retained section anchors for existing bookmarks. -->
+Create a file, then read it in a second task. You need **Node.js 24+** and the Outpost package. This first run needs no Git repository, Docker image or agent account.
 
-<span id="create-a-recipe"></span>
-<span id="declare-parameters-and-steps"></span>
-<span id="run-and-inspect-the-result"></span>
+## 1. Install the package
 
-## Review a README from YAML
+In a new directory, install Outpost. Save both YAML files below in that directory.
 
-This tutorial runs a command and then asks an agent to review your README. Complete [Installation](../setup/) to prepare Outpost, the `outpost-codex:dev` image and Codex account access. You need a Git repository with a committed README.
+```sh
+npm install @elie-laloum/outpost
+```
 
-Save the following two files in the repository. The recipe describes work you can share; `outpost.yaml` selects how it runs on your machine. Their `version` fields belong to different formats and need not match.
+## 2. Describe the work
 
-## Declare the two steps
-
-The command checks Node.js inside the sandbox. The agent starts only after it succeeds. You can choose the review focus when running the recipe.
+`recipe.yaml` lists the tasks. `after: [write]` makes the second command wait for the first; both use the same working directory.
 
 ```yaml title="recipe.yaml"
-version: 2
-name: readme-review
-inputs:
-  focus:
-    type: string
-    description: What the review should focus on.
-    default: setup instructions
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe.schema.json
+version: 3
+name: hello-files
 tasks:
-  - key: environment
+  - key: write
     command:
       executable: node
-      arguments: [-p, process.version]
-  - key: review
-    after: [environment]
-    agent: coder
-    brief: "Review the README {{ inputs.focus }}. Report findings without editing files."
+      arguments:
+        - -e
+        - "require('node:fs').writeFileSync('hello.txt', 'Hello from Outpost!')"
+  - key: read
+    after: [write]
+    command:
+      executable: node
+      arguments: [-p, "require('node:fs').readFileSync('hello.txt', 'utf8')"]
 ```
 
-## Choose the repository and agent
+## 3. Choose where it runs
 
-This configuration uses the image built during installation. `repository: .` resolves from the configuration file’s directory. The named branch keeps work separate from your current checkout; use a fresh name for a new independent review.
+`outpost.yaml` selects an empty temporary workspace and local execution. Commands run on your machine with your permissions; `local` provides no isolation. `ephemeral` describes the working files, not a security boundary.
 
 ```yaml title="outpost.yaml"
-version: 1
-repository: .
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json
+version: 3
+workspace:
+  kind: ephemeral
 sandbox:
-  provider: docker
-  image: outpost-codex:dev
-branch:
-  mode: named
-  name: outpost/recipe-review
-agents:
-  coder:
-    harness: codex
-    authentication: account
+  provider: local
 ```
 
-Account access is prepared on the harness. To use API billing or another environment, follow [Configure recipe execution](../recipe-configuration/). Keep secrets in the local configuration by declared variable name, never in shared recipe inputs.
+Use **version 3 in both files** for these guides. Their versions describe separate YAML formats, not the installed package version. The schema comments enable completion in editors with a YAML language server.
 
-## Validate, run and inspect
+## 4. Run and inspect
 
-From the directory containing the two files, validate before allocating a sandbox, then request a final JSON report:
+Validate the files, then execute the recipe with a final JSON report. Validation does not run commands or allocate a sandbox.
 
 ```sh
 npx outpost recipe validate --file recipe.yaml --config outpost.yaml
-npx outpost recipe run --file recipe.yaml --config outpost.yaml \
-  --input 'focus=setup instructions' --json
+npx outpost recipe run --file recipe.yaml --config outpost.yaml --json
 ```
 
-Validation checks declarations and references; it does not test credentials or run commands. The run report contains the Node.js command output, the review answer, usage and workspace information. It appears after cleanup. Without `--json` or configured outputs, a successful execution is silent.
+In the report, `outputs.read.stdout` contains `Hello from Outpost!`. The workspace is temporary: `hello.txt` is not created beside your YAML files. Without `--json` or configured reports, a successful run is silent.
 
-An agent instruction to avoid edits is not an access restriction. Inspect the named branch if changes were made; this configuration does not integrate it. A failed command stops dependent tasks. Failure or cancellation retains work for [recovery](../recovery/).
+## Next steps
 
-## Adapt the recipe
+| You want to…                                               | Continue with…                                  |
+| ---------------------------------------------------------- | ----------------------------------------------- |
+| Keep generated files, copy a directory or use a Git branch | [Choose a workspace](../recipe-workspaces/)     |
+| Add an agent or switch to Docker                           | [Configure execution](../recipe-configuration/) |
+| Pass inputs and results between tasks                      | [Compose steps](../recipe-workflows/)           |
+| See progress and final results                             | [Follow a run](../recipe-observation/)          |
+| Pause for approval and resume                              | [Save progress](../recipe-durability/)          |
 
-- [Pass results between steps](../recipe-workflows/): Use inputs, conditions and structured values.
-- [Configure execution](../recipe-configuration/): Select credentials, providers, editor schemas and reports.
-- [Save and resume](../recipe-durability/): Add checkpoints and human questions.
-- [Find another recipe](../sharing-recipes/): Inspect downloaded work before executing it.
-- [Use local TypeScript](../recipe-extensions/): Bind trusted callbacks or run the recipe engine from code.
-
-The [CLI reference](../recipe-cli/#outpost-recipe-run) describes flags and exit codes. [defineRecipe](../../reference/definerecipe/) describes the compiled declaration.
+The [recipe CLI reference](../recipe-cli/) lists commands and flags.
 
 <!-- Retained section anchors for existing bookmarks. -->
 
+<span id="review-a-readme-from-yaml"></span>
+<span id="declare-the-two-steps"></span>
+<span id="choose-the-repository-and-agent"></span>
+<span id="validate-run-and-inspect"></span>
+<span id="adapt-the-recipe"></span>
+<span id="create-a-recipe"></span>
+<span id="declare-parameters-and-steps"></span>
+<span id="run-and-inspect-the-result"></span>
 <span id="enable-editor-completion"></span>
 <span id="configure-execution-once"></span>
 <span id="declare-observation-and-final-reports"></span>
@@ -92,12 +90,9 @@ The [CLI reference](../recipe-cli/#outpost-recipe-run) describes flags and exit 
 <span id="select-secrets-before-allocation"></span>
 <span id="run-the-outpost-harness-from-yaml"></span>
 <span id="file-workspaces"></span>
-
 <span id="reuse-a-step-result"></span>
-
 <span id="use-the-engine-in-typescript"></span>
 <span id="reuse-local-observer-objects"></span>
 <span id="bind-typed-callbacks-locally"></span>
-
 <span id="find-and-download-recipes"></span>
 <span id="contribute-and-test-a-recipe"></span>

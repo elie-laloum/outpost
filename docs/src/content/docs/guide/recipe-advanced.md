@@ -8,7 +8,7 @@ description: "Select candidate work and verify conflict resolution before integr
 <span id="declare-reporters-and-telemetry"></span>
 <span id="track-coverage-and-validation"></span>
 
-Recipe format 3 and configuration format 2 compose the public declarative families through native engines. [Available components](../yaml-components/) is generated from their descriptors. Functions, SDK clients and custom runtime objects use explicit local extensions; immediate inspection, signing and recovery utilities remain callable from trusted TypeScript modules. Provider and agent restrictions still apply.
+Recipe and configuration format 3 compose the public declarative families through native engines. [Available components](../yaml-components/) is generated from their descriptors. Functions, SDK clients and custom runtime objects use explicit local extensions; immediate inspection, signing and recovery utilities remain callable from trusted TypeScript modules. Provider and agent restrictions still apply.
 
 ## Share candidate selection
 

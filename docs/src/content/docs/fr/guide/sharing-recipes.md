@@ -7,7 +7,7 @@ Après une [première exécution](../yaml-recipes/), réutilisez une recette d�
 
 ## Trouver et télécharger des recettes
 
-Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` et `update-docs`. Listez-le et copiez une recette dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
+Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` et `update-docs`. Configurez un [workspace Git](../recipe-workspaces/) pour ces recettes, puis listez-les et copiez-en une dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
 
 ```sh
 npx outpost recipe list
@@ -23,7 +23,7 @@ Avant d’écrire, le téléchargement vérifie SHA-256, valide la recette et co
 
 ## Contribuer et tester une recette
 
-Ajoutez un fichier YAML de version 2 sous `recipes/`, avec un nom identique au nom du fichier, une description, une révision de recette et des paramètres documentés. Gardez sandbox, modèles et authentification dans le YAML séparé de l’utilisateur. Mettez à jour le catalogue depuis ces déclarations, ajoutez un test hors ligne, puis proposez la modification Git. La CI refuse les empreintes périmées.
+Ajoutez un fichier YAML de version 3 sous `recipes/`, avec un nom identique au nom du fichier, une description, une révision de recette et des paramètres documentés. Gardez sandbox, modèles et authentification dans le YAML séparé de l’utilisateur. Mettez à jour le catalogue depuis ces déclarations, ajoutez un test hors ligne, puis proposez la modification Git. La CI refuse les empreintes périmées.
 
 ```sh
 node scripts/recipe-catalog.mjs --write

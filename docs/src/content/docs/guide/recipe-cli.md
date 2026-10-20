@@ -20,7 +20,7 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 | ------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--file`           | Required                                   | Local YAML recipe, limited to 1 MiB.                                                                                                                                             |
 | `--config`         | Required                                   | Local YAML execution configuration; TypeScript/JavaScript `RecipeConfiguration` modules and factories remain supported.                                                          |
-| `--input`          | None                                       | Repeat `name=value` for declared version-2 inputs. Numbers and booleans use JSON scalar syntax.                                                                                  |
+| `--input`          | None                                       | Repeat `name=value` for declared inputs (formats 2 and 3). Scalars use JSON syntax; format 3 also accepts objects, arrays and null.                                              |
 | `--json`           | Off                                        | Final report with overall `status`, `workflowStatus`, tasks, bounded `outputs`, `errors`, usage and workspace location.                                                          |
 | `--interactive`    | Automatic on a terminal without `--json`   | Collect dialogue answers and explicit unsigned gate decisions on stdin, display their prompts on stderr and resume. Requires terminal stdin and stderr and a YAML configuration. |
 | `--no-interactive` | Off                                        | Leave questions pending for a later invocation or an external client.                                                                                                            |
@@ -28,11 +28,11 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 
 With terminal stdin and stderr, run handles interactive questions without a TypeScript runner. Choices use a selection menu; free-text questions use a text prompt. Each answer is persisted before another question is displayed. `--json` disables automatic prompting; explicitly combine `--interactive --json` to keep prompts on stderr and receive one final JSON report on stdout. Without a terminal, execution leaves input requests pending.
 
-Paths are relative to the current directory. Apart from dialogue prompts, successful execution is silent unless observation or reports are declared in configuration version 2. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr.
+Paths are relative to the current directory. Apart from dialogue prompts, successful execution is silent unless observation or reports are declared in configuration version 2 or 3. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr.
 
 Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr.
 
-Successful runs integrate according to the branch policy; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved.
+Git runs integrate according to the branch policy; file runs publish declared outputs; the final report is emitted after cleanup. Failed or cancelled workspaces are preserved.
 
 Loading, execution or finalization failures exit 1. SIGINT/SIGTERM cancel the run, wait for cleanup and exit 130/143. Keep configuration stdout quiet for parseable JSON output.
 
@@ -71,13 +71,14 @@ Serve requires `--file`, a YAML `--config` and `--service`. It starts only that 
 
 ## `outpost recipe init`
 
-Create a version-2 starter with a required goal, a named agent and a test command. The editor schema comment points to the installed package. Existing files are never overwritten; the parent directory must exist.
+Create starter files without overwriting existing files. The parent directory must exist. Choose `--workspace-kind ephemeral` for a version-3 file recipe; `directory` creates a copied-directory variant. The default `git` retains the version-2 recipe and version-1 configuration starter for compatibility.
 
 ```sh
-outpost recipe init --file recipe.yaml [--config outpost.yaml] [--json]
+outpost recipe init --file recipe.yaml --config outpost.yaml \
+  --workspace-kind ephemeral
 ```
 
-`--file` is required. `--config` also creates a separate YAML execution configuration. `--json` reports created paths and the schema path. Customize the tools and agent roles before sharing the YAML.
+`--file` is required; `--config` also writes the execution configuration. `--json` reports created paths and the installed editor schema. Generated file starters select Docker: replace their `sandbox` block with `sandbox: { provider: local }` for local execution. The [first tutorial](../yaml-recipes/) supplies a complete local, ephemeral example directly.
 
 ## `outpost recipe validate`
 

@@ -7,7 +7,7 @@ After [running a first recipe](../yaml-recipes/), reuse a recipe from a trusted 
 
 ## Find and download recipes
 
-The package includes the official Git-versioned catalogue: `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` and `update-docs`. List it and copy a recipe into your project. Fetching never executes code or overwrites an existing file. Keep the local configuration separate and bind the required agent roles before running.
+The package includes the official Git-versioned catalogue: `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` and `update-docs`. Use a [Git workspace](../recipe-workspaces/) for these recipes, then list and copy one into your project. Fetching never executes code or overwrites an existing file. Keep the local configuration separate and bind the required agent roles before running.
 
 ```sh
 npx outpost recipe list
@@ -23,7 +23,7 @@ Before writing, fetch checks SHA-256, validates the recipe and matches its name 
 
 ## Contribute and test a recipe
 
-Add a version-2 YAML file under `recipes/` with a matching filename and name, a description, a recipe revision and documented inputs. Keep sandbox choices, models and authentication in the consumer’s separate YAML. Update the catalogue from those declarations, add an offline test, then submit the Git change. CI rejects stale catalogue digests.
+Add a version-3 YAML file under `recipes/` with a matching filename and name, a description, a recipe revision and documented inputs. Keep sandbox choices, models and authentication in the consumer’s separate YAML. Update the catalogue from those declarations, add an offline test, then submit the Git change. CI rejects stale catalogue digests.
 
 ```sh
 node scripts/recipe-catalog.mjs --write

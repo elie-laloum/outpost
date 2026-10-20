@@ -4,7 +4,7 @@ The Guide helps developers run a first task from TypeScript or YAML, then find f
 
 ## Recommended first steps
 
-The reading path is Introduction, Installation, Your first task, Your first workflow, then How Outpost runs a task. Installation covers the package, agent image, authentication prerequisite and an explicitly imported configuration file. Use `init` to prepare the image in a dedicated directory; generated workflow projects are optional and documented at the end of the CLI page.
+The reading path is Introduction, Installation, Your first task, Your first workflow, then How Outpost runs a task. Installation covers the package, agent image, authentication prerequisite and an explicitly imported configuration file. Use `image eject` and `image build` to prepare an agent image when a task needs one.
 
 Use `.ts` for every TypeScript example, import and execution command. Installation explains the ESM package setting once; CommonJS projects can keep these scripts in a separate directory with its own package manifest. Keep examples executable with Node.js 24 or later and match the public API.
 
@@ -13,6 +13,10 @@ Keep explanatory snippets short. A complete named file may be longer when splitt
 Use `console.log` for a first result; introduce `createReporter` on the progress page when live reporting is useful. A shared helper must never be a hidden prerequisite. When an example builds on another page, name the required files in the prose and declare `<!-- example:include page-slug file.ts other.ts -->` so validation assembles the same project.
 
 Use `<!-- canvas -->` when a diagram clarifies a relationship, decision or loop. Give each diagram one reader question, label arrows with meaningful conditions or results, and show correction loops explicitly. Prefer user actions to API names inside nodes. Use numbered steps for simple procedures that need no diagram; the retired `flow` component is forbidden. Keep the initial desktop view at a readable scale, even when the map needs panning. On mobile, show the steps and outgoing conditions as a vertical list. Inspect diagrams in both languages at desktop and mobile sizes.
+
+## YAML recipe path
+
+Start with Node commands in a local, ephemeral workspace, without Git, Docker or agent credentials. Use format 3 for both complete recipe and execution files; explain that their versions are independent of the package version. Follow with workspace selection, agents and execution, data dependencies, observation, persistence and services. Keep workspace choices and human dialogue on their own pages. Label configuration fragments and name their insertion point; distinguish adding entries to an existing mapping from replacing that mapping. Validate complete YAML examples and execute the first recipe in both languages. Keep CLI legacy-format descriptions accurate.
 
 ## Page types
 

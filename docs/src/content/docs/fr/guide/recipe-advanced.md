@@ -8,7 +8,7 @@ description: "Choisir un candidat et vérifier la résolution des conflits avant
 <span id="déclarer-les-rapports-et-la-télémétrie"></span>
 <span id="suivre-la-couverture-et-les-validations"></span>
 
-Le format de recette 3 et la configuration 2 composent les familles déclaratives publiques avec les moteurs natifs. Les [composants disponibles](../yaml-components/) sont générés depuis leurs descripteurs. Les fonctions, clients SDK et objets personnalisés passent par des extensions locales explicites ; les utilitaires de consultation, signature et récupération restent appelables depuis des modules TypeScript de confiance. Les restrictions des fournisseurs et agents continuent de s’appliquer.
+Les formats de recette et de configuration 3 composent les familles déclaratives publiques avec les moteurs natifs. Les [composants disponibles](../yaml-components/) sont générés depuis leurs descripteurs. Les fonctions, clients SDK et objets personnalisés passent par des extensions locales explicites ; les utilitaires de consultation, signature et récupération restent appelables depuis des modules TypeScript de confiance. Les restrictions des fournisseurs et agents continuent de s’appliquer.
 
 ## Partager une sélection de candidats
 
@@ -26,7 +26,7 @@ tasks:
     speculation: { $ref: speculations.compare }
 ```
 
-La spéculation exige `experimental: true` dans la configuration. Ses règles natives de budget, validation et sélection restent applicables. Pour `select: best`, fournissez une fonction de notation en plus de la validation. Déclarez ces fonctions avec les contrats `speculation.options.validate` et `speculation.options.score` ; consultez les [extensions locales](../yaml-recipes/).
+La spéculation exige `experimental: true` dans la configuration. Ses règles natives de budget, validation et sélection restent applicables. Pour `select: best`, fournissez une fonction de notation en plus de la validation. Déclarez ces fonctions avec les contrats `speculation.options.validate` et `speculation.options.score` ; consultez les [extensions locales](../recipe-extensions/).
 
 ```yaml title="outpost.yaml — candidats"
 experimental: true

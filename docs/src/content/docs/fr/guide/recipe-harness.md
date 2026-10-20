@@ -3,7 +3,7 @@ title: "Configurer une boucle d’agent en YAML"
 description: "Ajoutez un fournisseur de modèle et des outils à votre configuration d’exécution."
 ---
 
-Ajoutez un fournisseur de modèle et des outils à votre [configuration d’exécution](../recipe-configuration/). Ces déclarations demandent la version 2 ou suivante de cette configuration.
+Ajoutez un fournisseur de modèle et des outils à votre [configuration d’exécution](../recipe-configuration/). Gardez le workspace et la sandbox en version 3 du tutoriel local ; ajoutez les blocs ci-dessous à la racine.
 
 ## Exécuter le harness Outpost depuis le YAML
 
@@ -22,6 +22,7 @@ harnesses:
     modelProvider: { $ref: models.coding }
     tools:
       - type: files
+        selection: filesystem
       - type: edit
 agents:
   coder:
@@ -41,7 +42,7 @@ name: structured-review
 tasks:
   - key: review
     agent: coder
-    brief: Review the change.
+    brief: Inspect the workspace and summarize its files.
     dispatch:
       response: { $ref: responses.verdict }
 ```

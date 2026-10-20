@@ -1,17 +1,15 @@
 ---
-title: Jobs et services de recettes
-description: Publier des jobs et démarrer explicitement workers, cron et webhooks.
+title: "Mettre une recette en file et lancer un worker"
+description: "Exécuter des recettes persistantes depuis une file, une planification ou un webhook vérifié."
 ---
 
-Préparez une [configuration d’exécution](../recipe-configuration/) et une [recette durable](../recipe-durability/) avant de les confier à un worker. Les blocs ci-dessous complètent ce fichier ; les déclarer ne démarre aucun service en arrière-plan.
+Partez des deux fichiers en version 3 du guide [Enregistrer et reprendre une recette](../recipe-durability/). Ajoutez les blocs ci-dessous à `outpost.yaml`. Les déclarations seules ne démarrent rien : un service se lance avec `recipe serve`.
 
-La configuration de format 2 déclare files, jobs et services aux côtés des agents et du stockage. Lire ou valider ces déclarations ne démarre aucun serveur, worker ou planning. `recipe enqueue` publie un job ; `recipe serve --service` démarre uniquement le service sélectionné et ses dépendances. Les [recettes durables](../recipe-durability/) expliquent leurs checkpoints.
+## Déclarer la file et le worker
 
-## Déclarer une file et un job de recette
+Cette file SQLite stocke les jobs localement. Le handler `review` exécute votre recette avec checkpoint. Gardez les déclarations `transports` et `stores` existantes.
 
-Une file SQLite stocke les jobs localement. Une file HTTP utilise `type: http`, une URL et un token référencé par environnement ou callback de rotation. BullMQ utilise `type: bullmq`, les options Redis natives et le paquet BullMQ facultatif. Propriété, protection des leases et déduplication restent celles des [files natives](../job-queues/).
-
-```yaml title="outpost.yaml — jobs"
+```yaml title="outpost.yaml — queue and worker"
 queues:
   jobs: { type: sqlite, file: ./.outpost/jobs.sqlite }
 jobs:
@@ -19,15 +17,6 @@ jobs:
     type: recipe
     file: ./recipe.yaml
     config: ./outpost.yaml
-```
-
-Un job `recipe` accepte `{ runId, input }`, où `input` est une table de paramètres ou null. Il crée un runtime, démarre ou reprend ce checkpoint puis ferme ses ressources. La recette cible doit configurer un magasin de checkpoints permettant l’inspection. Les paramètres font partie de l’identité durable : une entrée modifiée ne réutilise pas silencieusement une exécution existante. `retryIncomplete: true` autorise explicitement le rejeu interrompu pour ce handler. Pour une factory TypeScript de confiance, utilisez `type: workflow` avec [WorkflowJobOptions](../../reference/workflowjoboptions/) et une référence de callback local.
-
-## Démarrer un worker explicitement
-
-Un worker associe des noms de handlers à des jobs déclarés. Sa déclaration seule ne réclame aucun travail. Il utilise le moteur natif, renouvelle les leases et ferme sa file possédée à l’arrêt. Une file prêtée par extension reste sous la responsabilité de son propriétaire.
-
-```yaml title="outpost.yaml — worker"
 services:
   worker:
     type: worker
@@ -37,22 +26,24 @@ services:
       review: { $ref: jobs.review }
 ```
 
-Publiez depuis un terminal puis démarrez le worker depuis un autre. Enqueue reste silencieux sans `--json`. L’ID de job par défaut est `recipe:<handler>:<run-id>` ; les publications répétées convergent sur la même requête. Pour reprendre ultérieurement un run en pause, choisissez un nouveau `--job-id` en conservant l’identité d’effet voulue avec `--idempotency-key`. Les effets externes exigent toujours une déduplication persistante à destination.
+## Publier et traiter un job
+
+La première commande publie seulement le travail et affiche son reçu. La seconde lance le worker, qui reste actif jusqu’à Ctrl+C. Pour cette recette d’approbation, l’exécution attend à son étape de validation ; examinez-la avec `recipe status --run-id change-42` et les mêmes `--file` et `--config`.
 
 ```sh
-outpost recipe enqueue --file recipe.yaml --config outpost.yaml \
-  --queue jobs --handler review --run-id change-42 --json
-outpost recipe serve --file recipe.yaml --config outpost.yaml \
-  --service worker
+npx outpost recipe enqueue --file recipe.yaml --config outpost.yaml   --queue jobs --handler review --run-id change-42 --json
+npx outpost recipe serve --file recipe.yaml --config outpost.yaml   --service worker
 ```
 
-`serve` reste actif jusqu’à interruption ou fermeture de son runtime, sans progression implicite. Chaque recette exécutée conserve son observation et ses rapports déclarés ; les jobs en échec gardent leur résultat natif de file et `recipe status` consulte l’exécution durable. `examples/70-recipe-services/` démontre un worker SQLite et l’inspection de son résultat hors ligne.
+L’identifiant de job par défaut est `recipe:<handler>:<run-id>`. Republier converge vers la même demande. Pour remettre une reprise en file, choisissez un nouveau `--job-id` ; conservez la clé d’effet souhaitée avec `--idempotency-key`. Les services externes doivent dédupliquer leurs propres effets.
 
-## Publier sur cron ou webhook authentifié
+Pour HTTP ou BullMQ, remplacez la file par le [composant adapté](../yaml-components/). Voir [la propriété des files et les leases](../job-queues/) ; le worker ferme ses files possédées, pas les extensions empruntées.
 
-Les composants cron gardent les règles natives d’heure civile et de fuseau. Un planning publie seulement le dernier créneau admissible sous `schedule:<name>:<slot>` ; il n’appelle aucun workflow. `input` accepte du JSON fixe ou un callback local, et un callback `runId` remplace l’ID de checkpoint par défaut. Démarrez ce service explicitement, indépendamment du worker.
+## Publier selon un horaire
 
-```yaml title="outpost.yaml — plannings"
+Ajoutez ces déclarations à la racine. Cette recette n’a pas de paramètres : son entrée planifiée est donc vide. Une recette paramétrée utilise leurs noms ici.
+
+```yaml title="outpost.yaml — schedule"
 crons:
   hourly: { type: schedule, expression: "0 * * * *", timeZone: UTC }
 schedules:
@@ -61,17 +52,25 @@ schedules:
     name: hourly-review
     cron: { $ref: crons.hourly }
     handler: review
-    input: { goal: Review recent commits. }
-services:
-  clock:
-    type: schedules
-    queue: { $ref: queues.jobs }
-    schedules: [{ $ref: schedules.review }]
+    input: {}
 ```
 
-Les sources prennent en charge GitHub, GitLab, Slack et Standard Webhooks avec leurs options natives. Les secrets sont des références d’environnement ou de callbacks de rotation explicites. Un mapper `job` filtre types/actions, choisit un handler et forme un ID avec source/préfixe et livraison. Son entrée par défaut est le payload authentifié ; `input` fixe ou une extension locale `triggerMapper` l’adapte aux paramètres de recette. L’identité authentifiée de l’émetteur ne devient pas un acteur autorisé de gate.
+Ajoutez `clock` **dans le bloc `services` existant**, à côté de `worker`. Lancez-le dans un autre terminal avec `recipe serve --file recipe.yaml --config outpost.yaml --service clock`.
 
-```yaml title="outpost.yaml — source vérifiée"
+```yaml title="outpost.yaml — add under services"
+clock:
+  type: schedules
+  queue: { $ref: queues.jobs }
+  schedules: [{ $ref: schedules.review }]
+```
+
+L’horloge publie les jobs ; le worker les exécute. Les identifiants de créneau dédupliquent les redémarrages, et seul le dernier créneau manqué admissible est rattrapé. Voir [les planifications cron](../cron-schedules/) pour les fuseaux et retards.
+
+## Publier depuis un webhook vérifié
+
+Ajoutez ces déclarations à la racine et définissez `GITHUB_WEBHOOK_SECRET` sur l’hôte. Cette route accepte les événements de pull request sélectionnés et soumet la même recette sans paramètres.
+
+```yaml title="outpost.yaml — webhook source and route"
 triggers:
   github: { type: github, secret: { env: GITHUB_WEBHOOK_SECRET } }
 routes:
@@ -81,39 +80,34 @@ routes:
     kinds: [pull_request]
     actions: [opened, synchronize]
     runIdPrefix: review
-    input: { goal: Review recent commits. }
+    input: {}
 ```
 
-Associez cette source et ce mapper à un chemin exact. Le serveur natif vérifie la requête avant le mapper et publie des jobs `trigger:<path>:<delivery>`. `type: queue` sert le protocole HTTP authentifié de file avec `queue`, `token`, `host` et `port` ; il ne démarre pas de worker. Les serveurs écoutent localhost par défaut. Le [guide des triggers](../webhooks/) détaille transport et signatures.
+Ajoutez `webhooks` **dans le bloc `services` existant**. Lancez-le séparément avec `--service webhooks`. Le serveur écoute sur localhost par défaut et vérifie les requêtes avant publication dans la file.
 
-```yaml title="outpost.yaml — service webhook"
-services:
-  webhooks:
-    type: triggers
-    queue: { $ref: queues.jobs }
-    port: 8080
-    routes:
-      - path: /github
-        source: { $ref: triggers.github }
-        on: { $ref: routes.review }
+```yaml title="outpost.yaml — add under services"
+webhooks:
+  type: triggers
+  queue: { $ref: queues.jobs }
+  port: 8080
+  routes:
+    - path: /github
+      source: { $ref: triggers.github }
+      on: { $ref: routes.review }
 ```
 
-## Attendre un job depuis une recette
+Suivez [le déploiement des webhooks](../operating-webhooks/) pour HTTPS public et la configuration du service émetteur. L’identité vérifiée de l’émetteur n’autorise pas les approbations. GitLab, Slack et Standard Webhooks utilisent leurs propres composants source.
 
-Une tâche `queued` utilise [defineQueuedTask](../../reference/definequeuedtask/) et ses règles natives de polling, annulation, consommation et quota. `arguments` construit l’entrée du handler. Un callback local `queued.input` peut remplacer cette expression et `queued.decode` personnalise le résultat JSON. La projection par défaut expose la valeur décodée sous `value`.
+## Attendre un résultat en file
 
-```yaml title="recipe.yaml — tâche en file"
-- key: remote-review
-  queued:
-    queue: { $ref: queues.jobs }
-    handler: review
-  arguments:
-    runId: change-42
-    input: { goal: Review recent commits. }
-```
+Une recette peut utiliser une tâche `queued` pour attendre le résultat d’un handler. Voir [defineQueuedTask](../../reference/definequeuedtask/) pour le polling, l’annulation, les quotas et la consommation ; déclarez les références de file dans la configuration et construisez la requête avec `arguments`.
 
-Les tests locaux couvrent publication silencieuse, démarrage explicite, annulation, rotation des tokens, webhooks signés, publication cron et jobs natifs. Les tests Redis 7 réels couvrent leases BullMQ, écritures obsolètes, effets interrompus et workers YAML. Aucun modèle payant ni endpoint public n’est utilisé ; TLS de production, Redis hébergé et livraisons réelles des émetteurs restent non validés.
+Les tests locaux et Redis réel couvrent la composition des services. Redis hébergé, les webhooks publics et la restauration cloud demandent une validation séparée.
 
-## Workspaces de fichiers
+<!-- Retained section anchors for existing bookmarks. -->
 
-Pour exécuter un service sans Git, utiliser la configuration 3 avec une source de fichiers explicite pour les tâches de sandbox, ou omettre workspace et sandbox pour les tâches sans fichiers. Files, schedules, webhooks et jobs nommés gardent leurs contrats existants. Voir [les workspaces de fichiers](../workspaces/).
+<span id="déclarer-une-file-et-un-job-de-recette"></span>
+<span id="démarrer-un-worker-explicitement"></span>
+<span id="publier-sur-cron-ou-webhook-authentifié"></span>
+<span id="attendre-un-job-depuis-une-recette"></span>
+<span id="workspaces-de-fichiers"></span>

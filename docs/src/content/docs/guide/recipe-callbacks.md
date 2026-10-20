@@ -21,9 +21,10 @@ tasks:
     arguments: { $step: select, path: [value] }
 ```
 
-Declare the module, export, version and callback contract in the local configuration. Alias the extension in `functions` to keep recipes independent of local module names. Validation resolves this metadata without importing the module; execution verifies its export before allocating resources.
+Save this complete local configuration. It needs no workspace or sandbox for these data tasks. Alias the extension in `functions` to keep recipes independent of local module names. Validation resolves this metadata without importing the module; execution verifies its export before allocating resources.
 
-```yaml title="outpost.yaml — callback binding"
+```yaml title="outpost.yaml"
+version: 3
 extensions:
   summary:
     module: ./steps.ts
@@ -45,7 +46,7 @@ export function summary(value: unknown) {
 }
 ```
 
-Replace the previous recipe with this `recipe.yaml` and add `extensions` and `functions` to your version-2 `outpost.yaml`. Run `npx outpost recipe validate --file recipe.yaml --config outpost.yaml`, then the same command with `run --json`. The `summarize.value` output contains `count: 2` and both paths.
+Save both YAML files and `steps.ts` together. Run `npx outpost recipe validate --file recipe.yaml --config outpost.yaml`, then the same command with `run --json`. The `summarize.value` output contains `count: 2` and both paths.
 
 `loop` accepts `maxRounds`, `attempt` and `check`, through [defineLoopTask](../../reference/definelooptask/). Bind callbacks using `loop.options.attempt` and `loop.options.check`; attempt results become the step's JSON `value`, while the check receives the unwrapped result. Round history and usage are maintained by the existing scheduler. Loops do not accept ordinary retry, gate or interaction options.
 

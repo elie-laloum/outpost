@@ -21,9 +21,10 @@ tasks:
     arguments: { $step: select, path: [value] }
 ```
 
-Déclarez le module, l’export, sa version et le contrat du callback dans la configuration locale. Un alias dans `functions` garde la recette indépendante des noms de modules locaux. La validation résout ces métadonnées sans importer le module ; l’exécution vérifie son export avant l’allocation.
+Enregistrez cette configuration locale complète. Ces tâches de données ne demandent ni workspace ni sandbox. Un alias dans `functions` garde la recette indépendante des noms de modules locaux. La validation résout ces métadonnées sans importer le module ; l’exécution vérifie son export avant l’allocation.
 
-```yaml title="outpost.yaml — liaison du callback"
+```yaml title="outpost.yaml"
+version: 3
 extensions:
   summary:
     module: ./steps.ts
@@ -45,7 +46,7 @@ export function summary(value: unknown) {
 }
 ```
 
-Remplacez la recette précédente par ce `recipe.yaml` et ajoutez les déclarations `extensions` et `functions` à votre `outpost.yaml` de version 2. Exécutez `npx outpost recipe validate --file recipe.yaml --config outpost.yaml`, puis la même commande avec `run --json`. La sortie `summarize.value` contient `count: 2` et les deux chemins.
+Enregistrez les deux fichiers YAML et `steps.ts` ensemble. Exécutez `npx outpost recipe validate --file recipe.yaml --config outpost.yaml`, puis la même commande avec `run --json`. La sortie `summarize.value` contient `count: 2` et les deux chemins.
 
 `loop` accepte `maxRounds`, `attempt` et `check` via [defineLoopTask](../../reference/definelooptask/). Liez les callbacks avec `loop.options.attempt` et `loop.options.check` ; le résultat d’une tentative devient le `value` JSON de l’étape, tandis que le contrôle reçoit le résultat sans enveloppe. Le moteur existant maintient l’historique des tours et la consommation. Les boucles refusent les options ordinaires de retry, gate et interaction.
 

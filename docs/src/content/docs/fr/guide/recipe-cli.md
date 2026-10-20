@@ -20,7 +20,7 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 | ------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--file`           | Obligatoire                                | Recette YAML locale, limitée à 1 Mio.                                                                                                                                                 |
 | `--config`         | Obligatoire                                | Configuration YAML locale ; les modules TypeScript/JavaScript `RecipeConfiguration` et factories restent acceptés.                                                                    |
-| `--input`          | Aucun                                      | Répétez `name=value` pour les paramètres déclarés de version 2. Nombres et booléens utilisent la syntaxe scalaire JSON.                                                               |
+| `--input`          | Aucun                                      | Répétez `name=value` pour les paramètres déclarés (formats 2 et 3). Les scalaires utilisent JSON ; le format 3 accepte aussi objets, tableaux et null.                                |
 | `--json`           | Désactivé                                  | Rapport final avec `status` global, `workflowStatus`, tâches, `outputs` bornés, `errors`, consommation et emplacement du workspace.                                                   |
 | `--interactive`    | Automatique dans un terminal sans `--json` | Recueille réponses et décisions explicites de gates non signées sur stdin, affiche leurs demandes sur stderr et reprend. Exige stdin et stderr en terminal et une configuration YAML. |
 | `--no-interactive` | Désactivé                                  | Laisse les questions en attente pour une prochaine invocation ou un client externe.                                                                                                   |
@@ -28,11 +28,11 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 
 Avec stdin et stderr dans un terminal, run gère les questions interactives sans script TypeScript. Les choix utilisent un menu de sélection et les questions libres un champ de texte. Chaque réponse est persistée avant la question suivante. `--json` désactive la saisie automatique ; combinez explicitement `--interactive --json` pour conserver les questions sur stderr et recevoir un seul rapport JSON final sur stdout. Sans terminal, l’exécution laisse les demandes en attente.
 
-Les chemins sont relatifs au dossier courant. Hormis les questions du dialogue, une exécution réussie est silencieuse sans observation ni rapports déclarés dans la configuration version 2. `--json` demande explicitement un seul rapport final JSON ; les échecs affichent toujours leurs diagnostics sur stderr.
+Les chemins sont relatifs au dossier courant. Hormis les questions du dialogue, une exécution réussie est silencieuse sans observation ni rapports déclarés dans la configuration version 2 ou 3. `--json` demande explicitement un seul rapport final JSON ; les échecs affichent toujours leurs diagnostics sur stderr.
 
 Les champs textuels sont limités à 16 384 caractères avec un marqueur de troncature. Les diagnostics de commandes comprennent leur code de sortie d’origine, stdout et stderr.
 
-Les exécutions réussies intègrent selon la politique de branche ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés.
+Les exécutions Git intègrent selon la politique de branche ; celles de fichiers publient les sorties déclarées ; le rapport final est émis après nettoyage. Les workspaces échoués ou annulés sont conservés.
 
 Les échecs de chargement, d’exécution ou de finalisation sortent avec le code 1. SIGINT/SIGTERM annulent le run, attendent le nettoyage et sortent avec 130/143. Gardez stdout silencieux dans la configuration pour un JSON exploitable.
 
@@ -71,13 +71,14 @@ Serve exige `--file`, un `--config` YAML et `--service`. Il démarre uniquement 
 
 ## `outpost recipe init`
 
-Créez un modèle de version 2 avec un objectif obligatoire, un agent nommé et une commande de test. Le commentaire du schéma pour l’éditeur pointe vers le paquet installé. Les fichiers existants ne sont jamais écrasés ; le dossier parent doit exister.
+Créez des fichiers de départ sans écraser ceux qui existent. Le dossier parent doit exister. Choisissez `--workspace-kind ephemeral` pour une recette de fichiers en version 3 ; `directory` crée une variante avec copie de dossier. Le choix par défaut `git` conserve les modèles de recette version 2 et de configuration version 1 pour compatibilité.
 
 ```sh
-outpost recipe init --file recipe.yaml [--config outpost.yaml] [--json]
+outpost recipe init --file recipe.yaml --config outpost.yaml \
+  --workspace-kind ephemeral
 ```
 
-`--file` est obligatoire. `--config` crée aussi une configuration YAML séparée. `--json` rapporte les chemins créés et le chemin du schéma. Adaptez les outils et rôles d’agents avant de partager le YAML.
+`--file` est obligatoire ; `--config` écrit aussi la configuration d’exécution. `--json` affiche les chemins créés et le schéma installé. Les modèles de fichiers générés choisissent Docker : remplacez leur bloc `sandbox` par `sandbox: { provider: local }` pour une exécution locale. Le [premier tutoriel](../yaml-recipes/) fournit directement un exemple local et éphémère complet.
 
 ## `outpost recipe validate`
 

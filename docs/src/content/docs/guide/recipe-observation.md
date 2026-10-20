@@ -3,18 +3,17 @@ title: "Follow a recipe run"
 description: "Add events or a final report to your execution configuration."
 ---
 
-Add events or a final report to your [execution configuration](../recipe-configuration/). Use configuration version 2 or later.
+Add events or a final report to your [execution configuration](../recipe-configuration/). Keep version 3 from the local tutorial.
 
 ## Declare observation and final reports
 
-Configuration version 2 can attach one observation hub to allocation, workflow tasks, agent activity and cleanup. A successful run without declared outputs is silent. Errors still reach stderr; `--json` explicitly selects one final JSON report and replaces configured final reports for that invocation.
+Use this complete configuration with the tutorial recipe to see events and its final report. A successful run without declared outputs is silent. Errors still reach stderr; `--json` explicitly selects one final JSON report and replaces configured final reports for that invocation.
 
 ```yaml title="outpost.yaml — observation and reports"
-version: 2
-repository: .
+version: 3
+workspace: { kind: ephemeral }
 sandbox:
-  provider: docker
-  image: outpost-codex:dev
+  provider: local
 observation:
   sinks:
     - type: console
@@ -28,7 +27,7 @@ The console sink writes events to stderr by default. The final report is publish
 
 ## Declare reporters and telemetry
 
-A console sink is sufficient for normal event output. Existing text reporters, custom reporter handlers and OpenTelemetry can also be composed as sinks. OpenTelemetry borrows a host tracer and meter from declared extensions; only the observer is closed, and the optional integration is loaded when used.
+A console sink is sufficient for normal event output. For telemetry, replace `observation` and `reports` with the following blocks and declare the tracer and meter extensions. OpenTelemetry borrows a host tracer and meter from declared extensions; only the observer is closed, and the optional integration is loaded when used.
 
 ```yaml title="outpost.yaml — telemetry"
 observation:

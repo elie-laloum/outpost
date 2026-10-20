@@ -3,7 +3,7 @@ title: "Configure an agent loop in YAML"
 description: "Add a model provider and tools to your execution configuration."
 ---
 
-Add a model provider and tools to your [execution configuration](../recipe-configuration/). These declarations require configuration version 2 or later.
+Add a model provider and tools to your [execution configuration](../recipe-configuration/). Keep the version-3 workspace and sandbox from the local tutorial; add the blocks below at the root.
 
 ## Run the Outpost harness from YAML
 
@@ -22,6 +22,7 @@ harnesses:
     modelProvider: { $ref: models.coding }
     tools:
       - type: files
+        selection: filesystem
       - type: edit
 agents:
   coder:
@@ -41,7 +42,7 @@ name: structured-review
 tasks:
   - key: review
     agent: coder
-    brief: Review the change.
+    brief: Inspect the workspace and summarize its files.
     dispatch:
       response: { $ref: responses.verdict }
 ```

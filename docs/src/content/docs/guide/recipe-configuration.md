@@ -1,125 +1,112 @@
 ---
-title: "Configure recipe execution"
-description: "Select the repository, agents, environment and reports in outpost.yaml."
+title: "Add an agent and choose execution"
+description: "Configure agent roles, local or container execution and YAML editor completion."
 ---
 
-Keep the recipe shareable and put machine-specific choices in `outpost.yaml`. Start with [your first recipe](../yaml-recipes/); the sections below adapt its execution without changing its tasks.
+`recipe.yaml` describes the work; `outpost.yaml` binds agent roles and chooses the environment. Start with the [local tutorial](../yaml-recipes/). Use [workspace configuration](../recipe-workspaces/) for directories, branches and output files.
 
-## Configure execution once
+## Add an agent
 
-Build the agent image with [setup](../setup/), then save this `outpost.yaml`. Repository and account-file paths resolve from its directory.
+For this local example, the Codex CLI must already be installed and authenticated on the host; follow the [Codex guide](../codex/). Save these two complete files. Commands and agents run with your host permissions.
 
 ```yaml title="outpost.yaml"
-version: 1
-repository: .
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+  branch: { mode: named, name: feature/welcome, from: main }
 sandbox:
-  provider: docker
-  image: outpost-codex:dev
-branch:
-  mode: named
-  name: outpost/recipe-change
+  provider: local
 agents:
-  coder:
-    harness: codex
-    authentication: account
-  reviewer:
+  writer:
     harness: codex
     authentication: account
 ```
 
-Choose another environment with `sandbox.provider`: see [sandbox selection](../choose-a-sandbox/). Unsupported options fail before execution; cloud providers need their optional SDK and host credentials. The `local` provider runs directly on your host.
+The recipe selects the configured `writer` role. Use a Git repository at `./project` with a `main` branch. The agent creates `welcome.md` on a separate branch. The current YAML validator still refuses native CLI harnesses in file workspaces, even where the TypeScript API advertises file capabilities; use the [Outpost harness](../recipe-harness/) for a file-only recipe.
 
-Declare [authentication](../authentication/) for each agent and, optionally, a model name or `{ name, reasoning, maxOutputTokens }`. Reference credentials by file or environment-variable name; literal secrets are refused. Only variables selected in `environment` reach the sandbox.
+```yaml title="recipe.yaml"
+version: 3
+name: write-note
+tasks:
+  - key: draft
+    agent: writer
+    brief: Write a short welcome message in welcome.md, then summarize it.
+```
 
-```yaml title="outpost.yaml — optional environment selection"
+Run with `npx outpost recipe run --file recipe.yaml --config outpost.yaml --json` and inspect `outputs.draft.text`. The named branch is retained without automatic integration. Choose [authentication](../authentication/) explicitly for every CLI role; model selection is optional.
+
+## Switch to Docker
+
+Prepare the Codex image using [agent images](../agent-images/), then replace only `sandbox` in the configuration above. Keep the workspace and agent role.
+
+```yaml title="outpost.yaml — sandbox"
+sandbox:
+  provider: docker
+  image: outpost-codex:dev
+```
+
+Other providers use their own [sandbox options](../choose-a-sandbox/). Unsupported workspace or agent capabilities are refused. Container file workspaces require an explicit image.
+
+## Share a profile
+
+Add `profiles` and replace `agents` in the same configuration. Profiles share instructions, supported tool restrictions and MCP declarations. A brief asking an agent not to edit files does not enforce read-only access.
+
+```yaml title="outpost.yaml — profiles"
+profiles:
+  writing:
+    type: portable
+    instructions: Write concise, plain-language documents.
+agents:
+  writer:
+    harness: codex
+    authentication: account
+    profile: { $ref: profiles.writing }
+```
+
+Native CLI lifecycle hooks and profile hook callbacks require [local extensions](../recipe-extensions/). The [built-in harness](../recipe-harness/) has its own tools, permissions and hook declarations.
+
+## Select environment variables
+
+Add this top-level block to forward only the selected host variable. Keep secret values out of recipes and configuration files. [Secret sources](../secret-sources/) can resolve selected names through declared components and host clients.
+
+```yaml title="outpost.yaml — environment"
 environment:
   PROJECT_TOKEN: PROJECT_TOKEN
 ```
 
-The CLI allocates and closes the sandbox. This example retains a named branch for review. Without an explicit branch policy, YAML execution integrates changes into your checkout; use `current` or `named` when you want another behavior. Configuration strings stay literal.
-
 ## Enable editor completion
 
-Use a YAML language server and add the schema comment to the recipe. The recipe and execution configuration have separate format versions.
+Keep the corresponding header at the top of each file, followed by its existing contents. These URLs follow the deployed documentation. For reproducible completion, use `/outpost/schemas/<package-version>/recipe.schema.json` and `recipe-configuration.schema.json`, without `v`; archives exist for releases containing both schemas.
 
-```yaml title="recipe.yaml — editor schema"
+```yaml title="recipe.yaml — schema header"
 # yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe.schema.json
 version: 3
 ```
 
-The execution configuration has its own schema and format version. Use this header in `outpost.yaml` to get completion for sandbox, agents, observation and named components:
-
-```yaml title="outpost.yaml — editor schema"
+```yaml title="outpost.yaml — schema header"
 # yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json
-version: 2
+version: 3
 ```
 
-The URLs above follow the current stable documentation. Pin completion with `/outpost/schemas/<package-version>/recipe.schema.json` or `recipe-configuration.schema.json`, using the package version without `v`. Archived schemas exist only for versions that included both files. This version is separate from YAML’s `version` field.
+Offline, use a relative path such as `./node_modules/@elie-laloum/outpost/recipe.schema.json`. `recipe init` writes installed-schema paths automatically. YAML format versions and package versions are independent; these guides use format 3, while older formats remain supported.
 
-Until these schemas are published, or when offline, use the installed package schema or a local checkout path. `recipe init` already uses the installed schema.
+## Find the next setting
 
-## Compose native configuration components
+| Goal                                              | Guide                                  |
+| ------------------------------------------------- | -------------------------------------- |
+| Branches, copied files, mounts and publication    | [Workspaces](../recipe-workspaces/)    |
+| Model providers, tools and validated JSON answers | [Agent loop](../recipe-harness/)       |
+| Progress events and final reports                 | [Observation](../recipe-observation/)  |
+| Named components and their supported options      | [YAML components](../yaml-components/) |
 
-With configuration version 2, use `$ref` to reuse a named component. Keep `version: 2` and `repository` in your file; add the following declarations. Unknown references, incompatible types and cycles fail before allocation.
+<!-- Retained section anchors for existing bookmarks. -->
 
-```yaml title="outpost.yaml — named provider"
-sandbox:
-  $ref: sandboxProviders.build
-sandboxProviders:
-  build:
-    type: docker
-    image: outpost:sandbox
-    repositoryMode: isolated
-    cpus: 2
-    memoryMb: 4096
-```
-
-See the [provider options](../choose-a-sandbox/) for mounts, caches and network restrictions. Firecracker is experimental and requires `experimental: true` plus a separately prepared host.
-
-Put preparation, guards and storage under `workspace`. Keep repository, branch, sandbox and observation at the root. Host paths resolve from the configuration file; sandbox paths follow the provider’s rules.
-
-```yaml title="outpost.yaml — workspace preparation"
-workspace:
-  guard:
-    protectedPaths: [".github/**"]
-  hooks:
-    sandboxReady:
-      - executable: npm
-        arguments: [ci]
-        when:
-          kind: changed
-          files: [package-lock.json]
-```
-
-Share instructions and tool permissions through a named [agent profile](../agent-profiles/). Each harness checks whether it can enforce the requested permissions.
-
-```yaml title="outpost.yaml — a shared profile"
-profiles:
-  reviewer:
-    type: portable
-    instructions: Review the change without editing files.
-    allowedTools: [read]
-agents:
-  reviewer:
-    harness: claude
-    authentication: account
-    profile:
-      $ref: profiles.reviewer
-```
-
-## File workspaces
-
-Configuration version 3 adds explicit directory and ephemeral sources. See [Workspaces](../workspaces/) for file sources, output publication and explicit mounts. Versions 1 and 2 retain their Git contracts.
-
-## Continue
-
-- [Follow a recipe run](../recipe-observation/)
-- [Configure the built-in agent loop](../recipe-harness/)
-- [Select secrets](../secret-sources/)
-
+<span id="configure-execution-once"></span>
+<span id="compose-native-configuration-components"></span>
+<span id="file-workspaces"></span>
+<span id="continue"></span>
 <span id="declare-observation-and-final-reports"></span>
 <span id="declare-reporters-and-telemetry"></span>
-
 <span id="select-secrets-before-allocation"></span>
-
 <span id="run-the-outpost-harness-from-yaml"></span>

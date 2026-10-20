@@ -54,29 +54,17 @@ Compose JSON values, conditions, loops, decisions and isolated tasks with [forma
 
 ## Use the engine in TypeScript
 
-Use the `recipe.yaml` from [your first YAML recipe](../yaml-recipes/). `defineRecipe()` borrows the sandbox and returns a [Workflow](../../reference/type-workflow/). Here the caller owns integration, preservation and cleanup; the engine only executes tasks. Supply typed values through `inputs` and inspect results using the normal workflow API.
+Save `run-recipe.ts` beside the two files from [your first YAML recipe](../yaml-recipes/). Run it with `node run-recipe.ts` in an ESM project. `createRecipeRuntime()` uses the same configuration as the CLI and owns its resources; `await using` closes it after execution.
 
 ```ts title="run-recipe.ts"
-import { readFile } from "node:fs/promises";
-import { createSandbox, defineRecipe } from "@elie-laloum/outpost";
-import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { fileURLToPath } from "node:url";
+import { createRecipeRuntime } from "@elie-laloum/outpost/recipes";
 
-const sandbox = await createSandbox({ repository, sandboxProvider });
-try {
-  const source = await readFile(
-    new URL("./recipe.yaml", import.meta.url),
-    "utf8",
-  );
-  const workflow = defineRecipe(source, {
-    sandbox,
-    agents: { coder },
-    inputs: { focus: "installation instructions" },
-  });
-  (await workflow.start()).unwrap();
-  await sandbox.workspace.integrate();
-} finally {
-  await sandbox.close({ preserve: true });
-}
+await using runtime = await createRecipeRuntime({
+  file: fileURLToPath(new URL("./recipe.yaml", import.meta.url)),
+  config: fileURLToPath(new URL("./outpost.yaml", import.meta.url)),
+});
+await runtime.run({ report: "json" });
 ```
 
-For the sequential recipes in this example, the shared sandbox requires concurrency 1. Use [durable YAML recipes](../recipe-durability/) for format-3 checkpoints and JSON result projections. The [recipe contract](../../reference/definerecipe/) describes validation limits.
+For an already open sandbox, [defineRecipe](../../reference/definerecipe/) borrows it: the caller owns integration and cleanup. Workflow options, checkpoints and component references require the full runtime.

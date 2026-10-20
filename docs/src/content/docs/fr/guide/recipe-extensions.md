@@ -54,29 +54,17 @@ Composez valeurs JSON, conditions, boucles, décisions et tâches isolées avec 
 
 ## Utiliser le moteur en TypeScript
 
-Reprenez le `recipe.yaml` de [votre première recette YAML](../yaml-recipes/). `defineRecipe()` emprunte la sandbox et retourne un [Workflow](../../reference/type-workflow/). Ici, l’appelant possède l’intégration, la préservation et le nettoyage ; le moteur exécute seulement les tâches. Transmettez des valeurs typées dans `inputs` et inspectez les résultats avec l’API habituelle des workflows.
+Enregistrez `run-recipe.ts` à côté des deux fichiers de [votre première recette YAML](../yaml-recipes/). Lancez `node run-recipe.ts` dans un projet ESM. `createRecipeRuntime()` utilise la même configuration que la CLI et possède ses ressources ; `await using` le ferme après exécution.
 
 ```ts title="run-recipe.ts"
-import { readFile } from "node:fs/promises";
-import { createSandbox, defineRecipe } from "@elie-laloum/outpost";
-import { repository, sandboxProvider, coder } from "./outpost.config.ts";
+import { fileURLToPath } from "node:url";
+import { createRecipeRuntime } from "@elie-laloum/outpost/recipes";
 
-const sandbox = await createSandbox({ repository, sandboxProvider });
-try {
-  const source = await readFile(
-    new URL("./recipe.yaml", import.meta.url),
-    "utf8",
-  );
-  const workflow = defineRecipe(source, {
-    sandbox,
-    agents: { coder },
-    inputs: { focus: "installation instructions" },
-  });
-  (await workflow.start()).unwrap();
-  await sandbox.workspace.integrate();
-} finally {
-  await sandbox.close({ preserve: true });
-}
+await using runtime = await createRecipeRuntime({
+  file: fileURLToPath(new URL("./recipe.yaml", import.meta.url)),
+  config: fileURLToPath(new URL("./outpost.yaml", import.meta.url)),
+});
+await runtime.run({ report: "json" });
 ```
 
-Dans cet exemple séquentiel, la sandbox partagée exige une concurrence de 1. Utilisez les [recettes YAML durables](../recipe-durability/) pour les checkpoints de format 3 et les projections JSON. Le [contrat de recette](../../reference/definerecipe/) décrit les limites de validation.
+Pour une sandbox déjà ouverte, [defineRecipe](../../reference/definerecipe/) l’emprunte : l’appelant possède l’intégration et le nettoyage. Les options de workflow, checkpoints et références de composants nécessitent le runtime complet.

@@ -1,88 +1,88 @@
 ---
 title: "Votre première recette YAML"
-description: "Exécuter une commande et un agent depuis deux fichiers YAML locaux."
+description: "Exécuter deux commandes locales dans un workspace éphémère, sans Git, Docker ni compte d’agent."
 ---
 
-<!-- Retained section anchors for existing bookmarks. -->
+Créez un fichier, puis lisez-le dans une seconde tâche. Il vous faut **Node.js 24+** et le paquet Outpost. Ce premier essai ne demande ni dépôt Git, ni image Docker, ni compte d’agent.
 
-<span id="créer-une-recette"></span>
-<span id="déclarer-les-paramètres-et-les-étapes"></span>
-<span id="exécuter-et-inspecter-le-résultat"></span>
+## 1. Installer le paquet
 
-## Relire un README depuis YAML
+Installez Outpost dans un nouveau dossier. Enregistrez les deux fichiers YAML ci-dessous dans ce dossier.
 
-Ce tutoriel exécute une commande, puis demande à un agent de relire votre README. Suivez [Installation](../setup/) pour préparer Outpost, l’image `outpost-codex:dev` et l’accès au compte Codex. Le dépôt Git doit contenir un README commité.
+```sh
+npm install @elie-laloum/outpost
+```
 
-Enregistrez les deux fichiers suivants dans le dépôt. La recette décrit le travail partageable ; `outpost.yaml` choisit son exécution sur votre machine. Leurs champs `version` correspondent à deux formats différents et peuvent donc différer.
+## 2. Décrire le travail
 
-## Déclarer les deux étapes
-
-La commande vérifie Node.js dans la sandbox. L’agent démarre uniquement après sa réussite. Le sujet de la revue peut être choisi au lancement.
+`recipe.yaml` contient les tâches. `after: [write]` fait attendre la seconde commande jusqu’à la fin de la première ; elles utilisent le même répertoire de travail.
 
 ```yaml title="recipe.yaml"
-version: 2
-name: readme-review
-inputs:
-  focus:
-    type: string
-    description: What the review should focus on.
-    default: setup instructions
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe.schema.json
+version: 3
+name: hello-files
 tasks:
-  - key: environment
+  - key: write
     command:
       executable: node
-      arguments: [-p, process.version]
-  - key: review
-    after: [environment]
-    agent: coder
-    brief: "Review the README {{ inputs.focus }}. Report findings without editing files."
+      arguments:
+        - -e
+        - "require('node:fs').writeFileSync('hello.txt', 'Hello from Outpost!')"
+  - key: read
+    after: [write]
+    command:
+      executable: node
+      arguments: [-p, "require('node:fs').readFileSync('hello.txt', 'utf8')"]
 ```
 
-## Choisir le dépôt et l’agent
+## 3. Choisir où l’exécuter
 
-La configuration utilise l’image construite pendant l’installation. `repository: .` est relatif au dossier du fichier de configuration. La branche nommée sépare le travail du dépôt courant ; choisissez un nouveau nom pour une revue indépendante.
+`outpost.yaml` sélectionne un workspace temporaire vide et une exécution locale. Les commandes s’exécutent sur votre machine avec vos permissions ; `local` ne fournit aucune isolation. `ephemeral` décrit les fichiers de travail, pas une protection de la machine.
 
 ```yaml title="outpost.yaml"
-version: 1
-repository: .
+# yaml-language-server: $schema=https://elie-laloum.github.io/outpost/schemas/recipe-configuration.schema.json
+version: 3
+workspace:
+  kind: ephemeral
 sandbox:
-  provider: docker
-  image: outpost-codex:dev
-branch:
-  mode: named
-  name: outpost/recipe-review
-agents:
-  coder:
-    harness: codex
-    authentication: account
+  provider: local
 ```
 
-L’accès au compte est déclaré sur le harness. Pour une facturation API ou un autre environnement, consultez [Configurer l’exécution](../recipe-configuration/). Gardez les secrets dans la configuration locale, par nom de variable déclaré, jamais dans les paramètres de la recette partagée.
+Utilisez la **version 3 dans les deux fichiers** pour suivre ces guides. Leurs versions désignent deux formats YAML distincts, pas la version du paquet installé. Les commentaires de schéma activent les suggestions dans les éditeurs équipés d’un serveur de langage YAML.
 
-## Valider, lancer et examiner
+## 4. Exécuter et vérifier
 
-Depuis le dossier des deux fichiers, validez les déclarations avant toute allocation, puis demandez un rapport JSON final :
+Validez les fichiers, puis exécutez la recette avec un rapport final JSON. La validation ne lance aucune commande et n’alloue aucune sandbox.
 
 ```sh
 npx outpost recipe validate --file recipe.yaml --config outpost.yaml
-npx outpost recipe run --file recipe.yaml --config outpost.yaml \
-  --input 'focus=setup instructions' --json
+npx outpost recipe run --file recipe.yaml --config outpost.yaml --json
 ```
 
-La validation contrôle les déclarations et références ; elle ne teste pas les identifiants et n’exécute aucune commande. Le rapport contient la sortie de Node.js, la réponse de l’agent, la consommation et les informations du workspace. Il paraît après le nettoyage. Sans `--json` ni sorties configurées, une exécution réussie reste silencieuse.
+Dans le rapport, `outputs.read.stdout` contient `Hello from Outpost!`. Le workspace est temporaire : `hello.txt` n’est pas créé à côté des fichiers YAML. Sans `--json` ni rapport configuré, une exécution réussie reste silencieuse.
 
-Demander à l’agent de ne rien modifier ne restreint pas ses accès. Examinez la branche nommée si des changements ont été produits ; cette configuration ne l’intègre pas. Une commande échouée bloque les tâches dépendantes. Un échec ou une annulation conserve le travail pour la [récupération](../recovery/).
+## Continuer
 
-## Adapter la recette
+| Vous voulez…                                                          | Consultez…                                          |
+| --------------------------------------------------------------------- | --------------------------------------------------- |
+| Conserver les fichiers, copier un dossier ou utiliser une branche Git | [Choisir un workspace](../recipe-workspaces/)       |
+| Ajouter un agent ou passer à Docker                                   | [Configurer l’exécution](../recipe-configuration/)  |
+| Transmettre des paramètres et des résultats                           | [Composer les étapes](../recipe-workflows/)         |
+| Voir la progression et les résultats                                  | [Suivre une exécution](../recipe-observation/)      |
+| Attendre une approbation puis reprendre                               | [Enregistrer la progression](../recipe-durability/) |
 
-- [Transmettre les résultats](../recipe-workflows/) : Utiliser paramètres, conditions et valeurs structurées.
-- [Configurer l’exécution](../recipe-configuration/) : Choisir identifiants, fournisseurs, schémas d’éditeur et rapports.
-- [Enregistrer et reprendre](../recipe-durability/) : Ajouter checkpoints et questions humaines.
-- [Trouver une autre recette](../sharing-recipes/) : Examiner le travail téléchargé avant de l’exécuter.
-- [Utiliser du TypeScript local](../recipe-extensions/) : Relier des fonctions de confiance ou appeler le moteur depuis le code.
+La [référence CLI des recettes](../recipe-cli/) décrit les commandes et leurs options.
 
-La [référence CLI](../recipe-cli/#outpost-recipe-run) décrit les options et codes de sortie. [defineRecipe](../../reference/definerecipe/) décrit la déclaration compilée.
+<!-- Retained section anchors for existing bookmarks. -->
 
+<span id="relire-un-readme-depuis-yaml"></span>
+<span id="déclarer-les-deux-étapes"></span>
+<span id="choisir-le-dépôt-et-lagent"></span>
+<span id="valider-lancer-et-examiner"></span>
+<span id="adapter-la-recette"></span>
+<span id="créer-une-recette"></span>
+<span id="déclarer-les-paramètres-et-les-étapes"></span>
+<span id="exécuter-et-inspecter-le-résultat"></span>
 <span id="activer-les-suggestions-de-léditeur"></span>
 <span id="configurer-lexécution-une-fois"></span>
 <span id="déclarer-lobservation-et-les-rapports-finaux"></span>
@@ -90,12 +90,9 @@ La [référence CLI](../recipe-cli/#outpost-recipe-run) décrit les options et c
 <span id="sélectionner-les-secrets-avant-allocation"></span>
 <span id="exécuter-le-harness-outpost-depuis-le-yaml"></span>
 <span id="workspaces-de-fichiers"></span>
-
 <span id="réutiliser-le-résultat-dune-étape"></span>
-
 <span id="utiliser-le-moteur-en-typescript"></span>
 <span id="réutiliser-des-objets-observateurs-locaux"></span>
 <span id="brancher-des-callbacks-typés-locaux"></span>
-
 <span id="trouver-et-télécharger-des-recettes"></span>
 <span id="contribuer-et-tester-une-recette"></span>

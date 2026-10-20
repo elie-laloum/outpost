@@ -1,32 +1,31 @@
 ---
-title: Durable YAML recipes
-description: Persist recipe work, request human input and resume by run ID.
+title: "Save and resume a recipe"
+description: "Persist progress, pause for approval and resume without replaying completed tasks."
 ---
 
-Use this guide after [running a YAML recipe](../yaml-recipes/). Choose a persistent storage location and a stable run ID before starting work; later status, answer and resume commands must refer to that same run.
+This example saves evidence, waits for approval and then records acceptance. It needs only the [installed package](../yaml-recipes/): no Git, sandbox or agent. Save these two complete files together.
 
-Format-3 recipes use the existing workflow checkpoint engine. Declare storage in the required local configuration, then select it from the shareable recipe. A paused execution releases its sandbox and retains its Git workspaces, completed task outputs, conversations and cumulative usage. [Recipe workflows](../recipe-workflows/) explains task composition.
+## Store progress
 
-## Configure persistent storage
+The local transport keeps checkpoints under `.outpost/state`. Later commands must use the same configuration and run ID. The YAML format is version 3; checkpoint `version: "1"` below is a separate identity you choose for the workflow.
 
-A local transport stores state on the host. An S3 transport can replace it through `type: s3` and its native options; declared SDK clients remain local extensions. `stores` contains checkpoint stores, `caches` contains task caches, and `artifactStores` stores artifact content. Each accepts a transport reference. See [transports](../object-storage/) for storage ownership and remote validation limits.
-
-```yaml title="outpost.yaml — storage"
-version: 2
-repository: ./repository
-sandbox: { provider: local }
-branch: { mode: integrate }
+```yaml title="outpost.yaml"
+version: 3
 transports:
-  state: { type: local, directory: ./.outpost/state }
+  state:
+    type: local
+    directory: ./.outpost/state
 stores:
   checkpoint:
     type: transport
     transporter: { $ref: transports.state }
 ```
 
-Choose a stable run ID and checkpoint version. `recipe run --run-id` can override the ID for a new execution; an existing ID requires `recipe resume`. The runtime adds a digest of the recipe, inputs, relevant configuration and extension versions to the checkpoint identity. Resolved secrets are excluded. Reports and observation declarations can change between invocations.
+## Pause at an approval
 
-```yaml title="recipe.yaml — checkpoint"
+`evidence` completes before the approval gate opens. The `accepted` task runs only after approval. The checkpoint keeps completed results and cumulative usage.
+
+```yaml title="recipe.yaml"
 version: 3
 name: reviewed-change
 workflow:
@@ -35,83 +34,68 @@ workflow:
     runId: reviewed-change
     version: "1"
 tasks:
+  - key: evidence
+    value: { summary: Ready for review }
   - key: review
+    after: [evidence]
     gate:
       kind: approval
-      prompt: Accept the change?
+      prompt: Accept this evidence?
       actors: [maintainer]
+  - key: accepted
+    after: [review]
+    value: { approved: true }
 ```
 
-## Inspect and resume
+## Inspect, then resume
 
-Apart from terminal dialogue prompts, a successful run or resume stays silent unless you declare reports or request `--json`. Status is an explicit consultation and always prints its result. A paused or waiting invocation returns a nonzero CLI exit status; inspect its final report to distinguish the state from a failure. Completed tasks are not replayed.
+The first command uses `--json`, so it leaves the gate pending and returns a nonzero exit status with a waiting report. `status` reads saved progress. Run the last command in a terminal to see the evidence and approve with a reason; it does not rerun `evidence`.
 
 ```sh
-outpost recipe run --file recipe.yaml --config outpost.yaml --json
-outpost recipe status --file recipe.yaml --config outpost.yaml \
-  --run-id reviewed-change --json
-outpost recipe resume --file recipe.yaml --config outpost.yaml \
-  --run-id reviewed-change --json
+npx outpost recipe run --file recipe.yaml --config outpost.yaml --json
+npx outpost recipe status --file recipe.yaml --config outpost.yaml   --run-id reviewed-change --json
+npx outpost recipe resume --file recipe.yaml --config outpost.yaml   --run-id reviewed-change --interactive
 ```
 
-Shared and isolated durable sandboxes use runtime-owned workspaces. On resume, Outpost checks the recorded repository, directory, branch, Git metadata and original diff baseline before execution. Missing or changed workspaces are refused. Providers must be able to open a fresh sandbox over that retained host workspace; filesystem synchronization preserves the files supported by the provider's existing transfer contract. Borrowed workspaces cannot be restored automatically. Interactive tasks use their native named-workspace and portable-conversation requirements.
+Leaving the gate pending is the default. For headless decisions, signed approvals or agent questions, follow [human interaction](../recipe-dialogue/).
 
-Interrupted tasks require `resume --retry-incomplete`. After a coordinator crash, first stop the previous coordinator and inspect the checkpoint. `--recover-revision <revision>` explicitly clears its owner only if that revision still matches; it does not recover Git locks or authorize task replay. Resolve retained workspace locks through the existing [recovery procedures](../recovery/). Heartbeat expiry alone authorizes neither action. An allocation interrupted before its workspace record was saved requires explicit recovery; the runtime never creates an empty replacement.
+Use `recipe run --run-id another-run` for a new execution. Use `resume` for an existing ID. Changes to recipe inputs or execution identity are refused; observation and report settings may change.
 
-## Submit human decisions and answers
+## Retain working files
 
-`recipe decide --decision decision.json` resumes with one native [WorkflowDecision](../../reference/workflowdecision/). Copy the execution, task and request IDs from the paused report; supply a trusted authorized actor and a reason. For signed gates, include the original signature proof and configure `workflow.decisionVerifier` with an `ed25519` verifier referencing a local approver-key callback. The engine verifies actor, request, expiry and signature before changing state.
+For command or agent tasks, add a [workspace and sandbox](../recipe-workspaces/) to `outpost.yaml`. Checkpoints retain the original workspace and verify it before resuming; a missing workspace is not silently replaced. File snapshots are conserved before a settled checkpoint. Mounted sources must remain available.
 
-```sh
-outpost recipe decide --file recipe.yaml --config outpost.yaml \
-  --run-id reviewed-change --decision decision.json --json
-```
+Git workspaces retain their branch and diff baseline. File workspaces use configuration 3 with `runtime.directory`, `runtime.namespace` and optional retention settings; see [file restoration](../resuming-file-workspaces/). Borrowed workspaces cannot be restored automatically.
 
-An `interactive` task accepts [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) except its key and dependencies. Its agent must support portable capture and resume. `recipe answer --answer answer.json` submits one native [WorkflowAnswer](../../reference/workflowanswer/) containing the execution, task, request, actor and answer value. Accepted answers and completed turns persist between processes.
+## Recover an interrupted run
 
-```yaml title="recipe.yaml — interactive task"
-- key: clarify
-  interactive:
-    repository: ./repository
-    sandboxProvider: { $ref: sandboxProviders.container }
-    agent: { $ref: agents.interviewer }
-    brief: Clarify the requested change before implementing it.
-    actors: [maintainer]
-```
+A normal pause needs only `resume`. After a crash, stop the previous coordinator and inspect the saved state before choosing recovery.
 
-## Answer directly in the terminal
+| Saved state                                        | Required action                                           |
+| -------------------------------------------------- | --------------------------------------------------------- |
+| Completed tasks and a pending gate                 | Resume or submit a decision                               |
+| An interrupted task                                | `resume --retry-incomplete` explicitly authorizes replay  |
+| Checkpoint still owned by an abandoned coordinator | `--recover-revision <revision>` after verifying ownership |
+| A retained workspace lock                          | Follow [lock recovery](../recovery/) separately           |
 
-Run and resume display pending questions automatically when stdin and stderr are terminals. The CLI collects each answer and resumes the workflow using its saved request IDs, conversation and workspace. No custom runner or answer file is needed. A single declared actor is selected automatically; multiple actors offer a choice. See the [CLI flags](../recipe-cli/#outpost-recipe-run) to choose an actor explicitly.
+Ownership recovery does not authorize task replay. Heartbeat expiry authorizes neither. [CLI reference](../recipe-cli/) documents the flags.
 
-```sh
-outpost recipe run --file recipe.yaml --config outpost.yaml
-# After cancelling at a question:
-outpost recipe resume --file recipe.yaml --config outpost.yaml \
-  --run-id reviewed-change
-```
+## Add caches, artifacts or quota pauses
 
-Ctrl+C leaves the question persisted and releases checkpoint ownership. Resume presents it again without replaying completed turns. Unsigned gates also display their saved dependency outputs and collect an explicit approval, resumption or rejection with a reason. Leave pending is the default. Signed gates require the existing `decide` command and original proof; all native actor and signature checks remain enforced.
+| Need                       | YAML integration                                        |
+| -------------------------- | ------------------------------------------------------- |
+| Reuse a task's JSON result | `options.cache`, a named cache store and a key callback |
+| Preserve an artifact       | `artifact` with a store, contract and `data` expression |
+| Wait after a quota limit   | `onQuota: { action: pause }` with cumulative budgets    |
+| Track execution by ID      | A `run` observation sink backed by a transport          |
 
-The offline example in `examples/72-recipe-cli-dialogue/` asks for a name and passes it to the next step. Run its YAML files with `outpost recipe run --file examples/72-recipe-cli-dialogue/recipe.yaml --config examples/72-recipe-cli-dialogue/outpost.yaml` after building the local CLI.
+Use the [component reference](../yaml-components/) for declarations and [extensions](../recipe-extensions/) for callbacks. Cache hits do not replay effects. Continuing an agent after quota requires a captured conversation and supported restoration. The checkpoint is authoritative; observation failures do not change the outcome.
 
-For automation or an HTTP client, use `--no-interactive` or `--json`, inspect `inputRequests` in the report and submit `recipe answer --answer answer.json`. The HTTP application authenticates its caller and supplies an authorized actor; a submitted actor name alone is not authentication. `--interactive --json` explicitly combines terminal questions on stderr with one final JSON report on stdout.
+<!-- Retained section anchors for existing bookmarks. -->
 
-## Keep artifacts, caches and quota accounting
-
-An `artifact` action selects a named artifact store and contract; `data` builds its JSON value. JSON contracts declare `jsonSchema`, with an optional local validator. A `binary` contract uses a local `produce` callback. Outputs contain artifact references and lineage, so dependent tasks can retain provenance without embedding bytes in checkpoints. `examples/69-recipe-durability/` runs an offline approval and artifact scenario across processes.
-
-```yaml title="recipe.yaml — artifact"
-- key: evidence
-  artifact:
-    store: { $ref: artifactStores.results }
-    contract: { $ref: artifacts.evidence }
-  data: { checked: true, files: [src/index.ts] }
-```
-
-Task `options.cache` uses the native cache contract and a declared key callback. Cache hits consume no attempt or usage and cannot replay effects. Workflow budgets and `onQuota: { action: pause }` retain cumulative native accounting. Agent and isolated tasks can declare `quotaResume: continue` or `restart`; continuation requires a captured conversation and supported restoration.
-
-A `run` observation sink persists the shared hub's execution projection. Declare its `transporter`, `id` and `kind: workflow`; set `resume: true` only for a settled projection being resumed. Use a new observation ID after explicit recovery of an unsettled coordinator. The checkpoint remains the execution authority; sink errors do not change outcomes. Tests cover local Git, process interruption, signed decisions, dialogues, caches and artifacts without paid calls. Live cloud/S3 restoration remains unvalidated.
-
-## File workspaces
-
-Configuration 3 checkpoints record versioned file workspace descriptions alongside progress. Synchronization and verified snapshot conservation precede a settled checkpoint; usage writes do not copy active files. Mounted source availability is still required during portable restoration. See [file workspaces](../workspaces/).
+<span id="configure-persistent-storage"></span>
+<span id="inspect-and-resume"></span>
+<span id="submit-human-decisions-and-answers"></span>
+<span id="answer-directly-in-the-terminal"></span>
+<span id="keep-artifacts-caches-and-quota-accounting"></span>
+<span id="file-workspaces"></span>
