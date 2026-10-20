@@ -38,15 +38,16 @@ Directory and ephemeral workspaces run commands and compatible harnesses without
 
 You need **Node.js 24+**, **Git**, a repository with a committed README, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [Codex guide](https://elie-laloum.github.io/outpost/guide/codex/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
 
-Install the package, then build the agent image in a dedicated directory:
+Install the package, then write and build the official Codex image:
 
 ```sh
 npm install @elie-laloum/outpost
 npm pkg set type=module
-npx outpost init --yes --directory .outpost-image --image outpost:dev
+npx outpost image eject --image codex --directory images/codex
+npx outpost image build --directory images/codex --tag outpost-codex:dev
 ```
 
-The first build downloads the agent CLIs. The image directory also receives example workflow files; write your own script as shown below. See [agent images](https://elie-laloum.github.io/outpost/guide/agent-images/) to add project tools or use Podman.
+The first build downloads the Codex CLI. Each agent has its own image, plus `harness` for the built-in agent loop; run `npx outpost image list`. See [agent images](https://elie-laloum.github.io/outpost/guide/agent-images/) to add project tools or use Podman.
 
 ## Write a TypeScript script
 
@@ -65,7 +66,7 @@ const result = await dispatch({
   agent: createAgent({
     harness: createCodexHarness({ authentication: "account" }),
   }),
-  sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
+  sandboxProvider: createDockerSandboxProvider({ image: "outpost-codex:dev" }),
   branch: { mode: "named", name: "outpost/readme-review" },
   brief: {
     text: "Review the README setup instructions. Report problems or say none were found. Do not edit files.",

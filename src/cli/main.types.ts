@@ -1,4 +1,4 @@
-import type { cliOptions } from "./main.constants.ts";
+import type { cliOptions, commandOptions } from "./main.constants.ts";
 
 export type CliValues = {
   readonly [
@@ -14,3 +14,9 @@ export interface CliInvocation {
   readonly positionals: readonly string[];
 }
 export type CliCommand = (invocation: CliInvocation) => Promise<void>;
+export type CommandDefinition =
+  (typeof commandOptions)[keyof typeof commandOptions];
+export interface CliOptionConfiguration {
+  readonly type: string;
+  readonly description: string;
+}

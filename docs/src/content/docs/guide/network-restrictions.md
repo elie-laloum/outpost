@@ -90,7 +90,7 @@ Use a domain for web access and a CIDR for direct TCP/UDP access. This example g
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   egress: {
     mode: "allowlist",
     domains: ["registry.npmjs.org"],
@@ -120,7 +120,7 @@ The source example in `examples/73-container-egress/` runs two agents with the s
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   egress: { mode: "deny-all" },
 });
 ```

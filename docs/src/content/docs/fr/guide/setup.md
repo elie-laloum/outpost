@@ -23,13 +23,14 @@ npm pkg set type=module
 
 ## Construire l’image des agents
 
-Préparez les outils une seule fois dans un dossier dédié. La première construction télécharge les CLI des agents et peut prendre plusieurs minutes.
+Écrivez la recette officielle de l’image Codex dans un dossier dédié, puis construisez-la pour votre utilisateur. La première construction télécharge la CLI Codex et peut prendre plusieurs minutes.
 
 ```sh
-npx outpost init --yes --directory .outpost-image --image outpost:dev
+npx outpost image eject --image codex --directory images/codex
+npx outpost image build --directory images/codex --tag outpost-codex:dev
 ```
 
-Attendez la réussite de la construction. `init` crée aussi des exemples de workflow dans `.outpost-image` ; ce tutoriel utilise le script que vous allez écrire. Pour ajouter les outils du projet ou utiliser Podman, consultez [Construire une image d’agent](../agent-images/).
+Attendez la réussite de la construction. Commitez `images/codex` avec vos scripts si vous voulez la réutiliser ou la personnaliser. Pour ajouter les outils du projet, utiliser un autre agent ou Podman, consultez [Images d’agent](../agent-images/).
 
 ## Préparer l’accès à l’agent
 
@@ -47,7 +48,7 @@ export const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
 });
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
 });
 export const repository = "/absolute/path/to/your-repository";
 ```
@@ -59,7 +60,7 @@ Enregistrez ensuite chaque onglet de code sous le nom indiqué, à côté de cet
 Lancez les contrôles locaux avant un appel au modèle :
 
 ```sh
-npx outpost doctor --image outpost:dev
+npx outpost doctor --image outpost-codex:dev
 ```
 
 Corrigez les lignes `FAIL` à l’aide du guide [Diagnostic](../diagnostics/). `doctor` vérifie les outils et l’image, pas votre connexion ni l’accès au modèle. Vous pouvez maintenant lancer [votre première tâche](../first-request/) ou [votre première recette YAML](../yaml-recipes/).

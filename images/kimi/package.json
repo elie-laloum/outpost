@@ -1,0 +1,8 @@
+{
+  "name": "outpost-kimi-image",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@moonshot-ai/kimi-code": "2.1.1"
+  }
+}

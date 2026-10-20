@@ -14,7 +14,7 @@ version: 2
 repository: .
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-codex:dev
 observation:
   sinks:
     - type: console

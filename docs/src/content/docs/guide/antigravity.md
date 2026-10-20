@@ -20,8 +20,8 @@ The installer supports Linux amd64 and arm64 (glibc and musl) and macOS Intel an
 Check the installed version against the pinned one:
 
 ```sh
-npx outpost doctor --agent antigravity --image outpost:dev
-npx outpost doctor --agent antigravity --sandbox-provider local
+npx outpost doctor --agent antigravity --image outpost-antigravity:dev
+npx outpost doctor --agent antigravity --provider local
 ```
 
 `doctor` warns when the versions differ. It does not verify the binary’s checksum or test sign-in.

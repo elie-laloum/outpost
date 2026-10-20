@@ -25,17 +25,17 @@ outpost recovery inspect [--repository PATH | --runtime-directory PATH] [--max-e
 
 Il ne modifie rien. Il sort avec `1` quand l’inventaire est partiel.
 
-## `outpost recovery verify`
+## `outpost recovery transfer verify`
 
 Vérifiez un transfert conservé avant de le restaurer. Vous pouvez comparer les sommes de contrôle et tester l’application de ses patchs dans un clone temporaire.
 
 ```sh
-outpost recovery verify --directory TRANSFER [--checksums [--max-bytes N]] [--restorability --repository PATH] [--json]
+outpost recovery transfer verify --path TRANSFER [--checksums [--max-bytes N]] [--restorability --repository PATH] [--json]
 ```
 
 | Option            | Par défaut | Valeurs et effet                                                             |
 | ----------------- | ---------- | ---------------------------------------------------------------------------- |
-| `--directory`     | Requis     | Répertoire du transfert conservé.                                            |
+| `--path`          | Requis     | Répertoire du transfert conservé.                                            |
 | `--checksums`     | Désactivé  | Compare les fichiers au manifeste de sommes de contrôle du transfert.        |
 | `--max-bytes`     | 1 Gio      | Octets vérifiés par `--checksums`, qu’il requiert.                           |
 | `--restorability` | Désactivé  | Applique les patchs du transfert dans un clone temporaire de `--repository`. |
@@ -44,17 +44,17 @@ outpost recovery verify --directory TRANSFER [--checksums [--max-bytes N]] [--re
 
 Il ne modifie aucun fichier. Il sort avec `1` quand un contrôle échoue ou reste incomplet.
 
-## `outpost recovery restore`
+## `outpost recovery transfer restore`
 
 Restaurez l’état sauvegardé de la machine ou les modifications reçues de la sandbox dans un nouveau répertoire. Consultez d’abord le plan, puis ajoutez `--apply` lorsque vous êtes prêt à créer la copie.
 
 ```sh
-outpost recovery restore --directory TRANSFER --repository PATH --destination NEW_PATH --side previous|incoming [--max-bytes N] [--apply] [--json]
+outpost recovery transfer restore --path TRANSFER --repository PATH --destination NEW_PATH --side previous|incoming [--max-bytes N] [--apply] [--json]
 ```
 
 | Option          | Par défaut | Valeurs et effet                                                                               |
 | --------------- | ---------- | ---------------------------------------------------------------------------------------------- |
-| `--directory`   | Requis     | Répertoire du transfert conservé.                                                              |
+| `--path`        | Requis     | Répertoire du transfert conservé.                                                              |
 | `--repository`  | Requis     | Checkout auquel appartient le transfert.                                                       |
 | `--destination` | Requis     | Nouveau répertoire hors du dépôt ; il ne doit pas exister.                                     |
 | `--side`        | Requis     | `previous` (état de l’hôte avant synchronisation) ou `incoming` (modifications de la sandbox). |
@@ -112,5 +112,5 @@ Ces commandes inspectent le verrou de coordination des chemins locaux puis libè
 
 ```sh
 outpost recovery registry inspect --json
-outpost recovery registry recover --revision REVISION --processes-stopped --json
+outpost recovery registry release --revision REVISION --processes-stopped --json
 ```

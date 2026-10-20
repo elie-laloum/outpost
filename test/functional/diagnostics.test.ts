@@ -274,31 +274,6 @@ test("remote provisioning bounds uploads and retries only transient Git setup fa
   assert.equal(permanent, 1);
 });
 
-test("scaffolding falls back for malformed metadata and detects the package manager", async (t) => {
-  const { initialize } = await import("../../src/cli/scaffold.ts");
-  const root = await repository(t),
-    malformed = join(root, "malformed"),
-    unknown = join(root, "unknown");
-  await mkdir(malformed);
-  await mkdir(unknown);
-  await writeFile(join(malformed, "package.json"), "{broken");
-  assert.equal((await initialize({ directory: malformed })).run, "node run.ts");
-  await writeFile(
-    join(unknown, "package.json"),
-    '{"packageManager":"other@1"}',
-  );
-  await writeFile(join(unknown, "pnpm-lock.yaml"), "");
-  const commands: string[] = [];
-  await initialize(
-    { directory: unknown, sandboxProvider: "docker", install: true },
-    async (command) => {
-      commands.push(command.executable + " " + command.arguments?.join(" "));
-      return { status: 0, stdout: "", stderr: "" };
-    },
-  );
-  assert.match(commands[0]!, /pnpm/);
-});
-
 test("local elevated commands run as the current account without escalation", async (t) => {
   const root = await repository(t);
   const box = await createSandbox({

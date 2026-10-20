@@ -8,7 +8,7 @@ await doctorCommand(
   {
     positionals: ["doctor"],
     values: {
-      sandboxProvider,
+      provider: sandboxProvider,
       agent: "codex",
       image: "outpost-ci:latest",
       json: true,

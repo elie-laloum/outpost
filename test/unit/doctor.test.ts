@@ -191,7 +191,7 @@ test("doctor formats human and JSON reports and reserves failure exit status for
   await doctorCommand(
     {
       positionals: ["doctor"],
-      values: { sandboxProvider: "vercel", agent: "claude" },
+      values: { provider: "vercel", agent: "claude" },
     },
     available,
     write,
@@ -201,7 +201,7 @@ test("doctor formats human and JSON reports and reserves failure exit status for
   await doctorCommand(
     {
       positionals: ["doctor"],
-      values: { sandboxProvider: "local", json: true },
+      values: { provider: "local", json: true },
     },
     available,
     write,

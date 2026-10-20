@@ -253,7 +253,7 @@ Ajoutez des fixtures pour les échecs, et vérifiez que `quota()` ne reconnaît 
 ## Limites
 
 - Le bootstrap distant n’installe que les CLI intégrées. Installez la vôtre dans l’image de chaque fournisseur utilisé.
-- `outpost init`, `outpost doctor` et `diagnoseAgentProtocol()` ne connaissent que les agents intégrés.
+- `outpost doctor`, `outpost image` et `diagnoseAgentProtocol()` ne connaissent que les agents intégrés.
 - Une ligne de stdout contient au plus 16 Mio ; une ligne plus longue fait échouer le tour.
 
 API : [createAgent](../../reference/createagent/) · [CliHarness](../../reference/cliharness/) · [AgentAdapter](../../reference/agentadapter/) · [AgentInput](../../reference/agentinput/) · [AgentEvent](../../reference/agentevent/) · [AgentLiveInput](../../reference/agentliveinput/) · [Usage](../../reference/usage/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/).

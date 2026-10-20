@@ -14,7 +14,7 @@ description: "Configure local containers, repository mounts and the user that ru
 Before running a task, check that the container engine responds and the agent image is available:
 
 ```sh
-npx outpost doctor --sandbox-provider docker --image outpost:dev
+npx outpost doctor --provider docker --image outpost-codex:dev
 ```
 
 ## Configure
@@ -25,7 +25,7 @@ Both providers take the same options. Pass the provider to `dispatch()`, `create
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   cpus: 2,
   memoryMb: 4096,
 });
@@ -35,7 +35,7 @@ export const sandboxProvider = createDockerSandboxProvider({
 import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 export const sandboxProvider = createPodmanSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   cpus: 2,
   memoryMb: 4096,
 });
@@ -61,7 +61,7 @@ To expose more host paths, add `volumes`. A relative `source` starts from the re
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   volumes: [{ source: "~/datasets", target: "/data", readOnly: true }],
 });
 ```
@@ -76,7 +76,7 @@ On SELinux hosts, keep the default `label: "z"` when mounts are shared by contai
 
 API reference: [ContainerOptions](../../reference/containeroptions/).
 
-`outpost init --sandbox-provider podman` writes a `Containerfile` instead of a `Dockerfile`.
+`outpost image eject --engine podman` writes a `Containerfile` instead of a `Dockerfile`.
 
 ## Limits
 

@@ -1,7 +1,0 @@
-node_modules/
-.env
-.outpost/workspaces/
-.outpost/locks/
-.outpost/recovery/
-.outpost/logs/
-.outpost/storage/

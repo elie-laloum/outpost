@@ -253,7 +253,7 @@ Add fixtures for failures, and check that `quota()` matches only terminal limit 
 ## Limits
 
 - Remote bootstrap installs only built-in CLIs. Install yours in the image of every provider you use.
-- `outpost init`, `outpost doctor` and `diagnoseAgentProtocol()` know only the built-in agents.
+- `outpost doctor`, `outpost image` and `diagnoseAgentProtocol()` know only the built-in agents.
 - One stdout line holds at most 16 MiB; a longer line fails the turn.
 
 API: [createAgent](../../reference/createagent/) · [CliHarness](../../reference/cliharness/) · [AgentAdapter](../../reference/agentadapter/) · [AgentInput](../../reference/agentinput/) · [AgentEvent](../../reference/agentevent/) · [AgentLiveInput](../../reference/agentliveinput/) · [Usage](../../reference/usage/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/).

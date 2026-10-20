@@ -97,7 +97,9 @@
     "recipe.schema.json",
     "recipe-configuration.schema.json",
     "recipes/*.yaml",
-    "recipes/catalog.json"
+    "recipes/catalog.json",
+    "images/*/package.json",
+    "images/*/package-lock.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

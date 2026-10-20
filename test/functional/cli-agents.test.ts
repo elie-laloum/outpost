@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { test } from "node:test";
 import { builtInAgentRecord } from "../../src/adapters/agents/catalog.ts";
-import { initialize } from "../../src/cli/scaffold.ts";
 import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import {
   createAntigravityHarness,
@@ -132,40 +129,4 @@ test("final-event agents reject truncated or failed turns while keeping the sand
   });
   assert.equal(result.completed, true);
   assert.equal(result.text, done);
-});
-
-test("new agents scaffold their harness, image installation and declared API keys", async (t) => {
-  const root = await repository(t);
-  for (const [agent, authentication, declared, model] of [
-    ["antigravity", "usage", "GEMINI_API_KEY=\n", undefined],
-    ["copilot", "account-token", "COPILOT_GITHUB_TOKEN=\n", undefined],
-    ["kimi", "usage", "KIMI_API_KEY=\n", "fixture-model"],
-  ] as const) {
-    const directory = join(root, agent);
-    await initialize({
-      directory,
-      agent,
-      authentication,
-      sandboxProvider: "docker",
-      build: false,
-      ...(model ? { model } : {}),
-    });
-    assert.match(
-      await readFile(join(directory, "run.ts"), "utf8"),
-      new RegExp(`harness: create${agent}Harness`, "i"),
-    );
-    assert.equal(
-      await readFile(join(directory, ".env.example"), "utf8"),
-      declared,
-    );
-    const recipe = await readFile(join(directory, "Dockerfile"), "utf8");
-    assert.match(recipe, /@github\/copilot@1\.0\.88/);
-    assert.match(recipe, /@moonshot-ai\/kimi-code@2\.1\.1/);
-    assert.doesNotMatch(recipe, /gemini-cli/);
-    assert.match(recipe, /antigravity-cli\/1\.2\.12-/);
-    assert.match(recipe, /sha512sum/);
-    assert.match(recipe, /ENV AGY_CLI_DISABLE_AUTO_UPDATE=true/);
-    assert.doesNotMatch(recipe, /install\.sh/);
-    assert.match(recipe, /^ENV XDG_CACHE_HOME=\/tmp\/\.cache$/m);
-  }
 });

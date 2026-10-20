@@ -82,7 +82,7 @@ Harden the sandbox first. This Docker provider keeps your Git metadata out of th
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   repositoryMode: "isolated",
   egress: { mode: "deny-all" },
 });

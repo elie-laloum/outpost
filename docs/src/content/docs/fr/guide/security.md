@@ -82,7 +82,7 @@ Durcissez d’abord la sandbox. Ce fournisseur Docker garde vos métadonnées Gi
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   repositoryMode: "isolated",
   egress: { mode: "deny-all" },
 });

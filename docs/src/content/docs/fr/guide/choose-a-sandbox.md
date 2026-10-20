@@ -29,7 +29,7 @@ const result = await dispatch({
   agent: coder,
   repository,
   branch: { mode: "named", name: "outpost/readme-review" },
-  sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
+  sandboxProvider: createDockerSandboxProvider({ image: "outpost-codex:dev" }),
   brief: { text: "Fix the broken links in the README and commit the change." },
 });
 console.log(result.branch, result.commits.length);

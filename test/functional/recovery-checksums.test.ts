@@ -279,7 +279,15 @@ test("checksum CLI exposes explicit results, budget failures and argument valida
   const run = (args: string[]) =>
     executeProcess({
       executable: process.execPath,
-      arguments: [cli, "recovery", "verify", "--directory", path, ...args],
+      arguments: [
+        cli,
+        "recovery",
+        "transfer",
+        "verify",
+        "--path",
+        path,
+        ...args,
+      ],
     });
   const success = await run(["--checksums", "--json"]);
   assert.equal(success.status, 0, success.stderr);

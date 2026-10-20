@@ -10,7 +10,7 @@ description: "Run an Outpost script in a CI job and keep the results you need af
 - **Node.js 24+**: Runs Outpost and your scripts.
 - **Git history**: A full clone, so the agent can read the history and cloud sandboxes can upload it.
 - **A sandbox**: Docker or Podman on the runner, or the SDK of a [cloud sandbox](../cloud-sandboxes/) and its allocation credentials.
-- **The agent image**: Built in the job from `.outpost-image/Dockerfile`, prepared during [installation](../setup/) and committed with your scripts.
+- **The agent image**: Built in the job from `images/codex/Dockerfile`, ejected during [installation](../setup/) and committed with your scripts.
 - **An unattended credential**: An API key or a dedicated account token, stored as a CI secret.
 - **Your scripts and configuration**: `package.json`, the lockfile, `outpost.config.ts` and your scripts, committed.
 
@@ -51,8 +51,8 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npx outpost image build --directory .outpost-image --image outpost:dev
-      - run: npx outpost doctor --image outpost:dev --json
+      - run: npx outpost image build --directory images/codex --tag outpost-codex:dev
+      - run: npx outpost doctor --image outpost-codex:dev --json
       - run: node review.ts
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -60,7 +60,7 @@ jobs:
 
 Build the image in the job so its user ID matches the runner. The Docker provider refuses an image built for another user ID. If your image recipe is in another directory, adjust `--directory`.
 
-`doctor` exits with status 1 when the engine, the image or the agent CLI is missing ([Diagnostics](../diagnostics/)). It checks Codex on Docker unless you pass `--agent` or `--sandbox-provider`, and it does not test the API key.
+`doctor` exits with status 1 when the engine, the image or the agent CLI is missing ([Diagnostics](../diagnostics/)). It checks Codex on Docker unless you pass `--agent` or `--provider`, and it does not test the API key.
 
 [Fix a failing CI build](../fix-failing-ci/) is a complete script to run this way.
 

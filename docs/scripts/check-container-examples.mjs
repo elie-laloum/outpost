@@ -42,7 +42,7 @@ for (const locale of ["", "fr/"]) {
       /```ts title="outpost\.config\.ts"\n([\s\S]*?)```/,
     )[1];
     config = config.replace(
-      '"outpost:dev"',
+      '"outpost-codex:dev"',
       JSON.stringify(process.env.OUTPOST_DOCS_IMAGE ?? "outpost:docs-demo"),
     );
     assert.ok(config.includes('"/absolute/path/to/your-repository"'));

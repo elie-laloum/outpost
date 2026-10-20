@@ -12,6 +12,15 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+This release reorganizes the CLI around preparing environments and replaces the all-agent image with one image per agent. It removes `outpost init`, so it requires a major version.
+
+- **Breaking:** Remove `outpost init` and the generated workflow projects. Install the package in your own scripts, prepare an image with `outpost image`, and create recipe files with `outpost recipe init`.
+- **Breaking:** Replace the single agent image with official `harness`, `codex`, `claude`, `antigravity`, `copilot` and `kimi` images. Each installs only its CLI, from a committed per-image lockfile, on a digest-pinned `node:24-bookworm-slim` base. `images/agents`, `images/base`, the `Agent images` workflow and `scripts/prepare-agent-image.mjs` are removed; the previously published `ghcr.io/elie-laloum/outpost/agents` image is no longer referenced.
+- Add `outpost image list`, `pull`, `verify` and `eject`. `eject` writes the exact official recipe, lockfiles and `.dockerignore` into the current directory or `--directory` and refuses to overwrite without `--force`. `pull` uses the digest recorded for this release, else the release tag; `verify` checks the GitHub provenance attestation with `gh`. `image build` now takes `--tag` and refuses a directory without a recipe; `image remove` takes the image reference only.
+- Add the `Images` workflow: it ejects, builds and smoke-tests every image on Docker and rootless Podman for Linux amd64 and arm64, publishes multi-architecture manifests tagged with the package version, attests and verifies their provenance, and prints the `scripts/record-images.mjs` command that records the verified digests. No image has been published from this workflow yet; `image list` reports unrecorded digests.
+- Group `outpost --help` by task, describe every command group, add examples to each command and add `-v, --version`. `doctor` accepts official image names and infers their agent. Rename `--sandbox-provider` to `--provider`, `recovery verify|restore --directory` to `recovery transfer verify|restore --path`, and `recovery registry recover` to `recovery registry release`; earlier names remain hidden aliases with a deprecation warning until the next major version.
+- Container CI builds its all-agent test image from the same recipe generator, and also ejects, builds and smoke-tests the `harness` image on both engines.
+
 ## 11.2.0
 
 This release adds Docker/Podman egress companions, typed native lifecycle hooks with agent-profile composition and live-validated native CLI file workspaces, and completes the audit follow-up without breaking existing APIs.

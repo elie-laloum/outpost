@@ -144,7 +144,9 @@ try {
     agent: createAgent({
       harness: createCodexHarness({ authentication: "usage", variables }),
     }),
-    sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
+    sandboxProvider: createDockerSandboxProvider({
+      image: "outpost-codex:dev",
+    }),
     branch: { mode: "named", name: `outpost/secrets-${randomUUID()}` },
     observe: createReporter(),
     brief: {

@@ -11,7 +11,7 @@ description: "Run a command and an agent from two local YAML files."
 
 ## Review a README from YAML
 
-This tutorial runs a command and then asks an agent to review your README. Complete [Installation](../setup/) to prepare Outpost, the `outpost:dev` image and Codex account access. You need a Git repository with a committed README.
+This tutorial runs a command and then asks an agent to review your README. Complete [Installation](../setup/) to prepare Outpost, the `outpost-codex:dev` image and Codex account access. You need a Git repository with a committed README.
 
 Save the following two files in the repository. The recipe describes work you can share; `outpost.yaml` selects how it runs on your machine. Their `version` fields belong to different formats and need not match.
 
@@ -47,7 +47,7 @@ version: 1
 repository: .
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-codex:dev
 branch:
   mode: named
   name: outpost/recipe-review

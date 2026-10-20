@@ -68,7 +68,7 @@ La commande se termine avec le statut 1 quand l’inventaire est incomplet.
 ### Vérifier
 
 ```sh
-npx outpost recovery verify --directory "$TRANSFER" --checksums --restorability --repository /projects/app
+npx outpost recovery transfer verify --path "$TRANSFER" --checksums --restorability --repository /projects/app
 ```
 
 `$TRANSFER` est le dossier indiqué par `details.recovery`. `--checksums` compare chaque fichier au manifeste du transfert ; `--max-bytes` limite les octets hachés. `--restorability` reconstruit les commits et les patches dans un clone temporaire de `--repository`. La commande se termine avec le statut 1 quand un contrôle échoue.
@@ -76,7 +76,7 @@ npx outpost recovery verify --directory "$TRANSFER" --checksums --restorability 
 ### Restaurer
 
 ```sh
-npx outpost recovery restore --directory "$TRANSFER" --repository /projects/app \
+npx outpost recovery transfer restore --path "$TRANSFER" --repository /projects/app \
   --destination /projects/app-recovered --side incoming
 ```
 
@@ -177,7 +177,7 @@ console.log(staging);
 // Example output: /project/.outpost/recovery/run-1
 ```
 
-Conservez `reference` (une clé et une révision) pour retrouver l’archive. Passez `staging` comme `--directory` à `outpost recovery restore`, avec un clone du dépôt source.
+Conservez `reference` (une clé et une révision) pour retrouver l’archive. Passez `staging` comme `--directory` à `outpost recovery transfer restore`, avec un clone du dépôt source.
 
 ## Libérer une exécution ou une course arrêtée
 

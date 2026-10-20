@@ -90,7 +90,7 @@ Utilisez un domaine pour le web et un CIDR pour les connexions TCP/UDP directes.
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   egress: {
     mode: "allowlist",
     domains: ["registry.npmjs.org"],
@@ -120,7 +120,7 @@ L’exemple source dans `examples/73-container-egress/` donne la même tâche Wi
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   egress: { mode: "deny-all" },
 });
 ```

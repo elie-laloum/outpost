@@ -20,8 +20,8 @@ L’installateur prend en charge Linux amd64 et arm64 (glibc et musl) ainsi que 
 Comparez la version installée à la version épinglée :
 
 ```sh
-npx outpost doctor --agent antigravity --image outpost:dev
-npx outpost doctor --agent antigravity --sandbox-provider local
+npx outpost doctor --agent antigravity --image outpost-antigravity:dev
+npx outpost doctor --agent antigravity --provider local
 ```
 
 `doctor` avertit quand les versions diffèrent. Il ne vérifie ni l’empreinte du binaire ni la connexion.

@@ -141,7 +141,7 @@ async function inspectImage(
       id: "image.runtime",
       status: "fail",
       message:
-        "Image diagnostics could not start. Check that the image exists locally, its UID matches the host, and sh, sleep, setsid, kill, tar and cp are installed. No image is downloaded.",
+        "Image diagnostics could not start. Check that the image exists locally (outpost image pull --image NAME), its UID matches the host (otherwise eject and build it), and sh, sleep, setsid, kill, tar and cp are installed. No image is downloaded.",
     });
   } finally {
     if (lease) {

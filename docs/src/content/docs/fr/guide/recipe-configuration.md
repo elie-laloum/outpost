@@ -14,7 +14,7 @@ version: 1
 repository: .
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-codex:dev
 branch:
   mode: named
   name: outpost/recipe-change

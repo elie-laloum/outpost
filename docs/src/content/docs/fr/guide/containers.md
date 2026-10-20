@@ -14,7 +14,7 @@ description: "Configurez les conteneurs locaux, les montages du dépôt et l’u
 Avant de lancer une tâche, vérifiez que le moteur de conteneurs répond et que l’image des agents est disponible :
 
 ```sh
-npx outpost doctor --sandbox-provider docker --image outpost:dev
+npx outpost doctor --provider docker --image outpost-codex:dev
 ```
 
 ## Configurer
@@ -25,7 +25,7 @@ Les deux fournisseurs acceptent les mêmes options. Passez le fournisseur à `di
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   cpus: 2,
   memoryMb: 4096,
 });
@@ -35,7 +35,7 @@ export const sandboxProvider = createDockerSandboxProvider({
 import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 export const sandboxProvider = createPodmanSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   cpus: 2,
   memoryMb: 4096,
 });
@@ -61,7 +61,7 @@ Pour exposer d’autres chemins hôte, ajoutez des `volumes`. Une `source` relat
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   volumes: [{ source: "~/datasets", target: "/data", readOnly: true }],
 });
 ```
@@ -76,7 +76,7 @@ Sur un hôte SELinux, gardez `label: "z"` si plusieurs conteneurs partagent les 
 
 Référence API : [ContainerOptions](../../reference/containeroptions/).
 
-`outpost init --sandbox-provider podman` écrit un `Containerfile` au lieu d’un `Dockerfile`.
+`outpost image eject --engine podman` écrit un `Containerfile` au lieu d’un `Dockerfile`.
 
 ## Limites
 

@@ -11,7 +11,7 @@ description: "Exécuter une commande et un agent depuis deux fichiers YAML locau
 
 ## Relire un README depuis YAML
 
-Ce tutoriel exécute une commande, puis demande à un agent de relire votre README. Suivez [Installation](../setup/) pour préparer Outpost, l’image `outpost:dev` et l’accès au compte Codex. Le dépôt Git doit contenir un README commité.
+Ce tutoriel exécute une commande, puis demande à un agent de relire votre README. Suivez [Installation](../setup/) pour préparer Outpost, l’image `outpost-codex:dev` et l’accès au compte Codex. Le dépôt Git doit contenir un README commité.
 
 Enregistrez les deux fichiers suivants dans le dépôt. La recette décrit le travail partageable ; `outpost.yaml` choisit son exécution sur votre machine. Leurs champs `version` correspondent à deux formats différents et peuvent donc différer.
 
@@ -47,7 +47,7 @@ version: 1
 repository: .
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-codex:dev
 branch:
   mode: named
   name: outpost/recipe-review

@@ -17,7 +17,7 @@ import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/dock
 import { coder, repository } from "./outpost.config.ts";
 
 const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   repositoryMode: "isolated",
 });
 
@@ -68,7 +68,7 @@ Si le worktree de l’hôte a changé pendant que la sandbox était active, ou s
 import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 const sandboxProvider = createPodmanSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   repositoryMode: "isolated",
   volumes: [{ source: "~/datasets", target: "/data", readOnly: true }],
   caches: [{ name: "npm", key: "node24" }],

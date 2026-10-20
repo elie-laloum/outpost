@@ -29,7 +29,7 @@ try {
     console.log(`Expected inspection exit status: ${expected}`);
     const result = await executeProcess({
       executable: process.execPath,
-      arguments: [cli, "recovery", "verify", "--directory", root],
+      arguments: [cli, "recovery", "transfer", "verify", "--path", root],
     });
     process.stdout.write(result.stdout);
     process.stderr.write(result.stderr);

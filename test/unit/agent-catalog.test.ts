@@ -9,7 +9,7 @@ import {
   isBuiltInAgent,
 } from "../../src/adapters/agents/catalog.ts";
 import type { AgentDescriptor } from "../../src/adapters/agents/agent-descriptor.types.ts";
-import { imageRecipe } from "../../src/cli/scaffold.constants.ts";
+import { imageRecipeText, officialImage } from "../../src/cli/image-recipes.ts";
 import * as api from "../../src/index.ts";
 
 const descriptors: readonly AgentDescriptor[] = builtInAgents;
@@ -61,30 +61,44 @@ test("authentication choices declare the variables their setting reads", () => {
   }
 });
 
-test("the agent image lock and recipe install every built-in agent", async () => {
-  const manifest = JSON.parse(
-    await readFile(
-      new URL("../../images/agents/package.json", import.meta.url),
-      "utf8",
-    ),
-  );
-  const npm = new Set<string>();
-  for (const { install, version, executable } of descriptors) {
+test("each agent image locks and installs only its own CLI", async () => {
+  for (const { name, install, version, executable } of descriptors) {
+    const recipe = imageRecipeText(officialImage(name)!);
     if (install.kind === "script") {
       assert.ok(
-        imageRecipe.includes(install.script(`/usr/local/bin/${executable}`)),
+        recipe.includes(install.script(`/usr/local/bin/${executable}`)),
       );
       continue;
     }
-    npm.add(install.package);
-    assert.equal(manifest.dependencies[install.package], version);
+    const manifest = JSON.parse(
+      await readFile(
+        new URL(`../../images/${name}/package.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    assert.deepEqual(manifest.dependencies, { [install.package]: version });
     assert.equal(
       manifest.allowScripts?.[install.package],
       install.allowScripts,
     );
-    assert.ok(imageRecipe.includes(`${install.package}@${version}`));
+    const lock = JSON.parse(
+      await readFile(
+        new URL(`../../images/${name}/package-lock.json`, import.meta.url),
+        "utf8",
+      ),
+    );
+    assert.equal(
+      lock.packages[`node_modules/${install.package}`].version,
+      version,
+    );
+    assert.match(recipe, /RUN npm ci --prefix \/opt\/outpost\/[a-z]+ /);
+    for (const other of descriptors)
+      if (other.name !== name && other.install.kind === "npm")
+        assert.ok(
+          !recipe.includes(other.install.package),
+          `${name} ${other.name}`,
+        );
   }
-  assert.deepEqual(Object.keys(manifest.dependencies).sort(), [...npm].sort());
 });
 
 test("catalog lookups reject unknown agents and derive complete records", () => {

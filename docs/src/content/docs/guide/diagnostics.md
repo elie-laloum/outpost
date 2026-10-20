@@ -8,18 +8,18 @@ description: "Check your tools and sandbox before investigating agent or model f
 Run `outpost doctor` to check the tools needed by your sandbox provider and agent. Add `--image` to test the image in a temporary container before sending your first request.
 
 ```sh
-npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
+npx outpost doctor --provider docker --agent codex --image outpost-codex:dev
 ```
 
 Each line shows a status (`PASS`, `WARN`, `FAIL`, `SKIPPED`), a check name and a remedy when something is missing. Fix every `FAIL` before your first dispatch, and read each `WARN`.
 
-| Flag                 | Default      | What it selects                                                                    |
-| -------------------- | ------------ | ---------------------------------------------------------------------------------- |
-| `--sandbox-provider` | `docker`     | `docker`, `podman`, `local`, `vercel` or `daytona`.                                |
-| `--agent`            | `codex`      | `claude`, `codex`, `antigravity`, `copilot` or `kimi`.                             |
-| `--image`            | none         | A local image to test in a temporary container. Docker and Podman only.            |
-| `--timeout`          | 5000 / 15000 | Per-check timeout in milliseconds: host / image defaults; integer from 1 to 60000. |
-| `--json`             | off          | Prints the report as JSON instead of text.                                         |
+| Flag         | Default      | What it selects                                                                    |
+| ------------ | ------------ | ---------------------------------------------------------------------------------- |
+| `--provider` | `docker`     | `docker`, `podman`, `local`, `vercel` or `daytona`.                                |
+| `--agent`    | `codex`      | `claude`, `codex`, `antigravity`, `copilot` or `kimi`.                             |
+| `--image`    | none         | A local image to test in a temporary container. Docker and Podman only.            |
+| `--timeout`  | 5000 / 15000 | Per-check timeout in milliseconds: host / image defaults; integer from 1 to 60000. |
+| `--json`     | off          | Prints the report as JSON instead of text.                                         |
 
 | Exit status | Meaning                                                                  |
 | ----------- | ------------------------------------------------------------------------ |
@@ -53,7 +53,7 @@ The engine checks and `host.tar` apply to Docker and Podman. For Vercel and Dayt
 `--json` prints the same checks for a script or a CI job ([Run in CI](../ci-automation/)).
 
 ```sh
-npx outpost doctor --image outpost:dev --json > doctor.json
+npx outpost doctor --image outpost-codex:dev --json > doctor.json
 jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"' doctor.json
 ```
 
@@ -61,7 +61,7 @@ jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"'
 {
   "sandboxProvider": "docker",
   "agent": "codex",
-  "image": "outpost:dev",
+  "image": "outpost-codex:dev",
   "scope": "host-and-image",
   "placement": "mounted",
   "interactiveTerminal": true,

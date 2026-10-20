@@ -108,7 +108,12 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      - run: node src/cli/main.ts init --yes --directory "$RUNNER_TEMP/outpost-agent-image" --repository "$GITHUB_WORKSPACE" --sandbox-provider ${{ matrix.engine }} --image outpost-ci:latest --build
+      - run: node test/fixtures/ci-image.ts ${{ matrix.engine }} outpost-ci:latest
+      - name: Eject, build and smoke test the official harness image
+        run: |
+          node src/cli/main.ts image eject --image harness --engine ${{ matrix.engine }} --directory "$RUNNER_TEMP/harness-image"
+          node src/cli/main.ts image build --directory "$RUNNER_TEMP/harness-image" --engine ${{ matrix.engine }} --tag outpost-harness:ci
+          node scripts/image-smoke.mjs ${{ matrix.engine }} outpost-harness:ci harness
       - run: ${{ matrix.engine }} pull docker.io/library/node:24-slim
       - run: bun run build
       - run: ${{ matrix.engine }} build -t outpost-egress:ci -f images/egress/Dockerfile .

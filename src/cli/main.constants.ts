@@ -1,4 +1,5 @@
-import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
+import { builtInAgentList } from "../adapters/agents/catalog.ts";
+import { officialImageNames } from "./image-recipes.ts";
 export const cliOptions = {
   interactive: {
     type: "boolean",
@@ -78,27 +79,6 @@ export const cliOptions = {
     description:
       "Local YAML recipe configuration or TypeScript/JavaScript bindings module",
   },
-  "base-url": {
-    type: "string",
-    description: "Custom Codex Responses API base URL (requires --model)",
-  },
-  "api-key-env": {
-    type: "string",
-    description: "Custom provider API-key environment variable",
-  },
-  authentication: {
-    type: "string",
-    description:
-      "Authentication: account, account-token (Claude, Copilot) or usage",
-  },
-  help: { type: "boolean", short: "h", description: "Help" },
-  yes: {
-    type: "boolean",
-    short: "y",
-    description: "Accept defaults without prompting",
-  },
-  install: { type: "boolean", description: "Install project dependencies" },
-  build: { type: "boolean", description: "Build the container image" },
   json: {
     type: "boolean",
     description: "Write a machine-readable JSON report",
@@ -161,64 +141,164 @@ export const cliOptions = {
   },
   agent: {
     type: "string",
-    description: `Agent: ${builtInAgentList()}`,
+    description: `Agent CLI to check: ${builtInAgentList()} (default codex)`,
   },
-  sandboxProvider: {
+  provider: {
     type: "string",
-    description: "Provider: docker, podman, local, vercel or daytona",
+    description:
+      "Sandbox provider: docker, podman, local, vercel or daytona (default docker)",
   },
-  manager: {
-    type: "string",
-    description: "Package manager: npm, pnpm, yarn or bun",
-  },
-  model: { type: "string", description: "Agent model name" },
   directory: {
     type: "string",
-    description: "Workflow or retained transfer directory",
+    description: "Directory to read or write (default: current directory)",
+  },
+  path: {
+    type: "string",
+    description: "Retained transfer directory under .outpost/recovery",
   },
   repository: { type: "string", description: "Target Git repository" },
   destination: { type: "string", description: "New restoration directory" },
   side: { type: "string", description: "Transfer side: previous or incoming" },
-  engine: { type: "string", description: "Container engine: docker or podman" },
+  engine: {
+    type: "string",
+    description: "Container engine: docker or podman (default docker)",
+  },
   file: { type: "string", description: "Recipe YAML path" },
-  image: { type: "string", description: "Container image name" },
-  uid: { type: "string", description: "Container user ID" },
-  gid: { type: "string", description: "Container group ID" },
+  image: {
+    type: "string",
+    description: `Image: official name (${officialImageNames()}) or a local reference`,
+  },
+  tag: {
+    type: "string",
+    description: "Local image name to build, e.g. outpost-codex:dev",
+  },
+  force: {
+    type: "boolean",
+    description: "Replace previously ejected files",
+  },
+  uid: {
+    type: "string",
+    description: "Agent user ID baked into the image (default: your UID)",
+  },
+  gid: {
+    type: "string",
+    description: "Agent group ID baked into the image (default: your GID)",
+  },
 } as const;
 
+const recipeFile = "--file recipe.yaml --config outpost.yaml";
+
+/** Command groups shown by `outpost --help`, in display order. */
+export const commandGroups = {
+  doctor: {
+    heading: "Get started:",
+    description: "Check the host, container engine, image and agent CLI",
+  },
+  image: {
+    heading: "Get started:",
+    description:
+      "List, pull, verify, eject and build the official agent images",
+  },
+  recipe: {
+    heading: "Run workflows:",
+    description: "Create, validate, run and resume YAML recipes",
+  },
+  recovery: {
+    heading: "Repair and clean up:",
+    description:
+      "Inspect and explicitly recover interrupted state (rarely needed)",
+  },
+} as const;
+
+export const subcommandGroups = {
+  "recovery workspace": "Inspect or recover a file workspace",
+  "recovery publication": "Inspect, finish or roll back a file publication",
+  "recovery registry": "Inspect or release the host path-lock registry",
+  "recovery transfer": "Verify or restore a retained synchronization transfer",
+} as const;
+
+const fileRecovery = [
+  "runtime-directory",
+  "namespace",
+  "file",
+  "config",
+  "json",
+] as const;
+
+/** Every command, its options, help examples and hidden legacy aliases. */
 export const commandOptions = {
-  "recipe enqueue": {
-    description: "Publish one recipe job without executing its workflow",
+  doctor: {
+    description: "Diagnose host and sandbox prerequisites",
     options: [
-      "file",
-      "config",
-      "queue",
-      "handler",
-      "run-id",
-      "job-id",
-      "idempotency-key",
-      "deadline",
-      "input",
+      "provider",
+      "agent",
+      "image",
+      "workspace-kind",
+      "timeout",
       "json",
     ],
+    examples: [
+      "outpost doctor",
+      "outpost doctor --agent claude --image claude",
+      "outpost doctor --provider podman --image outpost-codex:dev --json",
+    ],
   },
-  "recipe serve": {
-    description: "Start only the selected local service until interrupted",
-    options: ["file", "config", "service"],
+  "image list": {
+    description: "List the official images and their published references",
+    options: ["json"],
+    examples: ["outpost image list"],
   },
-  "recipe list": {
-    description: "List the bundled or selected recipe catalogue",
-    options: ["catalog", "json"],
-  },
-  "recipe fetch": {
+  "image pull": {
     description:
-      "Download and validate a catalogue recipe without executing it",
-    options: ["catalog", "recipe", "file", "json"],
+      "Pull an official image at the reference pinned by this release",
+    options: ["image", "engine", "json"],
+    examples: [
+      "outpost image pull --image codex",
+      "outpost image pull --image harness --engine podman",
+    ],
+  },
+  "image verify": {
+    description:
+      "Verify the signed build provenance of a published image (requires gh)",
+    options: ["image", "json"],
+    examples: [
+      "outpost image verify --image codex",
+      "outpost image verify --image ghcr.io/elie-laloum/outpost/codex@sha256:...",
+    ],
+  },
+  "image eject": {
+    description:
+      "Write an official image recipe and its lockfiles so you can customize it",
+    options: ["image", "directory", "engine", "force", "json"],
+    examples: [
+      "outpost image eject --image codex",
+      "outpost image eject --image harness --directory images/harness --engine podman",
+    ],
+  },
+  "image build": {
+    description: "Build an ejected or custom recipe for your user ID",
+    options: ["directory", "tag", "engine", "file", "uid", "gid", "json"],
+    examples: [
+      "outpost image build --tag outpost-codex:dev",
+      "outpost image build --directory images/harness --tag outpost-harness:dev --engine podman",
+    ],
+  },
+  "image remove": {
+    description: "Remove a local image",
+    options: ["image", "engine", "json"],
+    examples: ["outpost image remove --image outpost-codex:dev"],
   },
   "recipe init": {
     description:
       "Create a recipe starter with editor schema support; never overwrite an existing file",
     options: ["file", "config", "workspace-kind", "json"],
+    examples: [`outpost recipe init ${recipeFile}`],
+  },
+  "recipe validate": {
+    description:
+      "Validate a recipe and optional YAML configuration without allocating a sandbox",
+    options: ["file", "config", "json"],
+    examples: [`outpost recipe validate ${recipeFile}`],
   },
   "recipe run": {
     description:
@@ -232,10 +312,15 @@ export const commandOptions = {
       "actor",
       "json",
     ],
+    examples: [
+      `outpost recipe run ${recipeFile}`,
+      `outpost recipe run ${recipeFile} --input target=src --run-id nightly`,
+    ],
   },
   "recipe status": {
     description: "Inspect a durable recipe without acquiring its checkpoint",
     options: ["file", "config", "run-id", "json"],
+    examples: [`outpost recipe status ${recipeFile} --run-id nightly`],
   },
   "recipe resume": {
     description: "Resume an existing durable recipe",
@@ -251,6 +336,7 @@ export const commandOptions = {
       "actor",
       "json",
     ],
+    examples: [`outpost recipe resume ${recipeFile} --run-id nightly`],
   },
   "recipe answer": {
     description: "Submit a persisted dialogue answer and resume its recipe",
@@ -262,6 +348,9 @@ export const commandOptions = {
       "interactive",
       "actor",
       "json",
+    ],
+    examples: [
+      `outpost recipe answer ${recipeFile} --run-id nightly --answer answer.json`,
     ],
   },
   "recipe decide": {
@@ -275,59 +364,43 @@ export const commandOptions = {
       "actor",
       "json",
     ],
+    examples: [
+      `outpost recipe decide ${recipeFile} --run-id nightly --decision decision.json`,
+    ],
   },
-  "recipe validate": {
+  "recipe list": {
+    description: "List the bundled or selected recipe catalogue",
+    options: ["catalog", "json"],
+    examples: ["outpost recipe list"],
+  },
+  "recipe fetch": {
     description:
-      "Validate a recipe and optional YAML configuration without allocating a sandbox",
-    options: ["file", "config", "json"],
+      "Download and validate a catalogue recipe without executing it",
+    options: ["catalog", "recipe", "file", "json"],
+    examples: ["outpost recipe fetch --recipe review --file review.yaml"],
   },
-  init: {
-    description: "Create a standalone workflow project",
+  "recipe enqueue": {
+    description: "Publish one recipe job without executing its workflow",
     options: [
-      "yes",
-      "agent",
-      "sandboxProvider",
-      "manager",
-      "authentication",
-      "model",
-      "base-url",
-      "api-key-env",
-      "install",
-      "build",
-      "image",
-      "directory",
-      "repository",
-    ],
-  },
-  doctor: {
-    description: "Diagnose host and sandbox prerequisites",
-    options: [
-      "sandboxProvider",
-      "agent",
-      "image",
-      "workspace-kind",
-      "timeout",
+      "file",
+      "config",
+      "queue",
+      "handler",
+      "run-id",
+      "job-id",
+      "idempotency-key",
+      "deadline",
+      "input",
       "json",
     ],
-  },
-  "image build": {
-    description: "Build a container image",
-    options: ["directory", "engine", "file", "image", "uid", "gid"],
-  },
-  "image remove": {
-    description: "Remove a container image",
-    options: ["directory", "engine", "image"],
-  },
-  "recovery unlock": {
-    description: "Inspect or explicitly recover a stopped local lock owner",
-    options: [
-      "directory",
-      "lock",
-      "revision",
-      "processes-stopped",
-      "apply",
-      "json",
+    examples: [
+      `outpost recipe enqueue ${recipeFile} --queue jobs --handler review`,
     ],
+  },
+  "recipe serve": {
+    description: "Start only the selected local service until interrupted",
+    options: ["file", "config", "service"],
+    examples: [`outpost recipe serve ${recipeFile} --service worker`],
   },
   "recovery inspect": {
     description: "Inspect recovery inventory",
@@ -340,97 +413,41 @@ export const commandOptions = {
       "resources",
       "json",
     ],
+    examples: ["outpost recovery inspect --git --locks"],
   },
-  "recovery publication inspect": {
-    description: "Inspect a workspace publication",
-    options: [
-      "runtime-directory",
-      "namespace",
-      "publication-id",
-      "file",
-      "config",
-      "json",
-    ],
-  },
-  "recovery publication finish": {
-    description: "Finish an interrupted publication without replaying tasks",
-    options: [
-      "runtime-directory",
-      "namespace",
-      "publication-id",
-      "processes-stopped",
-      "file",
-      "config",
-      "run-id",
-      "json",
-    ],
-  },
-  "recovery publication rollback": {
-    description: "Conditionally roll back a workspace publication",
-    options: [
-      "runtime-directory",
-      "namespace",
-      "publication-id",
-      "processes-stopped",
-      "file",
-      "config",
-      "run-id",
-      "json",
-    ],
-  },
-  "recovery workspace inspect": {
-    description: "Inspect a file workspace record and snapshot",
-    options: [
-      "runtime-directory",
-      "namespace",
-      "workspace-id",
-      "file",
-      "config",
-      "json",
-    ],
-  },
-  "recovery registry inspect": {
-    description: "Inspect local path registry coordination without Git",
-    options: ["json"],
-  },
-  "recovery registry recover": {
-    description:
-      "Release an inspected registry gate after all coordinating processes are stopped",
-    options: ["revision", "processes-stopped", "json"],
-  },
-  "recovery workspace recover": {
-    description:
-      "Recover stopped workspace ownership without replaying its workflow",
-    options: [
-      "runtime-directory",
-      "namespace",
-      "workspace-id",
-      "revision",
-      "processes-stopped",
-      "allocation-released",
-      "adopt-files",
-      "adopt-source",
-      "portable",
-      "file",
-      "config",
-      "json",
-    ],
-  },
-  "recovery verify": {
-    description: "Verify a retained transfer",
+  "recovery unlock": {
+    description: "Inspect or explicitly recover a stopped local lock owner",
     options: [
       "directory",
+      "lock",
+      "revision",
+      "processes-stopped",
+      "apply",
+      "json",
+    ],
+    examples: [
+      "outpost recovery unlock --directory .outpost/locks --lock NAME.json",
+    ],
+  },
+  "recovery transfer verify": {
+    description: "Verify a retained transfer",
+    options: [
+      "path",
       "checksums",
       "max-bytes",
       "restorability",
       "repository",
       "json",
     ],
+    aliases: ["recovery verify"],
+    examples: [
+      "outpost recovery transfer verify --path .outpost/recovery/ID --checksums",
+    ],
   },
-  "recovery restore": {
-    description: "Restore a retained transfer",
+  "recovery transfer restore": {
+    description: "Restore a retained transfer into a new directory",
     options: [
-      "directory",
+      "path",
       "repository",
       "destination",
       "side",
@@ -438,22 +455,59 @@ export const commandOptions = {
       "apply",
       "json",
     ],
+    aliases: ["recovery restore"],
+    examples: [
+      "outpost recovery transfer restore --path .outpost/recovery/ID --destination ../restored --side incoming",
+    ],
   },
   "recovery prune": {
-    description: "Apply an explicit retention policy",
+    description: "Apply an explicit retention policy (preview unless --apply)",
     options: ["policy", "repository", "apply", "json"],
+    examples: ["outpost recovery prune --policy retention.json"],
+  },
+  "recovery workspace inspect": {
+    description: "Inspect a file workspace record and snapshot",
+    options: [...fileRecovery, "workspace-id"],
+  },
+  "recovery workspace recover": {
+    description:
+      "Recover stopped workspace ownership without replaying its workflow",
+    options: [
+      ...fileRecovery,
+      "workspace-id",
+      "revision",
+      "processes-stopped",
+      "allocation-released",
+      "adopt-files",
+      "adopt-source",
+      "portable",
+    ],
+  },
+  "recovery publication inspect": {
+    description: "Inspect a workspace publication",
+    options: [...fileRecovery, "publication-id"],
+  },
+  "recovery publication finish": {
+    description: "Finish an interrupted publication without replaying tasks",
+    options: [...fileRecovery, "publication-id", "processes-stopped", "run-id"],
+  },
+  "recovery publication rollback": {
+    description: "Conditionally roll back a workspace publication",
+    options: [...fileRecovery, "publication-id", "processes-stopped", "run-id"],
+  },
+  "recovery registry inspect": {
+    description: "Inspect local path registry coordination without Git",
+    options: ["json"],
+  },
+  "recovery registry release": {
+    description:
+      "Release an inspected registry gate after all coordinating processes are stopped",
+    options: ["revision", "processes-stopped", "json"],
+    aliases: ["recovery registry recover"],
   },
 } as const;
 
-export const initializationQuestions = [
-  {
-    key: "agent",
-    message: "Coding agent",
-    choices: builtInAgents.map((agent) => agent.name),
-  },
-  {
-    key: "sandboxProvider",
-    message: "Sandbox provider",
-    choices: ["docker", "podman", "vercel", "daytona", "local"],
-  },
-] as const;
+/** Legacy option names accepted with a deprecation warning. */
+export const optionAliases = {
+  "sandbox-provider": "provider",
+} as const;

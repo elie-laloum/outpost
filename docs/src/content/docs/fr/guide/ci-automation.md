@@ -10,7 +10,7 @@ description: "Exécutez un script Outpost dans un job de CI et conservez les ré
 - **Node.js 24+** : Exécute Outpost et vos scripts.
 - **L’historique Git** : Un clone complet, pour que l’agent lise l’historique et que les sandboxes cloud le téléversent.
 - **Une sandbox** : Docker ou Podman sur le runner, ou le SDK d’une [sandbox cloud](../cloud-sandboxes/) et ses identifiants d’allocation.
-- **L’image de l’agent** : Construite dans le job depuis `.outpost-image/Dockerfile`, préparé pendant l’[installation](../setup/) et commité avec vos scripts.
+- **L’image de l’agent** : Construite dans le job depuis `images/codex/Dockerfile`, éjecté pendant l’[installation](../setup/) et commité avec vos scripts.
 - **Des identifiants pour le job** : Une clé d’API ou un jeton de compte dédié, enregistré dans les secrets de votre CI.
 - **Vos scripts et leur configuration** : `package.json`, le lockfile, `outpost.config.ts` et vos scripts, commités.
 
@@ -51,8 +51,8 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npx outpost image build --directory .outpost-image --image outpost:dev
-      - run: npx outpost doctor --image outpost:dev --json
+      - run: npx outpost image build --directory images/codex --tag outpost-codex:dev
+      - run: npx outpost doctor --image outpost-codex:dev --json
       - run: node review.ts
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -60,7 +60,7 @@ jobs:
 
 Construisez l’image dans le job pour que son identifiant utilisateur corresponde à celui du runner. Le fournisseur Docker refuse une image construite pour un autre identifiant. Si votre Dockerfile se trouve dans un autre dossier, adaptez `--directory`.
 
-`doctor` sort avec le statut 1 quand le moteur, l’image ou la CLI de l’agent manque ([Diagnostic](../diagnostics/)). Il vérifie Codex sur Docker, sauf si vous passez `--agent` ou `--sandbox-provider`, et ne teste pas la clé API.
+`doctor` sort avec le statut 1 quand le moteur, l’image ou la CLI de l’agent manque ([Diagnostic](../diagnostics/)). Il vérifie Codex sur Docker, sauf si vous passez `--agent` ou `--provider`, et ne teste pas la clé API.
 
 [Réparer une CI en échec](../fix-failing-ci/) est un script complet à lancer de cette façon.
 

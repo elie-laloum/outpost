@@ -278,25 +278,25 @@ test("verify CLI requires a transfer path and reports structure separately from 
   const run = (args: string[]) =>
     executeProcess({
       executable: process.execPath,
-      arguments: [cli, "recovery", "verify", ...args],
+      arguments: [cli, "recovery", "transfer", "verify", ...args],
     });
-  const success = await run(["--directory", path, "--json"]);
+  const success = await run(["--path", path, "--json"]);
   assert.equal(success.status, 0, success.stderr);
   assert.equal(JSON.parse(success.stdout).complete, true);
   assert.equal(JSON.parse(success.stdout).integrity, "unverified");
-  const text = await run(["--directory", path]);
+  const text = await run(["--path", path]);
   assert.match(text.stdout, /Requested transfer checks passed/);
   assert.match(text.stdout, /restorability are unverified/);
   await rm(join(path, "previous-index.patch"));
-  const failure = await run(["--directory", path]);
+  const failure = await run(["--path", path]);
   assert.equal(failure.status, 1);
   assert.equal(failure.stderr, "");
   assert.match(failure.stdout, /\[FAIL\] FILE_UNAVAILABLE/);
   for (const args of [
     [],
-    ["--directory", path, "extra"],
-    ["--directory", path, "--git"],
-    ["--directory", path, "--repository", path],
+    ["--path", path, "extra"],
+    ["--path", path, "--git"],
+    ["--path", path, "--repository", path],
   ]) {
     const result = await run(args);
     assert.equal(result.status, 1);

@@ -1,0 +1,132 @@
+name: Images
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish and attest the tested images (requires images environment approval)"
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [harness, codex, claude, antigravity, copilot, kimi]
+        platform:
+          - { runner: ubuntu-latest, arch: amd64 }
+          - { runner: ubuntu-24.04-arm, arch: arm64 }
+    runs-on: ${{ matrix.platform.runner }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Eject the official recipe
+        run: node src/cli/main.ts image eject --image ${{ matrix.image }} --directory "$RUNNER_TEMP/image"
+      - name: Build for the published agent user (1000:1000)
+        run: node src/cli/main.ts image build --directory "$RUNNER_TEMP/image" --tag outpost-${{ matrix.image }}:ci --uid 1000 --gid 1000
+      - name: Smoke test with Docker
+        run: node scripts/image-smoke.mjs docker outpost-${{ matrix.image }}:ci ${{ matrix.image }}
+      - name: Smoke test with rootless Podman
+        run: |
+          docker save outpost-${{ matrix.image }}:ci | podman load
+          node scripts/image-smoke.mjs podman outpost-${{ matrix.image }}:ci ${{ matrix.image }}
+      - run: docker save outpost-${{ matrix.image }}:ci -o "$RUNNER_TEMP/image.tar"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: image-${{ matrix.image }}-${{ matrix.platform.arch }}
+          path: ${{ runner.temp }}/image.tar
+          retention-days: 7
+  publish:
+    needs: build
+    if: inputs.publish && github.ref == 'refs/heads/main' && vars.OUTPOST_IMAGES_PUBLISH == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [harness, codex, claude, antigravity, copilot, kimi]
+    runs-on: ubuntu-latest
+    environment: images
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: image-${{ matrix.image }}-*
+          path: ${{ runner.temp }}
+          digest-mismatch: error
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the tested bytes as one multi-architecture image
+        id: publish
+        env:
+          REPOSITORY: ${{ github.repository }}
+          NAME: ${{ matrix.image }}
+        run: |
+          image="ghcr.io/${REPOSITORY,,}/$NAME"
+          version=$(node -p 'require("./package.json").version')
+          run="sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          for arch in amd64 arm64; do
+            docker load -i "$RUNNER_TEMP/image-$NAME-$arch/image.tar"
+            docker tag "outpost-$NAME:ci" "$image:$run-$arch"
+            docker push "$image:$run-$arch"
+          done
+          docker buildx imagetools create -t "$image:$run" -t "$image:$version" "$image:$run-amd64" "$image:$run-arm64"
+          digest=$(docker buildx imagetools inspect "$image:$run" --format '{{.Manifest.Digest}}')
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ${{ steps.publish.outputs.image }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          push-to-registry: true
+      - name: Verify the provenance and report the digest to record
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ${{ steps.publish.outputs.image }}
+          DIGEST: ${{ steps.publish.outputs.digest }}
+          REPOSITORY: ${{ github.repository }}
+          NAME: ${{ matrix.image }}
+        run: |
+          gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPOSITORY" --signer-workflow "$REPOSITORY/.github/workflows/images.yml" --source-ref refs/heads/main --source-digest "$GITHUB_SHA" --bundle-from-oci
+          echo "$NAME=$DIGEST" > "$RUNNER_TEMP/digest.txt"
+          echo "Verified \`$IMAGE@$DIGEST\`" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: digest-${{ matrix.image }}
+          path: ${{ runner.temp }}/digest.txt
+          retention-days: 14
+  summary:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: digest-*
+          path: ${{ runner.temp }}/digests
+      - name: Print the record command
+        run: |
+          args=$(cat "$RUNNER_TEMP"/digests/*/digest.txt | sort | tr '\n' ' ')
+          echo "Record the verified digests before releasing Outpost: node scripts/record-images.mjs $args" >> "$GITHUB_STEP_SUMMARY"

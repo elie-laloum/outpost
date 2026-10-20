@@ -21,7 +21,7 @@ import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   variables: { CI: "true", NODE_ENV: "test" },
 });
 

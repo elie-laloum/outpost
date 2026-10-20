@@ -19,17 +19,36 @@ export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "transfer") {
+    const { path, ...rest } = values;
+    const legacy = {
+      values: { ...rest, ...(path ? { directory: path } : {}) },
+    };
+    invariant(
+      path,
+      `Usage: outpost recovery transfer ${positionals[2]} --path TRANSFER_PATH (see --help)`,
+    );
+    return positionals[2] === "restore"
+      ? recoveryRestoreCommand({
+          ...legacy,
+          positionals: ["recovery", "restore"],
+        })
+      : recoveryVerifyCommand({
+          ...legacy,
+          positionals: ["recovery", "verify"],
+        });
+  }
   if (positionals[1] === "unlock")
     return recoveryUnlockCommand({ values, positionals });
   if (positionals[1] === "registry") {
     const action = positionals[2];
     invariant(
       positionals.length === 3 &&
-        (action === "inspect" || action === "recover"),
-      "Usage: outpost recovery registry inspect|recover [--revision DEVICE:INODE --processes-stopped]",
+        (action === "inspect" || action === "release"),
+      "Usage: outpost recovery registry inspect|release [--revision DEVICE:INODE --processes-stopped]",
     );
     let gate = await inspectWorkspaceRegistryGate();
-    if (action === "recover") {
+    if (action === "release") {
       invariant(
         values["processes-stopped"] &&
           values.revision &&

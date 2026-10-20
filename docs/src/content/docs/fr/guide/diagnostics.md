@@ -8,18 +8,18 @@ description: "Vérifiez vos outils et votre sandbox avant de rechercher un probl
 Lancez `outpost doctor` pour vérifier les outils nécessaires au fournisseur de sandbox et à l’agent. Ajoutez `--image` pour tester l’image dans un conteneur temporaire avant d’envoyer votre première demande.
 
 ```sh
-npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
+npx outpost doctor --provider docker --agent codex --image outpost-codex:dev
 ```
 
 Chaque ligne affiche un statut (`PASS`, `WARN`, `FAIL`, `SKIPPED`), le nom d’un contrôle et un remède quand quelque chose manque. Corrigez chaque `FAIL` avant votre premier dispatch et lisez chaque `WARN`.
 
-| Option               | Défaut       | Ce qu’elle sélectionne                                                                  |
-| -------------------- | ------------ | --------------------------------------------------------------------------------------- |
-| `--sandbox-provider` | `docker`     | `docker`, `podman`, `local`, `vercel` ou `daytona`.                                     |
-| `--agent`            | `codex`      | `claude`, `codex`, `antigravity`, `copilot` ou `kimi`.                                  |
-| `--image`            | aucune       | Une image locale à tester dans un conteneur temporaire. Docker et Podman uniquement.    |
-| `--timeout`          | 5000 / 15000 | Délai de chaque contrôle en millisecondes : valeurs hôte / image ; entier de 1 à 60000. |
-| `--json`             | désactivé    | Affiche le rapport en JSON au lieu de texte.                                            |
+| Option       | Défaut       | Ce qu’elle sélectionne                                                                  |
+| ------------ | ------------ | --------------------------------------------------------------------------------------- |
+| `--provider` | `docker`     | `docker`, `podman`, `local`, `vercel` ou `daytona`.                                     |
+| `--agent`    | `codex`      | `claude`, `codex`, `antigravity`, `copilot` ou `kimi`.                                  |
+| `--image`    | aucune       | Une image locale à tester dans un conteneur temporaire. Docker et Podman uniquement.    |
+| `--timeout`  | 5000 / 15000 | Délai de chaque contrôle en millisecondes : valeurs hôte / image ; entier de 1 à 60000. |
+| `--json`     | désactivé    | Affiche le rapport en JSON au lieu de texte.                                            |
 
 | Code de sortie | Signification                                                                          |
 | -------------- | -------------------------------------------------------------------------------------- |
@@ -53,7 +53,7 @@ Les contrôles du moteur et `host.tar` concernent Docker et Podman. Pour Vercel 
 `--json` affiche les mêmes contrôles pour un script ou un job de CI ([Exécuter en CI](../ci-automation/)).
 
 ```sh
-npx outpost doctor --image outpost:dev --json > doctor.json
+npx outpost doctor --image outpost-codex:dev --json > doctor.json
 jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"' doctor.json
 ```
 
@@ -61,7 +61,7 @@ jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"'
 {
   "sandboxProvider": "docker",
   "agent": "codex",
-  "image": "outpost:dev",
+  "image": "outpost-codex:dev",
   "scope": "host-and-image",
   "placement": "mounted",
   "interactiveTerminal": true,

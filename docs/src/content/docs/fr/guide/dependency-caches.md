@@ -47,7 +47,7 @@ Les fournisseurs Docker et Podman acceptent `caches` : des volumes nommés qui s
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
   caches: [{ name: "npm", key: "node24" }],
   variables: { npm_config_cache: "/outpost/cache/npm" },
 });

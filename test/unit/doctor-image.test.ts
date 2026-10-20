@@ -228,7 +228,7 @@ test("missing image and disconnected engine do not attempt allocation", async ()
 
 test("image CLI validates its selection before commands and includes image checks in human output", async () => {
   for (const values of [
-    { sandboxProvider: "local", image: "outpost:test" },
+    { provider: "local", image: "outpost:test" },
     { image: "" },
     { image: "--privileged" },
     { image: "image\ninjected" },

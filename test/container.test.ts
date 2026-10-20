@@ -44,7 +44,7 @@ import type {
 import { executeProcess } from "../src/infrastructure/process.ts";
 import { repositoryTransport } from "../src/infrastructure/repository-transport.ts";
 import { git } from "../src/infrastructure/git.ts";
-import { imageRecipe } from "../src/cli/scaffold.constants.ts";
+import { imageRecipeText, officialImages } from "../src/cli/image-recipes.ts";
 
 const containerImage =
   process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
@@ -736,7 +736,8 @@ test(
   "generated image has a writable private home without a tmpfs mount",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async () => {
-    assert.match(imageRecipe, /mkdir -p \/home\/agent/);
+    for (const image of officialImages)
+      assert.match(imageRecipeText(image), /mkdir -p \/home\/agent/);
     const result = await executeProcess({
       executable: process.env.OUTPOST_CONTAINER_ENGINE!,
       arguments: [

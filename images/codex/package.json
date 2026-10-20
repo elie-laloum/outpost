@@ -1,0 +1,8 @@
+{
+  "name": "outpost-codex-image",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@openai/codex": "0.156.1"
+  }
+}

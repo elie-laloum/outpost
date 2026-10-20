@@ -68,7 +68,7 @@ The command exits with status 1 when the inventory is incomplete.
 ### Verify
 
 ```sh
-npx outpost recovery verify --directory "$TRANSFER" --checksums --restorability --repository /projects/app
+npx outpost recovery transfer verify --path "$TRANSFER" --checksums --restorability --repository /projects/app
 ```
 
 `$TRANSFER` is the directory from `details.recovery`. `--checksums` compares each file with the transfer’s manifest; `--max-bytes` bounds the bytes hashed. `--restorability` rebuilds the commits and patches in a temporary clone of `--repository`. The command exits with status 1 when a check fails.
@@ -76,7 +76,7 @@ npx outpost recovery verify --directory "$TRANSFER" --checksums --restorability 
 ### Restore
 
 ```sh
-npx outpost recovery restore --directory "$TRANSFER" --repository /projects/app \
+npx outpost recovery transfer restore --path "$TRANSFER" --repository /projects/app \
   --destination /projects/app-recovered --side incoming
 ```
 
@@ -177,7 +177,7 @@ console.log(staging);
 // Example output: /project/.outpost/recovery/run-1
 ```
 
-Keep `reference` (a key and a revision) to find the archive. Pass `staging` as `--directory` to `outpost recovery restore`, with a clone of the source repository.
+Keep `reference` (a key and a revision) to find the archive. Pass `staging` as `--directory` to `outpost recovery transfer restore`, with a clone of the source repository.
 
 ## Release a stopped run or race
 

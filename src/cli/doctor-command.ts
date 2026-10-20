@@ -11,6 +11,9 @@ import type {
 import { invariant } from "../domain/errors.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import type { CliInvocation } from "./main.types.ts";
+import { officialImage } from "./image-recipes.ts";
+import { publishedReference } from "./image.ts";
+import { packageVersion } from "./package-version.ts";
 
 function isProvider(value: string): value is DoctorProvider {
   return Object.hasOwn(providerDiagnostics, value);
@@ -27,12 +30,12 @@ export async function doctorCommand(
 ): Promise<void> {
   invariant(
     positionals.length === 1,
-    "Usage: outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]",
+    "Usage: outpost doctor [--provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
       [
-        "sandboxProvider",
+        "provider",
         "agent",
         "image",
         "workspace-kind",
@@ -41,9 +44,13 @@ export async function doctorCommand(
       ].includes(key),
       `Unsupported doctor option: --${key}`,
     );
-  const sandboxProvider =
-    values.sandboxProvider ?? doctorDefaults.sandboxProvider;
-  const agent = values.agent ?? doctorDefaults.agent;
+  const sandboxProvider = values.provider ?? doctorDefaults.sandboxProvider;
+  const official =
+    values.image === undefined ? undefined : officialImage(values.image);
+  const image = official
+    ? publishedReference(official, packageVersion()).reference
+    : values.image;
+  const agent = values.agent ?? official?.agent?.name ?? doctorDefaults.agent;
   const workspaceKind = values["workspace-kind"] ?? "git";
   invariant(
     workspaceKind === "git" ||
@@ -67,7 +74,7 @@ export async function doctorCommand(
       ...(values.timeout !== undefined
         ? { deadlineMs: Number(values.timeout) }
         : {}),
-      ...(values.image !== undefined ? { image: values.image } : {}),
+      ...(image !== undefined ? { image } : {}),
     },
     execute,
   );

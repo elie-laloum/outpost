@@ -25,17 +25,17 @@ outpost recovery inspect [--repository PATH | --runtime-directory PATH] [--max-e
 
 It changes nothing. It exits `1` when the inventory is partial.
 
-## `outpost recovery verify`
+## `outpost recovery transfer verify`
 
 Verify a retained transfer before restoring it. You can compare checksums and test whether its patches apply in a temporary clone.
 
 ```sh
-outpost recovery verify --directory TRANSFER [--checksums [--max-bytes N]] [--restorability --repository PATH] [--json]
+outpost recovery transfer verify --path TRANSFER [--checksums [--max-bytes N]] [--restorability --repository PATH] [--json]
 ```
 
 | Flag              | Default  | Values and effect                                                      |
 | ----------------- | -------- | ---------------------------------------------------------------------- |
-| `--directory`     | Required | Retained transfer directory.                                           |
+| `--path`          | Required | Retained transfer directory.                                           |
 | `--checksums`     | Off      | Compares the files with the transfer’s checksum manifest.              |
 | `--max-bytes`     | 1 GiB    | Bytes checked by `--checksums`, which it requires.                     |
 | `--restorability` | Off      | Applies the transfer’s patches in a temporary clone of `--repository`. |
@@ -44,17 +44,17 @@ outpost recovery verify --directory TRANSFER [--checksums [--max-bytes N]] [--re
 
 It changes no source files; restorability checks create a temporary clone. It exits `1` when a check fails or is incomplete.
 
-## `outpost recovery restore`
+## `outpost recovery transfer restore`
 
 Restore the saved host state or incoming sandbox changes into a new directory. Preview the plan first, then add `--apply` when you are ready to create the copy.
 
 ```sh
-outpost recovery restore --directory TRANSFER --repository PATH --destination NEW_PATH --side previous|incoming [--max-bytes N] [--apply] [--json]
+outpost recovery transfer restore --path TRANSFER --repository PATH --destination NEW_PATH --side previous|incoming [--max-bytes N] [--apply] [--json]
 ```
 
 | Flag            | Default  | Values and effect                                                               |
 | --------------- | -------- | ------------------------------------------------------------------------------- |
-| `--directory`   | Required | Retained transfer directory.                                                    |
+| `--path`        | Required | Retained transfer directory.                                                    |
 | `--repository`  | Required | Checkout the transfer belongs to.                                               |
 | `--destination` | Required | New directory outside the repository; it must not exist.                        |
 | `--side`        | Required | `previous` (host state before synchronization) or `incoming` (sandbox changes). |
@@ -112,5 +112,5 @@ These commands inspect the local path coordination gate and release the inspecte
 
 ```sh
 outpost recovery registry inspect --json
-outpost recovery registry recover --revision REVISION --processes-stopped --json
+outpost recovery registry release --revision REVISION --processes-stopped --json
 ```

@@ -1,119 +1,87 @@
 ---
 title: "CLI commands"
-description: "Build images, check your environment and inspect recovery data from the terminal."
+description: "Check your environment, prepare agent images, run YAML recipes and inspect recovery data from the terminal."
 ---
 
 ## Choose a command
 
-Use the CLI to build images, check prerequisites and inspect retained work. Write agent tasks in TypeScript and run them with Node.js, as shown in [Your first task](../first-request/).
+The CLI prepares and checks the environment your scripts or recipes run in. Write agent tasks in TypeScript and run them with Node.js, as shown in [Your first task](../first-request/), or describe them in a [YAML recipe](../yaml-recipes/). The CLI never creates a project on your machine.
 
 <!-- features -->
 
-- [`outpost recipe run`](../yaml-recipes/): Runs a local YAML recipe with explicit sandbox and agent bindings.
-- [`outpost doctor`](../diagnostics/): Checks the host, the sandbox provider and an image.
-- [`outpost image build`](../agent-images/): Builds the agent image from its recipe.
-- [`outpost image remove`](../agent-images/): Deletes the agent image.
-- [`outpost recovery inspect`](../recovery/): Lists what `.outpost` retains, read-only.
-- [`outpost recovery verify`](../recovery/): Checks a retained transfer before you restore it.
-- [`outpost recovery restore`](../recovery/): Restores a retained transfer into a new directory.
-- [`outpost recovery prune`](../retention/): Deletes old data according to a retention policy.
-- [`outpost --help`](#common-options): Lists the commands, or one command’s options.
+- [`outpost doctor`](#outpost-doctor): Checks the host, the sandbox provider and an image.
+- [`outpost image`](#outpost-image): Lists, pulls, verifies, ejects, builds and removes the [agent images](../agent-images/).
+- [`outpost recipe`](../recipe-cli/): Creates, validates, runs and resumes YAML recipes.
+- [`outpost recovery`](../recovery-cli/): Inspects and explicitly recovers interrupted state.
+- [`outpost --help`](#common-options): Lists the commands by task, or one command's options and examples.
 
 In a project that depends on `@elie-laloum/outpost`, run `npx outpost <command>`. Elsewhere, run `npx @elie-laloum/outpost <command>`.
 
 ## Common options
 
-| Option       | Commands                       | Effect                                         |
-| ------------ | ------------------------------ | ---------------------------------------------- |
-| `-h, --help` | All                            | Prints the usage and options, then exits.      |
-| `--json`     | `doctor`, `recovery`, `recipe` | Writes the report as JSON on stdout.           |
-| `-y, --yes`  | `init`                         | Accepts the defaults without prompting.        |
-| `--apply`    | `restore`, `prune`             | Performs the change; without it, only preview. |
+| Option          | Commands      | Effect                                                      |
+| --------------- | ------------- | ----------------------------------------------------------- |
+| `-h, --help`    | All           | Prints the usage, options and examples, then exits.         |
+| `-v, --version` | `outpost`     | Prints the installed Outpost version.                       |
+| `--json`        | Most commands | Writes the result as JSON on stdout.                        |
+| `--apply`       | Recovery      | Performs the change; without it, the command only previews. |
 
 | Exit code | Meaning                                                                            |
 | --------- | ---------------------------------------------------------------------------------- |
 | `0`       | Success. `doctor` warnings and skipped checks still exit `0`.                      |
 | `1`       | A check failed, a report is incomplete, or the command failed (message on stderr). |
-| `130`     | Interrupted with Ctrl+C, or an `init` prompt was cancelled.                        |
+| `130`     | Interrupted with Ctrl+C.                                                           |
 | `143`     | Stopped with SIGTERM.                                                              |
 
 ## `outpost doctor`
 
-Check the host tools and selected sandbox provider. Add `--image` to check a local agent image in a temporary container as well.
+Check the host tools and selected sandbox provider. Add `--image` to check an image in a temporary container as well.
 
 ```sh
-outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]
+outpost doctor [--provider NAME] [--agent NAME] [--image NAME] [--timeout MS] [--json]
 ```
 
-| Flag                 | Default  | Values and effect                                                              |
-| -------------------- | -------- | ------------------------------------------------------------------------------ |
-| `--sandbox-provider` | `docker` | `docker`, `podman`, `local`, `vercel`, `daytona`.                              |
-| `--agent`            | `codex`  | `codex`, `claude`, `antigravity`, `copilot`, `kimi`.                           |
-| `--image`            | None     | Also checks this local image in a temporary container. Docker and Podman only. |
-| `--json`             | Off      | JSON report.                                                                   |
+| Flag         | Default  | Values and effect                                                                                                          |
+| ------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `--provider` | `docker` | `docker`, `podman`, `local`, `vercel`, `daytona`.                                                                          |
+| `--agent`    | `codex`  | `codex`, `claude`, `antigravity`, `copilot`, `kimi`. Defaults to the image's agent when `--image` names an official image. |
+| `--image`    | None     | Local image reference or official image name, checked in a temporary container. Docker and Podman only.                    |
+| `--json`     | Off      | JSON report.                                                                                                               |
 
 It exits `1` when a check fails. [Diagnostics](../diagnostics/) explains the report.
 
-## `outpost image build`
+## `outpost image`
 
-Build the agent image from the recipe in the chosen directory. Select Docker or Podman and give the result the image name used by your scripts.
+Prepare the image your sandbox provider runs. Official names are `harness`, `codex`, `claude`, `antigravity`, `copilot` and `kimi` ([Agent images](../agent-images/)).
 
-```sh
-outpost image build [--directory PATH] [--engine docker|podman] [--file PATH] [--image NAME] [--uid N] [--gid N]
-```
+| Command                                                                             | Effect                                                                                       |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `image list [--json]`                                                               | Lists the official images and the reference pinned by this release.                          |
+| `image pull --image NAME [--engine E]`                                              | Pulls the published image: its recorded digest, or the tag matching this release.            |
+| `image verify --image NAME_OR_REFERENCE`                                            | Verifies the GitHub build provenance attestation of a digest. Requires `gh`.                 |
+| `image eject --image NAME [--directory D] [--engine E] [--force]`                   | Writes the official recipe, lockfiles and `.dockerignore` into the current directory or `D`. |
+| `image build --tag TAG [--directory D] [--engine E] [--file F] [--uid N] [--gid N]` | Builds the recipe in `D` for your UID and GID (`1000` on Windows).                           |
+| `image remove --image REFERENCE [--engine E]`                                       | Removes a local image.                                                                       |
 
-| Flag             | Default                                         | Values and effect                       |
-| ---------------- | ----------------------------------------------- | --------------------------------------- |
-| `--directory`    | Current directory                               | Build context holding the recipe.       |
-| `--engine`       | `docker`                                        | `docker`, `podman`.                     |
-| `--file`         | `Dockerfile` (Docker), `Containerfile` (Podman) | Recipe path, relative to `--directory`. |
-| `--image`        | `outpost:<directory name>`                      | Image tag.                              |
-| `--uid`, `--gid` | Your user and group IDs (`1000` on Windows)     | IDs of the agent user inside the image. |
-
-The engine’s output streams to the terminal, then the command prints `build: <image>`. A build stops after 30 minutes.
-
-## `outpost image remove`
-
-Remove the local agent image when you no longer need it. Use the engine and image name from the build you want to remove.
+`--engine` defaults to `docker`; `podman` writes and builds a `Containerfile`. `eject` refuses to overwrite existing files without `--force`. The engine's output streams to the terminal; a build stops after 30 minutes.
 
 ```sh
-outpost image remove [--directory PATH] [--engine docker|podman] [--image NAME]
+npx outpost image eject --image claude --directory images/claude
+npx outpost image build --directory images/claude --tag outpost-claude:dev
 ```
 
-`--directory`, `--engine` and `--image` take the same defaults as `image build`. The command prints `remove: <image>`.
+## Renamed commands
 
-## `outpost init`
+Earlier names still work and print a deprecation warning. They will be removed in the next major version.
 
-This command generates an example project and, with Docker or Podman, prepares its image. The recommended [installation path](../setup/) uses it to build the image; you then write your own TypeScript scripts.
+| Earlier name                        | Current name                            |
+| ----------------------------------- | --------------------------------------- |
+| `--provider`                        | `--provider`                            |
+| `recovery verify --directory PATH`  | `recovery transfer verify --path PATH`  |
+| `recovery restore --directory PATH` | `recovery transfer restore --path PATH` |
+| `recovery registry recover`         | `recovery registry release`             |
 
-```sh
-outpost init [--yes] [--directory PATH] [--repository PATH] [--agent NAME] [--sandbox-provider NAME] [options]
-```
-
-In a terminal, `init` prompts for the agent, sandbox provider, package manager and authentication you did not pass. Without a terminal, pass `--yes` or both `--agent` and `--sandbox-provider`.
-
-| Flag                    | Default                                    | Values and effect                                                         |
-| ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------- |
-| `--directory`           | Current directory                          | Where the project is written.                                             |
-| `--repository`          | `.`                                        | Git checkout the workflow edits, relative to `--directory`.               |
-| `--agent`               | `codex`                                    | `codex`, `claude`, `antigravity`, `copilot`, `kimi`.                      |
-| `--sandbox-provider`    | `docker`                                   | `docker`, `podman`, `local`, `vercel`, `daytona`.                         |
-| `--authentication`      | `account` (`usage` with `--base-url`)      | `account`, `usage`; `account-token` for `claude` and `copilot`.           |
-| `--model`               | The CLI’s default                          | Model name. Required for Kimi `usage` and for `--base-url`.               |
-| `--base-url`            | None                                       | Custom Codex Responses endpoint. Requires `--model` and `usage`.          |
-| `--api-key-env`         | `OPENAI_API_KEY`                           | Key variable for `--base-url`.                                            |
-| `--manager`             | `packageManager` field, lockfile, or `npm` | `npm`, `pnpm`, `yarn`, `bun`.                                             |
-| `--install`             | Off                                        | Installs `@elie-laloum/outpost` and the provider SDK as dev dependencies. |
-| `--build`, `--no-build` | Build for `docker` and `podman`            | Builds the image once the files are written.                              |
-| `--image`               | `outpost:<directory name>`                 | Image tag built and used by `run.ts` (Docker and Podman).                 |
-
-`init` writes `run.ts`, `brief.md`, `.env.example`, `.gitignore`, the image recipe and, when none exists, `package.json` (optional project generation). It stops before writing if one of these files exists, except `.gitignore`, which it extends.
-
-It then prints the sign-in steps for the chosen [authentication](../authentication/) and the command to run, such as `node run.ts`.
-
-```sh
-npx outpost init --yes --directory .outpost-image --image outpost:dev
-```
+`outpost init` was removed: install the package in your own scripts ([Installation](../setup/)), prepare an image with `outpost image`, and create recipe files with `outpost recipe init`.
 
 API: [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTransfer](../../reference/verifyrecoverytransfer/) · [planRecoveryRestore](../../reference/planrecoveryrestore/) · [restoreRecoveryTransfer](../../reference/restorerecoverytransfer/) · [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/).
 
@@ -122,6 +90,9 @@ API: [inspectRecovery](../../reference/inspectrecovery/) · [verifyRecoveryTrans
 - [Recipe command options](../recipe-cli/)
 - [Recovery command options](../recovery-cli/)
 
+<span id="outpost-image-build"></span>
+<span id="outpost-image-remove"></span>
+<span id="outpost-init"></span>
 <span id="outpost-recipe-run"></span>
 <span id="outpost-recipe-status-resume-answer-and-decide"></span>
 <span id="outpost-recipe-enqueue-and-serve"></span>

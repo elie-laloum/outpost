@@ -23,13 +23,14 @@ npm pkg set type=module
 
 ## Build the agent image
 
-Build the tools once in a dedicated directory. The first build downloads the agent CLIs and can take several minutes.
+Write the official Codex image recipe into a dedicated directory, then build it for your user. The first build downloads the Codex CLI and can take several minutes.
 
 ```sh
-npx outpost init --yes --directory .outpost-image --image outpost:dev
+npx outpost image eject --image codex --directory images/codex
+npx outpost image build --directory images/codex --tag outpost-codex:dev
 ```
 
-Wait for the image build to succeed. `init` also creates example workflow files in `.outpost-image`; this tutorial uses the script you write next. To add project tools or use Podman, see [Build an agent image](../agent-images/).
+Wait for the build to succeed. Commit `images/codex` with your scripts if you want to reuse or customize it. To add project tools, use another agent or Podman, see [Agent images](../agent-images/).
 
 ## Prepare access to the agent
 
@@ -47,7 +48,7 @@ export const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
 });
 export const sandboxProvider = createDockerSandboxProvider({
-  image: "outpost:dev",
+  image: "outpost-codex:dev",
 });
 export const repository = "/absolute/path/to/your-repository";
 ```
@@ -59,7 +60,7 @@ Save each later code tab using its displayed filename, alongside this configurat
 Run the local checks before sending a model request:
 
 ```sh
-npx outpost doctor --image outpost:dev
+npx outpost doctor --image outpost-codex:dev
 ```
 
 Fix any `FAIL` using [Troubleshoot your setup](../diagnostics/). `doctor` checks tools and the image, not your login or model access. You are ready to [run your first task](../first-request/) or [your first YAML recipe](../yaml-recipes/).

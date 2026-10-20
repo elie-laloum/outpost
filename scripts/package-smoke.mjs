@@ -240,40 +240,27 @@ try {
     "cli",
     "main.js",
   );
+  assert.equal(
+    execFileSync(process.execPath, [cli, "--version"], {
+      cwd: temporary,
+      encoding: "utf8",
+    }).trim(),
+    JSON.parse(readFileSync("package.json", "utf8")).version,
+  );
+  const ejected = join(temporary, "codex-image");
   execFileSync(
     process.execPath,
-    [cli, "init", "--yes", "--sandbox-provider", "local"],
+    [cli, "image", "eject", "--image", "codex", "--directory", ejected],
     { cwd: temporary, stdio: "inherit" },
   );
-  execFileSync(process.execPath, ["--check", join(temporary, "run.ts")], {
-    cwd: temporary,
-    stdio: "inherit",
-  });
-  const standalone = join(temporary, "workflow");
-  execFileSync(
-    process.execPath,
-    [
-      cli,
-      "init",
-      "--yes",
-      "--sandbox-provider",
-      "vercel",
-      "--directory",
-      standalone,
-      "--repository",
-      "../repository",
-    ],
-    {
-      cwd: temporary,
-      stdio: "inherit",
-    },
+  assert.match(
+    readFileSync(join(ejected, "Dockerfile"), "utf8"),
+    /^FROM node:24-bookworm-slim@sha256:/,
   );
-  const generated = JSON.parse(
-    readFileSync(join(standalone, "package.json"), "utf8"),
+  assert.ok(
+    JSON.parse(readFileSync(join(ejected, "package-lock.json"), "utf8"))
+      .packages["node_modules/@openai/codex"],
   );
-  assert.equal(generated.scripts.start, "node run.ts");
-  assert.ok(generated.devDependencies["@elie-laloum/outpost"]);
-  assert.ok(generated.devDependencies["@vercel/sandbox"]);
   const manifest = JSON.parse(
     readFileSync(
       join(
