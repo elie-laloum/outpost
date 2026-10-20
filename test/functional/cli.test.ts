@@ -11,6 +11,7 @@ import {
   verifyImage,
 } from "../../src/cli/image.ts";
 import { officialImage } from "../../src/cli/image-recipes.ts";
+import { publishedImages } from "../../src/cli/images.constants.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 
 const cli = resolve("src/cli/main.ts");
@@ -186,6 +187,19 @@ test("image build, pull, remove and verify issue the expected engine commands", 
   );
   assert.match(reference, /^ghcr\.io\/elie-laloum\/outpost\/kimi[:@]/);
   assert.deepEqual(calls.at(-1)!.arguments, ["pull", reference]);
+  await assert.rejects(
+    pullImage(officialImage("kimi")!, "1.2.3", "docker", async () => ({
+      status: 1,
+      stdout: "",
+      stderr: "manifest unknown",
+    })),
+    /Could not pull .*(no published digest|registry access)/,
+  );
+  const unrecorded = await run(["image", "verify", "--image", "codex"]);
+  if (!publishedImages.codex) {
+    assert.equal(unrecorded.status, 1);
+    assert.match(unrecorded.stderr, /records no published digest/);
+  }
   await removeImage("outpost-codex:dev", "docker", executor);
   assert.deepEqual(calls.at(-1)!.arguments, [
     "image",

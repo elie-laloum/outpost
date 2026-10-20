@@ -11,6 +11,7 @@ import {
   verifyImage,
 } from "./image.ts";
 import { officialImage } from "./image-recipes.ts";
+import { publishedImages } from "./images.constants.ts";
 import type { CliInvocation, CliValues } from "./main.types.ts";
 import { packageVersion } from "./package-version.ts";
 
@@ -63,6 +64,10 @@ const actions: Readonly<Record<string, (values: CliValues) => Promise<void>>> =
         "Select the image to verify with --image NAME_OR_REFERENCE",
       );
       const image = officialImage(values.image);
+      invariant(
+        !image || publishedImages[image.name],
+        `This release records no published digest for ${values.image}; pass a digest reference (REPOSITORY@sha256:...) or build the image locally.`,
+      );
       const reference = image
         ? publishedReference(image, packageVersion()).reference
         : values.image;

@@ -196,14 +196,17 @@ export async function pullImage(
   executor: Executor = executeProcess,
 ): Promise<string> {
   const { reference } = publishedReference(image, version);
-  await requireSuccess(
-    {
-      executable: engine,
-      arguments: ["pull", reference],
-      deadlineMs: imageDefaults.pullMs,
-      observe: write,
-    },
-    executor,
+  const result = await executor({
+    executable: engine,
+    arguments: ["pull", reference],
+    deadlineMs: imageDefaults.pullMs,
+    observe: write,
+  });
+  invariant(
+    result.status === 0,
+    publishedImages[image.name]
+      ? `Could not pull ${reference}; check the network and registry access.`
+      : `Could not pull ${reference}: this release records no published digest for ${image.name}. Build it instead: outpost image eject --image ${image.name}, then outpost image build.`,
   );
   return reference;
 }
