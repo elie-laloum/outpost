@@ -74,12 +74,14 @@ Tous les agents peuvent poursuivre une conversation tant que leur sandbox reste 
 | --------------- | --------------------------------- | ---- | --------------------- |
 | Claude Code     | Oui                               | Oui  | `injected`            |
 | Codex           | Oui                               | Oui  | `injected`            |
-| Copilot CLI     | Oui                               | Non  | `resumed`             |
-| Kimi Code       | Oui                               | Oui  | `resumed`             |
+| Copilot CLI     | Oui                               | Non  | `injected`            |
+| Kimi Code       | Oui                               | Oui  | `injected`            |
 | Antigravity     | Non                               | Non  | `resumed`             |
 | Harness intégré | Oui                               | Oui  | `injected`            |
 
 Avec `injected`, les nouvelles consignes arrivent pendant l’échange en cours. Avec `resumed`, Outpost arrête l’échange puis reprend sa conversation. La page [Réorienter un agent](../steering/) montre comment envoyer ces consignes ; [Poursuivre une conversation](../conversations/) explique la reprise et le fork.
+
+Copilot et Kimi utilisent l’interruption/reprise lorsque des hooks natifs ou des serveurs MCP sont configurés, ou si la sandbox ne prend pas en charge l’entrée en direct.
 
 Tous ces agents acceptent les [réparations de réponse](../typed-responses/) lorsque la poursuite de conversation est activée. Avec `saveConversations: false`, Claude Code et Codex ne peuvent reprendre que dans leur sandbox ouverte. Avec `conversations: false`, le harness intégré désactive la reprise, le fork et les réparations.
 

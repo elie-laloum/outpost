@@ -13,7 +13,7 @@ import { createCopilotHarness } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create the GitHub Copilot CLI preset without starting the CLI; createAgent({ harness, model }) binds it and rejects reasoning and maxOutputTokens. It captures and resumes session bundles, is steered by stopping and resuming the turn, and rejects fork. Usage is reported per message, then as a session total read after exit.
+Create the GitHub Copilot CLI preset without starting the CLI; createAgent({ harness, model }) binds it and rejects reasoning and maxOutputTokens. It captures and resumes session bundles, accepts acknowledged steering through its native RPC server, and rejects fork. Native hooks, MCP servers or leases without live input use interruption/resume. Usage is reported per message, then as a session total read after exit.
 
 [Complete example and detailed rules](../../guide/copilot-cli/).
 

@@ -53,7 +53,7 @@ Each CLI has its own factory, event names and decisions. The API lists all 85 ex
 - Outpost installs and removes its hook declarations around each CLI process. Ordering and matching remain native; existing hooks are preserved.
 
 :::note
-Implemented but unreleased. Native event firing depends on CLI version and still needs live validation across all five CLIs and remote providers. Hooks do not replace [tool permissions](../agent-profiles/) or sandbox isolation.
+Available from Outpost 11.2.0. Native event firing depends on CLI version and still needs live validation across all five CLIs and remote providers. Hooks do not replace [tool permissions](../agent-profiles/) or sandbox isolation.
 :::
 
 To share these hooks, declare them in [`defineAgentProfile({ hooks })`](../agent-profiles/#share-hooks). The harness selects its profile section before appending local hooks.

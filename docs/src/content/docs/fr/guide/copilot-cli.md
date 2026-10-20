@@ -44,7 +44,7 @@ Copilot n’a pas de mode par clé API : `authentication: "usage"` est refusé �
 
 - [Conversations](../conversations/) : Capturées sous forme d’archive de session, puis reprises à chaud ou à froid avec `--resume`.
 - [Réponses typées](../typed-responses/) : Une réponse invalide est réparée en reprenant la même conversation.
-- [Réorientation](../steering/) : Outpost arrête le processus et reprend la session avec votre texte.
+- [Réorientation](../steering/) : Le serveur RPC natif reçoit votre texte pendant le tour et confirme sa livraison. Une configuration avec hooks natifs ou MCP utilise plutôt l’interruption/reprise.
 - [Serveurs MCP](../mcp-servers/) : Transmis à chaque exécution avec `--additional-mcp-config`.
 - [Consommation](../budgets/) : Tokens lus après l’exécution dans `session-state/<id>/events.jsonl`.
 - [Pauses sur quota](../quota-pauses/) : Les messages de limite de débit et de crédits de Copilot échouent avec le code `quota`.

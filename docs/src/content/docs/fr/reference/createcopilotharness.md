@@ -13,7 +13,7 @@ import { createCopilotHarness } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le preset GitHub Copilot CLI sans lancer la CLI ; createAgent({ harness, model }) le lie et refuse reasoning et maxOutputTokens. Il capture et reprend des bundles de session, se pilote en arrêtant puis en reprenant le tour, et refuse le fork. L’usage est rapporté par message, puis en total de session lu après la sortie.
+Crée le preset GitHub Copilot CLI sans lancer la CLI ; createAgent({ harness, model }) le lie et refuse reasoning et maxOutputTokens. Il capture et reprend des bundles de session, accepte le steering confirmé via son serveur RPC natif et refuse le fork. Les hooks natifs, les serveurs MCP ou les sandboxes sans entrée en direct utilisent l’interruption/reprise. L’usage est rapporté par message, puis en total de session lu après la sortie.
 
 [Exemple complet et règles détaillées](../../guide/copilot-cli/).
 

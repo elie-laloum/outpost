@@ -13,7 +13,7 @@ import { createKimiHarness } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le preset CLI Kimi Code sans lancer la CLI ; createAgent({ harness, model }) le lie et refuse reasoning et maxOutputTokens. Il capture et reprend des bundles de session, forke avec kimi fork et se pilote en arrêtant puis en reprenant le tour. L’usage de jetons est lu dans la session après la sortie.
+Crée le preset CLI Kimi Code sans lancer la CLI ; createAgent({ harness, model }) le lie et refuse reasoning et maxOutputTokens. Il capture et reprend des bundles de session, forke avec kimi fork et accepte le steering confirmé via son serveur authentifié dans la sandbox. Les hooks natifs, les serveurs MCP ou les sandboxes sans entrée en direct utilisent l’interruption/reprise. L’usage de jetons est lu dans la session après la sortie.
 
 [Exemple complet et règles détaillées](../../guide/kimi-code/).
 

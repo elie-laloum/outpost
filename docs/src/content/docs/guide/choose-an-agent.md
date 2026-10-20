@@ -74,12 +74,14 @@ Every agent can continue a conversation while its sandbox remains open. To resum
 | ---------------- | ----------------------- | ---- | ------------- |
 | Claude Code      | Yes                     | Yes  | `injected`    |
 | Codex            | Yes                     | Yes  | `injected`    |
-| Copilot CLI      | Yes                     | No   | `resumed`     |
-| Kimi Code        | Yes                     | Yes  | `resumed`     |
+| Copilot CLI      | Yes                     | No   | `injected`    |
+| Kimi Code        | Yes                     | Yes  | `injected`    |
 | Antigravity      | No                      | No   | `resumed`     |
 | Built-in harness | Yes                     | Yes  | `injected`    |
 
 With `injected`, new instructions reach the running turn. With `resumed`, Outpost stops the turn and resumes its conversation. See [steering](../steering/) to send instructions and [conversations](../conversations/) to resume or fork.
+
+Copilot and Kimi fall back to interruption/resume when native hooks or MCP servers are configured, or the sandbox lease lacks live input.
 
 All these agents support [response repairs](../typed-responses/) when conversation continuation is enabled. Setting `saveConversations: false` on Claude Code or Codex keeps only continuation in the same sandbox. Setting `conversations: false` on the built-in harness disables continuation, forks and repairs.
 

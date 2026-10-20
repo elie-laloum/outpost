@@ -86,6 +86,10 @@ sandbox:
 
 Passez à `readOnly: false` uniquement pour modifier immédiatement les fichiers source. Un retour arrière de la publication ne peut pas annuler ces écritures. Le montage demande un fournisseur compatible ; `local` ne le prend pas en charge. Voir [travailler sur des fichiers](../working-with-files/).
 
+## Exécuter un agent sur des fichiers
+
+Les workspaces de fichiers acceptent aussi les [agents CLI natifs](../recipe-configuration/) dont les adaptateurs déclarent les capacités nécessaires. Préparez l’[image de l’agent](../agent-images/) et son authentification explicite, puis sélectionnez son rôle dans la recette. Les réparations, reprises ou modes interactifs non pris en charge sont refusés. Consultez les [capacités validées](../working-with-files/#état-de-validation-des-cli-natives) avant de choisir un agent.
+
 ## Conserver l’état entre les exécutions
 
 Pour les checkpoints et la restauration des conversations, suivez [enregistrer la progression](../recipe-durability/). La configuration de fichiers utilise `runtime.directory` pour l’état et `runtime.namespace` pour son identité. La conservation et les snapshots portables sont décrits dans [reprendre un workspace de fichiers](../resuming-file-workspaces/).

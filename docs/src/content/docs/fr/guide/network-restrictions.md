@@ -82,7 +82,7 @@ La confirmation intervient après le démarrage de la sandbox : du code lancé p
 
 Une allowlist démarre automatiquement un conteneur egress dédié par sandbox. La sandbox partage son namespace réseau, mais ni son système de fichiers ni son namespace de processus. Seul le conteneur de filtrage reçoit `NET_ADMIN` ; la sandbox ne peut pas modifier le pare-feu, même avec une commande `elevated`. Les deux conteneurs sont supprimés à la fermeture ; la récupération explicite retrouve aussi le conteneur de filtrage laissé par une allocation interrompue. Outpost ne demande ni modification du pare-feu hôte ni `sudo`.
 
-Cette implémentation des providers n’est pas encore publiée dans le package npm. Son image de filtrage est publique, prend en charge Linux amd64 et arm64, et son digest est épinglé dans Outpost. Le moteur la télécharge automatiquement si nécessaire ; aucune construction locale du conteneur de filtrage ni connexion au registre n’est requise.
+Les conteneurs de filtrage Docker/Podman sont disponibles depuis Outpost 11.2.0. Son image de filtrage est publique, prend en charge Linux amd64 et arm64, et son digest est épinglé dans Outpost. Le moteur la télécharge automatiquement si nécessaire ; aucune construction locale du conteneur de filtrage ni connexion au registre n’est requise.
 
 Utilisez un domaine pour le web et un CIDR pour les connexions TCP/UDP directes. Cet exemple autorise un registre en HTTPS et une plage IP réservée à la documentation ; remplacez cette plage par les adresses réelles de votre service. `denyCidrs` est prioritaire sur les autorisations de domaines et de CIDR.
 

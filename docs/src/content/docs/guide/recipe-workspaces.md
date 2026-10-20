@@ -86,6 +86,10 @@ sandbox:
 
 Set `readOnly: false` only to modify source files immediately. Output-publication rollback cannot undo those writes. Source mounts require a compatible provider; `local` does not support them. See [working with files](../working-with-files/) for mount behavior.
 
+## Run an agent on files
+
+File workspaces also accept [native CLI agents](../recipe-configuration/) whose adapters declare the required capabilities. Prepare the matching [agent image](../agent-images/) and explicit authentication, then select that agent role in your recipe. Unsupported repairs, continuation or interactive modes are refused. See the [validated capability table](../working-with-files/#native-cli-validation-status) before choosing an agent.
+
 ## Keep state between invocations
 
 For checkpoints and conversation restoration, follow [durable recipes](../recipe-durability/). File configuration uses `runtime.directory` for state and `runtime.namespace` for its identity. Retention and portable snapshots are described in [resuming file workspaces](../resuming-file-workspaces/).

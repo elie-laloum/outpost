@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-- Ajout du steering natif confirmé via le serveur RPC de Copilot et le serveur local authentifié de Kimi dans la sandbox. Les validations réelles Docker passent sur les quatre variantes de fichiers pour les deux CLI épinglées, ainsi que le steering par reprise pour Copilot, Kimi et Antigravity. Les configurations avec hooks natifs ou MCP conservent leur chemin print/reprise existant en attendant la validation serveur. Activation du terminal Antigravity en workspace fichiers après vérification réelle de l’accueil, des confirmations d’outils, du suivi, de la sortie, de l’annulation et de la réutilisation ; la reprise portable et l’injection native en cours de tour restent refusées.
+## 12.0.0
 
-Cette version réorganise la CLI autour de la préparation des environnements et remplace l’image unique par une image par agent. Elle retire `outpost init` et exige donc une version majeure.
+Cette version réorganise la CLI autour de la préparation des environnements, remplace l’image unique par une image par agent et ajoute le steering natif Copilot/Kimi. Le retrait de `outpost init` et de l’ancienne organisation des images en fait une version majeure.
 
 - **Rupture :** Retrait de `outpost init` et des projets de workflow générés. Installez le paquet dans vos propres scripts, préparez une image avec `outpost image` et créez les fichiers de recette avec `outpost recipe init`.
 - **Rupture :** Remplacement de l’image d’agent unique par les images officielles `harness`, `codex`, `claude`, `antigravity`, `copilot` et `kimi`. Chacune n’installe que sa CLI, depuis un lockfile versionné propre à l’image, sur une base `node:24-bookworm-slim` épinglée par digest. `images/agents`, `images/base`, le workflow `Agent images` et `scripts/prepare-agent-image.mjs` sont retirés ; l’image `ghcr.io/elie-laloum/outpost/agents` publiée auparavant n’est plus référencée.
@@ -12,6 +12,8 @@ Cette version réorganise la CLI autour de la préparation des environnements et
 - Ajout du workflow `Images` : il éjecte, construit et teste chaque image sur Docker et Podman rootless pour Linux amd64 et arm64, publie des manifestes multi-architectures étiquetés avec la version du paquet, atteste et vérifie leur provenance, puis affiche la commande `scripts/record-images.mjs` qui enregistre les digests vérifiés. Aucune image n’a encore été publiée par ce workflow ; `image list` signale les digests non enregistrés.
 - `outpost --help` regroupe les commandes par tâche, décrit chaque groupe, ajoute des exemples à chaque commande et ajoute `-v, --version`. `doctor` accepte les noms d’images officielles et en déduit l’agent. `--sandbox-provider` devient `--provider`, `recovery verify|restore --directory` devient `recovery transfer verify|restore --path` et `recovery registry recover` devient `recovery registry release` ; les anciens noms restent des alias masqués avec un avertissement de dépréciation jusqu’à la prochaine version majeure.
 - La CI des conteneurs construit son image de test multi-agents avec le même générateur de recettes, et éjecte, construit et teste aussi l’image `harness` sur les deux moteurs.
+- Ajout du steering natif confirmé via le serveur RPC de Copilot et le serveur local authentifié de Kimi dans la sandbox. Les validations réelles Docker passent sur les quatre variantes de fichiers pour les deux CLI épinglées, ainsi que le steering par reprise pour Copilot, Kimi et Antigravity. Les configurations avec hooks natifs ou MCP conservent leur chemin print/reprise existant en attendant la validation serveur. Activation du terminal Antigravity en workspace fichiers après vérification réelle de l’accueil, des confirmations d’outils, du suivi, de la sortie, de l’annulation et de la réutilisation ; la reprise portable et l’injection native en cours de tour restent refusées.
+- Autoriser les recettes YAML à utiliser les harness CLI natifs validés avec des workspaces de fichiers ; conserver le refus des capacités non prises en charge par l’adaptateur exécutant. Le tutoriel YAML bilingue commence par des commandes locales dans un workspace éphémère, sans Git, Docker ni identifiants d’agent.
 
 ## 11.2.0
 

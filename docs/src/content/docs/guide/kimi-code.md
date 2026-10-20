@@ -81,7 +81,7 @@ Outpost passes the key and model to the CLI as `KIMI_MODEL_API_KEY` and `KIMI_MO
 
 - [Conversations](../conversations/): Capture, cold and warm resume, and fork with `kimi fork`. The parent session stays unchanged.
 - [Typed responses](../typed-responses/): An invalid answer is repaired by resuming the session.
-- [Steering](../steering/): Outpost stops the CLI once its session is known, then resumes it with your text.
+- [Steering](../steering/): The authenticated server inside the sandbox injects your text during the turn and confirms delivery. Native hooks or MCP configuration use interruption/resume instead.
 - [MCP servers](../mcp-servers/): Merged into `~/.kimi-code/mcp.json` in the agent home. `oauth: "login"` servers reuse your host login.
 - [Quota pauses](../quota-pauses/): Quota and balance errors stop the turn with code `quota`.
 - [Budgets](../budgets/): Token usage is read from the session after the CLI exits.
@@ -109,6 +109,6 @@ After the CLI exits, Outpost reads the session’s `usage.record` entries in the
 
 API: [createKimiHarness](../../reference/createkimiharness/) · [KimiSettings](../../reference/kimisettings/) · [createKimiConversations](../../reference/createkimiconversations/) · [agentVersions](../../reference/agentversions/).
 
-Non-interactive prompts are passed as one CLI argument. Outpost refuses prompts above 65,536 UTF-8 bytes, including profile and response instructions, before process creation. Split larger work into smaller briefs or reference files already available in the workspace.
+Without native live input, non-interactive prompts are passed as one CLI argument. Outpost refuses prompts above 65,536 UTF-8 bytes, including profile and response instructions, before process creation. Split larger work into smaller briefs or reference files already available in the workspace.
 
-Kimi prompt text is visible in the native process argument list. Keep credentials in declared variables or private files rather than in the brief.
+In that print mode, Kimi prompt text is visible in the native process argument list. Keep credentials in declared variables or private files rather than in the brief.

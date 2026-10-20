@@ -53,7 +53,7 @@ Chaque CLI possède sa fabrique, ses noms d’événements et ses décisions. L�
 - Outpost installe puis retire ses déclarations autour de chaque processus CLI. L’ordre et les filtres restent natifs ; les hooks existants sont conservés.
 
 :::note
-Implémenté mais non publié. Le déclenchement des événements dépend de la version des CLI et reste à valider en conditions réelles pour les cinq CLI et les fournisseurs distants. Les hooks ne remplacent ni les [permissions](../agent-profiles/), ni l’isolation du sandbox.
+Disponible depuis Outpost 11.2.0. Le déclenchement des événements dépend de la version des CLI et reste à valider en conditions réelles pour les cinq CLI et les fournisseurs distants. Les hooks ne remplacent ni les [permissions](../agent-profiles/), ni l’isolation du sandbox.
 :::
 
 Pour partager ces hooks, déclarez-les dans [`defineAgentProfile({ hooks })`](../agent-profiles/#partager-les-hooks). Le harness sélectionne sa section du profil avant d’ajouter ses hooks locaux.

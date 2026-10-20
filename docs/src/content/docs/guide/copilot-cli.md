@@ -44,7 +44,7 @@ Copilot has no API-key mode: `authentication: "usage"` is rejected when the agen
 
 - [Conversations](../conversations/): Captured as a session bundle, then resumed warm or cold with `--resume`.
 - [Typed responses](../typed-responses/): An invalid answer is repaired by resuming the same conversation.
-- [Steering](../steering/): Outpost stops the process and resumes the session with your text.
+- [Steering](../steering/): The native RPC server receives your text during the turn and confirms delivery. Native hooks or MCP configuration use interruption/resume instead.
 - [MCP servers](../mcp-servers/): Passed on each run with `--additional-mcp-config`.
 - [Usage reporting](../budgets/): Token counts read after the run from `session-state/<id>/events.jsonl`.
 - [Quota pauses](../quota-pauses/): Copilot rate-limit and credit messages fail with code `quota`.

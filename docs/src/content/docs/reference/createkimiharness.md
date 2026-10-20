@@ -13,7 +13,7 @@ import { createKimiHarness } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create the Kimi Code CLI preset without starting the CLI; createAgent({ harness, model }) binds it and rejects reasoning and maxOutputTokens. It captures and resumes session bundles, forks with kimi fork and is steered by stopping and resuming the turn. Token usage is read from the session after exit.
+Create the Kimi Code CLI preset without starting the CLI; createAgent({ harness, model }) binds it and rejects reasoning and maxOutputTokens. It captures and resumes session bundles, forks with kimi fork and accepts acknowledged steering through its authenticated in-sandbox server. Native hooks, MCP servers or leases without live input use interruption/resume. Token usage is read from the session after exit.
 
 [Complete example and detailed rules](../../guide/kimi-code/).
 

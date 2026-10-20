@@ -128,3 +128,7 @@ Docker et Podman avec un dépôt monté n’installent jamais de CLI : l’image
 API : [agentVersions](../../reference/agentversions/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [SandboxOptions](../../reference/sandboxoptions/).
 
 Les UID/GID zéro sont acceptés pour des images root choisies explicitement. Root dispose de plus de privilèges dans le conteneur ; choisissez un UID non nul pour le travail normal des agents. Cette option ne fait pas des métadonnées Git montées une frontière de sécurité.
+
+## Remplacer l’ancienne image commune
+
+Outpost 12 retire `outpost init` et l’image commune `agents`. Conservez vos workflows TypeScript, installez `@elie-laloum/outpost` dans leur projet et générez puis construisez l’image de chaque CLI utilisée. Remplacez le champ `image` de chaque fournisseur de sandbox par le tag obtenu. Pour démarrer une recette YAML, utilisez `outpost recipe init`.

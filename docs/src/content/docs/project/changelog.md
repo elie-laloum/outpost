@@ -12,9 +12,9 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
-- Add acknowledged native steering through the Copilot RPC server and the authenticated Kimi loopback server inside the sandbox. Live Docker checks pass all four file bindings for both pinned CLIs, and resume-based steering for Copilot, Kimi and Antigravity. Keep native hooks/MCP on their existing print-mode resume path until server combinations are validated. Enable Antigravity file-workspace terminals after real onboarding, tool-confirmation, follow-up, exit, cancellation and reuse checks; portable continuation and in-flight native injection remain refused.
+## 12.0.0
 
-This release reorganizes the CLI around preparing environments and replaces the all-agent image with one image per agent. It removes `outpost init`, so it requires a major version.
+This release reorganizes the CLI around preparing environments, replaces the all-agent image with one image per agent, and adds native Copilot/Kimi steering. The removal of `outpost init` and the old image layout makes this a major release.
 
 - **Breaking:** Remove `outpost init` and the generated workflow projects. Install the package in your own scripts, prepare an image with `outpost image`, and create recipe files with `outpost recipe init`.
 - **Breaking:** Replace the single agent image with official `harness`, `codex`, `claude`, `antigravity`, `copilot` and `kimi` images. Each installs only its CLI, from a committed per-image lockfile, on a digest-pinned `node:24-bookworm-slim` base. `images/agents`, `images/base`, the `Agent images` workflow and `scripts/prepare-agent-image.mjs` are removed; the previously published `ghcr.io/elie-laloum/outpost/agents` image is no longer referenced.
@@ -22,6 +22,8 @@ This release reorganizes the CLI around preparing environments and replaces the 
 - Add the `Images` workflow: it ejects, builds and smoke-tests every image on Docker and rootless Podman for Linux amd64 and arm64, publishes multi-architecture manifests tagged with the package version, attests and verifies their provenance, and prints the `scripts/record-images.mjs` command that records the verified digests. No image has been published from this workflow yet; `image list` reports unrecorded digests.
 - Group `outpost --help` by task, describe every command group, add examples to each command and add `-v, --version`. `doctor` accepts official image names and infers their agent. Rename `--sandbox-provider` to `--provider`, `recovery verify|restore --directory` to `recovery transfer verify|restore --path`, and `recovery registry recover` to `recovery registry release`; earlier names remain hidden aliases with a deprecation warning until the next major version.
 - Container CI builds its all-agent test image from the same recipe generator, and also ejects, builds and smoke-tests the `harness` image on both engines.
+- Add acknowledged native steering through the Copilot RPC server and the authenticated Kimi loopback server inside the sandbox. Live Docker checks pass all four file bindings for both pinned CLIs, and resume-based steering for Copilot, Kimi and Antigravity. Keep native hooks/MCP on their existing print-mode resume path until server combinations are validated. Enable Antigravity file-workspace terminals after real onboarding, tool-confirmation, follow-up, exit, cancellation and reuse checks; portable continuation and in-flight native injection remain refused.
+- Allow YAML recipes to use validated native CLI harnesses with file workspaces; keep unsupported capabilities refused by the executing adapter. Start the bilingual YAML tutorial with local commands in an ephemeral workspace, without Git, Docker or agent credentials.
 
 ## 11.2.0
 

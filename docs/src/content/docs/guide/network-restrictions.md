@@ -82,7 +82,7 @@ Confirmation happens after the sandbox starts, so code the image launches on its
 
 An allowlist automatically starts one dedicated egress container per sandbox. The sandbox shares its network namespace, but not its filesystem or process namespace. Only the companion receives `NET_ADMIN`; the sandbox cannot change the firewall, including commands run with `elevated`. Both containers are removed on release, and explicit recovery also finds a companion left by interrupted provisioning. No host firewall configuration or `sudo` is required by Outpost.
 
-This provider implementation is unreleased in the npm package. Its companion image is public, supports Linux amd64 and arm64, and is pinned by digest in Outpost. The engine downloads it automatically when absent; no local companion build or registry login is required.
+Docker/Podman egress companions are available from Outpost 11.2.0. Its companion image is public, supports Linux amd64 and arm64, and is pinned by digest in Outpost. The engine downloads it automatically when absent; no local companion build or registry login is required.
 
 Use a domain for web access and a CIDR for direct TCP/UDP access. This example grants HTTPS to a registry and direct connections to a documentation-only IP range; replace that range with your service's actual addresses. `denyCidrs` takes priority over domain and CIDR grants.
 
