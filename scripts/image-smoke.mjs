@@ -19,10 +19,22 @@ assert.ok(executables, `Unknown image name ${name}`);
 const checks = [
   "node --version",
   "git --version",
-  "command -v setsid kill tar cp sleep >/dev/null",
+  ...["setsid", "kill", "tar", "cp", "sleep"].map(
+    (executable) => `command -v ${executable} >/dev/null`,
+  ),
   'test "$HOME" = /home/agent && test -w "$HOME" && touch "$HOME/probe"',
   ...executables.map((executable) => `${executable} --version`),
 ];
+// Podman rejects tmpfs uid options; keep-id and U give the home to the agent user.
+const user =
+  engine === "podman"
+    ? [
+        "--userns",
+        "keep-id:uid=1000,gid=1000",
+        "--tmpfs",
+        "/home/agent:rw,mode=0700,U",
+      ]
+    : ["--tmpfs", "/home/agent:rw,mode=0700,uid=1000,gid=1000"];
 const output = execFileSync(
   engine,
   [
@@ -32,8 +44,7 @@ const output = execFileSync(
     "none",
     "--user",
     "1000:1000",
-    "--tmpfs",
-    "/home/agent:rw,mode=0700,uid=1000,gid=1000",
+    ...user,
     "--entrypoint",
     "sh",
     image,
