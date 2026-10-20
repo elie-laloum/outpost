@@ -1,5 +1,4 @@
 import { invariant } from "../../domain/errors.ts";
-import { builtInAgents } from "../../adapters/agents/catalog.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 
@@ -14,10 +13,6 @@ export function validateFileRecipeCapabilities(
     const node = graph.nodes.get(name);
     if (!node) return;
     const factory = node.definition?.name;
-    invariant(
-      !builtInAgents.some((agent) => factory === `harness.${agent.name}`),
-      "Native CLI support for file workspaces has not been validated",
-    );
     invariant(
       factory !== "toolset.git" &&
         !(factory === "tool.custom" && node.options.workspace === "git"),
