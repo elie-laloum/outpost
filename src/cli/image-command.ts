@@ -40,8 +40,8 @@ const actions: Readonly<Record<string, (values: CliValues) => Promise<void>>> =
               `${image.name.padEnd(12)} ${image.description}\n${"".padEnd(13)}${image.reference}${image.pinned ? "" : " (digest not recorded yet)"}`,
           ),
           "",
-          "Pull one with: outpost image pull --image NAME",
-          "Customize one with: outpost image eject --image NAME",
+          "Build one for your user: outpost image eject --image NAME, then outpost image build --tag TAG",
+          "Pull one once its digest is recorded: outpost image pull --image NAME",
         ].join("\n"),
       );
     },

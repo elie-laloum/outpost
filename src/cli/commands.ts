@@ -149,7 +149,7 @@ export async function runCli(
   const program = new Command()
     .name("outpost")
     .description(
-      "Outpost — run coding agents in sandboxes and compose their workflows.\nStart with `outpost doctor`, then `outpost image pull --image codex`.",
+      "Outpost — run coding agents in sandboxes and compose their workflows.\nStart with `outpost doctor`, then `outpost image list` to choose an agent image.",
     )
     .version(packageVersion(), "-v, --version", "Print the Outpost version")
     .helpOption("-h, --help", "Show help for a command")
