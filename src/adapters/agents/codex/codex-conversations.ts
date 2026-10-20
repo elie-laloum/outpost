@@ -1,7 +1,7 @@
 import { join, posix } from "node:path";
 import type { NativeConversationStore } from "../../../domain/conversation.types.ts";
 import type { TranscriptConversationLayout } from "../../../infrastructure/conversations/layout.types.ts";
-import { createTranscriptConversations } from "../../../infrastructure/conversations/transcript-store.ts";
+import { configuredConversations } from "../configured-conversations.ts";
 import { CODEX_ROLLOUT_DATE } from "./codex-conversations.constants.ts";
 
 function rolloutPath(original: string): string[] {
@@ -26,5 +26,21 @@ export const codexConversationLayout: TranscriptConversationLayout = {
 
 /** Creates the native store for Codex rollouts under ~/.codex/sessions. */
 export function createCodexConversations(): NativeConversationStore {
-  return createTranscriptConversations(codexConversationLayout);
+  return configuredConversations(
+    codexConversationLayout,
+    "CODEX_HOME",
+    (root) => {
+      const sessions = join(root, "sessions");
+      return {
+        ...codexConversationLayout,
+        directory: () => sessions,
+        searchRoot: () => sessions,
+        remoteSearchRoot: () => sessions,
+        capturePath: (_id, _repository, _home, original) =>
+          join(sessions, ...rolloutPath(original)),
+        remotePath: (_id, _lease, original) =>
+          join(sessions, ...rolloutPath(original)).replaceAll("\\", "/"),
+      };
+    },
+  );
 }

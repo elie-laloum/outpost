@@ -12,6 +12,12 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+## 12.0.1
+
+- Correction de la capture et de la restauration des conversations natives lors de l’exécution locale de Claude Code et Codex lorsque `CLAUDE_CONFIG_DIR` ou `CODEX_HOME` désigne un répertoire personnalisé. Un tour de recette réussi ne signale plus une conversation introuvable après l’enregistrement de sa transcription par la CLI.
+- Prise en compte de ces variables de l’hôte pour la recherche et le stockage par défaut, tout en préservant les destinations `conversationHome` explicites, la relocalisation des transcriptions, les fichiers des sous-agents Claude et les chemins des sandboxes isolées.
+- Validation par des tests hors ligne de capture et de restauration, ainsi que par la capture d’une transcription Claude existante sans modification de l’original. Aucun nouvel appel payant à un modèle ni essai de fournisseur cloud n’a été effectué ; les limites de validation des CLI natives et du cloud restent inchangées.
+
 ## 12.0.0
 
 Cette version réorganise la CLI autour de la préparation des environnements, remplace l’image unique par une image par agent et ajoute le steering natif Copilot/Kimi. Le retrait de `outpost init` et de l’ancienne organisation des images en fait une version majeure.

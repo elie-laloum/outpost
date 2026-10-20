@@ -19,6 +19,8 @@ Après chaque tour, Outpost copie la conversation de la sandbox vers l’hôte. 
 
 Copilot et Kimi conservent une session sous forme de dossier : Outpost la regroupe en une archive JSON. L’option `conversationHome` de `dispatch()` ou de `createSandbox()` remplace `~`, ou le dépôt pour les archives, comme racine de ces chemins.
 
+Claude et Codex respectent aussi les variables `CLAUDE_CONFIG_DIR` et `CODEX_HOME` de l’hôte pour le stockage par défaut. Un `conversationHome` explicite reste prioritaire pour les copies capturées. En exécution locale, la capture et la restauration utilisent le répertoire de configuration visible par la CLI, y compris les variables déclarées dans la configuration. Les sandboxes isolées conservent leurs propres chemins de stockage natif ; les variables de l’hôte ne les redirigent pas.
+
 La restauration réécrit les chemins du dépôt enregistrés dans la conversation vers ceux de la nouvelle sandbox. Pour doter une CLI que vous ajoutez de son propre stockage, voir [Formats de conversation natifs](../conversation-formats/).
 
 Codex conserve la date inscrite dans le nom du rollout d’origine lors de la capture et de la restauration. Si plusieurs transcriptions correspondent à la même conversation sans chemin natif préféré, la recherche et la capture échouent explicitement. Inspectez et réconciliez ces copies avant de reprendre ; Outpost ne choisit plus selon l’ordre de parcours des fichiers.

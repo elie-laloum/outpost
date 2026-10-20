@@ -2,7 +2,7 @@ import { basename, join, posix, resolve } from "node:path";
 import type { NativeConversationStore } from "../../../domain/conversation.types.ts";
 import { projectKey } from "../../../infrastructure/conversations/identity.ts";
 import type { TranscriptConversationLayout } from "../../../infrastructure/conversations/layout.types.ts";
-import { createTranscriptConversations } from "../../../infrastructure/conversations/transcript-store.ts";
+import { configuredConversations } from "../configured-conversations.ts";
 
 const directory = (repository: string, home: string) =>
   join(home, ".claude", "projects", projectKey(resolve(repository)));
@@ -31,5 +31,25 @@ export const claudeConversationLayout: TranscriptConversationLayout = {
 
 /** Creates the native store for Claude Code transcripts under ~/.claude/projects. */
 export function createClaudeConversations(): NativeConversationStore {
-  return createTranscriptConversations(claudeConversationLayout);
+  return configuredConversations(
+    claudeConversationLayout,
+    "CLAUDE_CONFIG_DIR",
+    (root) => {
+      const projects = join(root, "projects");
+      const directory = (repository: string) =>
+        join(projects, projectKey(resolve(repository)));
+      const location = (id: string, repository: string) =>
+        join(directory(repository), `${id}.jsonl`);
+      return {
+        ...claudeConversationLayout,
+        directory,
+        searchRoot: () => projects,
+        remoteSearchRoot: () => projects,
+        preferredPath: location,
+        capturePath: location,
+        remotePath: (id, lease) =>
+          location(id, lease.root).replaceAll("\\", "/"),
+      };
+    },
+  );
 }

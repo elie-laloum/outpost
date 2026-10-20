@@ -19,6 +19,8 @@ After each turn, Outpost copies the conversation from the sandbox to the host. `
 
 Copilot and Kimi keep a session as a directory: Outpost packs it into one JSON bundle. The `conversationHome` option of `dispatch()` or `createSandbox()` replaces `~`, or the repository for bundles, as the root of these paths.
 
+Claude and Codex also honor the host's `CLAUDE_CONFIG_DIR` and `CODEX_HOME` for default storage. An explicit `conversationHome` takes precedence for captured copies. With local execution, capture and restore use the configuration directory visible to the CLI, including declared environment overrides. Isolated sandboxes keep their own native storage paths; host overrides do not redirect them.
+
 Restoring rewrites the repository paths recorded in the conversation to those of the new sandbox. To give a CLI you add its own store, see [Native conversation formats](../conversation-formats/).
 
 Codex keeps the date encoded in the original rollout filename when capturing and restoring it. If several transcripts match the same conversation without a preferred native path, lookup and capture fail explicitly. Inspect and reconcile those copies before resuming; Outpost does not choose one by filesystem traversal order.
