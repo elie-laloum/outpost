@@ -16,6 +16,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 - Fix native conversation capture and restoration during local Claude Code and Codex execution when `CLAUDE_CONFIG_DIR` or `CODEX_HOME` selects a custom CLI directory. This prevents successful recipe turns from failing with a conversation-not-found error after the CLI has saved its transcript.
 - Honor these host variables for default conversation lookup and storage while preserving explicit `conversationHome` destinations, transcript relocation, Claude subagent files and isolated sandbox paths.
+- Pin the repository's transitive `follow-redirects` dependency to 1.16.1 to address GHSA-q3jh-wrc6-jgq8 and GHSA-8r9p-f939-6h3c in the optional Daytona SDK dependency tree.
 - Validate the fix with offline capture/restore regressions and capture of an existing Claude transcript without modifying the original. No new paid model or cloud-provider runs were performed; existing native CLI and cloud validation limits remain unchanged.
 
 ## 12.0.0
