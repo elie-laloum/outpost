@@ -1,3 +1,4 @@
+import { createAgentConversationIndex } from "./agent-conversation-index.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
@@ -243,7 +244,7 @@ export async function createFileSandbox(
   const gate = operationGate();
   let closing:
     Promise<import("../domain/workspace.types.ts").Disposal> | undefined;
-  const known = new Set<string>();
+  const known = createAgentConversationIndex();
   let failed = false;
   const synchronize = () =>
     synchronizeFileWorkspace({ options, workspace, state, lease, staging });
@@ -395,7 +396,7 @@ export async function createFileSandbox(
                     const storage = storageFor(agent);
                     if (
                       settings.continuation &&
-                      !known.has(settings.continuation.id)
+                      !known.has(agent, settings.continuation.id)
                     ) {
                       invariant(
                         storage,
@@ -425,7 +426,8 @@ export async function createFileSandbox(
                       },
                       async (turn) => {
                         await synchronize();
-                        if (turn.conversation) known.add(turn.conversation);
+                        if (turn.conversation)
+                          known.remember(agent, turn.conversation);
                         const capturedTurn =
                           await conversations.captureTurn(turn);
                         const captured = turn.conversation
@@ -469,7 +471,7 @@ export async function createFileSandbox(
                               ],
                             };
                           }
-                          known.add(turn.conversation);
+                          known.remember(agent, turn.conversation);
                           await checkpoint();
                           return capturedTurn;
                         }

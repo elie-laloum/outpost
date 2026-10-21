@@ -1,3 +1,4 @@
+import { createAgentConversationIndex } from "./agent-conversation-index.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import type { Agent } from "../domain/agent.types.ts";
@@ -17,7 +18,7 @@ import type {
 export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   const { options, sandboxProvider, workspace, runtime, prepared, staging } =
     context;
-  const known = new Set<string>();
+  const known = createAgentConversationIndex();
   const authenticated = new Map<string, AuthenticatedAgent>();
   const selectAgent = async (
     selected: Agent | undefined,
@@ -78,14 +79,12 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       executionLease,
     };
   };
-  const conversationKey = (agent: Agent, id: string) =>
-    `${agent.storage?.name ?? agent.name}:${id}`;
   const restore = async (
     id: string,
     agent: Agent,
     executionLease: SandboxLease,
   ) => {
-    if (known.has(conversationKey(agent, id))) return;
+    if (known.has(agent, id)) return;
     const storage = storageFor(agent);
     invariant(storage, "This adapter does not support native conversations");
     await restoreConversation(
@@ -99,14 +98,14 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       },
       options.conversationHome,
     );
-    known.add(conversationKey(agent, id));
+    known.remember(agent, id);
   };
 
   return {
     selectAgent,
     restore,
     remember: (agent, id) => {
-      known.add(conversationKey(agent, id));
+      known.remember(agent, id);
     },
   };
 }

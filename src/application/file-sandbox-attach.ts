@@ -64,7 +64,10 @@ export function createFileSandboxAttachment({
         options.sandboxProvider.placement,
         signal,
       );
-      if (settings.continuation && !known.has(settings.continuation.id)) {
+      if (
+        settings.continuation &&
+        !known.has(agent, settings.continuation.id)
+      ) {
         const storage = storageFor(agent);
         invariant(storage, "Agent does not support conversation restoration");
         await restoreConversation(storage, settings.continuation.id, {
