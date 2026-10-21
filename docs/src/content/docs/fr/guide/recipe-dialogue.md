@@ -31,7 +31,7 @@ Un service recevant des décisions doit authentifier ses appelants avant de four
 
 ## Laisser un agent poser des questions
 
-Utilisez la configuration Git et le rôle `writer` de la page [configuration des agents](../recipe-configuration/), préparez son image Codex et gardez les `transports` et `stores` du checkpoint. Ajoutez cet élément sous `tasks` dans la recette persistante. L’agent doit permettre la capture et la reprise portables de conversation.
+Utilisez la configuration Git et le rôle `writer` de la page [configuration des agents](../recipe-configuration/), préparez son image Codex et gardez la déclaration `stores` du checkpoint. Ajoutez cet élément sous `tasks` dans la recette persistante. L’agent doit permettre la capture et la reprise portables de conversation.
 
 ```yaml title="recipe.yaml — interactive task"
 - key: clarify

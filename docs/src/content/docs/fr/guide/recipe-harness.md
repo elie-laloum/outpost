@@ -7,26 +7,22 @@ Ajoutez un fournisseur de modèle et des outils à votre [configuration d’exé
 
 ## Exécuter le harness Outpost depuis le YAML
 
-Déclarez un fournisseur sous `models`, puis reliez-le à une boucle d’agent munie d’outils de lecture et d’édition. Le rôle `coder` utilise cette boucle.
+Déclarez la boucle d’agent directement sur le rôle `coder`, avec son fournisseur de modèle et ses outils de lecture et d’édition. Déplacez un fournisseur ou une boucle sous `models` ou `harnesses` et référencez-le avec `$ref` seulement lorsque plusieurs rôles le partagent.
 
 ```yaml title="outpost.yaml — harness intégré"
-models:
-  coding:
-    type: openai
-    api: responses
-    baseUrl: https://api.openai.com/v1
-    apiKey: { env: OPENAI_API_KEY }
-harnesses:
-  coding:
-    type: outpost
-    modelProvider: { $ref: models.coding }
-    tools:
-      - type: files
-        selection: filesystem
-      - type: edit
 agents:
   coder:
-    harness: { $ref: harnesses.coding }
+    harness:
+      type: outpost
+      modelProvider:
+        type: openai
+        api: responses
+        baseUrl: https://api.openai.com/v1
+        apiKey: { env: OPENAI_API_KEY }
+      tools:
+        - type: files
+          selection: filesystem
+        - type: edit
     model: your-model-name
 ```
 

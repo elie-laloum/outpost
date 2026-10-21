@@ -197,25 +197,21 @@ API: [fromSecrets](../../reference/fromsecrets/) · [SecretSource](../../referen
 
 ## Select secrets before allocation
 
-An environment value can use `{ env: VARIABLE_NAME }`. Secret-manager components use their public options; clients supplied by installed SDKs are borrowed `object` extensions. For example, the Vault token below is read on the host only during execution. Native secret sources are under `secrets`; `variables.secrets` selects explicit names through `fromSecrets()`.
+An environment value can use `{ env: VARIABLE_NAME }`. Secret-manager components use their public options; clients supplied by installed SDKs are borrowed `object` extensions. For example, the Vault token below is read on the host only during execution. The `secrets` variable component selects explicit names through `fromSecrets()`. Declare a source under `secrets` and reference it with `$ref` when several sandboxes or variable selections share it.
 
 ```yaml title="outpost.yaml — a host-side secret source"
-secrets:
-  build:
-    type: vault
-    address: https://vault.example.com
-    token: { env: VAULT_TOKEN }
-    mount: secret
-    path: build
-variables:
-  selected:
-    type: secrets
-    source: { $ref: secrets.build }
-    names: [BUILD_TOKEN]
 sandbox:
   provider: docker
   image: outpost:sandbox
-  variables: { $ref: variables.selected }
+  variables:
+    type: secrets
+    source:
+      type: vault
+      address: https://vault.example.com
+      token: { env: VAULT_TOKEN }
+      mount: secret
+      path: build
+    names: [BUILD_TOKEN]
 ```
 
 Only the selected values reach the sandbox. Validation neither imports user modules nor reads secret values. Missing values fail before allocation; the runtime masks selected values in observations, returned reports and execution diagnostics. It does not modify the host environment. See [secret sources](../secret-sources/) for manager-specific restrictions and credential ownership.

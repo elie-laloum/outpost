@@ -52,18 +52,16 @@ Les autres fournisseurs proposent leurs [options de sandbox](../choose-a-sandbox
 
 ## Partager un profil
 
-Ajoutez `profiles` et remplacez `agents` dans cette même configuration. Les profils partagent instructions, restrictions d’outils compatibles et déclarations MCP. Demander à un agent de ne pas modifier les fichiers ne lui impose pas un accès en lecture seule.
+Remplacez `agents` dans cette même configuration pour ajouter un profil. Déplacez-le sous `profiles` et référencez-le avec `$ref` lorsque plusieurs rôles le partagent. Les profils portent instructions, restrictions d’outils compatibles et déclarations MCP. Demander à un agent de ne pas modifier les fichiers ne lui impose pas un accès en lecture seule.
 
 ```yaml title="outpost.yaml — profiles"
-profiles:
-  writing:
-    type: portable
-    instructions: Write concise, plain-language documents.
 agents:
   writer:
     harness: codex
     authentication: account
-    profile: { $ref: profiles.writing }
+    profile:
+      type: portable
+      instructions: Write concise, plain-language documents.
 ```
 
 Les hooks natifs des CLI et les callbacks de hooks des profils nécessitent des [extensions locales](../recipe-extensions/). Le [harness intégré](../recipe-harness/) possède ses propres déclarations d’outils, permissions et hooks.

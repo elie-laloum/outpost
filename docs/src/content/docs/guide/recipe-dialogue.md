@@ -31,7 +31,7 @@ A service accepting decisions must authenticate its callers before supplying tru
 
 ## Let an agent ask questions
 
-Use the Git configuration and `writer` role from [agent setup](../recipe-configuration/), prepare its Codex image, and keep the checkpoint `transports` and `stores`. Add this item under `tasks` in the checkpointed recipe. The agent must support portable conversation capture and resume.
+Use the Git configuration and `writer` role from [agent setup](../recipe-configuration/), prepare its Codex image, and keep the checkpoint `stores` declaration. Add this item under `tasks` in the checkpointed recipe. The agent must support portable conversation capture and resume.
 
 ```yaml title="recipe.yaml — interactive task"
 - key: clarify

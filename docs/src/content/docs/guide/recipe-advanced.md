@@ -59,17 +59,15 @@ Stop the old coordinator and use native `recoverSpeculation` with its exact revi
 
 ## Resolve integration conflicts
 
-Declare a resolver separately, then connect it through `integration.onConflict`. It receives a separate named workspace and explicit provider. The runtime closes and synchronizes the execution sandbox before integrating, retains rejected work and keeps borrowed workspaces open. Resolver usage is returned in `report.integration.usage`, separately from workflow usage.
+Declare a resolver under `integration.onConflict`; it references the `resolver` role under `agents` and the `build` provider also used by speculation. It receives a separate named workspace and explicit provider. The runtime closes and synchronizes the execution sandbox before integrating, retains rejected work and keeps borrowed workspaces open. Resolver usage is returned in `report.integration.usage`, separately from workflow usage.
 
 ```yaml title="outpost.yaml — integration"
-resolvers:
-  repair:
+integration:
+  onConflict:
     type: agent
     agent: { $ref: agents.resolver }
     sandboxProvider: { $ref: sandboxProviders.build }
     verify: { executable: npm, arguments: [test] }
-integration:
-  onConflict: { $ref: resolvers.repair }
   deadlineMs: 600000
 ```
 

@@ -52,18 +52,16 @@ Other providers use their own [sandbox options](../choose-a-sandbox/). Unsupport
 
 ## Share a profile
 
-Add `profiles` and replace `agents` in the same configuration. Profiles share instructions, supported tool restrictions and MCP declarations. A brief asking an agent not to edit files does not enforce read-only access.
+Replace `agents` in the same configuration to add a profile. Move it under `profiles` and reference it with `$ref` when several roles share it. Profiles carry instructions, supported tool restrictions and MCP declarations. A brief asking an agent not to edit files does not enforce read-only access.
 
 ```yaml title="outpost.yaml — profiles"
-profiles:
-  writing:
-    type: portable
-    instructions: Write concise, plain-language documents.
 agents:
   writer:
     harness: codex
     authentication: account
-    profile: { $ref: profiles.writing }
+    profile:
+      type: portable
+      instructions: Write concise, plain-language documents.
 ```
 
 Native CLI lifecycle hooks and profile hook callbacks require [local extensions](../recipe-extensions/). The [built-in harness](../recipe-harness/) has its own tools, permissions and hook declarations.

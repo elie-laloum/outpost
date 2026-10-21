@@ -7,26 +7,22 @@ Add a model provider and tools to your [execution configuration](../recipe-confi
 
 ## Run the Outpost harness from YAML
 
-Declare a model provider under `models`, then connect it to a harness with file-reading and editing tools. The `coder` role uses that harness.
+Declare the harness directly on the `coder` role, with its model provider and file-reading and editing tools. Move a provider or harness under `models` or `harnesses` and reference it with `$ref` only when several roles share it.
 
 ```yaml title="outpost.yaml — built-in harness"
-models:
-  coding:
-    type: openai
-    api: responses
-    baseUrl: https://api.openai.com/v1
-    apiKey: { env: OPENAI_API_KEY }
-harnesses:
-  coding:
-    type: outpost
-    modelProvider: { $ref: models.coding }
-    tools:
-      - type: files
-        selection: filesystem
-      - type: edit
 agents:
   coder:
-    harness: { $ref: harnesses.coding }
+    harness:
+      type: outpost
+      modelProvider:
+        type: openai
+        api: responses
+        baseUrl: https://api.openai.com/v1
+        apiKey: { env: OPENAI_API_KEY }
+      tools:
+        - type: files
+          selection: filesystem
+        - type: edit
     model: your-model-name
 ```
 

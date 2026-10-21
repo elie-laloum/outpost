@@ -7,7 +7,7 @@ Start with the two version-3 files from [Save and resume a recipe](../recipe-dur
 
 ## Declare the queue and worker
 
-This SQLite queue stores jobs locally. The `review` handler executes your checkpointed recipe. Keep the existing `transports` and `stores` declarations.
+This SQLite queue stores jobs locally. The `review` handler executes your checkpointed recipe. Keep the existing checkpoint `stores` declaration.
 
 ```yaml title="outpost.yaml — queue and worker"
 queues:

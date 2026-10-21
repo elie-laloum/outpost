@@ -197,25 +197,21 @@ API : [fromSecrets](../../reference/fromsecrets/) · [SecretSource](../../refere
 
 ## Sélectionner les secrets avant allocation
 
-Une valeur d’environnement peut utiliser `{ env: VARIABLE_NAME }`. Les composants de gestion de secrets reprennent leurs options publiques ; les clients SDK installés sont des extensions `object` empruntées. Le token Vault ci-dessous est ainsi lu sur l’hôte uniquement à l’exécution. Les sources natives sont déclarées sous `secrets` ; `variables.secrets` sélectionne des noms explicites avec `fromSecrets()`.
+Une valeur d’environnement peut utiliser `{ env: VARIABLE_NAME }`. Les composants de gestion de secrets reprennent leurs options publiques ; les clients SDK installés sont des extensions `object` empruntées. Le token Vault ci-dessous est ainsi lu sur l’hôte uniquement à l’exécution. Le composant de variables `secrets` sélectionne des noms explicites avec `fromSecrets()`. Déclarez une source sous `secrets` et référencez-la avec `$ref` lorsque plusieurs sandboxes ou sélections de variables la partagent.
 
 ```yaml title="outpost.yaml — source de secrets sur l’hôte"
-secrets:
-  build:
-    type: vault
-    address: https://vault.example.com
-    token: { env: VAULT_TOKEN }
-    mount: secret
-    path: build
-variables:
-  selected:
-    type: secrets
-    source: { $ref: secrets.build }
-    names: [BUILD_TOKEN]
 sandbox:
   provider: docker
   image: outpost:sandbox
-  variables: { $ref: variables.selected }
+  variables:
+    type: secrets
+    source:
+      type: vault
+      address: https://vault.example.com
+      token: { env: VAULT_TOKEN }
+      mount: secret
+      path: build
+    names: [BUILD_TOKEN]
 ```
 
 Seules les valeurs sélectionnées atteignent la sandbox. La validation n’importe aucun module utilisateur et ne lit aucune valeur de secret. Une valeur absente échoue avant allocation ; le runtime masque les valeurs sélectionnées dans les observations, les rapports retournés et les diagnostics d’exécution. Il ne modifie pas l’environnement hôte. Conservez les restrictions de votre service et les identifiants du gestionnaire sur l’hôte, comme décrit plus haut.

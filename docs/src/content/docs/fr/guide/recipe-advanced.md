@@ -59,17 +59,15 @@ Arrêtez l’ancien coordinateur puis utilisez `recoverSpeculation` avec sa rév
 
 ## Résoudre les conflits d’intégration
 
-Déclarez un résolveur séparément puis reliez-le avec `integration.onConflict`. Il reçoit un workspace nommé distinct et un fournisseur explicite. Le runtime ferme et synchronise la sandbox d’exécution avant l’intégration, conserve le travail refusé et laisse ouverts les workspaces empruntés. La consommation du résolveur figure dans `report.integration.usage`, séparément de celle du workflow.
+Déclarez un résolveur sous `integration.onConflict` ; il référence le rôle `resolver` de `agents` et le fournisseur `build` également utilisé par la spéculation. Il reçoit un workspace nommé distinct et un fournisseur explicite. Le runtime ferme et synchronise la sandbox d’exécution avant l’intégration, conserve le travail refusé et laisse ouverts les workspaces empruntés. La consommation du résolveur figure dans `report.integration.usage`, séparément de celle du workflow.
 
 ```yaml title="outpost.yaml — intégration"
-resolvers:
-  repair:
+integration:
+  onConflict:
     type: agent
     agent: { $ref: agents.resolver }
     sandboxProvider: { $ref: sandboxProviders.build }
     verify: { executable: npm, arguments: [test] }
-integration:
-  onConflict: { $ref: resolvers.repair }
   deadlineMs: 600000
 ```
 

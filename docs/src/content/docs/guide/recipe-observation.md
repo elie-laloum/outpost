@@ -47,19 +47,17 @@ A custom reporter uses `type: custom` and named `handlers`, each referencing a c
 
 ## Persist and read execution state
 
-Add a transport and reference it directly from observation. The default observation component is `client`; `type: hub` remains available for explicit low-level composition. Use this complete configuration with the tutorial recipe. Each run gets a generated observation ID, returned as `observationId` in the final report. To choose one in advance, add `runId: review-123` to the recipe’s `workflow` mapping, using a fresh ID for each independent run.
+Declare a transport directly inside observation. The default observation component is `client`; `type: hub` remains available for explicit low-level composition. Use this complete configuration with the tutorial recipe. Each run gets a generated observation ID, returned as `observationId` in the final report. To choose one in advance, add `runId: review-123` to the recipe’s `workflow` mapping, using a fresh ID for each independent run.
 
 ```yaml title="outpost.yaml — persisted observation"
 version: 3
 workspace: { kind: ephemeral }
 sandbox: { provider: local }
-transports:
-  runs:
-    type: local
-    directory: ./.outpost/storage
 observation:
   type: client
-  transporter: { $ref: transports.runs }
+  transporter:
+    type: local
+    directory: ./.outpost/storage
   sinks:
     - type: reporter
       label: review

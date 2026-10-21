@@ -47,19 +47,17 @@ Un reporter personnalisé utilise `type: custom` et des `handlers` nommés, chac
 
 ## Enregistrer et lire l’état d’exécution
 
-Ajoutez un transport et référencez-le directement depuis l’observation. Le composant par défaut est `client` ; `type: hub` reste disponible pour une composition élémentaire explicite. Utilisez cette configuration complète avec la recette du tutoriel. Chaque exécution reçoit un identifiant d’observation généré, renvoyé dans le champ `observationId` du rapport final. Pour le choisir à l’avance, ajoutez `runId: review-123` dans la section `workflow` de la recette, avec un identifiant neuf pour chaque exécution indépendante.
+Déclarez un transport directement dans l’observation. Le composant par défaut est `client` ; `type: hub` reste disponible pour une composition élémentaire explicite. Utilisez cette configuration complète avec la recette du tutoriel. Chaque exécution reçoit un identifiant d’observation généré, renvoyé dans le champ `observationId` du rapport final. Pour le choisir à l’avance, ajoutez `runId: review-123` dans la section `workflow` de la recette, avec un identifiant neuf pour chaque exécution indépendante.
 
 ```yaml title="outpost.yaml — observation persistante"
 version: 3
 workspace: { kind: ephemeral }
 sandbox: { provider: local }
-transports:
-  runs:
-    type: local
-    directory: ./.outpost/storage
 observation:
   type: client
-  transporter: { $ref: transports.runs }
+  transporter:
+    type: local
+    directory: ./.outpost/storage
   sinks:
     - type: reporter
       label: review

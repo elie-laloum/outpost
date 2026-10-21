@@ -7,7 +7,7 @@ Partez des deux fichiers en version 3 du guide [Enregistrer et reprendre une rec
 
 ## Déclarer la file et le worker
 
-Cette file SQLite stocke les jobs localement. Le handler `review` exécute votre recette avec checkpoint. Gardez les déclarations `transports` et `stores` existantes.
+Cette file SQLite stocke les jobs localement. Le handler `review` exécute votre recette avec checkpoint. Gardez la déclaration `stores` de checkpoint existante.
 
 ```yaml title="outpost.yaml — queue and worker"
 queues:

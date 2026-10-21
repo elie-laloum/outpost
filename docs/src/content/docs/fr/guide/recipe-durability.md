@@ -7,18 +7,16 @@ Cet exemple enregistre des éléments à relire, attend une approbation puis con
 
 ## Stocker la progression
 
-Le transport local conserve les checkpoints sous `.outpost/state`. Les commandes suivantes doivent utiliser la même configuration et le même identifiant d’exécution. Le format YAML est en version 3 ; le `version: "1"` du checkpoint ci-dessous est une identité distincte que vous choisissez pour le workflow.
+Le transport local déclaré dans le stockage de checkpoints conserve les checkpoints sous `.outpost/state` ; le stockage garde un nom parce que la recette le référence. Les commandes suivantes doivent utiliser la même configuration et le même identifiant d’exécution. Le format YAML est en version 3 ; le `version: "1"` du checkpoint ci-dessous est une identité distincte que vous choisissez pour le workflow.
 
 ```yaml title="outpost.yaml"
 version: 3
-transports:
-  state:
-    type: local
-    directory: ./.outpost/state
 stores:
   checkpoint:
     type: transport
-    transporter: { $ref: transports.state }
+    transporter:
+      type: local
+      directory: ./.outpost/state
 ```
 
 ## Attendre une approbation

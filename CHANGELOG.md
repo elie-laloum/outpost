@@ -8,6 +8,7 @@
 - Route the remaining task lifecycle changes (attempts, cache hits, failures, input suspension and answers, quota pauses, gate pauses and decisions) through named transitions, so each workflow status change has one owner. Statuses, events and checkpoints are unchanged.
 - Use the shared total deadline for tool calls, hooks, workflow and loop-task timeouts and System One decisions; closing a deadline with a reason now also stops work still bound to it. Share token-count validation between model adapters, session readers, harness turns, decisions and reported usage. Streaming inactivity limits keep their own renewable timers.
 - Add `readWorkflowJob(job)` to project a workflow job's queue `jobStatus` beside its `runId`, saved `workflowStatus` and `nextAction`, including summaries saved before `workflowStatus` existed. Type the next actions with `WorkflowJobNextAction` and document the new summary fields in the `defineWorkflowJob` reference.
+- Show direct YAML declarations first in the harness, durability, observation, profile, secret-source and conflict-resolver guides. Named `$ref` components are now introduced only for shared or referenced components; both forms keep the same validation and execution.
 
 ## 13.0.0
 

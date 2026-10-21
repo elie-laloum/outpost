@@ -7,18 +7,16 @@ This example saves evidence, waits for approval and then records acceptance. It 
 
 ## Store progress
 
-The local transport keeps checkpoints under `.outpost/state`. Later commands must use the same configuration and run ID. The YAML format is version 3; checkpoint `version: "1"` below is a separate identity you choose for the workflow.
+The local transport declared inside the checkpoint store keeps checkpoints under `.outpost/state`; the store keeps a name because the recipe references it. Later commands must use the same configuration and run ID. The YAML format is version 3; checkpoint `version: "1"` below is a separate identity you choose for the workflow.
 
 ```yaml title="outpost.yaml"
 version: 3
-transports:
-  state:
-    type: local
-    directory: ./.outpost/state
 stores:
   checkpoint:
     type: transport
-    transporter: { $ref: transports.state }
+    transporter:
+      type: local
+      directory: ./.outpost/state
 ```
 
 ## Pause at an approval
