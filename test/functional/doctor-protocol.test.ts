@@ -7,8 +7,8 @@ import {
   createCodexHarness,
   createCopilotHarness,
   createKimiHarness,
-  diagnoseAgentProtocol,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { diagnoseAgentProtocol } from "../../src/integrations.ts";
 import { builtInAgentRecord } from "../../src/adapters/agents/catalog.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 

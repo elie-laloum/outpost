@@ -9,7 +9,7 @@ import type {
   LoopCheckResult,
   DecisionProvider,
   WorkflowJson,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 export const visits: string[] = [];
 export function transform(

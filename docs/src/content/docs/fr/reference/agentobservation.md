@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AgentObservation } from "@elie-laloum/outpost";
+import type { AgentObservation } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

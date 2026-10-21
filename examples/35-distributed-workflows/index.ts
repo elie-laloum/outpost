@@ -9,18 +9,20 @@ import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createEd25519DecisionVerifier,
-  createHttpTaskQueue,
-  createLocalTransport,
-  createSqliteTaskQueue,
   createWorkflowCheckpointStore,
   defineApprovalTask,
-  defineQueuedTask,
   defineWorkflow,
+  signWorkflowDecision,
+} from "@elie-laloum/outpost/workflows";
+import {
+  createHttpTaskQueue,
+  createSqliteTaskQueue,
+  defineQueuedTask,
   runQueueWorker,
   serveTaskQueue,
-  signWorkflowDecision,
   type QueueHandler,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/queues";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import { model, modelProvider } from "../shared/model.ts";
 import { releaseChannel } from "./release-channel.ts";
 

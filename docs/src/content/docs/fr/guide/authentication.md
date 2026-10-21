@@ -20,7 +20,7 @@ import {
   createAgent,
   createClaudeHarness,
   createCodexHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 
 // Votre abonnement ChatGPT, depuis ~/.codex/auth.json
 export const planCoder = createAgent({
@@ -47,7 +47,7 @@ Référence API : [AgentAuthentication](../../reference/agentauthentication/), [
 La page de chaque agent indique sa commande de connexion. Consultez son contrat API pour choisir la source des identifiants.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const teamCoder = createAgent({
   harness: createCodexHarness({

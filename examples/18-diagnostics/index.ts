@@ -1,7 +1,8 @@
 // Diagnostics — check that the environment can do what you're about to ask of it,
 // before blaming the agent or the code.
 
-import { createSandbox, diagnoseSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
+import { diagnoseSandbox } from "@elie-laloum/outpost/integrations";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

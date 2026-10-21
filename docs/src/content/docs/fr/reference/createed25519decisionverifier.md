@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
+import { createEd25519DecisionVerifier } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

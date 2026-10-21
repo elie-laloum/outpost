@@ -10,14 +10,14 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
+import { createWorkspace } from "../src/workspaces.ts";
 import {
-  createWorkspace,
   createSandbox,
   createAgent,
   createLocalTransport,
   dispatch,
   changed,
-} from "../src/index.ts";
+} from "../src/core.ts";
 import type { AgentEvent } from "../src/domain/agent.types.ts";
 import { createClaudeConversations } from "../src/adapters/agents/claude/claude-conversations.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";

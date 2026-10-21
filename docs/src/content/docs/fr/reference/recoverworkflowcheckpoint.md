@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost";
+import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

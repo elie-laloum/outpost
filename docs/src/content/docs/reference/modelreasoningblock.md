@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ModelReasoningBlock } from "@elie-laloum/outpost";
+import type { ModelReasoningBlock } from "@elie-laloum/outpost/harness";
 ```
 
 ## Parameters and properties

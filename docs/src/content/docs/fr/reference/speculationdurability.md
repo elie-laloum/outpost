@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { SpeculationDurability } from "@elie-laloum/outpost";
+import type { SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
 ```
 
 ## Paramètres et propriétés

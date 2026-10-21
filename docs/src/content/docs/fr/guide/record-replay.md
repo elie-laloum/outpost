@@ -12,7 +12,7 @@ Enregistrez une tâche dans un [journal](../journals/), puis utilisez un agent d
 <!-- tabs -->
 
 ```ts title="record-settings.ts"
-import { createLocalTransport } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const transporter = createLocalTransport({
   directory: ".outpost/storage",
@@ -22,7 +22,8 @@ export const brief = { text: "Fix the failing parser test." };
 
 ```ts title="record.ts"
 import { writeFile } from "node:fs/promises";
-import { dispatch, readJournal } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
+import { readJournal } from "@elie-laloum/outpost/observation";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { brief, transporter } from "./record-settings.ts";
 
@@ -42,7 +43,8 @@ await writeFile("recorded-journal.json", JSON.stringify(journal));
 ```
 
 ```ts title="replay.ts"
-import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
+import { createReplayAgent } from "@elie-laloum/outpost/observation";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { readFile } from "node:fs/promises";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { brief } from "./record-settings.ts";
@@ -105,11 +107,11 @@ Quand le rejeu s’écarte de son journal, il lève [`ReplayDivergence`](../../r
 Référence API : [ReplayDivergenceKind](../../reference/replaydivergencekind/).
 
 ```ts
+import { dispatch } from "@elie-laloum/outpost/core";
 import {
-  dispatch,
   createReplayAgent,
   ReplayDivergence,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/observation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 declare const journal: readonly unknown[];
 try {
@@ -157,7 +159,8 @@ export const branch = {
 ```
 
 ```ts title="replay-parser.ts"
-import { createReplayAgent, dispatch } from "@elie-laloum/outpost";
+import { createReplayAgent } from "@elie-laloum/outpost/observation";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { journal, branch } from "./replay-fixture.ts";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 

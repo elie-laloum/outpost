@@ -3,9 +3,9 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createWorkspace,
-  createLocalTransport,
   publishWorkspaceOutputs,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
+import { createLocalTransport } from "../../src/core.ts";
 import type { Transport } from "../../src/domain/transport.types.ts";
 
 const [root, boundary, timing] = process.argv.slice(2);

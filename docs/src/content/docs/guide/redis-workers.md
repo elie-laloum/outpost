@@ -48,7 +48,7 @@ Other policies can evict the expiring keys that hold worker leases. With `noevic
 Import the adapter from its own subpath. The queue implements the same contract as the SQLite queue, so a worker runs on it unchanged ([Job queues and workers](../job-queues/)).
 
 ```ts title="worker.ts"
-import { runQueueWorker } from "@elie-laloum/outpost";
+import { runQueueWorker } from "@elie-laloum/outpost/queues";
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 const queue = await createBullMQTaskQueue({

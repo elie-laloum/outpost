@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ShellToolsOptions } from "@elie-laloum/outpost";
+import type { ShellToolsOptions } from "@elie-laloum/outpost/harness";
 ```
 
 ## Parameters and properties

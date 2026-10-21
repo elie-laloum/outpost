@@ -28,7 +28,7 @@ Connectez-vous sur l’hôte avec le même nom de serveur et la même URL que da
 Déclarez ensuite `oauth: "login"`.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createCodexHarness({
@@ -53,7 +53,7 @@ La CLI rafraîchit le jeton dans la sandbox. Si le serveur d’autorisation fait
 Pour les serveurs de machine à machine du [harness intégré](../harness/), nommez les variables qui contiennent l’identifiant et le secret du client.
 
 ```ts
-import type { McpServers } from "@elie-laloum/outpost";
+import type { McpServers } from "@elie-laloum/outpost/core";
 
 const mcpServers: McpServers = {
   internal: {

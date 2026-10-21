@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineHarnessContextStrategy } from "@elie-laloum/outpost";
+import { defineHarnessContextStrategy } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

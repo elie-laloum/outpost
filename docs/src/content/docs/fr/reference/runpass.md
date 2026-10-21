@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RunPass } from "@elie-laloum/outpost";
+import type { RunPass } from "@elie-laloum/outpost/observation";
 ```
 
 ## Paramètres et propriétés

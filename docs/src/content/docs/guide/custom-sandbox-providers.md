@@ -41,7 +41,7 @@ export declare const vms: {
 ```
 
 ```ts title="deadline.ts"
-import type { TransferOptions } from "@elie-laloum/outpost";
+import type { TransferOptions } from "@elie-laloum/outpost/integrations";
 
 export const bounded = ({ signal, deadlineMs }: TransferOptions) =>
   AbortSignal.any([
@@ -51,7 +51,8 @@ export const bounded = ({ signal, deadlineMs }: TransferOptions) =>
 ```
 
 ```ts title="command-options.ts"
-import type { SandboxContext, Command } from "@elie-laloum/outpost";
+import type { SandboxContext } from "@elie-laloum/outpost/integrations";
+import type { Command } from "@elie-laloum/outpost/core";
 import { bounded } from "./deadline.ts";
 
 export function commandOptions(context: SandboxContext, command: Command) {
@@ -67,7 +68,10 @@ export function commandOptions(context: SandboxContext, command: Command) {
 
 ```ts title="invoke-vm.ts"
 import type { Vm } from "./vm.types.ts";
-import type { SandboxContext, SandboxLease } from "@elie-laloum/outpost";
+import type {
+  SandboxContext,
+  SandboxLease,
+} from "@elie-laloum/outpost/integrations";
 import { commandOptions } from "./command-options.ts";
 
 export function invokeVm(
@@ -94,7 +98,7 @@ Add transfers and idempotent release, then compose the provider in `vm-provider.
 
 ```ts title="transfer-vm.ts"
 import type { Vm } from "./vm.types.ts";
-import type { SandboxLease } from "@elie-laloum/outpost";
+import type { SandboxLease } from "@elie-laloum/outpost/integrations";
 import { bounded } from "./deadline.ts";
 
 export function transferVm(vm: Vm): Pick<SandboxLease, "upload" | "download"> {
@@ -109,7 +113,7 @@ export function transferVm(vm: Vm): Pick<SandboxLease, "upload" | "download"> {
 
 ```ts title="vm-lease.ts"
 import type { Vm } from "./vm.types.ts";
-import type { SandboxLease } from "@elie-laloum/outpost";
+import type { SandboxLease } from "@elie-laloum/outpost/integrations";
 import { transferVm } from "./transfer-vm.ts";
 
 export function createVmLease(
@@ -129,7 +133,7 @@ export function createVmLease(
 ```
 
 ```ts title="vm-provider.ts"
-import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
+import { createRemoteSandboxProvider } from "@elie-laloum/outpost/integrations";
 import { randomUUID } from "node:crypto";
 import { vms } from "./vm-sdk.types.ts";
 import { createVmLease } from "./vm-lease.ts";
@@ -197,7 +201,7 @@ A durable race registers each sandbox before it exists, so a restarted coordinat
 <!-- tabs -->
 
 ```ts title="vm-lifecycle.types.ts"
-import type { SandboxLease } from "@elie-laloum/outpost";
+import type { SandboxLease } from "@elie-laloum/outpost/integrations";
 
 export declare function startVm(
   name: string,
@@ -210,10 +214,10 @@ export declare function removeVm(
 ```
 
 ```ts title="durable-vm.ts"
-import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
+import { createRemoteSandboxProvider } from "@elie-laloum/outpost/integrations";
 import { randomUUID } from "node:crypto";
 import { startVm, removeVm } from "./vm-lifecycle.types.ts";
-import type { SandboxProvider } from "@elie-laloum/outpost";
+import type { SandboxProvider } from "@elie-laloum/outpost/integrations";
 
 export const provider = createRemoteSandboxProvider({
   name: "vm",
@@ -238,7 +242,7 @@ export const durableVmProvider: SandboxProvider = {
 <!-- tabs -->
 
 ```ts title="diagnostic-lease.ts"
-import type { SandboxProvider } from "@elie-laloum/outpost";
+import type { SandboxProvider } from "@elie-laloum/outpost/integrations";
 import { repository } from "./outpost.config.ts";
 import { join } from "node:path";
 
@@ -255,7 +259,7 @@ export function openDiagnosticLease() {
 
 ```ts title="diagnose.ts"
 import { openDiagnosticLease, vmSandboxProvider } from "./diagnostic-lease.ts";
-import { diagnoseSandbox } from "@elie-laloum/outpost";
+import { diagnoseSandbox } from "@elie-laloum/outpost/integrations";
 
 export const lease = await openDiagnosticLease();
 try {

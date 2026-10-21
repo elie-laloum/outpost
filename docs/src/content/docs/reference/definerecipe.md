@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineRecipe } from "@elie-laloum/outpost";
+import { defineRecipe } from "@elie-laloum/outpost/recipes";
 ```
 
 ## Purpose and behavior

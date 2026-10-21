@@ -12,7 +12,8 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { join } from "node:path";
-import { openWorkspace, OutpostError } from "../../src/index.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
+import { OutpostError } from "../../src/core.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { changed } from "../../src/index.ts";
+import { changed } from "../../src/core.ts";
 import { createLifecycleHookRunner } from "../../src/application/lifecycle-hooks.ts";
 
 test("changed copies and freezes relative file declarations", () => {

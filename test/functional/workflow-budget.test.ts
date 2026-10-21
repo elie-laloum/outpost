@@ -2,12 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   defineAgentTask,
-  createSandbox,
   defineIsolatedTask,
-  defineTextResponse,
   defineTask,
   defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createSandbox, defineTextResponse } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 

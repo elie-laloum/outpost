@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryRetentionPolicy } from "@elie-laloum/outpost";
+import type { RecoveryRetentionPolicy } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Parameters and properties

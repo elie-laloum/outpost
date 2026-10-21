@@ -4,12 +4,14 @@
 import { join } from "node:path";
 import {
   createAgent,
-  createHarness,
-  createHarnessFileTools,
   createLocalTransport,
   createSandbox,
-  inspectRecovery,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost/harness";
+import { inspectRecovery } from "@elie-laloum/outpost/recovery";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

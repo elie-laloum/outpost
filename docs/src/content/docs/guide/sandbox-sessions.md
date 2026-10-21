@@ -10,7 +10,7 @@ Start with the [agent configuration](../setup/) and a project whose test command
 Open a sandbox with `createSandbox()` when several operations need the same files and installed dependencies. `await using` closes it at the end of the scope, including when an operation throws.
 
 ```ts title="session.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
@@ -40,7 +40,7 @@ An `agent` passed to `sandbox.dispatch()` replaces the one given to `createSandb
 `sandbox.command()` runs one executable with an array of arguments. No shell parses them: `*`, `|` and `$HOME` reach the program as plain text. Call a shell yourself when you need one.
 
 ```ts title="command.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
@@ -75,7 +75,7 @@ The result waits for the process to exit, even if its output closes earlier. Hos
 `observe` shows output while the command runs. `retain` only bounds what the result keeps, not what `observe` receives.
 
 ```ts
-import type { Command } from "@elie-laloum/outpost";
+import type { Command } from "@elie-laloum/outpost/core";
 
 const build: Command = {
   executable: "npm",
@@ -102,7 +102,7 @@ For this step, follow [Open an interactive agent terminal](../interactive-termin
 A sandbox you create never merges its branch on its own. With `branch: { mode: "integrate" }`, call `sandbox.workspace.integrate()` before closing to merge the work branch into its base.
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({
@@ -138,8 +138,8 @@ API: [createSandbox](../../reference/createsandbox/) · [Sandbox](../../referenc
 <!-- tabs -->
 
 ```ts title="fix-dates.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import { defineAgentTask } from "@elie-laloum/outpost/workflows";
 
 export function defineFix(sandbox: Sandbox) {
   return defineAgentTask({
@@ -151,9 +151,9 @@ export function defineFix(sandbox: Sandbox) {
 ```
 
 ```ts title="test-dates.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
 import { defineFix } from "./fix-dates.ts";
-import { defineCommandTask } from "@elie-laloum/outpost";
+import { defineCommandTask } from "@elie-laloum/outpost/workflows";
 
 export function defineTests(
   sandbox: Sandbox,
@@ -169,7 +169,8 @@ export function defineTests(
 ```
 
 ```ts title="run-dates.ts"
-import { createSandbox, defineWorkflow } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { defineFix } from "./fix-dates.ts";
 import { defineTests } from "./test-dates.ts";

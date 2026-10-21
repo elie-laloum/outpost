@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createCopilotHarness } from "@elie-laloum/outpost";
+import { createCopilotHarness } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

@@ -2,13 +2,12 @@
 // The real command says whether the tests pass, not the agent.
 
 import { join } from "node:path";
+import { createAgent, createSandbox } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
-  createSandbox,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

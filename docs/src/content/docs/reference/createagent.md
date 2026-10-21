@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createAgent } from "@elie-laloum/outpost";
+import { createAgent } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

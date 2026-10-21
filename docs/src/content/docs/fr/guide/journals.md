@@ -13,7 +13,7 @@ Chaque tâche d’agent enregistre ses événements dans un journal par défaut.
 
 ```ts title="record-journal.ts"
 import { writeFile } from "node:fs/promises";
-import { createLocalTransport, dispatch } from "@elie-laloum/outpost";
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -31,7 +31,8 @@ await writeFile("journal-reference.json", JSON.stringify(result.logReference));
 
 ```ts title="read-journal.ts"
 import { readFile } from "node:fs/promises";
-import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { readJournal } from "@elie-laloum/outpost/observation";
 
 const reference = JSON.parse(await readFile("journal-reference.json", "utf8"));
 const events = await readJournal({
@@ -60,8 +61,9 @@ Référence API : [ReadJournalOptions](../../reference/readjournaloptions/).
 La lecture échoue si le journal dépasse les limites configurées ; elle ne renvoie pas une transcription tronquée.
 
 ```ts
-import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
-import type { TransportReference } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { readJournal } from "@elie-laloum/outpost/observation";
+import type { TransportReference } from "@elie-laloum/outpost/storage";
 
 declare const reference: TransportReference;
 
@@ -82,7 +84,7 @@ Référence API : [ObservationEvent](../../reference/observationevent/) et [Agen
 Le [harness intégré](../harness/) n’émet `model-request` et `model-response` que sur un hub verbeux. Pour enregistrer les échanges complets avec le modèle, passez-en un avec un journal `verbose` :
 
 ```ts
-import { createObservation, dispatch } from "@elie-laloum/outpost";
+import { createObservation, dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const observation = createObservation({ verbose: true });
@@ -106,7 +108,7 @@ await observation.close();
 Un dispatch en échec ou annulé ferme quand même son journal par `dispatch-finished`, y compris lorsque la préparation échoue. L’erreur porte la référence : lisez-la avec `recoveryDetails()`.
 
 ```ts
-import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import { dispatch, recoveryDetails } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {

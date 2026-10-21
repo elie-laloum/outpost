@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { planRecoveryRestore } from "@elie-laloum/outpost";
+import { planRecoveryRestore } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Rôle et comportement

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { runQueueWorker } from "@elie-laloum/outpost";
+import { runQueueWorker } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

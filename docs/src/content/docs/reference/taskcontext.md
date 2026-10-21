@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskContext } from "@elie-laloum/outpost";
+import type { TaskContext } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

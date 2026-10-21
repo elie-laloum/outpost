@@ -10,7 +10,7 @@ Utilisez ce guide lorsqu’une tâche ne trouve pas les outils ou dépendances d
 Utilisez le hook `sandboxReady` pour installer les dépendances du projet avant de lancer l’agent. La commande s’exécute dans la sandbox préparée : l’agent dispose donc des paquets installés pendant sa tâche.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

@@ -10,7 +10,7 @@ Start from [Set deadlines and cancel work](../limits-and-cancellation/) and its 
 `passes` sends the brief again when a pass ends without a completion marker. Ask for the marker in the brief: Outpost does not add it.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

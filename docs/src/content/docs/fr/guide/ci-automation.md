@@ -19,7 +19,7 @@ description: "Exécutez un script Outpost dans un job de CI et conservez les ré
 Pour utiliser une clé d’API en CI, configurez `coder` dans `outpost.config.ts` afin de lire la clé dans l’environnement du job. Déclarez-la dans les secrets de votre CI pour que le runner puisse l’utiliser sans connexion interactive.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({
@@ -76,7 +76,7 @@ Un job échoue quand le script sort avec un statut non nul. Afficher une erreur 
 | `outpost doctor`                    | Sort avec le statut 1                         | Rien                               |
 
 ```ts title="fix.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const signal = AbortSignal.timeout(30 * 60_000);

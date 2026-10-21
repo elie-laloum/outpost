@@ -24,7 +24,11 @@ const packed = {
   files: packing.flatMap((line) => /^packed \S+ (.+)$/.exec(line)?.[1] ?? []),
 };
 assert.ok(packed.filename, "bun pm pack did not return an archive");
-assert.ok(packed.files.includes("dist/index.js"), "Build before packing");
+assert.ok(packed.files.includes("dist/core.js"), "Build before packing");
+assert.ok(
+  !packed.files.some((path) => /^dist\/index\.(?:js|d\.ts)/.test(path)),
+  "Retired root facade must not ship",
+);
 assert.ok(
   !packed.files.some((path) => path.startsWith("docs/")),
   "The documentation site must stay out of the library package",
@@ -68,7 +72,7 @@ try {
       "-e",
       `
     import assert from 'node:assert/strict';
-    import {fromSecrets} from '@elie-laloum/outpost';
+    import { fromSecrets } from '@elie-laloum/outpost/core';
     import {createVaultSecretSource} from '@elie-laloum/outpost/secrets/vault';
     import {createOnePasswordSecretSource} from '@elie-laloum/outpost/secrets/onepassword';
     import {createGcpSecretSource} from '@elie-laloum/outpost/secrets/gcp';
@@ -87,7 +91,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {createAgentConflictResolver, signWorkflowDecision, createEd25519DecisionVerifier, createOpenAIModelProvider, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, defineWorkflow, conversations, createReporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [createAgentConflictResolver,signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.transported,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
+      "import { createAgentConflictResolver } from '@elie-laloum/outpost/workspaces'; import { signWorkflowDecision, createEd25519DecisionVerifier, defineWorkflow } from '@elie-laloum/outpost/workflows'; import { createOpenAIModelProvider } from '@elie-laloum/outpost/harness'; import { createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, conversations, createReporter, recoveryDetails } from '@elie-laloum/outpost/core'; import { diagnoseAgentProtocol, diagnoseSandbox } from '@elie-laloum/outpost/integrations'; import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer } from '@elie-laloum/outpost/recovery'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [createAgentConflictResolver,signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.transported,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -101,7 +105,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {createLocalTransport,createArtifactStore,createWorkflowCheckpointStore,recoverWorkflowCheckpoint,readJournal,createTransportConversations,archiveRecovery,materializeRecoveryArchive} from '@elie-laloum/outpost'; const transporter=createLocalTransport({directory:'state'}); const first=await transporter.write('artifacts/smoke',new Uint8Array([0,255]),{ifRevision:null}); if((await transporter.read(first.key)).bytes[1]!==255)throw Error('Transport bytes changed'); for(const item of [createArtifactStore,createWorkflowCheckpointStore,recoverWorkflowCheckpoint,readJournal,createTransportConversations,archiveRecovery,materializeRecoveryArchive])if(typeof item!=='function')throw Error('Missing transport export');",
+      "import { createLocalTransport, createTransportConversations } from '@elie-laloum/outpost/core'; import { createArtifactStore } from '@elie-laloum/outpost/storage'; import { createWorkflowCheckpointStore, recoverWorkflowCheckpoint } from '@elie-laloum/outpost/workflows'; import { readJournal } from '@elie-laloum/outpost/observation'; import { archiveRecovery, materializeRecoveryArchive } from '@elie-laloum/outpost/recovery'; const transporter=createLocalTransport({directory:'state'}); const first=await transporter.write('artifacts/smoke',new Uint8Array([0,255]),{ifRevision:null}); if((await transporter.read(first.key)).bytes[1]!==255)throw Error('Transport bytes changed'); for(const item of [createArtifactStore,createWorkflowCheckpointStore,recoverWorkflowCheckpoint,readJournal,createTransportConversations,archiveRecovery,materializeRecoveryArchive])if(typeof item!=='function')throw Error('Missing transport export');",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -112,7 +116,11 @@ try {
       "-e",
       `
     import assert from 'node:assert/strict';
-    import * as api from '@elie-laloum/outpost';
+    const modules = await Promise.all(["core", "harness", "storage", "workflows", "observation", "recovery", "workspaces", "recipes", "integrations", "queues", "experimental/speculation"].map(name => import('@elie-laloum/outpost/' + name)));
+    const api = Object.assign({}, ...modules);
+    await assert.rejects(import('@elie-laloum/outpost'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+    const core = await import('@elie-laloum/outpost/core');
+    for (const name of ['defineWorkflow', 'speculate', 'runQueueWorker', 'recoverSpeculation', 'createHarness']) assert.equal(name in core, false, name);
     for (const name of ['fileArtifactStore','fileWorkflowCheckpointStore','claude','codex','gemini','geminiHarness','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
     const capitalized=(name)=>name[0].toUpperCase()+name.slice(1);
     for (const name of ['claude','codex','antigravity','copilot','kimi']) {
@@ -273,13 +281,18 @@ try {
       "utf8",
     ),
   );
-  assert.ok(manifest.exports["."].types);
+  assert.equal(manifest.exports["."], undefined);
+  assert.ok(manifest.exports["./core"].types);
   assert.ok(manifest.exports["./queues/bullmq"].types);
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { createAgent as composeAgent,  dispatch, createCodexHarness, createClaudeHarness, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineJsonResponse, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost';
-import { defineClaudeHook, defineCodexHook, defineCopilotHook, defineKimiHook, defineAntigravityHook } from '@elie-laloum/outpost';
+    `// @ts-expect-error The package root was removed in the major entry-point migration.
+import { dispatch as retiredRootDispatch } from '@elie-laloum/outpost';
+// @ts-expect-error Experimental orchestration is not part of core.
+import { speculate as misplacedSpeculation } from '@elie-laloum/outpost/core';
+import { createAgent as composeAgent, dispatch, createCodexHarness, createClaudeHarness, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineJsonResponse, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost/core';
+import { defineClaudeHook, defineCodexHook, defineCopilotHook, defineKimiHook, defineAntigravityHook } from '@elie-laloum/outpost/core';
 createClaudeHarness({hooks:[defineClaudeHook({on:'PreToolUse',run:()=>({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny'}})})]});
 createCodexHarness({hooks:[defineCodexHook({on:'Stop',run:()=>({decision:'block',reason:'run tests'})})]});
 createCopilotHarness({hooks:[defineCopilotHook({on:'permissionRequest',run:()=>({behavior:'deny'})})]});
@@ -287,7 +300,7 @@ createKimiHarness({hooks:[defineKimiHook({on:'UserPromptSubmit',run:()=> 'contex
 createAntigravityHarness({hooks:[defineAntigravityHook({on:'PreToolUse',run:()=>({decision:'deny'})})]});
 // @ts-expect-error Native CLI hooks cannot be reused with a different protocol.
 createClaudeHarness({hooks:[defineCodexHook({on:'Stop',run:()=>undefined})]});
-import { defineDecision, decide, defineDecisionTask, defineHarnessModelRouting, createSystemOneDecisionProvider, type DecisionProvider } from '@elie-laloum/outpost';
+import { defineDecision, decide, defineDecisionTask, createSystemOneDecisionProvider, type DecisionProvider } from '@elie-laloum/outpost/workflows'; import { defineHarnessModelRouting } from '@elie-laloum/outpost/harness';
 const routeDeclaration=defineDecision({questions:{route:{type:'choice',instructions:'Choose',criteria:{fast:'Routine',deep:'Reasoning'}}}});
 const router: DecisionProvider={name:'fixture',request:async()=>({model:'fixture',answers:{route:{type:'choice',choice:'fast',probabilities:{fast:0.9,deep:0.1},confidence:0.8}}})};
 const routeAnswer=await decide({provider:router,model:'fixture',decision:routeDeclaration,state:{goal:'review'}});
@@ -305,18 +318,18 @@ defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclara
 defineHarnessModelRouting({provider:router,model:'fixture',decision:routeDeclaration,question:'route',models:{fast:'small',deep:'large'},fallback:'absent'});
 
 void [routeChoice,invalidChoice,decisionTask,modelRouting,systemOne];
-import { defineLoopTask, defineWorkflow, type LoopTaskContext, type LoopTaskOptions, type LoopCheckResult, type LoopRoundRecord } from '@elie-laloum/outpost';
+import { defineLoopTask, defineWorkflow, type LoopTaskContext, type LoopTaskOptions, type LoopCheckResult, type LoopRoundRecord } from '@elie-laloum/outpost/workflows';
 const loopOptions: LoopTaskOptions<number> = {key:'fix',maxRounds:2,attempt:(ctx: LoopTaskContext)=>ctx.round,check:(_,value): LoopCheckResult=>value===2?{done:true}:{done:false,feedback:'again'}};
 const loop=defineLoopTask(loopOptions);
 const verified=await defineWorkflow('fix',[loop]).start();
 const number: number=verified.value(loop);
 const history: readonly LoopRoundRecord[] | undefined=verified.tasks[0]?.rounds;
-import { quotaFault, type QuotaFault, type WorkflowQuotaPolicy, type WorkflowQuotaPause, type WorkflowOptions } from '@elie-laloum/outpost';
+import { quotaFault, type QuotaFault } from '@elie-laloum/outpost/core'; import { type WorkflowQuotaPolicy, type WorkflowQuotaPause, type WorkflowOptions } from '@elie-laloum/outpost/workflows';
 const quotaPolicy: WorkflowQuotaPolicy = {action:'pause',maxWaitMs:60_000};
 const quotaOptions: WorkflowOptions = {onQuota:quotaPolicy};
 const quotaPause: WorkflowQuotaPause | undefined=verified.tasks[0]?.quota;
 const quotaSignal: QuotaFault | undefined=quotaFault(new Error('other'));
-import { createFallbackAgent, unavailableFault, type DispatchAgent, type DispatchResult, type FallbackAgent, type FallbackAgentOptions, type FallbackAttempt, type FallbackCandidate, type FallbackRecord, type FallbackTrigger, type UnavailableFault } from '@elie-laloum/outpost';
+import { createFallbackAgent, unavailableFault, type DispatchAgent, type DispatchResult, type FallbackAgent, type FallbackAgentOptions, type FallbackAttempt, type FallbackCandidate, type FallbackRecord, type FallbackTrigger, type UnavailableFault } from '@elie-laloum/outpost/core';
 const fallbackTriggers: readonly FallbackTrigger[] = ['quota','unavailable'];
 const fallbackOptions: FallbackAgentOptions = {on:fallbackTriggers};
 const fallbackCoder: FallbackAgent = createFallbackAgent([composeAgent({harness:createClaudeHarness(),model:'opus'}),composeAgent({harness:createClaudeHarness(),model:'sonnet'})],fallbackOptions);
@@ -325,7 +338,7 @@ const fallbackRecord: FallbackRecord | undefined = (undefined as DispatchResult<
 const selectedCandidate: FallbackCandidate | undefined = fallbackRecord?.selected;
 const failedAttempt: FallbackAttempt | undefined = fallbackRecord?.attempts[0];
 const outage: UnavailableFault | undefined = unavailableFault(new Error('other'));
-import { createReplayAgent, ReplayDivergence, readJournal, type ReplayAgent, type ReplayAgentOptions, type ReplayDivergenceKind, type ReplayTurn, type WorkspaceCommitsEvent } from '@elie-laloum/outpost';
+import { createReplayAgent, ReplayDivergence, readJournal, type ReplayAgent, type ReplayAgentOptions, type ReplayDivergenceKind, type ReplayTurn, type WorkspaceCommitsEvent } from '@elie-laloum/outpost/observation';
 const replayOptions: ReplayAgentOptions = {journal:[],divergence:'warn'};
 const replaying: ReplayAgent | undefined = replayOptions.journal.length ? createReplayAgent(replayOptions) : undefined;
 const replayedTurn: ReplayTurn | undefined = replaying?.turns[0];
@@ -334,7 +347,7 @@ const recordedCommits: WorkspaceCommitsEvent['kind'] = 'workspace-commits';
 const replayCoder: Agent | undefined = replaying;
 const replayLogging: Parameters<typeof dispatch>[0]['logging'] = {replayable:true};
 void readJournal;
-import { createCronSchedule, runSchedules, serveTriggers, createGithubWebhook, createGitlabWebhook, createSlackSource, createStandardWebhook, labelAdded, commandIssued, defineWorkflowJob, createWorkflowCheckpointStore as triggerCheckpoints, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type QueueHandler } from '@elie-laloum/outpost';
+import { createCronSchedule, runSchedules, serveTriggers, createGithubWebhook, createGitlabWebhook, createSlackSource, createStandardWebhook, labelAdded, commandIssued, defineWorkflowJob, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type QueueHandler } from '@elie-laloum/outpost/queues'; import { createWorkflowCheckpointStore as triggerCheckpoints } from '@elie-laloum/outpost/workflows';
 const cronOptions: CronOptions = {timeZone:'UTC'};
 const nightly: CronSchedule = createCronSchedule('0 2 * * *',cronOptions);
 const triggerSchedule: TriggerSchedule = {name:'nightly',cron:nightly,handler:'audit',runId:(slot)=>slot.toISOString()};
@@ -360,7 +373,7 @@ const jobOptions: WorkflowJobOptions = {checkpoint,start:jobStart,workflow:(inpu
 const jobHandler: QueueHandler = defineWorkflowJob(jobOptions);
 const triggerServer: ((options: TriggerServerOptions)=>Promise<TriggerServer>) = serveTriggers;
 void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,triggerServer,runSchedules];
-import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileHooks, type AgentProfileTool } from '@elie-laloum/outpost';
+import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileHooks, type AgentProfileTool } from '@elie-laloum/outpost/core';
 const profileHooks: AgentProfileHooks = {claude:[defineClaudeHook({on:'PreToolUse',run:({event})=>{const tool:string=event.tool_name;void tool;}})],codex:[defineCodexHook({on:'Stop',run:()=>undefined})]};
 createClaudeHarness({profile:defineAgentProfile({hooks:profileHooks})});
 // @ts-expect-error Profile sections retain each CLI's own hook brand.
@@ -370,7 +383,7 @@ const portableOptions: AgentProfileOptions = {instructions:'Never modify generat
 const portableProfile: AgentProfile = defineAgentProfile(portableOptions);
 createClaudeHarness({profile:portableProfile});
 createCodexHarness({profile:defineAgentProfile({instructions:'Read only.'})});
-import { createRunObserver, readRun, watchRun, type RunObserverOptions, type ReadRunOptions, type WatchRunOptions, type RunObserver, type RunSnapshot, type RunEvent } from '@elie-laloum/outpost';
+import { createRunObserver, readRun, watchRun, type RunObserverOptions, type ReadRunOptions, type WatchRunOptions, type RunObserver, type RunSnapshot, type RunEvent } from '@elie-laloum/outpost/observation';
 const runObserverOptions: RunObserverOptions = {transporter:createLocalTransport({directory:'runs'}),id:'typed-run',kind:'workflow'};
 const receiver: RunObserver = await createRunObserver(runObserverOptions);
 const runRead: ReadRunOptions = {transporter:runObserverOptions.transporter,id:runObserverOptions.id};
@@ -378,7 +391,7 @@ const snapshot: RunSnapshot | undefined = await readRun(runRead);
 const runWatch: WatchRunOptions = {...runRead,from:snapshot?.seq ?? 0};
 const events: AsyncIterable<RunEvent> = watchRun(runWatch);
 console.log(receiver,snapshot,events);
-import { defineTask, createTaskCacheStore, createLocalTransport, type TaskCacheOptions, type TaskCacheStore, type TaskCacheEntry, type TaskCacheStoreOptions, type TaskCacheOutcome, type WorkflowEvent } from '@elie-laloum/outpost';
+import { defineTask, createTaskCacheStore, type TaskCacheOptions, type TaskCacheStore, type TaskCacheEntry, type TaskCacheStoreOptions, type TaskCacheOutcome, type WorkflowEvent } from '@elie-laloum/outpost/workflows'; import { createLocalTransport } from '@elie-laloum/outpost/core';
 const cacheStoreOptions: TaskCacheStoreOptions = {transporter:createLocalTransport({directory:'typed-cache'}),maxBytes:1024};
 const cacheStore: TaskCacheStore = createTaskCacheStore(cacheStoreOptions);
 const cacheOptions: TaskCacheOptions = {store:cacheStore,version:'1',key:()=>['commit',{brief:'b'}],maxAgeMs:60_000,mode:'reuse'};
@@ -386,9 +399,9 @@ const cachedTask=defineTask({key:'cached',cache:cacheOptions,perform:()=>({ok:tr
 const cacheEntry: TaskCacheEntry | undefined=await cacheStore.read('a'.repeat(64));
 const cacheHit: true | undefined=verified.tasks[0]?.cacheHit;
 const cacheOutcome: TaskCacheOutcome | undefined=({} as WorkflowEvent).cache;
-import { repositoryFingerprint } from '@elie-laloum/outpost';
+import { repositoryFingerprint } from '@elie-laloum/outpost/workflows';
 const fingerprintKey=async (): Promise<string>=>repositoryFingerprint('.');
-import { defineAgentTask, defineIsolatedTask, type TaskContext, type QueueQuota, type QueueRequest, type SpeculationResult, type TerminationCode, type WorkflowTerminationCode } from '@elie-laloum/outpost';
+import { defineAgentTask, defineIsolatedTask, type TaskContext, type WorkflowTerminationCode } from '@elie-laloum/outpost/workflows'; import { type QueueQuota, type QueueRequest } from '@elie-laloum/outpost/queues'; import { type SpeculationResult } from '@elie-laloum/outpost/experimental/speculation'; import { type TerminationCode } from '@elie-laloum/outpost/core';
 const resumedConversation=(context: TaskContext): string | undefined=>context.quota?.conversation;
 const queueQuota: QueueQuota={resetAt:'2026-01-01T00:00:00.000Z',conversation:'c'};
 const resumedJob: QueueRequest={id:'job:quota:2',idempotencyKey:'job',handler:'work',input:null};
@@ -399,19 +412,19 @@ const speculationQuota=(result: SpeculationResult): string | undefined=>result.s
 type QuotaResumeOption=Parameters<typeof defineAgentTask>[0]['quotaResume'] | Parameters<typeof defineIsolatedTask>[0]['quotaResume'];
 const restart: QuotaResumeOption='restart';
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
-import { geminiHarness } from '@elie-laloum/outpost';
+import { geminiHarness } from '@elie-laloum/outpost/core';
 // @ts-expect-error Gemini CLI settings were removed.
-import type { GeminiSettings } from '@elie-laloum/outpost';
-import { createOpenAIModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
-import { createHarness, createAnthropicModelProvider, defineHarnessTool, type Agent, type AgentModel, type ModelReasoning, type HarnessTool, type Harness, type HarnessOptions, type AgentHarness } from '@elie-laloum/outpost';
+import type { GeminiSettings } from '@elie-laloum/outpost/core';
+import { createOpenAIModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult } from '@elie-laloum/outpost/harness'; import { type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost/integrations';
+import { createHarness, createAnthropicModelProvider, defineHarnessTool, type ModelReasoning, type HarnessTool, type Harness, type HarnessOptions } from '@elie-laloum/outpost/harness'; import { type Agent, type AgentModel, type AgentHarness } from '@elie-laloum/outpost/core';
 // @ts-expect-error The renamed harness contract has no compatibility export.
-import type { CustomHarness } from '@elie-laloum/outpost';
+import type { CustomHarness } from '@elie-laloum/outpost/core';
 // @ts-expect-error The renamed options contract has no compatibility export.
-import type { CustomHarnessOptions } from '@elie-laloum/outpost';
+import type { CustomHarnessOptions } from '@elie-laloum/outpost/core';
 // @ts-expect-error The renamed factory has no compatibility export.
-import { customHarness } from '@elie-laloum/outpost';
+import { customHarness } from '@elie-laloum/outpost/core';
 // @ts-expect-error Removed API has no compatibility export.
-import { openaiCompatible } from '@elie-laloum/outpost';
+import { openaiCompatible } from '@elie-laloum/outpost/core';
 // @ts-expect-error Removed sandbox factory has no alias.
 import { local } from '@elie-laloum/outpost/providers/local';
 const read: HarnessTool<{ path: string }> = defineHarnessTool({name:'read',description:'Read a file.',readOnly:true,input:{type:'object',properties:{path:{type:'string'}},required:['path']},execute:async(input: { path: string },context)=>(await context.sandbox.invoke({executable:'cat',arguments:[input.path],signal:context.signal})).stdout});
@@ -432,7 +445,7 @@ const composed: Agent = composeAgent({harness:custom,model:selectedModel});
 // @ts-expect-error Custom harness requires a model.
 composeAgent({harness:custom});
 // @ts-expect-error The old preset namespaces are no longer exported.
-import { claude, codex, gemini } from '@elie-laloum/outpost';
+import { claude, codex, gemini } from '@elie-laloum/outpost/core';
 // @ts-expect-error Model selection belongs to the agent.
 createCodexHarness({model:'arbitrary'});
 // @ts-expect-error Reasoning belongs to the agent model.
@@ -455,7 +468,7 @@ const microvm: typeof createFirecrackerSandboxProvider = (options: FirecrackerOp
 console.log(microvm);
 import { createDockerSandboxProvider, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
 import { createPodmanSandboxProvider } from '@elie-laloum/outpost/providers/podman';
-import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
+import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy } from '@elie-laloum/outpost/recovery'; import { type FileTransfers, type SandboxLease } from '@elie-laloum/outpost/integrations';
 const egress: EgressPolicy = { mode: 'deny-all' };
 createDockerSandboxProvider({egress});
 createPodmanSandboxProvider({egress});
@@ -487,7 +500,7 @@ const kimiSettings: KimiSettings = { authentication: 'usage' };
 composeAgent({ harness: createAntigravityHarness(antigravitySettings), model: 'fixture' });
 composeAgent({ harness: createCopilotHarness(copilotSettings) });
 composeAgent({ harness: createKimiHarness(kimiSettings), model: 'fixture' });
-import type { RunReport, RunReportOptions, RunReportDiff, RunReportFile, RunReportFailure } from '@elie-laloum/outpost';
+import type { RunReport, RunReportOptions, RunReportDiff, RunReportFile, RunReportFailure } from '@elie-laloum/outpost/core';
 const once = await dispatch({agent:composeAgent({ harness: createCodexHarness({}) }),sandboxProvider:createLocalSandboxProvider(),brief:{text:'hello'}});
 const reportOptions: RunReportOptions = {format:'json'};
 const report: RunReport = once.reportData;
@@ -508,7 +521,7 @@ console.log(n,once.commits);
   const guardConsumer = join(temporary, "guard.ts");
   writeFileSync(
     guardConsumer,
-    `import { type DiffGuard, type WorkspaceOptions, type SandboxOptions, type FaultCode } from '@elie-laloum/outpost';
+    `import { type DiffGuard, type WorkspaceOptions } from '@elie-laloum/outpost/workspaces'; import { type SandboxOptions, type FaultCode } from '@elie-laloum/outpost/core';
 const guard: DiffGuard = {protectedPaths:['.github/**'],maxChangedLines:800};
 const workspace: WorkspaceOptions = {branch:{mode:'integrate'},guard};
 const sandbox: SandboxOptions = workspace;
@@ -519,7 +532,7 @@ void [sandbox,code];
   const conflictConsumer = join(temporary, "conflicts.ts");
   writeFileSync(
     conflictConsumer,
-    `import {createAgentConflictResolver, type Workspace, type ConflictResolution, type ConflictResolver, type DispatchAgent} from '@elie-laloum/outpost';
+    `import { createAgentConflictResolver, type Workspace, type ConflictResolution, type ConflictResolver } from '@elie-laloum/outpost/workspaces'; import { type DispatchAgent } from '@elie-laloum/outpost/core';
 import {createLocalSandboxProvider} from '@elie-laloum/outpost/providers/local';
 declare const workspace: Workspace;
 declare const agent: DispatchAgent;
@@ -562,7 +575,7 @@ void [legacy,extended];
   writeFileSync(
     secretsConsumer,
     `
-import {fromSecrets, type SecretSource, type FromSecretsOptions} from '@elie-laloum/outpost';
+import { fromSecrets, type SecretSource, type FromSecretsOptions } from '@elie-laloum/outpost/core';
 import {createVaultSecretSource, type VaultSecretSourceOptions} from '@elie-laloum/outpost/secrets/vault';
 const connection: VaultSecretSourceOptions = {address:'https://vault.example',token:'fixture',mount:'kv',path:'outpost'};
 const source: SecretSource = createVaultSecretSource(connection);
@@ -580,7 +593,7 @@ import {execFileSync} from 'node:child_process';
 import {mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {dispatch, createSandbox, defineRecipe, type RecipeBindings, type RecipeConfiguration} from '@elie-laloum/outpost';
+import { dispatch, createSandbox } from '@elie-laloum/outpost/core'; import { defineRecipe, type RecipeBindings, type RecipeConfiguration } from '@elie-laloum/outpost/recipes';
 import {createRecipeRegistry, defineRecipeComponent, validateRecipeProject, createRecipeRuntime} from '@elie-laloum/outpost/recipes';
 import {createScriptedAgent, scriptedAgent, createMemorySandboxProvider, type ScriptedAgentOptions, type ScriptedTurn, type ScriptedCommit, type MemoryCommand, type MemorySandboxOptions} from '@elie-laloum/outpost/testing';
 const repository = await mkdtemp(join(tmpdir(),'outpost-testing-consumer-'));
@@ -611,7 +624,7 @@ try {
   assert.equal(registry.get('sink.example').kind,'sink');
   assert.equal(typeof validateRecipeProject,'function');
   assert.equal(typeof createRecipeRuntime,'function');
-  const cli = (await import('node:url')).fileURLToPath(new URL('./cli/main.js',import.meta.resolve('@elie-laloum/outpost')));
+  const cli = (await import('node:url')).fileURLToPath(new URL('./cli/main.js',import.meta.resolve('@elie-laloum/outpost/core')));
   const catalog = JSON.parse(execFileSync(process.execPath,[cli,'recipe','list','--json'],{encoding:'utf8'}));
   assert.ok(catalog.recipes.some((recipe: {name:string}) => recipe.name === 'review'));
   execFileSync(process.execPath,[cli,'recipe','fetch','--recipe','review','--file',join(repository,'review.yaml')]);
@@ -645,7 +658,7 @@ try {
     telemetryConsumer,
     `import { metrics, trace } from '@opentelemetry/api';
 import { createOpenTelemetryObserver, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
-import { defineTask, defineWorkflow, dispatch, createAgent as composeAgent, createCodexHarness, createCustomReporter, type DispatchTelemetry, type WorkflowTelemetry } from '@elie-laloum/outpost';
+import { defineTask, defineWorkflow, type WorkflowTelemetry } from '@elie-laloum/outpost/workflows'; import { dispatch, createAgent as composeAgent, createCodexHarness } from '@elie-laloum/outpost/core'; import { createCustomReporter, type DispatchTelemetry } from '@elie-laloum/outpost/observation';
 const telemetry: OpenTelemetryObserver = createOpenTelemetryObserver({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
 const step = defineTask({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
 const workflowTelemetry: WorkflowTelemetry = telemetry;
@@ -683,7 +696,7 @@ telemetry.close();
   writeFileSync(
     bullmqConsumer,
     `import { createBullMQTaskQueue, type BullMQTaskQueue, type BullMQTaskQueueOptions } from '@elie-laloum/outpost/queues/bullmq';
-import type { TaskQueue } from '@elie-laloum/outpost';
+import type { TaskQueue } from '@elie-laloum/outpost/queues';
 const options: BullMQTaskQueueOptions = {name:'consumer',connection:{host:'127.0.0.1'}};
 const open: (options: BullMQTaskQueueOptions) => Promise<BullMQTaskQueue> = createBullMQTaskQueue;
 function compatible(queue: BullMQTaskQueue): TaskQueue { return queue; }
@@ -731,7 +744,7 @@ if(createDaytonaSandboxProvider({egress}).name !== 'daytona') throw new Error('M
   const cloudCacheConsumer = join(temporary, "cloud-cache.ts");
   writeFileSync(
     cloudCacheConsumer,
-    `import {createLocalTransport} from '@elie-laloum/outpost';
+    `import { createLocalTransport } from '@elie-laloum/outpost/core';
 import { createVercelSandboxProvider, type CloudDependencyCache } from '@elie-laloum/outpost/providers/vercel';
 import { createDaytonaSandboxProvider, type CloudDependencyCache as DaytonaCache } from '@elie-laloum/outpost/providers/daytona';
 const cloudCache: CloudDependencyCache = {name:'npm', key:'app-node24', transport:createLocalTransport({directory:'downloads'})};
@@ -768,7 +781,7 @@ createDaytonaSandboxProvider({create:{image:'node:24'},caches:[daytonaCache]});
     adaptersConsumer,
     `
 import assert from 'node:assert/strict';
-import {fromSecrets} from '@elie-laloum/outpost';
+import { fromSecrets } from '@elie-laloum/outpost/core';
 import {SecretsManagerClient} from '@aws-sdk/client-secrets-manager';
 import {SecretManagerServiceClient} from '@google-cloud/secret-manager';
 import {SecretClient} from '@azure/keyvault-secrets';

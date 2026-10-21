@@ -24,7 +24,11 @@ The error you receive depends on the operation. A dispatch rejects its promise w
 Catch an `OutpostError` to read its code, message and recovery information. Keep other errors visible by throwing them again; recovery details help locate work retained after a failed dispatch.
 
 ```ts
-import { OutpostError, dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import {
+  OutpostError,
+  dispatch,
+  recoveryDetails,
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
@@ -63,7 +67,7 @@ API reference: [FaultCode](../../reference/faultcode/).
 `quotaFault(error)` and `unavailableFault(error)` search the error and up to seven wrapped causes. Each returns `undefined` when the failure is something else.
 
 ```ts
-import { quotaFault, unavailableFault } from "@elie-laloum/outpost";
+import { quotaFault, unavailableFault } from "@elie-laloum/outpost/core";
 
 function classify(error: unknown): string {
   const quota = quotaFault(error);
@@ -87,7 +91,8 @@ When upgrading from 9.x, handle `rejected` wherever your application previously 
 <!-- tabs -->
 
 ```ts title="deploy.ts"
-import { defineTask, OutpostError } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 
 export const deploy = defineTask({
   key: "deploy",
@@ -103,8 +108,8 @@ export const deploy = defineTask({
 import {
   defineWorkflow,
   WorkflowFailure,
-  OutpostError,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 import { deploy } from "./deploy.ts";
 
 export const result = await defineWorkflow("release", [deploy]).start();
@@ -129,7 +134,8 @@ API reference: [WorkflowFailure](../../reference/workflowfailure/), [WorkflowBud
 A task retries only when it has a `retry` policy; `accepts` chooses which errors qualify; without it, every failure is retried. Retry outages and timeouts; do not retry `configuration`, `prompt` or `conflict`.
 
 ```ts
-import { defineTask, unavailableFault } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { unavailableFault } from "@elie-laloum/outpost/core";
 
 const report = defineTask({
   key: "report",

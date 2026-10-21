@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecipeBindings } from "@elie-laloum/outpost";
+import type { RecipeBindings } from "@elie-laloum/outpost/recipes";
 ```
 
 ## Paramètres et propriétés

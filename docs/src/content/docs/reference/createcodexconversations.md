@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createCodexConversations } from "@elie-laloum/outpost";
+import { createCodexConversations } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { ReplayDivergence } from "@elie-laloum/outpost";
+import { ReplayDivergence } from "@elie-laloum/outpost/observation";
 ```
 
 ## Purpose and behavior

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { QuotaFault } from "@elie-laloum/outpost";
+import type { QuotaFault } from "@elie-laloum/outpost/core";
 ```
 
 ## Paramètres et propriétés

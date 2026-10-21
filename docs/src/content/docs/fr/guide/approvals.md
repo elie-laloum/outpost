@@ -16,7 +16,7 @@ import {
   defineApprovalTask,
   defineTask,
   defineWorkflow,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 export const approve = defineApprovalTask({
   key: "approve",
@@ -32,10 +32,8 @@ export const workflow = defineWorkflow("release", [approve, deploy]);
 ```
 
 ```ts title="release-checkpoint.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const checkpoint = {
   store: createWorkflowCheckpointStore({
@@ -47,7 +45,7 @@ export const checkpoint = {
 ```
 
 ```ts title="release-decision.ts"
-import type { WorkflowDecision } from "@elie-laloum/outpost";
+import type { WorkflowDecision } from "@elie-laloum/outpost/workflows";
 
 export function releaseDecision(
   executionId: string,

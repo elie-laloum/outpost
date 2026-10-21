@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { Turn } from "@elie-laloum/outpost";
+import type { Turn } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

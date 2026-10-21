@@ -22,7 +22,7 @@ codex -c cli_auth_credentials_store='"file"' login
 ```
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
@@ -36,7 +36,7 @@ Outpost copies `~/.codex/auth.json`, or `auth.json` under `CODEX_HOME`, into the
 `authentication: "usage"` signs Codex in with `OPENAI_API_KEY` inside the sandbox. The OpenAI Platform bills this usage separately from ChatGPT plans.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({
@@ -53,7 +53,7 @@ Other variable names and key sources: [Authentication](../authentication/).
 `modelProvider` points Codex at another endpoint that implements the OpenAI Responses API. It requires an explicit `model`.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({
@@ -88,7 +88,7 @@ API reference: [CodexModelProvider](../../reference/codexmodelprovider/).
 ### Model and reasoning
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),

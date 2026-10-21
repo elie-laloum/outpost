@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createRecipeRuntime } from "../../dist/recipes.js";
-import { createSqliteTaskQueue } from "../../dist/index.js";
+import { createSqliteTaskQueue } from "../../dist/queues.js";
 
 test("explicit worker executes a queued recipe", async () => {
   await using cleanup = new AsyncDisposableStack();

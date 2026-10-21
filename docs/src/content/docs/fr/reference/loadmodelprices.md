@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { loadModelPrices } from "@elie-laloum/outpost";
+import { loadModelPrices } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

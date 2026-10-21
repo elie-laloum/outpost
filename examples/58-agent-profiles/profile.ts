@@ -1,4 +1,4 @@
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 
 export const profile = defineAgentProfile({
   instructions: "Never modify generated files. Read notes before answering.",

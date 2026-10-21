@@ -7,18 +7,22 @@ import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import {
   createAgent,
-  createHarness,
-  createHarnessShellTools,
   createLocalTransport,
   createReporter,
   createObservation,
+  defineTextResponse,
+  dispatch,
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessShellTools,
+} from "@elie-laloum/outpost/harness";
+import {
   createWorkflowCheckpointStore,
   defineApprovalTask,
   defineTask,
-  defineTextResponse,
   defineWorkflow,
-  dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

@@ -10,7 +10,7 @@ Utilisez la [configuration initiale](../setup/) pour ces exemples. Choisissez le
 Définissez les délais à côté du brief si la tâche demande des limites plus strictes que celles par défaut. Vous pouvez limiter la durée totale d’un échange et le temps pendant lequel l’agent peut rester silencieux.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
@@ -41,7 +41,7 @@ Votre fonction de rappel `observe` reçoit un événement `stopped` dont le cham
 Passez un `AbortSignal`. Ici, Ctrl+C arrête l’agent au lieu de le laisser tourner dans la sandbox.
 
 ```ts
-import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import { dispatch, recoveryDetails } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const controller = new AbortController();
@@ -80,7 +80,7 @@ Pour cette étape, suivez [Répéter un brief sur plusieurs passes](../agent-pas
 `limits` fixe des délais aux étapes Git et fichiers qui entourent l’agent. Passez-le à `dispatch()`, `createWorkspace()` ou `createSandbox()`.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

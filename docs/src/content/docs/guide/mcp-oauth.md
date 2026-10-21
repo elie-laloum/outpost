@@ -28,7 +28,7 @@ Log in on the host with the same server name and URL as your declaration.
 Then declare `oauth: "login"`.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createCodexHarness({
@@ -53,7 +53,7 @@ The CLI refreshes the token inside the sandbox. If the authorization server rota
 For machine-to-machine servers in the [built-in harness](../harness/), name the variables that hold the client ID and secret.
 
 ```ts
-import type { McpServers } from "@elie-laloum/outpost";
+import type { McpServers } from "@elie-laloum/outpost/core";
 
 const mcpServers: McpServers = {
   internal: {

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { commandIssued } from "@elie-laloum/outpost";
+import { commandIssued } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

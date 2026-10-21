@@ -6,14 +6,13 @@ import type { TestContext } from "node:test";
 import {
   createAgentConflictResolver,
   openWorkspace,
-  OutpostError,
-  recoveryDetails,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
+import { OutpostError, recoveryDetails } from "../../src/core.ts";
 import type {
   AgentConflictResolverOptions,
   DiffGuard,
-  SandboxProvider,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
+import type { SandboxProvider } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { emit, repository, scripted } from "../helpers.ts";

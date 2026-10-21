@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { attach } from "@elie-laloum/outpost";
+import { attach } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

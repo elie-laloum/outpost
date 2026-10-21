@@ -5,10 +5,10 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import {
   createWorkspace,
-  createLocalTransport,
   prepareWorkspaceOutputs,
   publishWorkspaceOutputs,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
+import { createLocalTransport } from "../../src/core.ts";
 import { refreshFilePublicationReport } from "../../src/application/recipes/file-publication-report.ts";
 import type { Transport } from "../../src/domain/transport.types.ts";
 import type { RecipeReport } from "../../src/application/recipe-report.types.ts";

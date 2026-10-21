@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { readArtifact } from "@elie-laloum/outpost";
+import { readArtifact } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

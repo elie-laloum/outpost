@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileDispatchResult } from "@elie-laloum/outpost";
+import type { FileDispatchResult } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

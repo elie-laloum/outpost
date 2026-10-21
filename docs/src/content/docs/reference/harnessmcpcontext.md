@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { HarnessMcpContext } from "@elie-laloum/outpost";
+import type { HarnessMcpContext } from "@elie-laloum/outpost/harness";
 ```
 
 ## Parameters and properties

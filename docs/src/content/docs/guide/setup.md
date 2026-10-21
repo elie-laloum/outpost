@@ -21,6 +21,8 @@ npm install @elie-laloum/outpost
 npm pkg set type=module
 ```
 
+Import execution functions from `@elie-laloum/outpost/core`, workflow functions from `/workflows`, and providers from their `/providers/*` entry. See [package entry points](../integration-ports/#choose-a-package-entry-point) to replace root imports in existing scripts.
+
 ## Build the agent image
 
 Write the official Codex image recipe into a dedicated directory, then build it for your user. The first build downloads the Codex CLI and can take several minutes.
@@ -41,7 +43,7 @@ This configuration uses a Codex account login saved on your machine. Follow [Con
 Save `outpost.config.ts` next to your scripts. Replace the repository path with the absolute path to your checkout. The scripts import these values explicitly; no configuration discovery is required.
 
 ```ts title="outpost.config.ts"
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const coder = createAgent({

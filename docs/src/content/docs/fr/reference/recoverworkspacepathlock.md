@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { recoverWorkspacePathLock } from "@elie-laloum/outpost";
+import { recoverWorkspacePathLock } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Rôle et comportement

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RunStatus } from "@elie-laloum/outpost";
+import type { RunStatus } from "@elie-laloum/outpost/observation";
 ```
 
 ## Purpose and behavior

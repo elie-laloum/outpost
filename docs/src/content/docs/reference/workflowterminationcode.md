@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowTerminationCode } from "@elie-laloum/outpost";
+import type { WorkflowTerminationCode } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

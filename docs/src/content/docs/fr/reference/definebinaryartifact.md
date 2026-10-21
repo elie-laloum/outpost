@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineBinaryArtifact } from "@elie-laloum/outpost";
+import { defineBinaryArtifact } from "@elie-laloum/outpost/storage";
 ```
 
 ## Rôle et comportement

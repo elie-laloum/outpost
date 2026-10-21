@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { CopilotHookPhase } from "@elie-laloum/outpost";
+import type { CopilotHookPhase } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

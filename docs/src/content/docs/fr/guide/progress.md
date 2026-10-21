@@ -18,7 +18,7 @@ import {
   createObservation,
   createReporter,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using observation = createObservation({
@@ -43,7 +43,7 @@ Référence API : [ReporterOptions](../../reference/reporteroptions/).
 Passez votre propre fonction comme `observe`. Filtrez sur `kind` avant de lire les autres champs.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
@@ -80,7 +80,7 @@ Passez un seul objet observation au workflow pour recevoir ses transitions de t�
 <!-- tabs -->
 
 ```ts title="reported-review.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -95,11 +95,8 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="report-workflow.ts"
-import {
-  createObservation,
-  createReporter,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
+import { createObservation, createReporter } from "@elie-laloum/outpost/core";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { review } from "./reported-review.ts";
 
 await using observation = createObservation({

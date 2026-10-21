@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskCacheMode } from "@elie-laloum/outpost";
+import type { TaskCacheMode } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

@@ -4,14 +4,14 @@
 
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
   type Task,
   type WorkflowCheckpointOptions,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider } from "../shared/model.ts";
 
 // The simulated crash: the step named here fails before calling the model.

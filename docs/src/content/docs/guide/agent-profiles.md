@@ -12,7 +12,7 @@ Use `defineAgentProfile()` to keep your team's instructions and MCP servers inde
 Save the instructions in `profile.ts`. This first profile needs no MCP server.
 
 ```ts title="profile.ts"
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 
 export const profile = defineAgentProfile({
   instructions: "Never modify generated files.",
@@ -28,7 +28,7 @@ import {
   createAgent,
   createClaudeHarness,
   createCodexHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { profile } from "./profile.ts";
 
 export const claude = createAgent({
@@ -49,8 +49,8 @@ Group hooks by harness under `hooks`: `claude`, `codex`, `copilot`, `kimi`, `ant
 import {
   defineAgentProfile,
   defineClaudeHook,
-  defineHarnessHook,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const lifecycleProfile = defineAgentProfile({
   hooks: {
@@ -81,7 +81,7 @@ Pass `profile: lifecycleProfile` to the harness. It selects its section, then ap
 Save `restricted-profile.ts` beside the first file. This profile permits file reading, file edits and only the exact shell command `npm test`. Omitted tool restrictions preserve the harness's existing behavior; an empty list denies built-in action tools. In the built-in harness, `load_skill` remains available, but loading a skill never grants permission for its tools. Explicit MCP server declarations grant their own tools, restricted separately by each server's filters, and access to their resources and prompts. Additional harness permissions still apply.
 
 ```ts title="restricted-profile.ts"
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 import { profile } from "./profile.ts";
 
 export const restricted = defineAgentProfile({

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { changed } from "@elie-laloum/outpost";
+import { changed } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

@@ -24,7 +24,11 @@ L’erreur reçue dépend de l’opération. Un appel d’agent rejette sa prome
 Interceptez une `OutpostError` pour lire son code, son message et les informations de récupération. Relancez les autres erreurs pour qu’elles restent visibles ; les informations de récupération aident à retrouver le travail conservé après un dispatch en échec.
 
 ```ts
-import { OutpostError, dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import {
+  OutpostError,
+  dispatch,
+  recoveryDetails,
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
@@ -63,7 +67,7 @@ Référence API : [FaultCode](../../reference/faultcode/).
 `quotaFault(error)` et `unavailableFault(error)` examinent l’erreur et jusqu’à sept causes imbriquées. Chacune renvoie `undefined` quand l’échec est d’une autre nature.
 
 ```ts
-import { quotaFault, unavailableFault } from "@elie-laloum/outpost";
+import { quotaFault, unavailableFault } from "@elie-laloum/outpost/core";
 
 function classify(error: unknown): string {
   const quota = quotaFault(error);
@@ -87,7 +91,8 @@ En passant de la version 9.x, traitez `rejected` partout où votre application v
 <!-- tabs -->
 
 ```ts title="deploy.ts"
-import { defineTask, OutpostError } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 
 export const deploy = defineTask({
   key: "deploy",
@@ -103,8 +108,8 @@ export const deploy = defineTask({
 import {
   defineWorkflow,
   WorkflowFailure,
-  OutpostError,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 import { deploy } from "./deploy.ts";
 
 export const result = await defineWorkflow("release", [deploy]).start();
@@ -129,7 +134,8 @@ Référence API : [WorkflowFailure](../../reference/workflowfailure/), [Workflow
 Une tâche n’est relancée que si elle a une politique `retry` ; `accepts` choisit les erreurs concernées ; sans lui, tout échec est relancé. Relancez les pannes et les délais dépassés ; ne relancez pas `configuration`, `prompt` ni `conflict`.
 
 ```ts
-import { defineTask, unavailableFault } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { unavailableFault } from "@elie-laloum/outpost/core";
 
 const report = defineTask({
   key: "report",

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineHarnessPermissions } from "@elie-laloum/outpost";
+import { defineHarnessPermissions } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

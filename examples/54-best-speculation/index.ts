@@ -3,14 +3,14 @@
 
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  speculate,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 import { score } from "./score.ts";

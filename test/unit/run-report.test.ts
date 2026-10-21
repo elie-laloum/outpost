@@ -5,7 +5,9 @@ import {
   createRunReport,
   collectRunReportDiff,
 } from "../../src/application/run-report.ts";
-import type { RunReport, Observation, AgentEvent } from "../../src/index.ts";
+import type { RunReport } from "../../src/core.ts";
+import type { Observation } from "../../src/observation.ts";
+import type { AgentEvent } from "../../src/integrations.ts";
 
 const empty: RunReport = {
   version: 1,
@@ -210,7 +212,7 @@ test("a decorated report retains data for final observation enrichment and redac
       });
       return {
         ...projection,
-        report: (_options?: import("../../src/index.ts").RunReportOptions) =>
+        report: (_options?: import("../../src/core.ts").RunReportOptions) =>
           "decorated",
         completed: true,
         commits: [{ oid: "abc", subject: "secret commit" }],

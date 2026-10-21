@@ -3,9 +3,9 @@
 import { fileURLToPath } from "node:url";
 import {
   createOpenAIModelProvider,
-  type AgentModel,
   type ModelReasoning,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { type AgentModel } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 process.loadEnvFile(fileURLToPath(new URL("../../.env", import.meta.url)));

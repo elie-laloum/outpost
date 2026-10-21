@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryVerificationOptions } from "@elie-laloum/outpost";
+import type { RecoveryVerificationOptions } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Paramètres et propriétés

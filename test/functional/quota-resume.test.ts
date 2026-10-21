@@ -4,22 +4,20 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   defineAgentTask,
-  createSandbox,
   defineInteractiveAgentTask,
   defineIsolatedTask,
-  OutpostError,
   defineTask,
   defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createSandbox, OutpostError } from "../../src/core.ts";
+import type { AgentInput, ConversationStore } from "../../src/integrations.ts";
+import type { CliAgent } from "../../src/core.ts";
 import type {
-  AgentInput,
-  CliAgent,
-  ConversationStore,
   TaskContext,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
   WorkflowQuotaPause,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { recordRecovery } from "../../src/domain/errors.ts";
 import { quotaWorkspace } from "../../src/application/quota-resume.ts";
 import type { IsolatedTaskRequest } from "../../src/application/tasks.types.ts";

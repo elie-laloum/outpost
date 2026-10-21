@@ -12,7 +12,7 @@ Ajoutez `defineHarnessModelRouting()` au harness intégré pour choisir le modè
 <!-- tabs -->
 
 ```ts title="routing-decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const nextModel = defineDecision({
   questions: {
@@ -26,7 +26,7 @@ export const nextModel = defineDecision({
 ```
 
 ```ts title="router.ts"
-import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
+import { createSystemOneDecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const laya = createSystemOneDecisionProvider({
   baseUrl: "http://127.0.0.1:8000/v1",
@@ -35,7 +35,7 @@ export const laya = createSystemOneDecisionProvider({
 ```
 
 ```ts title="routing.ts"
-import { defineHarnessModelRouting } from "@elie-laloum/outpost";
+import { defineHarnessModelRouting } from "@elie-laloum/outpost/harness";
 import { nextModel } from "./routing-decision.ts";
 import { laya } from "./router.ts";
 
@@ -61,11 +61,11 @@ Définissez `FAST_MODEL` et `DEEP_MODEL` avec des noms acceptés par votre servi
 Le harness valide chaque candidat à sa composition, avant toute allocation de sandbox. Le modèle déclaré sur l’agent fournit le modèle initial, notamment pour une compaction précédant la première sélection.
 
 ```ts title="routed-agent.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createOpenAIModelProvider,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { routing } from "./routing.ts";
 
 export const agent = createAgent({
@@ -90,7 +90,7 @@ Le routage est évalué une fois par étape, après compaction et avant `before-
 Les instructions de session sont résolues une seule fois. La compaction utilise le modèle actif avant le nouveau routage. Les hooks et outils reçoivent le modèle sélectionné. La sélection préserve la sandbox, l’historique et les appels d’outils ; les règles existantes du fournisseur filtrent le raisonnement rejouable incompatible.
 
 ```ts title="focused-routing.ts"
-import { defineHarnessModelRouting } from "@elie-laloum/outpost";
+import { defineHarnessModelRouting } from "@elie-laloum/outpost/harness";
 import { routing } from "./routing.ts";
 
 const { kind: _kind, ...options } = routing;

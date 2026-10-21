@@ -15,7 +15,7 @@ npm install @aws-sdk/client-s3
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 const transporter = createS3Transport({
@@ -49,10 +49,8 @@ One transport serves every store. Pass it where you want each kind of object kep
 ```ts title="remote-stores.ts"
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 import { S3Client } from "@aws-sdk/client-s3";
-import {
-  createWorkflowCheckpointStore,
-  createArtifactStore,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createArtifactStore } from "@elie-laloum/outpost/storage";
 
 export const transporter = createS3Transport({
   client: new S3Client({ region: "eu-west-1" }),
@@ -64,7 +62,7 @@ export const artifacts = createArtifactStore({ transporter });
 ```
 
 ```ts title="save.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { transporter } from "./remote-stores.ts";
 

@@ -34,11 +34,11 @@ Local capture leaves the CLI’s original transcript and its subagent files inta
 ```ts
 import {
   createAgent,
-  createCodexConversations,
   createCodexHarness,
   createLocalTransport,
   createTransportConversations,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { createCodexConversations } from "@elie-laloum/outpost/integrations";
 
 const conversations = createTransportConversations(createCodexConversations(), {
   transporter: createLocalTransport({ directory: "/mnt/shared/outpost" }),
@@ -63,7 +63,7 @@ export const coder = createAgent({
 `saveConversations: false` on Claude Code or Codex keeps conversations inside the sandbox: only a warm resume can continue them. `conversations: false` on `createHarness()` saves no transcript and rejects resume, fork and response repairs. Copilot and Kimi always capture.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 export const reviewer = createAgent({
   harness: createClaudeHarness({

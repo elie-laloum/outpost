@@ -12,7 +12,7 @@ Attach `defineHarnessModelRouting()` to the built-in harness when each step shou
 <!-- tabs -->
 
 ```ts title="routing-decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const nextModel = defineDecision({
   questions: {
@@ -26,7 +26,7 @@ export const nextModel = defineDecision({
 ```
 
 ```ts title="router.ts"
-import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
+import { createSystemOneDecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const laya = createSystemOneDecisionProvider({
   baseUrl: "http://127.0.0.1:8000/v1",
@@ -35,7 +35,7 @@ export const laya = createSystemOneDecisionProvider({
 ```
 
 ```ts title="routing.ts"
-import { defineHarnessModelRouting } from "@elie-laloum/outpost";
+import { defineHarnessModelRouting } from "@elie-laloum/outpost/harness";
 import { nextModel } from "./routing-decision.ts";
 import { laya } from "./router.ts";
 
@@ -61,11 +61,11 @@ Set `FAST_MODEL` and `DEEP_MODEL` to names supported by your conversational mode
 The harness validates every candidate during composition, before allocating a sandbox. The agent's declared model supplies the initial model, including any compaction before the first selection.
 
 ```ts title="routed-agent.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createOpenAIModelProvider,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { routing } from "./routing.ts";
 
 export const agent = createAgent({
@@ -90,7 +90,7 @@ The route is evaluated once per step, after compaction and before `before-model`
 Session instructions are resolved once. Compaction uses the active model before the next route is chosen. Hooks and tools receive the newly selected model. Selection preserves the sandbox, history and tool calls; incompatible replayable reasoning is filtered by the existing model-provider rules.
 
 ```ts title="focused-routing.ts"
-import { defineHarnessModelRouting } from "@elie-laloum/outpost";
+import { defineHarnessModelRouting } from "@elie-laloum/outpost/harness";
 import { routing } from "./routing.ts";
 
 const { kind: _kind, ...options } = routing;

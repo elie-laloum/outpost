@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { WorkflowFailure } from "@elie-laloum/outpost";
+import { WorkflowFailure } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

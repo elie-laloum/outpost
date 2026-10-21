@@ -6,17 +6,18 @@ import { readFileSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
+import { createAgent, createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-  createLocalTransport,
+} from "@elie-laloum/outpost/harness";
+import {
   createWorkflowCheckpointStore,
   defineInteractiveAgentTask,
   defineTask,
   defineWorkflow,
   type WorkflowInputRequest,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

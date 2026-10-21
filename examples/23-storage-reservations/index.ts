@@ -2,13 +2,13 @@
 // so that parallel operations take one another into account.
 
 import { join } from "node:path";
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-  openWorkspace,
-  reserveRecoveryStorage,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
+import { reserveRecoveryStorage } from "@elie-laloum/outpost/recovery";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

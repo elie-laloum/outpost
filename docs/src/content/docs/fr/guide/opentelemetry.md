@@ -14,7 +14,7 @@ Installez `@opentelemetry/api` et un SDK OpenTelemetry, puis enregistrez le SDK 
 ```ts title="telemetry.ts"
 import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 import { trace, metrics } from "@opentelemetry/api";
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 
 export const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
@@ -24,7 +24,7 @@ export const observation = createObservation({ sinks: [telemetry] });
 ```
 
 ```ts title="telemetry-review.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -39,7 +39,7 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="observe-telemetry.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { review } from "./telemetry-review.ts";
 import { observation, telemetry } from "./telemetry.ts";
 

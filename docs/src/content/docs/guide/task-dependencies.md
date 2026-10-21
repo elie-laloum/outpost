@@ -16,7 +16,7 @@ The first example runs entirely in Node.js: install Outpost in an ESM project, s
 Declare each step with a task constructor, then give the tasks to `defineWorkflow()`. Dependencies determine execution order and which earlier results a task may read.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
 const report = defineTask({
@@ -56,7 +56,7 @@ List a task in `after`, then read its output with `context.value(task)`. The val
 `start()` resolves with a `WorkflowResult` once no task can run any more, even when tasks failed. It rejects when an option is invalid or a checkpoint cannot be saved.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const lint = defineTask({
   key: "lint",
@@ -92,7 +92,7 @@ Use `condition` when a task only makes sense for some inputs. A false condition 
 `diagram()` returns the graph as a Mermaid flowchart, for a README or a pull request.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const lint = defineTask({ key: "lint", perform: () => 0 });
 const report = defineTask({ key: "report", after: [lint], perform: () => 0 });

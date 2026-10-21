@@ -74,7 +74,7 @@ Chaque instruction en direct coûte une commande du fournisseur : un wrapper lan
 Passez le fournisseur à `dispatch()` ou à `createSandbox()`, comme pour toute sandbox.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 import { coder, repository } from "./outpost.config.ts";
 

@@ -12,9 +12,9 @@ Avec `authentication: "signed"` sur l’étape d’approbation, une décision do
 <!-- tabs -->
 
 ```ts title="sign.ts"
-import type { WorkflowDecision } from "@elie-laloum/outpost";
+import type { WorkflowDecision } from "@elie-laloum/outpost/workflows";
 import type { KeyObject } from "node:crypto";
-import { signWorkflowDecision } from "@elie-laloum/outpost";
+import { signWorkflowDecision } from "@elie-laloum/outpost/workflows";
 
 export function sign(decision: WorkflowDecision, privateKey: KeyObject) {
   return signWorkflowDecision({
@@ -32,7 +32,7 @@ import type {
   WorkflowCheckpointOptions,
   WorkflowDecision,
   WorkflowApproverKey,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 export interface SignedSubmission {
   workflow: Workflow;
@@ -44,7 +44,7 @@ export interface SignedSubmission {
 
 ```ts title="submit.ts"
 import type { SignedSubmission } from "./submission.types.ts";
-import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
+import { createEd25519DecisionVerifier } from "@elie-laloum/outpost/workflows";
 
 export function submit({
   workflow,

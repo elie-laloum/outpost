@@ -6,12 +6,10 @@ import {
   decide,
   defineDecision,
   createSystemOneDecisionProvider,
-  OutpostError,
-  quotaFault,
-  unavailableFault,
-  createObservationHub,
-} from "../../src/index.ts";
-import type { Observation } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { OutpostError, quotaFault, unavailableFault } from "../../src/core.ts";
+import { createObservationHub } from "../../src/observation.ts";
+import type { Observation } from "../../src/observation.ts";
 
 test("System One accepts Laya's rounded score response without normalizing it", async (t) => {
   const payload = {

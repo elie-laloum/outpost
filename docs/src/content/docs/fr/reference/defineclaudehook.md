@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineClaudeHook } from "@elie-laloum/outpost";
+import { defineClaudeHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

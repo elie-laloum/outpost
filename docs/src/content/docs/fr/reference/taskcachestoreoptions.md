@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskCacheStoreOptions } from "@elie-laloum/outpost";
+import type { TaskCacheStoreOptions } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

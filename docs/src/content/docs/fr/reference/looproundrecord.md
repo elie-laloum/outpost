@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { LoopRoundRecord } from "@elie-laloum/outpost";
+import type { LoopRoundRecord } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

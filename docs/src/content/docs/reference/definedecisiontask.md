@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineDecisionTask } from "@elie-laloum/outpost";
+import { defineDecisionTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

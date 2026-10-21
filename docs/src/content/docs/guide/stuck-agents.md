@@ -12,7 +12,7 @@ An agent can keep producing output while repeating the same commands or edits. E
 Begin with warnings: legitimate polling and test retries can also repeat. This dispatch reports when the same decoded tool call or file-change payload occurs three times among the last twenty activity events. The occurrences can have other calls between them.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
@@ -35,7 +35,7 @@ To enforce a stop after observing the behavior, replace `warn` with `stop`. Outp
 Give the watchdog a concrete new instruction when one change of approach is preferable to stopping immediately. This uses [steering](../steering/): the built-in loop receives a message, while a CLI receives live input or resumes its conversation in the same sandbox. A detected built-in subagent receives its own instruction.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

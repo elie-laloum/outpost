@@ -5,15 +5,17 @@ import {
   createAgent,
   createKimiHarness,
   createSandbox,
+  createLocalTransport,
+} from "../../src/core.ts";
+import {
   defineIsolatedTask,
   defineTask,
   defineWorkflow,
-  speculate,
   createWorkflowCheckpointStore,
-  createLocalTransport,
   WorkflowUsageUnavailable,
-  type AgentObservation,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { speculate } from "../../src/experimental/speculation.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 

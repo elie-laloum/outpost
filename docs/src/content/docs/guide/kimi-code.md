@@ -18,7 +18,7 @@ The [agent image](../agent-images/) and cloud bootstrap install the version in [
 Sign in on the host with `kimi login --region global` (`mainland-cn` for a kimi.com account), then select `account`. The run uses your Kimi Code plan.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({ authentication: "account" }),
@@ -45,7 +45,7 @@ Outpost sets `KIMI_CODE_OAUTH_HOST` and `KIMI_CODE_BASE_URL` to the region’s e
 `{ account: { file } }` points to a profile directory that holds `credentials/` and `device_id`. Set the `region` of the account signed in there.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({
@@ -60,7 +60,7 @@ export const coder = createAgent({
 Pass `KIMI_API_KEY` and a model: without a model, composition fails. API calls use Kimi’s API billing, not your plan.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({

@@ -6,14 +6,16 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
-  createHarness,
   createLocalTransport,
   createObservation,
   createReporter,
+} from "@elie-laloum/outpost/core";
+import { createHarness } from "@elie-laloum/outpost/harness";
+import {
   defineIsolatedTask,
   defineWorkflow,
-  readJournal,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { readJournal } from "@elie-laloum/outpost/observation";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 import { illustrativePrices, pricesFromCatalog } from "./prices.ts";

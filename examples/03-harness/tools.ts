@@ -7,7 +7,7 @@ import {
   createHarnessShellTools,
   defineHarnessTool,
   defineHarnessToolset,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 // A custom tool: a name, a description read by the model, an input schema
 // and a function that runs in the sandbox.

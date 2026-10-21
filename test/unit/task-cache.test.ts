@@ -6,14 +6,14 @@ import {
   defineLoopTask,
   defineTask,
   defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { Sandbox } from "../../src/core.ts";
 import type {
-  Sandbox,
   TaskCacheEntry,
   TaskCacheOptions,
   TaskCacheStore,
   WorkflowEvent,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { taskCacheFingerprint } from "../../src/domain/workflow/task-cache-entry.ts";
 
 function memory() {

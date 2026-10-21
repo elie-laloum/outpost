@@ -9,7 +9,7 @@ import {
   createKimiHarness,
   type AgentAuthentication,
   type CliAgent,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { authenticationForm } from "../../src/domain/authentication.ts";
 import type {
   CredentialPlan,

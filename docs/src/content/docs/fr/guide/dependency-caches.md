@@ -12,7 +12,7 @@ Gardez les secrets hors des caches : une sandbox peut modifier ce que les suivan
 Ajoutez `when: changed(["package-lock.json"])` pour vérifier le contenu avant chaque `sandbox.command()`, `dispatch()` (y compris resume et fork) ou `attach()`. La première préparation exécute toujours le hook ; les opérations suivantes le sautent tant qu’aucun fichier surveillé ne change.
 
 ```ts
-import { changed, createSandbox } from "@elie-laloum/outpost";
+import { changed, createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({

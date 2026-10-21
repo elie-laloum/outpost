@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createHttpTaskQueue } from "@elie-laloum/outpost";
+import { createHttpTaskQueue } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

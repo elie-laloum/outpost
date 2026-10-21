@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { StuckEvent } from "@elie-laloum/outpost";
+import type { StuckEvent } from "@elie-laloum/outpost/core";
 ```
 
 ## Paramètres et propriétés

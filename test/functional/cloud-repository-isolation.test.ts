@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createSandbox, OutpostError } from "../../src/index.ts";
+import { createSandbox, OutpostError } from "../../src/core.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import {
   daytonaRepositoryFixture,

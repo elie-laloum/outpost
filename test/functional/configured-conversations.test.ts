@@ -5,7 +5,7 @@ import { test } from "node:test";
 import {
   createClaudeConversations,
   createCodexConversations,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
 import { claudeConversationLayout } from "../../src/adapters/agents/claude/claude-conversations.ts";
 import { codexConversationLayout } from "../../src/adapters/agents/codex/codex-conversations.ts";
 import { createTranscriptConversations } from "../../src/infrastructure/conversations/transcript-store.ts";

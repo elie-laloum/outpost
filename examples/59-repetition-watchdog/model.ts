@@ -1,4 +1,4 @@
-import type { ModelProvider } from "@elie-laloum/outpost";
+import type { ModelProvider } from "@elie-laloum/outpost/harness";
 
 export function createRepetitiveModel(): ModelProvider {
   let call = 0;

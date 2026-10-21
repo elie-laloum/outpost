@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { HarnessHookResult } from "@elie-laloum/outpost";
+import type { HarnessHookResult } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

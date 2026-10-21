@@ -11,20 +11,26 @@ import { join } from "node:path";
 import * as v from "valibot";
 import {
   createAgent,
-  createArtifactStore,
-  createHarness,
-  createHarnessConversations,
-  createHarnessFileTools,
   createLocalTransport,
   createTransportConversations,
+  dispatch,
+} from "@elie-laloum/outpost/core";
+import {
+  createArtifactStore,
+  defineJsonArtifact,
+} from "@elie-laloum/outpost/storage";
+import {
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost/harness";
+import { createHarnessConversations } from "@elie-laloum/outpost/integrations";
+import {
   createWorkflowCheckpointStore,
   defineArtifactTask,
-  defineJsonArtifact,
   defineWorkflow,
-  dispatch,
-  inspectRecovery,
-  readJournal,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { inspectRecovery } from "@elie-laloum/outpost/recovery";
+import { readJournal } from "@elie-laloum/outpost/observation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

@@ -6,15 +6,19 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
+  OutpostError,
+  recoveryDetails,
+} from "@elie-laloum/outpost/core";
+import {
   createAgentConflictResolver,
+  openWorkspace,
+} from "@elie-laloum/outpost/workspaces";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  openWorkspace,
-  OutpostError,
-  recoveryDetails,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

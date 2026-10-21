@@ -10,7 +10,7 @@ Use the [setup configuration](../setup/) for these dispatch examples. Choose dea
 Set deadlines alongside the brief when a task needs tighter limits than the defaults. You can bound the whole agent turn and the time it may remain silent.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
@@ -41,7 +41,7 @@ Your `observe` callback receives a `stopped` event whose `reason` says which one
 Pass an `AbortSignal`. Here, Ctrl+C stops the agent instead of leaving it running in the sandbox.
 
 ```ts
-import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import { dispatch, recoveryDetails } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const controller = new AbortController();
@@ -80,7 +80,7 @@ For this step, follow [Repeat a brief across passes](../agent-passes/).
 `limits` sets deadlines on the Git and file steps around the agent. Pass it to `dispatch()`, `createWorkspace()` or `createSandbox()`.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

@@ -8,7 +8,7 @@ Les exemples utilisant `defineTask()` fonctionnent hors ligne avec Node.js et Ou
 Dans cet exemple, `flaky` et `lint` démarrent en parallèle. La première tâche échoue une fois, attend 100 ms et réussit à la tentative suivante. Son entrée dans `result.tasks` indique alors `attempts: 2`.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const flaky = defineTask({
   key: "flaky",
@@ -47,7 +47,8 @@ Référence API : [WorkflowOptions](../../reference/workflowoptions/).
 <!-- tabs -->
 
 ```ts title="request.ts"
-import { defineTask, OutpostError } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 
 export const request = defineTask({
   key: "request",
@@ -73,7 +74,7 @@ export const request = defineTask({
 ```
 
 ```ts title="run.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { request } from "./request.ts";
 
 export const result = await defineWorkflow("requests", [request]).start();
@@ -98,7 +99,8 @@ Définissez des délais distincts pour chaque tentative et pour l’ensemble du 
 
 ```ts
 import { setTimeout as sleep } from "node:timers/promises";
-import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { OutpostError } from "@elie-laloum/outpost/core";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const slow = defineTask({
   key: "slow",
@@ -139,7 +141,7 @@ Une tâche échoue quand sa dernière tentative échoue. La suite dépend de `st
 `condition` s’exécute une fois, avant la première tentative. Si elle renvoie `false`, la tâche finit `skipped`, tout comme les tâches qui en dépendent.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const changes = defineTask({ key: "changes", perform: () => ["README.md"] });
 const tests = defineTask({

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { changed, createSandbox } from "@elie-laloum/outpost";
+import { changed, createSandbox } from "@elie-laloum/outpost/core";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 

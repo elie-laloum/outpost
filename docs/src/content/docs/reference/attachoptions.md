@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AttachOptions } from "@elie-laloum/outpost";
+import type { AttachOptions } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

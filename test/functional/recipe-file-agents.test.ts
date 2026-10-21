@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
-import { createClaudeHarness } from "../../src/index.ts";
+import { createClaudeHarness } from "../../src/core.ts";
 import { builtInAgents } from "../../src/adapters/agents/catalog.ts";
 import {
   createRecipeRegistry,

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

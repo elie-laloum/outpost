@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineIsolatedCommandTask } from "@elie-laloum/outpost";
+import { defineIsolatedCommandTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

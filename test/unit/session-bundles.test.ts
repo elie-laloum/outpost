@@ -26,7 +26,7 @@ import { executeProcess } from "../../src/infrastructure/process.ts";
 import {
   createTransportConversations,
   createLocalTransport,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { seedSession, sessionDirectory } from "../fixtures/native-session.ts";
 import { conversationStore, repository } from "../helpers.ts";
 

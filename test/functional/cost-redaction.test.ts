@@ -1,19 +1,17 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { createAgent, createLocalTransport, dispatch } from "../../src/core.ts";
+import { createHarness } from "../../src/harness.ts";
+import { createObservationHub, readJournal } from "../../src/observation.ts";
 import {
-  createAgent,
-  createHarness,
-  createObservationHub,
-  createLocalTransport,
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
   defineIsolatedTask,
-  dispatch,
-  readJournal,
-} from "../../src/index.ts";
-import type { ModelPriceTable, Observation } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { ModelPriceTable } from "../../src/workflows.ts";
+import type { Observation } from "../../src/observation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 import {
@@ -240,8 +238,9 @@ test("native JSONL and base64 bundles mask decoded strings and reject binary red
 test("native transcript capture masks sidecars before transport archival", async (t) => {
   const { mkdir, writeFile } = await import("node:fs/promises");
   const { join } = await import("node:path");
-  const { createTranscriptConversations, createTransportConversations } =
-    await import("../../src/index.ts");
+  const { createTranscriptConversations } =
+    await import("../../src/integrations.ts");
+  const { createTransportConversations } = await import("../../src/core.ts");
   const repo = await repository(t);
   const home = join(repo, "native");
   const id = "session";
@@ -302,8 +301,8 @@ test("native transcript capture masks sidecars before transport archival", async
 test("native Kimi bundle capture masks decoded bytes before saving and archiving", async (t) => {
   const { mkdir, writeFile } = await import("node:fs/promises");
   const { join } = await import("node:path");
-  const { createKimiConversations, createTransportConversations } =
-    await import("../../src/index.ts");
+  const { createKimiConversations } = await import("../../src/integrations.ts");
+  const { createTransportConversations } = await import("../../src/core.ts");
   const repo = await repository(t);
   const home = join(repo, "native");
   const source = join(home, ".kimi-code", "sessions", "bucket", "session");
@@ -346,7 +345,7 @@ test("native Kimi bundle capture masks decoded bytes before saving and archiving
 });
 
 test("priced subagents preserve independent model counters and masked transcripts", async (t) => {
-  const { defineHarnessSubagent } = await import("../../src/index.ts");
+  const { defineHarnessSubagent } = await import("../../src/harness.ts");
   const repo = await repository(t);
   let parentCalls = 0;
   const child = createAgent({
@@ -437,8 +436,8 @@ test("masking model names never changes synchronous monetary accounting", async 
 });
 
 test("command task observers are masked while command results stay usable", async (t) => {
-  const { createSandbox, defineCommandTask } =
-    await import("../../src/index.ts");
+  const { createSandbox } = await import("../../src/core.ts");
+  const { defineCommandTask } = await import("../../src/workflows.ts");
   const repo = await repository(t);
   await using sandbox = await createSandbox({
     repository: repo,

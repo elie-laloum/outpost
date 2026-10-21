@@ -26,7 +26,7 @@ Implement an `AgentAdapter` to describe how your CLI starts and how its output b
 <!-- tabs -->
 
 ```ts title="protocol-values.ts"
-import type { AgentEvent } from "@elie-laloum/outpost";
+import type { AgentEvent } from "@elie-laloum/outpost/integrations";
 
 export const parse = (line: string) => {
   try {
@@ -41,7 +41,7 @@ export function usage(input: number, output: number): AgentEvent {
 ```
 
 ```ts title="events.ts"
-import type { AgentEvent } from "@elie-laloum/outpost";
+import type { AgentEvent } from "@elie-laloum/outpost/integrations";
 import { parse, usage } from "./protocol-values.ts";
 
 export function events(line: string): AgentEvent[] {
@@ -64,7 +64,8 @@ export function events(line: string): AgentEvent[] {
 ```
 
 ```ts title="model-request.ts"
-import type { AgentModel, AgentAdapter } from "@elie-laloum/outpost";
+import type { AgentModel } from "@elie-laloum/outpost/core";
+import type { AgentAdapter } from "@elie-laloum/outpost/integrations";
 
 export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
   return ({ text }) => ({
@@ -76,10 +77,10 @@ export function requestForModel(model?: AgentModel): AgentAdapter["request"] {
 ```
 
 ```ts title="mycli-agent.ts"
-import type { CliHarness } from "@elie-laloum/outpost";
+import type { CliHarness } from "@elie-laloum/outpost/core";
 import { requestForModel } from "./model-request.ts";
 import { events } from "./events.ts";
-import { createAgent } from "@elie-laloum/outpost";
+import { createAgent } from "@elie-laloum/outpost/core";
 
 export const myCliHarness: CliHarness = {
   kind: "cli",
@@ -97,7 +98,7 @@ export const myCli = createAgent({ harness: myCliHarness, model: "mycli-pro" });
 ```
 
 ```ts title="mycli.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { myCli } from "./mycli-agent.ts";
 
@@ -146,7 +147,7 @@ API reference: [AgentAdapter](../../reference/agentadapter/).
 API reference: [Usage](../../reference/usage/).
 
 ```ts
-import type { AgentAdapter } from "@elie-laloum/outpost";
+import type { AgentAdapter } from "@elie-laloum/outpost/integrations";
 
 export const sessionUsage: Pick<
   AgentAdapter,
@@ -183,7 +184,7 @@ A [steered](../steering/) dispatch reaches your CLI in one of two ways.
 | Neither                           | ―          | The dispatch is rejected before it starts.                                               |
 
 ```ts
-import type { AgentLiveInput } from "@elie-laloum/outpost";
+import type { AgentLiveInput } from "@elie-laloum/outpost/integrations";
 
 export const liveInput: AgentLiveInput = {
   open: () => ({
@@ -220,7 +221,7 @@ Record real output lines of the CLI once, then replay them through `events()`. [
 <!-- tabs -->
 
 ```ts title="protocol.types.ts"
-import type { AgentEvent } from "@elie-laloum/outpost";
+import type { AgentEvent } from "@elie-laloum/outpost/integrations";
 
 export interface ProtocolFixture {
   readonly name: string;
@@ -230,7 +231,7 @@ export interface ProtocolFixture {
 ```
 
 ```ts title="check-protocol.ts"
-import type { CliHarness } from "@elie-laloum/outpost";
+import type { CliHarness } from "@elie-laloum/outpost/core";
 import type { ProtocolFixture } from "./protocol.types.ts";
 import assert from "node:assert/strict";
 

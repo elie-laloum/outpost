@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { access, readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createSandbox, fromSecrets, OutpostError } from "../../src/index.ts";
+import { createSandbox, fromSecrets, OutpostError } from "../../src/core.ts";
 import { createVaultSecretSource } from "../../src/adapters/secrets/vault.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";

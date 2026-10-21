@@ -11,14 +11,14 @@ import {
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { test } from "node:test";
+import { createSandbox } from "../../src/core.ts";
 import {
-  createSandbox,
   inspectRecovery,
-  openWorkspace,
   planRecoveryRetention,
   pruneRecoveryRetention,
   reserveRecoveryStorage,
-} from "../../src/index.ts";
+} from "../../src/recovery.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
@@ -612,7 +612,7 @@ test("a timed out transfer that ignores cancellation retains its owned workspace
 
 test("an abruptly terminated owner leaves inspectable resources without reclamation", async (t) => {
   const root = await repository(t);
-  const facade = pathToFileURL(resolve("src/index.ts")).href;
+  const facade = pathToFileURL(resolve("src/core.ts")).href;
   const sandboxProvider = pathToFileURL(resolve("src/providers/local.ts")).href;
   const result = await executeProcess({
     executable: process.execPath,

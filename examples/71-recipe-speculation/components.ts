@@ -2,7 +2,7 @@ import {
   scriptedAgent,
   createMemorySandboxProvider,
 } from "../../dist/testing.js";
-import type { SpeculativeValidation } from "../../dist/index.js";
+import type { SpeculativeValidation } from "../../dist/experimental/speculation.js";
 
 export const memory = createMemorySandboxProvider();
 export const agent = scriptedAgent({

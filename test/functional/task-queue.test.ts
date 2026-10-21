@@ -13,14 +13,15 @@ import {
   createHttpTaskQueue,
   runQueueWorker,
   defineQueuedTask,
+} from "../../src/queues.ts";
+import {
   defineWorkflow,
   createWorkflowCheckpointStore,
-  createLocalTransport,
-  OutpostError,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport, OutpostError } from "../../src/core.ts";
 import { recordRecovery } from "../../src/domain/errors.ts";
 import { queueResult } from "../../src/domain/task-queue.ts";
-import type { TaskQueue, QueueHandler, QueueJob } from "../../src/index.ts";
+import type { TaskQueue, QueueHandler, QueueJob } from "../../src/queues.ts";
 
 const token = "test-only-token-with-at-least-32-characters";
 

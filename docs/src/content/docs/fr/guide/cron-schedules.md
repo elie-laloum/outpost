@@ -10,7 +10,7 @@ Créez une planification avec `createCronSchedule()`, une expression cron et un 
 <!-- tabs -->
 
 ```ts title="audit-schedule.ts"
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 
 export const timeZone = "Europe/Paris";
 export const day = (slot: Date) =>
@@ -27,7 +27,10 @@ export const schedules = [
 ```
 
 ```ts title="scheduler.ts"
-import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runSchedules,
+} from "@elie-laloum/outpost/queues";
 import { schedules } from "./audit-schedule.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -94,8 +97,8 @@ Augmentez `maxLateMs` pour rattraper un créneau manqué pendant une panne plus 
 Sans `onError`, le premier échec de publication arrête toutes les planifications et rejette `runSchedules()`. Avec lui, vous recevez l’erreur avec le nom de la planification et le créneau, et la planification continue avec le créneau suivant.
 
 ```ts
-import { runSchedules } from "@elie-laloum/outpost";
-import type { TaskQueue, TriggerSchedule } from "@elie-laloum/outpost";
+import { runSchedules } from "@elie-laloum/outpost/queues";
+import type { TaskQueue, TriggerSchedule } from "@elie-laloum/outpost/queues";
 
 function schedule(
   queue: TaskQueue,
@@ -119,7 +122,7 @@ Un créneau en échec n’est pas republié. Les erreurs levées par `onError` s
 `next(after)` renvoie le premier créneau strictement après une date, `previous(at)` le dernier créneau à cette date ou avant. Aucune des deux ne publie quoi que ce soit.
 
 ```ts
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
 console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());

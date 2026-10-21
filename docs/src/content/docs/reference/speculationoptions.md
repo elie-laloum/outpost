@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 ```
 
 ## Parameters and properties

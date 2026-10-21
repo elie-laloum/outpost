@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowAnswerRecord } from "@elie-laloum/outpost";
+import type { WorkflowAnswerRecord } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

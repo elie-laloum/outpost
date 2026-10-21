@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineMcpPrompt } from "@elie-laloum/outpost";
+import { defineMcpPrompt } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

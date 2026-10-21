@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TriggerSecret } from "@elie-laloum/outpost";
+import type { TriggerSecret } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

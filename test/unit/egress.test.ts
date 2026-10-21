@@ -10,7 +10,7 @@ import type { VercelOptions } from "../../src/providers/vercel.types.ts";
 import { daytonaNetworkPolicy } from "../../src/providers/daytona-network.ts";
 import type { Sandbox as DaytonaSandbox } from "@daytona/sdk";
 import type { DaytonaOptions } from "../../src/providers/daytona.types.ts";
-import type { Command } from "../../src/index.ts";
+import type { Command } from "../../src/core.ts";
 import { linuxHostMounts, repository } from "../helpers.ts";
 
 test("egress policies reject malformed, ambiguous and unrestricted domain patterns", () => {

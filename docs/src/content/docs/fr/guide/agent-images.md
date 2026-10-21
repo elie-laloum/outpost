@@ -87,7 +87,7 @@ Ne copiez pas `~/.codex`, `~/.claude`, `.env` ou des clés dans la recette avec 
 Chaque version d’Outpost épingle une version par CLI, exposée par `agentVersions`. Les recettes et lockfiles officiels installent exactement ces versions.
 
 ```ts
-import { agentVersions } from "@elie-laloum/outpost";
+import { agentVersions } from "@elie-laloum/outpost/integrations";
 
 console.log(agentVersions.codex);
 // Exemple de sortie : 0.156.1

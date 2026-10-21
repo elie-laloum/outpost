@@ -14,7 +14,8 @@ Conservez un [workspace de fichiers](../working-with-files/) pour un processus u
 Utilisez cette fonction à la place d’`openEmptyWorkspace()` dans l’exemple de workspace de fichiers.
 
 ```ts title="portable-workspace.ts"
-import { createWorkspace, createLocalTransport } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export function openPortableWorkspace() {
   return createWorkspace({
@@ -61,10 +62,8 @@ try {
 ```ts title="restore-files.ts"
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  createLocalTransport,
-  restoreFileWorkspace,
-} from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { restoreFileWorkspace } from "@elie-laloum/outpost/workspaces";
 
 const record = JSON.parse(await readFile("workspace-record.json", "utf8"));
 await using workspace = await restoreFileWorkspace(record, {

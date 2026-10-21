@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { openWorkspace } from "../../src/index.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";

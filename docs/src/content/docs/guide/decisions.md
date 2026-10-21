@@ -10,7 +10,7 @@ Use a typed decision when your application needs a choice or score over known st
 `defineDecision()` validates and freezes questions. A `choice` selects a named option, a `score` evaluates ordered levels, and `noul` returns the probability of yes. This declaration preserves the answer keys and choice literals in TypeScript.
 
 ```ts title="decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const routing = defineDecision({
   questions: {
@@ -38,7 +38,7 @@ Services such as Laya round probabilities and scores to four decimals. Validatio
 One provider implements the System One protocol. Its base URL includes `/v1`; Outpost appends `/systemone`. The address and credentials are used by your Node.js process, independently of the sandbox.
 
 ```ts title="decision-provider.ts"
-import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
+import { createSystemOneDecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const provider = createSystemOneDecisionProvider({
   baseUrl: process.env.SYSTEM_ONE_BASE_URL ?? "http://127.0.0.1:8000/v1",
@@ -54,7 +54,7 @@ Set the endpoint and a nonempty key for an authenticated service. `apiKey: false
 Pass text, an object or an array containing lossless JSON. Cycles, dates, undefined properties, sparse arrays, nonfinite numbers and serialization hooks are rejected before sending a request.
 
 ```ts title="evaluate.ts"
-import { decide } from "@elie-laloum/outpost";
+import { decide } from "@elie-laloum/outpost/workflows";
 import { routing } from "./decision.ts";
 import { provider } from "./decision-provider.ts";
 
@@ -81,7 +81,7 @@ Requests have no internal retries. HTTP 429 is `quota`; timeouts are `timeout`; 
 `defineDecisionTask()` uses the existing dependency, condition, retry, timeout and cache machinery. It evaluates its state callback with `TaskContext` and allocates no sandbox. Dependent tasks receive typed answers through `context.value(triage)`.
 
 ```ts title="triage.ts"
-import { defineDecisionTask, defineTask } from "@elie-laloum/outpost";
+import { defineDecisionTask, defineTask } from "@elie-laloum/outpost/workflows";
 import { provider } from "./decision-provider.ts";
 import { routing } from "./decision.ts";
 
@@ -111,7 +111,7 @@ This explicit test provider returns a fixed answer and usage receipt. Run `node 
 <!-- tabs -->
 
 ```ts title="offline-decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const readOnly = defineDecision({
   questions: {
@@ -121,7 +121,7 @@ export const readOnly = defineDecision({
 ```
 
 ```ts title="fixture-provider.ts"
-import type { DecisionProvider } from "@elie-laloum/outpost";
+import type { DecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const fixture: DecisionProvider = {
   name: "offline-fixture",
@@ -134,7 +134,7 @@ export const fixture: DecisionProvider = {
 ```
 
 ```ts title="offline.ts"
-import { decide } from "@elie-laloum/outpost";
+import { decide } from "@elie-laloum/outpost/workflows";
 import { readOnly } from "./offline-decision.ts";
 import { fixture } from "./fixture-provider.ts";
 

@@ -12,7 +12,7 @@ import {
   planRecoveryRestore,
   restoreRecoveryTransfer,
   verifyRecoveryTransfer,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 import { demoRepository } from "../shared/repository.ts";
 
 // The repository to inspect: the one passed as an argument, otherwise the demo's sample repository.

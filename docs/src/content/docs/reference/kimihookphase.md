@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { KimiHookPhase } from "@elie-laloum/outpost";
+import type { KimiHookPhase } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

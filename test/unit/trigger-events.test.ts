@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { commandIssued, labelAdded } from "../../src/index.ts";
-import type { TriggerEvent, WorkflowJson } from "../../src/index.ts";
+import { commandIssued, labelAdded } from "../../src/queues.ts";
+import type { TriggerEvent } from "../../src/queues.ts";
+import type { WorkflowJson } from "../../src/workflows.ts";
 
 function event(
   source: string,

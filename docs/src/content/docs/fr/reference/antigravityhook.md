@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AntigravityHook } from "@elie-laloum/outpost";
+import type { AntigravityHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Paramètres et propriétés

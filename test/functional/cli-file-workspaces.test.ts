@@ -9,10 +9,10 @@ import {
   createLocalTransport,
   createSandbox,
   createSteering,
-  createWorkspace,
   defineJsonResponse,
   dispatch,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createWorkspace } from "../../src/workspaces.ts";
 import type { AgentEvent } from "../../src/domain/agent.types.ts";
 import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
 import { builtInAgents } from "../../src/adapters/agents/catalog.ts";

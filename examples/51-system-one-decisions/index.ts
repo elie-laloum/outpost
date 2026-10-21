@@ -10,7 +10,7 @@ import {
   defineDecisionTask,
   defineTask,
   defineWorkflow,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const provider = createSystemOneDecisionProvider({
   baseUrl: process.env.LAYA_BASE_URL ?? "http://127.0.0.1:8000/v1",

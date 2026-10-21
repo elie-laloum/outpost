@@ -8,11 +8,11 @@ description: "Configure an OpenAI or Anthropic model provider for the built-in h
 Connect a model provider to `createHarness()` so the built-in loop can call the model API. Then compose the harness and a model with `createAgent()` and pass that agent to a dispatch.
 
 ```ts
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createAnthropicModelProvider,
   createHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const agent = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
@@ -37,7 +37,7 @@ Anthropic requires `maxOutputTokens`, hence the object form of `model`. Each mod
 `baseUrl` is required for OpenAI and includes the version prefix. The protocol you choose is the only one used: an error never switches to another.
 
 ```ts
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 const openai = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
@@ -53,7 +53,7 @@ const openai = createOpenAIModelProvider({
 Set `apiKey: false` for a server without authentication. The address is resolved from your host, not from the sandbox.
 
 ```ts
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 const local = createOpenAIModelProvider({
   baseUrl: "http://127.0.0.1:8080/v1",

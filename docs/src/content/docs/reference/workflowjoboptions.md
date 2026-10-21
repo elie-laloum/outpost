@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowJobOptions } from "@elie-laloum/outpost";
+import type { WorkflowJobOptions } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

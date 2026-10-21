@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileWorkspaceRecoveryAuthorization } from "@elie-laloum/outpost";
+import type { FileWorkspaceRecoveryAuthorization } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import {
   defineHarnessHook,
   defineHarnessPermissions,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import { normalizeResourcePath } from "../../src/domain/permissions.ts";
 
 test("hooks validate their phase, name and callback", () => {

@@ -5,17 +5,19 @@ import { test } from "node:test";
 import {
   createAgent,
   createLocalTransport,
-  createSessionBundleConversations,
-  createTranscriptConversations,
   createTransportConversations,
   dispatch,
+} from "../../src/core.ts";
+import {
+  createSessionBundleConversations,
+  createTranscriptConversations,
   type AgentAdapter,
   type AgentEvent,
   type AgentInput,
   type ConversationStore,
   type SessionBundleProfile,
   type TranscriptConversationLayout,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

@@ -3,18 +3,18 @@ import { test } from "node:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createLocalTransport } from "../../src/core.ts";
 import {
-  createLocalTransport,
   defineLoopTask,
   LoopTaskExhausted,
   defineWorkflow,
   createWorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import type {
   LoopTaskContext,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 for (const interrupted of ["attempt", "check"]) {
   test(`durable resume of interrupted ${interrupted} preserves rounds and usage`, async (t) => {

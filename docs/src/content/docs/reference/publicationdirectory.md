@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { PublicationDirectory } from "@elie-laloum/outpost";
+import type { PublicationDirectory } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

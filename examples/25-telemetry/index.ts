@@ -5,14 +5,12 @@
 // the OTLP exporters (@opentelemetry/exporter-trace-otlp-http…) to Jaeger, Grafana, Honeycomb…
 
 import { join } from "node:path";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-  defineTask,
-  defineWorkflow,
-  dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 import {
   BasicTracerProvider,

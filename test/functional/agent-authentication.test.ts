@@ -28,7 +28,7 @@ import {
   createKimiHarness,
   createSandbox,
   createObservation,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";

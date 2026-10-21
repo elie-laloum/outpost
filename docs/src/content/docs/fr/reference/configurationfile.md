@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ConfigurationFile } from "@elie-laloum/outpost";
+import type { ConfigurationFile } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

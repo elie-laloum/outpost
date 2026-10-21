@@ -5,8 +5,8 @@ import {
   createClaudeHarness,
   createFallbackAgent,
   OutpostError,
-} from "../../src/index.ts";
-import type { Agent, FallbackTrigger } from "../../src/index.ts";
+} from "../../src/core.ts";
+import type { Agent, FallbackTrigger } from "../../src/core.ts";
 import {
   dispatchCandidates,
   fallbackCandidate,

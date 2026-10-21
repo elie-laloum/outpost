@@ -8,21 +8,24 @@ import {
   createCodexHarness,
   createSandbox,
   createSteering,
-  defineHarnessSubagent,
-  defineHarnessTool,
   defineTextResponse,
   dispatch,
-  createHarness,
   OutpostError,
-  readJournal,
-  createReplayAgent,
-  type AgentInput,
-  type AgentObservation,
+  type SteeringDelivery,
+} from "../../src/core.ts";
+import {
+  defineHarnessSubagent,
+  defineHarnessTool,
+  createHarness,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
-  type SteeringDelivery,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { readJournal, createReplayAgent } from "../../src/observation.ts";
+import {
+  type AgentInput,
+  type AgentObservation,
+} from "../../src/integrations.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";

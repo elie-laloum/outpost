@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { signWorkflowDecision } from "@elie-laloum/outpost";
+import { signWorkflowDecision } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

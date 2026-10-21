@@ -33,7 +33,7 @@ export const runId = (slot: Date) =>
 ```
 
 ```ts title="nightly-schedules.ts"
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 import { timeZone, runId } from "./nightly-time.ts";
 
 export const schedules = [
@@ -53,7 +53,10 @@ export const schedules = [
 ```
 
 ```ts title="scheduler.ts"
-import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runSchedules,
+} from "@elie-laloum/outpost/queues";
 import { schedules } from "./nightly-schedules.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -88,7 +91,7 @@ Importez ce schéma dans `nightly-report.ts` pour que les consignes automatiques
 <!-- tabs -->
 
 ```ts title="nightly-report.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { reportSchema } from "./report-schema.ts";
 
 export function names(value: unknown): string[] {
@@ -114,7 +117,7 @@ import {
   createFallbackAgent,
   createAgent,
   createClaudeHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { coder } from "./outpost.config.ts";
 
 export const agent = createFallbackAgent(
@@ -140,7 +143,7 @@ export const brief = {
 ```
 
 ```ts title="update-agent.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./nightly-agent.ts";
 import { report } from "./nightly-report.ts";
@@ -163,7 +166,7 @@ export function updateAgent(runId: string) {
 
 ```ts title="update-task.ts"
 import { updateAgent } from "./update-agent.ts";
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 export function updateTask(runId: string) {
   const agentTask = updateAgent(runId);
@@ -187,7 +190,7 @@ Publiez le rapport et traitez les jobs avec checkpoint dans `worker.ts`.
 
 ```ts title="publish-report.ts"
 import { updateTask } from "./update-task.ts";
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { mkdir, writeFile } from "node:fs/promises";
 
 export function publishTask(
@@ -210,7 +213,7 @@ export function publishTask(
 ```ts title="nightly-workflow.ts"
 import { updateTask } from "./update-task.ts";
 import { publishTask } from "./publish-report.ts";
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 export function nightly(runId: string) {
   const update = updateTask(runId);
@@ -220,11 +223,9 @@ export function nightly(runId: string) {
 ```
 
 ```ts title="nightly-job.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-  defineWorkflowJob,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { defineWorkflowJob } from "@elie-laloum/outpost/queues";
 import { nightly } from "./nightly-workflow.ts";
 
 export const store = createWorkflowCheckpointStore({
@@ -238,7 +239,10 @@ export const job = defineWorkflowJob({
 ```
 
 ```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runQueueWorker,
+} from "@elie-laloum/outpost/queues";
 import { job } from "./nightly-job.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -271,7 +275,7 @@ Laissez le worker ouvert et lancez `node enqueue-now.ts` dans un autre terminal.
 
 ```ts title="enqueue-now.ts"
 import { randomUUID } from "node:crypto";
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const id = `manual-${randomUUID()}`;

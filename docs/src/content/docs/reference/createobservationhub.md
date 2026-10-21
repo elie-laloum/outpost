@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createObservationHub } from "@elie-laloum/outpost";
+import { createObservationHub } from "@elie-laloum/outpost/observation";
 ```
 
 ## Purpose and behavior

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineCopilotHook } from "@elie-laloum/outpost";
+import { defineCopilotHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

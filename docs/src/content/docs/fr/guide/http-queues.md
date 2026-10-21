@@ -10,7 +10,10 @@ Utilisez une file HTTP lorsque producteurs et workers ne peuvent pas ouvrir la m
 `serveTaskQueue()` place n’importe quelle file derrière un point d’accès HTTP. `createHttpTaskQueue()` est un client de file pour les producteurs et workers situés sur d’autres machines.
 
 ```ts title="queue-server.ts"
-import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  serveTaskQueue,
+} from "@elie-laloum/outpost/queues";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
 if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");
@@ -34,7 +37,7 @@ Pour faire tourner les jetons, donnez à `token` une fonction, lue à chaque req
 Lancez `node queue-server.ts` et le `worker.ts` de [Jobs et workers](../job-queues/) depuis le même répertoire : ils ouvrent la même base SQLite. Dans un troisième terminal, donnez le même `OUTPOST_QUEUE_TOKEN` au client puis lancez `node submit-http.ts`. Réexécutez-le après le traitement pour lire la valeur `3`. Pour cet essai local, aucun proxy n’est nécessaire.
 
 ```ts title="submit-http.ts"
-import { createHttpTaskQueue } from "@elie-laloum/outpost";
+import { createHttpTaskQueue } from "@elie-laloum/outpost/queues";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
 if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");

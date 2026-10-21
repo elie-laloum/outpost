@@ -24,7 +24,7 @@ Les nouvelles copies, snapshots et publications préservent les contenus binaire
 Créez une racine vide avec une conservation locale pour retrouver les fichiers après la fermeture.
 
 ```ts title="empty-workspace.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openEmptyWorkspace() {
   return createWorkspace({
@@ -64,7 +64,7 @@ Docker et Podman nécessitent Node.js 24+, le moteur choisi et `tar` sur l'hôte
 Déclarez le sous-répertoire exposé et choisissez explicitement si la sandbox peut écrire dans la source.
 
 ```ts title="mounted-documents.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openMountedDocuments() {
   return createWorkspace({

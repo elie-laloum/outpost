@@ -87,7 +87,7 @@ Do not `COPY` `~/.codex`, `~/.claude`, `.env` or keys into the recipe, and do no
 Each Outpost release pins one version per CLI, exposed as `agentVersions`. The official recipes and lockfiles install exactly these versions.
 
 ```ts
-import { agentVersions } from "@elie-laloum/outpost";
+import { agentVersions } from "@elie-laloum/outpost/integrations";
 
 console.log(agentVersions.codex);
 // Example output: 0.156.1

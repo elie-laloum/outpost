@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ChoiceAnswer } from "@elie-laloum/outpost";
+import type { ChoiceAnswer } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

@@ -8,7 +8,7 @@ The examples with `defineTask()` run offline with Node.js and Outpost. Save each
 In this example, `flaky` and `lint` start in parallel. The first task fails once, waits 100 ms and succeeds on its next attempt. Its entry in `result.tasks` then reports `attempts: 2`.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const flaky = defineTask({
   key: "flaky",
@@ -47,7 +47,8 @@ API reference: [WorkflowOptions](../../reference/workflowoptions/).
 <!-- tabs -->
 
 ```ts title="request.ts"
-import { defineTask, OutpostError } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 
 export const request = defineTask({
   key: "request",
@@ -73,7 +74,7 @@ export const request = defineTask({
 ```
 
 ```ts title="run.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { request } from "./request.ts";
 
 export const result = await defineWorkflow("requests", [request]).start();
@@ -98,7 +99,8 @@ Set separate deadlines for each task attempt and the whole workflow. In this exa
 
 ```ts
 import { setTimeout as sleep } from "node:timers/promises";
-import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { OutpostError } from "@elie-laloum/outpost/core";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const slow = defineTask({
   key: "slow",
@@ -139,7 +141,7 @@ A task fails when its last attempt fails. What happens next depends on `stopOnEr
 `condition` runs once, before the first attempt. When it returns `false`, the task ends `skipped` and so do the tasks that depend on it.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const changes = defineTask({ key: "changes", perform: () => ["README.md"] });
 const tests = defineTask({

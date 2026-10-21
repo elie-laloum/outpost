@@ -10,7 +10,7 @@ La réorientation ajoute une consigne à une tâche active sans l’annuler. Con
 Créez un contrôleur de réorientation et passez-le à la tâche. Pendant l’exécution, `send()` envoie une nouvelle consigne et se termine lorsqu’Outpost peut indiquer comment elle a été transmise.
 
 ```ts
-import { createSteering, dispatch } from "@elie-laloum/outpost";
+import { createSteering, dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const steering = createSteering();
@@ -61,7 +61,10 @@ Une consigne que le dispatch ne peut pas remettre, par exemple parce que l’age
 Chaque exécution d’un [sous-agent intégré](../subagents/) a un identifiant, fourni par son événement `subagent`. Passez-le dans `subagent` pour ne viser que cette exécution.
 
 ```ts
-import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
+import {
+  createSteering,
+  type DispatchOptions,
+} from "@elie-laloum/outpost/core";
 
 const steering = createSteering();
 const request: DispatchOptions = {

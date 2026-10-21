@@ -16,7 +16,7 @@ description: "Run a README review and inspect the answer and branch."
 Use the configuration from [Installation](../setup/). The target repository must have a committed README. Save `review.ts` beside `outpost.config.ts`; it asks the agent for findings on a separate branch.
 
 ```ts title="review.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

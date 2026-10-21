@@ -10,7 +10,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { repositoryFingerprint } from "../../src/index.ts";
+import { repositoryFingerprint } from "../../src/workflows.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 

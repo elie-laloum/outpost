@@ -30,7 +30,7 @@ export const candidates = ["minimal", "refactor"].map((key) => ({
 ```
 
 ```ts title="validate.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -48,7 +48,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
-import { speculate } from "@elie-laloum/outpost";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -69,7 +69,7 @@ console.log(result.status, result.terminationCode, result.winner?.branch);
 Utilisez `select: "best"` pour laisser finir tous les candidats admis. `score` s’exécute uniquement après l’acceptation par `validate`, dans la sandbox encore ouverte. Renvoyez un nombre fini : le score le plus élevé gagne après un nettoyage réussi. Les scores égaux suivent l’ordre de déclaration. Le mode par défaut `select: "first"` conserve le premier candidat accepté et annule les autres.
 
 ```ts title="best.ts"
-import { speculate } from "@elie-laloum/outpost";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -124,7 +124,7 @@ Référence API : [SpeculationIntegration](../../reference/speculationintegratio
 Votre checkout peut changer après la course. Vérifiez à nouveau juste avant de fusionner :
 
 ```ts
-import { checkSpeculationIntegration } from "@elie-laloum/outpost";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
 import { repository } from "./outpost.config.ts";
 
 export async function canMerge(branch: string, commit?: string) {

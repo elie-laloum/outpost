@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createHarnessEditTools } from "@elie-laloum/outpost";
+import { createHarnessEditTools } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

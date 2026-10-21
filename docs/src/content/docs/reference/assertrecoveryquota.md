@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { assertRecoveryQuota } from "@elie-laloum/outpost";
+import { assertRecoveryQuota } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Purpose and behavior

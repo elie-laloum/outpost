@@ -4,14 +4,16 @@ import { turn } from "../../src/application/agent-turn.ts";
 import {
   createAgent,
   createAntigravityHarness,
-  createAnthropicModelProvider,
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
   createKimiHarness,
-  createOpenAIModelProvider,
   OutpostError,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import {
+  createAnthropicModelProvider,
+  createOpenAIModelProvider,
+} from "../../src/harness.ts";
 import { quotaFault } from "../../src/domain/quota.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
 import type { CommandResult } from "../../src/domain/command.types.ts";

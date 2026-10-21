@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { DecisionAnswers } from "@elie-laloum/outpost";
+import type { DecisionAnswers } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

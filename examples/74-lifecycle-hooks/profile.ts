@@ -1,12 +1,12 @@
 import {
   defineAgentProfile,
-  defineHarnessHook,
   defineClaudeHook,
   defineCodexHook,
   defineCopilotHook,
   defineKimiHook,
   defineAntigravityHook,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const profile = defineAgentProfile({
   hooks: {

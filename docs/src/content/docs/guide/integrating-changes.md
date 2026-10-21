@@ -14,7 +14,7 @@ Integration acquires the same host-checkout lock as a `current` workspace. If th
 <!-- tabs -->
 
 ```ts title="change.ts"
-import type { Workspace } from "@elie-laloum/outpost";
+import type { Workspace } from "@elie-laloum/outpost/workspaces";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 
 export async function change(workspace: Workspace) {
@@ -34,7 +34,7 @@ export async function change(workspace: Workspace) {
 ```
 
 ```ts title="integrate.ts"
-import { openWorkspace } from "@elie-laloum/outpost";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
 import { repository } from "./outpost.config.ts";
 import { change } from "./change.ts";
 
@@ -57,7 +57,7 @@ try {
 Set a workspace `guard` to reject protected paths or an oversized final committed diff, independently of the agent. This dispatch integrates only when both rules pass. A refusal throws `OutpostError` with code `guard`, releases the sandbox and retains the branch and worktree for review.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

@@ -12,7 +12,7 @@ API reference: [HarnessInstructionsOption](../../reference/harnessinstructionsop
 Load the project’s `AGENTS.md` from the borrowed sandbox to build the system instructions. The example uses its content when the file can be read, and returns an empty string otherwise.
 
 ```ts
-import { defineHarnessInstructions } from "@elie-laloum/outpost";
+import { defineHarnessInstructions } from "@elie-laloum/outpost/harness";
 
 export const projectGuidance = defineHarnessInstructions(
   async ({ sandbox, signal }) => {
@@ -36,7 +36,7 @@ A skill is guidance and tools the model loads only when it needs them. Its name 
 import {
   createHarnessGitTools,
   defineHarnessSkill,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const review = defineHarnessSkill({
   name: "review",

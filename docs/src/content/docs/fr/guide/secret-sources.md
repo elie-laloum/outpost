@@ -16,7 +16,7 @@ La résolution refuse une valeur absente, vide, non textuelle, contenant un cara
 Les deux services utilisent l’API de lecture KV v2. Déclarez explicitement le serveur, le jeton, le point de montage et le chemin du document ; cet exemple lit le champ `OPENAI_API_KEY` du document `kv/outpost`. Une version et un espace de noms peuvent être fournis si nécessaire. Le jeton reste sur l’hôte.
 
 ```ts title="vault.ts"
-import { fromSecrets } from "@elie-laloum/outpost";
+import { fromSecrets } from "@elie-laloum/outpost/core";
 import { createVaultSecretSource } from "@elie-laloum/outpost/secrets/vault";
 
 export const variables = await fromSecrets(
@@ -37,7 +37,7 @@ import {
   createAgent,
   createCodexHarness,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { variables } from "./vault.ts";
 
@@ -172,7 +172,7 @@ Les agents et commandes peuvent lire toutes les variables reçues. Résoudre une
 Implémentez `SecretSource` avec une méthode `resolve()` nommée qui ne lit que les noms demandés. Cet exemple hors ligne démontre la sélection sans compte ni réseau. Utilisez `fromSecrets()` comme frontière de validation au démarrage avant de transmettre les variables au harness.
 
 ```ts
-import { fromSecrets, type SecretSource } from "@elie-laloum/outpost";
+import { fromSecrets, type SecretSource } from "@elie-laloum/outpost/core";
 
 const source: SecretSource = {
   name: "fixture",

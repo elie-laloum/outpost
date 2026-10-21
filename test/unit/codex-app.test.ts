@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createAgent, createCodexHarness } from "../../src/index.ts";
+import { createAgent, createCodexHarness } from "../../src/core.ts";
 import {
   codexAppInitialize,
   codexAppSession,

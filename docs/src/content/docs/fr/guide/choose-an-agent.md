@@ -35,7 +35,7 @@ Un agent associe un harness à un choix de modèle facultatif. Le harness pilote
 `createAgent()` prend un harness et un modèle facultatif. Chaque CLI a sa configuration prédéfinie : `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` et `createAntigravityHarness()`.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 export const reviewer = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),

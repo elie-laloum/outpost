@@ -2,14 +2,13 @@
 // An offline model demonstrates all three policies using real local commands, without paid calls.
 
 import assert from "node:assert/strict";
+import { createAgent, dispatch, OutpostError } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessShellTools,
-  dispatch,
-  OutpostError,
-} from "@elie-laloum/outpost";
-import type { AgentObservation, WatchdogOptions } from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import type { AgentObservation } from "@elie-laloum/outpost/integrations";
+import type { WatchdogOptions } from "@elie-laloum/outpost/core";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 import { createRepetitiveModel } from "./model.ts";

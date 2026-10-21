@@ -22,7 +22,7 @@ export type TestInput = z.infer<typeof testInput>;
 
 ```ts title="execute-tests.ts"
 import type { TestInput } from "./test-input.ts";
-import type { HarnessToolContext } from "@elie-laloum/outpost";
+import type { HarnessToolContext } from "@elie-laloum/outpost/harness";
 
 export async function executeTests(
   { match }: TestInput,
@@ -44,7 +44,7 @@ export async function executeTests(
 ```
 
 ```ts title="run-tests.ts"
-import { defineHarnessTool } from "@elie-laloum/outpost";
+import { defineHarnessTool } from "@elie-laloum/outpost/harness";
 import { testInput } from "./test-input.ts";
 import { executeTests } from "./execute-tests.ts";
 
@@ -74,7 +74,7 @@ import {
   createHarnessFileTools,
   createHarnessSearchTools,
   createHarnessGitTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const inspect = defineHarnessToolset({
   name: "inspect",
@@ -91,7 +91,7 @@ import {
   defineHarnessToolset,
   createHarnessEditTools,
   createHarnessShellTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { inspect } from "./inspect-tools.ts";
 
 export const coding = defineHarnessToolset({
@@ -107,7 +107,8 @@ Chaque nom d’outil doit être unique dans le harness : ses outils, ses ensembl
 Reprenez `read-model.ts` depuis [les outils intégrés](../harness-tools/) et la configuration d’[Installation](../setup/). Installez `zod`. Le dépôt doit avoir un `npm test` fonctionnel ; configurez le modèle et sa clé comme sur la page du harness. Enregistrez ce fichier puis lancez `node test-agent.ts`.
 
 ```ts title="test-agent.ts"
-import { createAgent, createHarness, dispatch } from "@elie-laloum/outpost";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
+import { createHarness } from "@elie-laloum/outpost/harness";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { modelProvider } from "./read-model.ts";
 import { runTests } from "./run-tests.ts";

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { NoulAnswer } from "@elie-laloum/outpost";
+import type { NoulAnswer } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { HarnessToolExecution } from "@elie-laloum/outpost";
+import type { HarnessToolExecution } from "@elie-laloum/outpost/harness";
 ```
 
 ## Paramètres et propriétés

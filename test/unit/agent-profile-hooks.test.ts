@@ -2,22 +2,21 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   createAgent,
-  createHarness,
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
   createKimiHarness,
   createAntigravityHarness,
   defineAgentProfile,
-  defineHarnessHook,
   defineClaudeHook,
   defineCodexHook,
   defineCopilotHook,
   defineKimiHook,
   defineAntigravityHook,
   OutpostError,
-} from "../../src/index.ts";
-import type { AgentProfileHooks } from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createHarness, defineHarnessHook } from "../../src/harness.ts";
+import type { AgentProfileHooks } from "../../src/core.ts";
 
 const claude = defineClaudeHook({
   on: "SessionStart",

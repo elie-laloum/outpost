@@ -4,17 +4,15 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { defineJsonArtifact, createArtifactStore } from "../../src/storage.ts";
 import {
-  defineJsonArtifact,
   defineArtifactTask,
-  createArtifactStore,
   createWorkflowCheckpointStore,
   defineIsolatedTask,
   readArtifact,
-  defineJsonResponse,
   defineWorkflow,
-  createLocalTransport,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { defineJsonResponse, createLocalTransport } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
@@ -129,7 +127,7 @@ test("isolated repositories exchange validated artifacts and resume references i
   const script = join(frontendRepository, "read.mjs");
   await writeFile(
     script,
-    `import { defineJsonArtifact, defineArtifactTask, createArtifactStore, createWorkflowCheckpointStore, readStoredArtifact, defineWorkflow, createLocalTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    `import { defineJsonArtifact, createArtifactStore, readStoredArtifact } from ${JSON.stringify(new URL("../../src/storage.ts", import.meta.url).href)}; import { defineArtifactTask, createWorkflowCheckpointStore, defineWorkflow } from ${JSON.stringify(new URL("../../src/workflows.ts", import.meta.url).href)}; import { createLocalTransport } from ${JSON.stringify(new URL("../../src/core.ts", import.meta.url).href)};
     const store=createArtifactStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) });
     const contract=defineJsonArtifact({name:'api',version:'1',schema:${schema.toString()}});
     const item=defineArtifactTask({key:'persisted',store,contract,produce(){throw new Error('must not replay')}});

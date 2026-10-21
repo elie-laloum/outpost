@@ -3,7 +3,7 @@
 import {
   defineHarnessHook,
   defineHarnessPermissions,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 // Permissions: the first matching rule decides, otherwise `default`.
 export const permissions = defineHarnessPermissions({

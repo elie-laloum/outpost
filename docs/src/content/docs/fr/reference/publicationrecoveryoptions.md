@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { PublicationRecoveryOptions } from "@elie-laloum/outpost";
+import type { PublicationRecoveryOptions } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Paramètres et propriétés

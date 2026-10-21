@@ -1,5 +1,8 @@
 import { join } from "node:path";
-import { createLocalTransport, createObservation } from "@elie-laloum/outpost";
+import {
+  createLocalTransport,
+  createObservation,
+} from "@elie-laloum/outpost/core";
 import { demoRepository } from "../shared/repository.ts";
 const id = process.argv[2];
 if (!id)

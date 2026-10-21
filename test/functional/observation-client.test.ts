@@ -5,13 +5,16 @@ import {
   createObservation,
   createLocalTransport,
   createReporter,
-  createCustomReporter,
+  dispatch,
+} from "../../src/core.ts";
+import { createCustomReporter } from "../../src/observation.ts";
+import {
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
-  dispatch,
-} from "../../src/index.ts";
-import type { Observation, RunEvent, Transport } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { Observation, RunEvent } from "../../src/observation.ts";
+import type { Transport } from "../../src/storage.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -304,7 +307,7 @@ test("YAML observation owns persistence for an ephemeral command workflow", asyn
   const reporterLog = join(root, "reporter.log");
   await writeFile(
     join(root, "reporter.mjs"),
-    `import { createReporter } from ${JSON.stringify(pathToFileURL(resolve("src/index.ts")).href)};
+    `import { createReporter } from ${JSON.stringify(pathToFileURL(resolve("src/core.ts")).href)};
 import { appendFileSync } from "node:fs";
 export const sink = createReporter({ verbose: true, write: text => appendFileSync(${JSON.stringify(reporterLog)}, text) });
 const observe = sink.observe;
@@ -379,7 +382,8 @@ test("reporter stream suppression is isolated between interleaved dispatches", a
 });
 
 test("file dispatch registration covers allocation failure and output publication failure", async (t) => {
-  const { createAgent, createHarness } = await import("../../src/index.ts");
+  const { createAgent } = await import("../../src/core.ts");
+  const { createHarness } = await import("../../src/harness.ts");
   const root = await repository(t);
   const transporter = createLocalTransport({ directory: join(root, "runs") });
   await using observation = createObservation({ transporter });

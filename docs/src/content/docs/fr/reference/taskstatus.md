@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskStatus } from "@elie-laloum/outpost";
+import type { TaskStatus } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

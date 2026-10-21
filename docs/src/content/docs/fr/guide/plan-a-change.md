@@ -30,7 +30,7 @@ export const planSchema = z.object({
 ```
 
 ```ts title="frame.ts"
-import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
+import { defineInteractiveAgentTask } from "@elie-laloum/outpost/workflows";
 import { repository, coder, sandboxProvider } from "./outpost.config.ts";
 import { ticket } from "./ticket.ts";
 
@@ -51,7 +51,7 @@ export const frame = defineInteractiveAgentTask({
 ```
 
 ```ts title="plan.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { frame } from "./frame.ts";
 import { planSchema } from "./ticket.ts";
 
@@ -63,7 +63,7 @@ export const plan = defineTask({
 ```
 
 ```ts title="approval.ts"
-import { defineApprovalTask } from "@elie-laloum/outpost";
+import { defineApprovalTask } from "@elie-laloum/outpost/workflows";
 import { plan } from "./plan.ts";
 import { ticket } from "./ticket.ts";
 
@@ -82,10 +82,8 @@ Le checkpoint conserve les questions, réponses et le plan entre les processus. 
 <!-- tabs -->
 
 ```ts title="checkpoint.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import { repository } from "./outpost.config.ts";
 import { ticket } from "./ticket.ts";
 
@@ -101,7 +99,7 @@ export const checkpoint = {
 ```
 
 ```ts title="plan-workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { frame } from "./frame.ts";
 import { plan } from "./plan.ts";
 import { review } from "./approval.ts";

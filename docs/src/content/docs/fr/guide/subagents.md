@@ -12,7 +12,7 @@ Déclarez un sous-agent avec `defineHarnessSubagent()` et exposez-le comme outil
 <!-- tabs -->
 
 ```ts title="model.ts"
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
@@ -23,11 +23,11 @@ export const model = process.env.MODEL_NAME ?? "";
 ```
 
 ```ts title="reviewer.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider } from "./model.ts";
 
 export const reviewer = createAgent({
@@ -42,7 +42,7 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="delegation.ts"
-import { defineHarnessSubagent } from "@elie-laloum/outpost";
+import { defineHarnessSubagent } from "@elie-laloum/outpost/harness";
 import { reviewer } from "./reviewer.ts";
 
 export const tools = [
@@ -55,7 +55,8 @@ export const tools = [
 ```
 
 ```ts title="coordinator.ts"
-import { createAgent, createHarness } from "@elie-laloum/outpost";
+import { createAgent } from "@elie-laloum/outpost/core";
+import { createHarness } from "@elie-laloum/outpost/harness";
 import { model, modelProvider } from "./model.ts";
 import { tools } from "./delegation.ts";
 
@@ -70,7 +71,7 @@ export const coordinator = createAgent({
 ```
 
 ```ts title="run.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { coordinator } from "./coordinator.ts";
 
@@ -126,7 +127,7 @@ Reprendre le parent ne relance pas l’enfant : le parent rejoue les résultats 
 Chaque délégation émet un événement `subagent` quand elle démarre, se termine ou échoue. Tous les autres événements de l’enfant, `usage` compris, portent l’identifiant de son exécution dans `subagentId`.
 
 ```ts
-import type { DispatchOptions } from "@elie-laloum/outpost";
+import type { DispatchOptions } from "@elie-laloum/outpost/core";
 
 const observe: DispatchOptions["observe"] = (event) => {
   if (event.kind === "subagent")

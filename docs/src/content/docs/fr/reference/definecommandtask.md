@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineCommandTask } from "@elie-laloum/outpost";
+import { defineCommandTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

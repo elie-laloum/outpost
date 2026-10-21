@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineQueuedTask } from "@elie-laloum/outpost";
+import { defineQueuedTask } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

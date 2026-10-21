@@ -27,7 +27,10 @@ Lancez le worker dans son propre processus. Il interroge la file et exécute un 
 Les erreurs de file sont signalées par le callback facultatif `onError(error)`. Une prise de job échouée est retentée après `pollMs` ; la publication du résultat est retentée tant que le bail reste valide, sans réexécuter le traitement. Un bail révoqué termine le traitement de ce job et laisse le worker disponible pour le suivant. Un échec de renouvellement annule le traitement actif ; ses effets externes exigent toujours une clé d’idempotence. Le signal du worker interrompt les attentes entre tentatives, et une erreur levée par `onError` n’arrête pas le worker.
 
 ```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runQueueWorker,
+} from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
@@ -53,7 +56,7 @@ try {
 Un producteur ouvre la même file et y ajoute un job sous un identifiant stable.
 
 ```ts title="submit.ts"
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
@@ -74,7 +77,7 @@ Le script affiche le job avec `status: "pending"` ; une fois qu’un worker l’
 Après le traitement, lancez `node read-job.ts`. Si le statut reste `pending`, vérifiez que le worker utilise la même base et connaît le traitement `count`. Un job terminé affiche la valeur `3`.
 
 ```ts title="read-job.ts"
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {

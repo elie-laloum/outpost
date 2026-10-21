@@ -5,12 +5,8 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 import { PassThrough, Readable } from "node:stream";
-import {
-  createSandbox,
-  dispatch,
-  openWorkspace,
-  attach,
-} from "../../src/index.ts";
+import { createSandbox, dispatch, attach } from "../../src/core.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { git } from "../../src/infrastructure/git.ts";

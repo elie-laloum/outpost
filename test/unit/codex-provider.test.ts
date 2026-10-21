@@ -1,7 +1,7 @@
 import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createCodexHarness } from "../../src/index.ts";
+import { createCodexHarness } from "../../src/core.ts";
 
 test("custom Responses models preserve Codex execution, continuation and secret boundaries", () => {
   const adapter = composeAgent({

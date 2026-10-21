@@ -6,8 +6,8 @@ import {
   defineCopilotHook,
   defineKimiHook,
   defineAntigravityHook,
-  defineHarnessHook,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { defineHarnessHook } from "../../src/harness.ts";
 import { claudeHookSchemas } from "../../src/adapters/agents/claude/claude-hooks.constants.ts";
 import { codexHookSchemas } from "../../src/adapters/agents/codex/codex-hooks.constants.ts";
 import { copilotHookSchemas } from "../../src/adapters/agents/copilot/copilot-hooks.constants.ts";

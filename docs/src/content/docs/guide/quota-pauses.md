@@ -12,7 +12,8 @@ Set `onQuota` on the workflow’s `start()` method when you want to preserve pro
 <!-- tabs -->
 
 ```ts title="quota-review.ts"
-import { defineTask, OutpostError } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 
 export let calls = 0;
 export const review = defineTask({
@@ -31,10 +32,8 @@ export function reviewCount() {
 ```
 
 ```ts title="quota-checkpoint.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const checkpoint = {
   store: createWorkflowCheckpointStore({
@@ -46,7 +45,7 @@ export const checkpoint = {
 ```
 
 ```ts title="resume.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { review } from "./quota-review.ts";
 import { checkpoint } from "./quota-checkpoint.ts";
 
@@ -126,8 +125,8 @@ Claude Code, Codex, Copilot CLI and Kimi Code can continue. A [fallback agent](.
 A worker stores a handler's quota error in `QueueResult.quota`, and `defineQueuedTask()` rejects with code `quota`. Pass the conversation through the task input:
 
 ```ts
-import { defineQueuedTask } from "@elie-laloum/outpost";
-import type { TaskQueue } from "@elie-laloum/outpost";
+import { defineQueuedTask } from "@elie-laloum/outpost/queues";
+import type { TaskQueue } from "@elie-laloum/outpost/queues";
 
 function implement(queue: TaskQueue) {
   return defineQueuedTask({
@@ -147,8 +146,10 @@ The handler then dispatches with `continuation: { id: input.continueFrom }`. [Jo
 When limits stop candidates and none wins, `speculate()` returns status `quota` with the earliest known reset. Throw it from a task to pause the workflow:
 
 ```ts
-import { OutpostError, speculate, defineTask } from "@elie-laloum/outpost";
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import { OutpostError } from "@elie-laloum/outpost/core";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 
 function race(options: SpeculationOptions) {
   return defineTask({

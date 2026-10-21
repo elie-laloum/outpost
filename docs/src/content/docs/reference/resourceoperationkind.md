@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ResourceOperationKind } from "@elie-laloum/outpost";
+import type { ResourceOperationKind } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Purpose and behavior

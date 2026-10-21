@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { fromSecrets } from "@elie-laloum/outpost";
+import { fromSecrets } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

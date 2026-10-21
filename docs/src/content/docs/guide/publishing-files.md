@@ -10,7 +10,7 @@ Use a [directory copy](../working-with-files/) to process files without changing
 Open an owned copy of the source directory to retain its files during processing.
 
 ```ts title="documents.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openDocuments() {
   return createWorkspace({
@@ -30,7 +30,7 @@ Declare selection and authorized deletions for publication back to the source.
 import {
   publishWorkspaceOutputs,
   type FileWorkspace,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workspaces";
 
 export function publishDocuments(workspace: FileWorkspace) {
   return publishWorkspaceOutputs(workspace, {
@@ -54,7 +54,7 @@ await writeFile("summary.json", JSON.stringify({ files }, null, 2));
 Save the TypeScript files in the parent directory and run `node process-documents.ts`. On success, `documents/summary.json` contains the copied file list.
 
 ```ts title="process-documents.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { openDocuments } from "./documents.ts";
 import { publishDocuments } from "./publication.ts";

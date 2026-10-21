@@ -5,21 +5,17 @@ import { dirname, join } from "node:path";
 import { test } from "node:test";
 import {
   attach,
-  createObservationHub,
   createSandbox,
-  defineIsolatedTask,
-  defineWorkflow,
   dispatch,
-  openWorkspace,
   OutpostError,
   recoveryDetails,
-} from "../../src/index.ts";
-import type {
-  DiffGuard,
-  ObservationHub,
-  SandboxProvider,
-  Workspace,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createObservationHub } from "../../src/observation.ts";
+import { defineIsolatedTask, defineWorkflow } from "../../src/workflows.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
+import type { DiffGuard, Workspace } from "../../src/workspaces.ts";
+import type { ObservationHub } from "../../src/observation.ts";
+import type { SandboxProvider } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { emit, repository, scripted } from "../helpers.ts";

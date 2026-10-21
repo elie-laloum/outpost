@@ -16,7 +16,7 @@ Le premier exemple s’exécute entièrement dans Node.js : installez Outpost da
 Déclarez chaque étape avec une fonction de définition de tâche, puis passez les tâches à `defineWorkflow()`. Les dépendances déterminent l’ordre d’exécution et les résultats précédents qu’une tâche peut lire.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
 const report = defineTask({
@@ -56,7 +56,7 @@ Listez une tâche dans `after`, puis lisez sa sortie avec `context.value(task)`.
 `start()` se résout avec un `WorkflowResult` dès qu’aucune tâche ne peut plus s’exécuter, même si des tâches ont échoué. La promesse est rejetée si une option est invalide ou si un checkpoint ne peut pas être enregistré.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const lint = defineTask({
   key: "lint",
@@ -92,7 +92,7 @@ Utilisez `condition` lorsqu’une tâche ne s’applique qu’à certaines entr�
 `diagram()` renvoie le graphe sous forme de flowchart Mermaid, à placer dans un README ou une pull request.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const lint = defineTask({ key: "lint", perform: () => 0 });
 const report = defineTask({ key: "report", after: [lint], perform: () => 0 });

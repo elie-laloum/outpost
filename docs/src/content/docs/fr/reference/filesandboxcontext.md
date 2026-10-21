@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileSandboxContext } from "@elie-laloum/outpost";
+import type { FileSandboxContext } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

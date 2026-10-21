@@ -3,8 +3,8 @@ import { test } from "node:test";
 import {
   createAnthropicModelProvider,
   createOpenAIModelProvider,
-  OutpostError,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { OutpostError } from "../../src/core.ts";
 import { retryAfterMs } from "../../src/adapters/models/retry-after.ts";
 
 test("Retry-After supports seconds and HTTP dates and ignores malformed values", () => {

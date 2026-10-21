@@ -2,12 +2,11 @@
 // Building one starts nothing: no sandbox, no network request.
 
 import { join } from "node:path";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-  dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

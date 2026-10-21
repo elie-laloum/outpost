@@ -85,7 +85,7 @@ Référence API : [SandboxDiagnosticReport](../../reference/sandboxdiagnosticrep
 `sandbox.diagnose()` sonde la sandbox que votre code détient déjà, avec son vrai fournisseur et ses montages. Elle laisse la sandbox ouverte.
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
@@ -106,7 +106,7 @@ Pour un [fournisseur de sandbox personnalisé](../custom-sandbox-providers/), `d
 `diagnoseAgentProtocol()` rejoue à travers l’adaptateur d’un agent des événements synthétiques fournis avec Outpost. Il ne lance ni CLI ni modèle.
 
 ```ts
-import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
+import { diagnoseAgentProtocol } from "@elie-laloum/outpost/integrations";
 
 const report = diagnoseAgentProtocol("claude");
 console.log(report.referenceVersion, report.hasFailures);

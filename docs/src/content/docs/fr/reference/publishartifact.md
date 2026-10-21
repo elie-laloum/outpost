@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { publishArtifact } from "@elie-laloum/outpost";
+import { publishArtifact } from "@elie-laloum/outpost/storage";
 ```
 
 ## Rôle et comportement

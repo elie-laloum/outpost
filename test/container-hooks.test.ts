@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
-import { defineClaudeHook } from "../src/index.ts";
+import { defineClaudeHook } from "../src/core.ts";
 import { openCliHooks } from "../src/application/cli-hooks.ts";
 import { repository } from "./helpers.ts";
 

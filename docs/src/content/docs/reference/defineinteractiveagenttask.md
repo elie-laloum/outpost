@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
+import { defineInteractiveAgentTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

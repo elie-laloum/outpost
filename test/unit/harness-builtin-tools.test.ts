@@ -5,8 +5,8 @@ import {
   createHarnessEditTools,
   createHarnessFileTools,
   type HarnessToolContext,
-  type SandboxLease,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type SandboxLease } from "../../src/integrations.ts";
 import { commandOutput } from "../../src/adapters/tools/sandbox-files.ts";
 import { TOOL_LIMITS } from "../../src/adapters/tools/tools.constants.ts";
 

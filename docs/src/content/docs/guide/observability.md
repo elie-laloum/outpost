@@ -12,7 +12,7 @@ Create an observation object when you want workflow, agent and resource events i
 <!-- tabs -->
 
 ```ts title="events.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 
 export const observation = createObservation({
   sinks: [
@@ -27,7 +27,7 @@ export const observation = createObservation({
 ```
 
 ```ts title="review-task.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -42,7 +42,7 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="observe-workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { review } from "./review-task.ts";
 import { observation } from "./events.ts";
 
@@ -62,7 +62,8 @@ API reference: [Observation](../../reference/observation/).
 `defineAgentTask` and `defineIsolatedTask` attach their dispatch to the task’s scope. In a task you write with `defineTask`, pass `context.observation` to each dispatch.
 
 ```ts
-import { defineTask, dispatch } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const audit = defineTask({

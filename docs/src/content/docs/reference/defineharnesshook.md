@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

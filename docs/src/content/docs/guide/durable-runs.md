@@ -10,12 +10,12 @@ Start with the offline example below to see a completed task reused after a rest
 Pass a `checkpoint` to the workflow’s `start()` method when you need to continue in a later process. Outpost saves task transitions and results under the checkpoint’s `runId`.
 
 ```ts
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   defineTask,
   defineWorkflow,
   createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -50,7 +50,7 @@ A serialization failure marks the task failed without repeating its completed ef
 A dispatch result carries methods such as `resume()`. Project it in a `defineTask`, as shown below:
 
 ```ts
-import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost/workflows";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const agent = defineIsolatedTask({
@@ -100,10 +100,8 @@ A run that ended with a failed, cancelled or interrupted task resumes only with 
 <!-- tabs -->
 
 ```ts title="upload-store.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -111,7 +109,7 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="upload.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 export let calls = 0;
 export const upload = defineTask({
@@ -128,7 +126,7 @@ export function uploadCount() {
 ```
 
 ```ts title="resume-upload.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { upload } from "./upload.ts";
 import { store } from "./upload-store.ts";
 
@@ -167,7 +165,7 @@ For this step, follow [Recover a workflow after a crash](../recovering-workflows
 To continue the run, enqueue a new job ID with the same `runId` and the same `input`:
 
 ```ts
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {

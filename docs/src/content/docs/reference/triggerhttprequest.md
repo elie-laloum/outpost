@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TriggerHttpRequest } from "@elie-laloum/outpost";
+import type { TriggerHttpRequest } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

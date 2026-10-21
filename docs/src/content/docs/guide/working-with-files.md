@@ -24,7 +24,7 @@ New copies, snapshots and publications preserve binary contents, portable permis
 Create an empty root with local retention to keep its files after closing.
 
 ```ts title="empty-workspace.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openEmptyWorkspace() {
   return createWorkspace({
@@ -64,7 +64,7 @@ Docker and Podman require Node.js 24+, the selected engine and host `tar` for th
 Declare the exposed subdirectory and explicitly choose whether the sandbox can write to the source.
 
 ```ts title="mounted-documents.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openMountedDocuments() {
   return createWorkspace({

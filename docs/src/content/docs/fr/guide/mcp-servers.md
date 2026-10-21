@@ -10,7 +10,7 @@ Partez d’un [agent CLI](../choose-an-agent/) ou d’un [harness intégré](../
 Déclarez les serveurs MCP dans `mcpServers`, en donnant un nom à chacun. Un serveur peut être lancé par une commande ou exposer un point d’accès Streamable HTTP. Les harness des agents et le harness intégré acceptent la même déclaration.
 
 ```ts
-import type { McpServers } from "@elie-laloum/outpost";
+import type { McpServers } from "@elie-laloum/outpost/core";
 
 const mcpServers: McpServers = {
   linear: {
@@ -32,7 +32,7 @@ Référence API : [McpStdioServer](../../reference/mcpstdioserver/) et [McpHttpS
 `command`, `arguments`, `environment`, `url` et `headers` sont recopiés tels quels et ne peuvent pas contenir `${`. Placez les secrets dans des [variables déclarées](../environment-variables/) et référencez-les par leur nom.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createClaudeHarness({
@@ -70,7 +70,7 @@ Kimi Code et Antigravity n’ont pas d’option par exécution. Outpost fusionne
 Cet exemple retire l’outil de suppression des outils proposés au modèle et laisse deux minutes au serveur pour démarrer.
 
 ```ts
-import type { McpServers } from "@elie-laloum/outpost";
+import type { McpServers } from "@elie-laloum/outpost/core";
 
 const mcpServers: McpServers = {
   linear: {
@@ -95,7 +95,7 @@ Transmettez les mêmes serveurs à `createHarness({ mcpServers })`. Chaque tour 
 <!-- tabs -->
 
 ```ts title="mcp-model.ts"
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
@@ -105,7 +105,7 @@ export const modelProvider = createOpenAIModelProvider({
 ```
 
 ```ts title="linear-access.ts"
-import { defineHarnessPermissions } from "@elie-laloum/outpost";
+import { defineHarnessPermissions } from "@elie-laloum/outpost/harness";
 
 export const mcpServers = {
   linear: {
@@ -120,11 +120,11 @@ export const permissions = defineHarnessPermissions({
 ```
 
 ```ts title="mcp-reviewer.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { modelProvider } from "./mcp-model.ts";
 import { mcpServers, permissions } from "./linear-access.ts";
 
@@ -156,7 +156,7 @@ Référence API : [createHarness](../../reference/createharness/) et [HarnessMcp
 `defineMcpPrompt()` place un prompt du serveur dans les instructions du harness. Il est rendu au début de chaque tour.
 
 ```ts
-import { defineMcpPrompt } from "@elie-laloum/outpost";
+import { defineMcpPrompt } from "@elie-laloum/outpost/harness";
 
 const review = defineMcpPrompt({
   server: "docs",

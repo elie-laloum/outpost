@@ -12,7 +12,7 @@ Use hooks to add instructions at the start, refuse `write_file` calls after step
 <!-- tabs -->
 
 ```ts title="editing-hooks.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const startHook = defineHarnessHook({
   on: "session-start",
@@ -28,7 +28,7 @@ export const editHook = defineHarnessHook({
 ```
 
 ```ts title="completion-hook.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const completionHook = defineHarnessHook({
   on: "stop",
@@ -70,7 +70,7 @@ Hooks also cover prompts, model calls, compaction and subagents. The API describ
 Add this hook to your list to append an instruction to each model request. Response transformations through `after-model` preserve accounted usage and permissions; they cannot change streaming deltas already delivered.
 
 ```ts title="model-hook.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const modelHook = defineHarnessHook({
   on: "before-model",

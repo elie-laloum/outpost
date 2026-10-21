@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createReporter } from "@elie-laloum/outpost";
+import { createReporter } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

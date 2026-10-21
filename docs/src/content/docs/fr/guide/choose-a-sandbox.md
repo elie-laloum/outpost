@@ -21,7 +21,7 @@ Commencez avec Docker ou Podman pour travailler dans un conteneur local. Pour un
 Importez le fournisseur depuis son sous-chemin et passez-le dans `sandboxProvider`. L’agent, le brief et la branche ne changent pas.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
 

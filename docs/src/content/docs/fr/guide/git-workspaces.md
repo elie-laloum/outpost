@@ -11,7 +11,7 @@ Passez `repository` pour choisir le dépôt Git utilisé par la tâche. Vos scri
 
 ```ts
 import { resolve } from "node:path";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
@@ -52,7 +52,7 @@ Un workspace sert une seule sandbox à la fois. Fermez la sandbox avant le works
 Un nouveau worktree ne contient que les fichiers commités. `copies` liste des fichiers ou dossiers, relatifs au dépôt, à copier depuis votre checkout, par exemple une configuration de test ignorée par Git.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

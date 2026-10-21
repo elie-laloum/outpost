@@ -5,7 +5,7 @@ import { test } from "node:test";
 import { recipeRuntimeError } from "../../src/application/recipes/errors.ts";
 import { createRecipeComponentScope } from "../../src/application/recipes/scope.ts";
 import { createRecipeRegistry } from "../../src/recipes.ts";
-import { OutpostError, recoveryDetails } from "../../src/index.ts";
+import { OutpostError, recoveryDetails } from "../../src/core.ts";
 
 test("recipe redaction retains fault classification, recovery and cleanup causes", () => {
   const scope = createRecipeComponentScope(

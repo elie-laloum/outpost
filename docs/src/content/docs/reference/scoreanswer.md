@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ScoreAnswer } from "@elie-laloum/outpost";
+import type { ScoreAnswer } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

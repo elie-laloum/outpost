@@ -15,10 +15,8 @@ Une exécution possède son checkpoint pendant `start()` et le libère quand `st
 
 ```ts
 import { createHash } from "node:crypto";
-import {
-  createLocalTransport,
-  recoverWorkflowCheckpoint,
-} from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost/workflows";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const runId = "scan-2026-09";

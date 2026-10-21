@@ -10,7 +10,10 @@ Use an HTTP queue when producers and workers cannot open the same local database
 `serveTaskQueue()` puts any queue behind an HTTP endpoint. `createHttpTaskQueue()` is a queue client for producers and workers on other machines.
 
 ```ts title="queue-server.ts"
-import { createSqliteTaskQueue, serveTaskQueue } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  serveTaskQueue,
+} from "@elie-laloum/outpost/queues";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
 if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");
@@ -34,7 +37,7 @@ To rotate tokens, give `token` a function, read on every request. The server's r
 Run `node queue-server.ts` and `worker.ts` from [Jobs and workers](../job-queues/) in the same directory: they open the same SQLite database. In a third terminal, give the client the same `OUTPOST_QUEUE_TOKEN`, then run `node submit-http.ts`. Run it again after processing to read the value `3`. This local test needs no proxy.
 
 ```ts title="submit-http.ts"
-import { createHttpTaskQueue } from "@elie-laloum/outpost";
+import { createHttpTaskQueue } from "@elie-laloum/outpost/queues";
 
 const token = process.env.OUTPOST_QUEUE_TOKEN;
 if (!token) throw new Error("Set OUTPOST_QUEUE_TOKEN");

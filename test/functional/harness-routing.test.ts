@@ -4,32 +4,37 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
+  dispatch,
+  OutpostError,
+  createLocalTransport,
+  createSandbox,
+  defineTextResponse,
+} from "../../src/core.ts";
+import {
   createHarness,
-  defineDecision,
   defineHarnessModelRouting,
   defineHarnessHook,
   defineHarnessTool,
   defineHarnessSubagent,
   defineHarnessContextStrategy,
-  dispatch,
-  OutpostError,
+} from "../../src/harness.ts";
+import {
+  defineDecision,
+  defineIsolatedTask,
+  defineWorkflow,
+} from "../../src/workflows.ts";
+import {
   createObservationHub,
   createReplayAgent,
   readJournal,
-  createLocalTransport,
-  createSandbox,
-  defineTextResponse,
-  defineIsolatedTask,
-  defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/observation.ts";
 import type {
   DecisionProvider,
   DecisionProviderResult,
-  ModelProvider,
-  ModelRequest,
-  AgentObservation,
-  Observation,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { ModelProvider, ModelRequest } from "../../src/harness.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
+import type { Observation } from "../../src/observation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { parseTranscript } from "../../src/domain/transcript.ts";
 import { repository } from "../helpers.ts";

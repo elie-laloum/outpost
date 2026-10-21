@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

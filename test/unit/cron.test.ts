@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createCronSchedule } from "../../src/index.ts";
+import { createCronSchedule } from "../../src/queues.ts";
 
 function next(expression: string, after: string, timeZone?: string) {
   return createCronSchedule(expression, timeZone ? { timeZone } : {})

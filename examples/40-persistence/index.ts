@@ -5,7 +5,8 @@
 
 import { readdir, rm } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { TransportConflict } from "@elie-laloum/outpost/storage";
 
 const state = join(import.meta.dirname, "state");
 await rm(state, { recursive: true, force: true });

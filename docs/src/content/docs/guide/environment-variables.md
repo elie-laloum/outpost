@@ -17,7 +17,7 @@ Declare each variable where it is needed: on the sandbox provider, on a CLI harn
 | `.outpost/.env` in the target repository | Every command in the sandbox, like the provider’s | Values you keep out of code for a checkout |
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowApproverKey } from "@elie-laloum/outpost";
+import type { WorkflowApproverKey } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

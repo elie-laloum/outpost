@@ -8,8 +8,8 @@ import {
   createSandbox,
   dispatch,
   createKimiHarness,
-  type AgentEvent,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { type AgentEvent } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

@@ -6,7 +6,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { TaskQueue } from "../../src/index.ts";
+import type { TaskQueue } from "../../src/queues.ts";
 
 export async function verifyProcessRecovery(
   t: TestContext,

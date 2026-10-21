@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { speculate } from "../../src/index.ts";
+import { speculate } from "../../src/experimental/speculation.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";

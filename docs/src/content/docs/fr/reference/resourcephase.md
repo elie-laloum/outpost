@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ResourcePhase } from "@elie-laloum/outpost";
+import type { ResourcePhase } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Rôle et comportement

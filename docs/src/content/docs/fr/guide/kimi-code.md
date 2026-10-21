@@ -18,7 +18,7 @@ L’[image d’agent](../agent-images/) et l’installation dans le cloud utilis
 Connectez-vous sur l’hôte avec `kimi login --region global` (`mainland-cn` pour un compte kimi.com), puis sélectionnez `account`. L’exécution utilise votre abonnement Kimi Code.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({ authentication: "account" }),
@@ -45,7 +45,7 @@ Outpost définit `KIMI_CODE_OAUTH_HOST` et `KIMI_CODE_BASE_URL` sur les points d
 `{ account: { file } }` désigne un dossier de profil qui contient `credentials/` et `device_id`. Indiquez la `region` du compte connecté dans ce profil.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({
@@ -60,7 +60,7 @@ export const coder = createAgent({
 Passez `KIMI_API_KEY` et un modèle : sans modèle, la composition échoue. Les appels relèvent de la facturation API de Kimi, pas de votre abonnement.
 
 ```ts
-import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createKimiHarness({

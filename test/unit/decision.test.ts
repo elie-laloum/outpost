@@ -3,17 +3,16 @@ import { test } from "node:test";
 import {
   defineDecision,
   decide,
-  defineHarnessModelRouting,
-  createHarness,
-  OutpostError,
   createSystemOneDecisionProvider,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { defineHarnessModelRouting, createHarness } from "../../src/harness.ts";
+import { OutpostError } from "../../src/core.ts";
 import type {
   DecisionProvider,
   DecisionState,
   ChoiceAnswer,
-  ModelProvider,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { ModelProvider } from "../../src/harness.ts";
 
 const decision = defineDecision({
   questions: {

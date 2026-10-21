@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { QueueHandlerContext } from "@elie-laloum/outpost";
+import type { QueueHandlerContext } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

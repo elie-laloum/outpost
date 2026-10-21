@@ -17,7 +17,7 @@ Déclarez chaque variable là où elle est utile : sur le fournisseur de sandbox
 | `.outpost/.env` dans le dépôt cible   | Toutes les commandes de la sandbox, comme celles du fournisseur | Des valeurs gardées hors du code, propres à un dépôt |
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 export const sandboxProvider = createDockerSandboxProvider({

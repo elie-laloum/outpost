@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { SteeringSendOptions } from "@elie-laloum/outpost";
+import type { SteeringSendOptions } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

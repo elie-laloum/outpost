@@ -1,5 +1,6 @@
 import { appendFile, readFile, writeFile } from "node:fs/promises";
-import type { ModelProvider, TaskContext } from "../../src/index.ts";
+import type { ModelProvider } from "../../src/harness.ts";
+import type { TaskContext } from "../../src/workflows.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
 import { recipeObject } from "../../src/domain/recipes/values.ts";
 

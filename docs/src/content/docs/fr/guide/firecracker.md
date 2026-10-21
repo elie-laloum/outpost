@@ -44,7 +44,7 @@ export const sandboxProvider = createFirecrackerSandboxProvider({
 ```
 
 ```ts title="run.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, coder } from "./outpost.config.ts";
 import { sandboxProvider } from "./firecracker.ts";
 

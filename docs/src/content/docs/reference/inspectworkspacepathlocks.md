@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { inspectWorkspacePathLocks } from "@elie-laloum/outpost";
+import { inspectWorkspacePathLocks } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Purpose and behavior

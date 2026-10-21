@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { DispatchTelemetrySession } from "@elie-laloum/outpost";
+import type { DispatchTelemetrySession } from "@elie-laloum/outpost/observation";
 ```
 
 ## Paramètres et propriétés

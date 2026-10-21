@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { materializeRecoveryArchive } from "@elie-laloum/outpost";
+import { materializeRecoveryArchive } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Rôle et comportement

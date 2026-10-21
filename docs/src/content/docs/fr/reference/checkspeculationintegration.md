@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { checkSpeculationIntegration } from "@elie-laloum/outpost";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
 ```
 
 ## Rôle et comportement

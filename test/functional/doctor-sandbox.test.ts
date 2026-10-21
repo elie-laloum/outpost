@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readdir, writeFile } from "node:fs/promises";
 import { test } from "node:test";
-import { createSandbox, diagnoseSandbox } from "../../src/index.ts";
+import { createSandbox } from "../../src/core.ts";
+import { diagnoseSandbox } from "../../src/integrations.ts";
 import type { TransferOptions } from "../../src/domain/sandbox.types.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";

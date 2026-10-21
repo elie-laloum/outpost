@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { runSchedules } from "@elie-laloum/outpost";
+import { runSchedules } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { QueueServer } from "@elie-laloum/outpost";
+import type { QueueServer } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

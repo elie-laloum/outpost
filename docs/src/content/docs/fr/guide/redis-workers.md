@@ -48,7 +48,7 @@ Les autres politiques peuvent évincer les clés expirables qui portent les baux
 Importez l’adaptateur depuis son propre sous-chemin. La file respecte le même contrat que la file SQLite : un worker s’y exécute sans changement ([Files de jobs et workers](../job-queues/)).
 
 ```ts title="worker.ts"
-import { runQueueWorker } from "@elie-laloum/outpost";
+import { runQueueWorker } from "@elie-laloum/outpost/queues";
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 const queue = await createBullMQTaskQueue({

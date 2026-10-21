@@ -15,10 +15,8 @@ While `start()` is running, the process owns the checkpoint. A normal return rel
 
 ```ts
 import { createHash } from "node:crypto";
-import {
-  createLocalTransport,
-  recoverWorkflowCheckpoint,
-} from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost/workflows";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const runId = "scan-2026-09";

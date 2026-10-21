@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { recoverFileWorkspace } from "@elie-laloum/outpost";
+import { recoverFileWorkspace } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Rôle et comportement

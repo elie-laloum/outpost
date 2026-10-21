@@ -8,12 +8,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import {
-  createSandbox,
   defineAgentTask,
   defineCommandTask,
   defineWorkflow,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import {
   createMemorySandboxProvider,
   scriptedAgent,

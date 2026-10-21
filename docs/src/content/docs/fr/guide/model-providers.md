@@ -8,11 +8,11 @@ description: "Configurez un fournisseur de modèle OpenAI ou Anthropic pour le h
 Connectez un fournisseur de modèle à `createHarness()` pour que la boucle intégrée puisse appeler l’API. Associez ensuite le harness et un modèle avec `createAgent()`, puis passez cet agent à votre tâche.
 
 ```ts
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createAnthropicModelProvider,
   createHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const agent = createAgent({
   model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
@@ -37,7 +37,7 @@ Anthropic exige `maxOutputTokens`, d’où la forme objet de `model`. Chaque req
 `baseUrl` est obligatoire pour OpenAI et inclut le préfixe de version. Le protocole choisi est le seul utilisé : une erreur ne bascule jamais vers un autre.
 
 ```ts
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 const openai = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
@@ -53,7 +53,7 @@ const openai = createOpenAIModelProvider({
 Indiquez `apiKey: false` pour un serveur sans authentification. L’adresse est résolue depuis votre hôte, pas depuis la sandbox.
 
 ```ts
-import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 
 const local = createOpenAIModelProvider({
   baseUrl: "http://127.0.0.1:8080/v1",

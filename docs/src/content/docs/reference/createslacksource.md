@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createSlackSource } from "@elie-laloum/outpost";
+import { createSlackSource } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

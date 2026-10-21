@@ -2,14 +2,13 @@
 // The custom harness records every pass, so you can pick up later.
 
 import { join } from "node:path";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

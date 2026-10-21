@@ -12,8 +12,8 @@ Utilisez une source de webhook pour vérifier la requête reçue, puis associez 
 <!-- tabs -->
 
 ```ts title="label-job.ts"
-import type { TriggerRoute } from "@elie-laloum/outpost";
-import { labelAdded } from "@elie-laloum/outpost";
+import type { TriggerRoute } from "@elie-laloum/outpost/queues";
+import { labelAdded } from "@elie-laloum/outpost/queues";
 
 const allowedActors = new Set(["github:octocat"]);
 export const on: TriggerRoute["on"] = (event) => {
@@ -29,7 +29,7 @@ export const on: TriggerRoute["on"] = (event) => {
 ```
 
 ```ts title="github-route.ts"
-import { createGithubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost/queues";
 import { on } from "./label-job.ts";
 
 export const secret = process.env.GITHUB_WEBHOOK_SECRET;
@@ -40,7 +40,10 @@ export const routes = [
 ```
 
 ```ts title="server.ts"
-import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  serveTriggers,
+} from "@elie-laloum/outpost/queues";
 import { routes } from "./github-route.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -134,8 +137,8 @@ Référence API : [TriggerEvent](../../reference/triggerevent/).
 Une signature vérifiée prouve que la requête vient de votre intégration GitHub, GitLab ou Slack, pas que son auteur a le droit de lancer un workflow. Toute personne qui peut commenter un dépôt public peut écrire `/outpost` : comparez `event.actor` à une liste explicite.
 
 ```ts
-import { commandIssued } from "@elie-laloum/outpost";
-import type { TriggerEvent, TriggerJob } from "@elie-laloum/outpost";
+import { commandIssued } from "@elie-laloum/outpost/queues";
+import type { TriggerEvent, TriggerJob } from "@elie-laloum/outpost/queues";
 
 const maintainers = new Set(["github:octocat", "slack:U012AB3CD"]);
 

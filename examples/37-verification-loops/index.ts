@@ -2,19 +2,20 @@
 // comes back to the agent as feedback, until the check accepts or rounds run out.
 
 import { join } from "node:path";
+import { createAgent, createSandbox } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createSandbox,
+} from "@elie-laloum/outpost/harness";
+import {
   defineAgentTask,
   defineLoopTask,
   defineWorkflow,
   LoopTaskExhausted,
   type WorkflowEvent,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

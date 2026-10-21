@@ -1,4 +1,4 @@
-import type { ModelProvider } from "@elie-laloum/outpost";
+import type { ModelProvider } from "@elie-laloum/outpost/harness";
 
 export function createDemoModel(): ModelProvider {
   const commands = [

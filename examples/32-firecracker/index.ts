@@ -12,14 +12,16 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   createAgent,
+  createReporter,
+  createObservation,
+  createSandbox,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createReporter,
-  createObservation,
-  createSandbox,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import {
   createFirecrackerSandboxProvider,
   type FirecrackerOptions,

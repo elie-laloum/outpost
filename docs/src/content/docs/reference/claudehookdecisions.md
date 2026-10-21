@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ClaudeHookDecisions } from "@elie-laloum/outpost";
+import type { ClaudeHookDecisions } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

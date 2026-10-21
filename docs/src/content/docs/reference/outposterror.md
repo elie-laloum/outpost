@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { OutpostError } from "@elie-laloum/outpost";
+import { OutpostError } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

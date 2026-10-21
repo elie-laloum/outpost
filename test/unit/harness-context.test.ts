@@ -7,7 +7,7 @@ import {
   truncateToolResults,
   type ModelMessage,
   type ModelProvider,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import {
   parseTranscript,
   transcriptMessages,

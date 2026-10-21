@@ -4,13 +4,12 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessShellTools,
-  dispatch,
-} from "@elie-laloum/outpost";
-import type { RunReport } from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import type { RunReport } from "@elie-laloum/outpost/core";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 import { createDemoModel } from "./model.ts";

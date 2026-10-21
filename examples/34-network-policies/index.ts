@@ -5,14 +5,16 @@
 import { join } from "node:path";
 import {
   createAgent,
-  createHarness,
-  createHarnessShellTools,
   createReporter,
   createObservation,
   createSandbox,
   dispatch,
-  type SandboxProvider,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessShellTools,
+} from "@elie-laloum/outpost/harness";
+import { type SandboxProvider } from "@elie-laloum/outpost/integrations";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { model, modelProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";

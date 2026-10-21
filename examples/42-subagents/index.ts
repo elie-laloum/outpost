@@ -3,19 +3,17 @@
 // still apply to them, and their tokens count toward the parent's budget.
 
 import { join } from "node:path";
+import { createAgent, dispatch, OutpostError } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
   defineHarnessPermissions,
   defineHarnessSubagent,
-  dispatch,
-  OutpostError,
-  type AgentEvent,
   type HarnessLimits,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { type AgentEvent } from "@elie-laloum/outpost/integrations";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

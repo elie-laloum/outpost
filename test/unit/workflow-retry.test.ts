@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import timers from "node:timers/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { defineTask, defineWorkflow, OutpostError } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/workflows.ts";
+import { OutpostError } from "../../src/core.ts";
 import { retryDelay, waitForRetry } from "../../src/domain/workflow/retry.ts";
 import { maxTimerMs } from "../../src/domain/workflow/retry.constants.ts";
 

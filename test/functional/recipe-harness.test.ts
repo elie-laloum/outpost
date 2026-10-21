@@ -11,15 +11,17 @@ import {
 } from "../../src/recipes.ts";
 import {
   createAgent,
-  createHarness,
   createSandbox,
   createFallbackAgent,
+  defineJsonResponse,
+} from "../../src/core.ts";
+import {
+  createHarness,
   defineHarnessTool,
   defineHarnessSubagent,
   defineHarnessHook,
   defineHarnessPermissions,
-  defineJsonResponse,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   model,
@@ -31,7 +33,7 @@ import {
 import { readRecipeProject } from "../../src/application/recipes/project.ts";
 import { createRecipeComponentScope } from "../../src/application/recipes/scope.ts";
 import { nativeRecipeGuards } from "../../src/application/recipes/native.ts";
-import type { CustomAgent } from "../../src/index.ts";
+import type { CustomAgent } from "../../src/core.ts";
 
 function isCustomAgent(value: unknown): value is CustomAgent {
   return (

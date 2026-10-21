@@ -6,18 +6,17 @@ import {
   defineDecisionTask,
   defineTask,
   defineWorkflow,
-  createLocalTransport,
   createWorkflowCheckpointStore,
   createTaskCacheStore,
-  createObservationHub,
-  OutpostError,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport, OutpostError } from "../../src/core.ts";
+import { createObservationHub } from "../../src/observation.ts";
 import type {
   DecisionProvider,
-  Observation,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { Observation } from "../../src/observation.ts";
 import { repository } from "../helpers.ts";
 
 const declaration = defineDecision({

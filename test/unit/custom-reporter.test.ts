@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createCustomReporter } from "../../src/index.ts";
-import type { AgentObservation, ReporterHandlers } from "../../src/index.ts";
+import { createCustomReporter } from "../../src/observation.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
+import type { ReporterHandlers } from "../../src/observation.ts";
 
 const text = (value: string): AgentObservation => ({
   kind: "text",

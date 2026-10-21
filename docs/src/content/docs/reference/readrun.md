@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { readRun } from "@elie-laloum/outpost";
+import { readRun } from "@elie-laloum/outpost/observation";
 ```
 
 ## Purpose and behavior

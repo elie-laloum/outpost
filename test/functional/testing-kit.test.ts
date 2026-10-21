@@ -4,13 +4,15 @@ import { join } from "node:path";
 import test from "node:test";
 import {
   createSandbox,
-  defineAgentTask,
-  defineCommandTask,
-  defineWorkflow,
   dispatch,
   defineTextResponse,
   OutpostError,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import {
+  defineAgentTask,
+  defineCommandTask,
+  defineWorkflow,
+} from "../../src/workflows.ts";
 import {
   scriptedAgent,
   createMemorySandboxProvider,

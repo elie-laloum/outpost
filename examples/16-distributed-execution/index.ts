@@ -8,10 +8,10 @@ import {
   createHttpTaskQueue,
   createSqliteTaskQueue,
   defineQueuedTask,
-  defineWorkflow,
   runQueueWorker,
   serveTaskQueue,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/queues";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { model, modelProvider } from "../shared/model.ts";
 
 // 1. The queue: stored in SQLite, exposed over HTTP with a token.

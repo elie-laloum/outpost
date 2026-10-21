@@ -10,7 +10,7 @@ import {
 } from "../../src/adapters/agents/catalog.ts";
 import type { AgentDescriptor } from "../../src/adapters/agents/agent-descriptor.types.ts";
 import { imageRecipeText, officialImage } from "../../src/cli/image-recipes.ts";
-import * as api from "../../src/index.ts";
+import * as api from "../../src/core.ts";
 
 const descriptors: readonly AgentDescriptor[] = builtInAgents;
 

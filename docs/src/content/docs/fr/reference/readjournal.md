@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { readJournal } from "@elie-laloum/outpost";
+import { readJournal } from "@elie-laloum/outpost/observation";
 ```
 
 ## Rôle et comportement

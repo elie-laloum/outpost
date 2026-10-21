@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ReplayDivergenceDetails } from "@elie-laloum/outpost";
+import type { ReplayDivergenceDetails } from "@elie-laloum/outpost/observation";
 ```
 
 ## Parameters and properties

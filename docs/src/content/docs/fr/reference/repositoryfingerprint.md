@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { repositoryFingerprint } from "@elie-laloum/outpost";
+import { repositoryFingerprint } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

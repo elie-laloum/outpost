@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { diagnoseSandbox } from "@elie-laloum/outpost";
+import { diagnoseSandbox } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Rôle et comportement

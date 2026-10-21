@@ -1,4 +1,4 @@
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 
 // One changed line costs one point; 1,000 output tokens cost one more point.
 export const score: NonNullable<SpeculationOptions["score"]> = async ({

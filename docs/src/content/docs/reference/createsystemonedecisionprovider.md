@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
+import { createSystemOneDecisionProvider } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

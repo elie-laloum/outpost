@@ -7,12 +7,9 @@ import { randomUUID, createHash } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Queue, Job } from "bullmq";
 import { createBullMQTaskQueue } from "../src/infrastructure/task-queue-bullmq.ts";
-import {
-  defineQueuedTask,
-  runQueueWorker,
-  defineWorkflow,
-} from "../src/index.ts";
-import type { QueueJob, TaskQueue } from "../src/index.ts";
+import { defineQueuedTask, runQueueWorker } from "../src/queues.ts";
+import { defineWorkflow } from "../src/workflows.ts";
+import type { QueueJob, TaskQueue } from "../src/queues.ts";
 
 const connection = {
   host: "127.0.0.1",

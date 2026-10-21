@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { test } from "node:test";
-import { loadModelPrices } from "../../src/index.ts";
+import { loadModelPrices } from "../../src/harness.ts";
 
 test("pricing catalogs normalize units, aliases and an explicit EUR exchange rate", async (t) => {
   let body: unknown = {

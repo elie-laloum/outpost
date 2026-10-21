@@ -7,12 +7,14 @@ import { join } from "node:path";
 import {
   createAgent,
   createKimiHarness,
+  dispatch,
+  type Usage,
+} from "@elie-laloum/outpost/core";
+import {
   defineTask,
   defineWorkflow,
-  dispatch,
   WorkflowUsageUnavailable,
-  type Usage,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

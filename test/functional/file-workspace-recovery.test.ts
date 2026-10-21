@@ -16,10 +16,6 @@ import { join, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import {
   createWorkspace,
-  createSandbox,
-  createLocalTransport,
-  defineIsolatedCommandTask,
-  defineWorkflow,
   inspectFileWorkspace,
   recoverFileWorkspace,
   restoreFileWorkspace,
@@ -29,9 +25,16 @@ import {
   recoverWorkspacePublication,
   publishWorkspaceOutputs,
   prepareWorkspaceOutputs,
+} from "../../src/workspaces.ts";
+import { createSandbox, createLocalTransport } from "../../src/core.ts";
+import {
+  defineIsolatedCommandTask,
+  defineWorkflow,
+} from "../../src/workflows.ts";
+import {
   createHarnessFileTools,
   createHarnessSearchTools,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import type { HarnessToolContext } from "../../src/domain/tool.types.ts";

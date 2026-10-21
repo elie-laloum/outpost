@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createObservationHub } from "../../src/index.ts";
-import type { Observation } from "../../src/index.ts";
+import { createObservationHub } from "../../src/observation.ts";
+import type { Observation } from "../../src/observation.ts";
 import { observedOperation } from "../../src/domain/observed-operation.ts";
 
 const event = { kind: "text", text: "hello" } as const;

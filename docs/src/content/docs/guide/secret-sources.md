@@ -16,7 +16,7 @@ The resolver rejects a missing, empty, non-string, NUL-containing or oversized v
 Both services use the KV v2 read API. Declare the server, token, mount and document path explicitly; this example reads the `OPENAI_API_KEY` field from the `kv/outpost` document. A version and namespace can be supplied when needed. The token remains on the host.
 
 ```ts title="vault.ts"
-import { fromSecrets } from "@elie-laloum/outpost";
+import { fromSecrets } from "@elie-laloum/outpost/core";
 import { createVaultSecretSource } from "@elie-laloum/outpost/secrets/vault";
 
 export const variables = await fromSecrets(
@@ -37,7 +37,7 @@ import {
   createAgent,
   createCodexHarness,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { variables } from "./vault.ts";
 
@@ -172,7 +172,7 @@ Agents and commands can read every variable they receive. Resolving a key from a
 Implement `SecretSource` with a named `resolve()` method that reads only its requested names. This offline example demonstrates selection without an account or network. Use `fromSecrets()` as the validation and startup boundary before handing the variables to a harness.
 
 ```ts
-import { fromSecrets, type SecretSource } from "@elie-laloum/outpost";
+import { fromSecrets, type SecretSource } from "@elie-laloum/outpost/core";
 
 const source: SecretSource = {
   name: "fixture",

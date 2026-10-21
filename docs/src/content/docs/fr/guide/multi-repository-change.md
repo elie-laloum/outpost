@@ -48,7 +48,7 @@ Importez ce schéma dans `rename-contract.ts` pour que les consignes automatique
 <!-- tabs -->
 
 ```ts title="delivery.ts"
-import type { DispatchResult } from "@elie-laloum/outpost";
+import type { DispatchResult } from "@elie-laloum/outpost/core";
 
 export const branch = {
   mode: "named",
@@ -65,7 +65,7 @@ export const delivery = (
 ```
 
 ```ts title="rename-contract.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { renameSchema } from "./rename-schema.ts";
 
 export const rename = defineJsonResponse({
@@ -91,7 +91,7 @@ export const apiBrief = {
 ```
 
 ```ts title="api-agent.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 import { branch } from "./delivery.ts";
 import { rename } from "./rename-contract.ts";
@@ -111,7 +111,7 @@ export const apiAgent = defineIsolatedTask({
 ```
 
 ```ts title="api.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { apiAgent } from "./api-agent.ts";
 import { delivery } from "./delivery.ts";
 
@@ -129,7 +129,7 @@ Mettez à jour les clients, attendez l’approbation, puis intégrez expliciteme
 <!-- tabs -->
 
 ```ts title="client-request.ts"
-import type { TaskContext } from "@elie-laloum/outpost";
+import type { TaskContext } from "@elie-laloum/outpost/workflows";
 import { api } from "./api.ts";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 import { branch } from "./delivery.ts";
@@ -149,7 +149,7 @@ export function clientRequest(repository: string, context: TaskContext) {
 ```
 
 ```ts title="client.ts"
-import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost/workflows";
 import { clientRequest } from "./client-request.ts";
 import { api } from "./api.ts";
 import { delivery } from "./delivery.ts";
@@ -178,7 +178,7 @@ export const clients = [
 ```
 
 ```ts title="approval.ts"
-import { defineApprovalTask } from "@elie-laloum/outpost";
+import { defineApprovalTask } from "@elie-laloum/outpost/workflows";
 import { api } from "./api.ts";
 import { clients } from "./clients.ts";
 
@@ -191,7 +191,7 @@ export const approve = defineApprovalTask({
 ```
 
 ```ts title="merge.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { api } from "./api.ts";
 import { clients } from "./clients.ts";
 import { approve } from "./approval.ts";
@@ -214,7 +214,7 @@ Enregistrez l’exécution dans un checkpoint et utilisez `rename-field.ts` pour
 <!-- tabs -->
 
 ```ts title="rename-workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { api } from "./api.ts";
 import { clients } from "./clients.ts";
 import { approve } from "./approval.ts";
@@ -229,10 +229,8 @@ export const workflow = defineWorkflow("rename-user-name", [
 ```
 
 ```ts title="rename-checkpoint.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -247,7 +245,7 @@ export const checkpoint = {
 ```
 
 ```ts title="merge-decision.ts"
-import type { WorkflowDecision } from "@elie-laloum/outpost";
+import type { WorkflowDecision } from "@elie-laloum/outpost/workflows";
 
 export function mergeDecision(
   executionId: string,
@@ -266,7 +264,7 @@ export function mergeDecision(
 ```
 
 ```ts title="rename-result.ts"
-import type { WorkflowResult } from "@elie-laloum/outpost";
+import type { WorkflowResult } from "@elie-laloum/outpost/workflows";
 
 export function showRun(result: WorkflowResult) {
   console.log(result.status);
@@ -354,7 +352,7 @@ Insérez une tâche de relecture en lecture seule par client, entre les clients 
 <!-- tabs -->
 
 ```ts title="review-contract.ts"
-import { defineTextResponse } from "@elie-laloum/outpost";
+import { defineTextResponse } from "@elie-laloum/outpost/core";
 
 export const response = defineTextResponse({ tag: "review" });
 export const brief = {
@@ -363,14 +361,14 @@ export const brief = {
 ```
 
 ```ts title="change.types.ts"
-import type { Task } from "@elie-laloum/outpost";
+import type { Task } from "@elie-laloum/outpost/workflows";
 
 export type ChangedRepository = Task<{ repository: string; branch: string }>;
 ```
 
 ```ts title="review-request.ts"
 import type { ChangedRepository } from "./change.types.ts";
-import type { TaskContext } from "@elie-laloum/outpost";
+import type { TaskContext } from "@elie-laloum/outpost/workflows";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 import { response, brief } from "./review-contract.ts";
 
@@ -389,7 +387,7 @@ export function reviewRequest(change: ChangedRepository, context: TaskContext) {
 
 ```ts title="review-agent.ts"
 import type { ChangedRepository } from "./change.types.ts";
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { reviewRequest } from "./review-request.ts";
 
 export function reviewAgent(change: ChangedRepository) {
@@ -403,7 +401,7 @@ export function reviewAgent(change: ChangedRepository) {
 ```ts title="review.ts"
 import type { ChangedRepository } from "./change.types.ts";
 import { reviewAgent } from "./review-agent.ts";
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 export function review(change: ChangedRepository) {
   const agent = reviewAgent(change);

@@ -19,28 +19,35 @@ import { createHash } from "node:crypto";
 import type { TestContext } from "node:test";
 import {
   createLocalTransport,
+  createTransportConversations,
+  dispatch,
+  createSandbox,
+} from "../../src/core.ts";
+import {
   TransportConflict,
   createArtifactStore,
-  createWorkflowCheckpointStore,
-  recoverWorkflowCheckpoint,
   defineBinaryArtifact,
   publishArtifact,
   readStoredArtifact,
+} from "../../src/storage.ts";
+import {
+  createWorkflowCheckpointStore,
+  recoverWorkflowCheckpoint,
   defineWorkflow,
   defineTask,
-  readJournal,
+} from "../../src/workflows.ts";
+import { readJournal } from "../../src/observation.ts";
+import {
   inspectRecovery,
   assertRecoveryQuota,
   planRecoveryRetention,
   pruneRecoveryRetention,
   archiveRecovery,
   materializeRecoveryArchive,
-  createTransportConversations,
-  createClaudeConversations,
-  dispatch,
-  createSandbox,
-} from "../../src/index.ts";
-import type { Transport, WorkflowCheckpoint } from "../../src/index.ts";
+} from "../../src/recovery.ts";
+import { createClaudeConversations } from "../../src/integrations.ts";
+import type { Transport } from "../../src/storage.ts";
+import type { WorkflowCheckpoint } from "../../src/workflows.ts";
 import { journal } from "../../src/infrastructure/journal.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
 import { reserveTransportStorage } from "../../src/infrastructure/transport-reservations.ts";
@@ -724,7 +731,7 @@ test("dispatch integrates transport journals, activity and workspace reservation
 
 test("transport failures preserve host recovery and do not apply incoming changes", async (t) => {
   const root = await repository(t);
-  const { openWorkspace } = await import("../../src/index.ts");
+  const { openWorkspace } = await import("../../src/workspaces.ts");
   const { seedRemote } =
     await import("../../src/application/remote-workspace.ts");
   const workspace = await openWorkspace({

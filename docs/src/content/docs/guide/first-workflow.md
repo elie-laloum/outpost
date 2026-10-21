@@ -19,7 +19,7 @@ Save these three files beside `outpost.config.ts`. The first declares the agent 
 <!-- tabs -->
 
 ```ts title="review-task.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const review = defineIsolatedTask({
@@ -35,7 +35,7 @@ export const review = defineIsolatedTask({
 ```
 
 ```ts title="summary.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { review } from "./review-task.ts";
 
 export const summary = defineTask({
@@ -50,7 +50,7 @@ export const summary = defineTask({
 ```
 
 ```ts title="workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { review } from "./review-task.ts";
 import { summary } from "./summary.ts";
 

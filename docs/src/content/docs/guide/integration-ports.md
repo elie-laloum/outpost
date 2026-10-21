@@ -29,7 +29,7 @@ Test what a user observes when things go wrong: a nonzero exit status, output th
 For a sandbox provider, `diagnose()` runs a bounded probe against a real sandbox: Node.js, Git, separate output streams, a nonzero exit status, the home directory and, with `transfers`, binary file transfers.
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({ sandboxProvider, repository });
@@ -53,3 +53,23 @@ API: [CliHarness](../../reference/cliharness/) · [AgentAdapter](../../reference
 ## Connect decision services
 
 [`DecisionProvider`](../../reference/decisionprovider/) evaluates typed questions over lossless JSON state. It is independent of `ModelProvider` and allocates no sandbox. Use the common System One HTTP adapter for Jev and compatible Laya endpoints, or implement one cancellable request returning native answers and available usage. See [typed decisions](../decisions/) and [per-step routing](../model-routing/).
+
+## Choose a package entry point
+
+Import each function and type from its owning module. All modules below belong to the same npm package; no additional package is needed. The root import `@elie-laloum/outpost` is removed in the next major release; replace all root imports before upgrading. This version’s guides and examples use the new paths directly.
+
+| Import after `@elie-laloum/outpost/` | Contents                                                                               |
+| ------------------------------------ | -------------------------------------------------------------------------------------- |
+| `core`                               | Agents, CLI harnesses, dispatch, sandbox sessions, responses and everyday observation. |
+| `workspaces`                         | Workspace creation, snapshots, publication and conflict integration.                   |
+| `harness`                            | Built-in agent loop, model providers, tools, context and subagents.                    |
+| `workflows`                          | Tasks, dependencies, decisions, budgets, checkpoints, caches and approval gates.       |
+| `queues`                             | Workers, queued tasks, schedules and webhook sources.                                  |
+| `storage`                            | Transport contracts and artifact storage.                                              |
+| `observation`                        | Custom sinks, low-level hubs, journals, replay and standalone run readers.             |
+| `recovery`                           | Inspection, restoration, retention and storage reservation recovery.                   |
+| `integrations`                       | Agent and sandbox ports, native conversation formats and diagnostics.                  |
+| `recipes`                            | Recipe compilation, runtime and local extension registration.                          |
+| `experimental/speculation`           | Candidate races, merge preflight and durable coordinator recovery.                     |
+
+The `/providers/*`, `/secrets/*`, `/transports/s3`, `/queues/bullmq`, `/opentelemetry` and `/testing` paths retain their names. Functions, options and persisted data retain their behavior. YAML recipe syntax stays the same; update imports in local TypeScript extensions. Each API reference page gives the exact import for its symbol.

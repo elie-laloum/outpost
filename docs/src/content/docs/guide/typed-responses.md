@@ -10,7 +10,7 @@ Use the [setup configuration](../setup/) and install `zod` with `npm install zod
 Define a JSON response contract to receive data your application can validate. The agent writes the answer inside the requested tag, and Outpost parses and validates it before exposing `result.value`.
 
 ```ts
-import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
+import { dispatch, defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 const verdict = defineJsonResponse({
@@ -39,7 +39,7 @@ import {
   dispatch,
   defineTextResponse,
   ResponseError,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
@@ -63,7 +63,7 @@ API reference: [ResponseError](../../reference/responseerror/).
 Set `repairs` to give the agent more turns after an invalid answer.
 
 ```ts
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 const verdict = defineJsonResponse({
@@ -109,7 +109,7 @@ export function validateVerdict(input: unknown) {
 ```
 
 ```ts title="verdict.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { validateVerdict } from "./validate-verdict.ts";
 export const verdict = defineJsonResponse({
   tag: "verdict",
@@ -140,7 +140,7 @@ The last complete `<verdict>…</verdict>` pair wins, so a draft earlier in the 
 This contract accepts a JSON string and returns its length. Outpost injects the string input schema automatically, while `read()` returns a number. Save it as `length.ts` and run `node length.ts` after installing Outpost and Zod as in the example above.
 
 ```ts
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 const length = defineJsonResponse({
   tag: "length",
@@ -160,7 +160,7 @@ console.log(
 `defineTextResponse()` automatically requests a final tagged text answer and returns its trimmed content, without JSON parsing.
 
 ```ts
-import { defineTextResponse } from "@elie-laloum/outpost";
+import { defineTextResponse } from "@elie-laloum/outpost/core";
 
 const summary = defineTextResponse({ tag: "summary" });
 console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>"));

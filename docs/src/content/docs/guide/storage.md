@@ -27,12 +27,12 @@ A transport stores versioned bytes under keys. The stores built on it interpret 
 `createLocalTransport({ directory })` stores objects in a private local directory. Pass the repository’s `.outpost/storage` to keep your stores next to the journals and activity Outpost writes there by default.
 
 ```ts
+import { createArtifactStore } from "@elie-laloum/outpost/storage";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createArtifactStore,
-  createLocalTransport,
   createTaskCacheStore,
   createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const checkpoints = createWorkflowCheckpointStore({ transporter });
@@ -65,11 +65,8 @@ The rest of the `.outpost` directory is described in [How it works](../how-it-wo
 Pass the same transport to the stores and to the dispatch options, and every object of a run lands in one place.
 
 ```ts
-import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
-  dispatch,
-} from "@elie-laloum/outpost";
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost/core";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const transporter = createLocalTransport({ directory: "/srv/outpost" });
@@ -94,7 +91,7 @@ A remote transport keeps the same store contracts. [S3 and R2](../object-storage
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 const client = new S3Client({ region: "eu-west-1" });
@@ -129,7 +126,8 @@ A remote transport moves stored objects, not the runtime. These still need the h
 Every write names the revision it expects: `ifRevision: null` creates, the observed `revision` replaces or removes. If another writer changed the object first, the call throws `TransportConflict` and nothing is written.
 
 ```ts
-import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { TransportConflict } from "@elie-laloum/outpost/storage";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const bytes = (text: string) => new TextEncoder().encode(text);

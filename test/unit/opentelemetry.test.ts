@@ -13,7 +13,7 @@ import {
   PeriodicExportingMetricReader,
   AggregationTemporality,
 } from "@opentelemetry/sdk-metrics";
-import { defineTask, defineWorkflow } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/workflows.ts";
 import { createOpenTelemetryObserver } from "../../src/infrastructure/opentelemetry.ts";
 
 function telemetry() {
@@ -429,7 +429,7 @@ test("legacy workflow observe wiring still exports the complete span tree", asyn
 });
 
 test("hub sink parents dispatch and operation spans and retains dispatch metric names", async (t) => {
-  const { createObservationHub } = await import("../../src/index.ts");
+  const { createObservationHub } = await import("../../src/observation.ts");
   const sdk = telemetry();
   t.after(async () => {
     sdk.observer.close();
@@ -493,7 +493,7 @@ test("hub sink parents dispatch and operation spans and retains dispatch metric 
 });
 
 test("the unified observation client accepts telemetry directly and exports one workflow span", async (t) => {
-  const { createObservation } = await import("../../src/index.ts");
+  const { createObservation } = await import("../../src/core.ts");
   const sdk = telemetry();
   t.after(async () => {
     sdk.observer.close();

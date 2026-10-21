@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { JsonSchema } from "@elie-laloum/outpost";
+import type { JsonSchema } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

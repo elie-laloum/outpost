@@ -10,7 +10,7 @@ Start from [Reuse a sandbox](../sandbox-sessions/) and its configuration. Work w
 `sandbox.attach()` starts the agent’s own CLI in your terminal, inside the sandbox. You work with it by hand; the call resolves when you quit, with `status` and the `commits` made during the session.
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({

@@ -10,19 +10,21 @@ import {
   createCronSchedule,
   createGithubWebhook,
   createGitlabWebhook,
-  createLocalTransport,
   createSqliteTaskQueue,
-  createWorkflowCheckpointStore,
-  defineTask,
-  defineWorkflow,
   defineWorkflowJob,
   labelAdded,
   runQueueWorker,
   runSchedules,
   serveTriggers,
   type TriggerEvent,
+} from "@elie-laloum/outpost/queues";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import {
+  createWorkflowCheckpointStore,
+  defineTask,
+  defineWorkflow,
   type WorkflowJson,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const state = join(import.meta.dirname, "state");
 await rm(state, { recursive: true, force: true });

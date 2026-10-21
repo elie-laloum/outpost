@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { LoopTaskExhausted } from "@elie-laloum/outpost";
+import { LoopTaskExhausted } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

@@ -5,19 +5,19 @@ import { mkdir, readFile, writeFile, symlink } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { repository } from "../helpers.ts";
+import { createLocalTransport } from "../../src/core.ts";
 import {
-  createLocalTransport,
   inspectStorageReservations,
   recoverStorageReservation,
-  TransportConflict,
-} from "../../src/index.ts";
+} from "../../src/recovery.ts";
+import { TransportConflict } from "../../src/storage.ts";
 import { lock, lockPath } from "../../src/infrastructure/git/lock.ts";
 import {
   inspectLocalLock,
   recoverLocalLock,
 } from "../../src/infrastructure/git/lock-recovery.ts";
 import { reserveTransportStorage } from "../../src/infrastructure/transport-reservations.ts";
-import type { Transport } from "../../src/index.ts";
+import type { Transport } from "../../src/storage.ts";
 
 test("a terminated owner leaves recoverable locks and reservations while another owner's reservation survives", async (t) => {
   const root = await repository(t);

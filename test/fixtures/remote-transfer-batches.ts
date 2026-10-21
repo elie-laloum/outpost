@@ -9,7 +9,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { openWorkspace } from "../../src/index.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";

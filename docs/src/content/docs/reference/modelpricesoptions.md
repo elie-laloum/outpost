@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ModelPricesOptions } from "@elie-laloum/outpost";
+import type { ModelPricesOptions } from "@elie-laloum/outpost/harness";
 ```
 
 ## Parameters and properties

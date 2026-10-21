@@ -11,7 +11,7 @@ Après [votre première tâche](../first-request/), utilisez `result.report()` p
 
 ```ts title="report.ts"
 import { writeFile } from "node:fs/promises";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

@@ -29,7 +29,7 @@ The commands run in the sandbox, in the checkout the agent works on, with `sh -c
 
 ```ts
 import { fileURLToPath } from "node:url";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

@@ -7,13 +7,15 @@ import { join } from "node:path";
 import { setTimeout } from "node:timers/promises";
 import {
   createAgent,
-  createHarness,
   createLocalTransport,
   createObservation,
+} from "@elie-laloum/outpost/core";
+import { createHarness } from "@elie-laloum/outpost/harness";
+import {
   defineIsolatedTask,
   defineTask,
   defineWorkflow,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 const repository = demoRepository(import.meta.dirname);

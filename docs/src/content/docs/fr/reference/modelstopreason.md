@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ModelStopReason } from "@elie-laloum/outpost";
+import type { ModelStopReason } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

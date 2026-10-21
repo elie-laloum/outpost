@@ -40,7 +40,7 @@ GitHub signatures carry no timestamp, so a captured request can be replayed unde
 Every secret option also accepts a callback that returns the secrets accepted right now. The source calls it on each request.
 
 ```ts
-import { createGithubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost/queues";
 
 const source = createGithubWebhook({
   secret: () =>
@@ -58,7 +58,10 @@ Accept both secrets, change the secret at the sender, then drop the old one. A c
 `serveTriggers()` listens on `127.0.0.1` by default; `host` and `port` change it. Put a reverse proxy that terminates TLS in front of it, and expose only the route paths.
 
 ```ts
-import type { DurableTaskQueue, TriggerServer } from "@elie-laloum/outpost";
+import type {
+  DurableTaskQueue,
+  TriggerServer,
+} from "@elie-laloum/outpost/queues";
 
 declare const server: TriggerServer;
 declare const queue: DurableTaskQueue;

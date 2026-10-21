@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { S3Client } from "@aws-sdk/client-s3";
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";

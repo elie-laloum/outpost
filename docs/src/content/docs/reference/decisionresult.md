@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { DecisionResult } from "@elie-laloum/outpost";
+import type { DecisionResult } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

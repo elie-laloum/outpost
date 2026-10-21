@@ -2,12 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   defineAgentTask,
-  createSandbox,
   defineLoopTask,
-  OutpostError,
   defineTask,
   defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createSandbox, OutpostError } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 import type {
@@ -15,7 +14,7 @@ import type {
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
   WorkflowEvent,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 function memoryCheckpoint() {
   let saved: WorkflowCheckpoint | undefined;

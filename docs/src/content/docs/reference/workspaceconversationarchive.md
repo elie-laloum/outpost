@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkspaceConversationArchive } from "@elie-laloum/outpost";
+import type { WorkspaceConversationArchive } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

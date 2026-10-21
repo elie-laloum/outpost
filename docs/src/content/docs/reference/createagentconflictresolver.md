@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createAgentConflictResolver } from "@elie-laloum/outpost";
+import { createAgentConflictResolver } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Purpose and behavior

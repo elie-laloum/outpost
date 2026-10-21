@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { GitDispatchRequest } from "@elie-laloum/outpost";
+import type { GitDispatchRequest } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

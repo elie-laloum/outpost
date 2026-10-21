@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { defineTask, defineWorkflow } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/workflows.ts";
 import { taskUsageAccounting } from "../../src/application/task-usage.constants.ts";
-import type { AgentObservation } from "../../src/index.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
 import { taskUsage } from "../../src/application/task-usage.ts";
 
 test("stream deltas, transcript summary corrections and final fallback reconcile without subtraction", async () => {
@@ -73,7 +73,7 @@ for (const delivery of ["throw", "stall"]) {
   test(`copied dispatch options account synchronously with a decorated ${delivery} observer`, async () => {
     const { observeDispatch } =
       await import("../../src/application/dispatch-observation.ts");
-    const { createObservationHub } = await import("../../src/index.ts");
+    const { createObservationHub } = await import("../../src/observation.ts");
     let tokens = 0;
     const usage = taskUsage(
       {

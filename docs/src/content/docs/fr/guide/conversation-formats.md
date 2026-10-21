@@ -22,7 +22,7 @@ La configuration indique à Outpost où trouver la transcription, sur l’hôte 
 
 ```ts title="conversation-layout.ts"
 import { join, basename, posix } from "node:path";
-import type { TranscriptConversationLayout } from "@elie-laloum/outpost";
+import type { TranscriptConversationLayout } from "@elie-laloum/outpost/integrations";
 
 export const sessions = (home: string) => join(home, ".mycli", "sessions");
 export const layout: TranscriptConversationLayout = {
@@ -40,7 +40,7 @@ export const layout: TranscriptConversationLayout = {
 ```
 
 ```ts title="conversation-events.ts"
-import type { AgentEvent } from "@elie-laloum/outpost";
+import type { AgentEvent } from "@elie-laloum/outpost/integrations";
 
 export function events(line: string): AgentEvent[] {
   const event = JSON.parse(line);
@@ -50,8 +50,8 @@ export function events(line: string): AgentEvent[] {
 ```
 
 ```ts title="adapter.ts"
-import type { AgentAdapter } from "@elie-laloum/outpost";
-import { createTranscriptConversations } from "@elie-laloum/outpost";
+import type { AgentAdapter } from "@elie-laloum/outpost/integrations";
+import { createTranscriptConversations } from "@elie-laloum/outpost/integrations";
 import { layout } from "./conversation-layout.ts";
 import { events } from "./conversation-events.ts";
 
@@ -72,7 +72,7 @@ export const adapter: AgentAdapter = {
 ```
 
 ```ts title="agent.ts"
-import { createAgent } from "@elie-laloum/outpost";
+import { createAgent } from "@elie-laloum/outpost/core";
 import { adapter } from "./adapter.ts";
 
 export const agent = createAgent({
@@ -93,7 +93,7 @@ Une transcription enregistre le dossier où la CLI s’exécutait. La capture re
 `createSessionBundleConversations()` regroupe un dossier de session en une seule archive JSON. Un script Node.js exécuté dans la sandbox crée cette archive ; la restauration en extrait les fichiers dans la nouvelle sandbox.
 
 ```ts
-import { createSessionBundleConversations } from "@elie-laloum/outpost";
+import { createSessionBundleConversations } from "@elie-laloum/outpost/integrations";
 
 export const storage = createSessionBundleConversations({
   format: "mycli",

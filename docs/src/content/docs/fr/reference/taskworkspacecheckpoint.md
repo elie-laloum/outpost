@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskWorkspaceCheckpoint } from "@elie-laloum/outpost";
+import type { TaskWorkspaceCheckpoint } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

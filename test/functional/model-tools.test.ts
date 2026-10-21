@@ -8,7 +8,7 @@ import {
   type ModelMessage,
   type ModelProvider,
   type ModelToolSpec,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 
 const tools: ModelToolSpec[] = [
   {

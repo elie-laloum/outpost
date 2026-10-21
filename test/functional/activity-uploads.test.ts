@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { inspectRecovery } from "../../src/index.ts";
+import { inspectRecovery } from "../../src/recovery.ts";
 import { trackedSandboxLease } from "../../src/application/sandbox-activity.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
 import { fileManifest } from "../../src/infrastructure/file-manifest.ts";

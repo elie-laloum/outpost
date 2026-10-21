@@ -5,8 +5,9 @@ import {
   defineTask,
   defineWorkflow,
   WorkflowBudgetExceeded,
-} from "../../src/index.ts";
-import type { TaskContext, Usage, WorkflowEvent } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { TaskContext, WorkflowEvent } from "../../src/workflows.ts";
+import type { Usage } from "../../src/core.ts";
 
 test("attempt admission is shared across concurrency and retries", async () => {
   const admitted: string[] = [];

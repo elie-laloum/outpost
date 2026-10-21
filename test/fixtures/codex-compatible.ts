@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createCodexHarness } from "../../src/index.ts";
+import { createCodexHarness } from "../../src/core.ts";
 import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../../src/providers/podman.ts";
 

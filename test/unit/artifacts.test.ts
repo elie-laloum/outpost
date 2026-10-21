@@ -16,16 +16,18 @@ import { join, parse } from "node:path";
 import {
   defineBinaryArtifact,
   defineJsonArtifact,
-  defineArtifactTask,
   createArtifactStore,
   publishArtifact,
-  readArtifact,
   readStoredArtifact,
+} from "../../src/storage.ts";
+import {
+  defineArtifactTask,
+  readArtifact,
   defineTask,
   defineWorkflow,
-  createLocalTransport,
-} from "../../src/index.ts";
-import type { ArtifactStore } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import type { ArtifactStore } from "../../src/storage.ts";
 
 const producer = { executionId: "run", taskKey: "build", attempt: 1 };
 const binary = defineBinaryArtifact({ name: "bundle", version: "1" });

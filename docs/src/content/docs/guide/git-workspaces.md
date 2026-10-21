@@ -11,7 +11,7 @@ Pass `repository` to select the Git checkout the task will use. Your workflow sc
 
 ```ts
 import { resolve } from "node:path";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({
@@ -52,7 +52,7 @@ A workspace serves one sandbox at a time. Close the sandbox before the workspace
 A new worktree holds only committed files. `copies` lists repository-relative files or directories to copy from your checkout, such as an ignored test configuration.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

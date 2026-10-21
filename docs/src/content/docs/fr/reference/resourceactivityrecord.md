@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ResourceActivityRecord } from "@elie-laloum/outpost";
+import type { ResourceActivityRecord } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Paramètres et propriétés

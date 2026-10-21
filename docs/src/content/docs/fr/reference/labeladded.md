@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { labelAdded } from "@elie-laloum/outpost";
+import { labelAdded } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

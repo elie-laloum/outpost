@@ -3,7 +3,10 @@ import { execFileSync } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { delimiter, join } from "node:path";
 import { test } from "node:test";
-import { checkSpeculationIntegration, speculate } from "../../src/index.ts";
+import {
+  checkSpeculationIntegration,
+  speculate,
+} from "../../src/experimental/speculation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { emit, repository, scripted } from "../helpers.ts";

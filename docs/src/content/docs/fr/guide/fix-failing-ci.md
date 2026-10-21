@@ -31,7 +31,7 @@ L’allocation et la fermeture restent dans le point d’entrée. La boucle regr
 <!-- tabs -->
 
 ```ts title="fix-sandbox.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export function openFixSandbox() {
@@ -46,8 +46,11 @@ export function openFixSandbox() {
 ```
 
 ```ts title="fix-task.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineAgentTask, defineLoopTask } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import {
+  defineAgentTask,
+  defineLoopTask,
+} from "@elie-laloum/outpost/workflows";
 
 export function defineFix(sandbox: Sandbox) {
   return defineLoopTask({
@@ -99,7 +102,7 @@ export function defineFix(sandbox: Sandbox) {
 ```ts title="fix-ci.ts"
 import { openFixSandbox } from "./fix-sandbox.ts";
 import { defineFix } from "./fix-task.ts";
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 await using sandbox = await openFixSandbox();
 export const fix = defineFix(sandbox);
 export const result = await defineWorkflow("fix-ci", [fix]).start({

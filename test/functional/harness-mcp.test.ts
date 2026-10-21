@@ -10,21 +10,25 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
   createAgent,
-  createHarness,
   defineAgentProfile,
+  dispatch,
+  type McpServers,
+} from "../../src/core.ts";
+import {
+  createHarness,
   defineHarnessPermissions,
   defineHarnessSubagent,
   defineHarnessTool,
   defineMcpPrompt,
-  dispatch,
-  type AgentObservation,
   type HarnessOptions,
-  type McpServers,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
+} from "../../src/harness.ts";
+import {
+  type AgentObservation,
   type SandboxProvider,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 import { profilePermissions } from "../../src/domain/agent-profile-permissions.ts";

@@ -5,12 +5,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
+import { openWorkspace } from "../../src/workspaces.ts";
+import { OutpostError } from "../../src/core.ts";
 import {
-  openWorkspace,
-  OutpostError,
   planRecoveryRestore,
   restoreRecoveryTransfer,
-} from "../../src/index.ts";
+} from "../../src/recovery.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";

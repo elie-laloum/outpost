@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { archiveRecovery } from "@elie-laloum/outpost";
+import { archiveRecovery } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Purpose and behavior

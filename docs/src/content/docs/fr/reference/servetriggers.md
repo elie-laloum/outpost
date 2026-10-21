@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { serveTriggers } from "@elie-laloum/outpost";
+import { serveTriggers } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

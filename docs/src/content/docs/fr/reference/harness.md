@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AgentHarness } from "@elie-laloum/outpost";
+import type { AgentHarness } from "@elie-laloum/outpost/core";
 ```
 
 ## Paramètres et propriétés

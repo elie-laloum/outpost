@@ -27,12 +27,12 @@ Un transport enregistre des données binaires versionnées sous des clés. Les s
 `createLocalTransport({ directory })` stocke les objets dans un dossier local privé. Passez-lui le `.outpost/storage` du dépôt pour ranger vos stockages à côté des journaux et de l’activité qu’Outpost y écrit par défaut.
 
 ```ts
+import { createArtifactStore } from "@elie-laloum/outpost/storage";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createArtifactStore,
-  createLocalTransport,
   createTaskCacheStore,
   createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const checkpoints = createWorkflowCheckpointStore({ transporter });
@@ -65,11 +65,8 @@ Le reste du dossier `.outpost` est décrit dans la page [Fonctionnement](../how-
 Passez le même transport aux stockages et aux options du dispatch : tous les objets d’une exécution arrivent au même endroit.
 
 ```ts
-import {
-  createLocalTransport,
-  createWorkflowCheckpointStore,
-  dispatch,
-} from "@elie-laloum/outpost";
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost/core";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const transporter = createLocalTransport({ directory: "/srv/outpost" });
@@ -94,7 +91,7 @@ Un transport distant conserve les mêmes contrats de stockage. [S3 et R2](../obj
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 const client = new S3Client({ region: "eu-west-1" });
@@ -129,7 +126,8 @@ Un transport distant permet de conserver les objets sur un autre service. Les é
 Pour créer un objet, utilisez `ifRevision: null`. Pour le remplacer ou le supprimer, indiquez la `revision` que vous avez lue. Si un autre processus a modifié l’objet entre-temps, l’opération lève `TransportConflict` sans écrire de données.
 
 ```ts
-import { createLocalTransport, TransportConflict } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { TransportConflict } from "@elie-laloum/outpost/storage";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const bytes = (text: string) => new TextEncoder().encode(text);

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createHarnessConversations } from "@elie-laloum/outpost";
+import { createHarnessConversations } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

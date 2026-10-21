@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createLocalTransport, speculate } from "../../src/index.ts";
-import type { SandboxProvider, TransportEntry } from "../../src/index.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import { speculate } from "../../src/experimental/speculation.ts";
+import type { SandboxProvider } from "../../src/integrations.ts";
+import type { TransportEntry } from "../../src/storage.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 

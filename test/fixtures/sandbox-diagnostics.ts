@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createSandbox } from "../../src/core.ts";
 import {
-  createSandbox,
   diagnoseAgentProtocol,
   diagnoseSandbox,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";

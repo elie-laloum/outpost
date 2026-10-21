@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RunError } from "@elie-laloum/outpost";
+import type { RunError } from "@elie-laloum/outpost/observation";
 ```
 
 ## Paramètres et propriétés

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

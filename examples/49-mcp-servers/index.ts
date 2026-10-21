@@ -5,13 +5,12 @@
 import { join } from "node:path";
 import {
   createAgent,
-  createHarness,
-  defineMcpPrompt,
   dispatch,
   OutpostError,
-  type AgentEvent,
   type McpServers,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { createHarness, defineMcpPrompt } from "@elie-laloum/outpost/harness";
+import { type AgentEvent } from "@elie-laloum/outpost/integrations";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { ResponseError } from "@elie-laloum/outpost";
+import { ResponseError } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

@@ -10,9 +10,9 @@ Start from [Check and integrate a branch](../integrating-changes/) and its confi
 Opt into `onConflict` to integrate an existing feature branch through a dedicated resolution branch. Close any sandbox on the source workspace before calling it. `branch.from` selects the feature commit to integrate; the host checkout is the target branch. A merge without Git conflicts skips the agent and the verification command.
 
 ```ts
-import { createAgentConflictResolver } from "@elie-laloum/outpost";
+import { createAgentConflictResolver } from "@elie-laloum/outpost/workspaces";
 import { coder, sandboxProvider } from "./outpost.config.ts";
-import { openWorkspace } from "@elie-laloum/outpost";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
 import { repository } from "./outpost.config.ts";
 
 await using workspace = await openWorkspace({

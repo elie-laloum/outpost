@@ -5,8 +5,8 @@ import { test } from "node:test";
 import {
   createClaudeConversations,
   createCodexConversations,
-  createObservationHub,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
+import { createObservationHub } from "../../src/observation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

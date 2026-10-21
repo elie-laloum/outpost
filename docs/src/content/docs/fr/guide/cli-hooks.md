@@ -10,7 +10,10 @@ Branchez un callback sur votre CLI pour observer ou contrôler ses actions. Part
 Ce hook Claude refuse les appels à `Bash` et demande à l’agent d’utiliser les outils de lecture. Passez `harness` à `createAgent({ harness })`, puis [exécutez l’agent](../first-request/).
 
 ```ts title="native-hooks.ts"
-import { createClaudeHarness, defineClaudeHook } from "@elie-laloum/outpost";
+import {
+  createClaudeHarness,
+  defineClaudeHook,
+} from "@elie-laloum/outpost/core";
 
 export const harness = createClaudeHarness({
   authentication: "account",

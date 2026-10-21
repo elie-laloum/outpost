@@ -10,9 +10,9 @@ Partez de [Vérifier puis intégrer une branche](../integrating-changes/) et de 
 Activez `onConflict` pour intégrer une branche de fonctionnalité existante via une branche dédiée à la résolution. Fermez toute sandbox du workspace source avant l’appel. `branch.from` choisit le commit à intégrer ; le checkout hôte porte la branche cible. Une fusion sans conflit Git n’exécute ni l’agent ni la commande de vérification.
 
 ```ts
-import { createAgentConflictResolver } from "@elie-laloum/outpost";
+import { createAgentConflictResolver } from "@elie-laloum/outpost/workspaces";
 import { coder, sandboxProvider } from "./outpost.config.ts";
-import { openWorkspace } from "@elie-laloum/outpost";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
 import { repository } from "./outpost.config.ts";
 
 await using workspace = await openWorkspace({

@@ -2,21 +2,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createAgent, dispatch, defineJsonResponse } from "../../src/core.ts";
+import { defineHarnessTool, createHarness } from "../../src/harness.ts";
 import {
-  createAgent,
-  defineHarnessTool,
-  dispatch,
-  createHarness,
   readJournal,
   createReplayAgent,
   ReplayDivergence,
-  defineJsonResponse,
-} from "../../src/index.ts";
-import type {
-  AgentObservation,
-  DispatchResult,
-  ModelProvider,
-} from "../../src/index.ts";
+} from "../../src/observation.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
+import type { DispatchResult } from "../../src/core.ts";
+import type { ModelProvider } from "../../src/harness.ts";
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";

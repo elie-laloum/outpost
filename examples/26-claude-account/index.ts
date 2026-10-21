@@ -5,12 +5,12 @@
 import { join } from "node:path";
 import {
   createAgent,
-  createClaudeConversations,
   createClaudeHarness,
   createLocalTransport,
   createTransportConversations,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { createClaudeConversations } from "@elie-laloum/outpost/integrations";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

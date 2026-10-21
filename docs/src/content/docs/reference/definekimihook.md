@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineKimiHook } from "@elie-laloum/outpost";
+import { defineKimiHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

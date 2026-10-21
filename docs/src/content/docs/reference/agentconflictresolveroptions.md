@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AgentConflictResolverOptions } from "@elie-laloum/outpost";
+import type { AgentConflictResolverOptions } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

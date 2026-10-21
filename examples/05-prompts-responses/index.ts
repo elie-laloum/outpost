@@ -5,13 +5,15 @@ import { join } from "node:path";
 import * as v from "valibot";
 import {
   createAgent,
-  createHarness,
-  createHarnessFileTools,
   createReporter,
   createObservation,
   defineJsonResponse,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

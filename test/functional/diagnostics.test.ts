@@ -10,8 +10,8 @@ import {
   createSandbox,
   createReporter,
   recoveryDetails,
-  openWorkspace,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { transfer } from "../../src/infrastructure/transfer.ts";
 import { downloadTree } from "../../src/providers/cloud-files.ts";

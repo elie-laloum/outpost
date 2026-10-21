@@ -10,7 +10,7 @@ sidebar:
 Choisissez un seul de ces imports équivalents.
 
 ```ts
-import type { EgressPolicy } from "@elie-laloum/outpost";
+import type { EgressPolicy } from "@elie-laloum/outpost/core";
 ```
 
 ```ts

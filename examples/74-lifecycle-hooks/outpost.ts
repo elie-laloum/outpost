@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
   defineHarnessHook,
   defineHarnessPermissions,
-} from "@elie-laloum/outpost";
-import type { ModelProvider } from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import type { ModelProvider } from "@elie-laloum/outpost/harness";
 
 import { profile } from "./profile.ts";
 

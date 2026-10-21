@@ -5,19 +5,20 @@
 
 import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { createLocalTransport, quotaFault } from "@elie-laloum/outpost/core";
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 import {
-  createLocalTransport,
-  createOpenAIModelProvider,
   createSqliteTaskQueue,
-  createWorkflowCheckpointStore,
   defineQueuedTask,
-  defineWorkflow,
-  quotaFault,
   runQueueWorker,
   type QueueHandlerContext,
+} from "@elie-laloum/outpost/queues";
+import {
+  createWorkflowCheckpointStore,
+  defineWorkflow,
   type WorkflowEvent,
   type WorkflowJson,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model } from "../shared/model.ts";
 import { quotaProxy } from "../39-quota-pauses/quota-proxy.ts";
 

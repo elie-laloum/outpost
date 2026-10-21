@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryStorageReservationOptions } from "@elie-laloum/outpost";
+import type { RecoveryStorageReservationOptions } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Parameters and properties

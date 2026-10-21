@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createGitlabWebhook } from "@elie-laloum/outpost";
+import { createGitlabWebhook } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

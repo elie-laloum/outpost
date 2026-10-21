@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecordedIdentity } from "@elie-laloum/outpost";
+import type { RecordedIdentity } from "@elie-laloum/outpost/observation";
 ```
 
 ## Parameters and properties

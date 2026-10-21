@@ -1,13 +1,12 @@
 import { join } from "node:path";
+import { createAgent, createLocalTransport } from "../../src/core.ts";
+import { createHarness } from "../../src/harness.ts";
 import {
-  createAgent,
-  createHarness,
   defineInteractiveAgentTask,
-  createLocalTransport,
   createWorkflowCheckpointStore,
   defineWorkflow,
-} from "../../src/index.ts";
-import type { WorkflowAnswer } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { WorkflowAnswer } from "../../src/workflows.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 
 const repository = process.argv[2]!;

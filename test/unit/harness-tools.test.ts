@@ -5,7 +5,7 @@ import {
   defineHarnessTool,
   defineHarnessToolset,
   type StandardJsonSchema,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import { schemaIssues } from "../../src/domain/tool-schema.ts";
 
 const noop = () => "ok";

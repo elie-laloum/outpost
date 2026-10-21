@@ -3,7 +3,8 @@ import { test } from "node:test";
 import { mkdir, cp, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import type { SandboxLease, Transport } from "../../src/index.ts";
+import type { SandboxLease } from "../../src/integrations.ts";
+import type { Transport } from "../../src/storage.ts";
 import type { CloudDependencyCache } from "../../src/providers/cloud-cache.types.ts";
 import {
   prepareCloudCaches,

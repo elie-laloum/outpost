@@ -9,11 +9,14 @@ import {
   defineWorkflow,
   defineTask,
   createWorkflowCheckpointStore,
-  createLocalTransport,
   signWorkflowDecision,
   createEd25519DecisionVerifier,
-} from "../../src/index.ts";
-import type { WorkflowApproverKey, WorkflowDecision } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import type {
+  WorkflowApproverKey,
+  WorkflowDecision,
+} from "../../src/workflows.ts";
 
 const oldKey = generateKeyPairSync("ed25519");
 const newKey = generateKeyPairSync("ed25519");
@@ -248,7 +251,7 @@ test("task idempotency keys survive retry and checkpoint replay but separate tas
 });
 
 test("signed pause decisions validate a whole batch before persisting and resist async mutation", async (t) => {
-  const { definePauseTask } = await import("../../src/index.ts");
+  const { definePauseTask } = await import("../../src/workflows.ts");
   const directory = await mkdtemp(join(tmpdir(), "outpost-signed-batch-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const checkpoint = {

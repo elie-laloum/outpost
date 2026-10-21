@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineHarnessSubagent } from "@elie-laloum/outpost";
+import { defineHarnessSubagent } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

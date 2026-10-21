@@ -1,5 +1,5 @@
 import { appendFile } from "node:fs/promises";
-import type { TaskContext } from "../../src/index.ts";
+import type { TaskContext } from "../../src/workflows.ts";
 import { recipeObject } from "../../src/domain/recipes/values.ts";
 
 export async function effect(input: unknown, context: TaskContext) {
@@ -18,7 +18,7 @@ export const clientToken = () => process.env.OUTPOST_RECIPE_QUEUE_TOKEN!;
 export const scheduleRunId = (slot: Date) => `slot:${slot.toISOString()}`;
 
 export async function nativeWorkflow() {
-  const { defineTask, defineWorkflow } = await import("../../src/index.ts");
+  const { defineTask, defineWorkflow } = await import("../../src/workflows.ts");
   return defineWorkflow("native-queued-workflow", [
     defineTask({
       key: "value",

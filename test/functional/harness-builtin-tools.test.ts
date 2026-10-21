@@ -2,10 +2,9 @@ import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { chmod, stat, symlink, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { createAgent, dispatch } from "../../src/core.ts";
 import {
-  createAgent,
   defineHarnessPermissions,
-  dispatch,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
@@ -15,7 +14,7 @@ import {
   type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";

@@ -12,7 +12,7 @@ Utilisez des hooks pour ajouter des consignes au démarrage, refuser les appels 
 <!-- tabs -->
 
 ```ts title="editing-hooks.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const startHook = defineHarnessHook({
   on: "session-start",
@@ -28,7 +28,7 @@ export const editHook = defineHarnessHook({
 ```
 
 ```ts title="completion-hook.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const completionHook = defineHarnessHook({
   on: "stop",
@@ -70,7 +70,7 @@ Vous pouvez aussi intervenir sur le prompt, le modèle, la compaction et les sou
 Pour ajouter une consigne à chaque requête modèle, ajoutez ce hook à votre liste. Les transformations de réponse via `after-model` conservent l’usage facturé et les permissions ; elles ne modifient pas les deltas déjà diffusés en streaming.
 
 ```ts title="model-hook.ts"
-import { defineHarnessHook } from "@elie-laloum/outpost";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const modelHook = defineHarnessHook({
   on: "before-model",

@@ -43,7 +43,7 @@ This lesson reuses the previous lesson’s files, not its saved execution. It de
 The review verdict belongs to the implementation loop. Save its contract in `verdict.ts`.
 
 ```ts title="verdict.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 export const verdict = defineJsonResponse({
@@ -91,7 +91,7 @@ export const greenCheck: LoopCheck = async (context) => {
 ```
 
 ```ts title="review-brief.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
 import { ticket } from "./ticket.ts";
 import { plan } from "./plan.ts";
 
@@ -107,8 +107,8 @@ export function reviewBrief(context: LoopTaskContext) {
 ```
 
 ```ts title="review-changes.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
+import { defineAgentTask } from "@elie-laloum/outpost/workflows";
 import { workbench } from "./workbench.ts";
 import { verdict } from "./verdict.ts";
 import { reviewBrief } from "./review-brief.ts";
@@ -150,7 +150,7 @@ Compose the tasks and checkpoint, then close the sandbox after each call.
 <!-- tabs -->
 
 ```ts title="code.ts"
-import { defineLoopTask } from "@elie-laloum/outpost";
+import { defineLoopTask } from "@elie-laloum/outpost/workflows";
 import { tests } from "./tests.ts";
 import { codeAttempt } from "./code-attempt.ts";
 import { codeCheck } from "./code-check.ts";
@@ -165,7 +165,7 @@ export const code = defineLoopTask({
 ```
 
 ```ts title="workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { frame } from "./frame.ts";
 import { plan } from "./plan.ts";
 import { review } from "./approval.ts";
@@ -182,7 +182,7 @@ export const workflow = defineWorkflow("develop", [
 ```
 
 ```ts title="view.ts"
-import type { WorkflowResult } from "@elie-laloum/outpost";
+import type { WorkflowResult } from "@elie-laloum/outpost/workflows";
 import { plan } from "./plan.ts";
 import { branch } from "./branch.ts";
 import { code } from "./code.ts";

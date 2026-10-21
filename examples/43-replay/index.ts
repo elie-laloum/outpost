@@ -6,18 +6,22 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
+  createLocalTransport,
+  dispatch,
+  type Commit,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createLocalTransport,
+} from "@elie-laloum/outpost/harness";
+import {
   createReplayAgent,
-  dispatch,
   readJournal,
   ReplayDivergence,
-  type AgentEvent,
-  type Commit,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/observation";
+import { type AgentEvent } from "@elie-laloum/outpost/integrations";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

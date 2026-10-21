@@ -58,7 +58,7 @@ import {
   createAgent,
   createCodexHarness,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
@@ -79,6 +79,8 @@ console.log(result.commits);
 ```
 
 `dispatch()` closes the sandbox it allocates; the named branch remains for review. Use a fresh branch name for each independent task. The agent’s answer is not an enforced test result: add explicit verification when checks must gate integration.
+
+The next major release uses explicit package entry points and removes the root import. Start with `@elie-laloum/outpost/core`, compose tasks through `/workflows`, and import advanced features from their owning module. See [package entry points](docs/src/content/docs/guide/integration-ports.md#choose-a-package-entry-point) for the complete mapping. Existing provider subpaths and YAML syntax keep their names.
 
 ## Choose your building blocks
 

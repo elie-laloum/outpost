@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { repetitionWatchdog } from "../../src/application/repetition-watchdog.ts";
-import { createReplayAgent, createSteering } from "../../src/index.ts";
+import { createReplayAgent } from "../../src/observation.ts";
+import { createSteering } from "../../src/core.ts";
 import { scripted } from "../helpers.ts";
 import {
   preflightDispatch,
@@ -9,7 +10,7 @@ import {
 } from "../../src/application/dispatch-validation.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
 import type { AgentObservation } from "../../src/domain/agent.types.ts";
-import type { WatchdogOptions } from "../../src/index.ts";
+import type { WatchdogOptions } from "../../src/core.ts";
 import { steeringInbox } from "../../src/domain/steering.ts";
 import { harnessSteering } from "../../src/application/harness-steering.ts";
 

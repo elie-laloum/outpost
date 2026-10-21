@@ -6,8 +6,8 @@ import {
   LoopTaskExhausted,
   defineTask,
   defineWorkflow,
-} from "../../src/index.ts";
-import type { LoopTaskContext, WorkflowEvent } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { LoopTaskContext, WorkflowEvent } from "../../src/workflows.ts";
 
 test("loop feedback, dependency values, typed result and phase identities", async () => {
   const source = defineTask({ key: "source", perform: () => 10 });

@@ -1,17 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { createObservationHub, readJournal } from "../../src/observation.ts";
 import {
-  createObservationHub,
   dispatch,
+  createSandbox,
+  createLocalTransport,
+  recoveryDetails,
+} from "../../src/core.ts";
+import {
   defineIsolatedTask,
   defineWorkflow,
-  createSandbox,
   defineCommandTask,
-  createLocalTransport,
-  readJournal,
-  recoveryDetails,
-} from "../../src/index.ts";
-import type { Observation } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { Observation } from "../../src/observation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 

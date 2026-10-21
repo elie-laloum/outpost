@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineAntigravityHook } from "@elie-laloum/outpost";
+import { defineAntigravityHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

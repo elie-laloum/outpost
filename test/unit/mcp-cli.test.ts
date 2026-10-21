@@ -8,8 +8,8 @@ import {
   createCodexHarness,
   createCopilotHarness,
   createKimiHarness,
-} from "../../src/index.ts";
-import type { McpServers } from "../../src/index.ts";
+} from "../../src/core.ts";
+import type { McpServers } from "../../src/core.ts";
 import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi/kimi-mcp.ts";
 
 const servers: McpServers = {

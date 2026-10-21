@@ -14,15 +14,13 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
   createWorkspace,
-  createSandbox,
-  dispatch,
   publishWorkspaceOutputs,
   prepareWorkspaceOutputs,
   workspaceFingerprint,
   snapshotWorkspaceFiles,
   restoreWorkspaceFiles,
-  changed,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
+import { createSandbox, dispatch, changed } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   createMemorySandboxProvider,

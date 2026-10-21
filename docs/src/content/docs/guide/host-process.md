@@ -16,7 +16,7 @@ Nothing is isolated. The agent and every command it runs act as your user, with 
 Create the provider with `createLocalSandboxProvider()` and pass it to `dispatch()`, like any other sandbox provider.
 
 ```ts title="host.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { coder, repository } from "./outpost.config.ts";
 

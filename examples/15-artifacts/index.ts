@@ -5,18 +5,24 @@ import { join } from "node:path";
 import * as v from "valibot";
 import {
   createAgent,
+  createLocalTransport,
+  defineJsonResponse,
+  dispatch,
+} from "@elie-laloum/outpost/core";
+import {
   createArtifactStore,
+  defineJsonArtifact,
+} from "@elie-laloum/outpost/storage";
+import {
   createHarness,
   createHarnessFileTools,
-  createLocalTransport,
+} from "@elie-laloum/outpost/harness";
+import {
   defineArtifactTask,
-  defineJsonArtifact,
-  defineJsonResponse,
   defineTask,
   defineWorkflow,
-  dispatch,
   readArtifact,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

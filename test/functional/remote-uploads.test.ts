@@ -18,7 +18,8 @@ import { fileManifest } from "../../src/infrastructure/file-manifest.ts";
 import { boundedTransfers } from "../../src/infrastructure/transfer.ts";
 import { uploadFiles } from "../../src/application/remote-upload.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
-import { createSandbox, openWorkspace } from "../../src/index.ts";
+import { createSandbox } from "../../src/core.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { repository } from "../helpers.ts";
 
 test("uploads verify reuse and destination changes through a sandbox process, preserving binary, modes and links", async (t) => {

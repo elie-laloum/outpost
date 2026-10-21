@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { unavailableFault } from "@elie-laloum/outpost";
+import { unavailableFault } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

@@ -11,10 +11,8 @@ Pass `durability` to `speculate()`. Attempts, usage, outputs and allocated resou
 
 ```ts title="durability.ts"
 import { join } from "node:path";
-import {
-  createLocalTransport,
-  type SpeculationDurability,
-} from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {
@@ -31,7 +29,7 @@ Reuse `candidates.ts` and `validate.ts` from [the first race](../speculation/). 
 <!-- example:include speculation candidates.ts validate.ts -->
 
 ```ts title="durable-race.ts"
-import { speculate } from "@elie-laloum/outpost";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -71,7 +69,8 @@ A crashed race stays owned by its coordinator, the process that ran `speculate()
 ```ts
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { createLocalTransport, recoverSpeculation } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { recoverSpeculation } from "@elie-laloum/outpost/experimental/speculation";
 import { repository } from "./outpost.config.ts";
 const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),

@@ -4,25 +4,27 @@ import { readFile, writeFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import {
   createAgent,
-  createHarness,
-  defineInteractiveAgentTask,
   createLocalTransport,
-  createWorkflowCheckpointStore,
-  defineWorkflow,
-  defineTask,
   createAntigravityHarness,
   createCodexHarness,
   createClaudeHarness,
   createCopilotHarness,
   createKimiHarness,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createHarness } from "../../src/harness.ts";
+import {
+  defineInteractiveAgentTask,
+  createWorkflowCheckpointStore,
+  defineWorkflow,
+  defineTask,
+} from "../../src/workflows.ts";
 import type {
   WorkflowResult,
   WorkflowAnswer,
   TaskContext,
-  ModelProvider,
   WorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { ModelProvider } from "../../src/harness.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository, scripted } from "../helpers.ts";
@@ -701,7 +703,7 @@ test("a completed dialogue checkpoint is reused after finalization fails without
 });
 
 test("durable loops and interactive tasks compose without replaying completed rounds", async (t) => {
-  const { defineLoopTask } = await import("../../src/index.ts");
+  const { defineLoopTask } = await import("../../src/workflows.ts");
   const checkpoint = checkpointFor(await repository(t));
   let rounds = 0;
   const build = () => {

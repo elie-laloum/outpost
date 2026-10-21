@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

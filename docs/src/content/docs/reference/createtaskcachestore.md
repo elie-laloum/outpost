@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createTaskCacheStore } from "@elie-laloum/outpost";
+import { createTaskCacheStore } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

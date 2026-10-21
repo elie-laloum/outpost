@@ -12,7 +12,7 @@ Utilisez `defineAgentProfile()` pour conserver les instructions et serveurs MCP 
 Enregistrez les instructions dans `profile.ts`. Ce premier profil ne nécessite aucun serveur MCP.
 
 ```ts title="profile.ts"
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 
 export const profile = defineAgentProfile({
   instructions: "Never modify generated files.",
@@ -28,7 +28,7 @@ import {
   createAgent,
   createClaudeHarness,
   createCodexHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { profile } from "./profile.ts";
 
 export const claude = createAgent({
@@ -49,8 +49,8 @@ Déclarez les hooks par harness dans `hooks` : `claude`, `codex`, `copilot`, `ki
 import {
   defineAgentProfile,
   defineClaudeHook,
-  defineHarnessHook,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { defineHarnessHook } from "@elie-laloum/outpost/harness";
 
 export const lifecycleProfile = defineAgentProfile({
   hooks: {
@@ -81,7 +81,7 @@ Passez `profile: lifecycleProfile` au harness. Il prend sa section, puis ajoute 
 Enregistrez `restricted-profile.ts` à côté du premier fichier. Ce profil autorise la lecture et l’édition de fichiers et uniquement la commande shell exacte `npm test`. L’absence de restriction conserve le comportement du harness ; une liste vide refuse les outils intégrés d’action. Dans le harness intégré, `load_skill` reste disponible, mais charger un skill n’autorise jamais ses outils. Les déclarations explicites de serveurs MCP accordent leurs propres outils, restreints séparément par les filtres de chaque serveur, ainsi que l’accès à leurs ressources et prompts. Les permissions supplémentaires du harness restent applicables.
 
 ```ts title="restricted-profile.ts"
-import { defineAgentProfile } from "@elie-laloum/outpost";
+import { defineAgentProfile } from "@elie-laloum/outpost/core";
 import { profile } from "./profile.ts";
 
 export const restricted = defineAgentProfile({

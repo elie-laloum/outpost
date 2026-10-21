@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineHarnessModelRouting } from "@elie-laloum/outpost";
+import { defineHarnessModelRouting } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

@@ -9,9 +9,9 @@ import {
   createSandbox,
   attach,
   dispatch,
-  openWorkspace,
   defineJsonResponse,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";

@@ -10,7 +10,7 @@ Partez de [Fixer des délais et annuler une tâche](../limits-and-cancellation/)
 `passes` renvoie le brief quand une passe se termine sans marqueur de fin. Demandez le marqueur dans le brief : Outpost ne l’ajoute pas.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

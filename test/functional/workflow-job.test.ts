@@ -8,23 +8,21 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import {
   defineApprovalTask,
-  createGithubWebhook,
-  labelAdded,
-  createLocalTransport,
-  runQueueWorker,
-  serveTriggers,
-  createSqliteTaskQueue,
   defineTask,
   defineWorkflow,
   createWorkflowCheckpointStore,
+} from "../../src/workflows.ts";
+import {
+  createGithubWebhook,
+  labelAdded,
+  runQueueWorker,
+  serveTriggers,
+  createSqliteTaskQueue,
   defineWorkflowJob,
-} from "../../src/index.ts";
-import type {
-  QueueHandler,
-  QueueJob,
-  TaskQueue,
-  WorkflowJson,
-} from "../../src/index.ts";
+} from "../../src/queues.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import type { QueueHandler, QueueJob, TaskQueue } from "../../src/queues.ts";
+import type { WorkflowJson } from "../../src/workflows.ts";
 
 const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 

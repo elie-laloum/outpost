@@ -15,7 +15,7 @@ import {
   createAgent,
   createClaudeHarness,
   defineAgentProfile,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { nativeRecipeGuards } from "../../src/application/recipes/native.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
 import { repository } from "../helpers.ts";

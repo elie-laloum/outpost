@@ -5,20 +5,20 @@ import { join } from "node:path";
 import {
   createAgent,
   createSteering,
-  defineHarnessSubagent,
   defineAgentProfile,
-  createHarness,
-  createHarnessShellTools,
   createSandbox,
   dispatch,
   defineTextResponse,
   OutpostError,
-} from "../../src/index.ts";
-import type {
-  AgentObservation,
-  ModelProvider,
-  WatchdogOptions,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import {
+  defineHarnessSubagent,
+  createHarness,
+  createHarnessShellTools,
+} from "../../src/harness.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
+import type { ModelProvider } from "../../src/harness.ts";
+import type { WatchdogOptions } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 

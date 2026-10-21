@@ -2,14 +2,14 @@
 // A workspace owns the branch; sandboxes come and go on top of it.
 
 import { join } from "node:path";
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  openWorkspace,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

@@ -7,8 +7,8 @@ import {
   createCopilotHarness,
   createKimiHarness,
   createAntigravityHarness,
-} from "../../src/index.ts";
-import type { AgentObservation } from "../../src/index.ts";
+} from "../../src/core.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
 import { agentOutput } from "../../src/application/agent-output.ts";
 import { boundedLines } from "../../src/application/output-lines.ts";
 import { executionDefaults } from "../../src/application/execution.constants.ts";

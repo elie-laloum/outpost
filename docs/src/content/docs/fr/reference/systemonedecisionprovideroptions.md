@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { SystemOneDecisionProviderOptions } from "@elie-laloum/outpost";
+import type { SystemOneDecisionProviderOptions } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

@@ -5,7 +5,7 @@ import {
   requestMessages,
   validateMessages,
 } from "../../src/domain/model-messages.ts";
-import type { ModelMessage } from "../../src/index.ts";
+import type { ModelMessage } from "../../src/harness.ts";
 
 const user = (text = "go"): ModelMessage => ({
   role: "user",

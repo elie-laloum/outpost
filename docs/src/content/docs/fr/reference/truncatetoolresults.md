@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { truncateToolResults } from "@elie-laloum/outpost";
+import { truncateToolResults } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

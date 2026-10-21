@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { recoverWorkflowCheckpoint } from "../../src/index.ts";
+import { recoverWorkflowCheckpoint } from "../../src/workflows.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -12,9 +12,9 @@ import {
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
-  createLocalTransport,
-} from "../../src/index.ts";
-import type { Retry, WorkflowCheckpointStore } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import type { Retry, WorkflowCheckpointStore } from "../../src/workflows.ts";
 
 async function temporary(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-checkpoint-"));
@@ -389,10 +389,9 @@ test(
   async (t) => {
     const directory = await temporary(t);
     const script = join(directory, "run.mjs");
-    const module = new URL("../../src/index.ts", import.meta.url).href;
     await writeFile(
       script,
-      `import { createWorkflowCheckpointStore, defineTask, defineWorkflow, createLocalTransport } from ${JSON.stringify(module)};
+      `import { createWorkflowCheckpointStore, defineTask, defineWorkflow } from ${JSON.stringify(new URL("../../src/workflows.ts", import.meta.url).href)}; import { createLocalTransport } from ${JSON.stringify(new URL("../../src/core.ts", import.meta.url).href)};
 const first = defineTask({key:'first',perform:()=>42});
 const second = defineTask({key:'second',after:[first],async perform(context){context.reportUsage({input:5,cached:0,output:1}); await context.checkpoint?.(); process.send('active'); return new Promise(()=>{setInterval(()=>{},1000)});}});
 await defineWorkflow('process',[first,second]).start({checkpoint:{store:createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'process',version:'1'}});`,
@@ -573,7 +572,7 @@ test("corrupt records, output envelopes and accounting never replay effects", as
 test("checkpoint restart preserves graph identity across host locales", async (t) => {
   const directory = await temporary(t);
   const program = `
-    import { createWorkflowCheckpointStore, defineTask, defineWorkflow, createLocalTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    import { createWorkflowCheckpointStore, defineTask, defineWorkflow } from ${JSON.stringify(new URL("../../src/workflows.ts", import.meta.url).href)}; import { createLocalTransport } from ${JSON.stringify(new URL("../../src/core.ts", import.meta.url).href)};
     const tasks = ["a", "A"].map(key => defineTask({ key, perform() {
       if (process.env.OUTPOST_TEST_RESUME === "1") throw new Error("Completed task replayed");
       return key;

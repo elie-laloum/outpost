@@ -30,7 +30,7 @@ Save the files shown in the tabs in the same directory, next to the `outpost.con
 <!-- tabs -->
 
 ```ts title="webhook-source.ts"
-import { createGithubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost/queues";
 
 export const secret = process.env.GITHUB_WEBHOOK_SECRET;
 if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
@@ -39,7 +39,7 @@ export const source = createGithubWebhook({ secret });
 ```
 
 ```ts title="payload-field.ts"
-import type { WorkflowJson } from "@elie-laloum/outpost";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 
 export function field(value: WorkflowJson | undefined, ...path: string[]) {
   for (const key of path) {
@@ -51,7 +51,7 @@ export function field(value: WorkflowJson | undefined, ...path: string[]) {
 ```
 
 ```ts title="pull-commits.ts"
-import type { WorkflowJson } from "@elie-laloum/outpost";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 import { field } from "./payload-field.ts";
 
 export function commits(payload: WorkflowJson) {
@@ -63,8 +63,8 @@ export function commits(payload: WorkflowJson) {
 ```
 
 ```ts title="review-trigger.ts"
-import type { TriggerRoute } from "@elie-laloum/outpost";
-import { labelAdded } from "@elie-laloum/outpost";
+import type { TriggerRoute } from "@elie-laloum/outpost/queues";
+import { labelAdded } from "@elie-laloum/outpost/queues";
 import { reviewers } from "./webhook-source.ts";
 import { commits } from "./pull-commits.ts";
 
@@ -83,7 +83,10 @@ export const on: TriggerRoute["on"] = (event) => {
 ```
 
 ```ts title="server.ts"
-import { createSqliteTaskQueue, serveTriggers } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  serveTriggers,
+} from "@elie-laloum/outpost/queues";
 import { source } from "./webhook-source.ts";
 import { on } from "./review-trigger.ts";
 
@@ -132,7 +135,7 @@ export type Verdict = { approved: boolean; findings: string[] };
 ```
 
 ```ts title="verdict.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { verdictSchema } from "./verdict-schema.ts";
 import type { Verdict } from "./review.types.ts";
 
@@ -155,7 +158,7 @@ export const verdict = defineJsonResponse({
 ```
 
 ```ts title="read-pull.ts"
-import type { WorkflowJson } from "@elie-laloum/outpost";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 import type { PullRequest } from "./review.types.ts";
 
 export function readPullRequest(input: WorkflowJson): PullRequest {
@@ -267,7 +270,7 @@ export function reviewRequest(pull: PullRequest) {
 
 ```ts title="pull-agent.ts"
 import type { PullRequest } from "./review.types.ts";
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { reviewRequest } from "./pull-request.ts";
 
 export function reviewAgent(pull: PullRequest) {
@@ -280,9 +283,9 @@ export function reviewAgent(pull: PullRequest) {
 
 ```ts title="pull-review.ts"
 import type { PullRequest } from "./review.types.ts";
-import type { Task } from "@elie-laloum/outpost";
+import type { Task } from "@elie-laloum/outpost/workflows";
 import { reviewAgent } from "./pull-agent.ts";
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 export function reviewTask(pull: PullRequest, fetch: Task<void>) {
   const agent = reviewAgent(pull);
@@ -297,7 +300,7 @@ export function reviewTask(pull: PullRequest, fetch: Task<void>) {
 ```ts title="post-review.ts"
 import type { PullRequest } from "./review.types.ts";
 import { reviewTask } from "./pull-review.ts";
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { saveVerdict } from "./github-effects.ts";
 
 export function postTask(
@@ -315,7 +318,7 @@ export function postTask(
 
 ```ts title="review-workflow.ts"
 import type { PullRequest } from "./review.types.ts";
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { requireCommits } from "./github-effects.ts";
 import { reviewTask } from "./pull-review.ts";
 import { postTask } from "./post-review.ts";
@@ -336,11 +339,9 @@ Save the workflow state and run the queue worker.
 <!-- tabs -->
 
 ```ts title="review-job.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-  defineWorkflowJob,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { defineWorkflowJob } from "@elie-laloum/outpost/queues";
 import { reviewWorkflow } from "./review-workflow.ts";
 import { readPullRequest } from "./read-pull.ts";
 
@@ -354,7 +355,10 @@ export const job = defineWorkflowJob({
 ```
 
 ```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runQueueWorker,
+} from "@elie-laloum/outpost/queues";
 import { job } from "./review-job.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -408,8 +412,8 @@ Replace `createSqliteTaskQueue()` in the queue configuration with [`createBullMQ
 Insert an [approval gate](../approvals/) between `review` and `post`. The job then completes as `paused`, with the pending gate in its value; submit the decision to the same run as shown in [Job queues and workers](../job-queues/).
 
 ```ts
-import { defineApprovalTask, defineTask } from "@elie-laloum/outpost";
-import type { Task } from "@elie-laloum/outpost";
+import { defineApprovalTask, defineTask } from "@elie-laloum/outpost/workflows";
+import type { Task } from "@elie-laloum/outpost/workflows";
 
 type Verdict = { approved: boolean; findings: string[] };
 declare const review: Task<Verdict>;

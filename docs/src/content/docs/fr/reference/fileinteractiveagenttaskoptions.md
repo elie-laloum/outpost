@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileInteractiveAgentTaskOptions } from "@elie-laloum/outpost";
+import type { FileInteractiveAgentTaskOptions } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

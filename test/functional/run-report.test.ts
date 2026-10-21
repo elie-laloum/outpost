@@ -2,20 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  dispatch,
-  createSandbox,
-  createAgent,
-  createHarness,
-  createHarnessShellTools,
-  createObservationHub,
-} from "../../src/index.ts";
-import type {
-  RunReport,
-  ModelResult,
-  ModelPriceTable,
-  DispatchResult,
-} from "../../src/index.ts";
+import { dispatch, createSandbox, createAgent } from "../../src/core.ts";
+import { createHarness, createHarnessShellTools } from "../../src/harness.ts";
+import { createObservationHub } from "../../src/observation.ts";
+import type { RunReport, DispatchResult } from "../../src/core.ts";
+import type { ModelResult } from "../../src/harness.ts";
+import type { ModelPriceTable } from "../../src/workflows.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { repository, scripted, emit } from "../helpers.ts";

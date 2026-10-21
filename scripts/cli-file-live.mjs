@@ -8,10 +8,10 @@ import {
   createAgent,
   createLocalTransport,
   createSteering,
-  createWorkspace,
   defineJsonResponse,
   dispatch,
-} from "../src/index.ts";
+} from "../src/core.ts";
+import { createWorkspace } from "../src/workspaces.ts";
 import { builtInAgent, builtInAgents } from "../src/adapters/agents/catalog.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { OutpostError } from "../src/domain/errors.ts";

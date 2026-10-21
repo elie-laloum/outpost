@@ -63,7 +63,7 @@ Référence API : [RecoveryRetentionEntry](../../reference/recoveryretentionentr
 import {
   planRecoveryRetention,
   pruneRecoveryRetention,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 import { repository } from "./outpost.config.ts";
 const plan = await planRecoveryRetention({
   repository,
@@ -99,7 +99,7 @@ Un worktree redevenu propre est supprimé à la prochaine exécution d’une pol
 Une réservation retient des octets dans `.outpost` avant qu’une tâche ne les écrive. Elle est refusée si l’usage actuel, les réservations actives et la nouvelle demande dépassent `maxBytes`.
 
 ```ts
-import { reserveRecoveryStorage } from "@elie-laloum/outpost";
+import { reserveRecoveryStorage } from "@elie-laloum/outpost/recovery";
 import { repository } from "./outpost.config.ts";
 
 await using reservation = await reserveRecoveryStorage({
@@ -129,11 +129,11 @@ API : [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneR
 Les nouvelles entrées enregistrent l’identifiant d’instance du processus, le nom d’hôte, le PID, la date de création et le dépôt, avec l’identité Linux si disponible. Ces informations identifient le propriétaire sans prouver son activité distante. Choisissez l’entrée exacte et arrêtez son propriétaire avant récupération. Une modification concurrente du registre refuse la récupération et exige une nouvelle inspection. L’exemple utilise le Transport par défaut du dépôt ; utilisez votre Transport d’origine si le stockage est personnalisé.
 
 ```ts
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   inspectStorageReservations,
   recoverStorageReservation,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 
 const transporter = createLocalTransport({
   directory: "/projects/app/.outpost/storage",

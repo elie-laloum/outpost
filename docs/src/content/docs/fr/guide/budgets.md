@@ -10,7 +10,7 @@ Définissez un budget avant d’ajouter tentatives, boucles ou agents parallèle
 Passez un `budget` à la méthode `start()` du workflow pour limiter les tentatives, les tokens déclarés ou les deux. Ces limites portent sur l’ensemble des tâches du workflow, et non sur chaque tâche séparément.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const meter = defineTask({
   key: "meter",
@@ -51,8 +51,8 @@ Un échange avec l’agent compte comme une tentative, même s’il comporte de 
 Les fonctions utilitaires de tâche d’agent rapportent automatiquement les tokens de leur agent : `defineAgentTask()`, `defineIsolatedTask()`, `defineInteractiveAgentTask()` et `defineQueuedTask()`. Une tâche personnalisée qui appelle un modèle rapporte ce qu’elle a consommé.
 
 ```ts
-import { defineTask } from "@elie-laloum/outpost";
-import type { Usage } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import type { Usage } from "@elie-laloum/outpost/core";
 
 declare function summarize(
   text: string,
@@ -101,7 +101,7 @@ Avec des limites de tokens sans `attempts`, une consommation incomplète arrête
 <!-- tabs -->
 
 ```ts title="fix-task.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const fix = defineIsolatedTask({
@@ -120,7 +120,7 @@ export const fix = defineIsolatedTask({
 ```
 
 ```ts title="run-fix.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { fix } from "./fix-task.ts";
 
 export const result = await defineWorkflow("fix-tests", [fix]).start({

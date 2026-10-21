@@ -10,7 +10,7 @@ Create a schedule with `createCronSchedule()` and give it a cron expression and 
 <!-- tabs -->
 
 ```ts title="audit-schedule.ts"
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 
 export const timeZone = "Europe/Paris";
 export const day = (slot: Date) =>
@@ -27,7 +27,10 @@ export const schedules = [
 ```
 
 ```ts title="scheduler.ts"
-import { createSqliteTaskQueue, runSchedules } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runSchedules,
+} from "@elie-laloum/outpost/queues";
 import { schedules } from "./audit-schedule.ts";
 
 export const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -94,8 +97,8 @@ Raise `maxLateMs` to catch up a slot missed during a longer outage, for example 
 Without `onError`, the first failed publication stops every schedule and rejects `runSchedules()`. With it, you receive the error with the schedule name and slot, and scheduling continues with the next slot.
 
 ```ts
-import { runSchedules } from "@elie-laloum/outpost";
-import type { TaskQueue, TriggerSchedule } from "@elie-laloum/outpost";
+import { runSchedules } from "@elie-laloum/outpost/queues";
+import type { TaskQueue, TriggerSchedule } from "@elie-laloum/outpost/queues";
 
 function schedule(
   queue: TaskQueue,
@@ -119,7 +122,7 @@ A failed slot is not published again. Errors thrown by `onError` are ignored.
 `next(after)` returns the first slot strictly after a date, `previous(at)` the latest slot at or before it. Neither publishes anything.
 
 ```ts
-import { createCronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost/queues";
 
 const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
 console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());

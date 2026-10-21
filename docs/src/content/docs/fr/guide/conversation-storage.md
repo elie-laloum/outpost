@@ -34,11 +34,11 @@ La capture locale laisse intacts la transcription d’origine du CLI et les fich
 ```ts
 import {
   createAgent,
-  createCodexConversations,
   createCodexHarness,
   createLocalTransport,
   createTransportConversations,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import { createCodexConversations } from "@elie-laloum/outpost/integrations";
 
 const conversations = createTransportConversations(createCodexConversations(), {
   transporter: createLocalTransport({ directory: "/mnt/shared/outpost" }),
@@ -63,7 +63,7 @@ export const coder = createAgent({
 `saveConversations: false` sur Claude Code ou Codex laisse les conversations dans la sandbox : seule une reprise à chaud peut les poursuivre. `conversations: false` sur `createHarness()` n’enregistre aucune transcription et refuse reprise, fork et réparations de réponse. Copilot et Kimi capturent toujours.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 export const reviewer = createAgent({
   harness: createClaudeHarness({

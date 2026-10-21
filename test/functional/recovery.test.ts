@@ -7,14 +7,16 @@ import { executeProcess } from "../../src/infrastructure/process.ts";
 import {
   createSandbox,
   dispatch,
-  openWorkspace,
   defineTextResponse,
   ResponseError,
+} from "../../src/core.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
+import {
   defineAgentTask,
   defineCommandTask,
   defineIsolatedTask,
   defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";

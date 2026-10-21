@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileTransfers } from "@elie-laloum/outpost";
+import type { FileTransfers } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

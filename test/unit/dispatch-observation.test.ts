@@ -1,17 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { observeDispatch } from "../../src/application/dispatch-observation.ts";
-import {
-  createObservationHub,
-  createLocalTransport,
-  readJournal,
-} from "../../src/index.ts";
+import { createObservationHub, readJournal } from "../../src/observation.ts";
+import { createLocalTransport } from "../../src/core.ts";
 import { repository } from "../helpers.ts";
 import { join } from "node:path";
-import type {
-  DispatchTelemetryOutcome,
-  TransportReference,
-} from "../../src/index.ts";
+import type { DispatchTelemetryOutcome } from "../../src/observation.ts";
+import type { TransportReference } from "../../src/storage.ts";
 
 test("flushing a running dispatch preserves subsequent journal events", async (t) => {
   const root = await repository(t);

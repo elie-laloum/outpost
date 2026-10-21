@@ -5,23 +5,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   inspectRecovery,
-  createLocalTransport,
   planRecoveryRetention,
   pruneRecoveryRetention,
+} from "../../src/recovery.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import {
   defineTask,
   defineLoopTask,
   createTaskCacheStore,
   defineWorkflow,
   createWorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { repository } from "../helpers.ts";
 import type {
   TaskCacheEntry,
-  Transport,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
   WorkflowEvent,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { Transport } from "../../src/storage.ts";
 
 async function storage(t: { after(callback: () => unknown): void }) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-task-cache-"));

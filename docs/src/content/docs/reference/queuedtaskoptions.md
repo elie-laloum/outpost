@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { QueuedTaskOptions } from "@elie-laloum/outpost";
+import type { QueuedTaskOptions } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

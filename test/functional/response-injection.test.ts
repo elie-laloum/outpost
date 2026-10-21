@@ -5,17 +5,13 @@ import { join } from "node:path";
 import {
   createSandbox,
   createSteering,
-  createReplayAgent,
   defineJsonResponse,
   defineTextResponse,
   dispatch,
-  readJournal,
-} from "../../src/index.ts";
-import type {
-  AgentInput,
-  AgentObservation,
-  SteeringDelivery,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createReplayAgent, readJournal } from "../../src/observation.ts";
+import type { AgentInput, AgentObservation } from "../../src/integrations.ts";
+import type { SteeringDelivery } from "../../src/core.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";

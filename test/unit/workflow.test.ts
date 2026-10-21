@@ -5,9 +5,9 @@ import {
   defineWorkflow,
   defineTask,
   WorkflowFailure,
-  OutpostError,
-} from "../../src/index.ts";
-import type { Task, WorkflowEvent } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { OutpostError } from "../../src/core.ts";
+import type { Task, WorkflowEvent } from "../../src/workflows.ts";
 
 test("typed values flow through a diamond regardless of declaration order", async () => {
   const seed = defineTask({ key: "seed", perform: () => 3 });

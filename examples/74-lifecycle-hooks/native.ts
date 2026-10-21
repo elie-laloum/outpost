@@ -9,7 +9,7 @@ import {
   defineCodexHook,
   defineCopilotHook,
   defineKimiHook,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 
 import { profile } from "./profile.ts";
 

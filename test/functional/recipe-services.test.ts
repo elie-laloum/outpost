@@ -14,7 +14,7 @@ import {
   validateRecipeProject,
 } from "../../src/recipes.ts";
 import { createSqliteTaskQueue } from "../../src/infrastructure/task-queue.ts";
-import type { QueueJob, TaskQueue } from "../../src/index.ts";
+import type { QueueJob, TaskQueue } from "../../src/queues.ts";
 
 async function settled(queue: TaskQueue, id: string): Promise<QueueJob> {
   const deadline = Date.now() + 10_000;

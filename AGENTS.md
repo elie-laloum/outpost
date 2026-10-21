@@ -27,7 +27,7 @@ Use the repository as the source of truth for versions, supported options and co
 
 - Runtime: Node.js 24+, TypeScript, ESM. Bun (version pinned by `packageManager`) installs dependencies and runs scripts, with committed `bun.lock` files; tests and scripts still execute on Node.js. `images/<agent>/` keeps one npm lockfile per CLI image because images install CLIs with npm; they ship in the package for `image eject`.
 - Public package: `@elie-laloum/outpost`.
-- Public facade: `src/index.ts` and the provider subpaths declared in `package.json`.
+- Public API: explicit subpaths declared in `package.json`. `/core` owns everyday agent execution; `/workspaces`, `/harness`, `/workflows`, `/queues`, `/storage`, `/observation`, `/recovery`, `/integrations`, `/recipes` and `/experimental/speculation` own their contracts. There is no package-root export or compatibility barrel. Import each symbol from its owning entry; internal services continue to import implementation modules directly. Clean builds remove retired entry artifacts before packing.
 - Canonical repository: <https://gitlab.elielaloum.com/elielaloum/outpost>.
 - GitHub mirror and CI: <https://github.com/elie-laloum/outpost>.
 - Documentation: <https://elie-laloum.github.io/outpost/>.

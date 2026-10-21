@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkspaceRetention } from "@elie-laloum/outpost";
+import type { WorkspaceRetention } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

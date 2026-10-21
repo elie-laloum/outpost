@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { GitWorkspaceOptions } from "@elie-laloum/outpost";
+import type { GitWorkspaceOptions } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Paramètres et propriétés

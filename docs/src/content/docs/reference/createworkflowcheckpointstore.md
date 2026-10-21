@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

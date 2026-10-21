@@ -2,18 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import {
-  dispatch,
-  createFallbackAgent,
-  quotaFault,
-  readJournal,
-  createReplayAgent,
-} from "../../src/index.ts";
-import type {
-  AgentObservation,
-  CliAgent,
-  TransportReference,
-} from "../../src/index.ts";
+import { dispatch, createFallbackAgent, quotaFault } from "../../src/core.ts";
+import { readJournal, createReplayAgent } from "../../src/observation.ts";
+import type { AgentObservation } from "../../src/integrations.ts";
+import type { CliAgent } from "../../src/core.ts";
+import type { TransportReference } from "../../src/storage.ts";
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";

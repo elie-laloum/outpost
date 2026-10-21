@@ -13,7 +13,7 @@ import {
   defineAntigravityHook,
   createClaudeHarness,
   createCodexHarness,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { AgentHookPlan } from "../../src/domain/agent-hook.types.ts";
 import { openCliHooks } from "../../src/application/cli-hooks.ts";

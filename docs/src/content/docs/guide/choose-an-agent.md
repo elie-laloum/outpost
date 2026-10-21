@@ -35,7 +35,7 @@ An agent combines a harness with an optional model selection. The harness runs t
 Pass a harness to `createAgent()`, then add `model` if you want to override the agent’s default. Outpost provides a harness constructor for each supported CLI: `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` and `createAntigravityHarness()`.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 export const reviewer = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),

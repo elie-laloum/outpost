@@ -1,10 +1,11 @@
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessShellTools,
   defineHarnessHook,
-} from "@elie-laloum/outpost";
-import type { AgentModel, ModelProvider } from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import type { AgentModel } from "@elie-laloum/outpost/core";
+import type { ModelProvider } from "@elie-laloum/outpost/harness";
 
 export function createWikipediaAgent(
   modelProvider: ModelProvider,

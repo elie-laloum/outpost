@@ -1,4 +1,5 @@
-import { loadModelPrices, type ModelPriceTable } from "@elie-laloum/outpost";
+import { loadModelPrices } from "@elie-laloum/outpost/harness";
+import { type ModelPriceTable } from "@elie-laloum/outpost/workflows";
 
 export const illustrativePrices: ModelPriceTable = {
   currency: "EUR",

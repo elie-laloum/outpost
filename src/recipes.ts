@@ -1,3 +1,13 @@
+export { defineRecipe } from "./application/recipe.ts";
+export type {
+  RecipeBindings,
+  RecipeConfiguration,
+} from "./application/recipe.types.ts";
+export type {
+  FileRecipeBindings,
+  MixedRecipeBindings,
+  FileRecipeConfiguration,
+} from "./application/recipe.types.ts";
 export {
   defineRecipeComponent,
   createRecipeRegistry,

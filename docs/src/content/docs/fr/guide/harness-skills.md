@@ -12,7 +12,7 @@ Référence API : [HarnessInstructionsOption](../../reference/harnessinstruction
 Lisez le fichier `AGENTS.md` du projet dans la sandbox empruntée pour construire les instructions système. Cet exemple utilise son contenu si la lecture réussit et renvoie une chaîne vide dans le cas contraire.
 
 ```ts
-import { defineHarnessInstructions } from "@elie-laloum/outpost";
+import { defineHarnessInstructions } from "@elie-laloum/outpost/harness";
 
 export const projectGuidance = defineHarnessInstructions(
   async ({ sandbox, signal }) => {
@@ -36,7 +36,7 @@ Une compétence regroupe des consignes et des outils que le modèle ne charge qu
 import {
   createHarnessGitTools,
   defineHarnessSkill,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const review = defineHarnessSkill({
   name: "review",

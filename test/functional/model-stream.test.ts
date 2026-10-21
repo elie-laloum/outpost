@@ -1,4 +1,5 @@
-import { createLocalTransport, readJournal } from "../../src/index.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import { readJournal } from "../../src/observation.ts";
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { createServer, type ServerResponse } from "node:http";
@@ -6,17 +7,16 @@ import { once } from "node:events";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+import { createAgent, dispatch } from "../../src/core.ts";
 import {
-  createAgent,
   createAnthropicModelProvider,
   defineHarnessTool,
-  dispatch,
   createHarness,
   createOpenAIModelProvider,
-  type AgentObservation,
   type ModelProvider,
   type ModelStreamEvent,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

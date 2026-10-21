@@ -10,12 +10,12 @@ Commencez par l’exemple hors ligne ci-dessous pour voir une tâche terminée r
 Passez un `checkpoint` à la méthode `start()` du workflow si vous devez poursuivre dans un autre processus. Outpost enregistre les changements d’état des tâches et leurs résultats sous le `runId` du checkpoint.
 
 ```ts
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   defineTask,
   defineWorkflow,
   createWorkflowCheckpointStore,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -50,7 +50,7 @@ Un échec de sérialisation marque la tâche en échec sans répéter ses effets
 Un résultat de dispatch porte des méthodes comme `resume()`. Projetez-le dans une `defineTask`, comme dans l’exemple ci-dessous :
 
 ```ts
-import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask, defineTask } from "@elie-laloum/outpost/workflows";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const agent = defineIsolatedTask({
@@ -100,10 +100,8 @@ Une exécution terminée sur une tâche en échec, annulée ou interrompue ne re
 <!-- tabs -->
 
 ```ts title="upload-store.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -111,7 +109,7 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="upload.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 export let calls = 0;
 export const upload = defineTask({
@@ -128,7 +126,7 @@ export function uploadCount() {
 ```
 
 ```ts title="resume-upload.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { upload } from "./upload.ts";
 import { store } from "./upload-store.ts";
 
@@ -167,7 +165,7 @@ Pour cette étape, suivez [Récupérer un workflow après un plantage](../recove
 Pour poursuivre l’exécution, publiez un nouvel identifiant de job avec le même `runId` et la même `input` :
 
 ```ts
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {

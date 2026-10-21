@@ -6,27 +6,30 @@ import { test } from "node:test";
 import type { TestContext } from "node:test";
 import {
   defineAgentTask,
+  defineTask,
+  defineWorkflow,
+} from "../../src/workflows.ts";
+import {
   createSandbox,
   dispatch,
   createFallbackAgent,
   OutpostError,
   quotaFault,
-  speculate,
-  defineTask,
   unavailableFault,
-  defineWorkflow,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { speculate } from "../../src/experimental/speculation.ts";
 import type {
   AgentInput,
   AgentObservation,
-  CliAgent,
   ConversationStore,
-  FallbackTrigger,
+} from "../../src/integrations.ts";
+import type { CliAgent, FallbackTrigger } from "../../src/core.ts";
+import type {
   TaskContext,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
   WorkflowEvent,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { quotaWorkspace } from "../../src/application/quota-resume.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";

@@ -10,7 +10,7 @@ Estimate token spending without making a model request. Save these files togethe
 Rates are per million tokens in one currency. Model names must match your agent configuration exactly.
 
 ```ts title="prices.ts"
-import type { ModelPriceTable } from "@elie-laloum/outpost";
+import type { ModelPriceTable } from "@elie-laloum/outpost/workflows";
 export const prices: ModelPriceTable = {
   currency: "EUR",
   models: {
@@ -22,7 +22,7 @@ export const prices: ModelPriceTable = {
 This task reports usage explicitly. Agent task helpers already do so; a custom dispatch needs `prices: context.prices`, and a queue worker must return usage attributed to each model.
 
 ```ts title="monetary-budget.ts"
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { prices } from "./prices.ts";
 const task = defineTask({
   key: "meter",
@@ -55,7 +55,7 @@ Requests already in flight can overshoot. Keep provider spending limits: this is
 To use Models.dev prices, map your model alias to its catalog ID. This EUR exchange rate is illustrative.
 
 ```ts title="catalog-prices.ts"
-import { loadModelPrices } from "@elie-laloum/outpost";
+import { loadModelPrices } from "@elie-laloum/outpost/harness";
 
 export const prices = await loadModelPrices({
   provider: "openai",

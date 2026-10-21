@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createFallbackAgent } from "@elie-laloum/outpost";
+import { createFallbackAgent } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

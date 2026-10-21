@@ -1,4 +1,4 @@
-import type { RecipeConfiguration } from "@elie-laloum/outpost";
+import type { RecipeConfiguration } from "@elie-laloum/outpost/recipes";
 import {
   createMemorySandboxProvider,
   scriptedAgent,

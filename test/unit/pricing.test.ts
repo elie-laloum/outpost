@@ -6,8 +6,9 @@ import {
   defineWorkflow,
   WorkflowBudgetExceeded,
   WorkflowCostUnavailable,
-} from "../../src/index.ts";
-import type { ModelPriceTable, Usage } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { ModelPriceTable } from "../../src/workflows.ts";
+import type { Usage } from "../../src/core.ts";
 import {
   addUsage,
   usageDifference,

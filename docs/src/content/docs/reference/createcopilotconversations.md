@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createCopilotConversations } from "@elie-laloum/outpost";
+import { createCopilotConversations } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

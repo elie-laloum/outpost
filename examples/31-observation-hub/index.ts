@@ -6,17 +6,23 @@ import { appendFile, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
-  createHarness,
-  createHarnessFileTools,
   createObservation,
   createSandbox,
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessFileTools,
+} from "@elie-laloum/outpost/harness";
+import {
   defineCommandTask,
   defineTask,
   defineWorkflow,
+} from "@elie-laloum/outpost/workflows";
+import {
   type Observation,
   type ObservationEvent,
   type ObservationSink,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/observation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

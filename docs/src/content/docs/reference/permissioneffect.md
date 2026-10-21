@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { PermissionEffect } from "@elie-laloum/outpost";
+import type { PermissionEffect } from "@elie-laloum/outpost/harness";
 ```
 
 ## Purpose and behavior

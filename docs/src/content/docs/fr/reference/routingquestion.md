@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RoutingQuestion } from "@elie-laloum/outpost";
+import type { RoutingQuestion } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

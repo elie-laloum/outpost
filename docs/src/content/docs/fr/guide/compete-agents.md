@@ -55,7 +55,7 @@ import {
   createAgent,
   createCodexHarness,
   createClaudeHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 
 export const codex = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
@@ -78,7 +78,7 @@ export const candidates = [
 ```
 
 ```ts title="candidate-check.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -96,7 +96,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="run-candidates.ts"
-import { speculate } from "@elie-laloum/outpost";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidate-briefs.ts";
 import { validate } from "./candidate-check.ts";
@@ -114,8 +114,8 @@ export function runCandidates() {
 ```
 
 ```ts title="merge-check.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost";
-import { checkSpeculationIntegration } from "@elie-laloum/outpost";
+import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
 import { repository } from "./outpost.config.ts";
 
 export function verifyWinner(winner: NonNullable<SpeculationResult["winner"]>) {
@@ -128,7 +128,7 @@ Demandez la confirmation dans `compete.ts`, puis vérifiez à nouveau l’intég
 <!-- tabs -->
 
 ```ts title="merge-winner.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost";
+import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
 import { verifyWinner } from "./merge-check.ts";
 import { execFileSync } from "node:child_process";
 import { repository } from "./outpost.config.ts";
@@ -218,7 +218,7 @@ export const candidates = Object.entries(approaches).map(([key, text]) => ({
 ```
 
 ```ts title="check-approach.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   sandbox,
@@ -234,7 +234,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
-import { speculate } from "@elie-laloum/outpost";
+import { speculate } from "@elie-laloum/outpost/experimental/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
 import { validate } from "./check-approach.ts";
@@ -260,7 +260,7 @@ Le schéma explicite de `review-schema.ts` décrit le JSON d’entrée injecté 
 <!-- tabs -->
 
 ```ts title="review-agent.ts"
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 export const reviewer = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),
@@ -276,7 +276,7 @@ export const reviewSchema = {
 ```
 
 ```ts title="review-verdict.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { reviewSchema } from "./review-schema.ts";
 
 export const verdict = defineJsonResponse({
@@ -296,7 +296,7 @@ export const verdict = defineJsonResponse({
 ```
 
 ```ts title="test-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
 
 export async function testBranch({
   sandbox,
@@ -312,7 +312,7 @@ export async function testBranch({
 ```
 
 ```ts title="review-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
 import { testBranch } from "./test-candidate.ts";
 import { reviewer } from "./review-agent.ts";
 import { verdict } from "./review-verdict.ts";
@@ -340,10 +340,8 @@ Passez `durability` à `speculate()` : tentatives, usage et résultats sont enre
 
 ```ts
 import { join } from "node:path";
-import {
-  createLocalTransport,
-  type SpeculationDurability,
-} from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {

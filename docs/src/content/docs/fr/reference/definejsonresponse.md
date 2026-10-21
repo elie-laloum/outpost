@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

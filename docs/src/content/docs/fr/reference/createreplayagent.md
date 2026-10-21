@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createReplayAgent } from "@elie-laloum/outpost";
+import { createReplayAgent } from "@elie-laloum/outpost/observation";
 ```
 
 ## Rôle et comportement

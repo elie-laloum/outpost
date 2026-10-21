@@ -24,7 +24,8 @@ Transmettez `signal` à chaque opération lancée par le traitement, pour que l�
 Un job peut s’exécuter deux fois : le successeur d’un worker planté relance le traitement. Les traitements qui produisent des effets externes les dédupliquent avec `idempotencyKey`.
 
 ```ts
-import type { QueueHandler, WorkflowJson } from "@elie-laloum/outpost";
+import type { QueueHandler } from "@elie-laloum/outpost/queues";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 
 function deliveryHandler(
   deliverOnce: (

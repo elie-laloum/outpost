@@ -4,7 +4,7 @@ import type {
   ObservationEvent,
   ObservationScope,
   RunSnapshot,
-} from "../../src/index.ts";
+} from "../../src/observation.ts";
 import { projectRun, emptyRunUsage } from "../../src/domain/run.ts";
 import {
   runSnapshot,

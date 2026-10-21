@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { WorkflowCostUnavailable } from "@elie-laloum/outpost";
+import { WorkflowCostUnavailable } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

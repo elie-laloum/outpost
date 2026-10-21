@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { DiagnosticStatus } from "@elie-laloum/outpost";
+import type { DiagnosticStatus } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

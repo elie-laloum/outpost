@@ -1,4 +1,4 @@
-import type { TaskContext } from "../../dist/index.js";
+import type { TaskContext } from "../../dist/workflows.js";
 
 export function identity(_input: unknown, context: TaskContext) {
   const dialogue = context.interaction;

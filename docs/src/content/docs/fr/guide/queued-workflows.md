@@ -10,9 +10,13 @@ Partez du [producteur et du worker](../job-queues/). Une tâche en file attend u
 `defineQueuedTask()` est une tâche de workflow qui met un job en file, l’interroge jusqu’à ce qu’il se termine et valide sa valeur avec `decode`.
 
 ```ts
-import * as outpost from "@elie-laloum/outpost";
-const queue = await outpost.createSqliteTaskQueue(".outpost/jobs.sqlite");
-const count = outpost.defineQueuedTask({
+import {
+  createSqliteTaskQueue,
+  defineQueuedTask,
+} from "@elie-laloum/outpost/queues";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+const count = defineQueuedTask({
   key: "count",
   queue,
   handler: "count",
@@ -23,7 +27,7 @@ const count = outpost.defineQueuedTask({
   },
 });
 console.log(
-  (await outpost.defineWorkflow("count-items", [count]).start()).value(count),
+  (await defineWorkflow("count-items", [count]).start()).value(count),
 );
 // Example output: 3
 queue.close();
@@ -36,13 +40,13 @@ L’identifiant du job dérive de l’`executionId` de l’exécution et de la c
 `defineWorkflowJob()` transforme un traitement en une [exécution durable](../durable-runs/) par job. L’entrée du job est `{ runId, input }`, ce que publient la [Planification cron](../cron-schedules/) et les [Webhooks](../webhooks/).
 
 ```ts title="fix-job.ts"
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
-  defineWorkflowJob,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { defineWorkflowJob } from "@elie-laloum/outpost/queues";
 
 const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -59,7 +63,10 @@ export const fix = defineWorkflowJob({
 Lancez ce worker avec `node workflow-worker.ts`. Il utilise la même file que le producteur.
 
 ```ts title="workflow-worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runQueueWorker,
+} from "@elie-laloum/outpost/queues";
 import { fix } from "./fix-job.ts";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -94,7 +101,7 @@ L’empreinte lie un `runId` à une seule entrée. Un job avec le même `runId` 
 Un identifiant de job terminé ne s’exécute plus : le remettre en file renvoie le job enregistré. Pour poursuivre une exécution, mettez en file un nouvel identifiant de job avec le même `runId` et la même entrée.
 
 ```ts
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const job = await queue.enqueue({
@@ -120,7 +127,7 @@ Le script affiche `pending` jusqu’à ce qu’un worker exécute le job. Les t�
 Cette factory déclare une commande éphémère distincte pour chaque clé de tâche.
 
 ```ts title="file-task.ts"
-import { defineIsolatedCommandTask } from "@elie-laloum/outpost";
+import { defineIsolatedCommandTask } from "@elie-laloum/outpost/workflows";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 
 export function fileTask(key: string) {
@@ -138,7 +145,7 @@ export function fileTask(key: string) {
 Exécutez les deux tâches ensemble ; leurs racines et leurs sandboxes restent distinctes.
 
 ```ts title="independent-files.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { fileTask } from "./file-task.ts";
 
 const left = fileTask("left"),

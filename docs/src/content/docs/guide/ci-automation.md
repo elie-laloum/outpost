@@ -19,7 +19,7 @@ description: "Run an Outpost script in a CI job and keep the results you need af
 For API-key access in CI, configure `coder` in `outpost.config.ts` to read a key from the job’s environment. Declare that key in your CI secret settings, so the runner can use it without an interactive login.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCodexHarness({
@@ -76,7 +76,7 @@ A job fails when the script exits with a non-zero status. Printing an error is n
 | `outpost doctor`                  | Exits with status 1                          | Nothing                      |
 
 ```ts title="fix.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const signal = AbortSignal.timeout(30 * 60_000);

@@ -4,11 +4,8 @@
 
 import { execFileSync } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
-import {
-  defineQueuedTask,
-  defineWorkflow,
-  runQueueWorker,
-} from "@elie-laloum/outpost";
+import { defineQueuedTask, runQueueWorker } from "@elie-laloum/outpost/queues";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 import { model, modelProvider } from "../shared/model.ts";
 

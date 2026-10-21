@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AgentAdapter } from "@elie-laloum/outpost";
+import type { AgentAdapter } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

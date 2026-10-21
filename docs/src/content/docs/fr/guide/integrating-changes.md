@@ -14,7 +14,7 @@ L’intégration acquiert le même verrou du checkout hôte qu’un workspace `c
 <!-- tabs -->
 
 ```ts title="change.ts"
-import type { Workspace } from "@elie-laloum/outpost";
+import type { Workspace } from "@elie-laloum/outpost/workspaces";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 
 export async function change(workspace: Workspace) {
@@ -34,7 +34,7 @@ export async function change(workspace: Workspace) {
 ```
 
 ```ts title="integrate.ts"
-import { openWorkspace } from "@elie-laloum/outpost";
+import { openWorkspace } from "@elie-laloum/outpost/workspaces";
 import { repository } from "./outpost.config.ts";
 import { change } from "./change.ts";
 
@@ -57,7 +57,7 @@ try {
 Définissez un `guard` sur le workspace pour refuser les chemins protégés ou un diff commité final trop volumineux, indépendamment de l’agent. Ce dispatch intègre uniquement si les deux règles passent. Un refus lève `OutpostError` avec le code `guard`, libère la sandbox et conserve la branche et le worktree pour relecture.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

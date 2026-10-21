@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryArchiveOptions } from "@elie-laloum/outpost";
+import type { RecoveryArchiveOptions } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Parameters and properties

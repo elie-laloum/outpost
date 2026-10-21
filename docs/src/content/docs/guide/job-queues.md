@@ -27,7 +27,10 @@ Run the worker in its own process. It polls the queue and runs one job at a time
 Queue errors are reported through optional `onError(error)`. Failed claims retry after `pollMs`; failed result publication retries while the lease remains valid, without rerunning the handler. A revoked lease ends that job's processing and leaves the worker available for the next job. A renewal failure cancels the active handler; its external effects still require idempotency. The worker's signal interrupts retry waits, and an error thrown by `onError` does not stop the worker.
 
 ```ts title="worker.ts"
-import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import {
+  createSqliteTaskQueue,
+  runQueueWorker,
+} from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
@@ -53,7 +56,7 @@ try {
 A producer opens the same queue and enqueues a job under a stable ID.
 
 ```ts title="submit.ts"
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
@@ -74,7 +77,7 @@ The immediate read can show `pending`, `running` or a finished job. Once the wor
 After processing, run `node read-job.ts`. If the status stays `pending`, check that the worker uses the same database and registers `count`. A completed job prints the value `3`.
 
 ```ts title="read-job.ts"
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {

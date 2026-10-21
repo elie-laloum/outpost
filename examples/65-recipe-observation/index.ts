@@ -1,7 +1,10 @@
 // Observe a YAML recipe through allocation, task execution and cleanup using one observation client.
 // Build Outpost, then run with Node.js 24+ and Git; this example makes no model calls.
 
-import { createObservation, createLocalTransport } from "@elie-laloum/outpost";
+import {
+  createObservation,
+  createLocalTransport,
+} from "@elie-laloum/outpost/core";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFile } from "node:child_process";

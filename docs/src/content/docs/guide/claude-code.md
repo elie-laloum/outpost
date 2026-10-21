@@ -18,7 +18,7 @@ The [agent image](../agent-images/) contains Claude Code. Remote sandboxes insta
 Run `claude`, then `/login`, on the host. `authentication: "account"` copies the subscription login from `~/.claude/.credentials.json` (or `$CLAUDE_CONFIG_DIR/.credentials.json`) into the sandbox’s private home.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createClaudeHarness({ authentication: "account" }),
@@ -28,7 +28,7 @@ const coder = createAgent({
 On macOS, Claude Code keeps its login in the keychain by default, and Outpost never reads a keychain. Run `claude setup-token` instead and pass the printed token as a variable. It uses your Pro, Max, Team or Enterprise plan.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createClaudeHarness({
@@ -47,7 +47,7 @@ Choosing between account and API access, and where credentials go: [Authenticati
 `authentication: "usage"` passes `ANTHROPIC_API_KEY`. Requests are billed to your Anthropic API account, not to a subscription.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createClaudeHarness({
@@ -62,7 +62,7 @@ const coder = createAgent({
 Omit `model` to use Claude Code’s default. A model object adds an effort level and an output limit.
 
 ```ts
-import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost/core";
 
 const coder = createAgent({
   harness: createClaudeHarness({

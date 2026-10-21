@@ -10,12 +10,11 @@ import {
 } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { createAgent, createSandbox } from "../src/core.ts";
 import {
-  createAgent,
   createHarness,
   defineHarnessSubagent,
   defineHarnessTool,
-  createSandbox,
   createOpenAIModelProvider,
   createAnthropicModelProvider,
   createHarnessFileTools,
@@ -23,7 +22,7 @@ import {
   createHarnessSearchTools,
   createHarnessGitTools,
   createHarnessShellTools,
-} from "../src/index.ts";
+} from "../src/harness.ts";
 import { createLocalSandboxProvider } from "../src/providers/local.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";

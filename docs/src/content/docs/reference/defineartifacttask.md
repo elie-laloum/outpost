@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineArtifactTask } from "@elie-laloum/outpost";
+import { defineArtifactTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

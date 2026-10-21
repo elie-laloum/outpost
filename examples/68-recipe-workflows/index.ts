@@ -1,7 +1,7 @@
 // Compose structured inputs, conditions, local transformations and a bounded loop in a YAML workflow.
 // Build Outpost, then run with Node.js 24+; the workflow performs no sandbox allocation or paid calls.
 
-import type { TaskRecord } from "../../dist/index.js";
+import type { TaskRecord } from "../../dist/workflows.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { execFile } from "node:child_process";

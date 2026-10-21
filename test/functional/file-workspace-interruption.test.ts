@@ -12,7 +12,7 @@ import {
   recoverFileWorkspace,
   inspectWorkspacePathLocks,
   recoverWorkspacePathLock,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
 
 async function evidence(path: string): Promise<string> {
   for (let attempt = 0; attempt < 500; attempt++) {

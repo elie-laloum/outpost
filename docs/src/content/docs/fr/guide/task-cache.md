@@ -13,10 +13,8 @@ Ajoutez une politique de cache si une tâche peut réutiliser le même résultat
 import { mkdtemp } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import {
-  createTaskCacheStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createTaskCacheStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
 export const store = createTaskCacheStore({
@@ -25,7 +23,7 @@ export const store = createTaskCacheStore({
 ```
 
 ```ts title="summarize.ts"
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 import { store } from "./cache-store.ts";
 
 export let executions = 0;
@@ -42,7 +40,7 @@ export function executionCount() {
 
 ```ts title="run-cache.ts"
 import { summarize } from "./summarize.ts";
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 for (let run = 1; run <= 2; run++) {
   const summary = summarize();
@@ -66,10 +64,8 @@ Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/) et [Task
 <!-- tabs -->
 
 ```ts title="review-cache.ts"
-import {
-  createTaskCacheStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createTaskCacheStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import { repository } from "./outpost.config.ts";
 
 export const brief =
@@ -82,7 +78,7 @@ export const store = createTaskCacheStore({
 ```
 
 ```ts title="review-task.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { brief } from "./review-cache.ts";
 
@@ -98,7 +94,10 @@ export const reviewer = defineIsolatedTask({
 ```
 
 ```ts title="review.ts"
-import { defineTask, repositoryFingerprint } from "@elie-laloum/outpost";
+import {
+  defineTask,
+  repositoryFingerprint,
+} from "@elie-laloum/outpost/workflows";
 import { store, brief } from "./review-cache.ts";
 import { repository } from "./outpost.config.ts";
 import { reviewer } from "./review-task.ts";
@@ -149,7 +148,7 @@ Référence API : [TaskCacheOptions](../../reference/taskcacheoptions/).
 Affichez les événements du cache depuis l’observateur du workflow pour suivre les résultats trouvés, les absences et les erreurs de stockage. Un échec du cache n’empêche pas la tâche de s’exécuter ou de terminer.
 
 ```ts
-import type { Workflow } from "@elie-laloum/outpost";
+import type { Workflow } from "@elie-laloum/outpost/workflows";
 
 declare const workflow: Workflow;
 

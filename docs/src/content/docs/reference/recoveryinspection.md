@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryInspection } from "@elie-laloum/outpost";
+import type { RecoveryInspection } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Parameters and properties

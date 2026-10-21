@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TaskCacheOutcome } from "@elie-laloum/outpost";
+import type { TaskCacheOutcome } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

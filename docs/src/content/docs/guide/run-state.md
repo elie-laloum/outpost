@@ -10,7 +10,7 @@ Use `createObservation({ transporter })` when a terminal, dashboard or another p
 Save the following files together. The shared transport gives the runner and reader access to the same storage. Creating the observation object only configures it: no run record or heartbeat starts until an execution uses it.
 
 ```ts title="storage.ts"
-import { createLocalTransport } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const transporter = createLocalTransport({
   directory: ".outpost/storage",
@@ -20,7 +20,7 @@ export const transporter = createLocalTransport({
 Create the observation object with the transport and any additional sinks. It borrows those sinks and the transport; their owner remains responsible for closing them when necessary.
 
 ```ts title="observation.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 export const observation = createObservation({ transporter });
@@ -32,7 +32,7 @@ Save this as `start.ts` and run `node start.ts`. The workflow chooses the execut
 
 ```ts title="start.ts"
 import { observation } from "./observation.ts";
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 await using ownedObservation = observation;
 const check = defineTask({ key: "check", perform: () => "ok" });
@@ -55,7 +55,7 @@ With a transport, duplicate IDs refuse creation before execution work begins. St
 With the [agent configuration](../setup/), save this additional file and run `node dispatch.ts`. The dispatch owns tracking and returns after its session closes. Use a fresh ID for another independent execution.
 
 ```ts title="dispatch.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { observation } from "./observation.ts";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -77,7 +77,7 @@ console.log(result.observationId, result.text);
 Run this file after the execution has been registered. A missing ID returns `undefined`; readers neither create a record nor acquire execution ownership. With S3, use the same bucket and prefix in each process. Configure [redaction](../redacting-secrets/) on the producing observation or execution before anything is stored.
 
 ```ts title="snapshot.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 await using reader = createObservation({ transporter });
@@ -94,7 +94,7 @@ if (run) {
 Read a snapshot, then follow observations after its `seq`. Save the last processed cursor to reconnect. Run this file after registration; it prints stored events followed by new ones until the execution settles or its heartbeat expires. The event payload is `unknown`, so validate it before reading its fields.
 
 ```ts title="watch.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 await using reader = createObservation({ transporter });

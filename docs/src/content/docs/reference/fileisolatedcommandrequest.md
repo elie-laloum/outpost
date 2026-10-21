@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileIsolatedCommandRequest } from "@elie-laloum/outpost";
+import type { FileIsolatedCommandRequest } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

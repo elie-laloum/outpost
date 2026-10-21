@@ -27,7 +27,7 @@ Définissez une tentative et une vérification avec `defineLoopTask()`. La véri
   - Workflow
 
 ```ts
-import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const fix = defineLoopTask({
   key: "fix",
@@ -61,7 +61,7 @@ Séparez la sandbox, la tentative et la vérification pour faciliter la lecture 
 <!-- tabs -->
 
 ```ts title="loop-sandbox.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export function openLoopSandbox() {
@@ -75,8 +75,8 @@ export function openLoopSandbox() {
 ```
 
 ```ts title="coding-task.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import { defineAgentTask } from "@elie-laloum/outpost/workflows";
 
 export function codingTask(sandbox: Sandbox, feedback?: string) {
   return defineAgentTask({
@@ -90,7 +90,8 @@ export function codingTask(sandbox: Sandbox, feedback?: string) {
 ```
 
 ```ts title="loop-attempt.ts"
-import type { Sandbox, LoopTaskContext } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
 import { codingTask } from "./coding-task.ts";
 
 export function createAttempt(sandbox: Sandbox) {
@@ -102,11 +103,11 @@ export function createAttempt(sandbox: Sandbox) {
 ```
 
 ```ts title="loop-check.ts"
+import type { Sandbox } from "@elie-laloum/outpost/core";
 import type {
-  Sandbox,
   LoopTaskContext,
   LoopCheckResult,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 
 export function createCheck(sandbox: Sandbox) {
   return async (context: LoopTaskContext): Promise<LoopCheckResult> => {
@@ -123,8 +124,8 @@ export function createCheck(sandbox: Sandbox) {
 ```
 
 ```ts title="fix-loop.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineLoopTask } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import { defineLoopTask } from "@elie-laloum/outpost/workflows";
 import { createAttempt } from "./loop-attempt.ts";
 import { createCheck } from "./loop-check.ts";
 
@@ -145,7 +146,7 @@ Lancez `run-loop.ts` : il garde la sandbox ouverte jusqu’à la fin du workflow
 ```ts title="run-loop.ts"
 import { openLoopSandbox } from "./loop-sandbox.ts";
 import { defineFix } from "./fix-loop.ts";
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 await using sandbox = await openLoopSandbox();
 export const fix = defineFix(sandbox);
@@ -174,7 +175,7 @@ import {
   createAgent,
   createClaudeHarness,
   defineJsonResponse,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 export const reviewer = createAgent({
@@ -190,8 +191,8 @@ export const brief = {
 ```
 
 ```ts title="reviewing-task.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import { defineAgentTask } from "@elie-laloum/outpost/workflows";
 import { reviewer, review, brief } from "./review-settings.ts";
 
 export declare const sandbox: Sandbox;
@@ -205,7 +206,10 @@ export function reviewingTask() {
 ```
 
 ```ts title="review-changes.ts"
-import type { LoopTaskContext, LoopCheckResult } from "@elie-laloum/outpost";
+import type {
+  LoopTaskContext,
+  LoopCheckResult,
+} from "@elie-laloum/outpost/workflows";
 import { reviewingTask } from "./reviewing-task.ts";
 
 export async function reviewChanges(

@@ -6,11 +6,11 @@ import {
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
-  createHarness,
   createKimiHarness,
   defineAgentProfile,
   OutpostError,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { createHarness } from "../../src/harness.ts";
 import { profilePermissions } from "../../src/domain/agent-profile-permissions.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

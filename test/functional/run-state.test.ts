@@ -1,22 +1,23 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
+import { createLocalTransport, dispatch } from "../../src/core.ts";
 import {
-  createLocalTransport,
   createObservationHub,
   createRunObserver,
   readRun,
   watchRun,
+} from "../../src/observation.ts";
+import {
   defineWorkflow,
   defineTask,
   defineIsolatedTask,
   createWorkflowCheckpointStore,
-  dispatch,
-  TransportConflict,
-  inspectRecovery,
-  planRecoveryRetention,
-} from "../../src/index.ts";
-import type { Transport, RunEvent } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { TransportConflict } from "../../src/storage.ts";
+import { inspectRecovery, planRecoveryRetention } from "../../src/recovery.ts";
+import type { Transport } from "../../src/storage.ts";
+import type { RunEvent } from "../../src/observation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { s3Fixture } from "../fixtures/s3-transport-server.ts";
 import { repository, scripted, emit } from "../helpers.ts";

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createSteering, OutpostError } from "../../src/index.ts";
+import { createSteering, OutpostError } from "../../src/core.ts";
 import {
   mainLoopSteering,
   steeringChannel,

@@ -7,19 +7,25 @@ import { appendFile, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
+  createLocalTransport,
+  dispatch,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessFileTools,
-  createLocalTransport,
+} from "@elie-laloum/outpost/harness";
+import {
   createTaskCacheStore,
   defineTask,
   defineWorkflow,
-  dispatch,
-  planRecoveryRetention,
-  pruneRecoveryRetention,
   repositoryFingerprint,
   type TaskCacheMode,
   type WorkflowEvent,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import {
+  planRecoveryRetention,
+  pruneRecoveryRetention,
+} from "@elie-laloum/outpost/recovery";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

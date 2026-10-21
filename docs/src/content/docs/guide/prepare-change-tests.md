@@ -26,8 +26,8 @@ export const isTest = (file: string) =>
 ```
 
 ```ts title="workbench.ts"
-import type { Sandbox } from "@elie-laloum/outpost";
-import { createSandbox } from "@elie-laloum/outpost";
+import type { Sandbox } from "@elie-laloum/outpost/core";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 import { branch } from "./branch.ts";
 
@@ -49,7 +49,7 @@ export async function closeWorkbench() {
 ```
 
 ```ts title="commands.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
 import { workbench } from "./workbench.ts";
 
 export async function run(
@@ -67,7 +67,7 @@ export async function run(
 ```
 
 ```ts title="git.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
 import { run } from "./commands.ts";
 
 export async function changedFiles(context: LoopTaskContext) {
@@ -100,8 +100,8 @@ export async function commit(context: LoopTaskContext, message: string) {
 ```
 
 ```ts title="ask.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
-import { defineAgentTask } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
+import { defineAgentTask } from "@elie-laloum/outpost/workflows";
 import { workbench } from "./workbench.ts";
 
 export async function ask(
@@ -121,7 +121,10 @@ export async function ask(
 These shared types connect each loop’s attempts and checks.
 
 ```ts title="loop.types.ts"
-import type { LoopTaskContext, LoopCheckResult } from "@elie-laloum/outpost";
+import type {
+  LoopTaskContext,
+  LoopCheckResult,
+} from "@elie-laloum/outpost/workflows";
 
 export type LoopCheck = (context: LoopTaskContext) => Promise<LoopCheckResult>;
 export type LoopAttempt = (
@@ -137,7 +140,7 @@ The test loop rejects changes outside test files and requires the tests to fail 
 <!-- tabs -->
 
 ```ts title="write-zones.ts"
-import type { LoopTaskContext } from "@elie-laloum/outpost";
+import type { LoopTaskContext } from "@elie-laloum/outpost/workflows";
 import { changedFiles } from "./git.ts";
 import { isTest } from "./branch.ts";
 
@@ -189,7 +192,7 @@ export const testCheck: LoopCheck = async (context) => {
 ```
 
 ```ts title="tests.ts"
-import { defineLoopTask } from "@elie-laloum/outpost";
+import { defineLoopTask } from "@elie-laloum/outpost/workflows";
 import { review } from "./approval.ts";
 import { testAttempt } from "./test-attempt.ts";
 import { testCheck } from "./test-check.ts";
@@ -210,7 +213,7 @@ Save these files beside the helpers. Use a fresh ticket key: this four-task grap
 <!-- tabs -->
 
 ```ts title="workflow.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { frame } from "./frame.ts";
 import { plan } from "./plan.ts";
 import { review } from "./approval.ts";
@@ -225,7 +228,7 @@ export const workflow = defineWorkflow("prepare-tests", [
 ```
 
 ```ts title="view.ts"
-import type { WorkflowResult } from "@elie-laloum/outpost";
+import type { WorkflowResult } from "@elie-laloum/outpost/workflows";
 import { plan } from "./plan.ts";
 import { branch } from "./branch.ts";
 import { tests } from "./tests.ts";

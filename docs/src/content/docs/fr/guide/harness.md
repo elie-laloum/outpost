@@ -25,7 +25,7 @@ Choisissez le harness intégré si vous voulez contrôler vous-même l’API du 
 <!-- tabs -->
 
 ```ts title="review-model.ts"
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
@@ -33,12 +33,12 @@ export const modelProvider = createAnthropicModelProvider({
 ```
 
 ```ts title="review-agent.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
   createHarnessSearchTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { modelProvider } from "./review-model.ts";
 
 export const reviewer = createAgent({
@@ -52,7 +52,7 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="harness-review.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./review-agent.ts";
 
@@ -83,7 +83,7 @@ import {
   createAnthropicModelProvider,
   createHarness,
   createHarnessShellTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 const harness = createHarness({
   modelProvider: createAnthropicModelProvider({
@@ -112,7 +112,7 @@ Suivez les appels d’outils et les requêtes au modèle pendant l’exécution 
 <!-- tabs -->
 
 ```ts title="observed-model.ts"
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 
 export const observedModel = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
@@ -120,11 +120,11 @@ export const observedModel = createAnthropicModelProvider({
 ```
 
 ```ts title="observed-agent.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { observedModel } from "./observed-model.ts";
 
 export const agent = createAgent({
@@ -137,7 +137,7 @@ export const agent = createAgent({
 ```
 
 ```ts title="observe-harness.ts"
-import { dispatch, createObservation } from "@elie-laloum/outpost";
+import { dispatch, createObservation } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./observed-agent.ts";
 

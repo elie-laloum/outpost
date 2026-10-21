@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

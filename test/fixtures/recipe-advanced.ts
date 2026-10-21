@@ -4,12 +4,12 @@ import { trace, metrics } from "@opentelemetry/api";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { emit, scripted } from "../helpers.ts";
+import type { SpeculativeValidation } from "../../src/experimental/speculation.ts";
 import type {
-  SpeculativeValidation,
   SandboxProvider,
-  WorkflowJson,
   AgentObservation,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
+import type { WorkflowJson } from "../../src/workflows.ts";
 
 export function candidate() {
   return scripted(

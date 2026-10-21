@@ -10,7 +10,10 @@ Attach a callback to your CLI's lifecycle to inspect or control its actions. Sta
 This Claude hook refuses `Bash` calls and asks the agent to use file-reading tools. Pass `harness` to `createAgent({ harness })`, then [dispatch the agent](../first-request/).
 
 ```ts title="native-hooks.ts"
-import { createClaudeHarness, defineClaudeHook } from "@elie-laloum/outpost";
+import {
+  createClaudeHarness,
+  defineClaudeHook,
+} from "@elie-laloum/outpost/core";
 
 export const harness = createClaudeHarness({
   authentication: "account",

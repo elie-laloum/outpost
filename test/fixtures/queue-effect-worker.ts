@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { createHttpTaskQueue, runQueueWorker } from "../../src/index.ts";
+import { createHttpTaskQueue, runQueueWorker } from "../../src/queues.ts";
 import { createBullMQTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
 
 const [backend, configuration, effects, mode] = process.argv.slice(2);

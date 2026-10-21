@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { McpServers } from "@elie-laloum/outpost";
+import type { McpServers } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

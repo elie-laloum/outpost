@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { reserveRecoveryStorage } from "@elie-laloum/outpost";
+import { reserveRecoveryStorage } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Rôle et comportement

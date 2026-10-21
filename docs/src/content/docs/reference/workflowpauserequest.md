@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowPauseRequest } from "@elie-laloum/outpost";
+import type { WorkflowPauseRequest } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Parameters and properties

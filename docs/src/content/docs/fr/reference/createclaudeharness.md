@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createClaudeHarness } from "@elie-laloum/outpost";
+import { createClaudeHarness } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

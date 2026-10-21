@@ -10,7 +10,7 @@ Utilisez la [configuration initiale](../setup/) et installez `zod` avec `npm ins
 Définissez un contrat de réponse JSON pour recevoir des données que votre application peut valider. L’agent écrit sa réponse dans la balise demandée, puis Outpost l’analyse et la valide avant de fournir `result.value`.
 
 ```ts
-import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
+import { dispatch, defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 const verdict = defineJsonResponse({
@@ -39,7 +39,7 @@ import {
   dispatch,
   defineTextResponse,
   ResponseError,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
@@ -63,7 +63,7 @@ Référence API : [ResponseError](../../reference/responseerror/).
 Définissez `repairs` pour accorder à l’agent des tours supplémentaires après une réponse invalide.
 
 ```ts
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 const verdict = defineJsonResponse({
@@ -109,7 +109,7 @@ export function validateVerdict(input: unknown) {
 ```
 
 ```ts title="verdict.ts"
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { validateVerdict } from "./validate-verdict.ts";
 export const verdict = defineJsonResponse({
   tag: "verdict",
@@ -140,7 +140,7 @@ La dernière paire `<verdict>…</verdict>` complète l’emporte : un brouillon
 Ce contrat accepte une chaîne JSON et renvoie sa longueur. Outpost injecte automatiquement le schéma d’entrée de type chaîne, tandis que `read()` renvoie un nombre. Enregistrez-le dans `length.ts` et lancez `node length.ts` après avoir installé Outpost et Zod comme dans l’exemple précédent.
 
 ```ts
-import { defineJsonResponse } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 const length = defineJsonResponse({
   tag: "length",
@@ -160,7 +160,7 @@ console.log(
 `defineTextResponse()` demande automatiquement une réponse textuelle dans une balise finale et renvoie son contenu nettoyé, sans analyse JSON.
 
 ```ts
-import { defineTextResponse } from "@elie-laloum/outpost";
+import { defineTextResponse } from "@elie-laloum/outpost/core";
 
 const summary = defineTextResponse({ tag: "summary" });
 console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>"));

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FileWorkspaceOptions } from "@elie-laloum/outpost";
+import type { FileWorkspaceOptions } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Paramètres et propriétés

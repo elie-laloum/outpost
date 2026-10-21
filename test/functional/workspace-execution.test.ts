@@ -7,7 +7,7 @@ import {
   createWorkspace,
   openWorkspace,
   restoreFileWorkspace,
-} from "../../src/index.ts";
+} from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
 import { emit, repository, scripted } from "../helpers.ts";

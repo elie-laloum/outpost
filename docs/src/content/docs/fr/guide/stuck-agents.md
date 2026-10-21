@@ -12,7 +12,7 @@ Un agent peut continuer à produire des sorties tout en répétant les mêmes co
 Commencez par des avertissements : une attente ou une relance légitime de tests peut se répéter. Ce dispatch signale quand un même appel d’outil décodé ou contenu de changement de fichiers apparaît trois fois parmi les vingt derniers événements d’activité. D’autres appels peuvent séparer ces occurrences.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({
@@ -35,7 +35,7 @@ Pour imposer ensuite l’arrêt, remplacez `warn` par `stop`. Outpost émet `stu
 Donnez une nouvelle consigne concrète au watchdog si un changement d’approche est préférable à un arrêt immédiat. Cela utilise le [steering](../steering/) : la boucle intégrée reçoit un message, tandis qu’une CLI reçoit une entrée directe ou reprend sa conversation dans la même sandbox. Un sous-agent intégré détecté reçoit sa propre consigne.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

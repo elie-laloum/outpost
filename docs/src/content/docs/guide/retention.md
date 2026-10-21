@@ -63,7 +63,7 @@ API reference: [RecoveryRetentionEntry](../../reference/recoveryretentionentry/)
 import {
   planRecoveryRetention,
   pruneRecoveryRetention,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 import { repository } from "./outpost.config.ts";
 const plan = await planRecoveryRetention({
   repository,
@@ -99,7 +99,7 @@ A worktree that became clean is removed by the next run of a `clean-workspaces` 
 A reservation claims bytes in `.outpost` before a job writes them. It is refused when current usage, active reservations and the new request exceed `maxBytes`.
 
 ```ts
-import { reserveRecoveryStorage } from "@elie-laloum/outpost";
+import { reserveRecoveryStorage } from "@elie-laloum/outpost/recovery";
 import { repository } from "./outpost.config.ts";
 
 await using reservation = await reserveRecoveryStorage({
@@ -129,11 +129,11 @@ API: [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRe
 New reservation entries record a process instance ID, host name, PID, creation time and repository, with Linux process identity when available. These are owner identifiers, not proof of remote liveness. Select the exact entry and stop its owner before recovery. The example uses the default repository Transport; use your original Transport when storage is customized.
 
 ```ts
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import {
-  createLocalTransport,
   inspectStorageReservations,
   recoverStorageReservation,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 
 const transporter = createLocalTransport({
   directory: "/projects/app/.outpost/storage",

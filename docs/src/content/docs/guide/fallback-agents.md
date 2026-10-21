@@ -16,7 +16,7 @@ import {
   createClaudeHarness,
   createFallbackAgent,
   createAgent,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { coder } from "./outpost.config.ts";
 
 export const claude = createClaudeHarness({ authentication: "account" });
@@ -31,7 +31,7 @@ export const agent = createFallbackAgent(
 ```
 
 ```ts title="run.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { agent } from "./fallback.ts";
 

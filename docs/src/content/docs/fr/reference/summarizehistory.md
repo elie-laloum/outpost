@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { summarizeHistory } from "@elie-laloum/outpost";
+import { summarizeHistory } from "@elie-laloum/outpost/harness";
 ```
 
 ## Rôle et comportement

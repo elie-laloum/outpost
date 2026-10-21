@@ -13,7 +13,7 @@ Each dispatch records its events in a journal by default. Set `logging.transport
 
 ```ts title="record-journal.ts"
 import { writeFile } from "node:fs/promises";
-import { createLocalTransport, dispatch } from "@elie-laloum/outpost";
+import { createLocalTransport, dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 const transporter = createLocalTransport({ directory: ".outpost/storage" });
@@ -31,7 +31,8 @@ await writeFile("journal-reference.json", JSON.stringify(result.logReference));
 
 ```ts title="read-journal.ts"
 import { readFile } from "node:fs/promises";
-import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { readJournal } from "@elie-laloum/outpost/observation";
 
 const reference = JSON.parse(await readFile("journal-reference.json", "utf8"));
 const events = await readJournal({
@@ -60,8 +61,9 @@ API reference: [ReadJournalOptions](../../reference/readjournaloptions/).
 Reading fails if the journal exceeds the configured limits; it does not return a truncated transcript.
 
 ```ts
-import { createLocalTransport, readJournal } from "@elie-laloum/outpost";
-import type { TransportReference } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { readJournal } from "@elie-laloum/outpost/observation";
+import type { TransportReference } from "@elie-laloum/outpost/storage";
 
 declare const reference: TransportReference;
 
@@ -82,7 +84,7 @@ API reference: [ObservationEvent](../../reference/observationevent/) and [AgentO
 The [built-in harness](../harness/) emits `model-request` and `model-response` only on a verbose hub. To record full model exchanges, pass one with `verbose` logging:
 
 ```ts
-import { createObservation, dispatch } from "@elie-laloum/outpost";
+import { createObservation, dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const observation = createObservation({ verbose: true });
@@ -106,7 +108,7 @@ await observation.close();
 A failed or cancelled dispatch still closes its journal with `dispatch-finished`, including a failure during preparation. The error carries the reference: read it with `recoveryDetails()`.
 
 ```ts
-import { dispatch, recoveryDetails } from "@elie-laloum/outpost";
+import { dispatch, recoveryDetails } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {

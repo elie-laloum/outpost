@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { publishWorkspaceOutputs } from "@elie-laloum/outpost";
+import { publishWorkspaceOutputs } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Rôle et comportement

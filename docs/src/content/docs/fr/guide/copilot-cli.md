@@ -14,7 +14,7 @@ Votre compte GitHub doit avoir accès à Copilot ; voir le [démarrage rapide de
 Copilot s’exécute toujours sur votre abonnement Copilot. Fournissez un jeton GitHub à permissions fines disposant de la permission **Copilot Requests** :
 
 ```ts
-import { createAgent, createCopilotHarness } from "@elie-laloum/outpost";
+import { createAgent, createCopilotHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCopilotHarness({

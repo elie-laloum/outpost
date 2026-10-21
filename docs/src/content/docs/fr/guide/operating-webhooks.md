@@ -40,7 +40,7 @@ Les signatures GitHub ne portent pas d’horodatage : une requête interceptée 
 Chaque option de secret accepte aussi une fonction qui renvoie les secrets acceptés à cet instant. La source l’appelle à chaque requête.
 
 ```ts
-import { createGithubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost/queues";
 
 const source = createGithubWebhook({
   secret: () =>
@@ -58,7 +58,10 @@ Acceptez les deux secrets, changez le secret chez l’émetteur, puis retirez l�
 `serveTriggers()` écoute par défaut sur `127.0.0.1` ; `host` et `port` le modifient. Placez devant lui un reverse proxy qui termine TLS, et n’exposez que les chemins des routes.
 
 ```ts
-import type { DurableTaskQueue, TriggerServer } from "@elie-laloum/outpost";
+import type {
+  DurableTaskQueue,
+  TriggerServer,
+} from "@elie-laloum/outpost/queues";
 
 declare const server: TriggerServer;
 declare const queue: DurableTaskQueue;

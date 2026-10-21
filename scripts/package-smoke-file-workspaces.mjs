@@ -15,7 +15,7 @@ export function smokeFileWorkspaces(directory, checkTypes) {
   const consumer = join(directory, "file-workspaces.ts");
   writeFileSync(
     consumer,
-    `import {createWorkspace,createSandbox,dispatch,attach,defineIsolatedCommandTask,workspaceFingerprint,publishWorkspaceOutputs,type Workspace,type FileWorkspace,type FileDispatchResult,type FileRunReport,type DispatchResult} from '@elie-laloum/outpost';
+    `import { createWorkspace, workspaceFingerprint, publishWorkspaceOutputs, type Workspace, type FileWorkspace } from '@elie-laloum/outpost/workspaces'; import { createSandbox, dispatch, attach, type FileRunReport, type DispatchResult } from '@elie-laloum/outpost/core'; import { defineIsolatedCommandTask } from '@elie-laloum/outpost/workflows'; import { type FileDispatchResult } from '@elie-laloum/outpost/core';
 import {createLocalSandboxProvider} from '@elie-laloum/outpost/providers/local';
 import {scriptedAgent} from '@elie-laloum/outpost/testing';
 const sandboxProvider=createLocalSandboxProvider();

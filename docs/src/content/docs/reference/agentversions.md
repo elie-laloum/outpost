@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { agentVersions } from "@elie-laloum/outpost";
+import { agentVersions } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

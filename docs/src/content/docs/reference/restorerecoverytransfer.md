@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
+import { restoreRecoveryTransfer } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Purpose and behavior

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createSessionBundleConversations } from "@elie-laloum/outpost";
+import { createSessionBundleConversations } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

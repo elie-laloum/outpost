@@ -25,7 +25,7 @@ The task needs a checkpoint: it stores the questions and answers between process
 <!-- tabs -->
 
 ```ts title="clarify.ts"
-import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
+import { defineInteractiveAgentTask } from "@elie-laloum/outpost/workflows";
 import { repository, coder, sandboxProvider } from "./outpost.config.ts";
 
 export const clarify = defineInteractiveAgentTask({
@@ -40,10 +40,8 @@ export const clarify = defineInteractiveAgentTask({
 ```
 
 ```ts title="question-store.ts"
-import {
-  createWorkflowCheckpointStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost/workflows";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const store = createWorkflowCheckpointStore({
   transporter: createLocalTransport({ directory: ".outpost/storage" }),
@@ -51,7 +49,7 @@ export const store = createWorkflowCheckpointStore({
 ```
 
 ```ts title="start.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { clarify } from "./clarify.ts";
 import { store } from "./question-store.ts";
 
@@ -104,7 +102,7 @@ Restart the same workflow with the same checkpoint and an `answers` entry per re
 <!-- tabs -->
 
 ```ts title="answer-value.ts"
-import type { WorkflowInputRequest } from "@elie-laloum/outpost";
+import type { WorkflowInputRequest } from "@elie-laloum/outpost/workflows";
 
 export function answerValue(
   request: WorkflowInputRequest,
@@ -126,7 +124,7 @@ import type {
   Workflow,
   WorkflowCheckpointOptions,
   WorkflowInputRequest,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { answerValue } from "./answer-value.ts";
 
 export async function answer(
@@ -178,7 +176,7 @@ The turn restarts from the last saved conversation and answer; a completed outpu
 `defineTask()` with `interaction` suspends any task on a question. `defineInteractiveAgentTask()` is built on it.
 
 ```ts
-import { defineTask } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
 
 const region = defineTask({
   key: "region",

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ConversationContext } from "@elie-laloum/outpost";
+import type { ConversationContext } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Paramètres et propriétés

@@ -24,7 +24,8 @@ Pass `signal` to every operation the handler starts, so cancellation and lost le
 A job can run twice: a crashed worker's successor starts the handler again. Handlers with external effects deduplicate them with `idempotencyKey`.
 
 ```ts
-import type { QueueHandler, WorkflowJson } from "@elie-laloum/outpost";
+import type { QueueHandler } from "@elie-laloum/outpost/queues";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 
 function deliveryHandler(
   deliverOnce: (

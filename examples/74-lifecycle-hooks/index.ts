@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createAgent, dispatch } from "@elie-laloum/outpost";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";

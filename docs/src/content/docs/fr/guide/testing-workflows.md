@@ -30,7 +30,7 @@ Utilisez le chemin de votre dépôt temporaire dans `workflow.test.ts`, puis lan
 ```ts title="workflow.test.ts"
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createMemorySandboxProvider } from "@elie-laloum/outpost/testing";
 import { coder } from "./coder.ts";
 import { mkdtemp, rm } from "node:fs/promises";

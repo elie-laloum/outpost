@@ -3,7 +3,7 @@ import {
   defineTask,
   defineWorkflow,
   WorkflowBudgetExceeded,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 import { createOpenTelemetryObserver } from "../../src/infrastructure/opentelemetry.ts";
 import {
   BasicTracerProvider,

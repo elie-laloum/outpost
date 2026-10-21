@@ -460,13 +460,10 @@ test("YAML artifacts, task caches, signed gates and quota pauses reuse native pe
   const file = join(directory, "recipe.yaml"),
     config = join(directory, "outpost.yaml");
   const { generateKeyPairSync } = await import("node:crypto");
-  const {
-    signWorkflowDecision,
-    createLocalTransport,
-    createArtifactStore,
-    defineJsonArtifact,
-    readStoredArtifact,
-  } = await import("../../src/index.ts");
+  const { signWorkflowDecision } = await import("../../src/workflows.ts");
+  const { createLocalTransport } = await import("../../src/core.ts");
+  const { createArtifactStore, defineJsonArtifact, readStoredArtifact } =
+    await import("../../src/storage.ts");
   const pair = generateKeyPairSync("ed25519"),
     module = resolve("test/fixtures/recipe-durable.ts");
   const jsonSchema = {
@@ -787,7 +784,8 @@ test("durable recipe observers stay open until cleanup and retain projection cur
       ],
     }),
   );
-  const { createLocalTransport, readRun } = await import("../../src/index.ts");
+  const { createLocalTransport } = await import("../../src/core.ts");
+  const { readRun } = await import("../../src/observation.ts");
   const transporter = createLocalTransport({
     directory: join(directory, "state"),
   });

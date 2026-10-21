@@ -12,7 +12,7 @@ Git privé est un prototype à activer explicitement : son comportement peut enc
 Définissez `repositoryMode: "isolated"` sur un fournisseur Docker ou Podman pour donner au conteneur sa propre copie Git. Cette option est expérimentale ; la tâche conserve les mêmes réglages d’agent et d’exécution.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
 

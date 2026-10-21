@@ -6,7 +6,7 @@ import {
   createAgent,
   createCodexHarness,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

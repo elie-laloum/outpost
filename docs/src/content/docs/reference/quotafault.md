@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { quotaFault } from "@elie-laloum/outpost";
+import { quotaFault } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

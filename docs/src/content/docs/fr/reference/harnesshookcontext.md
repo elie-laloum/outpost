@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { HarnessHookContext } from "@elie-laloum/outpost";
+import type { HarnessHookContext } from "@elie-laloum/outpost/harness";
 ```
 
 ## Paramètres et propriétés

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ConversationFormat } from "@elie-laloum/outpost";
+import type { ConversationFormat } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Rôle et comportement

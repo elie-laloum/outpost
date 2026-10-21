@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowJson } from "@elie-laloum/outpost";
+import type { WorkflowJson } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

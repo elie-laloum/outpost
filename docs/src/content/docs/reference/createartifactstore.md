@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createArtifactStore } from "@elie-laloum/outpost";
+import { createArtifactStore } from "@elie-laloum/outpost/storage";
 ```
 
 ## Purpose and behavior

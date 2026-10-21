@@ -16,7 +16,7 @@ description: "Lancer une revue du README et examiner la réponse et la branche."
 Utilisez la configuration de la page [Installation](../setup/). Le dépôt cible doit contenir un README commité. Enregistrez `review.ts` à côté de `outpost.config.ts` ; le script demande une revue à l’agent sur une branche séparée.
 
 ```ts title="review.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

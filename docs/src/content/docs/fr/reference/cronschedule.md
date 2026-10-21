@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { CronSchedule } from "@elie-laloum/outpost";
+import type { CronSchedule } from "@elie-laloum/outpost/queues";
 ```
 
 ## Paramètres et propriétés

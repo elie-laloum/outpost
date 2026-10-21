@@ -11,7 +11,7 @@ Appelez `result.resume()` pour envoyer une nouvelle demande dans la conversation
 
 ```ts
 import { writeFile } from "node:fs/promises";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const first = await dispatch({
@@ -39,7 +39,7 @@ Conservez `first.conversation` dans `conversation-id.txt` après le premier appe
 
 ```ts title="resume-conversation.ts"
 import { readFile } from "node:fs/promises";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const id = (await readFile("conversation-id.txt", "utf8")).trim();
@@ -60,7 +60,7 @@ Exécutez `node resume-conversation.ts`. La réponse reprend le contexte enregis
 `result.fork()` démarre une nouvelle conversation à partir d’une copie de la première. L’originale reste intacte : vous pouvez explorer deux pistes depuis le même contexte. Donnez au fork sa propre branche pour séparer ses commits.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const first = await dispatch({
@@ -84,7 +84,7 @@ console.log(alternative.conversation, alternative.branch);
 Dans une [session de sandbox](../sandbox-sessions/), `result.resume()` et `result.fork()` continuent dans la même sandbox, sans restauration. Ils n’acceptent que les options du brief et du tour : les réglages de la sandbox sont figés.
 
 ```ts
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await using sandbox = await createSandbox({

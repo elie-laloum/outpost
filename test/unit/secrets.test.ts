@@ -7,8 +7,8 @@ import {
 } from "@aws-sdk/client-secrets-manager";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { SecretClient } from "@azure/keyvault-secrets";
-import { fromSecrets, OutpostError } from "../../src/index.ts";
-import type { SecretSource } from "../../src/index.ts";
+import { fromSecrets, OutpostError } from "../../src/core.ts";
+import type { SecretSource } from "../../src/core.ts";
 import { createAwsSecretSource } from "../../src/adapters/secrets/aws.ts";
 import { createGcpSecretSource } from "../../src/adapters/secrets/gcp.ts";
 import { createAzureSecretSource } from "../../src/adapters/secrets/azure.ts";

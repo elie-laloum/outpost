@@ -12,7 +12,7 @@ Give each repository its own `defineIsolatedTask()` and connect those tasks in a
 <!-- tabs -->
 
 ```ts title="upgrade.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { resolve } from "node:path";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 
@@ -34,7 +34,7 @@ export function upgrade(key: string, path: string) {
 
 ```ts title="upgrade-repositories.ts"
 import { upgrade } from "./upgrade.ts";
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 export const api = upgrade("api", "../api");
 export const web = upgrade("web", "../web");
@@ -57,7 +57,7 @@ Add the first task to `after`, then read its result with `context.value()` in `r
 <!-- tabs -->
 
 ```ts title="api-change.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { resolve } from "node:path";
 import { sandboxProvider, coder } from "./outpost.config.ts";
 
@@ -77,7 +77,7 @@ export const api = defineIsolatedTask({
 ```
 
 ```ts title="web-change.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { api, branch } from "./api-change.ts";
 import { resolve } from "node:path";
 import { sandboxProvider, coder } from "./outpost.config.ts";
@@ -98,7 +98,7 @@ export const web = defineIsolatedTask({
 ```
 
 ```ts title="rename.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { api } from "./api-change.ts";
 import { web } from "./web-change.ts";
 

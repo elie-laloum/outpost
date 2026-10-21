@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TerminationCode } from "@elie-laloum/outpost";
+import type { TerminationCode } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

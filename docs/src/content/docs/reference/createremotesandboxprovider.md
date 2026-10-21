@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
+import { createRemoteSandboxProvider } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

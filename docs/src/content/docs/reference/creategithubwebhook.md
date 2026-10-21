@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createGithubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

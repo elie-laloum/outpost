@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createStandardWebhook } from "@elie-laloum/outpost";
+import { createStandardWebhook } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { prepareWorkspaceOutputs } from "@elie-laloum/outpost";
+import { prepareWorkspaceOutputs } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Rôle et comportement

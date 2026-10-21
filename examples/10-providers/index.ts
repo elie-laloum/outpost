@@ -2,12 +2,11 @@
 // Same agent, same brief: only the environment changes.
 
 import { join } from "node:path";
+import { createAgent, dispatch } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessShellTools,
-  dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { model, modelProvider } from "../shared/model.ts";

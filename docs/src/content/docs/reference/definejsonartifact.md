@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineJsonArtifact } from "@elie-laloum/outpost";
+import { defineJsonArtifact } from "@elie-laloum/outpost/storage";
 ```
 
 ## Purpose and behavior

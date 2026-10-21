@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TransferOptions } from "@elie-laloum/outpost";
+import type { TransferOptions } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Parameters and properties

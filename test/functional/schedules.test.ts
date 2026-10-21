@@ -8,13 +8,13 @@ import {
   createCronSchedule,
   runSchedules,
   createSqliteTaskQueue,
-} from "../../src/index.ts";
+} from "../../src/queues.ts";
 import { runSchedulesWithClock } from "../../src/application/schedules.ts";
 import type {
   QueueRequest,
   RunSchedulesOptions,
   TaskQueue,
-} from "../../src/index.ts";
+} from "../../src/queues.ts";
 import type { ScheduleClock } from "../../src/application/schedules.types.ts";
 
 /** SQLite decodes JSON into null-prototype objects. */

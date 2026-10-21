@@ -12,7 +12,7 @@ Pass the tools or toolsets the model needs to `createHarness({ tools })`. The mo
 <!-- tabs -->
 
 ```ts title="read-model.ts"
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
@@ -24,7 +24,7 @@ import {
   createHarnessFileTools,
   createHarnessSearchTools,
   createHarnessGitTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 export const tools = [
   createHarnessFileTools(),
@@ -34,7 +34,8 @@ export const tools = [
 ```
 
 ```ts title="reviewer.ts"
-import { createAgent, createHarness } from "@elie-laloum/outpost";
+import { createAgent } from "@elie-laloum/outpost/core";
+import { createHarness } from "@elie-laloum/outpost/harness";
 import { modelProvider } from "./read-model.ts";
 import { tools } from "./read-tools.ts";
 
@@ -45,7 +46,7 @@ export const reviewer = createAgent({
 ```
 
 ```ts title="review.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { reviewer } from "./reviewer.ts";
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Breaking, next major release:** Remove the package-root import and move every public symbol to its owning subpath: `/core`, `/workspaces`, `/harness`, `/workflows`, `/queues`, `/storage`, `/observation`, `/recovery`, `/integrations`, `/recipes` or `/experimental/speculation`. Replace root imports in one step; there is no compatibility barrel. Existing provider, secret-manager, telemetry, S3, BullMQ and testing entry points retain their paths. Migrate guides, API references, examples, recipe extensions and package tests together. YAML syntax, execution behavior, checkpoint identities and recovery authorization stay unchanged. Clean builds exclude retired entry artifacts from the package.
+
 - Add explicit `observationId` to automatically tracked dispatch and workflow results, retaining `runId` and separating tracking from checkpoint and execution identities. Recipe reports consume the explicit identifier; reader and recovery behavior stay unchanged.
 - Share the `TerminationCode` vocabulary with speculation results while retaining `WorkflowTerminationCode`, existing statuses and dispatch exceptions. Preserve explicit coordinator stop reasons in new speculation checkpoints, read older checkpoints, and expose the optional reason in YAML speculation outputs. Budget exhaustion remains `limit`; incomplete accounting is `usage-unavailable`. Budgets, deadlines and replay authorization keep their existing contracts.
 

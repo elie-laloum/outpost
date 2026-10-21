@@ -31,7 +31,10 @@ npx outpost doctor --agent antigravity --provider local
 Lancez `agy` sur l’hôte et connectez-vous avec votre compte Google.
 
 ```ts
-import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
+import {
+  createAgent,
+  createAntigravityHarness,
+} from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createAntigravityHarness({ authentication: "account" }),
@@ -45,7 +48,10 @@ Outpost copie `~/.gemini/antigravity-cli/antigravity-oauth-token` dans le réper
 Déclarez `GEMINI_API_KEY`. L’usage de l’API Gemini est facturé séparément des forfaits Google AI.
 
 ```ts
-import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
+import {
+  createAgent,
+  createAntigravityHarness,
+} from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createAntigravityHarness({

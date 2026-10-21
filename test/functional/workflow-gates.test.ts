@@ -13,16 +13,15 @@ import {
   createWorkflowCheckpointStore,
   defineTask,
   defineWorkflow,
-  createLocalTransport,
   WorkflowFailure,
-  OutpostError,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { createLocalTransport, OutpostError } from "../../src/core.ts";
 import type {
   WorkflowCheckpointStore,
   WorkflowDecision,
   WorkflowEvent,
   WorkflowResult,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 async function setup(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-gates-"));
@@ -355,10 +354,9 @@ test(
   async (t) => {
     const { directory, checkpoint } = await setup(t);
     const script = join(directory, "pause.mjs");
-    const module = new URL("../../src/index.ts", import.meta.url).href;
     await writeFile(
       script,
-      `import { defineApprovalTask, defineTask, defineWorkflow, createWorkflowCheckpointStore, createLocalTransport } from ${JSON.stringify(module)};
+      `import { defineApprovalTask, defineTask, defineWorkflow, createWorkflowCheckpointStore } from ${JSON.stringify(new URL("../../src/workflows.ts", import.meta.url).href)}; import { createLocalTransport } from ${JSON.stringify(new URL("../../src/core.ts", import.meta.url).href)};
 const source = defineTask({key:'source',perform:()=>42});
 const gate = defineApprovalTask({key:'review',after:[source],prompt:'Ship this change?',actors:['maintainer']});
 const result = await defineWorkflow('release',[source,gate]).start({checkpoint:{store:createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'release',version:'1'}});

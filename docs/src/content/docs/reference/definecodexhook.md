@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineCodexHook } from "@elie-laloum/outpost";
+import { defineCodexHook } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

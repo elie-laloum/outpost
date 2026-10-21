@@ -1,14 +1,14 @@
 // Retries and delays — capped exponential backoff, full jitter, HTTP Retry-After
 // respected as a minimum wait, and a deadline for the whole workflow.
 
+import { createOpenAIModelProvider } from "@elie-laloum/outpost/harness";
 import {
-  createOpenAIModelProvider,
   defineTask,
   defineWorkflow,
-  OutpostError,
   type Retry,
   type WorkflowEvent,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
+import { OutpostError } from "@elie-laloum/outpost/core";
 import { model } from "../shared/model.ts";
 import { flakyProxy } from "./flaky-proxy.ts";
 

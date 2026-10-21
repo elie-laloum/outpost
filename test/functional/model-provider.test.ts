@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { test } from "node:test";
-import { createOpenAIModelProvider } from "../../src/index.ts";
+import { createOpenAIModelProvider } from "../../src/harness.ts";
 
 const completion = {
   choices: [

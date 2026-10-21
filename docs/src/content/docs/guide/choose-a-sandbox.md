@@ -21,7 +21,7 @@ Start with Docker or Podman if you want a local container. For hosted execution,
 Import the provider from its subpath and pass it as `sandboxProvider`. The agent, the brief and the branch stay the same.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
 

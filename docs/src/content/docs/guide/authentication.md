@@ -20,7 +20,7 @@ import {
   createAgent,
   createClaudeHarness,
   createCodexHarness,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 
 // Your ChatGPT plan, from ~/.codex/auth.json
 export const planCoder = createAgent({
@@ -47,7 +47,7 @@ API reference: [AgentAuthentication](../../reference/agentauthentication/), [Acc
 Each agent page gives its login command. Use its API contract to choose the credential source.
 
 ```ts
-import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost/core";
 
 export const teamCoder = createAgent({
   harness: createCodexHarness({

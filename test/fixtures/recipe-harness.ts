@@ -1,13 +1,13 @@
-import { OutpostError } from "../../src/index.ts";
+import { OutpostError } from "../../src/core.ts";
 import type {
   HarnessHookInput,
   HarnessToolContext,
   ModelProvider,
   ModelRequest,
   ModelResult,
-  Observation,
-} from "../../src/index.ts";
-import type { DecisionProvider } from "../../src/index.ts";
+} from "../../src/harness.ts";
+import type { Observation } from "../../src/observation.ts";
+import type { DecisionProvider } from "../../src/workflows.ts";
 
 export const requests: ModelRequest[] = [];
 export const observations: Observation[] = [];

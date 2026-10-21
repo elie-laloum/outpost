@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { inspectRecovery } from "@elie-laloum/outpost";
+import { inspectRecovery } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Purpose and behavior

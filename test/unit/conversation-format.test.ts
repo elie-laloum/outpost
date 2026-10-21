@@ -3,21 +3,22 @@ import { test } from "node:test";
 import {
   createAgent,
   createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
+  createLocalTransport,
+  createTransportConversations,
+} from "../../src/core.ts";
+import {
   createClaudeConversations,
   createCodexConversations,
   createCopilotConversations,
   createKimiConversations,
-  createClaudeHarness,
-  createCodexHarness,
-  createCopilotHarness,
-  createHarness,
   createHarnessConversations,
-  createKimiHarness,
-  createLocalTransport,
-  createTransportConversations,
   type ConversationStore,
-  type ModelProvider,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
+import { createHarness, type ModelProvider } from "../../src/harness.ts";
 import { isConversationStore } from "../../src/domain/conversation.ts";
 
 const modelProvider: ModelProvider = {

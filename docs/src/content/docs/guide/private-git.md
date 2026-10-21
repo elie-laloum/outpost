@@ -12,7 +12,7 @@ Private Git is an opt-in prototype: its behavior can still change.
 Set `repositoryMode: "isolated"` on a Docker or Podman provider to give the container its own Git checkout. This option is experimental; the rest of the task uses the same agent and dispatch settings.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { coder, repository } from "./outpost.config.ts";
 

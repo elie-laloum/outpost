@@ -2,27 +2,29 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   createAgent,
-  createHarness,
   createAntigravityHarness,
   createCodexHarness,
   createClaudeHarness,
   createCopilotHarness,
   createKimiHarness,
-  defineHarnessInstructions,
-  defineHarnessTool,
-  defineHarnessHook,
   dispatch,
   createSandbox,
   attach,
   OutpostError,
   defineTextResponse,
-  type AgentObservation,
+} from "../../src/core.ts";
+import {
+  createHarness,
+  defineHarnessInstructions,
+  defineHarnessTool,
+  defineHarnessHook,
   type HarnessOptions,
   type HarnessTool,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

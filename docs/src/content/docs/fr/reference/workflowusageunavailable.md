@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { WorkflowUsageUnavailable } from "@elie-laloum/outpost";
+import { WorkflowUsageUnavailable } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

@@ -8,8 +8,8 @@ import {
   createCopilotHarness,
   createKimiHarness,
   type Usage,
-  type AgentObservation,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { agentOutput } from "../../src/application/agent-output.ts";
 import {

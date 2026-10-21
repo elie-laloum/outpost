@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { definePauseTask } from "@elie-laloum/outpost";
+import { definePauseTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Rôle et comportement

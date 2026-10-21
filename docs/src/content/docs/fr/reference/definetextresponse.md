@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineTextResponse } from "@elie-laloum/outpost";
+import { defineTextResponse } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

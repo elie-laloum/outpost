@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ConflictResolution } from "@elie-laloum/outpost";
+import type { ConflictResolution } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Parameters and properties

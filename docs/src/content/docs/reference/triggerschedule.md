@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TriggerSchedule } from "@elie-laloum/outpost";
+import type { TriggerSchedule } from "@elie-laloum/outpost/queues";
 ```
 
 ## Parameters and properties

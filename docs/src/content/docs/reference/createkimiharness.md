@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createKimiHarness } from "@elie-laloum/outpost";
+import { createKimiHarness } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

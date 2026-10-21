@@ -11,11 +11,8 @@ Cet exemple hors ligne rend toujours `hello`, même si le récepteur refuse chaq
 
 ```ts
 import assert from "node:assert/strict";
-import {
-  createObservation,
-  defineTask,
-  defineWorkflow,
-} from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const observation = createObservation({
   sinks: [
@@ -52,7 +49,7 @@ Un récepteur qui ne renvoie rien s’exécute pendant l’émission : gardez-le
 <!-- tabs -->
 
 ```ts title="slow-observer.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 
 export const observation = createObservation({
   deliveryTimeoutMs: 2_000,
@@ -69,7 +66,7 @@ export const observation = createObservation({
 ```
 
 ```ts title="delivery.ts"
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { observation } from "./slow-observer.ts";
 
 export const greet = defineTask({ key: "greet", perform: () => "hello" });
@@ -95,11 +92,8 @@ Une ligne de protocole de plus de 16 Mio arrête un agent CLI. Le hub et `observ
 
 ```ts
 import { appendFile } from "node:fs/promises";
-import {
-  createObservation,
-  createCustomReporter,
-  dispatch,
-} from "@elie-laloum/outpost";
+import { createObservation, dispatch } from "@elie-laloum/outpost/core";
+import { createCustomReporter } from "@elie-laloum/outpost/observation";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const report = createCustomReporter({

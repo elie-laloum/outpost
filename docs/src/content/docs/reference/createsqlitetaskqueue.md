@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createSqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost/queues";
 ```
 
 ## Purpose and behavior

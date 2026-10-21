@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { containerProvider } from "../../src/providers/container.ts";
-import type { Command } from "../../src/index.ts";
+import type { Command } from "../../src/core.ts";
 import { repository } from "../helpers.ts";
 
 test("file mounts resolve the agent home and prepare writable parents without broad capabilities", async (t) => {

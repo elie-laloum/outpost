@@ -31,14 +31,14 @@ export const rules = [
 ```
 
 ```ts title="permissions.ts"
-import { defineHarnessPermissions } from "@elie-laloum/outpost";
+import { defineHarnessPermissions } from "@elie-laloum/outpost/harness";
 import { rules } from "./permission-rules.ts";
 
 export const permissions = defineHarnessPermissions({ default: "deny", rules });
 ```
 
 ```ts title="permission-model.ts"
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
@@ -51,7 +51,7 @@ import {
   createHarnessFileTools,
   createHarnessEditTools,
   createHarnessShellTools,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { modelProvider } from "./permission-model.ts";
 import { permissions } from "./permissions.ts";
 

@@ -13,7 +13,7 @@ import {
   createSlackSource,
   createSqliteTaskQueue,
   createStandardWebhook,
-} from "../../src/index.ts";
+} from "../../src/queues.ts";
 import type {
   QueueRequest,
   TaskQueue,
@@ -21,7 +21,7 @@ import type {
   TriggerFailure,
   TriggerRoute,
   TriggerServerOptions,
-} from "../../src/index.ts";
+} from "../../src/queues.ts";
 
 const githubSecret = "github-test-secret";
 const slackSecret = "slack-test-secret";

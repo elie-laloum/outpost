@@ -11,7 +11,7 @@ import {
   createKimiHarness,
   defineCopilotHook,
   defineKimiHook,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { copilotRpcBridge } from "../../src/adapters/agents/copilot/copilot-rpc.constants.ts";
 import { copilotRpcSession } from "../../src/adapters/agents/copilot/copilot-rpc.ts";
 import {

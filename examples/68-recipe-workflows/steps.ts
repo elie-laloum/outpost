@@ -2,7 +2,7 @@ import type {
   LoopTaskContext,
   LoopCheckResult,
   WorkflowJson,
-} from "../../dist/index.js";
+} from "../../dist/workflows.js";
 
 export function summary(files: WorkflowJson) {
   if (!Array.isArray(files)) throw new Error("Expected a file list");

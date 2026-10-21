@@ -5,11 +5,9 @@ import { once } from "node:events";
 import {
   createOpenAIModelProvider,
   createAnthropicModelProvider,
-  createSystemOneDecisionProvider,
-  OutpostError,
-  quotaFault,
-  unavailableFault,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { createSystemOneDecisionProvider } from "../../src/workflows.ts";
+import { OutpostError, quotaFault, unavailableFault } from "../../src/core.ts";
 
 test("HTTP error body reads still honor cancellation and request deadlines", async (t) => {
   const server = createServer((_request, response) => {

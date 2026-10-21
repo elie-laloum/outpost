@@ -15,8 +15,8 @@ Utilisez un artefact lorsqu’une tâche produit un fichier ou un rapport à con
 import {
   defineJsonArtifact,
   createArtifactStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/storage";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 export const coverage = defineJsonArtifact({
@@ -30,7 +30,10 @@ export const store = createArtifactStore({
 ```
 
 ```ts title="publish.ts"
-import { publishArtifact, readStoredArtifact } from "@elie-laloum/outpost";
+import {
+  publishArtifact,
+  readStoredArtifact,
+} from "@elie-laloum/outpost/storage";
 import { store, coverage } from "./coverage.ts";
 
 export const reference = await publishArtifact(
@@ -77,8 +80,8 @@ Changez `version` quand le format change. Un contrat dont le nom, la version ou 
 import {
   defineJsonArtifact,
   createArtifactStore,
-  createLocalTransport,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/storage";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 import { z } from "zod";
 
 export const findings = defineJsonArtifact({
@@ -92,7 +95,7 @@ export const store = createArtifactStore({
 ```
 
 ```ts title="audit.ts"
-import { defineArtifactTask } from "@elie-laloum/outpost";
+import { defineArtifactTask } from "@elie-laloum/outpost/workflows";
 import { store, findings } from "./findings.ts";
 
 export const audit = defineArtifactTask({
@@ -104,7 +107,7 @@ export const audit = defineArtifactTask({
 ```
 
 ```ts title="summary.ts"
-import { defineTask, readArtifact } from "@elie-laloum/outpost";
+import { defineTask, readArtifact } from "@elie-laloum/outpost/workflows";
 import { audit } from "./audit.ts";
 import { findings, store } from "./findings.ts";
 
@@ -119,7 +122,7 @@ export const summary = defineTask({
 ```
 
 ```ts title="audit-report.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { audit } from "./audit.ts";
 import { summary } from "./summary.ts";
 
@@ -139,8 +142,14 @@ La tâche renseigne `producer` à partir de l’exécution, de sa clé et de la 
 
 ```ts
 import { readFile } from "node:fs/promises";
-import { defineBinaryArtifact, publishArtifact } from "@elie-laloum/outpost";
-import type { ArtifactReference, ArtifactStore } from "@elie-laloum/outpost";
+import {
+  defineBinaryArtifact,
+  publishArtifact,
+} from "@elie-laloum/outpost/storage";
+import type {
+  ArtifactReference,
+  ArtifactStore,
+} from "@elie-laloum/outpost/storage";
 
 declare const store: ArtifactStore;
 declare const report: ArtifactReference;
@@ -169,8 +178,11 @@ Une référence est du JSON ordinaire : enregistrez-la dans un checkpoint, un jo
 
 ```ts
 import { readFile } from "node:fs/promises";
-import { readStoredArtifact } from "@elie-laloum/outpost";
-import type { ArtifactContract, ArtifactStore } from "@elie-laloum/outpost";
+import { readStoredArtifact } from "@elie-laloum/outpost/storage";
+import type {
+  ArtifactContract,
+  ArtifactStore,
+} from "@elie-laloum/outpost/storage";
 
 declare const store: ArtifactStore;
 declare const coverage: ArtifactContract<{ lines: number }>;

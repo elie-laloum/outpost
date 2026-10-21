@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecipeConfiguration } from "@elie-laloum/outpost";
+import type { RecipeConfiguration } from "@elie-laloum/outpost/recipes";
 ```
 
 ## Parameters and properties

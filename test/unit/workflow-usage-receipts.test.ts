@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { defineTask, defineWorkflow } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/workflows.ts";
 import type {
   TaskContext,
   WorkflowCheckpoint,
   WorkflowCheckpointStore,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 const usage = { input: 3, cached: 0, output: 2 };
 

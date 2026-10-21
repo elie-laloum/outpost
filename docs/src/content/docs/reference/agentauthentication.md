@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AgentAuthentication } from "@elie-laloum/outpost";
+import type { AgentAuthentication } from "@elie-laloum/outpost/core";
 ```
 
 ## Parameters and properties

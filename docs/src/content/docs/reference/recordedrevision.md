@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecordedRevision } from "@elie-laloum/outpost";
+import type { RecordedRevision } from "@elie-laloum/outpost/observation";
 ```
 
 ## Parameters and properties

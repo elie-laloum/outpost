@@ -1,20 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { createAgent, defineTextResponse, dispatch } from "../../src/core.ts";
 import {
-  createAgent,
   defineHarnessHook,
-  defineTextResponse,
   defineHarnessContextStrategy,
   defineHarnessPermissions,
   defineHarnessTool,
-  dispatch,
   createHarness,
-  type AgentObservation,
   type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

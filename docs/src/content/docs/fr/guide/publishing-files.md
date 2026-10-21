@@ -10,7 +10,7 @@ Travaillez sur une [copie du dossier](../working-with-files/) pour garder la sou
 Ouvrez une copie possédée du dossier source pour conserver ses fichiers pendant le traitement.
 
 ```ts title="documents.ts"
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 
 export function openDocuments() {
   return createWorkspace({
@@ -30,7 +30,7 @@ Déclarez la sélection et les suppressions autorisées pour la restitution vers
 import {
   publishWorkspaceOutputs,
   type FileWorkspace,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workspaces";
 
 export function publishDocuments(workspace: FileWorkspace) {
   return publishWorkspaceOutputs(workspace, {
@@ -54,7 +54,7 @@ await writeFile("summary.json", JSON.stringify({ files }, null, 2));
 Enregistrez les fichiers TypeScript dans le dossier parent et lancez `node process-documents.ts`. En cas de réussite, `documents/summary.json` contient la liste des fichiers copiés.
 
 ```ts title="process-documents.ts"
-import { createSandbox } from "@elie-laloum/outpost";
+import { createSandbox } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { openDocuments } from "./documents.ts";
 import { publishDocuments } from "./publication.ts";

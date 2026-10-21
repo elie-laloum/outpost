@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   createOpenAIModelProvider,
-  OutpostError,
   type ModelToolSpec,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { OutpostError } from "../../src/core.ts";
 import { readChatCompletion } from "../../src/adapters/models/openai-chat.ts";
 import { readModelResponse } from "../../src/adapters/models/openai-responses.ts";
 import { modelJson } from "../../src/adapters/models/model-http.ts";

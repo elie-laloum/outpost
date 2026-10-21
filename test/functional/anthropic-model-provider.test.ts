@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createServer } from "node:http";
 import { once } from "node:events";
-import { createAnthropicModelProvider } from "../../src/index.ts";
+import { createAnthropicModelProvider } from "../../src/harness.ts";
 import { readAnthropicResponse } from "../../src/adapters/models/anthropic-response.ts";
 
 const message = {

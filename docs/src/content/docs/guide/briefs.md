@@ -31,7 +31,7 @@ Run `npm test` and commit your change.
 
 ```ts title="feature.ts"
 import { fileURLToPath } from "node:url";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const result = await dispatch({

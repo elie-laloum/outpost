@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { DecisionState } from "@elie-laloum/outpost";
+import type { DecisionState } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

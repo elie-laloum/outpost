@@ -21,7 +21,11 @@ Un worktree conservé est un worktree Git ordinaire sur sa branche : ouvrez-le, 
 [`recoveryDetails()`](../../reference/recoverydetails/) renvoie ce qu’Outpost a attaché à l’erreur : `branch`, `directory`, `commits`, `transcript` et `logReference` lorsqu’ils existent.
 
 ```ts
-import { dispatch, OutpostError, recoveryDetails } from "@elie-laloum/outpost";
+import {
+  dispatch,
+  OutpostError,
+  recoveryDetails,
+} from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 try {
@@ -110,7 +114,10 @@ export const transfer = process.env.TRANSFER!;
 ```
 
 ```ts title="verify-transfer.ts"
-import { inspectRecovery, verifyRecoveryTransfer } from "@elie-laloum/outpost";
+import {
+  inspectRecovery,
+  verifyRecoveryTransfer,
+} from "@elie-laloum/outpost/recovery";
 import { repository, transfer } from "./recovery-target.ts";
 
 export async function verifyTransfer() {
@@ -136,7 +143,7 @@ import { verifyTransfer } from "./verify-transfer.ts";
 import {
   planRecoveryRestore,
   restoreRecoveryTransfer,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
 import { transfer, repository } from "./recovery-target.ts";
 
 await verifyTransfer();
@@ -160,9 +167,9 @@ console.log(restored.directory, restored.commit);
 ```ts
 import {
   archiveRecovery,
-  createLocalTransport,
   materializeRecoveryArchive,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/recovery";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 const transporter = createLocalTransport({ directory: "/mnt/shared/outpost" });
 const reference = await archiveRecovery({
   transporter,

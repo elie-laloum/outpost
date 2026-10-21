@@ -10,7 +10,7 @@ Enregistrez ces fichiers ensemble et lancez `node redact.ts`. L’observateur af
 Créez un observateur pour afficher la sortie de commande.
 
 ```ts title="events.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 
 export const observation = createObservation({
   sinks: [
@@ -26,7 +26,7 @@ export const observation = createObservation({
 Passez `redact` au workflow. Les chaînes correspondantes sont masquées avant chaque récepteur local ou hérité, y compris les journaux et les anciens callbacks d’observation. `dispatch()` et `createObservation()` acceptent la même politique.
 
 ```ts title="redact.ts"
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { observation } from "./events.ts";
 const task = defineTask({
   key: "record",

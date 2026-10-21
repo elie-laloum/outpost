@@ -8,12 +8,9 @@ import {
   createRecipeRuntime,
   validateRecipeProject,
 } from "../../src/recipes.ts";
-import {
-  speculate,
-  createLocalTransport,
-  defineRecipe,
-  createSandbox,
-} from "../../src/index.ts";
+import { speculate } from "../../src/experimental/speculation.ts";
+import { createLocalTransport, createSandbox } from "../../src/core.ts";
+import { defineRecipe } from "../../src/recipes.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { recipeSpeculationTransport } from "../../src/application/recipes/speculation-usage.ts";
 import { mapRecipeSchema } from "../../src/domain/recipes/schema-walk.ts";
@@ -24,7 +21,8 @@ import {
   events,
   output,
 } from "../fixtures/recipe-advanced.ts";
-import type { Usage, TaskContext } from "../../src/index.ts";
+import type { Usage } from "../../src/core.ts";
+import type { TaskContext } from "../../src/workflows.ts";
 
 const module = resolve("test/fixtures/recipe-advanced.ts");
 const extension = (kind: string, name: string, contract?: string) => ({

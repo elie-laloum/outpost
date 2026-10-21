@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ModelMessage } from "@elie-laloum/outpost";
+import type { ModelMessage } from "@elie-laloum/outpost/harness";
 ```
 
 ## Paramètres et propriétés

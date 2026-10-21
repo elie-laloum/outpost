@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { WorkflowUsage } from "@elie-laloum/outpost";
+import type { WorkflowUsage } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Paramètres et propriétés

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RunSnapshot } from "@elie-laloum/outpost";
+import type { RunSnapshot } from "@elie-laloum/outpost/observation";
 ```
 
 ## Paramètres et propriétés

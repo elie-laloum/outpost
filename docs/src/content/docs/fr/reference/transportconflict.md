@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { TransportConflict } from "@elie-laloum/outpost";
+import { TransportConflict } from "@elie-laloum/outpost/storage";
 ```
 
 ## Rôle et comportement

@@ -4,20 +4,22 @@ import { readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
-  defineHarnessTool,
   dispatch,
-  createHarness,
   createLocalTransport,
   defineJsonResponse,
-  summarizeHistory,
   createTransportConversations,
+} from "../../src/core.ts";
+import {
+  defineHarnessTool,
+  createHarness,
+  summarizeHistory,
   truncateToolResults,
-  type AgentObservation,
   type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { openTranscript } from "../../src/infrastructure/conversations/harness-transcript.ts";
 import { createHarnessConversations } from "../../src/infrastructure/conversations/harness-store.ts";

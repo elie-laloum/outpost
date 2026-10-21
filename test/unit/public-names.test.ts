@@ -1,6 +1,29 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as api from "../../src/index.ts";
+import * as core from "../../src/core.ts";
+import * as harness from "../../src/harness.ts";
+import * as storage from "../../src/storage.ts";
+import * as workflows from "../../src/workflows.ts";
+import * as observation from "../../src/observation.ts";
+import * as recovery from "../../src/recovery.ts";
+import * as workspaces from "../../src/workspaces.ts";
+import * as recipes from "../../src/recipes.ts";
+import * as integrations from "../../src/integrations.ts";
+import * as queues from "../../src/queues.ts";
+import * as speculation from "../../src/experimental/speculation.ts";
+const api = {
+  ...core,
+  ...harness,
+  ...storage,
+  ...workflows,
+  ...observation,
+  ...recovery,
+  ...workspaces,
+  ...recipes,
+  ...integrations,
+  ...queues,
+  ...speculation,
+};
 import * as daytona from "../../src/providers/daytona.ts";
 import * as docker from "../../src/providers/docker.ts";
 import * as firecracker from "../../src/providers/firecracker.ts";

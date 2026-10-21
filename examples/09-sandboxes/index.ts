@@ -2,12 +2,11 @@
 // Whatever you set up in it (files, installed tools…) stays available until it closes.
 
 import { join } from "node:path";
+import { createAgent, createSandbox } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessShellTools,
-  createSandbox,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

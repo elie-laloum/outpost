@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createWorkspace } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
 ```
 
 ## Purpose and behavior

@@ -1,23 +1,23 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { createAgent, dispatch, createSandbox } from "../../src/core.ts";
 import {
-  createAgent,
   createHarness,
   defineHarnessSubagent,
   defineHarnessTool,
   defineHarnessPermissions,
   defineHarnessContextStrategy,
   defineHarnessHook,
-  dispatch,
-  createSandbox,
-  createHarnessConversations,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
   type HarnessOptions,
+} from "../../src/harness.ts";
+import {
+  createHarnessConversations,
   type AgentObservation,
-} from "../../src/index.ts";
+} from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

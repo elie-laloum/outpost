@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ConversationStore } from "@elie-laloum/outpost";
+import type { ConversationStore } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Parameters and properties

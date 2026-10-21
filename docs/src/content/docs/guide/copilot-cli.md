@@ -14,7 +14,7 @@ Your GitHub account needs Copilot access; see [GitHub’s CLI quickstart](https:
 Copilot always runs on your Copilot plan. Pass a fine-grained GitHub token with the **Copilot Requests** permission:
 
 ```ts
-import { createAgent, createCopilotHarness } from "@elie-laloum/outpost";
+import { createAgent, createCopilotHarness } from "@elie-laloum/outpost/core";
 
 export const coder = createAgent({
   harness: createCopilotHarness({

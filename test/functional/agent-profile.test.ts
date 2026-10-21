@@ -4,19 +4,21 @@ import { join } from "node:path";
 import { test } from "node:test";
 import {
   createAgent,
+  createSandbox,
+  defineAgentProfile,
+} from "../../src/core.ts";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createSandbox,
-  defineAgentProfile,
   defineHarnessHook,
   defineHarnessPermissions,
   defineHarnessSubagent,
-  type AgentObservation,
   type ModelProvider,
   type ModelRequest,
-} from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

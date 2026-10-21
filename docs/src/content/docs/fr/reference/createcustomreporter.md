@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createCustomReporter } from "@elie-laloum/outpost";
+import { createCustomReporter } from "@elie-laloum/outpost/observation";
 ```
 
 ## Rôle et comportement

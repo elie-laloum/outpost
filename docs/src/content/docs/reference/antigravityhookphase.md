@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { AntigravityHookPhase } from "@elie-laloum/outpost";
+import type { AntigravityHookPhase } from "@elie-laloum/outpost/core";
 ```
 
 ## Purpose and behavior

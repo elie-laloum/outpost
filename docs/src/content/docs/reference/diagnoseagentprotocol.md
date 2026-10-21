@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
+import { diagnoseAgentProtocol } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Purpose and behavior

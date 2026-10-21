@@ -10,7 +10,7 @@ Choose a context strategy to reduce the history sent to the model as a conversat
 <!-- tabs -->
 
 ```ts title="context-model.ts"
-import { createAnthropicModelProvider } from "@elie-laloum/outpost";
+import { createAnthropicModelProvider } from "@elie-laloum/outpost/harness";
 
 export const modelProvider = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
@@ -18,12 +18,12 @@ export const modelProvider = createAnthropicModelProvider({
 ```
 
 ```ts title="context-agent.ts"
+import { createAgent } from "@elie-laloum/outpost/core";
 import {
-  createAgent,
   createHarness,
   createHarnessFileTools,
   summarizeHistory,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { modelProvider } from "./context-model.ts";
 
 export const coder = createAgent({
@@ -62,7 +62,7 @@ import {
   defineHarnessContextStrategy,
   summarizeHistory,
   truncateToolResults,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 
 const truncate = truncateToolResults();
 const summarize = summarizeHistory();

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
+import { WorkflowBudgetExceeded } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior
@@ -21,7 +21,7 @@ Error recorded in WorkflowResult.errors when a budget limit is reached, which fa
 
 | Name        | Type                                                                        | Presence | Meaning                                                                                     |
 | ----------- | --------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `dimension` | `"input" \| "cached" \| "cacheCreated" \| "output" \| "attempts" \| "cost"` | Required | Budget dimension whose admission limit was exceeded: attempts or a token counter.           |
+| `dimension` | `"input" \| "cached" \| "cacheCreated" \| "output" \| "cost" \| "attempts"` | Required | Budget dimension whose admission limit was exceeded: attempts or a token counter.           |
 | `limit`     | `number`                                                                    | Required | Configured admission threshold for the exceeded budget dimension.                           |
 | `observed`  | `number`                                                                    | Required | Current cumulative amount observed for the exceeded budget dimension.                       |
 | `name`      | `string`                                                                    | Required | Error class name used to distinguish this failure from other JavaScript errors.             |

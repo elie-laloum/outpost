@@ -4,13 +4,13 @@
 // Antigravity has no portable session format yet, so the fork is done by hand.
 
 import { join } from "node:path";
+import { agentVersions } from "@elie-laloum/outpost/integrations";
 import {
-  agentVersions,
   createAgent,
   createAntigravityHarness,
   createSandbox,
   dispatch,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

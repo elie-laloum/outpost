@@ -6,14 +6,16 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createAgent,
+  dispatch,
+  OutpostError,
+  recoveryDetails,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  dispatch,
-  OutpostError,
-  recoveryDetails,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

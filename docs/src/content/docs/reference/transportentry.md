@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TransportEntry } from "@elie-laloum/outpost";
+import type { TransportEntry } from "@elie-laloum/outpost/storage";
 ```
 
 ## Parameters and properties

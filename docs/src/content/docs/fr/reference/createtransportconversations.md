@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createTransportConversations } from "@elie-laloum/outpost";
+import { createTransportConversations } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

@@ -29,7 +29,7 @@ Les commandes s’exécutent dans la sandbox, dans la copie de travail de l’ag
 
 ```ts
 import { fileURLToPath } from "node:url";
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 await dispatch({

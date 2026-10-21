@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { RecoveryRestoreResult } from "@elie-laloum/outpost";
+import type { RecoveryRestoreResult } from "@elie-laloum/outpost/recovery";
 ```
 
 ## Paramètres et propriétés

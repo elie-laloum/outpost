@@ -19,7 +19,8 @@ import { hashInspectionEntry } from "../../src/infrastructure/inspection-hash.ts
 import { inspectionHashChunkBytes } from "../../src/infrastructure/inspection-hash.constants.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
-import { openWorkspace, OutpostError } from "../../src/index.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
+import { OutpostError } from "../../src/core.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";

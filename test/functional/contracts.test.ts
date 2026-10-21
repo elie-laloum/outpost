@@ -1,4 +1,5 @@
-import { createLocalTransport, readJournal } from "../../src/index.ts";
+import { createLocalTransport } from "../../src/core.ts";
+import { readJournal } from "../../src/observation.ts";
 import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -13,8 +14,11 @@ import {
   createSandbox,
   defineJsonResponse,
   defineTextResponse,
-} from "../../src/index.ts";
-import type { AgentObservation, ConversationStore } from "../../src/index.ts";
+} from "../../src/core.ts";
+import type {
+  AgentObservation,
+  ConversationStore,
+} from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   parseEnvironment,

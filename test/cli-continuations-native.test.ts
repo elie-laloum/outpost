@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createKimiHarness } from "../src/index.ts";
+import { createKimiHarness } from "../src/core.ts";
 import { createLocalSandboxProvider } from "../src/providers/local.ts";
 import { seedSession, sessionDirectory } from "./fixtures/native-session.ts";
 import { conversationStore, repository } from "./helpers.ts";

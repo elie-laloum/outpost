@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ObservationSource } from "@elie-laloum/outpost";
+import type { ObservationSource } from "@elie-laloum/outpost/observation";
 ```
 
 ## Rôle et comportement

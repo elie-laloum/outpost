@@ -2,7 +2,8 @@
 // The model runs on the host; each agent runs Node.js fetch through its sandbox shell.
 
 import { join } from "node:path";
-import { createWorkspace, defineTextResponse } from "@elie-laloum/outpost";
+import { createWorkspace } from "@elie-laloum/outpost/workspaces";
+import { defineTextResponse } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 import { model, modelProvider } from "../shared/model.ts";

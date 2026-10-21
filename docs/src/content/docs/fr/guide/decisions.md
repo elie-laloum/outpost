@@ -10,7 +10,7 @@ Utilisez une décision typée lorsque votre application doit choisir ou noter un
 `defineDecision()` valide et fige les questions. `choice` sélectionne une option nommée, `score` évalue des niveaux ordonnés et `noul` renvoie la probabilité du oui. La déclaration conserve les clés des réponses et les valeurs littérales des choix dans TypeScript.
 
 ```ts title="decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const routing = defineDecision({
   questions: {
@@ -38,7 +38,7 @@ Des services comme Laya arrondissent les probabilités et les scores à quatre d
 Un seul fournisseur implémente le protocole System One. Son URL de base inclut `/v1` ; Outpost ajoute `/systemone`. Votre processus Node.js utilise cette adresse et ces identifiants indépendamment de la sandbox.
 
 ```ts title="decision-provider.ts"
-import { createSystemOneDecisionProvider } from "@elie-laloum/outpost";
+import { createSystemOneDecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const provider = createSystemOneDecisionProvider({
   baseUrl: process.env.SYSTEM_ONE_BASE_URL ?? "http://127.0.0.1:8000/v1",
@@ -54,7 +54,7 @@ Configurez l’endpoint et une clé non vide pour un service authentifié. `apiK
 Fournissez du texte, un objet ou un tableau contenant du JSON sans perte. Les cycles, dates, propriétés indéfinies, tableaux creux, nombres non finis et hooks de sérialisation sont refusés avant la requête.
 
 ```ts title="evaluate.ts"
-import { decide } from "@elie-laloum/outpost";
+import { decide } from "@elie-laloum/outpost/workflows";
 import { routing } from "./decision.ts";
 import { provider } from "./decision-provider.ts";
 
@@ -81,7 +81,7 @@ Les requêtes n’ont aucune nouvelle tentative interne. HTTP 429 produit `quota
 `defineDecisionTask()` utilise les mécanismes existants de dépendance, condition, nouvelle tentative, délai et cache. Elle évalue sa fonction d’état avec `TaskContext` et n’alloue aucune sandbox. Les tâches dépendantes reçoivent des réponses typées via `context.value(triage)`.
 
 ```ts title="triage.ts"
-import { defineDecisionTask, defineTask } from "@elie-laloum/outpost";
+import { defineDecisionTask, defineTask } from "@elie-laloum/outpost/workflows";
 import { provider } from "./decision-provider.ts";
 import { routing } from "./decision.ts";
 
@@ -111,7 +111,7 @@ Ce fournisseur de test explicite renvoie une réponse et un reçu d’usage fixe
 <!-- tabs -->
 
 ```ts title="offline-decision.ts"
-import { defineDecision } from "@elie-laloum/outpost";
+import { defineDecision } from "@elie-laloum/outpost/workflows";
 
 export const readOnly = defineDecision({
   questions: {
@@ -121,7 +121,7 @@ export const readOnly = defineDecision({
 ```
 
 ```ts title="fixture-provider.ts"
-import type { DecisionProvider } from "@elie-laloum/outpost";
+import type { DecisionProvider } from "@elie-laloum/outpost/workflows";
 
 export const fixture: DecisionProvider = {
   name: "offline-fixture",
@@ -134,7 +134,7 @@ export const fixture: DecisionProvider = {
 ```
 
 ```ts title="offline.ts"
-import { decide } from "@elie-laloum/outpost";
+import { decide } from "@elie-laloum/outpost/workflows";
 import { readOnly } from "./offline-decision.ts";
 import { fixture } from "./fixture-provider.ts";
 

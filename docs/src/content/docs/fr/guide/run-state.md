@@ -10,7 +10,7 @@ Utilisez `createObservation({ transporter })` lorsqu’un terminal, une interfac
 Enregistrez les fichiers suivants ensemble. Le transport partagé donne accès au même stockage depuis le programme d’exécution et le lecteur. Construire l’objet observation ne crée aucun enregistrement ni heartbeat : le suivi commence lorsqu’une exécution l’utilise.
 
 ```ts title="storage.ts"
-import { createLocalTransport } from "@elie-laloum/outpost";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
 
 export const transporter = createLocalTransport({
   directory: ".outpost/storage",
@@ -20,7 +20,7 @@ export const transporter = createLocalTransport({
 Configurez l’objet avec ce transport et les sorties supplémentaires souhaitées. Il emprunte ses sorties et le transport ; leur propriétaire conserve la responsabilité de les fermer si nécessaire.
 
 ```ts title="observation.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 export const observation = createObservation({ transporter });
@@ -32,7 +32,7 @@ Enregistrez ce fichier sous `start.ts`, puis lancez `node start.ts`. Le workflow
 
 ```ts title="start.ts"
 import { observation } from "./observation.ts";
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 await using ownedObservation = observation;
 const check = defineTask({ key: "check", perform: () => "ok" });
@@ -55,7 +55,7 @@ Avec un transport, un identifiant déjà utilisé fait échouer l’ouverture av
 Avec la [configuration d’agent](../setup/), enregistrez aussi ce fichier puis lancez `node dispatch.ts`. Le dispatch possède son suivi et rend la main après sa fermeture. Utilisez un nouvel identifiant pour une autre exécution indépendante.
 
 ```ts title="dispatch.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { observation } from "./observation.ts";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
@@ -77,7 +77,7 @@ console.log(result.observationId, result.text);
 Lancez ce fichier après l’enregistrement de l’exécution. Un identifiant absent renvoie `undefined` ; le lecteur ne crée aucun enregistrement et ne prend aucun verrou d’exécution. Avec S3, utilisez le même bucket et le même préfixe dans chaque processus. Configurez le [masquage](../redacting-secrets/) sur l’observation productrice ou l’exécution avant la persistance.
 
 ```ts title="snapshot.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 await using reader = createObservation({ transporter });
@@ -94,7 +94,7 @@ if (run) {
 Lisez un état, puis suivez les observations après son `seq`. Conservez le dernier curseur traité pour vous reconnecter. Lancez ce fichier après l’enregistrement : il affiche les événements sauvegardés puis les nouveaux jusqu’à la fin de l’exécution ou l’expiration du heartbeat. La charge utile est de type `unknown` ; validez-la avant d’accéder à ses champs.
 
 ```ts title="watch.ts"
-import { createObservation } from "@elie-laloum/outpost";
+import { createObservation } from "@elie-laloum/outpost/core";
 import { transporter } from "./storage.ts";
 
 await using reader = createObservation({ transporter });

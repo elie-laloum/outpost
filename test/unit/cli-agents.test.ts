@@ -8,7 +8,7 @@ import {
   createClaudeHarness,
   createCopilotHarness,
   createKimiHarness,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { prepareAdapter } from "../../src/application/agent-bootstrap.ts";
 import { diagnoseAgentCli } from "../../src/application/doctor-agent.ts";
 import { doctorAgents } from "../../src/application/doctor-agent.constants.ts";

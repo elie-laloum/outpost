@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { createAntigravityHarness } from "@elie-laloum/outpost";
+import { createAntigravityHarness } from "@elie-laloum/outpost/core";
 ```
 
 ## Rôle et comportement

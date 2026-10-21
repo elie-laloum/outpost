@@ -16,7 +16,7 @@ Rien n’est isolé. L’agent et chaque commande qu’il lance agissent sous vo
 Créez le fournisseur avec `createLocalSandboxProvider()` et passez-le à `dispatch()`, comme tout autre fournisseur de sandbox.
 
 ```ts title="host.ts"
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { coder, repository } from "./outpost.config.ts";
 

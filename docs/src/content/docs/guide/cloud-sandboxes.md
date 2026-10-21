@@ -74,7 +74,7 @@ Live input costs one provider command per instruction: a wrapper started with th
 Pass the provider to `dispatch()` or `createSandbox()` as with any sandbox.
 
 ```ts
-import { dispatch } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost/core";
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 import { coder, repository } from "./outpost.config.ts";
 

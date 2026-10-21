@@ -10,8 +10,8 @@ import {
   createObservation,
   dispatch,
   fromSecrets,
-} from "@elie-laloum/outpost";
-import type { SecretSource } from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/core";
+import type { SecretSource } from "@elie-laloum/outpost/core";
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using observation = createObservation({ sinks: [createReporter()] });

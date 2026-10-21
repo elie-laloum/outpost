@@ -17,8 +17,8 @@ import {
   defineLoopTask,
   defineDecision,
   defineDecisionTask,
-  openWorkspace,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import { openWorkspace } from "../../src/workspaces.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   transform,

@@ -15,23 +15,26 @@ import {
   createSandbox,
   changed,
   OutpostError,
-  createAgentConflictResolver,
-  openWorkspace,
   recoveryDetails,
   dispatch,
-  readJournal,
-  createReplayAgent,
   createCodexHarness,
   createClaudeHarness,
   createCopilotHarness,
   createSteering,
   createKimiHarness,
+} from "../src/core.ts";
+import {
+  createAgentConflictResolver,
+  openWorkspace,
+} from "../src/workspaces.ts";
+import { readJournal, createReplayAgent } from "../src/observation.ts";
+import {
   createHarness,
   createHarnessFileTools,
   createHarnessEditTools,
   defineMcpPrompt,
-} from "../src/index.ts";
-import type { ModelRequest, HarnessToolContext } from "../src/index.ts";
+} from "../src/harness.ts";
+import type { ModelRequest, HarnessToolContext } from "../src/harness.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { conversationStore, repository, scripted } from "./helpers.ts";
@@ -39,8 +42,8 @@ import type {
   AgentEvent,
   AgentInput,
   AgentLiveInput,
-  SteeringDelivery,
-} from "../src/index.ts";
+} from "../src/integrations.ts";
+import type { SteeringDelivery } from "../src/core.ts";
 import { executeProcess } from "../src/infrastructure/process.ts";
 import { repositoryTransport } from "../src/infrastructure/repository-transport.ts";
 import { git } from "../src/infrastructure/git.ts";
@@ -1121,7 +1124,7 @@ test(
   "isolated synchronization preserves dirty and concurrently edited host workspaces",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async (t) => {
-    const { openWorkspace } = await import("../src/index.ts");
+    const { openWorkspace } = await import("../src/workspaces.ts");
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
@@ -1326,15 +1329,15 @@ test(
   "durable interactive tasks release containers between questions and restore files and history",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async (t) => {
+    const { createAgent, createLocalTransport } =
+      await import("../src/core.ts");
+    const { createHarness, defineHarnessTool } =
+      await import("../src/harness.ts");
     const {
-      createAgent,
-      createHarness,
-      defineHarnessTool,
       defineInteractiveAgentTask,
       defineWorkflow,
       createWorkflowCheckpointStore,
-      createLocalTransport,
-    } = await import("../src/index.ts");
+    } = await import("../src/workflows.ts");
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"

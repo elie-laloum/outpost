@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { containerProvider } from "../../src/providers/container.ts";
 import { containerMounts } from "../../src/providers/container-mounts.ts";
-import type { Command } from "../../src/index.ts";
+import type { Command } from "../../src/core.ts";
 import { repository } from "../helpers.ts";
 
 test("isolated containers use remote placement and private writable Git storage", async (t) => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createSteering, dispatch } from "../src/index.ts";
+import { createSteering, dispatch } from "../src/core.ts";
 
 export async function validateSteering({
   common,

@@ -1,15 +1,14 @@
 import { writeSync } from "node:fs";
 import { join } from "node:path";
+import { createAgent, createLocalTransport } from "../../src/core.ts";
+import { createHarness, defineHarnessTool } from "../../src/harness.ts";
 import {
-  createAgent,
-  createHarness,
-  defineHarnessTool,
   defineInteractiveAgentTask,
-  createLocalTransport,
   createWorkflowCheckpointStore,
   defineWorkflow,
-} from "../../src/index.ts";
-import type { WorkflowAnswer, SandboxProvider } from "../../src/index.ts";
+} from "../../src/workflows.ts";
+import type { WorkflowAnswer } from "../../src/workflows.ts";
+import type { SandboxProvider } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 
 const control = process.argv[2]!;

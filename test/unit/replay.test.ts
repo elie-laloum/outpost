@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createReplayAgent, ReplayDivergence } from "../../src/index.ts";
+import { createReplayAgent, ReplayDivergence } from "../../src/observation.ts";
 
 const usage = { input: 2, cached: 1, output: 3 };
 const entry = (kind: string, fields: Record<string, unknown> = {}) => ({

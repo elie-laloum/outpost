@@ -10,7 +10,7 @@ Estimez une dépense en tokens sans appeler de modèle. Enregistrez ces fichiers
 Les tarifs sont exprimés par million de tokens dans une seule devise. Les noms de modèles doivent correspondre exactement à la configuration de vos agents.
 
 ```ts title="prices.ts"
-import type { ModelPriceTable } from "@elie-laloum/outpost";
+import type { ModelPriceTable } from "@elie-laloum/outpost/workflows";
 export const prices: ModelPriceTable = {
   currency: "EUR",
   models: {
@@ -22,7 +22,7 @@ export const prices: ModelPriceTable = {
 Cette tâche déclare sa consommation explicitement. Les fonctions de tâches d’agent le font déjà ; un dispatch personnalisé doit recevoir `prices: context.prices`, et un worker doit retourner la consommation par modèle.
 
 ```ts title="monetary-budget.ts"
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { prices } from "./prices.ts";
 const task = defineTask({
   key: "meter",
@@ -55,7 +55,7 @@ Les requêtes en cours peuvent dépasser le plafond. Gardez les limites de dépe
 Pour utiliser les tarifs de Models.dev, associez votre alias de modèle à son identifiant dans le catalogue. Le taux EUR est illustratif.
 
 ```ts title="catalog-prices.ts"
-import { loadModelPrices } from "@elie-laloum/outpost";
+import { loadModelPrices } from "@elie-laloum/outpost/harness";
 
 export const prices = await loadModelPrices({
   provider: "openai",

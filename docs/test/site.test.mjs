@@ -1163,7 +1163,7 @@ for (const locale of ["", "fr/"]) {
     expect(show.x).toBeGreaterThanOrEqual(say.x + say.width - 1);
     await page.goto(`${locale}reference/dispatch/`);
     await expect(page.locator(".title-show")).toContainText(
-      'import { dispatch } from "@elie-laloum/outpost"',
+      'import { dispatch } from "@elie-laloum/outpost/core";',
     );
     await expect(page.locator(".prop")).toHaveCount(119);
     for (const name of [

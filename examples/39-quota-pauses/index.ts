@@ -7,18 +7,22 @@ import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import {
   createAgent,
+  createLocalTransport,
+  createSandbox,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessFileTools,
-  createLocalTransport,
   createOpenAIModelProvider,
-  createSandbox,
+} from "@elie-laloum/outpost/harness";
+import {
   createWorkflowCheckpointStore,
   defineAgentTask,
   defineTask,
   defineWorkflow,
   type WorkflowEvent,
   type WorkflowResult,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 import { quotaProxy } from "./quota-proxy.ts";

@@ -19,7 +19,7 @@ import type { TestContext } from "node:test";
 import {
   planRecoveryRestore,
   restoreRecoveryTransfer,
-} from "../../src/index.ts";
+} from "../../src/recovery.ts";
 import { captureRecoveryChecksums } from "../../src/application/recovery-checksum-capture.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";

@@ -17,8 +17,9 @@ import {
   defineJsonResponse,
   recoveryDetails,
   createTransportConversations,
-} from "../../src/index.ts";
-import type { CliAgent, ConversationStore } from "../../src/index.ts";
+} from "../../src/core.ts";
+import type { CliAgent } from "../../src/core.ts";
+import type { ConversationStore } from "../../src/integrations.ts";
 import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";

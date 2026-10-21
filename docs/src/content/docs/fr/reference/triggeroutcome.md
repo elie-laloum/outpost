@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TriggerOutcome } from "@elie-laloum/outpost";
+import type { TriggerOutcome } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

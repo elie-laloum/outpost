@@ -10,7 +10,7 @@ Use steering to add context to an active task without cancelling it. Keep the pr
 Create a steering controller and pass it to the dispatch. While the task runs, `send()` submits another instruction and resolves when Outpost can report how it was delivered.
 
 ```ts
-import { createSteering, dispatch } from "@elie-laloum/outpost";
+import { createSteering, dispatch } from "@elie-laloum/outpost/core";
 import { coder, repository, sandboxProvider } from "./outpost.config.ts";
 
 const steering = createSteering();
@@ -61,7 +61,10 @@ An instruction the dispatch cannot deliver, for example because the agent never 
 Each [built-in subagent](../subagents/) run has an id, reported by its `subagent` event. Pass it as `subagent` to reach that run only.
 
 ```ts
-import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
+import {
+  createSteering,
+  type DispatchOptions,
+} from "@elie-laloum/outpost/core";
 
 const steering = createSteering();
 const request: DispatchOptions = {

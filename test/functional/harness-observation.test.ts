@@ -1,16 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { createAgent, dispatch, createLocalTransport } from "../../src/core.ts";
 import {
-  createAgent,
   createHarness,
   defineHarnessTool,
   defineHarnessHook,
-  dispatch,
-  createObservationHub,
-  readJournal,
-  createLocalTransport,
-} from "../../src/index.ts";
-import type { Observation, ModelProvider } from "../../src/index.ts";
+} from "../../src/harness.ts";
+import { createObservationHub, readJournal } from "../../src/observation.ts";
+import type { Observation } from "../../src/observation.ts";
+import type { ModelProvider } from "../../src/harness.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 

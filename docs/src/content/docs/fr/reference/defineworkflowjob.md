@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineWorkflowJob } from "@elie-laloum/outpost";
+import { defineWorkflowJob } from "@elie-laloum/outpost/queues";
 ```
 
 ## Rôle et comportement

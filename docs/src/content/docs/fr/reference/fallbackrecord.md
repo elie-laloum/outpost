@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { FallbackRecord } from "@elie-laloum/outpost";
+import type { FallbackRecord } from "@elie-laloum/outpost/core";
 ```
 
 ## Paramètres et propriétés

@@ -4,7 +4,7 @@ import { symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { cacheMounts } from "../../src/providers/container-cache.ts";
 import { containerProvider } from "../../src/providers/container.ts";
-import type { Command } from "../../src/index.ts";
+import type { Command } from "../../src/core.ts";
 import { linuxHostMounts, repository } from "../helpers.ts";
 
 test("dependency caches require explicit safe names, keys and disjoint mounts", () => {

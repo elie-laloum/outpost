@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { ReplayDivergencePolicy } from "@elie-laloum/outpost";
+import type { ReplayDivergencePolicy } from "@elie-laloum/outpost/observation";
 ```
 
 ## Rôle et comportement

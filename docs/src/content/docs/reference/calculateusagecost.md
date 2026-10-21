@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { calculateUsageCost } from "@elie-laloum/outpost";
+import { calculateUsageCost } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

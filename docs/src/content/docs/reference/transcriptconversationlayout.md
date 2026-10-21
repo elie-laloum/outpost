@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { TranscriptConversationLayout } from "@elie-laloum/outpost";
+import type { TranscriptConversationLayout } from "@elie-laloum/outpost/integrations";
 ```
 
 ## Parameters and properties

@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { defineLoopTask } from "@elie-laloum/outpost";
+import { defineLoopTask } from "@elie-laloum/outpost/workflows";
 ```
 
 ## Purpose and behavior

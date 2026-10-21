@@ -21,7 +21,7 @@ import {
   createCodexHarness,
   createKimiHarness,
   createSandbox,
-} from "../../src/index.ts";
+} from "../../src/core.ts";
 import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi/kimi-mcp.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";

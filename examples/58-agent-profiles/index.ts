@@ -10,14 +10,16 @@ import {
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
-  createHarness,
-  createHarnessEditTools,
-  createHarnessFileTools,
   createKimiHarness,
   dispatch,
   OutpostError,
+} from "@elie-laloum/outpost/core";
+import {
+  createHarness,
+  createHarnessEditTools,
+  createHarnessFileTools,
   type ModelProvider,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
 import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local";
 import { demoRepository } from "../shared/repository.ts";
 import { profile, restricted } from "./profile.ts";

@@ -7,17 +7,21 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import {
   checkSpeculationIntegration,
+  recoverSpeculation,
+  speculate,
+} from "@elie-laloum/outpost/experimental/speculation";
+import {
   createAgent,
+  createLocalTransport,
+  createObservation,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createLocalTransport,
-  createObservation,
-  recoverSpeculation,
-  speculate,
-  type ObservationHub,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/harness";
+import { type ObservationHub } from "@elie-laloum/outpost/observation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

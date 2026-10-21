@@ -4,18 +4,22 @@
 import { join } from "node:path";
 import {
   createAgent,
+  createReporter,
+  createObservation,
+  createSandbox,
+} from "@elie-laloum/outpost/core";
+import {
   createHarness,
   createHarnessEditTools,
   createHarnessFileTools,
   createHarnessShellTools,
-  createReporter,
-  createObservation,
-  createSandbox,
+} from "@elie-laloum/outpost/harness";
+import {
   defineAgentTask,
   defineCommandTask,
   defineTask,
   defineWorkflow,
-} from "@elie-laloum/outpost";
+} from "@elie-laloum/outpost/workflows";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 

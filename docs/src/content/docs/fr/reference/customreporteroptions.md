@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { CustomReporterOptions } from "@elie-laloum/outpost";
+import type { CustomReporterOptions } from "@elie-laloum/outpost/observation";
 ```
 
 ## Paramètres et propriétés

@@ -5,7 +5,7 @@ import {
   defineWorkflow,
   type WorkflowEvent,
   type WorkflowTelemetry,
-} from "../../src/index.ts";
+} from "../../src/workflows.ts";
 
 test("workflow telemetry and observers receive the full lifecycle independently", async () => {
   const events: WorkflowEvent[] = [];

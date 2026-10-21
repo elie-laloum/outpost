@@ -10,7 +10,7 @@ Set a budget before adding retries, loops or parallel agents. The first example 
 Pass a `budget` to the workflow’s `start()` method to limit attempts, reported tokens or both. These limits apply across the workflow’s tasks, rather than to each task separately.
 
 ```ts
-import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const meter = defineTask({
   key: "meter",
@@ -51,8 +51,8 @@ One agent turn counts as one attempt, even if it makes many model requests. A sk
 Agent task helpers report the tokens of their agent automatically: `defineAgentTask()`, `defineIsolatedTask()`, `defineInteractiveAgentTask()` and `defineQueuedTask()`. A custom task that calls a model reports what it spent.
 
 ```ts
-import { defineTask } from "@elie-laloum/outpost";
-import type { Usage } from "@elie-laloum/outpost";
+import { defineTask } from "@elie-laloum/outpost/workflows";
+import type { Usage } from "@elie-laloum/outpost/core";
 
 declare function summarize(
   text: string,
@@ -101,7 +101,7 @@ With token limits and no `attempts`, incomplete usage stops the run with `Workfl
 <!-- tabs -->
 
 ```ts title="fix-task.ts"
-import { defineIsolatedTask } from "@elie-laloum/outpost";
+import { defineIsolatedTask } from "@elie-laloum/outpost/workflows";
 import { repository, sandboxProvider, coder } from "./outpost.config.ts";
 
 export const fix = defineIsolatedTask({
@@ -120,7 +120,7 @@ export const fix = defineIsolatedTask({
 ```
 
 ```ts title="run-fix.ts"
-import { defineWorkflow } from "@elie-laloum/outpost";
+import { defineWorkflow } from "@elie-laloum/outpost/workflows";
 import { fix } from "./fix-task.ts";
 
 export const result = await defineWorkflow("fix-tests", [fix]).start({
