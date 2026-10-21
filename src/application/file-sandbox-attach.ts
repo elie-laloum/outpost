@@ -17,7 +17,7 @@ export function createFileSandboxAttachment({
   lease,
   signal,
   gate,
-  settled,
+  settlement,
   agents,
 }: FileSandboxAttachmentContext): FileSandbox["attach"] {
   return (settings = {}) => {
@@ -78,7 +78,7 @@ export function createFileSandboxAttachment({
         : undefined;
       let hookFailure: unknown;
       try {
-        const output = await settled(
+        const output = await settlement.settled(
           () =>
             executionLease.invoke({
               ...(hooks ? hooks.command(command) : command),

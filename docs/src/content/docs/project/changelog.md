@@ -22,6 +22,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 - Add an ordered path to the Guide introduction after the first workflow: reuse a sandbox, validate responses, save and resume, then automate runs. Recipe generators now name the files they derive and the sources to edit, including in stale-output errors.
 - Report recipe configuration errors from component references, component types, unknown fields, extension declarations, callback contracts and dependency cycles as structured diagnostics located at the faulty value, instead of the first line of the file. Diagnostics can carry a `hint`, printed on a `Hint:` line by the CLI and included in `--json` errors.
 - Prepare agents and restore conversations through one internal session component shared by Git and file sandboxes, with paths and variables injected by each mode. Git sandboxes still authenticate each CLI adapter once per lease and file sandboxes on every dispatch; both now install agent configuration through the authenticated lease, and a file sandbox no longer restores the same continuation twice.
+- Split `createFileSandbox()` into sandbox provisioning with its allocation journal, file settlement (readiness hooks, synchronization and checkpoints) and agent dispatch modules; the facade only composes them and keeps the existing ownership, recovery and close behavior.
 
 ## 13.0.0
 
