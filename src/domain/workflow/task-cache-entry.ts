@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { canonicalJson } from "./canonical-json.ts";
+import { losslessJson } from "../lossless-json.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { taskCacheFormat } from "./task-cache.constants.ts";
 import type { TaskCacheEntry } from "./task-cache.types.ts";
@@ -14,14 +15,14 @@ export function taskCacheFingerprint(
   version: string,
   key: unknown,
 ): string {
+  if (key === undefined)
+    throw new Error("Task cache key must be a lossless JSON value");
   let parts;
   try {
-    parts = checkpointValue(key);
+    parts = losslessJson(key, { label: "Task cache key" });
   } catch {
     throw new Error("Task cache key must be a lossless JSON value");
   }
-  if (parts.kind !== "json")
-    throw new Error("Task cache key must be a lossless JSON value");
   return createHash("sha256")
     .update(
       canonicalJson({
@@ -29,7 +30,7 @@ export function taskCacheFingerprint(
         workflow,
         task,
         version,
-        key: parts.value,
+        key: parts,
       }),
     )
     .digest("hex");

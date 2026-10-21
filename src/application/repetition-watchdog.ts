@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { OutpostError } from "../domain/errors.ts";
 import { defaultStuckInterventions } from "../domain/watchdog.constants.ts";
 import { canonicalJson } from "../domain/workflow/canonical-json.ts";
-import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
+import { losslessJson } from "../domain/lossless-json.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 import type {
   RepetitionActivity,
@@ -127,17 +127,19 @@ export function repetitionWatchdog(
 
 function activityFingerprint(event: RepetitionActivity, scope: string): string {
   try {
-    const value = checkpointValue(
-      event.kind === "tool" ? event.input : event.changes,
-    );
+    const activity = event.kind === "tool" ? event.input : event.changes;
+    const value =
+      activity === undefined
+        ? null
+        : losslessJson(activity, { label: "Repetition activity" });
     return createHash("sha256")
       .update(
         canonicalJson([
           scope,
           event.kind,
           event.kind === "tool" ? event.name : "",
-          value.kind,
-          value.kind === "json" ? value.value : null,
+          activity === undefined ? "undefined" : "json",
+          value,
         ]),
       )
       .digest("hex");

@@ -225,6 +225,14 @@ test("fingerprints canonicalize keys and separate workflows, tasks and versions"
       () => taskCacheFingerprint("w", "t", "1", invalid),
       /Task cache key must be a lossless JSON value/,
     );
+  // Persisted entries from earlier releases are found only under this identity.
+  assert.equal(
+    taskCacheFingerprint("review", "summarize", "1", {
+      files: ["a.ts", 2, null, true],
+      nested: { depth: 1 },
+    }),
+    "f7550dbd9c5ceb7267498423d7ec6ce71598869a4a471f404be9aeefd0fa3e0d",
+  );
 
   const { store } = memory();
   let runs = 0;

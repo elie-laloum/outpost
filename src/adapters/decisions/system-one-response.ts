@@ -2,7 +2,7 @@ import {
   decisionObject,
   requireDecisionResponse,
 } from "../../domain/decision-result.ts";
-import { checkpointValue } from "../../domain/workflow/checkpoint-value.ts";
+import { losslessJson } from "../../domain/lossless-json.ts";
 import { OutpostError } from "../../domain/errors.ts";
 import type { DecisionProviderResult } from "../../domain/decision.types.ts";
 
@@ -36,9 +36,10 @@ export function readSystemOneResponse(value: unknown): DecisionProviderResult {
   requireDecisionResponse(
     truncated === undefined || typeof truncated === "boolean",
   );
+  requireDecisionResponse(value !== undefined);
   const metadata = (() => {
     try {
-      return checkpointValue(value);
+      return losslessJson(value, { label: "Decision response" });
     } catch {
       throw new OutpostError(
         "response",
@@ -46,7 +47,6 @@ export function readSystemOneResponse(value: unknown): DecisionProviderResult {
       );
     }
   })();
-  requireDecisionResponse(metadata.kind === "json");
   return {
     model: data.model,
     answers,
@@ -60,6 +60,6 @@ export function readSystemOneResponse(value: unknown): DecisionProviderResult {
         }
       : {}),
     ...(truncated === undefined ? {} : { truncated }),
-    metadata: structuredClone(metadata.value),
+    metadata: structuredClone(metadata),
   };
 }

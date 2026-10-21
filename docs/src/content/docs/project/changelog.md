@@ -13,6 +13,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 ## Unreleased
 
 - Compile interactive recipe tasks through an internal entry that accepts Git and file options, removing the last identical type-narrowing branch.
+- Validate harness routing states, decision responses, replayed decision events, recipe inputs, task cache keys and repetition fingerprints as labelled lossless JSON rather than checkpoint outputs. Persisted checkpoint values keep their envelope, and existing cache identities are unchanged.
 
 ## 13.0.0
 

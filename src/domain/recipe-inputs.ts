@@ -1,4 +1,4 @@
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import { canonicalJson } from "./workflow/canonical-json.ts";
 import { recipeObject } from "./recipes/values.ts";
 
@@ -118,10 +118,8 @@ export function resolveRecipeInputs(
 
 function jsonInput(value: unknown): RecipeValue {
   if (recipeValue(value)) return value;
-  const result = checkpointValue(value);
-  if (result.kind !== "json")
-    throw new Error("Recipe inputs require JSON values");
-  return result.value;
+  if (value === undefined) throw new Error("Recipe inputs require JSON values");
+  return losslessJson(value, { label: "Recipe inputs" });
 }
 function sameValue(left: unknown, right: unknown): boolean {
   return canonicalJson(jsonInput(left)) === canonicalJson(jsonInput(right));

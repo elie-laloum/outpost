@@ -8,7 +8,7 @@ import type {
   FallbackTrigger,
 } from "./fallback-agent.types.ts";
 import { addUsage, usageDifference, validateUsage } from "./usage.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import type { FaultCode } from "./errors.types.ts";
 import {
   replayDefaults,
@@ -291,7 +291,7 @@ function recordedDecision(
   event: JournalObject,
   index: number,
 ): ReplayDecisionEvent["event"] {
-  checkpointValue(event);
+  losslessJson(event, { label: "Replay decision events" });
   if (event.kind === "decision-request") {
     invariant(
       Object.hasOwn(event, "request"),

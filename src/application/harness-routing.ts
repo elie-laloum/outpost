@@ -6,28 +6,29 @@ import type { DecisionState } from "../domain/decision.types.ts";
 import type { ModelRouteEvent } from "../domain/harness-routing.types.ts";
 import type { HarnessHistory, HarnessRuntime } from "./harness.types.ts";
 import { executeDecision } from "./decision.ts";
-import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
+import { losslessJson } from "../domain/lossless-json.ts";
 import { invariant } from "../domain/errors.ts";
 import type { HarnessModelRoutingContext } from "../domain/harness-routing.types.ts";
 
 function routingState(context: HarnessModelRoutingContext): DecisionState {
-  const state = checkpointValue({
-    system: context.system,
-    step: context.step,
-    model: context.model,
-    tools: context.tools,
-    messages: context.messages.map((message) => ({
-      role: message.role,
-      content: message.content.filter((block) => block.type !== "reasoning"),
-    })),
-  });
+  const state = losslessJson(
+    {
+      system: context.system,
+      step: context.step,
+      model: context.model,
+      tools: context.tools,
+      messages: context.messages.map((message) => ({
+        role: message.role,
+        content: message.content.filter((block) => block.type !== "reasoning"),
+      })),
+    },
+    { label: "Routing state" },
+  );
   invariant(
-    state.kind === "json" &&
-      state.value !== null &&
-      typeof state.value === "object",
+    state !== null && typeof state === "object",
     "Routing state must be a JSON object",
   );
-  return state.value;
+  return state;
 }
 
 export async function routeHarnessModel(
