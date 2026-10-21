@@ -1,5 +1,12 @@
 import { createDeadline } from "../deadline.ts";
-import { startTask, resumeTask } from "./task-state.ts";
+import {
+  recordTaskCacheHit,
+  recordTaskFailure,
+  resumeTask,
+  startTask,
+  startTaskAttempt,
+  recordTaskInteraction,
+} from "./task-state.ts";
 import { InputSuspension } from "./input.ts";
 import { loopDefinition } from "./loop-task.ts";
 import { runLoopTask } from "./loop-runner.ts";
@@ -50,7 +57,7 @@ export async function runTask(
         : undefined;
     if (cache?.hit) {
       values.set(item, cache.value);
-      state.cacheHit = true;
+      recordTaskCacheHit(state);
       finish(item, "done");
       return;
     }
@@ -67,7 +74,7 @@ export async function runTask(
       }
     }
   } catch (error) {
-    state.error = error instanceof Error ? error.message : String(error);
+    recordTaskFailure(state, error);
     if (
       signal.aborted ||
       ((error instanceof WorkflowBudgetExceeded ||
@@ -122,7 +129,7 @@ async function perform(
     const attempt = priorAttempts + cycle;
     signal.throwIfAborted();
     runtime.accounting.admit();
-    state.attempts = attempt;
+    startTaskAttempt(state, attempt);
     emit({ type: "attempt", key: item.key, attempt });
     await runtime.persist();
     let delayMs = 0;
@@ -145,7 +152,7 @@ async function perform(
     } catch (error) {
       runtime.closeAttempt(item);
       if (error instanceof InputSuspension && item.interaction) {
-        state.interaction = error.interaction;
+        recordTaskInteraction(state, error.interaction);
         finish(item, "waiting-input");
         emit({
           type: "input-request",

@@ -1,3 +1,4 @@
+import { decideTask, pauseTaskAtGate } from "./task-state.ts";
 import { randomUUID } from "node:crypto";
 import { OutpostError } from "../errors.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
@@ -56,7 +57,7 @@ export async function pauseGate(
   runtime: WorkflowExecutionState,
 ): Promise<void> {
   const gate = item.gate!;
-  runtime.record(item).pause = Object.freeze({
+  pauseTaskAtGate(runtime.record(item), {
     ...gate,
     id: randomUUID(),
     requestedAt: new Date().toISOString(),
@@ -158,16 +159,19 @@ export function applyDecisions(
   for (const decision of decisions) {
     const item = pending.get(decision.key)!;
     const record = runtime.record(item);
-    record.decision = decision;
+    const rejection =
+      decision.action === "reject"
+        ? `${item.key} rejected by ${decision.actor}: ${decision.reason}`
+        : undefined;
+    decideTask(record, decision, rejection);
     runtime.emit({
       type: "decision",
       key: item.key,
       status: decision.action === "reject" ? "rejected" : "done",
     });
-    if (decision.action === "reject") {
-      record.error = `${item.key} rejected by ${decision.actor}: ${decision.reason}`;
+    if (rejection !== undefined) {
       runtime.errors.push(
-        new OutpostError("rejected", record.error, {
+        new OutpostError("rejected", rejection, {
           key: item.key,
           actor: decision.actor,
           reason: decision.reason,

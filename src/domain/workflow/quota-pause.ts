@@ -1,3 +1,4 @@
+import { pauseTaskForQuota, releaseTaskQuota } from "./task-state.ts";
 import { recoveryDetails } from "../errors.ts";
 import { quotaFault } from "../quota.ts";
 import { waitForRetry } from "./retry.ts";
@@ -53,7 +54,7 @@ export async function pauseForQuota(
     typeof recovery?.transcript === "string" ||
     (fault.conversation !== undefined &&
       recovery?.conversation === fault.conversation);
-  state.quota = Object.freeze({
+  pauseTaskForQuota(state, {
     requestedAt: new Date().toISOString(),
     message: fault.message,
     ...(fault.resetAt === undefined ? {} : { resetAt: fault.resetAt }),
@@ -98,6 +99,6 @@ export async function awaitQuotaReset(
     throw error;
   }
   runtime.quotaResumes.set(item, pause);
-  delete state.quota;
+  releaseTaskQuota(state);
   return true;
 }

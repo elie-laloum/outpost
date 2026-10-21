@@ -1,4 +1,5 @@
 import { checkpointValue } from "./checkpoint-value.ts";
+import { startTaskAttempt } from "./task-state.ts";
 import { OutpostError } from "../errors.ts";
 import { LoopTaskExhausted } from "./loop-task.ts";
 import { validateLoopCheck } from "./loop-validation.ts";
@@ -47,7 +48,7 @@ export async function runLoopTask(
         ? last
         : { round: rounds.length + 1, phase: "attempt" };
     runtime.accounting.admit();
-    state.attempts++;
+    startTaskAttempt(state, state.attempts + 1);
     runtime.emit({ type: "attempt", key: item.key, attempt: state.attempts });
     await save(entry);
     const deadline = new AbortController();

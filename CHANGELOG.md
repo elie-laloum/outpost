@@ -5,6 +5,7 @@
 - Compile interactive recipe tasks through an internal entry that accepts Git and file options, removing the last identical type-narrowing branch.
 - Validate harness routing states, decision responses, replayed decision events, recipe inputs, task cache keys and repetition fingerprints as labelled lossless JSON rather than checkpoint outputs. Persisted checkpoint values keep their envelope, and existing cache identities are unchanged.
 - Bind every typed JSON Schema decode to a decoder declared once with its schema, compiled on first use, and keep untyped validation for caller-supplied schemas. Workspace inspection and recovery reuse the workspace record decoder; the internal `validateRecipeSchema` alias is removed.
+- Route the remaining task lifecycle changes (attempts, cache hits, failures, input suspension and answers, quota pauses, gate pauses and decisions) through named transitions, so each workflow status change has one owner. Statuses, events and checkpoints are unchanged.
 
 ## 13.0.0
 

@@ -1,3 +1,4 @@
+import { answerTaskInput, recordTaskInteraction } from "./task-state.ts";
 import { randomUUID } from "node:crypto";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { validateAnswer, validateInputQuestion } from "./input-validation.ts";
@@ -59,7 +60,10 @@ export function interactionContext(
     },
     async save(state: WorkflowJson) {
       current();
-      record.interaction = immutableInput({ ...record.interaction, state });
+      recordTaskInteraction(
+        record,
+        immutableInput({ ...record.interaction, state }),
+      );
       await runtime.persist();
     },
     suspend(question, state) {
@@ -123,9 +127,7 @@ export function applyAnswers(
       (task) => task.key === answer.key,
     )!;
     const record = runtime.record(item);
-    record.interaction = immutableInput({ ...record.interaction, answer });
-    record.status = "waiting";
-    delete record.finishedAt;
+    answerTaskInput(record, immutableInput({ ...record.interaction, answer }));
     runtime.emit({ type: "input-answer", key: item.key, status: "waiting" });
   }
 }
