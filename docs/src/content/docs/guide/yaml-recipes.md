@@ -54,6 +54,8 @@ Use **version 3 in both files** for these guides. Their versions describe separa
 
 Validate the files, then execute the recipe with a final JSON report. Validation does not run commands or allocate a sandbox.
 
+Each task declares one operation. If you put both `agent` and `command` in a format-3 task, validation names the conflicting operations and reports the task's line and column. Split them into separate tasks and connect them with `after`.
+
 ```sh
 npx outpost recipe validate --file recipe.yaml --config outpost.yaml
 npx outpost recipe run --file recipe.yaml --config outpost.yaml --json

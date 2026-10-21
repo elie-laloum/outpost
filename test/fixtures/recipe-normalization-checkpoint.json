@@ -1,0 +1,81 @@
+{
+  "revision": "7060dcc2",
+  "recipe": {
+    "version": 3,
+    "name": "normalized-compatibility",
+    "tasks": [
+      {
+        "key": "select",
+        "call": {}
+      },
+      {
+        "key": "approve",
+        "after": ["select"],
+        "gate": {
+          "kind": "approval",
+          "prompt": "Continue?",
+          "actors": ["maintainer"]
+        }
+      },
+      {
+        "key": "finish",
+        "after": ["approve", "select"],
+        "value": {
+          "$step": "select",
+          "path": ["value"]
+        }
+      }
+    ]
+  },
+  "checkpoint": {
+    "format": 1,
+    "identity": "ee953a480864bd652edeed0eec202f88f9be349fd2f74339f21ed2d8eccfccda",
+    "executionId": "7e934580-812c-443c-a692-c9cccfd12bdd",
+    "records": [
+      {
+        "key": "select",
+        "status": "done",
+        "attempts": 1,
+        "startedAt": "2026-10-21T10:00:28.046Z",
+        "finishedAt": "2026-10-21T10:00:28.047Z"
+      },
+      {
+        "key": "approve",
+        "status": "paused",
+        "attempts": 0,
+        "pause": {
+          "kind": "approval",
+          "prompt": "Continue?",
+          "actors": ["maintainer"],
+          "id": "8fbbb11d-c85e-4fcf-9518-22a36af5db32",
+          "requestedAt": "2026-10-21T10:00:28.048Z"
+        },
+        "finishedAt": "2026-10-21T10:00:28.048Z"
+      },
+      {
+        "key": "finish",
+        "status": "waiting",
+        "attempts": 0
+      }
+    ],
+    "values": {
+      "select": {
+        "kind": "json",
+        "value": {
+          "value": {
+            "literal": "{{ inputs.goal }}",
+            "nested": [null, false, 0]
+          }
+        }
+      }
+    },
+    "usage": {
+      "attempts": 1,
+      "tokens": {
+        "input": 0,
+        "cached": 0,
+        "output": 0
+      }
+    }
+  }
+}

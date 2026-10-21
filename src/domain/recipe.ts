@@ -1,3 +1,4 @@
+import { recipeAction } from "./recipes/actions.ts";
 import {
   recipeJson,
   validateRecipeCondition,
@@ -121,22 +122,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       : {};
   Object.assign(common, additions);
   if (version === 3) {
-    const actions = [
-      "speculation",
-      "queued",
-      "command",
-      "agent",
-      "value",
-      "call",
-      "loop",
-      "decision",
-      "isolated",
-      "gate",
-      "interactive",
-      "artifact",
-    ].filter((key) => Object.hasOwn(item, key));
-    if (actions.length !== 1)
-      throw new Error(`${path} requires exactly one task action`);
+    recipeAction(item, path);
     for (const field of [
       "speculation",
       "queued",

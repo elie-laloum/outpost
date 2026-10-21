@@ -1,37 +1,20 @@
-import { defineQueuedTask } from "../queued-task.ts";
-import { defineInteractiveAgentTask } from "../interactive-task.ts";
-import {
-  defineApprovalTask,
-  definePauseTask,
-} from "../../domain/workflow/gates.ts";
-import { defineArtifactTask } from "../artifact-tasks.ts";
-import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
-import { recipeDispatchProjection } from "./projection.ts";
-import { runRecipeSpeculation } from "./speculation.ts";
-import { defineTask, defineWorkflow } from "../../domain/workflow.ts";
-import { defineLoopTask } from "../../domain/workflow/loop-task.ts";
-import {
-  defineAgentTask,
-  defineCommandTask,
-  defineIsolatedTask,
-  defineIsolatedCommandTask,
-} from "../tasks.ts";
-import { defineDecisionTask } from "../decision-task.ts";
+import { defineWorkflow } from "../../domain/workflow.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import {
   recipeCondition,
   recipeExpression,
-  recipeJson,
 } from "../../domain/recipes/expressions.ts";
-import { renderRecipeCommand } from "../../domain/recipe-templates.ts";
+import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
+import { normalizeRecipe } from "./normalize.ts";
+import { compileRecipeStep } from "./compile-step.ts";
+import { recipeTextRenderer } from "./rendering.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type {
   Task,
   TaskContext,
   Workflow,
+  WorkflowOptions,
 } from "../../domain/workflow.types.ts";
-import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
-import type { DecisionState } from "../../domain/decision.types.ts";
 import type {
   RecipeExecutionBindings,
   RecipeWorkflowComponents,
@@ -63,22 +46,15 @@ export function validateRecipeConcurrency(
         );
 }
 
-function decisionState(value: WorkflowJson): DecisionState {
-  if (
-    typeof value === "string" ||
-    (value !== null && typeof value === "object")
-  )
-    return value;
-  throw new Error("Recipe decision state requires a string, object or array");
-}
-
 export function bindRecipeWorkflow(
   document: RecipeDocument,
   bindings: RecipeExecutionBindings,
   components: RecipeWorkflowComponents = { workflow: {}, steps: {} },
 ): Workflow {
-  validateRecipeWorkflowSettings(document, components);
+  if (document.version === 3)
+    validateRecipeWorkflowSettings(document, components);
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
+  const program = normalizeRecipe(document, components);
   const tasks = new Map<string, Task>();
   const sandbox = async (context: TaskContext) => {
     if (bindings.acquireSandbox) return bindings.acquireSandbox(context);
@@ -86,36 +62,31 @@ export function bindRecipeWorkflow(
       throw new Error("Recipe task requires a shared sandbox");
     return bindings.sandbox;
   };
-  for (const step of document.tasks) {
-    const configuration = components.steps[step.key] ?? {};
+  const keys = program.tasks.map((step) => step.key);
+  const contextFor = (context: TaskContext) => ({
+    inputs,
+    steps: keys,
+    output(key: string) {
+      const task = tasks.get(key);
+      if (!task) throw new Error(`Unknown recipe dependency: ${key}`);
+      return context.value(task);
+    },
+  });
+  const evaluate = (value: unknown, context: TaskContext) =>
+    recipeExpression(value, contextFor(context));
+  const text = recipeTextRenderer(program.version, contextFor);
+  for (const step of program.tasks) {
     const after = step.after.map((key) => {
       const task = tasks.get(key);
       if (!task) throw new Error(`Unknown recipe dependency: ${key}`);
       return task;
     });
-    const contextFor = (context: TaskContext) => ({
-      inputs,
-      steps: document.tasks.map((task) => task.key),
-      output(key: string) {
-        const task = tasks.get(key);
-        if (!task) throw new Error(`Unknown recipe dependency: ${key}`);
-        return context.value(task);
-      },
-    });
-    const evaluate = (value: unknown, context: TaskContext) =>
-      recipeExpression(value, contextFor(context));
-    const text = (value: string, context: TaskContext): string => {
-      const result = evaluate(value, context);
-      if (typeof result !== "string")
-        throw new Error("Recipe text requires a string");
-      return result;
-    };
     const common = {
       key: step.key,
       after,
       ...(step.timeoutMs === undefined ? {} : { timeoutMs: step.timeoutMs }),
       ...(step.retry ? { retry: step.retry } : {}),
-      ...configuration.options,
+      ...step.options,
       ...(step.when === undefined
         ? {}
         : {
@@ -123,311 +94,30 @@ export function bindRecipeWorkflow(
               recipeCondition(step.when, contextFor(context)),
           }),
     };
-    const save = (task: Task) => tasks.set(step.key, task);
-    if (step.speculation) {
-      if (!configuration.speculation)
-        throw new Error("Recipe speculation requires createRecipeRuntime");
-      const options = configuration.speculation;
-      save(
-        defineTask({
-          ...common,
-          async perform(context) {
-            const candidates = options.candidates.map((candidate) => ({
-              ...candidate,
-              request: {
-                ...candidate.request,
-                brief:
-                  candidate.request.brief.text === undefined
-                    ? candidate.request.brief
-                    : { text: text(candidate.request.brief.text, context) },
-              },
-            }));
-            const durability = options.durability
-              ? {
-                  ...options.durability,
-                  runId: JSON.stringify([
-                    components.workflow.checkpoint?.runId,
-                    step.key,
-                    options.durability.runId,
-                  ]),
-                  version: `${options.durability.version}#recipe:${components.identity}`,
-                  ...(components.retryIncomplete
-                    ? { resume: "retry-incomplete" as const }
-                    : {}),
-                }
-              : undefined;
-            return {
-              value: await runRecipeSpeculation(
-                {
-                  ...options,
-                  candidates,
-                  ...(durability ? { durability } : {}),
-                },
-                context,
-              ),
-            };
-          },
-        }),
-      );
-      continue;
-    }
-    if (step.queued) {
-      if (!configuration.queued)
-        throw new Error("Recipe queued tasks require createRecipeRuntime");
-      const options = configuration.queued;
-      if (options.input && Object.hasOwn(step, "arguments"))
-        throw new Error(
-          `${step.key}: provide either arguments or queued.input`,
-        );
-      const queued = defineQueuedTask({
-        ...common,
-        ...options,
-        input:
-          options.input ??
-          ((context) => evaluate(step.arguments ?? {}, context)),
-        decode: options.decode ?? recipeJson,
-      });
-      save(
-        defineTask({
-          ...queued,
-          async perform(context) {
-            return { value: recipeJson(await queued.perform(context)) };
-          },
-        }),
-      );
-      continue;
-    }
-    if (step.gate) {
-      if (!configuration.gate)
-        throw new Error("Recipe gates require createRecipeRuntime");
-      const { kind, ...gate } = configuration.gate;
-      const factories = {
-        approval: defineApprovalTask,
-        pause: definePauseTask,
-      };
-      save(
-        defineTask({
-          ...factories[kind]({ key: step.key, after, ...gate }),
-          ...common,
-        }),
-      );
-      continue;
-    }
-    if (step.interactive) {
-      if (!configuration.interactive)
-        throw new Error("Recipe dialogues require createRecipeRuntime");
-      const interactive =
-        "workspaceSource" in configuration.interactive
-          ? defineInteractiveAgentTask({
-              ...common,
-              ...configuration.interactive,
-            })
-          : defineInteractiveAgentTask({
-              ...common,
-              ...configuration.interactive,
-            });
-      save(
-        defineTask({
-          ...interactive,
-          ...common,
-          async perform(context) {
-            return { value: recipeJson(await interactive.perform(context)) };
-          },
-        }),
-      );
-      continue;
-    }
-    if (step.artifact) {
-      if (!configuration.artifact)
-        throw new Error("Recipe artifacts require createRecipeRuntime");
-      const artifact = configuration.artifact;
-      if ((artifact.produce !== undefined) === Object.hasOwn(step, "data"))
-        throw new Error(`${step.key}: provide either data or artifact.produce`);
-      save(
-        defineArtifactTask({
-          ...common,
-          ...artifact,
-          produce:
-            artifact.produce ?? ((context) => evaluate(step.data, context)),
-        }),
-      );
-      continue;
-    }
-    if (step.loop) {
-      if (!configuration.loop)
-        throw new Error("Recipe loop components require createRecipeRuntime");
-      const loop = configuration.loop;
-      save(
-        defineLoopTask({
-          ...common,
-          ...loop,
-          attempt: async (context, feedback) => ({
-            value: recipeJson(await loop.attempt(context, feedback)),
-          }),
-          check: (context, output) => loop.check(context, output.value),
-        }),
-      );
-      continue;
-    }
-    if (step.decision) {
-      if (!configuration.decision)
-        throw new Error(
-          "Recipe decision components require createRecipeRuntime",
-        );
-      const decision = defineDecisionTask({
-        ...common,
-        ...configuration.decision,
-        state: (context) => decisionState(evaluate(step.state ?? {}, context)),
-      });
-      save(
-        defineTask({
-          ...decision,
-          async perform(context) {
-            return { value: recipeJson(await decision.perform(context)) };
-          },
-        }),
-      );
-      continue;
-    }
-    if (step.isolated) {
-      if (!configuration.isolated)
-        throw new Error(
-          "Recipe isolated components require createRecipeRuntime",
-        );
-      const request = configuration.isolated;
-      if ("command" in request) {
-        const isolated = defineIsolatedCommandTask({
-          ...common,
-          request: (context) => ({
-            ...request,
-            command: renderRecipeCommand(request.command, (value) =>
-              text(value, context),
-            ),
-          }),
-        });
-        save(
-          defineTask({
-            ...isolated,
-            async perform(context) {
-              return { value: recipeJson(await isolated.perform(context)) };
-            },
-          }),
-        );
-        continue;
-      }
-      const isolated = defineIsolatedTask({
-        ...common,
-        ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
-        request: async (context) => {
-          const rendered = {
-            ...request,
-            brief:
-              request.brief.text === undefined
-                ? request.brief
-                : { text: text(request.brief.text, context) },
-          };
-          const prepared = bindings.prepareIsolated
-            ? await bindings.prepareIsolated(step.key, rendered, context)
-            : rendered;
-          if ("command" in prepared)
-            throw new Error(
-              "An isolated agent declaration cannot become a command",
-            );
-          return prepared;
-        },
-      });
-      save(
-        defineTask({
-          ...isolated,
-          async perform(context) {
-            try {
-              return recipeDispatchProjection(await isolated.perform(context));
-            } finally {
-              await bindings.releaseIsolated?.(step.key);
-            }
-          },
-        }),
-      );
-      continue;
-    }
-    if (Object.hasOwn(step, "value")) {
-      save(
-        defineTask({
-          ...common,
-          perform: (context) => ({ value: evaluate(step.value, context) }),
-        }),
-      );
-      continue;
-    }
-    if (step.call) {
-      if (!configuration.call)
-        throw new Error("Recipe call components require createRecipeRuntime");
-      const call = configuration.call;
-      save(
-        defineTask({
-          ...common,
-          async perform(context) {
-            return {
-              value: recipeJson(
-                await call.perform(
-                  evaluate(step.arguments ?? {}, context),
-                  context,
-                ),
-              ),
-            };
-          },
-        }),
-      );
-      continue;
-    }
-    if (step.command) {
-      const command = step.command;
-      save(
-        defineTask({
-          ...common,
-          perform: async (context) =>
-            defineCommandTask({
-              key: step.key,
-              sandbox: await sandbox(context),
-              command: renderRecipeCommand(command, (value) =>
-                text(value, context),
-              ),
-            }).perform(context),
-        }),
-      );
-      continue;
-    }
-    const agent = step.agent ? bindings.agents?.[step.agent] : undefined;
-    if (!agent || step.brief === undefined)
-      throw new Error(`Unknown recipe agent: ${step.agent}`);
-    if (step.dispatch && !configuration.dispatch)
-      throw new Error("Recipe dispatch components require createRecipeRuntime");
-    const brief = step.brief;
-    save(
-      defineTask({
-        ...common,
-        async perform(context) {
-          const request = {
-            ...configuration.dispatch,
-            agent,
-            brief: { text: text(brief, context) },
-          };
-          await bindings.validateDispatch?.(request);
-          const task = defineAgentTask({
-            ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
-            key: step.key,
-            sandbox: await sandbox(context),
-            request: () => request,
-          });
-          return recipeDispatchProjection(await task.perform(context));
-        },
+    tasks.set(
+      step.key,
+      compileRecipeStep(step, {
+        version: program.version,
+        common,
+        bindings,
+        components,
+        sandbox,
+        evaluate,
+        text,
       }),
     );
   }
-  const workflow = defineWorkflow(document.name, [...tasks.values()]);
-  return {
+  const workflow = defineWorkflow(program.name, [...tasks.values()]);
+  const result: Workflow = {
     ...workflow,
-    start(options = {}) {
+    start(options: WorkflowOptions = {}) {
+      if (program.version !== 3) {
+        if (options.concurrency !== undefined && options.concurrency !== 1)
+          throw new Error(
+            "A recipe shares one sandbox and requires concurrency 1",
+          );
+        return workflow.start({ ...options, concurrency: 1 });
+      }
       const settings = {
         ...(recipeHasSharedSandbox(document) ? { concurrency: 1 } : {}),
         ...components.workflow,
@@ -437,4 +127,5 @@ export function bindRecipeWorkflow(
       return workflow.start(settings);
     },
   };
+  return program.version === 3 ? result : Object.freeze(result);
 }

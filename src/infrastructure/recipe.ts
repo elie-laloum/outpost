@@ -33,7 +33,7 @@ export function parseRecipe(source: string): RecipeDocument {
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const path =
-      /\b(?:tasks\[\d+\](?:\.[A-Za-z]+)*|inputs\.[A-Za-z0-9_-]+(?:\.[A-Za-z]+)*|recipe\.[A-Za-z]+)\b/.exec(
+      /\b(?:tasks\[\d+\](?:\.[A-Za-z]+)*|inputs\.[A-Za-z0-9_-]+(?:\.[A-Za-z]+)*|recipe\.[A-Za-z]+)(?!\w)/.exec(
         error.message,
       )?.[0];
     const keys = (path ?? "")

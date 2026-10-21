@@ -54,6 +54,8 @@ Utilisez la **version 3 dans les deux fichiers** pour suivre ces guides. Leurs v
 
 Validez les fichiers, puis exécutez la recette avec un rapport final JSON. La validation ne lance aucune commande et n’alloue aucune sandbox.
 
+Chaque étape déclare une seule opération. Si vous placez `agent` et `command` dans la même étape au format 3, la validation nomme les opérations incompatibles et indique la ligne et la colonne de l’étape. Séparez-les en deux étapes reliées par `after`.
+
 ```sh
 npx outpost recipe validate --file recipe.yaml --config outpost.yaml
 npx outpost recipe run --file recipe.yaml --config outpost.yaml --json
