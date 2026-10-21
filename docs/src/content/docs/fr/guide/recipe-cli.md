@@ -101,3 +101,7 @@ outpost recipe fetch --recipe review --file review.yaml \
 ```
 
 `--recipe` sélectionne l’entrée du catalogue et `--file` la destination. Le rapport JSON comprend nom, révision de recette, SHA-256 et chemin enregistré. Les sources et redirections distantes exigent HTTPS sans identifiants dans l’URL ; chaque ressource est limitée à 1 Mio et 15 secondes. Le catalogue fournit l’empreinte attendue : faites confiance à son éditeur. Consultez [la contribution de recettes](../sharing-recipes/#contribuer-et-tester-une-recette) pour le format.
+
+## Examiner avant d’exécuter
+
+Lancez `outpost recipe plan --file recipe.yaml --config execution.yaml` pour examiner le type de workspace, les dépendances des tâches, les composants requis et les publications de sorties. Ajoutez `--json` pour obtenir le plan structuré. Comme la validation, cette inspection n’alloue aucune sandbox, n’importe aucune extension et ne résout aucune valeur secrète. Elle contrôle la compatibilité statique ; les capacités réelles du fournisseur et de l’agent sont revérifiées avant exécution.

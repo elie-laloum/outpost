@@ -294,6 +294,12 @@ export const commandOptions = {
     options: ["file", "config", "workspace-kind", "json"],
     examples: [`outpost recipe init ${recipeFile}`],
   },
+  "recipe plan": {
+    description:
+      "Inspect workspace, components and publications without allocation or resolving secrets",
+    options: ["file", "config", "json"],
+    examples: [`outpost recipe plan ${recipeFile}`],
+  },
   "recipe validate": {
     description:
       "Validate a recipe and optional YAML configuration without allocating a sandbox",

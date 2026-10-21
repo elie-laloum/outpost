@@ -409,3 +409,42 @@ test("extensions resolve installed import-only packages without importing during
   await using runtime = await createRecipeRuntime({ file, config });
   await assert.rejects(runtime.run(), /imported fixture/);
 });
+
+test("static recipe plans inspect file work without allocating or resolving environment", async (t) => {
+  const { inspectRecipeExecution } =
+    await import("../../src/application/recipes/plan.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-plan-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "execution.yaml");
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "plan",
+      tasks: [{ key: "read", command: { executable: "must-not-run" } }],
+    }),
+  );
+  await writeFile(
+    config,
+    JSON.stringify({
+      version: 3,
+      workspace: { kind: "ephemeral" },
+      sandbox: { provider: "local" },
+      environment: { PLAN_SECRET: "OUTPOST_UNDECLARED_PLAN_SECRET" },
+      outputs: [
+        { paths: ["*.json"], destination: "./results", policy: "create" },
+      ],
+    }),
+  );
+  const plan = await inspectRecipeExecution({ file, config });
+  assert.equal(plan.workspace.kind, "ephemeral");
+  assert.equal(plan.validation, "static");
+  assert.equal(plan.outputs.length, 1);
+  assert.equal(plan.tasks[0]?.key, "read");
+  const { readdir } = await import("node:fs/promises");
+  assert.deepEqual((await readdir(directory)).sort(), [
+    "execution.yaml",
+    "recipe.yaml",
+  ]);
+});

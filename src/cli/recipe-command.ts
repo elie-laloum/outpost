@@ -1,3 +1,4 @@
+import { inspectRecipeExecution } from "../application/recipes/plan.ts";
 import { open } from "node:fs/promises";
 import { resolve, extname } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -121,6 +122,20 @@ export async function recipeCommand({
     return recipeCatalogCommand({ values, positionals });
   if (positionals[1] === "init")
     return initializeRecipe({ values, positionals });
+  if (positionals[1] === "plan") {
+    if (!values.file || !values.config || !/\.ya?ml$/.test(values.config))
+      throw new Error("Recipe plan requires --file and a YAML --config");
+    const plan = await inspectRecipeExecution({
+      file: values.file,
+      config: values.config,
+    });
+    process.stdout.write(
+      values.json
+        ? `${JSON.stringify(plan)}\n`
+        : `${plan.name}: static plan\nWorkspace: ${plan.workspace.kind}\nTasks: ${plan.tasks.map((task) => task.key).join(", ")}\nComponents: ${plan.requirements.map((item) => item.name).join(", ") || "none"}\nPublications: ${plan.outputs.length}\nRuntime capabilities are checked again before execution.\n`,
+    );
+    return;
+  }
   if (positionals[1] === "validate") {
     if (!values.file)
       throw new Error("Recipe validate requires --file recipe.yaml");
