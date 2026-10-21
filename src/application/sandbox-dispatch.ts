@@ -15,6 +15,7 @@ import { warmContinuation } from "./continuation.ts";
 import { preflightDispatch } from "./dispatch-validation.ts";
 import { recordReplayChanges } from "./replay-recording.ts";
 import { execute } from "./execution.ts";
+import { createAgentConversations } from "./agent-conversations.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 import type { Sandbox, WarmDispatchResult } from "./outpost.types.ts";
 import type {
@@ -54,41 +55,23 @@ export async function dispatchInSandbox<T>(
       "agent.prepare",
       async () => selectAgent(requestedAgent, signal, dispatch.observation),
     );
-    const storage = storageFor(selected);
-    const continued = dispatch.continuation;
-    const session: CandidateSession = {
-      selected,
-      conversations: new Set(
-        continued && !continued.fork ? [continued.id] : [],
-      ),
-      captured: new Map(),
-      conversation: continued?.id,
-      async save(id) {
-        invariant(storage, "Conversation storage is unavailable");
-        const location = await observedOperation(
-          dispatch.observation,
-          "conversation",
-          "conversation.capture",
-          async () =>
-            storage.capture(id, {
-              repository: workspace.repository,
-              ...(dispatch.observation
-                ? { observation: dispatch.observation }
-                : {}),
-              sandbox: executionLease,
-              staging,
-              ...(options.conversationHome
-                ? { home: options.conversationHome }
-                : {}),
-              ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-              local: sandboxProvider.placement === "host",
-            }),
-        );
-        session.captured.set(id, location);
-        transcript = location;
-        return location;
+    const session = createAgentConversations({
+      agent: selected,
+      ...(dispatch.continuation ? { continuation: dispatch.continuation } : {}),
+      context: {
+        repository: workspace.repository,
+        ...(dispatch.observation ? { observation: dispatch.observation } : {}),
+        sandbox: executionLease,
+        staging,
+        ...(options.conversationHome ? { home: options.conversationHome } : {}),
+        ...(dispatch.warn ? { warn: dispatch.warn } : {}),
+        local: sandboxProvider.placement === "host",
       },
-    };
+      onCapture(record) {
+        transcript = record;
+      },
+    });
+    const continued = dispatch.continuation;
     sessions.push(session);
     if (continued)
       await observedOperation(
@@ -116,7 +99,6 @@ export async function dispatchInSandbox<T>(
     initial = undefined;
     const { session, adapter, executionLease } = prepared;
     const { selected } = session;
-    const storage = storageFor(selected);
     const execution = await execute(
       workspace,
       executionLease,
@@ -135,9 +117,8 @@ export async function dispatchInSandbox<T>(
         },
       },
       async (turn) => {
-        if (!turn.conversation || !storage || selected.capture === false)
-          return turn;
-        const location = await session.save(turn.conversation);
+        const captured = await session.captureTurn(turn);
+        if (captured === turn) return turn;
         const usage =
           turn.usage.input +
             turn.usage.output +
@@ -145,13 +126,11 @@ export async function dispatchInSandbox<T>(
             (turn.usage.cacheCreated ?? 0) >
           0
             ? undefined
-            : selected.transcriptUsage?.(await readFile(location.file, "utf8"));
+            : selected.transcriptUsage?.(
+                await readFile(captured.transcript!, "utf8"),
+              );
         return {
-          ...turn,
-          transcript: location.file,
-          ...(location.reference
-            ? { transcriptReference: location.reference }
-            : {}),
+          ...captured,
           ...(usage
             ? {
                 usage: dispatch.prices

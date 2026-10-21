@@ -30,10 +30,13 @@ const files = (await readdir(root, { recursive: true })).filter((file) =>
   file.endsWith(".ts"),
 );
 const failures = [];
+const runtimeDependencies = new Map();
 for (const file of files) {
   const absolute = resolve(root, file);
   const text = await readFile(absolute, "utf8");
   const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+  const imports = new Set();
+  runtimeDependencies.set(absolute, imports);
   const layer = file.split(/[\\/]/)[0];
   const types = file.endsWith(".types.ts");
   const fail = (node, message) =>
@@ -61,6 +64,20 @@ for (const file of files) {
       ts.isStringLiteral(node.moduleSpecifier)
     ) {
       const specifier = node.moduleSpecifier.text;
+      const bindings = ts.isImportDeclaration(node)
+        ? node.importClause?.namedBindings
+        : node.exportClause;
+      const typeOnly = ts.isImportDeclaration(node)
+        ? node.importClause?.isTypeOnly
+        : node.isTypeOnly;
+      const namedTypes =
+        bindings &&
+        (ts.isNamedImports(bindings) || ts.isNamedExports(bindings)) &&
+        bindings.elements.length > 0 &&
+        bindings.elements.every((item) => item.isTypeOnly) &&
+        !(ts.isImportDeclaration(node) && node.importClause?.name);
+      if (specifier.startsWith(".") && !typeOnly && !namedTypes)
+        imports.add(resolve(dirname(absolute), specifier));
       if (specifier.startsWith(".") && dependencies[layer]) {
         const target = relative(
           root,
@@ -70,6 +87,13 @@ for (const file of files) {
           fail(node, `${layer} cannot depend on ${target}`);
       }
     }
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      node.arguments[0].text.startsWith(".")
+    )
+      imports.add(resolve(dirname(absolute), node.arguments[0].text));
     if (
       ts.isImportTypeNode(node) &&
       ts.isLiteralTypeNode(node.argument) &&
@@ -108,6 +132,47 @@ for (const file of files) {
     }
   }
 }
+const indexes = new Map(),
+  low = new Map(),
+  stack = [],
+  pending = new Set();
+let next = 0;
+function checkCycles(file) {
+  indexes.set(file, next);
+  low.set(file, next++);
+  stack.push(file);
+  pending.add(file);
+  for (const dependency of runtimeDependencies.get(file) ?? []) {
+    if (!indexes.has(dependency)) {
+      checkCycles(dependency);
+      low.set(file, Math.min(low.get(file), low.get(dependency)));
+      continue;
+    }
+    if (pending.has(dependency))
+      low.set(file, Math.min(low.get(file), indexes.get(dependency)));
+  }
+  if (low.get(file) !== indexes.get(file)) return;
+  const group = [];
+  let member;
+  do {
+    member = stack.pop();
+    pending.delete(member);
+    group.push(relative(root, member).replaceAll("\\", "/"));
+  } while (member !== file);
+  if (
+    group.length > 1 &&
+    group.some((name) =>
+      /^application\/(?:(?:file|git)-)?(?:workspace|sandbox|dispatch|attach)(?:-|\.ts)/.test(
+        name,
+      ),
+    )
+  )
+    failures.push(
+      `Workspace execution modules must not form runtime import cycles: ${group.sort().join(", ")}`,
+    );
+}
+for (const file of runtimeDependencies.keys())
+  if (!indexes.has(file)) checkCycles(file);
 assert.deepEqual(
   failures,
   [],

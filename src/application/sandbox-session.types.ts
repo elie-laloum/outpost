@@ -1,6 +1,6 @@
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
-import type { ConversationRecord } from "../domain/conversation.types.ts";
+import type { AgentConversations } from "./agent-conversations.types.ts";
 import type { FallbackRecord } from "../domain/fallback-agent.types.ts";
 import type { Execution } from "./execution.types.ts";
 import type { Variables } from "../domain/command.types.ts";
@@ -66,13 +66,7 @@ export interface AuthenticatedAgent {
   readonly variables: Variables;
 }
 
-export interface CandidateSession {
-  readonly selected: Agent;
-  readonly conversations: Set<string>;
-  readonly captured: Map<string, ConversationRecord>;
-  save(id: string): Promise<ConversationRecord>;
-  conversation: string | undefined;
-}
+export type CandidateSession = AgentConversations;
 
 export interface CandidateExecution<T> {
   readonly session: CandidateSession;

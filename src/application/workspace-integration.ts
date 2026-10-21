@@ -14,7 +14,7 @@ import type {
 } from "./conflict-resolution.types.ts";
 import type { Workspace, WorkspaceOptions } from "./outpost.types.ts";
 import { checkSpeculationIntegration } from "./speculation-integration.ts";
-import { openWorkspace } from "./workspace.ts";
+import type { WorkspaceFactory } from "./workspace-execution.types.ts";
 import { workspaces } from "./workspace-registry.ts";
 
 export async function integrateWorkspace(
@@ -22,6 +22,7 @@ export async function integrateWorkspace(
   lease: WorkspaceLease,
   options: WorkspaceOptions,
   settings: IntegrationOptions = {},
+  openWorkspace: WorkspaceFactory,
 ): Promise<ConflictResolution | void> {
   settings.signal?.throwIfAborted();
   const onConflict = settings.onConflict;

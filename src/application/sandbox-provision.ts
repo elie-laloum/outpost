@@ -23,10 +23,11 @@ import type { RemoteSync } from "./remote-workspace.types.ts";
 import type { ProvisionedSandbox } from "./sandbox-session.types.ts";
 import { startupFailure } from "./startup-recovery.ts";
 import { workspaces } from "./workspace-registry.ts";
-import { openWorkspace } from "./workspace.ts";
+import type { WorkspaceFactory } from "./workspace-execution.types.ts";
 
 export async function provisionSandbox(
   options: SandboxOptions,
+  openWorkspace: WorkspaceFactory,
 ): Promise<ProvisionedSandbox> {
   invariant(
     !("provider" in options),

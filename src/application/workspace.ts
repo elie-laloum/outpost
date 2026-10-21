@@ -9,11 +9,12 @@ import { invariant } from "../domain/errors.ts";
 import { validateDiffGuard } from "../domain/diff-guard.ts";
 import { allocateWorkspace } from "./workspace-allocation.ts";
 import { executeProcess } from "../infrastructure/process.ts";
-import { attach } from "./attach.ts";
-import { dispatch } from "./dispatch.ts";
+import { attachGit } from "./git-attach.ts";
+import { dispatchGit } from "./git-dispatch.ts";
 import { hooks } from "./lifecycle-hooks.ts";
 import type { Workspace, WorkspaceOptions } from "./outpost.types.ts";
-import { createSandbox } from "./sandbox.ts";
+import { createPreparedSandbox } from "./git-sandbox.ts";
+import type { SandboxOptions } from "./outpost.types.ts";
 import { startupFailure } from "./startup-recovery.ts";
 import { workspaces } from "./workspace-registry.ts";
 
@@ -75,20 +76,20 @@ export function createLeasedWorkspace(
       options.observation,
       "git",
       "branch.integrate",
-      () => integrateWorkspace(result, lease, options, settings),
+      () => integrateWorkspace(result, lease, options, settings, openWorkspace),
     );
   }
   const result: Workspace = {
     ...lease,
     integrate,
     dispatch(options) {
-      return dispatch({ ...options, workspace: result });
+      return dispatchGit({ ...options, workspace: result }, createSandbox);
     },
     sandbox(options = {}) {
       return createSandbox({ ...options, workspace: result });
     },
     attach(options) {
-      return attach({ ...options, workspace: result });
+      return attachGit({ ...options, workspace: result }, createSandbox);
     },
     async close(settings = {}) {
       invariant(
@@ -109,4 +110,8 @@ export function createLeasedWorkspace(
   };
   workspaces.set(result, state);
   return result;
+}
+
+function createSandbox(options: SandboxOptions) {
+  return createPreparedSandbox(options, openWorkspace);
 }

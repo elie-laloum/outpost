@@ -49,7 +49,7 @@ import {
 } from "../infrastructure/transport-json.ts";
 import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
 import { fileWorkspaces } from "./file-workspace-registry.ts";
-import { recordFileWorkspace } from "./file-workspace.ts";
+import { recordFileWorkspace } from "./file-workspace-lifecycle.ts";
 import type { FileWorkspace } from "./file-workspace.types.ts";
 import {
   workspaceOutputIdentity,

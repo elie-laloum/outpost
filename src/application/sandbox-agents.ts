@@ -7,6 +7,7 @@ import { prepareAgentExecution } from "./agent-preparation.ts";
 import { configureAgent } from "./agent-configuration.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { storageFor } from "./agent-storage.ts";
+import { restoreConversation } from "./agent-conversations.ts";
 import type {
   AuthenticatedAgent,
   ProvisionedSandbox,
@@ -87,17 +88,17 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
     if (known.has(conversationKey(agent, id))) return;
     const storage = storageFor(agent);
     invariant(storage, "This adapter does not support native conversations");
-    const found = await storage.locate(
+    await restoreConversation(
+      storage,
       id,
-      workspace.repository,
+      {
+        repository: workspace.repository,
+        sandbox: executionLease,
+        staging,
+        local: sandboxProvider.placement === "host",
+      },
       options.conversationHome,
     );
-    await storage.restore(found, {
-      repository: workspace.repository,
-      sandbox: executionLease,
-      staging,
-      local: sandboxProvider.placement === "host",
-    });
     known.add(conversationKey(agent, id));
   };
 

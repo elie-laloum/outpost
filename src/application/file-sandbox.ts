@@ -1,16 +1,21 @@
+import { dispatchFiles as dispatchFileWorkspace } from "./file-dispatch.ts";
+import { validateFileAgent } from "./file-agent-validation.ts";
+export { validateFileAgent } from "./file-agent-validation.ts";
+import type {
+  FileWorkspace,
+  FileWorkspaceOptions,
+  FileWorkspaceRegistration,
+  RestoreFileWorkspaceOptions,
+} from "./file-workspace.types.ts";
+import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
 import { openCliHooks } from "./cli-hooks.ts";
-import { lstat, mkdir, readFile, rename, rm } from "node:fs/promises";
-import { dirname, basename, join, relative, resolve } from "node:path";
+import { lstat, mkdir, rename, rm } from "node:fs/promises";
+import { dirname, basename, join, relative } from "node:path";
 import { randomUUID } from "node:crypto";
-import {
-  createFileRunReport,
-  fileRunReportData,
-  fileRunReportSnapshot,
-} from "./file-run-report.ts";
+import { createFileRunReport, fileRunReportData } from "./file-run-report.ts";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
 import { addUsage } from "../domain/usage.ts";
 import { invariant, OutpostError, recordRecovery } from "../domain/errors.ts";
-import type { Agent } from "../domain/agent.types.ts";
 import {
   copyWorkspaceManifest,
   workspaceManifest,
@@ -20,26 +25,26 @@ import { authenticateAgent } from "./agent-authentication.ts";
 import { prepareAgentExecution } from "./agent-preparation.ts";
 import { configureAgent } from "./agent-configuration.ts";
 import { storageFor } from "./agent-storage.ts";
+import {
+  createAgentConversations,
+  restoreConversation,
+} from "./agent-conversations.ts";
 import { execute } from "./execution.ts";
-import { preflightDispatch } from "./dispatch-validation.ts";
 import { runWithFallback } from "./agent-fallback.ts";
 import { operationGate } from "./operation-gate.ts";
 import {
-  createFileWorkspace,
+  createFileWorkspace as allocateFileWorkspace,
   checkpointFileWorkspace,
-  restoreFileWorkspace,
+  restoreFileWorkspace as reopenFileWorkspace,
   recordFileWorkspace,
-} from "./file-workspace.ts";
+} from "./file-workspace-lifecycle.ts";
 import { fileWorkspaces } from "./file-workspace-registry.ts";
-import { prepareWorkspaceOutputs } from "./workspace-output-baseline.ts";
-import { publishWorkspaceOutputs } from "./workspace-publication.ts";
 import type {
   FileDispatchRequest,
   FileDispatchResult,
   FileSandbox,
   FileSandboxOptions,
 } from "./file-sandbox.types.ts";
-import type { DispatchOptions } from "./execution.types.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
 import { diagnoseSandbox } from "./doctor-sandbox.ts";
 import { agentRequest } from "./agent-request.ts";
@@ -74,54 +79,6 @@ export function isFileSandboxOptions(
       "kind" in options.workspace &&
       String(options.workspace.kind) !== "git"
     )
-  );
-}
-
-export async function validateFileAgent(
-  agent: Agent,
-  settings?: DispatchOptions<unknown>,
-): Promise<void> {
-  if (agent.kind === "custom")
-    invariant(
-      !agent.harness.tools.some((tool) => tool.workspace === "git"),
-      "Git harness tools cannot run in file workspaces; select filesystem tools explicitly",
-    );
-  invariant(
-    agent.kind !== "cli" || agent.fileWorkspaces?.dispatch,
-    `${agent.name} has not declared validated support for file workspaces`,
-  );
-  invariant(
-    agent.kind !== "replay" || agent.turns.every((turn) => !turn.changes),
-    "Git replay effects cannot run in file workspaces",
-  );
-  if (!settings) return;
-  if (agent.kind === "cli") {
-    invariant(
-      !settings.continuation || agent.fileWorkspaces?.continuation,
-      "Agent continuation is not validated for file workspaces",
-    );
-    invariant(
-      !settings.response?.repairs || agent.fileWorkspaces?.repairs,
-      "Agent repairs are not validated for file workspaces",
-    );
-    invariant(
-      !settings.steering || !agent.liveInput || agent.fileWorkspaces?.liveInput,
-      "Agent live input is not validated for file workspaces",
-    );
-  }
-  await preflightDispatch(settings, "", agent);
-  const source =
-    settings.brief.text ?? (await readFile(settings.brief.file, "utf8"));
-  invariant(
-    !/\{\{\s*(WORK_BRANCH|BASE_BRANCH)\s*\}\}/.test(source),
-    "Git branch variables are unavailable in file workspaces",
-  );
-  invariant(
-    !settings.logging ||
-      typeof settings.logging !== "object" ||
-      !("replayable" in settings.logging) ||
-      !settings.logging.replayable,
-    "Replayable file effects are not supported",
   );
 }
 
@@ -535,6 +492,18 @@ export async function createFileSandbox(
                         signal,
                       );
                     }
+                    const conversationContext = {
+                      repository: workspace.runtime.directory,
+                      runtimeDirectory: workspace.runtime.directory,
+                      home: conversationHome,
+                      staging,
+                      sandbox: executionLease,
+                      local: options.sandboxProvider.placement === "host",
+                    };
+                    const conversations = createAgentConversations({
+                      agent,
+                      context: conversationContext,
+                    });
                     const storage = storageFor(agent);
                     if (
                       settings.continuation &&
@@ -544,21 +513,10 @@ export async function createFileSandbox(
                         storage,
                         "Agent does not support conversation restoration",
                       );
-                      await storage.restore(
-                        await storage.locate(
-                          settings.continuation.id,
-                          workspace.runtime.directory,
-                          conversationHome,
-                          workspace.runtime.directory,
-                        ),
-                        {
-                          repository: workspace.runtime.directory,
-                          runtimeDirectory: workspace.runtime.directory,
-                          home: conversationHome,
-                          staging,
-                          sandbox: executionLease,
-                          local: options.sandboxProvider.placement === "host",
-                        },
+                      await restoreConversation(
+                        storage,
+                        settings.continuation.id,
+                        conversationContext,
                       );
                     }
                     const execution = await execute(
@@ -580,23 +538,12 @@ export async function createFileSandbox(
                       async (turn) => {
                         await synchronize();
                         if (turn.conversation) known.add(turn.conversation);
-                        if (
-                          turn.conversation &&
-                          storage &&
-                          agent.capture !== false
-                        ) {
-                          const captured = await storage.capture(
-                            turn.conversation,
-                            {
-                              repository: workspace.runtime.directory,
-                              runtimeDirectory: workspace.runtime.directory,
-                              home: conversationHome,
-                              staging,
-                              sandbox: executionLease,
-                              local:
-                                options.sandboxProvider.placement === "host",
-                            },
-                          );
+                        const capturedTurn =
+                          await conversations.captureTurn(turn);
+                        const captured = turn.conversation
+                          ? conversations.captured.get(turn.conversation)
+                          : undefined;
+                        if (captured && turn.conversation) {
                           if (state.options.retention?.policy === "portable") {
                             invariant(
                               inside(
@@ -636,13 +583,7 @@ export async function createFileSandbox(
                           }
                           known.add(turn.conversation);
                           await checkpoint();
-                          return {
-                            ...turn,
-                            transcript: captured.file,
-                            ...(captured.reference
-                              ? { transcriptReference: captured.reference }
-                              : {}),
-                          };
+                          return capturedTurn;
                         }
                         await checkpoint();
                         return turn;
@@ -752,22 +693,14 @@ export async function createFileSandbox(
         if (settings.continuation && !known.has(settings.continuation.id)) {
           const storage = storageFor(agent);
           invariant(storage, "Agent does not support conversation restoration");
-          await storage.restore(
-            await storage.locate(
-              settings.continuation.id,
-              workspace.runtime.directory,
-              conversationHome,
-              workspace.runtime.directory,
-            ),
-            {
-              repository: workspace.runtime.directory,
-              runtimeDirectory: workspace.runtime.directory,
-              home: conversationHome,
-              staging,
-              sandbox: lease,
-              local: options.sandboxProvider.placement === "host",
-            },
-          );
+          await restoreConversation(storage, settings.continuation.id, {
+            repository: workspace.runtime.directory,
+            runtimeDirectory: workspace.runtime.directory,
+            home: conversationHome,
+            staging,
+            sandbox: lease,
+            local: options.sandboxProvider.placement === "host",
+          });
         }
         const prompt = brief
           ? await renderBrief(
@@ -886,132 +819,39 @@ export async function createFileSandbox(
   return result;
 }
 
-export async function dispatchFiles<T>(
+export function dispatchFiles<T = undefined>(
   options: FileDispatchRequest<T>,
-  onSettled?: (
-    record: import("../domain/file-workspace.types.ts").FileWorkspaceRecord,
-  ) => Promise<void>,
+  onSettled?: FileWorkspaceRegistration,
 ): Promise<FileDispatchResult<T>> {
-  options.signal?.throwIfAborted();
-  const runtime =
-    options.workspace?.runtime.directory ??
-    resolve(
-      ("runtime" in options ? options.runtime?.directory : undefined) ??
-        ".outpost",
-    );
-  await mkdir(runtime, { recursive: true });
-  const logging =
-    options.logging === false || options.logging === "stdout"
-      ? options.logging
-      : {
-          ...options.logging,
-          transporter:
-            options.logging?.transporter ??
-            createLocalTransport({ directory: join(runtime, "storage") }),
-        };
-  return observeDispatch(
-    { ...options, logging },
-    (observed) =>
-      dispatchFileOperation(
-        { ...options, ...observed },
-        onSettled,
-        options.observation,
-      ),
-    runtime,
+  return dispatchFileWorkspace(
+    options,
+    {
+      createWorkspace: createFileWorkspace,
+      restoreWorkspace: restoreFileWorkspace,
+      createSandbox: createFileSandbox,
+    },
+    onSettled,
   );
 }
 
-async function dispatchFileOperation<T>(
-  options: FileDispatchRequest<T>,
-  onSettled: Parameters<typeof dispatchFiles>[1],
-  continuationObservation:
-    import("../domain/observation.types.ts").ObservationHub | undefined,
-): Promise<FileDispatchResult<T>> {
-  for (const agent of dispatchCandidates(options.agent))
-    await validateFileAgent(agent, options);
-  const owned = !options.workspace;
-  const workspace =
-    options.workspace ??
-    (await createFileWorkspace({
-      ...options,
-      source: options.workspaceSource,
-    }));
-  const { workspaceSource: _source, ...settings } = options;
-  let sandbox: FileSandbox | undefined;
-  try {
-    if (options.outputs)
-      await prepareWorkspaceOutputs(workspace, options.outputs);
-    sandbox = await createFileSandbox({ ...settings, workspace }, onSettled);
-    const execution = await sandbox.dispatch(options);
-    await sandbox.close({ preserve: true });
-    const publications = [];
-    for (const output of options.outputs ?? [])
-      publications.push(
-        await publishWorkspaceOutputs(sandbox.workspace, output),
-      );
-    if (owned) await workspace.close();
-    const continueExecution = async <U>(
-      next: DispatchOptions<U>,
-      fork: boolean,
-    ) => {
-      invariant(
-        execution.conversation,
-        "Dispatch has no captured conversation",
-      );
-      const state = fileWorkspaces.get(workspace)!;
-      const reopened = state.closed
-        ? await restoreFileWorkspace(state.record, {
-            ...(state.options.retention
-              ? { retention: state.options.retention }
-              : {}),
-          })
-        : workspace;
-      try {
-        return await dispatchFiles({
-          sandboxProvider: settings.sandboxProvider,
-          agent: settings.agent,
-          workspace: reopened,
-          ...(continuationObservation
-            ? { observation: continuationObservation }
-            : {}),
-          ...(settings.variables ? { variables: settings.variables } : {}),
-          ...next,
-          continuation: {
-            id: execution.conversation,
-            ...(fork ? { fork: true } : {}),
-          },
-        });
-      } finally {
-        if (state.closed) await reopened.close({ preserve: true });
-      }
-    };
-    const workspaceInfo = fileWorkspaces.get(workspace)!.record;
-    const outcome: FileDispatchResult<T> = {
-      ...execution,
-      workspaceInfo,
-      fileOutputs: publications,
-      report: createFileRunReport({
-        ...(fileRunReportSnapshot(execution.report) ??
-          fileRunReportData(execution)),
-        workspaceInfo,
-        fileOutputs: publications,
-      }),
-      resume(next) {
-        return continueExecution(next, false);
-      },
-      fork(next) {
-        return continueExecution(next, true);
-      },
-    };
-    return outcome;
-  } catch (error) {
-    recordRecovery(error, {
-      workspaceId: workspace.id,
-      directory: workspace.directory,
-    });
-    await sandbox?.close({ preserve: true });
-    if (owned && !fileWorkspaces.get(workspace)?.active)
-      await workspace.close({ preserve: true });
-    throw error;
-  }
+export function createFileWorkspace(
+  options: FileWorkspaceOptions,
+  register?: FileWorkspaceRegistration,
+): Promise<FileWorkspace> {
+  return allocateFileWorkspace(
+    options,
+    { sandbox: createFileSandbox, dispatch: dispatchFiles },
+    register,
+  );
+}
+
+export function restoreFileWorkspace(
+  record: FileWorkspaceRecord,
+  options: RestoreFileWorkspaceOptions = {},
+): Promise<FileWorkspace> {
+  return reopenFileWorkspace(
+    record,
+    { sandbox: createFileSandbox, dispatch: dispatchFiles },
+    options,
+  );
 }
