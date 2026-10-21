@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Share internal budget and cancellation control between workflows and speculation, reusing cumulative accounting. Attempt limits refuse new admissions while active work may finish; token and cost enforcement still cancels active work after admission closes. Keep public APIs, YAML, outcomes, checkpoint ownership, explicit replay and cleanup policies unchanged.
+
 - **Breaking, next major release:** Remove the package-root import and move every public symbol to its owning subpath: `/core`, `/workspaces`, `/harness`, `/workflows`, `/queues`, `/storage`, `/observation`, `/recovery`, `/integrations`, `/recipes` or `/experimental/speculation`. Replace root imports in one step; there is no compatibility barrel. Existing provider, secret-manager, telemetry, S3, BullMQ and testing entry points retain their paths. Migrate guides, API references, examples, recipe extensions and package tests together. YAML syntax, execution behavior, checkpoint identities and recovery authorization stay unchanged. Clean builds exclude retired entry artifacts from the package.
 
 - Add explicit `observationId` to automatically tracked dispatch and workflow results, retaining `runId` and separating tracking from checkpoint and execution identities. Recipe reports consume the explicit identifier; reader and recovery behavior stay unchanged.

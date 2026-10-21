@@ -84,7 +84,9 @@ Outpost vérifie la consommation déclarée avant d’autoriser la suite du trav
 | `usage.input`, `usage.output`, …                    | Avant chaque tentative et à chaque rapport de tokens | Les tentatives en cours sont annulées ; rien d’autre ne démarre. `WorkflowBudgetExceeded`.           |
 | Limites de tokens, sans `attempts`, usage incomplet | Avant chaque tentative et à chaque rapport de tokens | Les tentatives en cours sont annulées ; rien d’autre ne démarre. `WorkflowUsageUnavailable`.         |
 
-Une limite arrête l’exécution dès que le total l’atteint. L’exécution se termine alors avec `status: "failed"`, les tâches arrêtées sont `cancelled` et `result.errors` contient l’erreur avec ses valeurs `dimension`, `limit` et `observed`.
+La limite de tentatives est contrôlée lorsqu’une nouvelle tentative demande à démarrer : utiliser la dernière tentative autorisée ne l’annule pas et ne fait pas échouer un workflow dont tout le travail est terminé. Une admission refusée fait échouer le workflow ; une limite de tokens atteinte annule aussi le travail en cours. Pour ces erreurs de budget, `result.terminationCode` vaut `"limit"`, les tâches arrêtées sont `cancelled` et `result.errors` contient l’erreur avec ses valeurs `dimension`, `limit` et `observed`.
+
+Les mêmes règles d’admission et d’annulation s’appliquent aux candidats spéculatifs. Leurs résultats diffèrent : avec deux candidats et `budget: { attempts: 1 }`, le candidat admis peut encore terminer et gagner. Une spéculation arrêtée par son budget sans gagnant renvoie `status: "budget-exhausted"`. Si le travail en cours atteint une limite de tokens après que la limite de tentatives a déjà refusé du travail supplémentaire, il est tout de même annulé dans les deux moteurs.
 
 :::caution
 Un tour d’agent en cours peut consommer des tokens avant de les rapporter : le total peut donc dépasser une limite. Un budget n’est pas un plafond de facturation : gardez des limites de dépense chez votre fournisseur.

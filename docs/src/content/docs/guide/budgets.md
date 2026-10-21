@@ -84,7 +84,9 @@ Outpost checks the reported usage before allowing more work to start. The budget
 | `usage.input`, `usage.output`, …              | Before each attempt and at each usage report | Running attempts are cancelled; nothing else starts. `WorkflowBudgetExceeded`.          |
 | Token limits, no `attempts`, incomplete usage | Before each attempt and at each usage report | Running attempts are cancelled; nothing else starts. `WorkflowUsageUnavailable`.        |
 
-A limit stops the run once the total reaches it. The run then ends with `status: "failed"`, the stopped tasks are `cancelled`, and `result.errors` holds the error with its `dimension`, `limit` and `observed` values.
+An attempt limit is enforced when another attempt asks to start: using the last allowed attempt does not cancel it or make an otherwise completed workflow fail. A refused admission fails the workflow; a reached token limit also cancels running work. For these budget errors, `result.terminationCode` is `"limit"`, stopped tasks are `cancelled`, and `result.errors` holds the error with its `dimension`, `limit` and `observed` values.
+
+The same admission and cancellation rules apply to speculative candidates. Their outcomes differ: with two candidates and `budget: { attempts: 1 }`, the admitted candidate can still finish and win. A speculation stopped by its budget without a winner returns `status: "budget-exhausted"`. If running work reaches a token limit after the attempt limit has already refused more work, it is still cancelled in either engine.
 
 :::caution
 A running agent turn can spend tokens before it reports them, so the total can exceed a limit. A budget is not a billing cap: keep spending limits with your provider.

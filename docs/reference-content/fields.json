@@ -1238,8 +1238,8 @@
     "Sortie de la tâche en JSON sans perte : objets simples, tableaux denses, chaînes, booléens, null et nombres finis autres que -0, sans cycle."
   ],
   "WorkflowBudget.attempts": [
-    "Maximum task attempts admitted over the run and its checkpoint resumes. Reaching it cancels the tasks not yet started.",
-    "Nombre maximal de tentatives admises sur l’exécution et ses reprises de checkpoint. L’atteindre annule les tâches non démarrées."
+    "Maximum attempts admitted across the workflow or speculation and its checkpoint resumes. Refuses further admissions while running attempts may finish. A later token or cost limit still cancels running work. Using the last allowed attempt alone is not a failure.",
+    "Nombre maximal de tentatives admises sur le workflow ou la spéculation et ses reprises de checkpoint. Refuse les admissions suivantes tout en laissant les tentatives en cours terminer. Une limite de tokens ou de coût atteinte ensuite annule toujours le travail en cours. Utiliser la dernière tentative autorisée ne constitue pas en soi un échec."
   ],
   "WorkflowBudget.usage": [
     "Token limits per counter (input, cached, cacheCreated, output). Reaching one cancels running tasks too; usage reported late can exceed it.",

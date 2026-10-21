@@ -11,7 +11,7 @@ import { invariant, recoveryDetails } from "../domain/errors.ts";
 import { quotaFault } from "../domain/quota.ts";
 import type { QuotaFault } from "../domain/quota.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
-import { workflowAccounting } from "../domain/workflow/budget.ts";
+import { createBudgetControl } from "../domain/budget-control.ts";
 import { speculativeHostSnapshot } from "./speculation-host.ts";
 import type { Sandbox } from "./outpost.types.ts";
 import { createSandbox } from "./sandbox.ts";
@@ -32,21 +32,16 @@ export async function runSpeculation<T>(
 ): Promise<SpeculationResult<T>> {
   const { candidates } = options;
   const best = options.select === "best";
-  const stop = new AbortController();
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, stop.signal])
-    : stop.signal;
   let budgetError: unknown;
   let sealed = false;
-  const accounting = workflowAccounting(
-    options.budget,
-    (error) => {
+  const { stop, signal, accounting } = createBudgetControl({
+    signal: options.signal,
+    budget: options.budget,
+    initialUsage: state.usage,
+    onExhausted(error) {
       budgetError = error;
-      // Attempt limits stop admissions; already admitted candidates may finish.
-      if (error.dimension !== "attempts") stop.abort(error);
     },
-    state.usage,
-  );
+  });
   const before = state.before;
   const baseline = before.head;
   const id = state.id;

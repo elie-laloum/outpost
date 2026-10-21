@@ -7,7 +7,7 @@ import { validateUsageReceipt } from "./usage-receipt.ts";
 import type { Usage } from "../agent.types.ts";
 import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import type { WorkflowQuotaPause } from "./quota-pause.types.ts";
-import { workflowAccounting } from "./budget.ts";
+import { createBudgetControl } from "../budget-control.ts";
 import { randomUUID } from "node:crypto";
 import { OutpostError } from "../errors.ts";
 import type {
@@ -45,10 +45,6 @@ export function workflowState(
     ],
     options.redact,
   );
-  const stop = new AbortController();
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, stop.signal])
-    : stop.signal;
   const values = new Map<Task, unknown>();
   const activeAttempts = new Map<Task, number>();
   const quotaResumes = new Map<Task, WorkflowQuotaPause>();
@@ -122,15 +118,15 @@ export function workflowState(
           reason: entry.decision!.reason,
         }),
       );
-  const accounting = workflowAccounting(
-    options.budget,
-    (error) => {
+  const { stop, signal, accounting } = createBudgetControl({
+    signal: options.signal,
+    budget: options.budget,
+    initialUsage: saved?.usage,
+    onExhausted(error) {
       errors.push(error);
       emit({ type: "budget-exceeded" });
-      if (error.dimension !== "attempts") stop.abort(error);
     },
-    saved?.usage,
-  );
+  });
   const record = (item: Task) => records.get(item)!;
   function emit(
     event: Omit<WorkflowEvent, "executionId" | "workflow" | "timestamp">,
