@@ -5,6 +5,12 @@ description: "Observe workflow, agent and resource activity through one observat
 
 For a single terminal session, start with [Follow progress](../progress/). Use an observation object when several tasks and resource operations need a common execution scope. Save the named files below together and run `node observe-workflow.ts` using the [setup configuration](../setup/).
 
+## Choose one observation entry point
+
+Use `createObservation()` for new integrations. Add `createReporter()` for terminal progress and a `transporter` when runs must be readable later. Pass that client as `observation` to dispatches and workflows. You do not need to configure `observe`, `telemetry`, `warn`, `diagnostic` or `logging` to get started.
+
+Specialized callbacks remain available for existing integrations and targeted diagnostics. Observation sinks receive bounded events and may lose delivery; replayable journals record a different contract, and checkpoints or queues own durable control state. Reading an observed run never authorizes recovery or replay. See [run state](../run-state/), [journals](../journals/) and [durable runs](../durable-runs/).
+
 ## Observe a whole run
 
 Create an observation object when you want workflow, agent and resource events in one place. Add sinks that receive the events, then pass it as `observation` to your run. Each event includes its execution scope.

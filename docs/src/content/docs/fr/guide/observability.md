@@ -5,6 +5,12 @@ description: "Observer l’activité des workflows, agents et ressources avec un
 
 Pour une session de terminal, commencez par [Suivre la progression](../progress/). Un objet observation devient utile pour réunir plusieurs tâches et opérations de ressources sous une même exécution. Enregistrez les fichiers nommés ensemble et lancez `node observe-workflow.ts` avec la [configuration initiale](../setup/).
 
+## Choisir une entrée d’observation
+
+Utilisez `createObservation()` pour les nouvelles intégrations. Ajoutez `createReporter()` pour la progression dans le terminal et un `transporter` pour lire les exécutions ultérieurement. Passez ce client via `observation` aux dispatchs et workflows. Inutile de configurer `observe`, `telemetry`, `warn`, `diagnostic` ou `logging` pour démarrer.
+
+Les callbacks spécialisés restent disponibles pour les intégrations existantes et les diagnostics ciblés. Les récepteurs d’observation ont une livraison bornée pouvant perdre des événements ; les journaux rejouables ont un autre contrat, et les checkpoints ou files portent l’état de contrôle durable. Lire une exécution observée n’autorise jamais sa récupération ou son rejeu. Consultez [l’état des exécutions](../run-state/), [les journaux](../journals/) et [les workflows durables](../durable-runs/).
+
 ## Observer une exécution entière
 
 Créez un objet observation pour réunir les événements du workflow, des agents et des ressources. Ajoutez les fonctions qui recevront les événements, puis passez cet objet dans l’option `observation`. Chaque événement contient son contexte d’exécution.
