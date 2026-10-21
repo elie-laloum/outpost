@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Compiler les tâches interactives des recettes par une entrée interne qui accepte les options Git et fichiers, ce qui supprime la dernière branche identique servant au rétrécissement de type.
+
 ## 13.0.0
 
 - Préserver les identités des fichiers de conversations avec les métadonnées bigint sous Windows et mettre à jour Vite, utilisé par la documentation, vers la version corrigée 8.3.3.

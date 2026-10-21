@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Compile interactive recipe tasks through an internal entry that accepts Git and file options, removing the last identical type-narrowing branch.
+
 ## 13.0.0
 
 - Preserve native transcript file identities with bigint filesystem metadata on Windows, and update the documentation Vite dependency to the patched 8.3.3 release.

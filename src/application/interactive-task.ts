@@ -27,6 +27,12 @@ export function defineInteractiveAgentTask(
 export function defineInteractiveAgentTask(
   options: InteractiveAgentTaskOptions | FileInteractiveAgentTaskOptions,
 ): Task<InteractiveAgentResult> | Task<FileInteractiveAgentResult> {
+  return defineInteractiveAgentTaskForOptions(options);
+}
+
+export function defineInteractiveAgentTaskForOptions(
+  options: InteractiveAgentTaskOptions | FileInteractiveAgentTaskOptions,
+): Task<InteractiveAgentResult> | Task<FileInteractiveAgentResult> {
   if ("workspaceSource" in options)
     return defineFileInteractiveAgentTask(options);
   invariant(

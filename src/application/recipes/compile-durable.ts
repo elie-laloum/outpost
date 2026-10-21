@@ -1,5 +1,5 @@
 import { defineQueuedTask } from "../queued-task.ts";
-import { defineInteractiveAgentTask } from "../interactive-task.ts";
+import { defineInteractiveAgentTaskForOptions } from "../interactive-task.ts";
 import {
   defineApprovalTask,
   definePauseTask,
@@ -103,16 +103,10 @@ export function compileInteractive(
   context: RecipeCompilationContext,
 ): Task {
   const { common } = context;
-  const interactive =
-    "workspaceSource" in step.interactive
-      ? defineInteractiveAgentTask({
-          ...common,
-          ...step.interactive,
-        })
-      : defineInteractiveAgentTask({
-          ...common,
-          ...step.interactive,
-        });
+  const interactive = defineInteractiveAgentTaskForOptions({
+    ...common,
+    ...step.interactive,
+  });
   return defineTask({
     ...interactive,
     ...common,
