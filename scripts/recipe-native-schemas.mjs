@@ -267,8 +267,12 @@ for (const [name, typeName, file, factory, factoryFile] of nativeRecipeTypes) {
 const factories = nativeRecipeTypes
   .filter(([, , , factory]) => factory)
   .map(
-    ([name, , , factory, file]) =>
-      `${JSON.stringify(name)}: async () => (await import(${JSON.stringify(`../../${file}`)})).${factory}`,
+    ([name, , , factory, file, , lifecycle]) =>
+      `${JSON.stringify(name)}: { kind: ${JSON.stringify(name.split(".")[0])}, load: async () => (await import(${JSON.stringify(`../../${file}`)})).${factory}, ${Object.entries(
+        lifecycle ?? {},
+      )
+        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+        .join(",")} }`,
   )
   .join(",\n");
 for (const [file, code] of [
@@ -278,7 +282,7 @@ for (const [file, code] of [
   ],
   [
     "src/application/recipes/native-factories.ts",
-    `export const nativeRecipeFactories: Readonly<Record<string, () => Promise<unknown>>> = {${factories}};\n`,
+    `import type { NativeRecipeFactory } from "./native-factories.types.ts";\nexport const nativeRecipeFactories: Readonly<Record<string, NativeRecipeFactory>> = {${factories}};\n`,
   ],
 ]) {
   const path = resolve(root, file);

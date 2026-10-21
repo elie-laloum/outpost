@@ -189,9 +189,10 @@ export async function resolveRecipeOptions(
 }
 
 export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
-  Object.entries(nativeRecipeFactories).map(([name, load]) => {
-    const kind = name.split(".")[0]!;
-    const schema = nativeRecipeSchemas[name]!;
+  Object.entries(nativeRecipeFactories).map(([name, descriptor]) => {
+    const { kind, load } = descriptor;
+    const schema = nativeRecipeSchemas[name];
+    if (!schema) throw new Error(`Missing native component schema: ${name}`);
     const accepts = nativeRecipeGuards[kind];
     if (!accepts) throw new Error(`Missing native component guard: ${kind}`);
     return {
@@ -199,13 +200,7 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
       kind,
       schema,
       accepts,
-      ...([
-        "sink.run",
-        "sink.custom",
-        "sink.opentelemetry",
-        "queue.sqlite",
-        "queue.bullmq",
-      ].includes(name)
+      ...(descriptor.dispose === "close"
         ? {
             async dispose(value: unknown) {
               if (recipeObject(value) && typeof value.close === "function")
@@ -213,7 +208,7 @@ export const nativeRecipeComponents: readonly RecipeComponentDefinition[] =
             },
           }
         : {}),
-      ...(name === "sandboxProvider.firecracker" ? { experimental: true } : {}),
+      ...(descriptor.experimental ? { experimental: true } : {}),
       async create(options, context) {
         const value = await resolveRecipeOptions(schema, options, context);
         const factory = await load();

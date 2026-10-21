@@ -54,6 +54,7 @@ export const nativeRecipeTypes = [
     "createRecipeCustomReporter",
     "application/recipes/advanced-components.ts",
     7,
+    { dispose: "close" },
   ],
   [
     "sink.opentelemetry",
@@ -62,6 +63,7 @@ export const nativeRecipeTypes = [
     "createOpenTelemetryObserver",
     "infrastructure/opentelemetry.ts",
     7,
+    { dispose: "close" },
   ],
   [
     "speculation.options",
@@ -94,6 +96,7 @@ export const nativeRecipeTypes = [
     "createRecipeSqliteQueue",
     "application/recipes/service-components.ts",
     6,
+    { dispose: "close" },
   ],
   [
     "queue.http",
@@ -110,6 +113,7 @@ export const nativeRecipeTypes = [
     "createBullMQTaskQueue",
     "infrastructure/task-queue-bullmq.ts",
     6,
+    { dispose: "close" },
   ],
   [
     "service.worker",
@@ -278,6 +282,7 @@ export const nativeRecipeTypes = [
     "createRunObserver",
     "infrastructure/run-observer.ts",
     5,
+    { dispose: "close" },
   ],
   [
     "interactive.options",
@@ -688,6 +693,7 @@ export const nativeRecipeTypes = [
     "createFirecrackerSandboxProvider",
     "providers/firecracker.ts",
     2,
+    { experimental: true },
   ],
   [
     "profile.portable",
