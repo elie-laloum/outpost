@@ -437,6 +437,9 @@ test("static recipe plans inspect file work without allocating or resolving envi
       ],
     }),
   );
+  const project = await readRecipeProject({ file, config });
+  assert.equal(project.configuration.version, 3);
+  assert.equal(project.componentConfiguration?.version, 3);
   const plan = await inspectRecipeExecution({ file, config });
   assert.equal(plan.workspace.kind, "ephemeral");
   assert.equal(plan.validation, "static");

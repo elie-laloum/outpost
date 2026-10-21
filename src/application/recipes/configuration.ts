@@ -1,6 +1,5 @@
 import { realpath } from "node:fs/promises";
-import { readRecipeConfiguration } from "../recipe-configuration.ts";
-import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
+import { resolveRecipeConfiguration } from "../recipe-configuration.ts";
 import type { RecipeProject } from "./project.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type {
@@ -33,18 +32,10 @@ export async function recipeExecutionConfiguration(
   scope: RecipeComponentScope,
 ): Promise<RecipeRuntimeConfiguration> {
   const declared = project.componentConfiguration ?? project.configuration;
-  const source = JSON.stringify({
-    ...Object.fromEntries(
-      Object.entries(declared).filter(([key]) =>
-        recipeConfigurationKeys.root.some((allowed) => allowed === key),
-      ),
-    ),
-    version: 1,
-    ...(declared.version === 2
-      ? { sandbox: { provider: "local" }, agents: {} }
-      : {}),
-  });
-  const legacy = await readRecipeConfiguration(source, project.options.config);
+  const legacy = await resolveRecipeConfiguration(
+    declared,
+    project.options.config,
+  );
   if (declared.version === 1) return legacy;
   const [provider, options] = await Promise.all([
     scope.resolve("sandbox", "sandboxProvider"),

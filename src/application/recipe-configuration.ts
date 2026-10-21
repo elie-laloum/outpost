@@ -27,6 +27,15 @@ export async function readRecipeConfiguration(
   );
   if (record.version !== 1)
     throw new Error("Recipe configuration version must be 1");
+  return resolveRecipeConfiguration(record, file, resolveEnvironment);
+}
+
+export async function resolveRecipeConfiguration(
+  record: Readonly<Record<string, unknown>>,
+  file: string,
+  resolveEnvironment = true,
+): Promise<RecipeConfiguration> {
+  const components = record.version !== 1;
   if (record.$schema !== undefined)
     configurationText(record.$schema, "configuration.$schema");
   const directory = dirname(resolve(file));
@@ -35,36 +44,34 @@ export async function readRecipeConfiguration(
     configurationText(record.repository, "repository"),
   );
   const agents = Object.fromEntries(
-    Object.entries(configurationObject(record.agents ?? {}, "agents")).map(
-      ([role, value]) => {
-        const agent = configurationObject(
-          value,
-          `agents.${role}`,
-          recipeConfigurationKeys.agent,
-        );
-        const descriptor = builtInAgent(
-          configurationText(agent.harness, `agents.${role}.harness`),
-        );
-        if (!descriptor)
-          throw new Error(
-            `Unknown recipe harness; choose ${builtInAgentList()}`,
-          );
-        return [
-          role,
-          createAgent({
-            harness: descriptor.harness({
-              authentication: configurationAuthentication(
-                agent.authentication,
-                directory,
-              ),
-            }),
-            ...(agent.model === undefined
-              ? {}
-              : { model: configurationModel(agent.model) }),
+    Object.entries(
+      configurationObject(components ? {} : (record.agents ?? {}), "agents"),
+    ).map(([role, value]) => {
+      const agent = configurationObject(
+        value,
+        `agents.${role}`,
+        recipeConfigurationKeys.agent,
+      );
+      const descriptor = builtInAgent(
+        configurationText(agent.harness, `agents.${role}.harness`),
+      );
+      if (!descriptor)
+        throw new Error(`Unknown recipe harness; choose ${builtInAgentList()}`);
+      return [
+        role,
+        createAgent({
+          harness: descriptor.harness({
+            authentication: configurationAuthentication(
+              agent.authentication,
+              directory,
+            ),
           }),
-        ];
-      },
-    ),
+          ...(agent.model === undefined
+            ? {}
+            : { model: configurationModel(agent.model) }),
+        }),
+      ];
+    }),
   );
   const variables = Object.fromEntries(
     Object.entries(
@@ -81,7 +88,10 @@ export async function readRecipeConfiguration(
   return {
     sandbox: {
       repository,
-      sandboxProvider: await configurationProvider(record.sandbox, variables),
+      sandboxProvider: await configurationProvider(
+        components ? { provider: "local" } : record.sandbox,
+        variables,
+      ),
       branch: configurationBranch(record.branch),
       logging: false,
     },

@@ -30,8 +30,8 @@ export function recipeComponentGraph(
   const declarations = new Map<string, unknown>();
   const extensions = new Map<string, RecipeExtensionDeclaration>();
   if (document?.version === 3) {
-    if (configuration.version !== 2)
-      throw new Error("Recipe format 3 requires configuration version 2");
+    if (configuration.version === 1)
+      throw new Error("Recipe format 3 requires configuration version 2 or 3");
     declarations.set("workflow", { ...document.workflow, type: "options" });
     expected.set("workflow", "workflowOptions");
   }
@@ -66,7 +66,7 @@ export function recipeComponentGraph(
       expected.set(key, `${kind}Options`);
     }
   }
-  if (configuration.version === 2) {
+  if (configuration.version !== 1) {
     declarations.set("integration", {
       ...recipeRecord(configuration.integration ?? {}, "integration"),
       type: "options",

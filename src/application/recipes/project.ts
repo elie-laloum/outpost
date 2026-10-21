@@ -16,7 +16,7 @@ import {
   validateRecipeSchema,
   recipeJsonValidator,
 } from "../../infrastructure/recipes/schema.ts";
-import { readRecipeConfiguration } from "../recipe-configuration.ts";
+import { resolveRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
 import {
@@ -110,25 +110,18 @@ export async function readRecipeProject(
       document,
     );
     const normalizedConfiguration = normalized.configuration;
-    const legacySource = JSON.stringify({
-      ...Object.fromEntries(
-        Object.entries(normalizedConfiguration).filter(([key]) =>
-          recipeConfigurationKeys.root.some((allowed) => allowed === key),
-        ),
-      ),
-      version: 1,
-      ...(normalizedConfiguration.version === 2
-        ? { sandbox: { provider: "local" }, agents: {} }
-        : {}),
-    });
     const legacy = normalized.files
       ? { sandbox: {}, agents: {} }
-      : await readRecipeConfiguration(legacySource, config, false);
+      : await resolveRecipeConfiguration(
+          normalizedConfiguration,
+          config,
+          false,
+        );
     for (const step of document.tasks) {
       if (
         step.agent &&
         !Object.hasOwn(
-          normalizedConfiguration.version === 2
+          normalizedConfiguration.version !== 1
             ? recipeRecord(configuration.agents ?? {}, "agents")
             : (legacy.agents ?? {}),
           step.agent,

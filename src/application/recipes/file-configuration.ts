@@ -74,7 +74,6 @@ export function normalizeRecipeWorkspaceConfiguration(
     return {
       configuration: {
         ...configuration,
-        version: 2,
         repository,
         ...(branch ? { branch } : {}),
         workspace: options,
@@ -316,7 +315,7 @@ export function normalizeRecipeWorkspaceConfiguration(
   );
   const { runtime: _runtime, outputs: _outputs, ...components } = configuration;
   return {
-    configuration: { ...components, version: 2, workspace: {}, sandbox },
+    configuration: { ...components, workspace: {}, sandbox },
     files: {
       runtime,
       ...(source ? { source } : {}),
