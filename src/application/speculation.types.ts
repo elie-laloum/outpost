@@ -95,6 +95,7 @@ export interface SpeculativeCandidateResult<T = undefined> {
 }
 
 export interface SpeculationResult<T = undefined> {
+  readonly terminationCode?: import("../domain/termination.types.ts").TerminationCode;
   readonly integration?: SpeculationIntegration;
   readonly previousAttempts?: readonly SpeculativeCandidateResult<T>[];
   readonly id: string;

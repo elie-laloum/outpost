@@ -19,14 +19,14 @@ Error thrown by WorkflowResult.unwrap() when status is not done. result holds th
 
 ## Parameters and properties
 
-| Name      | Type                                   | Presence | Meaning                                                                                                                                          |
-| --------- | -------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `code`    | `WorkflowTerminationCode \| undefined` | Required | The result’s terminationCode, available when unwrap() throws for failed, cancelled or rejected runs; undefined for paused or waiting-input runs. |
-| `result`  | `WorkflowResult`                       | Required | The unsuccessful WorkflowResult, with its task records, errors and usage.                                                                        |
-| `name`    | `string`                               | Required | Error class name used to distinguish this failure from other JavaScript errors.                                                                  |
-| `message` | `string`                               | Required | Human-readable explanation of the failure.                                                                                                       |
-| `stack`   | `string \| undefined`                  | Optional | JavaScript stack trace for the error, when available.                                                                                            |
-| `cause`   | `unknown`                              | Optional | Underlying failure this error wraps; quotaFault() and unavailableFault() follow this chain.                                                      |
+| Name      | Type                           | Presence | Meaning                                                                                                                                          |
+| --------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `code`    | `TerminationCode \| undefined` | Required | The result’s terminationCode, available when unwrap() throws for failed, cancelled or rejected runs; undefined for paused or waiting-input runs. |
+| `result`  | `WorkflowResult`               | Required | The unsuccessful WorkflowResult, with its task records, errors and usage.                                                                        |
+| `name`    | `string`                       | Required | Error class name used to distinguish this failure from other JavaScript errors.                                                                  |
+| `message` | `string`                       | Required | Human-readable explanation of the failure.                                                                                                       |
+| `stack`   | `string \| undefined`          | Optional | JavaScript stack trace for the error, when available.                                                                                            |
+| `cause`   | `unknown`                      | Optional | Underlying failure this error wraps; quotaFault() and unavailableFault() follow this chain.                                                      |
 
 ## Signature
 

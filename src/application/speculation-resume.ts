@@ -116,5 +116,6 @@ function reopenQuota<T>(
   }
   state.finished = false;
   delete state.status;
+  delete state.terminationCode;
   delete state.error;
 }

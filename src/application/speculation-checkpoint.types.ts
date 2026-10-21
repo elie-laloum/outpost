@@ -23,6 +23,7 @@ export interface SpeculationCheckpoint<T> {
   attempts: SpeculationAttempt<T>[];
   usage: WorkflowUsage;
   finished: boolean;
+  terminationCode?: import("../domain/termination.types.ts").TerminationCode;
   status?: "winner" | "no-winner" | "quota" | "aborted" | "budget-exhausted";
   error?: string;
 }

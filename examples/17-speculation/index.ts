@@ -51,7 +51,7 @@ const result = await speculate({
   },
 });
 
-console.log("statut :", result.status);
+console.log("statut :", result.status, "motif :", result.terminationCode);
 console.log(
   "gagnant :",
   result.winner?.key,

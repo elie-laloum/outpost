@@ -49,7 +49,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       action,
       repository,
     );
-    return owned ? { ...result, runId } : result;
+    return owned ? { ...result, runId, observationId: runId } : result;
   } finally {
     await owned?.close();
   }

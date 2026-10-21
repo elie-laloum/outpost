@@ -92,6 +92,7 @@ export interface ActivityWatchdog {
 }
 
 export interface Execution<T> {
+  readonly observationId?: string;
   readonly runId?: string;
   readonly text: string;
   readonly turns: readonly Turn[];

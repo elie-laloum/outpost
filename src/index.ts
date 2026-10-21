@@ -284,6 +284,7 @@ export { OutpostError, recoveryDetails } from "./domain/errors.ts";
 export type { DiffGuard } from "./domain/diff-guard.types.ts";
 
 export type { FaultCode } from "./domain/errors.ts";
+export type { TerminationCode } from "./domain/termination.types.ts";
 
 export { quotaFault } from "./domain/quota.ts";
 export type { QuotaFault } from "./domain/quota.types.ts";

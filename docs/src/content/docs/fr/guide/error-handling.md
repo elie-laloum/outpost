@@ -156,4 +156,6 @@ Pour le récit complet d’un dispatch en échec, ouvrez son [journal](../journa
 - Certains échecs sont de simples `Error` : définitions de tâche ou de workflow invalides, et [checkpoint](../durable-runs/) déjà détenu par un autre processus.
 - Un `timeout` ne prouve pas que les effets externes ont été annulés. Vérifiez la branche conservée avant de relancer.
 
+Les résultats de workflow et les arrêts des coordinateurs de spéculation partagent [TerminationCode](../../reference/terminationcode/). Un budget épuisé utilise `limit` ; une comptabilité de tokens ou de coût incomplète utilise `usage-unavailable`. La spéculation conserve son statut `budget-exhausted` et expose le motif séparément. Un résultat `winner` ou `no-winner` n’a pas de code d’arrêt du coordinateur ; les échecs des candidats restent dans `candidates`. Les exceptions du dispatch et le type `WorkflowTerminationCode` restent compatibles.
+
 API : [OutpostError](../../reference/outposterror/) · [FaultCode](../../reference/faultcode/) · [recoveryDetails](../../reference/recoverydetails/) · [quotaFault](../../reference/quotafault/) · [unavailableFault](../../reference/unavailablefault/) · [WorkflowFailure](../../reference/workflowfailure/) · [WorkflowResult](../../reference/workflowresult/) · [ResponseError](../../reference/responseerror/) · [TransportConflict](../../reference/transportconflict/)

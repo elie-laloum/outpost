@@ -11451,16 +11451,16 @@
     "Identifiant d’observation d’un dispatch autonome utilisant createObservation() ; généré si omis. Avec un transport, la création refuse les doublons. Les dispatchs imbriqués rejoignent la projection du workflow. Une continuation constitue un nouveau dispatch et n’hérite pas de cet identifiant."
   ],
   "Execution.runId": [
-    "Tracking ID returned when createObservation() owns this dispatch session; absent for legacy hubs and nested dispatches. Read its persisted state through the observation client when a transport is configured.",
-    "Identifiant renvoyé lorsque createObservation() possède le suivi de ce dispatch ; absent avec un hub historique ou un dispatch imbriqué. Consultez son état via le client observation lorsqu’un transport est configuré."
+    "Tracking ID returned when createObservation() owns this dispatch session; absent for legacy hubs and nested dispatches. Read its persisted state through the observation client when a transport is configured. Retained for compatibility; prefer observationId when reading or watching tracking state.",
+    "Identifiant renvoyé lorsque createObservation() possède le suivi de ce dispatch ; absent avec un hub historique ou un dispatch imbriqué. Consultez son état via le client observation lorsqu’un transport est configuré. Conservé pour compatibilité ; préférez observationId pour lire ou suivre l’état observé."
   ],
   "WorkflowOptions.runId": [
     "Observation ID when using createObservation(); defaults to checkpoint.runId, otherwise a generated ID. On checkpoint resume, a settled projection retains its cursor. After explicit execution recovery, choose a fresh observation ID if the old projection is unsettled. Does not change checkpoint ownership or authorize replay.",
     "Identifiant d’observation avec createObservation() ; utilise checkpoint.runId par défaut, sinon un identifiant généré. Une reprise de checkpoint conserve le curseur d’une projection stabilisée. Après récupération explicite de l’exécution, choisissez un nouvel identifiant d’observation si l’ancienne projection est encore active. Ne modifie pas la propriété du checkpoint et n’autorise pas le rejeu."
   ],
   "WorkflowResult.runId": [
-    "Observation ID of this workflow when started with createObservation(). Independent of executionId and available without persistence; reading requires a configured transport.",
-    "Identifiant d’observation du workflow démarré avec createObservation(). Distinct d’executionId et disponible sans persistance ; sa lecture demande un transport configuré."
+    "Observation ID of this workflow when started with createObservation(). Independent of executionId and available without persistence; reading requires a configured transport. Retained for compatibility; prefer observationId when reading or watching tracking state.",
+    "Identifiant d’observation du workflow démarré avec createObservation(). Distinct d’executionId et disponible sans persistance ; sa lecture demande un transport configuré. Conservé pour compatibilité ; préférez observationId pour lire ou suivre l’état observé."
   ],
   "createObservation.options": [
     "Optional delivery, redaction, sink and persistence settings. With no transport, only in-memory observation is enabled. Sinks and transport are borrowed; no run is started by construction.",
@@ -11513,5 +11513,17 @@
   "FileDispatchResult.reportData": [
     "Version-2 FileRunReport data with workspaceInfo and fileOutputs, without synthetic Git fields. Available after cleanup with the same redaction as report(); independent of the renderer and other result fields. Editing this snapshot does not change report().",
     "Données FileRunReport version 2 avec workspaceInfo et fileOutputs, sans champs Git artificiels. Disponibles après nettoyage avec le même masquage que report() ; indépendantes du rendu et des autres champs du résultat. Modifier cet instantané ne change pas report()."
+  ],
+  "Execution.observationId": [
+    "Tracking ID when createObservation() owns this dispatch session; use it with observation.readRun/watchRun when a transport is configured. Equal to the retained runId field. Absent for legacy hubs and nested dispatches, which join the parent projection. Continuations own new sessions.",
+    "Identifiant du suivi lorsque createObservation() possède la session du dispatch ; à utiliser avec observation.readRun/watchRun si un transport est configuré. Égal au champ runId conservé. Absent avec un hub historique ou un dispatch imbriqué, qui rejoint la projection parente. Les continuations possèdent de nouvelles sessions."
+  ],
+  "WorkflowResult.observationId": [
+    "Tracking ID when started with createObservation(); equal to the retained result.runId. Selected by options.runId, otherwise checkpoint.runId or a generated ID. Independent of executionId and checkpoint ownership. Available without persistence, but reading requires a transport. Absent without an automatic tracking session.",
+    "Identifiant du suivi avec createObservation() ; égal au result.runId conservé. Choisi par options.runId, sinon checkpoint.runId ou un identifiant généré. Indépendant d’executionId et de la propriété du checkpoint. Disponible sans persistance, mais la lecture exige un transport. Absent sans session de suivi automatique."
+  ],
+  "SpeculationResult.terminationCode": [
+    "Coordinator stop reason using the shared TerminationCode vocabulary: aborted for external cancellation, quota for quota-stopped races, limit for an exhausted budget, or usage-unavailable when token/cost accounting is incomplete. Absent for winner and no-winner; inspect candidates for individual failures and validation rejections. Persisted with new durable checkpoints; legacy budget-exhausted checkpoints without a saved reason use limit. Does not authorize recovery or replay.",
+    "Motif d’arrêt du coordinateur utilisant le vocabulaire commun TerminationCode : aborted pour une annulation externe, quota pour une course arrêtée par quota, limit pour un budget épuisé, ou usage-unavailable si la consommation ou le coût est incomplet. Absent pour winner et no-winner ; consultez les candidats pour les échecs individuels et rejets de validation. Persisté dans les nouveaux checkpoints durables ; les anciens checkpoints budget-exhausted sans motif enregistré utilisent limit. N’autorise ni récupération ni rejeu."
   ]
 }

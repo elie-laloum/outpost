@@ -74,3 +74,5 @@ integration:
 ```
 
 The [native conflict-resolution contract](../workspaces/) still verifies the combined commit, rechecks diff guards and fences changed host/source commits. Verification failure retains recovery workspaces. A recipe cannot replace that verification with an agent's unverified assertion.
+
+A newly executed speculation task exposes its coordinator stop reason as `value.terminationCode`, using the same codes as TypeScript (`aborted`, `quota`, `limit`, `usage-unavailable`). It is absent for `winner` and `no-winner`. Existing settled workflow outputs are restored unchanged; older saved outputs may lack this optional field.

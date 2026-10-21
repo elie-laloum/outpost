@@ -33,12 +33,13 @@ export function recipeWorkflowReport(
         )
       : { value: projection };
   }
+  const observationId = result?.observationId ?? result?.runId;
   return {
     name: workflow.name,
     ...(result
       ? {
           executionId: result.executionId,
-          ...(result.runId ? { observationId: result.runId } : {}),
+          ...(observationId ? { observationId } : {}),
           workflowStatus: result.status,
           usage: result.usage,
           inputRequests: result.inputRequests,

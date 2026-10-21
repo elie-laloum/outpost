@@ -156,4 +156,6 @@ For the full record of a failed dispatch, open its [journal](../journals/) from 
 - Some failures are plain `Error`s: invalid task or workflow definitions, and a [checkpoint](../durable-runs/) already owned by another runner.
 - A `timeout` does not prove that external effects were rolled back. Check the retained branch before running again.
 
+Workflow results and speculation coordinator stops share [TerminationCode](../../reference/terminationcode/). Budget exhaustion uses `limit`; incomplete token or cost accounting uses `usage-unavailable`. Speculation keeps its `budget-exhausted` status and exposes the reason separately. A `winner` or `no-winner` has no coordinator stop code; candidate failures remain on `candidates`. Dispatch exceptions and the `WorkflowTerminationCode` type remain compatible.
+
 API: [OutpostError](../../reference/outposterror/) · [FaultCode](../../reference/faultcode/) · [recoveryDetails](../../reference/recoverydetails/) · [quotaFault](../../reference/quotafault/) · [unavailableFault](../../reference/unavailablefault/) · [WorkflowFailure](../../reference/workflowfailure/) · [WorkflowResult](../../reference/workflowresult/) · [ResponseError](../../reference/responseerror/) · [TransportConflict](../../reference/transportconflict/)

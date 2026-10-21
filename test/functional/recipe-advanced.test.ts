@@ -147,6 +147,37 @@ test("experimental recipe speculation matches native results, usage and explicit
   assert.ok(output.length);
   assert.ok(events.some((event) => event.kind === "summary"));
   assert.equal(JSON.stringify(result).includes('"resume"'), false);
+  assert.equal("terminationCode" in result, false);
+  await runtime.close();
+  await writeFile(
+    options.file,
+    JSON.stringify({
+      ...recipe,
+      tasks: [
+        {
+          ...recipe.tasks[0],
+          speculation: {
+            ...recipe.tasks[0]!.speculation,
+            budget: { attempts: 0 },
+          },
+        },
+      ],
+    }),
+  );
+  await using stoppedRuntime = await createRecipeRuntime(options);
+  const stoppedReport = await stoppedRuntime.run();
+  assert.equal(
+    stoppedReport.status,
+    "done",
+    JSON.stringify(stoppedReport.errors),
+  );
+  const stopped = stoppedReport.outputs.choose?.value;
+  assert.ok(stopped && typeof stopped === "object" && !Array.isArray(stopped));
+  assert.ok("status" in stopped && "terminationCode" in stopped);
+  assert.equal(stopped.status, "budget-exhausted");
+  assert.equal(stopped.terminationCode, "limit");
+  await stoppedRuntime.close();
+  await writeFile(options.file, JSON.stringify(recipe));
   await writeFile(
     options.config,
     JSON.stringify({ ...configuration, experimental: false }),

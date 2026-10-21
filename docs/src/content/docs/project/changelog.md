@@ -12,6 +12,9 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add explicit `observationId` to automatically tracked dispatch and workflow results, retaining `runId` and separating tracking from checkpoint and execution identities. Recipe reports consume the explicit identifier; reader and recovery behavior stay unchanged.
+- Share the `TerminationCode` vocabulary with speculation results while retaining `WorkflowTerminationCode`, existing statuses and dispatch exceptions. Preserve explicit coordinator stop reasons in new speculation checkpoints, read older checkpoints, and expose the optional reason in YAML speculation outputs. Budget exhaustion remains `limit`; incomplete accounting is `usage-unavailable`. Budgets, deadlines and replay authorization keep their existing contracts.
+
 - Expose typed `result.reportData` on Git and file dispatches as a redacted snapshot independent of `report()` rendering. Preserve Markdown/JSON defaults and YAML workflow report/checkpoint projections.
 - Replace identity-keyed report, usage-accounting, observation-session and loop-definition registries with explicit internal data and capabilities. Copied observation clients retain session ownership, copied loop tasks retain rounds and checkpoint identity, and decorated observer callbacks cannot detach synchronous usage accounting from budget enforcement. Preserve observer isolation and independent tracking sessions.
 

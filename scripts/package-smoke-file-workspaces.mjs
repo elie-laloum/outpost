@@ -23,6 +23,7 @@ const workspace:FileWorkspace=await createWorkspace({source:{kind:'ephemeral'},r
 const sandbox=await createSandbox({workspace,sandboxProvider});
 const result:FileDispatchResult<undefined>=await dispatch({workspace,sandboxProvider,agent:scriptedAgent({turns:[{text:'ok'}]}),brief:{text:'work'}});
 const report:FileRunReport=result.reportData;
+const observationId:string|undefined=result.observationId;
 const reportVersion:2=report.version;
 await workspaceFingerprint(workspace);
 await publishWorkspaceOutputs(workspace,{paths:['**/*.json'],destination:'./out',policy:'create'});

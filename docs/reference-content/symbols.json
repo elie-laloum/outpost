@@ -692,8 +692,8 @@
     "Valeurs littérales des critères de la question choice sélectionnée, utilisées comme clés de candidats et de repli."
   ],
   "WorkflowTerminationCode": [
-    "Reason for an unsuccessful workflow termination, exposed on WorkflowResult, finish events and WorkflowFailure.code. Uses FaultCode, failed for unclassified errors and usage-unavailable for incomplete budget accounting. Successful and suspended runs have no termination code.",
-    "Motif d’une terminaison de workflow sans succès, exposé sur WorkflowResult, les événements finish et WorkflowFailure.code. Utilise FaultCode, failed pour les erreurs non classées et usage-unavailable pour une comptabilité de budget incomplète. Les exécutions réussies ou suspendues n’ont pas de code de terminaison."
+    "Reason for an unsuccessful workflow termination, exposed on WorkflowResult, finish events and WorkflowFailure.code. Uses FaultCode, failed for unclassified errors and usage-unavailable for incomplete budget accounting. Successful and suspended runs have no termination code. Compatibility name for the shared TerminationCode type.",
+    "Motif d’une terminaison de workflow sans succès, exposé sur WorkflowResult, les événements finish et WorkflowFailure.code. Utilise FaultCode, failed pour les erreurs non classées et usage-unavailable pour une comptabilité de budget incomplète. Les exécutions réussies ou suspendues n’ont pas de code de terminaison. Nom compatible du type commun TerminationCode."
   ],
   "createAgentConflictResolver": [
     "Create an opt-in conflict strategy that prepares a merge in the supplied resolution workspace, runs one agent dispatch, then executes mandatory verification in the same sandbox. It requires both a sandboxProvider and a noninteractive verification command, returns the verified commit, usage and check output, and closes its sandbox on every outcome. It rejects unresolved entries, missing ancestry, uncommitted nonignored changes and commits changed by verification. No model or sandbox runs during construction.",
@@ -906,5 +906,9 @@
   "createObservation": [
     "Create a reusable observation client with optional persistence and borrowed sinks. Dispatch and workflow engines open independent tracking sessions and close them on settlement; the client exposes readRun and watchRun for the same transport. Construction performs no storage writes or execution. Sessions use separate event sequences, and checkpoint resumes preserve persistent cursors. close() waits for active sessions without cancelling execution. Low-level hubs and standalone readers remain compatible.",
     "Crée un client d’observation réutilisable avec persistance optionnelle et sorties empruntées. Les moteurs de dispatch et de workflow ouvrent des suivis indépendants et les ferment à stabilisation ; le client expose readRun et watchRun sur le même transport. La construction n’écrit rien et ne lance aucune exécution. Les suivis ont des séquences distinctes et les reprises conservent les curseurs persistants. close() attend les suivis actifs sans annuler le travail. Les hubs et lecteurs indépendants restent compatibles."
+  ],
+  "TerminationCode": [
+    "Shared termination reason vocabulary for workflow results and speculation coordinator stops. Includes FaultCode, failed for unclassified errors and usage-unavailable for incomplete budget accounting. Each result documents its applicable codes; dispatch continues to throw OutpostError with its existing code. Budget exhaustion uses limit, not the speculation status budget-exhausted.",
+    "Vocabulaire commun des motifs de terminaison des workflows et d’arrêt des coordinateurs de spéculation. Inclut FaultCode, failed pour une erreur non classée et usage-unavailable pour une comptabilité de budget incomplète. Chaque résultat décrit les codes applicables ; le dispatch continue de lever OutpostError avec son code existant. Un budget épuisé utilise limit, et non le statut de spéculation budget-exhausted."
   ]
 }

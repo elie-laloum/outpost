@@ -28,7 +28,7 @@ export const observation = createObservation({ transporter });
 
 ## Démarrer un workflow
 
-Enregistrez ce fichier sous `start.ts`, puis lancez `node start.ts`. Le workflow choisit le type d’exécution et possède son suivi. Précisez `runId` lorsqu’un autre processus doit connaître l’identifiant à l’avance. Sinon, l’identifiant du checkpoint est utilisé, ou un nouvel identifiant est généré et renvoyé dans `result.runId`.
+Enregistrez ce fichier sous `start.ts`, puis lancez `node start.ts`. Le workflow choisit le type d’exécution et possède son suivi. Précisez `runId` lorsqu’un autre processus doit connaître l’identifiant à l’avance. Sinon, l’identifiant du checkpoint est utilisé, ou un nouvel identifiant est généré et renvoyé dans `result.observationId`.
 
 ```ts title="start.ts"
 import { observation } from "./observation.ts";
@@ -40,9 +40,11 @@ const result = await defineWorkflow("nightly", [check]).start({
   observation,
   runId: "nightly_2026_10_21",
 });
-console.log(result.runId, result.status);
+console.log(result.observationId, result.status);
 result.unwrap();
 ```
+
+Utilisez `result.observationId` avec le client observation ; le champ `runId` existant du résultat reste égal à cet identifiant pour compatibilité. L’option d’entrée conserve le nom `runId`. L’`executionId` d’un workflow identifie son historique d’exécution, tandis que `checkpoint.runId` sélectionne son checkpoint durable. Choisir un autre identifiant d’observation ne rejoue pas les tâches terminées et ne change pas la propriété du checkpoint. Sans session de suivi automatique, `observationId` est absent.
 
 `dispatch({ observation, runId, ... })` emploie la même API pour une requête. Un dispatch imbriqué recevant `context.observation` rejoint la projection du workflow. Transmettez ce contexte dans les tâches personnalisées ; les tâches isolées le font automatiquement. La continuation d’un dispatch autonome constitue une nouvelle exécution et demande un nouvel identifiant.
 
@@ -67,7 +69,7 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/review-123" },
   brief: { text: "Review the code without modifying files." },
 });
-console.log(result.runId, result.text);
+console.log(result.observationId, result.text);
 ```
 
 ## Lire depuis un autre processus

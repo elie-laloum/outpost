@@ -102,7 +102,9 @@ const race = defineTask({
       console.log(
         `  tentative précédente : ${attempt.key} (${attempt.status})`,
       );
-    console.log(`  course : ${result.status}`);
+    console.log(
+      `  course : ${result.status} (${result.terminationCode ?? "completed"})`,
+    );
 
     // 2. No winner because of a limit: hand it to the workflow as a quota error.
     if (result.status === "quota" && result.quota) {

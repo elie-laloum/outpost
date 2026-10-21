@@ -1,3 +1,8 @@
+import {
+  speculationIdentity,
+  validateSpeculation,
+  encodeSpeculation,
+} from "../../src/application/speculation-checkpoint.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { spawn } from "node:child_process";
@@ -193,6 +198,7 @@ for (const phase of [
       durability: { ...options.durability, resume: "retry-incomplete" },
     });
     assert.equal(result.status, "winner");
+    assert.equal(result.terminationCode, undefined);
     if (best) {
       assert.equal(result.winner?.key, "later");
       assert.equal(result.winner.score, 10);
@@ -256,6 +262,7 @@ test("cleanup deadline retains ownership and can be recovered without replaying 
   };
   const result = await speculate(options);
   assert.equal(result.status, "no-winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.candidates[0]?.cleanup, "pending");
   await assert.rejects(speculate(options), /already owned/);
   finish();
@@ -297,6 +304,7 @@ test("aborted noncooperative validation returns with recoverable work within cle
     },
   });
   assert.equal(result.status, "aborted");
+  assert.equal(result.terminationCode, "aborted");
   assert.equal(result.candidates[0]?.cleanup, "pending");
   assert.equal(
     await readFile(
@@ -378,8 +386,10 @@ test("completed exhausted races retain their outcome and reject changed versions
   };
   const first = await speculate(options);
   assert.equal(first.status, "budget-exhausted");
+  assert.equal(first.terminationCode, "limit");
   const second = await speculate(options);
   assert.equal(second.status, first.status);
+  assert.equal(second.terminationCode, first.terminationCode);
   assert.equal(second.usage.attempts, 0);
   await assert.rejects(
     speculate({
@@ -529,6 +539,7 @@ test("unprintable callback failures do not break durable error reporting", async
   };
   const result = await speculate(options);
   assert.equal(result.status, "no-winner");
+  assert.equal(result.terminationCode, undefined);
   const restored = await speculate(options);
   assert.equal(restored.candidates[0]?.error, "Unprintable speculation error");
 });
@@ -593,6 +604,7 @@ for (const score of [undefined, "invalid", null])
     };
     const result = await speculate(options);
     assert.equal(result.status, "winner");
+    assert.equal(result.terminationCode, undefined);
     const current = await entry(transporter);
     const stored = await transporter.read(current.key);
     assert.ok(stored);
@@ -627,3 +639,91 @@ for (const score of [undefined, "invalid", null])
       /incompatible/,
     );
   });
+
+for (const dimension of ["usage", "cost"] as const) {
+  test(`durable speculation retains ${dimension} accounting refusal without allocating again`, async (t) => {
+    const repo = await repository(t);
+    const transporter = createLocalTransport({
+      directory: join(repo, "state"),
+    });
+    const budget: import("../../src/index.ts").WorkflowBudget =
+      dimension === "usage"
+        ? { usage: { input: 100 } }
+        : {
+            prices: { currency: "USD", models: {} },
+            cost: { currency: "USD", limit: 1 },
+          };
+    const options = {
+      repository: repo,
+      sandboxProvider: recoverable(),
+      durability: { transporter, runId: "incomplete", version: "1" },
+      budget,
+      candidates: [
+        {
+          ...candidate,
+          agent: scripted(
+            `console.log(JSON.stringify({kind:"usage",tokens:{input:1,cached:0,output:1,complete:false}}));${emit("done")}`,
+          ),
+        },
+      ],
+      validate: () => true,
+    };
+    const first = await speculate(options);
+    assert.equal(first.status, "budget-exhausted");
+    assert.equal(first.terminationCode, "usage-unavailable");
+    const second = await speculate({
+      ...options,
+      sandboxProvider: {
+        ...options.sandboxProvider,
+        acquire: async () => assert.fail("settled runs must not allocate"),
+      },
+    });
+    assert.equal(second.status, first.status);
+    assert.equal(second.terminationCode, first.terminationCode);
+    assert.deepEqual(second.usage, first.usage);
+  });
+}
+
+test("legacy exhausted checkpoints remain readable and incompatible termination metadata is refused", async (t) => {
+  const { openSpeculationStore } =
+    await import("../../src/infrastructure/speculation-store.ts");
+  const repo = await repository(t);
+  const transporter = createLocalTransport({ directory: join(repo, "state") });
+  const options = {
+    repository: repo,
+    sandboxProvider: recoverable(),
+    durability: { transporter, runId: "legacy", version: "1" },
+    candidates: [candidate],
+    budget: { attempts: 0 },
+    validate: () => true,
+  };
+  const first = await speculate(options);
+  const session = await openSpeculationStore(transporter, "legacy");
+  const saved = session.initial;
+  const identity = await speculationIdentity(options);
+  validateSpeculation(saved, identity, [candidate.key]);
+  delete saved.terminationCode;
+  await session.save(encodeSpeculation(saved));
+  await session.release();
+  const restored = await speculate(options);
+  assert.equal(restored.id, first.id);
+  assert.equal(restored.terminationCode, "limit");
+  for (const code of ["quota", "timeout", "unknown", 1]) {
+    assert.throws(
+      () =>
+        validateSpeculation({ ...saved, terminationCode: code }, identity, [
+          candidate.key,
+        ]),
+      /incompatible/,
+    );
+  }
+  assert.throws(
+    () =>
+      validateSpeculation(
+        { ...saved, status: "winner", terminationCode: "limit" },
+        identity,
+        [candidate.key],
+      ),
+    /incompatible/,
+  );
+});

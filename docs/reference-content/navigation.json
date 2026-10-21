@@ -3013,6 +3013,11 @@
         "attrs": { "data-api-kind": "type" }
       },
       {
+        "slug": "reference/terminationcode",
+        "label": "TerminationCode",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/type-quotafault",
         "label": "QuotaFault",
         "attrs": { "data-api-kind": "interface" }

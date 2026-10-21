@@ -68,6 +68,7 @@ test("speculation selects a validated candidate, cancels dirty loser and awaits 
     },
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.winner?.key, "winner");
   assert.equal(released.length, 2);
   assert.equal(result.candidates[1]?.status, "cancelled");
@@ -151,6 +152,7 @@ test("validation rejection, exceptions and agent failures produce no winner with
     },
   });
   assert.equal(result.status, "no-winner");
+  assert.equal(result.terminationCode, undefined);
   assert.deepEqual(
     result.candidates.map((value) => value.status),
     ["rejected", "failed", "failed"],
@@ -175,6 +177,7 @@ test("streaming usage cancels admitted work and counts failed attempts", async (
     validate: () => assert.fail("budget exceeded"),
   });
   assert.equal(result.status, "budget-exhausted");
+  assert.equal(result.terminationCode, "limit");
   assert.equal(result.usage.tokens.input, 3);
   assert.equal(result.usage.attempts, 1);
   assert.equal(result.candidates[1]?.status, "skipped");
@@ -190,6 +193,7 @@ test("attempt caps stop admission without cancelling an admitted candidate", asy
     validate: () => true,
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.usage.attempts, 1);
   assert.equal(result.candidates[1]?.status, "skipped");
   const empty = await speculate({
@@ -225,6 +229,7 @@ test("external abort returns owned recovery after cancelling a running command",
     validate: () => false,
   });
   assert.equal(result.status, "aborted");
+  assert.equal(result.terminationCode, "aborted");
   assert.equal(result.candidates[0]?.status, "cancelled");
   await access(result.candidates[0]!.retainedDirectory!);
 });
@@ -252,6 +257,7 @@ test("cleanup failure prevents selection and preserves output and workspace", as
     validate: () => true,
   });
   assert.equal(result.status, "no-winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.candidates[0]?.status, "failed");
   assert.match(String(result.candidates[0]?.error), /cleanup failure/);
   assert.ok(result.candidates[0]?.result);
@@ -358,6 +364,7 @@ test("loser cleanup failures stay visible after another candidate wins", async (
     },
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.candidates[1]?.status, "failed");
   const error = result.candidates[1]?.error;
   assert.ok(error instanceof AggregateError);

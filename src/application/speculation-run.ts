@@ -1,3 +1,4 @@
+import { speculationTerminationCode } from "./speculation-termination.ts";
 import { resumeSpeculation } from "./speculation-resume.ts";
 import { encodeSpeculation } from "./speculation-checkpoint.ts";
 import { checkSpeculationIntegration } from "./speculation-integration.ts";
@@ -389,6 +390,11 @@ export async function runSpeculation<T>(
     return "no-winner";
   }
   const status = state.finished && state.status ? state.status : outcome();
+  const terminationCode = speculationTerminationCode(
+    status,
+    budgetError,
+    state.finished ? state.terminationCode : undefined,
+  );
   const host = await speculativeHostSnapshot(options.repository).then(
     (after) => ({
       before,
@@ -405,6 +411,8 @@ export async function runSpeculation<T>(
     (attempt) => attempt.phase === "waiting" || attempt.phase === "settled",
   );
   state.status = status;
+  if (terminationCode) state.terminationCode = terminationCode;
+  if (!terminationCode) delete state.terminationCode;
   if (budgetError !== undefined) state.error = String(budgetError);
   state.usage = accounting.snapshot();
   await session?.save(encodeSpeculation(state));
@@ -421,6 +429,7 @@ export async function runSpeculation<T>(
     baseline,
     host,
     status,
+    ...(terminationCode ? { terminationCode } : {}),
     candidates: records,
     ...(integration ? { integration } : {}),
     ...(session

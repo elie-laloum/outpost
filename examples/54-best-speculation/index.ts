@@ -62,7 +62,7 @@ console.table(
     outputTokens: candidate.result?.usage.output,
   })),
 );
-console.log("Status:", result.status);
+console.log("Status:", result.status, "Reason:", result.terminationCode);
 console.log("Shared usage:", result.usage);
 console.log("Host changed:", result.host.changed);
 for (const candidate of result.candidates) {

@@ -74,3 +74,5 @@ integration:
 ```
 
 Le [contrat natif de résolution](../workspaces/) vérifie toujours le commit combiné, réapplique les guards de diff et refuse les changements concurrents des commits source ou hôte. Un échec de vérification conserve les workspaces de récupération. Une affirmation non vérifiée de l’agent ne remplace pas ces contrôles.
+
+Une tâche de spéculation nouvellement exécutée expose le motif d’arrêt de son coordinateur dans `value.terminationCode`, avec les mêmes codes qu’en TypeScript (`aborted`, `quota`, `limit`, `usage-unavailable`). Il est absent pour `winner` et `no-winner`. Les sorties de workflow déjà stabilisées sont restaurées sans modification ; les anciennes sorties peuvent ne pas contenir ce champ optionnel.

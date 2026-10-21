@@ -17,7 +17,8 @@ import { WorkflowFailure } from "./failure.ts";
 import { runTask } from "./task-runner.ts";
 import { positive } from "./validation.ts";
 import { workflowState } from "./workflow-state.ts";
-import { terminationCode, workflowOutcome } from "./termination.ts";
+import { terminationCode } from "../termination.ts";
+import { workflowOutcome } from "./termination.ts";
 
 export async function schedule(
   name: string,
@@ -210,7 +211,7 @@ async function scheduleRun(
     await state.observation.close();
     observerErrors.push(...state.observation.errors);
     const result: WorkflowResult = Object.freeze({
-      ...(runId ? { runId } : {}),
+      ...(runId ? { runId, observationId: runId } : {}),
       executionId,
       name,
       inputRequests: Object.freeze(

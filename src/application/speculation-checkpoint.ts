@@ -1,3 +1,4 @@
+import { validSpeculationTermination } from "./speculation-termination.ts";
 import { validateUsage } from "../domain/usage.ts";
 import { createHash } from "node:crypto";
 import { realpath } from "node:fs/promises";
@@ -182,6 +183,8 @@ export function validateSpeculation<T>(
       String(value.status),
     )
   )
+    throw invalid();
+  if (!validSpeculationTermination(value.status, value.terminationCode))
     throw invalid();
   if (value.error !== undefined && typeof value.error !== "string")
     throw invalid();

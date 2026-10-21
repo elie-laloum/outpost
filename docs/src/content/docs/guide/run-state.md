@@ -28,7 +28,7 @@ export const observation = createObservation({ transporter });
 
 ## Start a workflow
 
-Save this as `start.ts` and run `node start.ts`. The workflow chooses the execution kind and owns the tracking session. Specify `runId` when another process needs to know the ID in advance. Otherwise the checkpoint’s run ID is used, or a new ID is generated and returned as `result.runId`.
+Save this as `start.ts` and run `node start.ts`. The workflow chooses the execution kind and owns the tracking session. Specify `runId` when another process needs to know the ID in advance. Otherwise the checkpoint’s run ID is used, or a new ID is generated and returned as `result.observationId`.
 
 ```ts title="start.ts"
 import { observation } from "./observation.ts";
@@ -40,9 +40,11 @@ const result = await defineWorkflow("nightly", [check]).start({
   observation,
   runId: "nightly_2026_10_21",
 });
-console.log(result.runId, result.status);
+console.log(result.observationId, result.status);
 result.unwrap();
 ```
+
+Use `result.observationId` with the observation client; the existing result `runId` remains equal to it for compatibility. The input option is still named `runId`. A workflow’s `executionId` identifies its execution history, while `checkpoint.runId` selects its durable checkpoint. Choosing a different observation ID does not replay completed tasks or change checkpoint ownership. Without an automatic tracking session, `observationId` is absent.
 
 `dispatch({ observation, runId, ... })` uses the same API for a single request. A nested dispatch receiving `context.observation` joins its workflow’s projection. Forward that scope in custom tasks; isolated tasks do it automatically. A standalone dispatch continuation is a new execution and needs a fresh ID.
 
@@ -67,7 +69,7 @@ const result = await dispatch({
   branch: { mode: "named", name: "outpost/review-123" },
   brief: { text: "Review the code without modifying files." },
 });
-console.log(result.runId, result.text);
+console.log(result.observationId, result.text);
 ```
 
 ## Read from another process

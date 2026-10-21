@@ -46,6 +46,7 @@ test("candidates stopped by a quota report quota with the earliest reset", async
     validate: () => false,
   });
   assert.equal(result.status, "quota");
+  assert.equal(result.terminationCode, "quota");
   assert.deepEqual(
     result.candidates.map((candidate) => candidate.status),
     ["quota", "quota", "failed", "rejected"],
@@ -74,6 +75,7 @@ test("a winner still takes precedence over quota-stopped candidates", async (t) 
     validate: () => true,
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.quota, undefined);
   assert.equal(result.candidates[0]?.status, "quota");
 });

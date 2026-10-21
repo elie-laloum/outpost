@@ -71,10 +71,11 @@ const following = (async () => {
   }))
     console.log("Event:", event.seq, event.source, event.event);
 })();
-await execution;
+const result = await execution;
+assert.equal(result.observationId, id);
 await observation.close();
 await following;
-const run = await observation.readRun(id);
+const run = await observation.readRun(result.observationId!);
 assert.ok(run);
 assert.equal(run.status, "done");
 assert.equal(run.complete, true);

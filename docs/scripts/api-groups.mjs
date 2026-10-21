@@ -150,7 +150,7 @@ export const groups = [
     title: ["Errors", "Erreurs"],
     guide: "guide/error-handling",
     names:
-      "OutpostError recoveryDetails quotaFault unavailableFault FaultCode QuotaFault UnavailableFault",
+      "OutpostError recoveryDetails quotaFault unavailableFault FaultCode TerminationCode QuotaFault UnavailableFault",
   },
   {
     id: "storage-reservations",
@@ -303,7 +303,7 @@ const guidePages = {
   "environment-variables": "Variables",
   retention:
     "planRecoveryRetention pruneRecoveryRetention assertRecoveryQuota RecoveryRetentionPolicy RecoveryRetentionOptions RecoveryRetentionPlan RecoveryRetentionEntry RecoveryPruneResult RecoveryQuotaOptions",
-  "error-handling": "OutpostError FaultCode",
+  "error-handling": "OutpostError FaultCode TerminationCode",
   "redis-workers":
     "createBullMQTaskQueue BullMQTaskQueue BullMQTaskQueueOptions",
   "cron-schedules":

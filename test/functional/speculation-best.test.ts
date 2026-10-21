@@ -78,6 +78,7 @@ test("best selection waits for cleanup, runs queued candidates and keeps losing 
     },
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.winner?.key, "last", JSON.stringify(result));
   assert.equal(result.winner?.score, -1);
   assert.deepEqual(scored, ["first", "second", "last"]);
@@ -206,6 +207,7 @@ test("best selection respects admission limits without stopping admitted candida
     score: () => 1,
   });
   assert.equal(result.status, "winner");
+  assert.equal(result.terminationCode, undefined);
   assert.equal(result.winner?.key, "first");
   assert.equal(result.candidates[1]?.status, "skipped");
   assert.equal(result.usage.attempts, 1);

@@ -3917,6 +3917,7 @@
       "fallback": "FallbackRecord | undefined",
       "resume": "<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>",
       "fork": "<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>",
+      "observationId": "string | undefined",
       "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
@@ -3945,6 +3946,7 @@
       "fallback": "contract",
       "resume": "contract",
       "fork": "contract",
+      "observationId": "contract",
       "runId": "contract",
       "text": "contract",
       "turns": "contract",
@@ -4074,6 +4076,7 @@
   ".:Execution": {
     "signatures": [],
     "options": {
+      "observationId": "string | undefined",
       "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
@@ -4089,6 +4092,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "observationId": "contract",
       "runId": "contract",
       "text": "contract",
       "turns": "contract",
@@ -4354,6 +4358,7 @@
       "report": "(options?: import(\"../domain/run-report.types.ts\").RunReportOptions) => string",
       "resume": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
       "fork": "<U = undefined>(options: DispatchOptions<U>) => Promise<FileDispatchResult<U>>",
+      "observationId": "string | undefined",
       "runId": "string | undefined",
       "text": "string",
       "turns": "readonly Turn[]",
@@ -4381,6 +4386,7 @@
       "report": "contract",
       "resume": "contract",
       "fork": "contract",
+      "observationId": "contract",
       "runId": "contract",
       "text": "contract",
       "turns": "contract",
@@ -10662,6 +10668,7 @@
   ".:SpeculationResult": {
     "signatures": [],
     "options": {
+      "terminationCode": "import(\"../domain/termination.types.ts\").TerminationCode | undefined",
       "integration": "SpeculationIntegration | undefined",
       "previousAttempts": "readonly SpeculativeCandidateResult<T>[] | undefined",
       "id": "string",
@@ -10680,6 +10687,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "terminationCode": "contract",
       "integration": "contract",
       "previousAttempts": "contract",
       "id": "contract",
@@ -10784,6 +10792,7 @@
       "transcriptReference": "TransportReference | undefined",
       "logReference": "TransportReference | undefined",
       "retainedDirectory": "string | undefined",
+      "observationId": "string | undefined",
       "runId": "string | undefined",
       "turns": "readonly Turn[]",
       "value": "T",
@@ -10808,6 +10817,7 @@
       "transcriptReference": "contract",
       "logReference": "contract",
       "retainedDirectory": "contract",
+      "observationId": "contract",
       "runId": "contract",
       "turns": "contract",
       "value": "contract",
@@ -11502,6 +11512,16 @@
       "read": "contract",
       "write": "contract"
     }
+  },
+  ".:TerminationCode": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Shared stop-reason type for workflow and speculation results; no independent YAML declaration.",
+    "optionCoverage": {}
   },
   ".:ToolOutput": {
     "signatures": [],
@@ -12242,6 +12262,7 @@
       "transcriptReference": "TransportReference | undefined",
       "logReference": "TransportReference | undefined",
       "retainedDirectory": "string | undefined",
+      "observationId": "string | undefined",
       "runId": "string | undefined",
       "turns": "readonly Turn[]",
       "value": "T",
@@ -12270,6 +12291,7 @@
       "transcriptReference": "contract",
       "logReference": "contract",
       "retainedDirectory": "contract",
+      "observationId": "contract",
       "runId": "contract",
       "turns": "contract",
       "value": "contract",
@@ -12698,7 +12720,7 @@
     "options": {
       "tasks": "readonly Readonly<TaskRecord>[] | undefined",
       "accounting": "WorkflowUsage | undefined",
-      "terminationCode": "WorkflowTerminationCode | undefined",
+      "terminationCode": "TerminationCode | undefined",
       "executionId": "string",
       "workflow": "string",
       "timestamp": "string",
@@ -12744,7 +12766,7 @@
   ".:WorkflowFailure": {
     "signatures": [],
     "options": {
-      "code": "WorkflowTerminationCode | undefined",
+      "code": "import(\"../termination.types.js\").TerminationCode | undefined",
       "result": "WorkflowResult"
     },
     "category": "contract",
@@ -13050,8 +13072,9 @@
   ".:WorkflowResult": {
     "signatures": [],
     "options": {
+      "observationId": "string | undefined",
       "runId": "string | undefined",
-      "terminationCode": "WorkflowTerminationCode | undefined",
+      "terminationCode": "TerminationCode | undefined",
       "inputRequests": "readonly WorkflowInputRequest[]",
       "executionId": "string",
       "name": "string",
@@ -13069,6 +13092,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "observationId": "contract",
       "runId": "contract",
       "terminationCode": "contract",
       "inputRequests": "contract",

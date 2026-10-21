@@ -59,9 +59,10 @@ test("a copied observation client records a dispatch and reads its masked events
     logging: false,
   });
   assert.equal(result.runId, "dispatch");
+  assert.equal(result.observationId, result.runId);
   assert.deepEqual(result.observerErrors, []);
   await using reader = createObservation({ transporter });
-  const snapshot = await reader.readRun("dispatch");
+  const snapshot = await reader.readRun(result.observationId!);
   assert.equal(snapshot?.status, "done");
   assert.equal(snapshot?.complete, true);
   const events = await collect(reader.watchRun("dispatch"));
@@ -171,6 +172,7 @@ test("scoped clients preserve redaction and nested dispatches belong to the work
         brief: { text: "test" },
         logging: false,
       });
+      assert.equal(result.observationId, undefined);
       return result.text;
     },
   });
@@ -216,6 +218,8 @@ test("settled workflow resume keeps its cursor and checkpoint identity", async (
   assert.equal(effects, 1);
   assert.equal(first.executionId, second.executionId);
   assert.equal(second.runId, "durable");
+  assert.equal(first.observationId, "durable");
+  assert.equal(second.observationId, "durable");
   assert.equal(resumed?.complete, true);
   assert.ok(resumed!.seq > snapshot!.seq);
   assert.equal(
@@ -403,6 +407,7 @@ test("file dispatch registration covers allocation failure and output publicatio
   };
   const result = await dispatch({ ...settings, runId: "file" });
   assert.equal(result.runId, "file");
+  assert.equal(result.observationId, "file");
   assert.deepEqual(result.reportData, JSON.parse(result.report()));
   assert.doesNotMatch(JSON.stringify(result.reportData), /private/);
   assert.equal(result.reportData.usage.input, 1);
@@ -591,4 +596,42 @@ test("changing the YAML observation ID preserves the durable recipe identity", a
   assert.equal(next.runId, "checkpoint");
   assert.equal(next.observationId, "second");
   assert.equal(next.tasks[0]?.attempts, 1);
+});
+
+test("tracking IDs stay independent of checkpoint and execution IDs", async (t) => {
+  const root = await repository(t);
+  const transporter = createLocalTransport({ directory: join(root, "store") });
+  await using observation = createObservation({ transporter });
+  const checkpoint = {
+    store: createWorkflowCheckpointStore({ transporter }),
+    runId: "checkpoint",
+    version: "1",
+  };
+  let calls = 0;
+  const workflow = defineWorkflow("identities", [
+    defineTask({ key: "once", perform: () => ++calls }),
+  ]);
+  const first = await workflow.start({
+    observation,
+    checkpoint,
+    runId: "tracking-one",
+  });
+  const second = await workflow.start({
+    observation,
+    checkpoint,
+    runId: "tracking-two",
+  });
+  assert.equal(calls, 1);
+  assert.equal(first.observationId, "tracking-one");
+  assert.equal(second.observationId, "tracking-two");
+  assert.equal(first.executionId, second.executionId);
+  assert.equal(await observation.readRun("checkpoint"), undefined);
+  assert.equal(
+    (await observation.readRun(second.observationId!))?.executionId,
+    second.executionId,
+  );
+  const unobserved = await workflow.start({ checkpoint });
+  assert.equal(unobserved.observationId, undefined);
+  assert.equal(unobserved.runId, undefined);
+  assert.equal(unobserved.executionId, first.executionId);
 });

@@ -60,8 +60,8 @@ export const result = await speculate({
   candidates,
   validate,
 });
-console.log(result.status, result.winner?.branch);
-// Example output: winner outpost/speculation/…/codex
+console.log(result.status, result.terminationCode, result.winner?.branch);
+// Example output: winner undefined outpost/speculation/…/codex
 ```
 
 ## Choose the highest score
@@ -134,6 +134,10 @@ export async function canMerge(branch: string, commit?: string) {
 ```
 
 Pass `winner.branch` and `winner.commit`. A branch that moved since validation is `blocked`. The check never merges: run `git merge` yourself.
+
+Read `result.terminationCode` for a coordinator stop: `aborted`, `quota`, `limit` or `usage-unavailable`. Workflows use the same vocabulary; `budget-exhausted` remains a speculation status, while its reason is `limit` or incomplete accounting. A winner has no termination code. A `no-winner` result also has no coordinator stop code: inspect `candidates` for execution failures and validation rejections.
+
+The race’s `id` identifies its coordinator. Observation follows candidate dispatches; the race does not return a single aggregate `observationId`.
 
 ## Limits
 
