@@ -1,3 +1,4 @@
+import { recipeStatusText } from "./recipe-status.ts";
 import { createRecipeProjectRuntime } from "../application/recipes/runtime.ts";
 import { readRecipeProject } from "../application/recipes/project.ts";
 import {
@@ -82,7 +83,7 @@ export async function recipeYamlCommand(
       process.stdout.write(
         values.json
           ? `${JSON.stringify(status ?? null)}\n`
-          : `${runId}: ${status ? (status.owned ? "owned" : (status.report?.status ?? "interrupted")) : "not found"}\n`,
+          : recipeStatusText(runId!, status),
       );
       if (!status) process.exitCode = 1;
       return;
