@@ -17,6 +17,16 @@ L’**agent** reçoit la tâche et renvoie une réponse. Un harness CLI lance l�
 
 Ces choix sont indépendants. Changer d’agent n’impose pas de changer d’environnement. Remplacer la sandbox n’impose pas d’abandonner un workspace que vous gérez.
 
+## Choisir qui gère les ressources
+
+| Point d’entrée      | Qui ferme ?                                                                                           | Que reste-t-il ?                                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `dispatch()`        | Outpost ferme la sandbox et le workspace qu’il crée. Les workspaces empruntés restent à votre charge. | Le résultat, les conversations capturées et le travail conservé selon la politique du workspace.                              |
+| `createSandbox()`   | Vous fermez la sandbox, de préférence avec `await using`.                                             | Un workspace emprunté reste ouvert ; les fichiers possédés suivent la politique de nettoyage choisie.                         |
+| `createWorkspace()` | Vous fermez ses sandboxes, puis le workspace.                                                         | Les branches Git nommées, snapshots explicitement conservés et sorties publiées suivent leurs propres règles de conservation. |
+
+Commencez par [une demande](../first-request/), réutilisez ensuite une [session de sandbox](../sandbox-sessions/), puis gérez explicitement un [workspace](../workspaces/) lorsque ses fichiers doivent survivre à l’environnement. Fermer une sandbox empruntée ne transfère jamais sa propriété à l’appelant.
+
 ## De la demande au nettoyage
 
 Un appel ponctuel à `dispatch()` gère les ressources qu’il crée. C’est le cycle suivi par [votre première tâche](../first-request/).

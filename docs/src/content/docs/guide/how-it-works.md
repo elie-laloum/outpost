@@ -17,6 +17,16 @@ The **agent** receives the task and returns an answer. A CLI harness starts an i
 
 These choices are independent. Changing the agent need not change where it runs. Changing the sandbox need not discard a workspace you own.
 
+## Choose who owns the resources
+
+| Entry point         | Who closes it?                                                                         | What remains?                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `dispatch()`        | Outpost closes the sandbox and workspace it creates. Borrowed workspaces remain yours. | The result, captured conversations and work retained by the workspace policy.                             |
+| `createSandbox()`   | You close the sandbox, preferably with `await using`.                                  | A borrowed workspace remains open; owned files follow the selected cleanup policy.                        |
+| `createWorkspace()` | You close every sandbox using it, then the workspace.                                  | Named Git branches, explicitly retained snapshots and published outputs follow their own retention rules. |
+
+Start with [one request](../first-request/), reuse an environment through [sandbox sessions](../sandbox-sessions/), then choose explicit [workspace ownership](../workspaces/) when files must outlive an environment. Closing a borrowed sandbox never transfers ownership to its caller.
+
 ## One task, from start to cleanup
 
 A one-shot `dispatch()` owns the resources it creates. This is the lifecycle used by [your first task](../first-request/).
