@@ -12,6 +12,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Corriger la disparition de texte du reporter YAML lorsque dispatchs, passes et sous-agents s’entrelacent, en branchant directement la sortie d’observation native. Supprimer les adaptateurs superflus du reporter et d’OpenTelemetry, préserver la fermeture par la recette et attendre les callbacks asynchrones lors du drainage du reporter personnalisé.
 - Ajout de `createObservation()` pour composer reporters et OpenTelemetry empruntés, ainsi qu’un état d’exécution optionnel persisté par Transport. Les moteurs possèdent les suivis ; `observation.readRun(id)` et `observation.watchRun(id)` les consultent sans lancer de travail. Conservation des hubs, observateurs et callbacks historiques.
 - Ajout de la sélection et du retour de `runId` d’observation pour les dispatchs et workflows, de séquences indépendantes en concurrence, de la fermeture automatique des heartbeats et de la continuation d’historiques de checkpoints stabilisés. Les lecteurs n’autorisent ni rejeu ni récupération ; après récupération explicite, une projection interrompue demande un nouvel identifiant d’observation.
 - Les reporters et observateurs OpenTelemetry s’utilisent directement comme sorties. L’observation YAML emploie le client par défaut, accepte un transport et des réglages de heartbeat, et expose les identifiants dans les rapports ; `type: hub` et `sink.run` restent compatibles. Mise à jour des schémas, classifications de parité, guides bilingues, référence API et exemples exécutables.

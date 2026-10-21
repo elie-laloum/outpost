@@ -9,14 +9,13 @@ export const nativeRecipeFactories: Readonly<
     (await import("../../application/recipes/advanced-components.ts"))
       .createRecipeConflictResolver,
   "sink.reporter": async () =>
-    (await import("../../application/recipes/advanced-components.ts"))
-      .createRecipeReporter,
+    (await import("../../infrastructure/reporter.ts")).createReporter,
   "sink.custom": async () =>
     (await import("../../application/recipes/advanced-components.ts"))
       .createRecipeCustomReporter,
   "sink.opentelemetry": async () =>
-    (await import("../../application/recipes/advanced-components.ts"))
-      .createRecipeOpenTelemetry,
+    (await import("../../infrastructure/opentelemetry.ts"))
+      .createOpenTelemetryObserver,
   "queue.sqlite": async () =>
     (await import("../../application/recipes/service-components.ts"))
       .createRecipeSqliteQueue,

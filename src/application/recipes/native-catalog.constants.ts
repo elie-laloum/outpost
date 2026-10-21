@@ -43,8 +43,8 @@ export const nativeRecipeTypes = [
     "sink.reporter",
     "ReporterOptions",
     "infrastructure/reporter.types.ts",
-    "createRecipeReporter",
-    "application/recipes/advanced-components.ts",
+    "createReporter",
+    "infrastructure/reporter.ts",
     7,
   ],
   [
@@ -59,8 +59,8 @@ export const nativeRecipeTypes = [
     "sink.opentelemetry",
     "OpenTelemetryOptions",
     "infrastructure/opentelemetry.types.ts",
-    "createRecipeOpenTelemetry",
-    "application/recipes/advanced-components.ts",
+    "createOpenTelemetryObserver",
+    "infrastructure/opentelemetry.ts",
     7,
   ],
   [

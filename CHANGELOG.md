@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix YAML reporter text suppression across interleaved dispatches, passes and subagents by connecting the native observation sink directly. Remove redundant reporter and OpenTelemetry adapters, preserve recipe-owned cleanup, and make custom reporter flushing wait for asynchronous handlers.
 - Add `createObservation()` to compose borrowed reporters, OpenTelemetry and optional Transport-backed run state. Execution engines own tracking sessions; `observation.readRun(id)` and `observation.watchRun(id)` read them without starting execution. Preserve low-level hubs, observers and historical callbacks.
 - Add observation `runId` selection and result IDs for dispatches and workflows, independent concurrent event sequences, automatic heartbeat cleanup and settled checkpoint history continuation. Readers cannot authorize replay or recovery; interrupted projections require a fresh observation ID after explicit execution recovery.
 - Make reporters and OpenTelemetry observers directly usable as observation sinks. YAML observation defaults to the client, accepts a transport and heartbeat settings, and exposes observation IDs in reports; explicit `type: hub` and `sink.run` remain compatible. Update schemas, parity classifications, bilingual guides, API reference and runnable examples.
