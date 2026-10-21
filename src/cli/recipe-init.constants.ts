@@ -21,9 +21,10 @@ export const starterRecipeConfiguration = `version: 1
 repository: .
 sandbox:
   provider: docker
-  image: outpost:latest
+  image: outpost-codex:dev
 branch:
-  mode: integrate
+  mode: named
+  name: outpost/first-task
 agents:
   coder:
     harness: codex
@@ -44,7 +45,7 @@ export const starterFileConfigurations = {
 workspace: { kind: ephemeral }
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-harness:dev
 outputs:
   - paths: ["**/*.json"]
     destination: ./results
@@ -57,7 +58,7 @@ workspace:
   access: copy
 sandbox:
   provider: docker
-  image: outpost:dev
+  image: outpost-harness:dev
 outputs:
   - paths: ["**/*.json"]
     destination: ./documents

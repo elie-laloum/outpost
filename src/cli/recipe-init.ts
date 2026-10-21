@@ -57,9 +57,15 @@ export async function initializeRecipe({
       { flag: "wx" },
     );
   }
+  const image = kind === "git" ? "codex" : "harness";
   process.stdout.write(
     values.json
       ? `${JSON.stringify({ file, schema, configuration })}\n`
-      : `Created ${file}${configuration ? ` and ${configuration}` : ""}\n`,
+      : `Created ${file}${configuration ? ` and ${configuration}` : ""}\n` +
+          `Prepare the image:\n  npx outpost image eject --image ${image} --directory images/${image}\n` +
+          `  npx outpost image build --directory images/${image} --tag outpost-${image}:dev\n` +
+          (kind === "git"
+            ? "Use a fresh branch name for each independent task.\n"
+            : ""),
   );
 }
