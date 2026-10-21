@@ -1,4 +1,3 @@
-import { recipeRecord } from "../../domain/recipes/values.ts";
 import { recipeJson } from "../../domain/recipes/expressions.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
@@ -37,7 +36,7 @@ import { prepareRecipeWorkflow } from "./workflow-components.ts";
 import { recipeWorkflowReport } from "./workflow-report.ts";
 import { nativeRecipeGuards } from "./native.ts";
 import { openRecipeCheckpoint } from "./durable-session.ts";
-import { configurationVariable } from "../recipe-configuration-values.ts";
+import { resolveRecipeEnvironment } from "./configuration-model.ts";
 import type { Transport } from "../../domain/transport.types.ts";
 import type { WorkspaceRetention } from "../../domain/file-workspace.types.ts";
 import { refreshFilePublicationReport } from "./file-publication-report.ts";
@@ -87,9 +86,7 @@ export async function runFileRecipe(
     }),
   );
   const agents: Record<string, DispatchAgent> = {};
-  for (const role of Object.keys(
-    recipeRecord(project.configuration.agents ?? {}, "agents"),
-  )) {
+  for (const role of project.model.agents) {
     const agent = await scope.resolve(`agents.${role}`, "agent");
     invariant(isAgent(agent), `Invalid recipe agent: ${role}`);
     agents[role] = agent;
@@ -102,20 +99,7 @@ export async function runFileRecipe(
     for (const candidate of dispatchCandidates(agent))
       await validateFileAgent(candidate);
   }
-  const variables = Object.fromEntries(
-    Object.entries(
-      recipeRecord(project.configuration.environment ?? {}, "environment"),
-    ).map(([name, selection]) => {
-      configurationVariable(name);
-      const selected = configurationVariable(selection);
-      const value = process.env[selected];
-      invariant(
-        value !== undefined,
-        `Missing declared environment variable: ${selected}`,
-      );
-      return [name, value];
-    }),
-  );
+  const variables = resolveRecipeEnvironment(project.model.environment);
   scope.protect(Object.values(variables));
   let components =
     project.document.version === 3

@@ -7,7 +7,7 @@ import type { RecipeResumeOptions, RecipeRunStatus } from "./durable.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
-import type { RecipeConfiguration } from "../recipe.types.ts";
+import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 import type { RecipeReport } from "../recipe-report.types.ts";
 
@@ -27,13 +27,14 @@ export interface RecipeProjectValidation {
 }
 
 export interface RecipeProject {
-  readonly componentConfiguration?: Readonly<Record<string, unknown>>;
+  /** File workspace declarations, present when `model.workspace.kind` is `files`. */
   readonly files?: import("./file-configuration.types.ts").RecipeFileConfiguration;
   readonly options: RecipeProjectOptions;
   readonly directory: string;
   readonly document: RecipeDocument;
+  /** The original configuration document, kept for project and checkpoint identity. */
   readonly configuration: Readonly<Record<string, unknown>>;
-  readonly legacy: RecipeConfiguration;
+  readonly model: RecipeConfigurationModel;
   readonly graph: RecipeComponentGraph;
   readonly registry: RecipeRegistry;
   readonly reports: readonly RecipeReportDeclaration[];

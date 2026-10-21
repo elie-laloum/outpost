@@ -17,7 +17,6 @@ import {
   createJsonDecoder,
   validateJsonSchema,
 } from "../../infrastructure/json-schema.ts";
-import { resolveRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
 import {
@@ -28,7 +27,7 @@ import {
 import { secretSelectionComponent } from "./variables.ts";
 import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
-import { normalizeRecipeWorkspaceConfiguration } from "./file-configuration.ts";
+import { readRecipeConfigurationModel } from "./configuration-model.ts";
 import { validateFileRecipeCapabilities } from "./file-validation.ts";
 import type {
   RecipeProject,
@@ -115,29 +114,15 @@ export async function readRecipeProject(
         `Remove ${key} or move it under the section that declares it.`,
       );
     }
-    const normalized = normalizeRecipeWorkspaceConfiguration(
+    const model = await readRecipeConfigurationModel(
       configuration,
-      dirname(config),
+      config,
       document,
     );
-    const normalizedConfiguration = normalized.configuration;
-    const legacy = normalized.files
-      ? { sandbox: {}, agents: {} }
-      : await resolveRecipeConfiguration(
-          normalizedConfiguration,
-          config,
-          false,
-        );
+    const files =
+      model.workspace.kind === "files" ? model.workspace.files : undefined;
     for (const step of document.tasks) {
-      if (
-        step.agent &&
-        !Object.hasOwn(
-          normalizedConfiguration.version !== 1
-            ? recipeRecord(configuration.agents ?? {}, "agents")
-            : (legacy.agents ?? {}),
-          step.agent,
-        )
-      )
+      if (step.agent && !model.agents.includes(step.agent))
         throw configurationError(
           `Unknown recipe agent: ${step.agent}`,
           ["tasks", document.tasks.indexOf(step), "agent"],
@@ -158,22 +143,21 @@ export async function readRecipeProject(
     });
     const directory = dirname(config);
     const graph = recipeComponentGraph(
-      normalizedConfiguration,
+      model.components,
       registry,
       directory,
       document,
     );
     validateRecipeProjectExpressions(document, graph);
-    if (normalized.files) validateFileRecipeCapabilities(document, graph);
+    if (files) validateFileRecipeCapabilities(document, graph);
     if (
-      normalized.files?.retention?.policy === "portable" &&
-      graph.nodes.get(normalized.files.retention.transporter)?.kind !==
-        "transport"
+      files?.retention?.policy === "portable" &&
+      graph.nodes.get(files.retention.transporter)?.kind !== "transport"
     )
       throw new Error(
         "Portable workspace retention references an unknown Transport",
       );
-    for (const input of normalized.files?.inputs ?? [])
+    for (const input of files?.inputs ?? [])
       if (
         "snapshot" in input &&
         graph.nodes.get(input.transporter)?.kind !== "transport"
@@ -189,9 +173,8 @@ export async function readRecipeProject(
       document,
       directory,
       configuration,
-      componentConfiguration: normalizedConfiguration,
-      legacy,
-      ...(normalized.files ? { files: normalized.files } : {}),
+      model,
+      ...(files ? { files } : {}),
       registry,
       graph,
       reports: reports.map((value, index) =>

@@ -9,7 +9,8 @@ import type {
 import type { SandboxProvider } from "../../domain/sandbox.types.ts";
 import type { SandboxOptions } from "../outpost.types.ts";
 import { nativeRecipeGuards } from "./native.ts";
-import { recipeRecord } from "../../domain/recipes/values.ts";
+import { invariant } from "../../domain/errors.ts";
+import { resolveRecipeEnvironment } from "./configuration-model.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
 
@@ -31,12 +32,18 @@ export async function recipeExecutionConfiguration(
   project: RecipeProject,
   scope: RecipeComponentScope,
 ): Promise<RecipeRuntimeConfiguration> {
-  const declared = project.componentConfiguration ?? project.configuration;
-  const legacy = await resolveRecipeConfiguration(
-    declared,
-    project.options.config,
+  const { model } = project;
+  if (model.version === 1)
+    return resolveRecipeConfiguration(
+      project.configuration,
+      project.options.config,
+    );
+  invariant(
+    model.workspace.kind === "git",
+    "File recipe configurations run through file workspaces",
   );
-  if (declared.version === 1) return legacy;
+  const { repository, branch } = model.workspace;
+  const environment = resolveRecipeEnvironment(model.environment);
   const [provider, options] = await Promise.all([
     scope.resolve("sandbox", "sandboxProvider"),
     scope.resolve("workspace", "sandboxOptions"),
@@ -46,12 +53,9 @@ export async function recipeExecutionConfiguration(
   const integration = await scope.resolve("integration", "integrationOptions");
   if (!isIntegration(integration))
     throw new Error("Invalid integration options");
-  const environment = legacy.sandbox.sandboxProvider?.variables ?? {};
   scope.protect(Object.values(environment));
   const agents: Record<string, DispatchAgent> = {};
-  for (const role of Object.keys(
-    recipeRecord(declared.agents ?? {}, "agents"),
-  )) {
+  for (const role of model.agents) {
     const agent = await scope.resolve(`agents.${role}`, "agent");
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
     agents[role] = agent;
@@ -61,15 +65,14 @@ export async function recipeExecutionConfiguration(
   )) {
     await preflightRecipeAgent(
       agents[role]!,
-      legacy.sandbox.repository!,
+      repository,
       { ...provider.variables, ...environment },
       scope,
     );
   }
 
-  const { repository, branch, ...borrowedSettings } = legacy.sandbox;
   if (options.workspace) {
-    if (declared.branch !== undefined)
+    if (model.components.branch !== undefined)
       throw new Error(
         "A borrowed workspace owns its branch policy; omit configuration.branch",
       );
@@ -78,7 +81,7 @@ export async function recipeExecutionConfiguration(
         throw new Error(`A borrowed workspace cannot declare workspace.${key}`);
     if (
       (await realpath(options.workspace.repository)) !==
-      (await realpath(repository!))
+      (await realpath(repository))
     )
       throw new Error(
         "Borrowed workspace repository does not match configuration.repository",
@@ -86,7 +89,8 @@ export async function recipeExecutionConfiguration(
   }
   return {
     sandbox: {
-      ...(options.workspace ? borrowedSettings : legacy.sandbox),
+      ...(options.workspace ? {} : { repository, branch }),
+      logging: false,
       ...options,
       sandboxProvider: {
         ...provider,

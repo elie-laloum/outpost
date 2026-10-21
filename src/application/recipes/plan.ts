@@ -5,10 +5,10 @@ export async function inspectRecipeExecution(options: RecipeProjectOptions) {
   const project = await readRecipeProject(options);
   return {
     name: project.document.name,
-    workspace: project.files?.source ?? {
-      kind: "git",
-      repository: project.legacy.sandbox.repository,
-    },
+    workspace:
+      project.model.workspace.kind === "git"
+        ? { kind: "git", repository: project.model.workspace.repository }
+        : (project.model.workspace.files.source ?? { kind: "none" }),
     requirements: [...project.graph.nodes.values()].map((node) => ({
       name: node.name,
       kind: node.kind,

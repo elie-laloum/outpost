@@ -439,7 +439,7 @@ test("static recipe plans inspect file work without allocating or resolving envi
   );
   const project = await readRecipeProject({ file, config });
   assert.equal(project.configuration.version, 3);
-  assert.equal(project.componentConfiguration?.version, 3);
+  assert.equal(project.model.components.version, 3);
   const plan = await inspectRecipeExecution({ file, config });
   assert.equal(plan.workspace.kind, "ephemeral");
   assert.equal(plan.validation, "static");
@@ -450,6 +450,20 @@ test("static recipe plans inspect file work without allocating or resolving envi
     "execution.yaml",
     "recipe.yaml",
   ]);
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "plan",
+      tasks: [{ key: "constant", value: "ready" }],
+    }),
+  );
+  await writeFile(config, JSON.stringify({ version: 3 }));
+  assert.deepEqual(
+    (await inspectRecipeExecution({ file, config })).workspace,
+    { kind: "none" },
+    "a file configuration without a workspace source is not reported as Git",
+  );
 });
 
 test("unknown agent diagnostics identify the recipe rather than its configuration", async (t) => {
