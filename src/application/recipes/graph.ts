@@ -1,3 +1,4 @@
+import { configurationError } from "../../domain/configuration-diagnostic.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
@@ -39,7 +40,12 @@ export function recipeComponentGraph(
   const extensions = new Map<string, RecipeExtensionDeclaration>();
   if (document?.version === 3) {
     if (configuration.version === 1)
-      throw new Error("Recipe format 3 requires configuration version 2 or 3");
+      throw configurationError(
+        "Recipe format 3 requires configuration version 2 or 3",
+        ["version"],
+        "unsupported-version",
+        "Set version: 3 in the execution configuration.",
+      );
     declarations.set("workflow", { ...document.workflow, type: "options" });
     expected.set("workflow", "workflowOptions");
   }
@@ -88,8 +94,11 @@ export function recipeComponentGraph(
       "observation",
     ])
       if (Object.hasOwn(workspace, key))
-        throw new Error(
+        throw configurationError(
           `workspace.${key} must be declared at the configuration root`,
+          ["workspace", key],
+          "misplaced-field",
+          `Move ${key} out of workspace to the top level.`,
         );
     const provider = recipeRecord(configuration.sandbox, "sandbox");
     const { provider: shorthand, ...options } = provider;
@@ -134,10 +143,18 @@ export function recipeComponentGraph(
     const extension = extensionDeclaration.parse(source, `extensions.${name}`);
     recipeModulePath(extension.module, directory);
     if (extension.factory && !extension.schema)
-      throw new Error(`Extension factory ${name} requires a static schema`);
+      throw configurationError(
+        `Extension factory ${name} requires a static schema`,
+        ["extensions", name, "factory"],
+        "invalid-extension",
+        "Declare a JSON Schema for the factory options under schema.",
+      );
     if (!extension.factory && (extension.options || extension.dispose))
-      throw new Error(
+      throw configurationError(
         `Borrowed extension ${name} cannot declare options or disposal`,
+        ["extensions", name, extension.options ? "options" : "dispose"],
+        "invalid-extension",
+        "Declare factory to let Outpost create and dispose of the object.",
       );
     const key = `extensions.${name}`;
     extensions.set(key, extension);
@@ -162,8 +179,11 @@ export function recipeComponentGraph(
             while (node && !node.extension && !node.definition)
               node = nodes.get(recipeReference(node.options)!);
             if (node?.extension && node.extension.contract !== shape.contract)
-              throw new Error(
+              throw configurationError(
                 `${path} requires callback contract ${shape.contract}`,
+                path,
+                "callback-contract",
+                `Declare the extension with contract: ${shape.contract}.`,
               );
           }
           dependencies.push(target);
@@ -204,9 +224,20 @@ export function recipeComponentGraph(
   function component(source: unknown, kind: string, name: string): string {
     const reference = recipeReference(source);
     if (reference) {
-      if (expected.get(reference) !== kind)
-        throw new Error(
+      const actual = expected.get(reference);
+      if (actual === undefined)
+        throw configurationError(
+          `Component ${name} requires ${kind}, got unknown reference ${reference}`,
+          name,
+          "unknown-reference",
+          `Declare ${reference} in the execution configuration.`,
+        );
+      if (actual !== kind)
+        throw configurationError(
           `Component ${name} requires ${kind}, got reference ${reference}`,
+          name,
+          "component-kind",
+          `${reference} is a ${actual} component; reference a ${kind} component instead.`,
         );
       build(reference);
       return reference;
@@ -216,13 +247,33 @@ export function recipeComponentGraph(
       record.type ??
       (kind === "observation" ? "client" : undefined) ??
       (kind.endsWith("Options") ? "options" : undefined);
-    const definition = registry.get(
-      `${kind}.${recipeString(type, `${name}.type`)}`,
+    const componentType = recipeString(type, `${name}.type`);
+    const definition = registry.components.find(
+      (candidate) => candidate.name === `${kind}.${componentType}`,
     );
+    if (!definition)
+      throw configurationError(
+        `Unknown ${kind} type ${componentType}`,
+        `${name}.type`,
+        "unknown-component",
+        `Choose one of: ${registry.components
+          .filter((candidate) => candidate.kind === kind)
+          .map((candidate) => candidate.name.slice(kind.length + 1))
+          .join(", ")}.`,
+      );
     if (definition.kind !== kind)
-      throw new Error(`Component ${name} requires ${kind}`);
+      throw configurationError(
+        `Component ${name} requires ${kind}`,
+        name,
+        "component-kind",
+      );
     if (definition.experimental && configuration.experimental !== true)
-      throw new Error(`${definition.name} requires experimental: true`);
+      throw configurationError(
+        `${definition.name} requires experimental: true`,
+        name,
+        "experimental-component",
+        "Set experimental: true at the top level of the execution configuration.",
+      );
     const dependencies: string[] = [];
     const options = Object.fromEntries(
       Object.entries(record).filter(([key]) => key !== "type"),
@@ -244,7 +295,12 @@ export function recipeComponentGraph(
   }
   function build(name: string): void {
     if (building.has(name))
-      throw new Error(`Recipe component dependency cycle: ${name}`);
+      throw configurationError(
+        `Recipe component dependency cycle: ${name}`,
+        name,
+        "component-cycle",
+        "Remove one of the $ref links that lead back to this component.",
+      );
     if (nodes.has(name)) return;
     building.add(name);
     const kind = expected.get(name);

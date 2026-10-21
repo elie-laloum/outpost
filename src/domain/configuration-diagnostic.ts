@@ -25,10 +25,12 @@ export function configurationError(
   message: string,
   path: string | readonly (string | number)[],
   code = "invalid-configuration",
+  hint?: string,
 ): ConfigurationError {
   return new ConfigurationError({
     code,
     path: typeof path === "string" ? configurationPath(path) : path,
     message,
+    ...(hint === undefined ? {} : { hint }),
   });
 }

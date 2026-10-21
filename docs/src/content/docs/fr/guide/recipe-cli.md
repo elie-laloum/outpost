@@ -90,6 +90,15 @@ outpost recipe validate --file recipe.yaml [--config outpost.yaml] [--json]
 
 `--file` est obligatoire. L’option `--config` valide une configuration YAML et les rôles d’agents requis sans allouer de ressource ni lire les valeurs des secrets déclarés ; cette commande refuse les modules de configuration exécutables. `--json` rapporte le nom de la recette, la version du format, les métadonnées, les définitions de paramètres, les noms d’agents requis et les clés de tâches ordonnées. La validation n’exécute aucun outil et ne vérifie pas leur installation.
 
+Un fichier refusé indique la ligne et la colonne de la valeur fautive. Lorsque la correction est connue, une ligne `Hint:` suit le message :
+
+```text
+outpost.yaml:6:13: Unknown configuration field unexpected
+Hint: Remove unexpected or move it under the section that declares it.
+```
+
+Avec `--json`, l’objet `error` porte les mêmes champs `code`, `path`, `message`, `hint`, `file`, `line` et `column`.
+
 ## `outpost recipe list` et `outpost recipe fetch`
 
 Listez le catalogue Git inclus ou choisissez un fichier JSON local / catalogue HTTPS avec `--catalog`. Téléchargez une recette nommée dans un nouveau fichier local, vérifiez son SHA-256 et son identité déclarée, puis validez son YAML avant d’écrire. Les fichiers existants ne sont jamais écrasés ; télécharger n’exécute pas la recette.

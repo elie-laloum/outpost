@@ -476,3 +476,73 @@ test("unknown agent diagnostics identify the recipe rather than its configuratio
     return true;
   });
 });
+
+test("configuration component errors locate their use site with a hint", async (t) => {
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-diagnostic-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml");
+  const config = join(directory, "execution.yaml");
+  await writeFile(
+    file,
+    "version: 3\nname: components\ntasks:\n  - key: review\n    value: 1\n",
+  );
+  const base =
+    "version: 3\nworkspace:\n  kind: ephemeral\nsandbox:\n  provider: local\n";
+  for (const [source, code, path, line, hint] of [
+    [
+      "observation:\n  type: client\n  transporter: { $ref: transports.missing }\n",
+      "unknown-reference",
+      ["observation", "transporter"],
+      8,
+      /Declare transports\.missing/,
+    ],
+    [
+      "observation:\n  type: clinet\n",
+      "unknown-component",
+      ["observation", "type"],
+      7,
+      /Choose one of: .*client/,
+    ],
+    [
+      "unexpected: true\n",
+      "unknown-field",
+      ["unexpected"],
+      6,
+      /Remove unexpected/,
+    ],
+  ] as const) {
+    await writeFile(config, base + source);
+    await assert.rejects(readRecipeProject({ file, config }), (error) => {
+      assert.ok(error instanceof ConfigurationError);
+      assert.equal(error.diagnostic.code, code);
+      assert.equal(error.diagnostic.file, config);
+      assert.deepEqual(error.diagnostic.path, path);
+      assert.equal(error.diagnostic.line, line);
+      assert.match(error.diagnostic.hint ?? "", hint);
+      return true;
+    });
+  }
+  await writeFile(config, base + "unexpected: true\n");
+  const failure = await promisify(execFile)(
+    process.execPath,
+    [
+      resolve("src/cli/main.ts"),
+      "recipe",
+      "validate",
+      "--file",
+      file,
+      "--config",
+      config,
+    ],
+    { encoding: "utf8" },
+  ).then(
+    () => assert.fail("Validation must reject the unknown field"),
+    (error: { stderr: string }) => error.stderr,
+  );
+  assert.match(
+    failure,
+    /execution\.yaml:6:13: Unknown configuration field unexpected\nHint: Remove unexpected/,
+  );
+});

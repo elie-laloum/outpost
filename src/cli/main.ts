@@ -5,6 +5,8 @@ import { runCli } from "./commands.ts";
 function errorText(error: unknown): string {
   if (error instanceof ConfigurationError && process.argv.includes("--json"))
     return JSON.stringify({ error: error.diagnostic });
+  if (error instanceof ConfigurationError && error.diagnostic.hint)
+    return `${error.message}\nHint: ${error.diagnostic.hint}`;
   return error instanceof Error ? error.message : String(error);
 }
 

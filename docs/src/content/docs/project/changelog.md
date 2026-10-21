@@ -20,6 +20,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 - Add `readWorkflowJob(job)` to project a workflow job's queue `jobStatus` beside its `runId`, saved `workflowStatus` and `nextAction`, including summaries saved before `workflowStatus` existed. Type the next actions with `WorkflowJobNextAction` and document the new summary fields in the `defineWorkflowJob` reference.
 - Show direct YAML declarations first in the harness, durability, observation, profile, secret-source and conflict-resolver guides. Named `$ref` components are now introduced only for shared or referenced components; both forms keep the same validation and execution.
 - Add an ordered path to the Guide introduction after the first workflow: reuse a sandbox, validate responses, save and resume, then automate runs. Recipe generators now name the files they derive and the sources to edit, including in stale-output errors.
+- Report recipe configuration errors from component references, component types, unknown fields, extension declarations, callback contracts and dependency cycles as structured diagnostics located at the faulty value, instead of the first line of the file. Diagnostics can carry a `hint`, printed on a `Hint:` line by the CLI and included in `--json` errors.
 
 ## 13.0.0
 

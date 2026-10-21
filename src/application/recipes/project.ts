@@ -108,7 +108,12 @@ export async function readRecipeProject(
       )
         continue;
       if (configuration.version === 3 && extra.has(key)) continue;
-      throw new Error(`${config}: unknown configuration field ${key}`);
+      throw configurationError(
+        `Unknown configuration field ${key}`,
+        [key],
+        "unknown-field",
+        `Remove ${key} or move it under the section that declares it.`,
+      );
     }
     const normalized = normalizeRecipeWorkspaceConfiguration(
       configuration,
@@ -137,6 +142,7 @@ export async function readRecipeProject(
           `Unknown recipe agent: ${step.agent}`,
           ["tasks", document.tasks.indexOf(step), "agent"],
           "unknown-agent",
+          `Declare agents.${step.agent} in the execution configuration.`,
         );
     }
     const registry = createRecipeRegistry({
@@ -176,7 +182,8 @@ export async function readRecipeProject(
           "Workspace snapshot input references an unknown Transport",
         );
     const reports = configuration.reports ?? [];
-    if (!Array.isArray(reports)) throw new Error("reports must be a list");
+    if (!Array.isArray(reports))
+      throw configurationError("reports must be a list", ["reports"]);
     return {
       options,
       document,
