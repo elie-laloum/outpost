@@ -6606,7 +6606,7 @@
   "./integrations:SandboxWorkspaces": {
     "signatures": [],
     "options": {
-      "bindings": "readonly (\"ephemeral\" | \"copy\" | \"mount-readonly\" | \"mount-write\")[]",
+      "bindings": "readonly FileWorkspaceBinding[]",
       "acquire": "(context: FileSandboxContext) => Promise<SandboxLease>"
     },
     "category": "contract",

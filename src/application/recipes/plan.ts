@@ -9,6 +9,13 @@ export async function inspectRecipeExecution(options: RecipeProjectOptions) {
       project.model.workspace.kind === "git"
         ? { kind: "git", repository: project.model.workspace.repository }
         : (project.model.workspace.files.source ?? { kind: "none" }),
+    ...(project.files
+      ? {
+          binding: project.files.plan.binding,
+          sandbox: project.files.plan.sandbox,
+        }
+      : {}),
+    environment: Object.keys(project.model.environment),
     requirements: [...project.graph.nodes.values()].map((node) => ({
       name: node.name,
       kind: node.kind,

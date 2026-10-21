@@ -7,6 +7,7 @@ import type {
 } from "../../domain/file-workspace.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import { validateWorkspaceSelection } from "../../infrastructure/workspace-files.ts";
+import { planFileWorkspace } from "./execution-plan.ts";
 import type { NormalizedRecipeConfiguration } from "./file-configuration.types.ts";
 import type { RecipeFileConfiguration } from "./file-configuration.types.ts";
 import { transportReference } from "../../infrastructure/transport-json.ts";
@@ -265,21 +266,9 @@ export function normalizeRecipeWorkspaceConfiguration(
     configuration.sandbox ?? { provider: "local" },
     "sandbox",
   );
-  if (
-    source &&
-    ["docker", "podman"].includes(String(sandbox.provider ?? sandbox.type))
-  )
-    invariant(
-      typeof sandbox.image === "string" && !!sandbox.image,
-      "File workspaces require an explicit container image",
-    );
-  if (source?.kind === "directory" && source.access.mode === "mount")
-    invariant(
-      !["local", "vercel", "daytona", "firecracker", "memory"].includes(
-        String(sandbox.provider ?? sandbox.type),
-      ) && sandbox.repositoryMode !== "isolated",
-      "Sandbox provider cannot mount workspace sources",
-    );
+  const plan = planFileWorkspace(source, sandbox);
+  const [diagnostic] = plan.diagnostics;
+  invariant(diagnostic === undefined, diagnostic ?? "");
   invariant(
     configuration.outputs === undefined || Array.isArray(configuration.outputs),
     "Workspace outputs must be a list",
@@ -317,6 +306,7 @@ export function normalizeRecipeWorkspaceConfiguration(
   return {
     configuration: { ...components, workspace: {}, sandbox },
     files: {
+      plan,
       runtime,
       ...(source ? { source } : {}),
       ...(retention ? { retention } : {}),

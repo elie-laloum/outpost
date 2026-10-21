@@ -1,3 +1,4 @@
+import { remoteSandboxCapabilities } from "./sandbox-capabilities.constants.ts";
 import {
   prepareCloudCaches,
   validateCloudCaches,
@@ -41,7 +42,7 @@ export function createDaytonaSandboxProvider(
   const create = { ...options.create, ...networkPolicy };
   return withTransferredWorkspaces({
     name: "daytona",
-    placement: "remote",
+    placement: remoteSandboxCapabilities.placement,
     variables: { ...options.variables },
     async acquire(context) {
       context.signal?.throwIfAborted();

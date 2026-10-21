@@ -1,3 +1,4 @@
+import { nativeSandboxCapabilities } from "../../src/providers/sandbox-capabilities.ts";
 import { PassThrough } from "node:stream";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -251,9 +252,11 @@ test(
   async () => {
     const f = await fixture();
     try {
-      assert.equal(
-        createFirecrackerSandboxProvider(f.options).placement,
-        "remote",
+      const provider = createFirecrackerSandboxProvider(f.options);
+      assert.equal(provider.placement, "remote");
+      assert.deepEqual(
+        provider.workspaces?.bindings,
+        nativeSandboxCapabilities("firecracker", {})?.bindings,
       );
       const networkOptions = { ...f.options, egress: { mode: "deny-all" } };
       assert.throws(

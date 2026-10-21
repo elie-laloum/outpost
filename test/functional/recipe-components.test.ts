@@ -442,14 +442,54 @@ test("static recipe plans inspect file work without allocating or resolving envi
   assert.equal(project.model.components.version, 3);
   const plan = await inspectRecipeExecution({ file, config });
   assert.equal(plan.workspace.kind, "ephemeral");
+  assert.equal(plan.binding, "ephemeral");
+  assert.deepEqual(plan.sandbox, {
+    provider: "local",
+    placement: "host",
+    bindings: ["copy", "ephemeral"],
+  });
+  assert.deepEqual(plan.environment, ["PLAN_SECRET"]);
   assert.equal(plan.validation, "static");
   assert.equal(plan.outputs.length, 1);
   assert.equal(plan.tasks[0]?.key, "read");
+  const { stdout } = await promisify(execFile)(
+    process.execPath,
+    [
+      resolve("src/cli/main.ts"),
+      "recipe",
+      "plan",
+      "--file",
+      file,
+      "--config",
+      config,
+    ],
+    { encoding: "utf8" },
+  );
+  assert.match(
+    stdout,
+    /Binding: ephemeral on local \(host; supports copy, ephemeral\)\nEnvironment: PLAN_SECRET\n/,
+  );
   const { readdir } = await import("node:fs/promises");
   assert.deepEqual((await readdir(directory)).sort(), [
     "execution.yaml",
     "recipe.yaml",
   ]);
+  await writeFile(
+    config,
+    JSON.stringify({
+      version: 3,
+      workspace: {
+        kind: "directory",
+        directory: ".",
+        access: { mode: "mount", target: "work", readOnly: true },
+      },
+      sandbox: { provider: "vercel" },
+    }),
+  );
+  await assert.rejects(
+    inspectRecipeExecution({ file, config }),
+    /Sandbox provider cannot mount workspace sources/,
+  );
   await writeFile(
     file,
     JSON.stringify({

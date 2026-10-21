@@ -1,3 +1,4 @@
+import { hostSandboxCapabilities } from "./sandbox-capabilities.constants.ts";
 import { homedir } from "node:os";
 import type { Command } from "../domain/command.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
@@ -15,7 +16,7 @@ export function createLocalSandboxProvider(
   );
   const provider: SandboxProvider = {
     name: "local",
-    placement: "host",
+    placement: hostSandboxCapabilities.placement,
     variables: { ...options.variables },
     async acquire(context) {
       context.signal?.throwIfAborted();
@@ -60,7 +61,7 @@ export function createLocalSandboxProvider(
   return {
     ...provider,
     workspaces: {
-      bindings: ["copy", "ephemeral"],
+      bindings: hostSandboxCapabilities.bindings,
       acquire(context) {
         return provider.acquire({
           directory: context.workspace.directory,

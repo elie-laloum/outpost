@@ -1,3 +1,4 @@
+import { remoteSandboxCapabilities } from "./sandbox-capabilities.constants.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
@@ -21,7 +22,7 @@ export function createFirecrackerSandboxProvider(
   let allocated = false;
   return withTransferredWorkspaces({
     name: "firecracker",
-    placement: "remote",
+    placement: remoteSandboxCapabilities.placement,
     variables: { ...options.variables },
     async acquire(context) {
       if (allocated)

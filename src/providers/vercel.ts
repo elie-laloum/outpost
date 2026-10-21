@@ -1,3 +1,4 @@
+import { remoteSandboxCapabilities } from "./sandbox-capabilities.constants.ts";
 import {
   prepareCloudCaches,
   validateCloudCaches,
@@ -37,7 +38,7 @@ export function createVercelSandboxProvider(
   const create: NonNullable<VercelOptions["create"]> = { ...options.create };
   return withTransferredWorkspaces({
     name: "vercel",
-    placement: "remote",
+    placement: remoteSandboxCapabilities.placement,
     variables: { ...options.variables },
     async acquire(context) {
       context.signal?.throwIfAborted();

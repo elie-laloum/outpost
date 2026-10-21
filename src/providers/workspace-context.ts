@@ -1,3 +1,4 @@
+import { remoteSandboxCapabilities } from "./sandbox-capabilities.constants.ts";
 import { invariant } from "../domain/errors.ts";
 import type {
   FileSandboxContext,
@@ -30,7 +31,7 @@ export function withTransferredWorkspaces(
   return {
     ...provider,
     workspaces: {
-      bindings: ["copy", "ephemeral"],
+      bindings: remoteSandboxCapabilities.bindings,
       acquire(context) {
         invariant(
           context.workspace.source.kind !== "directory" ||

@@ -29,6 +29,7 @@ import { containerPlan } from "./container-plan.ts";
 import { containerPreflight } from "./container-preflight.ts";
 import { containerDefaults } from "./container.constants.ts";
 import type { ContainerEngine, ContainerOptions } from "./container.types.ts";
+import { containerSandboxCapabilities } from "./sandbox-capabilities.ts";
 import { fileProviderContext } from "./workspace-context.ts";
 
 export type { ContainerOptions } from "./container.types.ts";
@@ -86,9 +87,10 @@ export function containerProvider(
         config.memoryMb >= containerDefaults.minimumMemoryMb,
       "memoryMb must be at least 64",
     );
+  const capabilities = containerSandboxCapabilities(config);
   const provider: SandboxProvider = {
     name: engine,
-    placement: config.repositoryMode === "isolated" ? "remote" : "mounted",
+    placement: capabilities.placement,
     variables: { ...config.variables },
     ...(config.repositoryMode !== "isolated"
       ? {
@@ -318,10 +320,7 @@ export function containerProvider(
   return {
     ...provider,
     workspaces: {
-      bindings:
-        config.repositoryMode === "isolated"
-          ? ["copy", "ephemeral"]
-          : ["copy", "ephemeral", "mount-readonly", "mount-write"],
+      bindings: capabilities.bindings,
       async acquire(context) {
         invariant(
           config.image,

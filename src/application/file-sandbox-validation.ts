@@ -1,5 +1,6 @@
 import { invariant } from "../domain/errors.ts";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
+import { fileWorkspaceBinding } from "../domain/file-workspace-binding.ts";
 import { validateFileAgent } from "./file-agent-validation.ts";
 import type { FileSandboxOptions } from "./file-sandbox.types.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
@@ -56,13 +57,7 @@ export async function validateFileSandbox(
   invariant(capability, "Sandbox provider does not support file workspaces");
   const source = options.workspace?.source ?? options.workspaceSource;
   invariant(source, "Provide a file workspace source");
-  let binding: "copy" | "ephemeral" | "mount-readonly" | "mount-write" =
-    "ephemeral";
-  if (source.kind === "directory") {
-    binding = "copy";
-    if (source.access.mode === "mount")
-      binding = source.access.readOnly ? "mount-readonly" : "mount-write";
-  }
+  const binding = fileWorkspaceBinding(source);
   invariant(
     capability.bindings.includes(binding),
     `Sandbox provider does not support ${binding} workspaces`,

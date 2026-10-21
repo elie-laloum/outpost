@@ -12,10 +12,12 @@ export interface FileSandboxContext {
   readonly registerRecovery?: (resourceId: string) => Promise<void>;
 }
 
+/** How a file workspace reaches the sandbox: copied, empty, or mounted from its source. */
+export type FileWorkspaceBinding =
+  "copy" | "ephemeral" | "mount-readonly" | "mount-write";
+
 export interface SandboxWorkspaces {
-  readonly bindings: readonly (
-    "copy" | "ephemeral" | "mount-readonly" | "mount-write"
-  )[];
+  readonly bindings: readonly FileWorkspaceBinding[];
   acquire(context: FileSandboxContext): Promise<SandboxLease>;
 }
 

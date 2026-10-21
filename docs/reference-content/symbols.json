@@ -922,5 +922,9 @@
   "WorkflowJobNextAction": [
     "Operator action derived from a saved workflow status: none after done, answer for waiting-input, inspect-pause for paused, and inspect for failed, cancelled or rejected runs.",
     "Action attendue, déduite du statut enregistré d’un workflow : none après done, answer pour waiting-input, inspect-pause pour paused, et inspect pour les exécutions failed, cancelled ou rejected."
+  ],
+  "FileWorkspaceBinding": [
+    "How a file workspace reaches its sandbox: copy transfers the files, ephemeral starts empty, mount-readonly and mount-write expose the source directory. Providers list the bindings they support in workspaces.bindings, and recipe plans report the one a workspace requires.",
+    "Manière dont un workspace de fichiers atteint sa sandbox : copy transfère les fichiers, ephemeral démarre vide, mount-readonly et mount-write exposent le répertoire source. Les fournisseurs listent les modes pris en charge dans workspaces.bindings, et les plans de recettes indiquent celui qu’un workspace exige."
   ]
 }

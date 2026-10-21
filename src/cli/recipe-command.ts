@@ -129,10 +129,21 @@ export async function recipeCommand({
       file: values.file,
       config: values.config,
     });
+    const sandbox = plan.sandbox?.placement
+      ? `${plan.sandbox.provider} (${plan.sandbox.placement}; supports ${plan.sandbox.bindings?.join(", ")})`
+      : `${plan.sandbox?.provider} (capabilities checked at execution)`;
+    const lines = [
+      `${plan.name}: static plan`,
+      `Workspace: ${plan.workspace.kind}`,
+      ...(plan.binding ? [`Binding: ${plan.binding} on ${sandbox}`] : []),
+      `Environment: ${plan.environment.join(", ") || "none"}`,
+      `Tasks: ${plan.tasks.map((task) => task.key).join(", ")}`,
+      `Components: ${plan.requirements.map((item) => item.name).join(", ") || "none"}`,
+      `Publications: ${plan.outputs.length}`,
+      "Runtime capabilities are checked again before execution.",
+    ];
     process.stdout.write(
-      values.json
-        ? `${JSON.stringify(plan)}\n`
-        : `${plan.name}: static plan\nWorkspace: ${plan.workspace.kind}\nTasks: ${plan.tasks.map((task) => task.key).join(", ")}\nComponents: ${plan.requirements.map((item) => item.name).join(", ") || "none"}\nPublications: ${plan.outputs.length}\nRuntime capabilities are checked again before execution.\n`,
+      values.json ? `${JSON.stringify(plan)}\n` : `${lines.join("\n")}\n`,
     );
     return;
   }
