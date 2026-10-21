@@ -2,12 +2,10 @@ import { randomUUID } from "node:crypto";
 import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { invariant } from "../domain/errors.ts";
-import { fileWorkspaceRecordSchema } from "../domain/file-workspace.constants.ts";
 import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
 import { validateFilePaths } from "../infrastructure/file-manifest.ts";
 import { directory, inside, safeDestination } from "../infrastructure/files.ts";
 import { createLocalTransport } from "../infrastructure/local-transport.ts";
-import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import { restoreArchiveFiles } from "../infrastructure/transport-archive.ts";
 import { jsonObject } from "../infrastructure/transport-json.ts";
 import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
@@ -22,6 +20,7 @@ import {
   lockWorkspacePath,
 } from "../infrastructure/workspace-lock.ts";
 import { restoreWorkspaceFiles } from "../infrastructure/workspace-snapshot.ts";
+import { workspaceRecordDecoder } from "./file-workspace-decoders.ts";
 import { fileWorkspaces } from "./file-workspace-registry.ts";
 import type {
   FileWorkspace,
@@ -38,7 +37,7 @@ export async function restoreFileWorkspace(
   execution: FileWorkspaceExecution,
   options: RestoreFileWorkspaceOptions = {},
 ): Promise<FileWorkspace> {
-  validateRecipeSchema(fileWorkspaceRecordSchema, record, "workspace record");
+  workspaceRecordDecoder.parse(record);
   invariant(
     record.format === 1 &&
       record.ownership === "owned" &&
@@ -74,11 +73,7 @@ export async function restoreFileWorkspace(
     saved,
     "Workspace record is missing; it will not be recreated silently",
   );
-  const current = validateRecipeSchema<FileWorkspaceRecord>(
-    fileWorkspaceRecordSchema,
-    jsonObject(saved),
-    "workspace record",
-  );
+  const current = workspaceRecordDecoder.parse(jsonObject(saved));
   const recoverCurrent = options.recover?.expectedRevision === saved.revision;
   invariant(
     current.id === record.id &&

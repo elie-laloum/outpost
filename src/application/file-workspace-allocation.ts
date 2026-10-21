@@ -2,7 +2,6 @@ import { createHash, randomUUID } from "node:crypto";
 import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { invariant, recordRecovery } from "../domain/errors.ts";
-import { fileWorkspaceSourceSchema } from "../domain/file-workspace.constants.ts";
 import type {
   FileWorkspaceRecord,
   WorkspaceFileEntry,
@@ -11,7 +10,6 @@ import { validateFilePaths } from "../infrastructure/file-manifest.ts";
 import { directory, inside } from "../infrastructure/files.ts";
 import { createLocalTransport } from "../infrastructure/local-transport.ts";
 import { executeProcess } from "../infrastructure/process.ts";
-import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import type { StorageReservation } from "../infrastructure/storage-reservations.types.ts";
 import { jsonBytes } from "../infrastructure/transport-json.ts";
 import { reserveTransportStorage } from "../infrastructure/transport-reservations.ts";
@@ -28,6 +26,7 @@ import {
   lockWorkspacePath,
 } from "../infrastructure/workspace-lock.ts";
 import { restoreWorkspaceFiles } from "../infrastructure/workspace-snapshot.ts";
+import { workspaceSourceDecoder } from "./file-workspace-decoders.ts";
 import { fileWorkspaces } from "./file-workspace-registry.ts";
 import type {
   FileWorkspace,
@@ -45,11 +44,7 @@ export async function createFileWorkspace(
   register?: FileWorkspaceRegistration,
 ): Promise<FileWorkspace> {
   options.signal?.throwIfAborted();
-  validateRecipeSchema(
-    fileWorkspaceSourceSchema,
-    options.source,
-    "workspace source",
-  );
+  workspaceSourceDecoder.parse(options.source);
   if (options.paths) validateWorkspaceSelection(options.paths);
   invariant(
     !["repository", "branch", "guard", "copies"].some((key) => key in options),
