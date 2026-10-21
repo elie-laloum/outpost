@@ -1,4 +1,5 @@
 import { OutpostError } from "./errors.ts";
+import { isTokenCount } from "./usage.ts";
 import { losslessJson } from "./lossless-json.ts";
 import {
   DECISION_PROBABILITY_TOLERANCE,
@@ -41,8 +42,7 @@ export function decisionUsage(usage: Usage | undefined): Usage {
   requireDecisionResponse(usage !== null && typeof usage === "object");
   requireDecisionResponse(
     [usage.input, usage.cached, usage.output, usage.cacheCreated ?? 0].every(
-      (value) =>
-        Number.isSafeInteger(value) && value >= 0 && !Object.is(value, -0),
+      (value) => isTokenCount(value) && !Object.is(value, -0),
     ),
   );
   requireDecisionResponse(

@@ -1,3 +1,4 @@
+import { createDeadline } from "../deadline.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { startTaskAttempt } from "./task-state.ts";
 import { OutpostError } from "../errors.ts";
@@ -51,21 +52,15 @@ export async function runLoopTask(
     startTaskAttempt(state, state.attempts + 1);
     runtime.emit({ type: "attempt", key: item.key, attempt: state.attempts });
     await save(entry);
-    const deadline = new AbortController();
-    const timer =
-      item.timeoutMs === undefined
-        ? undefined
-        : setTimeout(
-            () =>
-              deadline.abort(
-                new OutpostError("timeout", `${item.key} timed out`, {
-                  key: item.key,
-                  timeoutMs: item.timeoutMs,
-                }),
-              ),
-            item.timeoutMs,
-          );
-    const signal = AbortSignal.any([runtime.signal, deadline.signal]);
+    const deadline = createDeadline({
+      parent: runtime.signal,
+      ...(item.timeoutMs === undefined ? {} : { durationMs: item.timeoutMs }),
+      reason: new OutpostError("timeout", `${item.key} timed out`, {
+        key: item.key,
+        timeoutMs: item.timeoutMs,
+      }),
+    });
+    const { signal } = deadline;
     const base = runtime.context(item, state.attempts, signal);
     const context = (phase: LoopTaskContext["phase"]): LoopTaskContext => ({
       ...base,
@@ -115,10 +110,10 @@ export async function runLoopTask(
       signal.throwIfAborted();
       if (check.done) return result;
     } catch (error) {
-      throw deadline.signal.aborted ? deadline.signal.reason : error;
+      throw deadline.expired.aborted ? deadline.expired.reason : error;
     } finally {
       runtime.closeAttempt(item);
-      clearTimeout(timer);
+      deadline.close();
     }
   }
 }

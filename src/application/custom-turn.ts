@@ -3,13 +3,13 @@ import { profilePermissions } from "../domain/agent-profile-permissions.ts";
 import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
 import type { ModelResult } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
-import { invariant, OutpostError } from "../domain/errors.ts";
+import { OutpostError } from "../domain/errors.ts";
 import { steeringInbox } from "../domain/steering.ts";
 import { harnessSteering } from "./harness-steering.ts";
 import { harnessBudget } from "./harness-budget.ts";
 import { harnessModelProvider } from "./harness-model-provider.ts";
 import { MAX_DELEGATION_DEPTH } from "../domain/subagent.constants.ts";
-import { addUsage } from "../domain/usage.ts";
+import { addUsage, validateTokenUsage } from "../domain/usage.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import type { DispatchOptions, Turn } from "./execution.types.ts";
@@ -223,20 +223,7 @@ export async function customTurn(
         ),
     );
     signal.throwIfAborted();
-    for (const value of [
-      usage.input,
-      usage.cached,
-      usage.output,
-      usage.cacheCreated ?? 0,
-    ])
-      invariant(
-        Number.isSafeInteger(value) && value >= 0,
-        "Harness usage must contain nonnegative token counts",
-      );
-    invariant(
-      usage.cached + (usage.cacheCreated ?? 0) <= usage.input,
-      "Cached tokens must be included in input usage",
-    );
+    validateTokenUsage(usage, "Harness usage");
     notify(options.observe, {
       kind: "result",
       text,

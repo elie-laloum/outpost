@@ -1,3 +1,4 @@
+import { createDeadline } from "../domain/deadline.ts";
 import { isHarnessSubagent } from "../domain/subagent.ts";
 import { runSubagent } from "./harness-subagent.ts";
 import type { HarnessToolContext } from "../domain/tool.types.ts";
@@ -239,18 +240,15 @@ async function runTool(
   step: number,
 ): Promise<ToolOutput> {
   const { deadlineMs } = runtime.agent.harness.toolExecution;
-  const controller = new AbortController();
-  const signal = AbortSignal.any([runtime.signal, controller.signal]);
-  const timer = setTimeout(
-    () =>
-      controller.abort(
-        new OutpostError(
-          "timeout",
-          `Tool ${call.name} timed out after ${deadlineMs} ms`,
-        ),
-      ),
-    deadlineMs,
-  );
+  const deadline = createDeadline({
+    parent: runtime.signal,
+    durationMs: deadlineMs,
+    reason: new OutpostError(
+      "timeout",
+      `Tool ${call.name} timed out after ${deadlineMs} ms`,
+    ),
+  });
+  const { signal } = deadline;
   const release = runtime.hold();
   const aborted = new Promise<never>((_, reject) => {
     const fail = () => reject(signal.reason);
@@ -289,8 +287,7 @@ async function runTool(
   try {
     return await Promise.race([execution, aborted]);
   } finally {
-    clearTimeout(timer);
-    controller.abort(new OutpostError("aborted", "Tool call ended"));
+    deadline.close(new OutpostError("aborted", "Tool call ended"));
     release();
   }
 }

@@ -1,4 +1,5 @@
 import { OutpostError } from "../../domain/errors.ts";
+import { isTokenCount } from "../../domain/usage.ts";
 import type {
   ModelContentBlock,
   ModelResult,
@@ -18,9 +19,7 @@ export function object(value: unknown): Record<string, unknown> {
 }
 
 export function tokens(value: unknown): number {
-  requireResponse(
-    typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
-  );
+  requireResponse(isTokenCount(value));
   return value;
 }
 

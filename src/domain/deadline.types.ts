@@ -7,5 +7,6 @@ export interface DeadlineOptions {
 export interface Deadline {
   readonly signal: AbortSignal;
   readonly expired: AbortSignal;
-  close(): void;
+  /** A reason also aborts the signal, stopping work still bound to it. */
+  close(reason?: unknown): void;
 }

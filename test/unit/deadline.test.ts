@@ -22,3 +22,15 @@ test("deadlines distinguish expiry from parent cancellation and stop on close", 
   await delay(20);
   assert.equal(closed.signal.aborted, false);
 });
+
+test("closing a deadline with a reason stops bound work without expiring it", async () => {
+  const parent = new AbortController();
+  const ended = new Error("call ended");
+  const deadline = createDeadline({ parent: parent.signal, durationMs: 5 });
+  deadline.close(ended);
+  assert.equal(deadline.signal.reason, ended);
+  assert.equal(deadline.expired.aborted, false);
+  await delay(20);
+  assert.equal(deadline.expired.aborted, false);
+  assert.equal(parent.signal.aborted, false);
+});

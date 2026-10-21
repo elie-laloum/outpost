@@ -1,7 +1,7 @@
 import type { Usage } from "../domain/agent.types.ts";
-import { invariant, OutpostError } from "../domain/errors.ts";
+import { OutpostError } from "../domain/errors.ts";
 import type { HarnessLimits } from "../domain/harness.types.ts";
-import { addUsage } from "../domain/usage.ts";
+import { addUsage, validateTokenUsage } from "../domain/usage.ts";
 import type { HarnessBudget } from "./harness-budget.types.ts";
 
 export function harnessBudget(
@@ -20,20 +20,7 @@ export function harnessBudget(
       try {
         if (result.usage) {
           const tokens = result.usage;
-          for (const value of [
-            tokens.input,
-            tokens.cached,
-            tokens.cacheCreated ?? 0,
-            tokens.output,
-          ])
-            invariant(
-              Number.isSafeInteger(value) && value >= 0,
-              "Harness usage must contain nonnegative token counts",
-            );
-          invariant(
-            tokens.cached + (tokens.cacheCreated ?? 0) <= tokens.input,
-            "Cached tokens must be included in input usage",
-          );
+          validateTokenUsage(tokens, "Harness usage");
           usage = addUsage(usage, tokens);
         }
         if (!limits.usage) return;

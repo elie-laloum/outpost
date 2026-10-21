@@ -1,3 +1,4 @@
+import { createDeadline } from "../domain/deadline.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 
@@ -20,15 +21,15 @@ export async function invokeHook<T>(
   run: (signal: AbortSignal) => T | Promise<T>,
 ): Promise<T> {
   parent.throwIfAborted();
-  const controller = new AbortController();
-  const signal = AbortSignal.any([parent, controller.signal]);
-  const timer = setTimeout(
-    () =>
-      controller.abort(
-        new OutpostError("timeout", `Hook ${name} exceeded ${timeoutMs} ms`),
-      ),
-    timeoutMs,
-  );
+  const deadline = createDeadline({
+    parent,
+    durationMs: timeoutMs,
+    reason: new OutpostError(
+      "timeout",
+      `Hook ${name} exceeded ${timeoutMs} ms`,
+    ),
+  });
+  const { signal } = deadline;
   let cancel: () => void = () => undefined;
   const aborted = new Promise<never>((_, reject) => {
     cancel = () => reject(signal.reason);
@@ -40,9 +41,8 @@ export async function invokeHook<T>(
       aborted,
     ]);
   } finally {
-    clearTimeout(timer);
     signal.removeEventListener("abort", cancel);
-    controller.abort(new OutpostError("aborted", `Hook ${name} ended`));
+    deadline.close(new OutpostError("aborted", `Hook ${name} ended`));
   }
 }
 

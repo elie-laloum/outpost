@@ -1,6 +1,6 @@
 import type { Usage } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
-import { addUsage } from "../../domain/usage.ts";
+import { addUsage, isTokenCount } from "../../domain/usage.ts";
 import { asRecord, decodeRecord } from "./protocol.ts";
 import {
   sessionUsageLimits,
@@ -32,8 +32,7 @@ export function usageCounts(
   cached: unknown,
   cacheCreated: unknown,
 ): Usage {
-  const valid = (value: unknown): value is number =>
-    typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+  const valid = isTokenCount;
   return {
     input: valid(input) ? input : 0,
     output: valid(output) ? output : 0,

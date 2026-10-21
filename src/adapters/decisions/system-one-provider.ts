@@ -1,3 +1,4 @@
+import { createDeadline } from "../../domain/deadline.ts";
 import { httpTransportFailure } from "../../infrastructure/http-transport.ts";
 import { invariant, OutpostError, positive } from "../../domain/errors.ts";
 import {
@@ -78,11 +79,11 @@ export function createSystemOneDecisionProvider(
       );
       const decision = defineDecision({ questions: request.questions });
       validateDecisionState(request.state);
-      const deadline = new AbortController();
-      const signal = request.signal
-        ? AbortSignal.any([request.signal, deadline.signal])
-        : deadline.signal;
-      const timer = setTimeout(() => deadline.abort(), timeoutMs);
+      const deadline = createDeadline({
+        ...(request.signal ? { parent: request.signal } : {}),
+        durationMs: timeoutMs,
+      });
+      const { signal } = deadline;
       try {
         signal.throwIfAborted();
         const response = await fetch(endpoint, {
@@ -119,7 +120,7 @@ export function createSystemOneDecisionProvider(
           httpTransportFailure(error),
         );
       } finally {
-        clearTimeout(timer);
+        deadline.close();
       }
     },
   });

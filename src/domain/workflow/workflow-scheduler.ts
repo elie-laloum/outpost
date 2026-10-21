@@ -1,3 +1,4 @@
+import { createDeadline } from "../deadline.ts";
 import { randomUUID } from "node:crypto";
 import { openObservationSession } from "../observation-session.ts";
 import type { ObservationSession } from "../observation-session.types.ts";
@@ -49,22 +50,16 @@ export async function schedule(
     if (options.timeoutMs > maxTimerMs)
       throw new Error("Workflow timeoutMs exceeds the supported timer range");
   }
-  const deadline = new AbortController();
-  const timer =
-    options.timeoutMs === undefined
-      ? undefined
-      : setTimeout(
-          () =>
-            deadline.abort(
-              new OutpostError("timeout", `Workflow ${name} timed out`, {
-                timeoutMs: options.timeoutMs,
-              }),
-            ),
-          options.timeoutMs,
-        );
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, deadline.signal])
-    : deadline.signal;
+  const deadline = createDeadline({
+    ...(options.signal ? { parent: options.signal } : {}),
+    ...(options.timeoutMs === undefined
+      ? {}
+      : { durationMs: options.timeoutMs }),
+    reason: new OutpostError("timeout", `Workflow ${name} timed out`, {
+      timeoutMs: options.timeoutMs,
+    }),
+  });
+  const { signal } = deadline;
   let checkpoint: WorkflowCheckpointSession | undefined;
   let observationSession: ObservationSession | undefined;
   try {
@@ -91,12 +86,12 @@ export async function schedule(
           : {}),
       },
       checkpoint,
-      deadline.signal,
+      deadline.expired,
       observationSession ? runId : undefined,
     );
     return result;
   } finally {
-    clearTimeout(timer);
+    deadline.close();
     try {
       await observationSession?.close();
     } finally {

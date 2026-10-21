@@ -6,6 +6,7 @@
 - Validate harness routing states, decision responses, replayed decision events, recipe inputs, task cache keys and repetition fingerprints as labelled lossless JSON rather than checkpoint outputs. Persisted checkpoint values keep their envelope, and existing cache identities are unchanged.
 - Bind every typed JSON Schema decode to a decoder declared once with its schema, compiled on first use, and keep untyped validation for caller-supplied schemas. Workspace inspection and recovery reuse the workspace record decoder; the internal `validateRecipeSchema` alias is removed.
 - Route the remaining task lifecycle changes (attempts, cache hits, failures, input suspension and answers, quota pauses, gate pauses and decisions) through named transitions, so each workflow status change has one owner. Statuses, events and checkpoints are unchanged.
+- Use the shared total deadline for tool calls, hooks, workflow and loop-task timeouts and System One decisions; closing a deadline with a reason now also stops work still bound to it. Share token-count validation between model adapters, session readers, harness turns, decisions and reported usage. Streaming inactivity limits keep their own renewable timers.
 
 ## 13.0.0
 

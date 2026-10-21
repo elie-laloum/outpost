@@ -1,5 +1,6 @@
 import type { TokenUsage } from "./pricing.types.ts";
 import type { Usage } from "./agent.types.ts";
+import { invariant } from "./errors.ts";
 
 export function addUsage(left: Usage, right: Usage): Usage {
   return {
@@ -90,6 +91,23 @@ export function modelUsage(
   };
 }
 
+export function isTokenCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+export function validateTokenUsage(usage: TokenUsage, label: string): void {
+  invariant(
+    [usage.input, usage.cached, usage.output, usage.cacheCreated ?? 0].every(
+      isTokenCount,
+    ),
+    `${label} must contain nonnegative token counts`,
+  );
+  invariant(
+    usage.cached + (usage.cacheCreated ?? 0) <= usage.input,
+    "Cached tokens must be included in input usage",
+  );
+}
+
 export function validateUsage(value: unknown): asserts value is Usage {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new Error("Invalid reported usage");
@@ -114,7 +132,7 @@ export function validateUsage(value: unknown): asserts value is Usage {
     usage.output,
     usage.cacheCreated ?? 0,
   ])
-    if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
+    if (!isTokenCount(value))
       throw new Error("Reported usage must contain nonnegative safe integers");
   const total: TokenUsage = Object.values(usage.models ?? {}).reduce(
     (sum, tokens) => {
