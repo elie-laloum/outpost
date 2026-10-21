@@ -5,6 +5,22 @@ description: "Choose sandbox tools or define your own tools for the built-in har
 
 Start from a [working harness](../harness/). Give it the smallest useful toolset, then add a custom tool only when the model needs another operation. All file and command effects should use the sandbox supplied to the tool.
 
+## Inspect files without Git
+
+For a copied directory, mount or ephemeral workspace, compose the read and search toolsets with explicit filesystem selection. Pass `inspectionTools` to `createHarness({ tools: inspectionTools, modelProvider })`. This composition adds neither shell execution, editing nor Git tools. Add each capability explicitly when the task needs it; tool selection does not replace sandbox isolation.
+
+```ts
+import {
+  createHarnessFileTools,
+  createHarnessSearchTools,
+} from "@elie-laloum/outpost/harness";
+
+const inspectionTools = [
+  createHarnessFileTools({ selection: "filesystem" }),
+  createHarnessSearchTools({ selection: "filesystem" }),
+];
+```
+
 ## Give the model ready-made tools
 
 Pass the tools or toolsets the model needs to `createHarness({ tools })`. The model can call only this declared set, so start with the tools required by the task.

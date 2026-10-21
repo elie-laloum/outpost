@@ -5,6 +5,22 @@ description: "Choisissez les outils de la sandbox ou définissez vos propres out
 
 Partez d’un [harness fonctionnel](../harness/). Donnez-lui les outils nécessaires, puis ajoutez un outil personnalisé si une opération manque. Les effets sur les fichiers et commandes doivent passer par la sandbox fournie à l’outil.
 
+## Examiner des fichiers sans Git
+
+Pour un dossier copié, un montage ou un workspace éphémère, composez les outils de lecture et de recherche avec une sélection explicite du système de fichiers. Passez `inspectionTools` à `createHarness({ tools: inspectionTools, modelProvider })`. Cette composition n’ajoute ni shell, ni édition, ni outils Git. Ajoutez chaque capacité explicitement selon les besoins ; le choix des outils ne remplace pas l’isolation de la sandbox.
+
+```ts
+import {
+  createHarnessFileTools,
+  createHarnessSearchTools,
+} from "@elie-laloum/outpost/harness";
+
+const inspectionTools = [
+  createHarnessFileTools({ selection: "filesystem" }),
+  createHarnessSearchTools({ selection: "filesystem" }),
+];
+```
+
 ## Donner des outils prêts à l’emploi au modèle
 
 Passez les outils ou ensembles d’outils nécessaires au modèle à `createHarness({ tools })`. Le modèle peut appeler uniquement les outils déclarés : commencez par ceux dont la tâche a besoin.
