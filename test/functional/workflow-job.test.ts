@@ -131,6 +131,8 @@ test("webhook deliveries run a checkpointed workflow once per run", async (t) =>
     version: (first.result?.value as { version: string }).version,
     executionId: (first.result?.value as { executionId: string }).executionId,
     status: "done",
+    workflowStatus: "done",
+    nextAction: "none",
     tasks: [{ key: "patch", status: "done" }],
     pauses: [],
     inputRequests: [],
@@ -197,6 +199,8 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
     }[];
   };
   assert.equal(value.status, "paused");
+  assert.equal(value.workflowStatus, "paused");
+  assert.equal(value.nextAction, "inspect-pause");
   assert.deepEqual(
     value.pauses.map(({ key, kind, prompt, actors }) => ({
       key,

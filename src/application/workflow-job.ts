@@ -1,3 +1,4 @@
+import { workflowJobNextActions } from "./workflow-job.constants.ts";
 import { createHash } from "node:crypto";
 import { queueMaxStringLength } from "../domain/task-queue.constants.ts";
 import { triggerJobInput } from "../domain/trigger-job.ts";
@@ -31,6 +32,8 @@ function summary(
     version,
     executionId: result.executionId,
     status: result.status,
+    workflowStatus: result.status,
+    nextAction: workflowJobNextActions[result.status],
     ...(result.terminationCode
       ? { terminationCode: result.terminationCode }
       : {}),

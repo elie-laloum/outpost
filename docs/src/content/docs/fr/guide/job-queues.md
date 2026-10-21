@@ -132,3 +132,9 @@ API : [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueu
 <span id="réservation-des-jobs-et-nouvelles-tentatives"></span>
 <span id="dédupliquer-les-effets-avec-les-clés-didempotence"></span>
 <span id="exploiter-les-workers"></span>
+
+## Distinguer la fin du job de celle du workflow
+
+Un job traité par `defineWorkflowJob()` peut être `done` alors que son workflow est `paused` ou `waiting-input` : le handler a sauvegardé cet état arrêté avec succès. Lisez le `status` du job pour la livraison et `job.result.value.workflowStatus` pour le workflow. Le résumé conserve son ancien champ `status` et ajoute `nextAction` (`none`, `answer`, `inspect-pause` ou `inspect`) aux côtés de `runId`.
+
+Répondez aux questions ou examinez les pauses d’approbation et de quota avec l’identifiant du workflow. Les nouvelles tentatives de livraison, les retries de tâche et la reprise de checkpoint restent distincts. L’action `inspect` n’autorise ni le rejeu ni la récupération du propriétaire : arrêtez ce dernier et fournissez les autorisations explicites nécessaires.
