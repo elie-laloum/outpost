@@ -92,3 +92,99 @@ test("recipe expression validation rejects malformed references while literal JS
     assert.throws(() => validateRecipeExpression(value, context));
   validateRecipeExpression({ $literal: { $input: "missing" } }, context);
 });
+
+test("compiled expressions keep each reference once with its source location", async () => {
+  const { compileRecipeExpression, compileRecipeCondition } =
+    await import("../../src/domain/recipes/expressions.ts");
+  const scope = { inputs: ["topic"], steps: ["review"] };
+  assert.deepEqual(
+    compileRecipeExpression(
+      {
+        summary: { $step: "review", path: ["summary"] },
+        line: "Topic {{ inputs.topic }}",
+      },
+      scope,
+      ["tasks", 2, "arguments"],
+    ),
+    {
+      kind: "object",
+      entries: [
+        [
+          "summary",
+          {
+            kind: "step-value",
+            step: "review",
+            path: ["summary"],
+            sourcePath: ["tasks", 2, "arguments", "summary"],
+          },
+        ],
+        [
+          "line",
+          {
+            kind: "text",
+            text: "Topic {{ inputs.topic }}",
+            interpolations: [
+              {
+                source: "{{ inputs.topic }}",
+                reference: {
+                  kind: "input-value",
+                  input: "topic",
+                  path: [],
+                  sourcePath: ["tasks", 2, "arguments", "line"],
+                },
+              },
+            ],
+            sourcePath: ["tasks", 2, "arguments", "line"],
+          },
+        ],
+      ],
+    },
+  );
+  assert.deepEqual(
+    compileRecipeCondition({ not: { exists: { $input: "topic" } } }, scope),
+    {
+      kind: "not",
+      item: {
+        kind: "exists",
+        expression: {
+          kind: "input-value",
+          input: "topic",
+          path: [],
+          sourcePath: ["not", "exists"],
+        },
+      },
+    },
+  );
+});
+
+test("expression validation errors point at the task in source order", async () => {
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const { recipeTaskSourcePath } = await import("../../src/domain/recipe.ts");
+  const source = (value: string) =>
+    `version: 3\nname: located\ntasks:\n  - key: second\n    after: [first]\n    value: ${value}\n  - key: first\n    value: 1\n  - key: other\n    value: 2\n`;
+  const document = parseRecipe(source("{ $step: first }"));
+  assert.equal(document.tasks.at(-1)?.key, "second");
+  assert.deepEqual(recipeTaskSourcePath(document, document.tasks.at(-1)!), [
+    "tasks",
+    0,
+  ]);
+  for (const [value, path, message] of [
+    ["{ $step: other }", ["tasks", 0, "value"], /declare other in after/],
+    [
+      "{ items: [{ $input: missing }] }",
+      ["tasks", 0, "value", "items", 0],
+      /unknown recipe input missing/,
+    ],
+    ['"{{ steps.other.text }}"', ["tasks", 0, "value"], /declare other/],
+  ] as const)
+    assert.throws(
+      () => parseRecipe(source(value)),
+      (error) => {
+        assert.ok(error instanceof ConfigurationError);
+        assert.deepEqual(error.diagnostic.path, path);
+        assert.match(error.message, message);
+        return true;
+      },
+    );
+});

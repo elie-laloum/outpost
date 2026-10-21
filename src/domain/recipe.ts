@@ -11,8 +11,9 @@ import { recipeKeys, recipeLimits } from "./recipe.constants.ts";
 import { recipeInputs } from "./recipe-inputs.ts";
 import {
   validateRecipeReferences,
-  recipeCommandStrings,
+  recipeCommandFields,
 } from "./recipe-templates.ts";
+import type { RecipeSourcePath } from "./recipes/expressions.types.ts";
 import { SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
 
 function object(value: unknown, path: string): Record<string, unknown> {
@@ -255,6 +256,16 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
   };
 }
 
+const taskSources = new WeakMap<RecipeStep, number>();
+
+/** Locates a task in its source document, whose order can differ from the dependency order. */
+export function recipeTaskSourcePath(
+  document: RecipeDocument,
+  step: RecipeStep,
+): RecipeSourcePath {
+  return ["tasks", taskSources.get(step) ?? document.tasks.indexOf(step)];
+}
+
 export function validateRecipe(value: unknown): RecipeDocument {
   const mapping = object(value, "recipe");
   const record = fields(
@@ -315,24 +326,36 @@ export function validateRecipe(value: unknown): RecipeDocument {
       ? {}
       : { recipeVersion: text(record.recipeVersion, "recipe.recipeVersion") }),
   };
+  for (const [index, task] of tasks.entries()) taskSources.set(task, index);
   validateRecipeReferences(document);
   if (document.version === 3)
     for (const step of document.tasks) {
-      const context = { document, step };
-      for (const value of [
-        ...(step.command ? recipeCommandStrings(step.command) : []),
-        ...(step.brief === undefined ? [] : [step.brief]),
-      ])
-        validateRecipeExpression(value, context);
+      const at = (...path: RecipeSourcePath) => ({
+        document,
+        step,
+        sourcePath: [...recipeTaskSourcePath(document, step), ...path],
+      });
+      for (const [value, path] of step.command
+        ? recipeCommandFields(step.command)
+        : [])
+        validateRecipeExpression(value, at("command", ...path));
+      if (step.brief !== undefined)
+        validateRecipeExpression(step.brief, at("brief"));
       if (
         step.isolated &&
         typeof step.isolated.brief === "object" &&
         step.isolated.brief !== null &&
         "text" in step.isolated.brief
       )
-        validateRecipeExpression(step.isolated.brief.text, context);
+        validateRecipeExpression(
+          step.isolated.brief.text,
+          at("isolated", "brief", "text"),
+        );
       if (Array.isArray(step.speculation?.candidates))
-        for (const candidate of step.speculation.candidates) {
+        for (const [
+          index,
+          candidate,
+        ] of step.speculation.candidates.entries()) {
           const request =
             typeof candidate === "object" &&
             candidate !== null &&
@@ -346,12 +369,23 @@ export function validateRecipe(value: unknown): RecipeDocument {
               ? request.brief
               : undefined;
           if (typeof brief === "object" && brief !== null && "text" in brief)
-            validateRecipeExpression(brief.text, context);
+            validateRecipeExpression(
+              brief.text,
+              at(
+                "speculation",
+                "candidates",
+                index,
+                "request",
+                "brief",
+                "text",
+              ),
+            );
         }
-      if (step.when !== undefined) validateRecipeCondition(step.when, context);
+      if (step.when !== undefined)
+        validateRecipeCondition(step.when, at("when"));
       for (const field of ["value", "arguments", "state", "data"] as const)
         if (step[field] !== undefined)
-          validateRecipeExpression(step[field], context);
+          validateRecipeExpression(step[field], at(field));
       if (step.when !== undefined && step.options?.condition !== undefined)
         throw new Error(`${step.key}: use either when or options.condition`);
       if (

@@ -1,14 +1,26 @@
+import {
+  ConfigurationError,
+  configurationError,
+} from "../configuration-diagnostic.ts";
 import { losslessJson } from "../lossless-json.ts";
 import { canonicalJson } from "../workflow/canonical-json.ts";
 import { recipeTextReferences } from "./expression-text.ts";
+import { recipeComparisons } from "./expressions.constants.ts";
 import { recipeTemplatePattern } from "../recipe.constants.ts";
 import { recipeValue } from "../recipe-inputs.ts";
 import { recipeObject } from "./values.ts";
 import type { WorkflowJson } from "../workflow/checkpoint.types.ts";
 import type {
-  CompiledRecipeExpression,
+  RecipeComparison,
+  RecipeConditionNode,
   RecipeExpressionContext,
+  RecipeExpressionNode,
+  RecipeExpressionReference,
+  RecipeExpressionScope,
   RecipeExpressionValidation,
+  RecipeReferencePath,
+  RecipeSourcePath,
+  RecipeValueReference,
 } from "./expressions.types.ts";
 
 export function recipeJson(value: unknown): WorkflowJson {
@@ -26,18 +38,47 @@ function plainJson(value: WorkflowJson): WorkflowJson {
 
 class MissingRecipeField extends Error {}
 
-function select(value: unknown, path: unknown): WorkflowJson {
-  if (
-    path !== undefined &&
-    (!Array.isArray(path) ||
-      !path.every(
-        (key) => typeof key === "string" || Number.isSafeInteger(key),
-      ))
-  )
-    throw new Error(
-      "Recipe reference path must be an array of property names or indexes",
+function expressionError(message: string, sourcePath: RecipeSourcePath): Error {
+  return sourcePath.length
+    ? configurationError(message, sourcePath)
+    : new Error(message);
+}
+
+function located<T>(sourcePath: RecipeSourcePath, read: () => T): T {
+  try {
+    return read();
+  } catch (error) {
+    if (!sourcePath.length || error instanceof ConfigurationError) throw error;
+    throw expressionError(
+      error instanceof Error ? error.message : String(error),
+      sourcePath,
     );
-  for (const key of path ?? []) {
+  }
+}
+
+function prefix(scope: RecipeExpressionScope): string {
+  return scope.label === undefined ? "" : `${scope.label}: `;
+}
+
+function referencePath(
+  path: unknown,
+  scope: RecipeExpressionScope,
+  sourcePath: RecipeSourcePath,
+): RecipeReferencePath {
+  if (path === undefined) return [];
+  if (
+    !Array.isArray(path) ||
+    !path.every(
+      (key) =>
+        typeof key === "string" || (Number.isSafeInteger(key) && key >= 0),
+    )
+  )
+    throw expressionError(`${prefix(scope)}invalid reference path`, sourcePath);
+  return path;
+}
+
+function select(value: unknown, path: RecipeReferencePath): WorkflowJson {
+  for (const key of path) {
     if (
       value === null ||
       typeof value !== "object" ||
@@ -49,235 +90,364 @@ function select(value: unknown, path: unknown): WorkflowJson {
   return recipeJson(value);
 }
 
+function valueReference(
+  kind: "$input" | "$step",
+  value: Readonly<Record<string, unknown>>,
+  scope: RecipeExpressionScope,
+  sourcePath: RecipeSourcePath,
+): RecipeValueReference {
+  const key = value[kind];
+  if (typeof key !== "string")
+    throw expressionError(
+      `${prefix(scope)}${kind} requires a name`,
+      sourcePath,
+    );
+  if (Object.keys(value).some((field) => ![kind, "path"].includes(field)))
+    throw expressionError(
+      `${prefix(scope)}unknown reference field`,
+      sourcePath,
+    );
+  const path = referencePath(value.path, scope, sourcePath);
+  return kind === "$input"
+    ? { kind: "input-value", input: key, path, sourcePath }
+    : { kind: "step-value", step: key, path, sourcePath };
+}
+
+/** Parses an expression once into located nodes; validation and evaluation share the result. */
 export function compileRecipeExpression(
   value: unknown,
-  inputs: readonly string[],
-  steps: readonly string[],
-): CompiledRecipeExpression {
-  const compile = (value: unknown) =>
-    compileRecipeExpression(value, inputs, steps);
+  scope: RecipeExpressionScope,
+  sourcePath: RecipeSourcePath = [],
+): RecipeExpressionNode {
   if (typeof value === "string") {
-    const references = recipeTextReferences(value, inputs, steps);
-    return (context) => {
-      let index = 0;
-      return value.replace(recipeTemplatePattern, () => {
-        const reference = references[index++]!;
-        const result = select(
-          reference.kind === "inputs"
-            ? context.inputs[reference.key]
-            : context.output(reference.key),
-          reference.path,
-        );
-        if (!recipeValue(result))
-          throw new Error(
-            `Text interpolation requires a scalar: ${reference.source}`,
-          );
-        return String(result);
-      });
+    const interpolations = located(sourcePath, () =>
+      recipeTextReferences(value, scope.inputs, scope.steps),
+    ).map((reference) => ({
+      source: reference.source,
+      reference:
+        reference.kind === "inputs"
+          ? ({
+              kind: "input-value",
+              input: reference.key,
+              path: reference.path,
+              sourcePath,
+            } as const)
+          : ({
+              kind: "step-value",
+              step: reference.key,
+              path: reference.path,
+              sourcePath,
+            } as const),
+    }));
+    return interpolations.length
+      ? { kind: "text", text: value, interpolations, sourcePath }
+      : { kind: "literal", value };
+  }
+  if (Array.isArray(value))
+    return {
+      kind: "array",
+      items: value.map((item, index) =>
+        compileRecipeExpression(item, scope, [...sourcePath, index]),
+      ),
+    };
+  if (!recipeObject(value))
+    return {
+      kind: "literal",
+      value: located(sourcePath, () => recipeJson(value)),
+    };
+  if (Object.hasOwn(value, "$literal")) {
+    if (Object.keys(value).length !== 1)
+      throw expressionError(
+        `${prefix(scope)}$literal must be the only field`,
+        sourcePath,
+      );
+    return {
+      kind: "literal",
+      value: located(sourcePath, () => recipeJson(value.$literal)),
     };
   }
-  if (Array.isArray(value)) {
-    const items = value.map(compile);
-    return (context) => items.map((item) => item(context));
+  for (const kind of ["$input", "$step"] as const)
+    if (Object.hasOwn(value, kind))
+      return valueReference(kind, value, scope, sourcePath);
+  if (Object.hasOwn(value, "$select")) {
+    const selection = value.$select;
+    if (
+      Object.keys(value).length !== 1 ||
+      !recipeObject(selection) ||
+      Object.keys(selection).some((key) => !["from", "path"].includes(key)) ||
+      !Array.isArray(selection.path) ||
+      !selection.path.every(
+        (key) =>
+          typeof key === "string" || (Number.isSafeInteger(key) && key >= 0),
+      )
+    )
+      throw expressionError(
+        `${prefix(scope)}$select requires from and a property path`,
+        sourcePath,
+      );
+    return {
+      kind: "select",
+      from: compileRecipeExpression(selection.from, scope, [
+        ...sourcePath,
+        "$select",
+        "from",
+      ]),
+      path: referencePath(selection.path, scope, sourcePath),
+      sourcePath,
+    };
   }
-  if (!recipeObject(value) || Object.hasOwn(value, "$literal")) {
-    const literal = recipeJson(recipeObject(value) ? value.$literal : value);
-    return () => recipeJson(literal);
+  return {
+    kind: "object",
+    entries: Object.entries(value).map(
+      ([key, item]) =>
+        [
+          key,
+          compileRecipeExpression(item, scope, [...sourcePath, key]),
+        ] as const,
+    ),
+  };
+}
+
+export function evaluateRecipeExpression(
+  node: RecipeExpressionNode,
+  context: RecipeExpressionContext,
+): WorkflowJson {
+  switch (node.kind) {
+    case "literal":
+      return recipeJson(node.value);
+    case "input-value":
+      return select(context.inputs[node.input], node.path);
+    case "step-value":
+      return select(context.output(node.step), node.path);
+    case "select":
+      return select(evaluateRecipeExpression(node.from, context), node.path);
+    case "text": {
+      let index = 0;
+      return node.text.replace(recipeTemplatePattern, () => {
+        const { source, reference } = node.interpolations[index++]!;
+        const result = evaluateRecipeExpression(reference, context);
+        if (!recipeValue(result))
+          throw new Error(`Text interpolation requires a scalar: ${source}`);
+        return String(result);
+      });
+    }
+    case "array":
+      return node.items.map((item) => evaluateRecipeExpression(item, context));
+    case "object":
+      return Object.fromEntries(
+        node.entries.map(([key, item]) => [
+          key,
+          evaluateRecipeExpression(item, context),
+        ]),
+      );
   }
-  if (typeof value.$input === "string") {
-    const key = value.$input,
-      path = value.path;
-    return (context) => select(context.inputs[key], path);
-  }
-  if (typeof value.$step === "string") {
-    const key = value.$step,
-      path = value.path;
-    return (context) => select(context.output(key), path);
-  }
-  if (recipeObject(value.$select)) {
-    const from = compile(value.$select.from),
-      path = value.$select.path;
-    return (context) => select(from(context), path);
-  }
-  const entries = Object.entries(value).map(
-    ([key, item]) => [key, compile(item)] as const,
-  );
-  return (context) =>
-    Object.fromEntries(entries.map(([key, item]) => [key, item(context)]));
+}
+
+function scopeOf(context: RecipeExpressionContext): RecipeExpressionScope {
+  return { inputs: Object.keys(context.inputs), steps: context.steps };
 }
 
 export function recipeExpression(
   value: unknown,
   context: RecipeExpressionContext,
 ): WorkflowJson {
-  return compileRecipeExpression(
-    value,
-    Object.keys(context.inputs),
-    context.steps,
-  )(context);
+  return evaluateRecipeExpression(
+    compileRecipeExpression(value, scopeOf(context)),
+    context,
+  );
 }
 
 export function createRecipeExpressionEvaluator(
   inputs: readonly string[],
   steps: readonly string[],
 ) {
-  const compiled = new Map<unknown, CompiledRecipeExpression>();
+  const compiled = new Map<unknown, RecipeExpressionNode>();
   return (value: unknown, context: RecipeExpressionContext): WorkflowJson => {
     let expression = compiled.get(value);
     if (!expression) {
-      expression = compileRecipeExpression(value, inputs, steps);
+      expression = compileRecipeExpression(value, { inputs, steps });
       compiled.set(value, expression);
     }
-    return expression(context);
+    return evaluateRecipeExpression(expression, context);
   };
 }
 
+function* expressionReferences(
+  node: RecipeExpressionNode,
+): Generator<RecipeExpressionReference> {
+  switch (node.kind) {
+    case "input-value":
+    case "step-value":
+      yield { reference: node, interpolated: false };
+      return;
+    case "text":
+      for (const { reference } of node.interpolations)
+        yield { reference, interpolated: true };
+      return;
+    case "select":
+      yield* expressionReferences(node.from);
+      return;
+    case "array":
+      for (const item of node.items) yield* expressionReferences(item);
+      return;
+    case "object":
+      for (const [, item] of node.entries) yield* expressionReferences(item);
+      return;
+    case "literal":
+      return;
+  }
+}
+
+function* conditionExpressions(
+  node: RecipeConditionNode,
+): Generator<RecipeExpressionNode> {
+  switch (node.kind) {
+    case "all":
+    case "any":
+      for (const item of node.items) yield* conditionExpressions(item);
+      return;
+    case "not":
+      yield* conditionExpressions(node.item);
+      return;
+    case "exists":
+      yield node.expression;
+      return;
+    case "compare":
+      yield node.left;
+      yield node.right;
+      return;
+    case "constant":
+      return;
+  }
+}
+
+function documentScope({
+  document,
+  step,
+}: RecipeExpressionValidation): RecipeExpressionScope {
+  return {
+    inputs: Object.keys(document.inputs),
+    steps: document.tasks.map((task) => task.key),
+    label: step.key,
+  };
+}
+
+function validateReferences(
+  node: RecipeExpressionNode,
+  { document, step }: RecipeExpressionValidation,
+): void {
+  for (const { reference, interpolated } of expressionReferences(node)) {
+    if (reference.kind === "step-value") {
+      if (!step.after.includes(reference.step))
+        throw expressionError(
+          `${step.key} must declare ${reference.step} in after before referencing its output`,
+          reference.sourcePath,
+        );
+      continue;
+    }
+    if (!Object.hasOwn(document.inputs, reference.input))
+      throw expressionError(
+        `${step.key}: unknown recipe input ${reference.input}`,
+        reference.sourcePath,
+      );
+    if (
+      interpolated &&
+      reference.path.length === 0 &&
+      !["string", "number", "boolean"].includes(
+        document.inputs[reference.input]!.type,
+      )
+    )
+      throw expressionError(
+        `${step.key}: text interpolation requires a scalar input ${reference.input}`,
+        reference.sourcePath,
+      );
+  }
+}
+
+/** Compiles an expression against its task and rejects references to undeclared inputs or dependencies. */
 export function validateRecipeExpression(
   value: unknown,
   context: RecipeExpressionValidation,
 ): void {
-  const { document, step } = context;
-  function reference(kind: string, key: unknown): void {
-    if (typeof key !== "string")
-      throw new Error(`${step.key}: ${kind} requires a name`);
-    if (kind === "$input") {
-      if (!Object.hasOwn(document.inputs, key))
-        throw new Error(`${step.key}: unknown recipe input ${key}`);
-      return;
-    }
-    if (!step.after.includes(key))
-      throw new Error(
-        `${step.key} must declare ${key} in after before referencing its output`,
-      );
-  }
-  if (typeof value === "string") {
-    for (const item of recipeTextReferences(
+  validateReferences(
+    compileRecipeExpression(
       value,
-      Object.keys(document.inputs),
-      document.tasks.map((task) => task.key),
-    )) {
-      reference(item.kind === "inputs" ? "$input" : "$step", item.key);
-      if (
-        item.kind === "inputs" &&
-        item.path.length === 0 &&
-        !["string", "number", "boolean"].includes(
-          document.inputs[item.key]!.type,
-        )
-      )
-        throw new Error(
-          `${step.key}: text interpolation requires a scalar input ${item.key}`,
-        );
-    }
-    return;
+      documentScope(context),
+      context.sourcePath ?? [],
+    ),
+    context,
+  );
+}
+
+function isComparison(operator: string): operator is RecipeComparison {
+  return recipeComparisons.some((comparison) => comparison === operator);
+}
+
+export function compileRecipeCondition(
+  value: unknown,
+  scope: RecipeExpressionScope,
+  sourcePath: RecipeSourcePath = [],
+): RecipeConditionNode {
+  if (typeof value === "boolean") return { kind: "constant", value };
+  if (!recipeObject(value) || Object.keys(value).length !== 1)
+    throw expressionError(
+      `${prefix(scope)}condition requires one operator`,
+      sourcePath,
+    );
+  const [operator, operands] = Object.entries(value)[0]!;
+  const at = [...sourcePath, operator];
+  if (operator === "all" || operator === "any") {
+    if (!Array.isArray(operands))
+      throw expressionError(`${operator} requires a list of conditions`, at);
+    return {
+      kind: operator,
+      items: operands.map((item, index) =>
+        compileRecipeCondition(item, scope, [...at, index]),
+      ),
+    };
   }
-  if (Array.isArray(value)) {
-    for (const item of value) validateRecipeExpression(item, context);
-    return;
-  }
-  if (!recipeObject(value)) {
-    recipeJson(value);
-    return;
-  }
-  if (Object.hasOwn(value, "$literal")) {
-    if (Object.keys(value).length !== 1)
-      throw new Error(`${step.key}: $literal must be the only field`);
-    recipeJson(value.$literal);
-    return;
-  }
-  for (const kind of ["$input", "$step"]) {
-    if (!Object.hasOwn(value, kind)) continue;
-    reference(kind, value[kind]);
-    if (Object.keys(value).some((key) => ![kind, "path"].includes(key)))
-      throw new Error(`${step.key}: unknown reference field`);
-    if (
-      value.path !== undefined &&
-      (!Array.isArray(value.path) ||
-        !value.path.every(
-          (key) =>
-            typeof key === "string" ||
-            (Number.isSafeInteger(key) && Number(key) >= 0),
-        ))
-    )
-      throw new Error(`${step.key}: invalid reference path`);
-    return;
-  }
-  if (Object.hasOwn(value, "$select")) {
-    if (
-      Object.keys(value).length !== 1 ||
-      !recipeObject(value.$select) ||
-      Object.keys(value.$select).some(
-        (key) => !["from", "path"].includes(key),
-      ) ||
-      !Array.isArray(value.$select.path) ||
-      !value.$select.path.every(
-        (key) =>
-          typeof key === "string" ||
-          (Number.isSafeInteger(key) && Number(key) >= 0),
-      )
-    )
-      throw new Error(`${step.key}: $select requires from and a property path`);
-    validateRecipeExpression(value.$select.from, context);
-    return;
-  }
-  for (const item of Object.values(value))
-    validateRecipeExpression(item, context);
+  if (operator === "not")
+    return { kind: "not", item: compileRecipeCondition(operands, scope, at) };
+  if (operator === "exists")
+    return {
+      kind: "exists",
+      expression: compileRecipeExpression(operands, scope, at),
+    };
+  if (
+    !isComparison(operator) ||
+    !Array.isArray(operands) ||
+    operands.length !== 2
+  )
+    throw expressionError(
+      `${prefix(scope)}invalid comparison ${operator}`,
+      sourcePath,
+    );
+  return {
+    kind: "compare",
+    operator,
+    left: compileRecipeExpression(operands[0], scope, [...at, 0]),
+    right: compileRecipeExpression(operands[1], scope, [...at, 1]),
+  };
 }
 
 export function validateRecipeCondition(
   value: unknown,
   context: RecipeExpressionValidation,
 ): void {
-  if (typeof value === "boolean") return;
-  if (!recipeObject(value) || Object.keys(value).length !== 1)
-    throw new Error(`${context.step.key}: condition requires one operator`);
-  const [operator, operands] = Object.entries(value)[0]!;
-  if (["all", "any"].includes(operator)) {
-    if (!Array.isArray(operands))
-      throw new Error(`${operator} requires a list of conditions`);
-    for (const item of operands) validateRecipeCondition(item, context);
-    return;
-  }
-  if (operator === "not") {
-    validateRecipeCondition(operands, context);
-    return;
-  }
-  if (operator === "exists") {
-    validateRecipeExpression(operands, context);
-    return;
-  }
-  if (
-    !["eq", "ne", "gt", "gte", "lt", "lte", "in"].includes(operator) ||
-    !Array.isArray(operands) ||
-    operands.length !== 2
-  )
-    throw new Error(`${context.step.key}: invalid comparison ${operator}`);
-  for (const item of operands) validateRecipeExpression(item, context);
+  const condition = compileRecipeCondition(
+    value,
+    documentScope(context),
+    context.sourcePath ?? [],
+  );
+  for (const expression of conditionExpressions(condition))
+    validateReferences(expression, context);
 }
 
-export function recipeCondition(
-  value: unknown,
-  context: RecipeExpressionContext,
+function compare(
+  operator: RecipeComparison,
+  left: WorkflowJson,
+  right: WorkflowJson,
 ): boolean {
-  if (typeof value === "boolean") return value;
-  if (!recipeObject(value)) throw new Error("Invalid recipe condition");
-  const [operator, operands] = Object.entries(value)[0]!;
-  if (operator === "all" && Array.isArray(operands))
-    return operands.every((item) => recipeCondition(item, context));
-  if (operator === "any" && Array.isArray(operands))
-    return operands.some((item) => recipeCondition(item, context));
-  if (operator === "not") return !recipeCondition(operands, context);
-  if (operator === "exists") {
-    try {
-      recipeExpression(operands, context);
-      return true;
-    } catch (error) {
-      if (error instanceof MissingRecipeField) return false;
-      throw error;
-    }
-  }
-  if (!Array.isArray(operands)) throw new Error("Invalid recipe comparison");
-  const left = recipeExpression(operands[0], context),
-    right = recipeExpression(operands[1], context);
   const equal = (a: WorkflowJson, b: WorkflowJson) =>
     canonicalJson(a) === canonicalJson(b);
   if (operator === "eq") return equal(left, right);
@@ -301,4 +471,44 @@ export function recipeCondition(
     lte: order <= 0,
   };
   return comparisons[operator] ?? false;
+}
+
+export function evaluateRecipeCondition(
+  node: RecipeConditionNode,
+  context: RecipeExpressionContext,
+): boolean {
+  switch (node.kind) {
+    case "constant":
+      return node.value;
+    case "all":
+      return node.items.every((item) => evaluateRecipeCondition(item, context));
+    case "any":
+      return node.items.some((item) => evaluateRecipeCondition(item, context));
+    case "not":
+      return !evaluateRecipeCondition(node.item, context);
+    case "exists":
+      try {
+        evaluateRecipeExpression(node.expression, context);
+        return true;
+      } catch (error) {
+        if (error instanceof MissingRecipeField) return false;
+        throw error;
+      }
+    case "compare":
+      return compare(
+        node.operator,
+        evaluateRecipeExpression(node.left, context),
+        evaluateRecipeExpression(node.right, context),
+      );
+  }
+}
+
+export function recipeCondition(
+  value: unknown,
+  context: RecipeExpressionContext,
+): boolean {
+  return evaluateRecipeCondition(
+    compileRecipeCondition(value, scopeOf(context)),
+    context,
+  );
 }

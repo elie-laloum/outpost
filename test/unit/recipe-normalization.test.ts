@@ -139,13 +139,15 @@ test("the normalized compiler resumes a checkpoint produced by 7060dcc2 without 
 });
 
 test("compiled expressions reuse references but read fresh outputs and interpolate once", async () => {
-  const { compileRecipeExpression } =
+  const { compileRecipeExpression, evaluateRecipeExpression } =
     await import("../../src/domain/recipes/expressions.ts");
-  const expression = compileRecipeExpression(
-    "{{ steps.review.text }}",
-    [],
-    ["review"],
-  );
+  const node = compileRecipeExpression("{{ steps.review.text }}", {
+    inputs: [],
+    steps: ["review"],
+  });
+  const expression = (
+    context: Parameters<typeof evaluateRecipeExpression>[1],
+  ) => evaluateRecipeExpression(node, context);
   const context = {
     inputs: {},
     steps: ["review"],

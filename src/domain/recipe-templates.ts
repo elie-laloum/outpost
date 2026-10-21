@@ -9,6 +9,7 @@ import type {
   RecipeValue,
 } from "./recipe.types.ts";
 import type { Command } from "./command.types.ts";
+import type { RecipeSourcePath } from "./recipes/expressions.types.ts";
 
 export function recipeReferences(text: string): readonly RecipeReference[] {
   if (text.replace(recipeTemplatePattern, "").includes("{{"))
@@ -25,12 +26,27 @@ export function recipeReferences(text: string): readonly RecipeReference[] {
 }
 
 export function recipeCommandStrings(command: Command): readonly string[] {
+  return recipeCommandFields(command).map(([value]) => value);
+}
+
+/** Pairs each templated command string with its path under the task's `command` field. */
+export function recipeCommandFields(
+  command: Command,
+): readonly (readonly [string, RecipeSourcePath])[] {
   return [
-    command.executable,
-    ...(command.arguments ?? []),
-    ...(command.stdin === undefined ? [] : [command.stdin]),
-    ...(command.directory === undefined ? [] : [command.directory]),
-    ...Object.values(command.variables ?? {}),
+    [command.executable, ["executable"]],
+    ...(command.arguments ?? []).map(
+      (value, index) => [value, ["arguments", index]] as const,
+    ),
+    ...(command.stdin === undefined
+      ? []
+      : [[command.stdin, ["stdin"]] as const]),
+    ...(command.directory === undefined
+      ? []
+      : [[command.directory, ["directory"]] as const]),
+    ...Object.entries(command.variables ?? {}).map(
+      ([name, value]) => [value, ["variables", name]] as const,
+    ),
   ];
 }
 

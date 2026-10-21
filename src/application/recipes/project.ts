@@ -11,6 +11,7 @@ import { parseRecipe, parseRecipeYaml } from "../../infrastructure/recipe.ts";
 import { readRecipeFile } from "../../infrastructure/recipes/read.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
+import { recipeTaskSourcePath } from "../../domain/recipe.ts";
 import { createRecipeRegistry } from "../../domain/recipes/component.ts";
 import { recipeJsonValidator } from "../../infrastructure/recipes/schema.ts";
 import {
@@ -125,7 +126,7 @@ export async function readRecipeProject(
       if (step.agent && !model.agents.includes(step.agent))
         throw configurationError(
           `Unknown recipe agent: ${step.agent}`,
-          ["tasks", document.tasks.indexOf(step), "agent"],
+          [...recipeTaskSourcePath(document, step), "agent"],
           "unknown-agent",
           `Declare agents.${step.agent} in the execution configuration.`,
         );

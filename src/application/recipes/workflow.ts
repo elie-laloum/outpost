@@ -1,7 +1,8 @@
 import { defineWorkflow } from "../../domain/workflow.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import {
-  recipeCondition,
+  compileRecipeCondition,
+  evaluateRecipeCondition,
   createRecipeExpressionEvaluator,
 } from "../../domain/recipes/expressions.ts";
 import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
@@ -82,17 +83,24 @@ export function bindRecipeWorkflow(
       if (!task) throw new Error(`Unknown recipe dependency: ${key}`);
       return task;
     });
+    const condition =
+      step.when === undefined
+        ? undefined
+        : compileRecipeCondition(step.when, {
+            inputs: Object.keys(inputs),
+            steps: keys,
+          });
     const common = {
       key: step.key,
       after,
       ...(step.timeoutMs === undefined ? {} : { timeoutMs: step.timeoutMs }),
       ...(step.retry ? { retry: step.retry } : {}),
       ...step.options,
-      ...(step.when === undefined
+      ...(condition === undefined
         ? {}
         : {
             condition: (context: TaskContext) =>
-              recipeCondition(step.when, contextFor(context)),
+              evaluateRecipeCondition(condition, contextFor(context)),
           }),
     };
     tasks.set(
