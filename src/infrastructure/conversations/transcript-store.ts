@@ -148,8 +148,8 @@ async function captureTranscript(
   if (context.local) {
     if (inside(layout.directory(repository, home), remote)) file = remote;
     const [source, destination] = await Promise.all([
-      stat(remote),
-      stat(file).catch(() => undefined),
+      stat(remote, { bigint: true }),
+      stat(file, { bigint: true }).catch(() => undefined),
     ]);
     if (
       resolve(file) === resolve(remote) ||
