@@ -13,10 +13,7 @@ import { randomUUID } from "node:crypto";
 import { agentObservation } from "../domain/agent-observation.ts";
 import type { Agent, Usage } from "../domain/agent.types.ts";
 import type { DispatchTelemetrySession } from "../domain/dispatch-telemetry.types.ts";
-import type {
-  ObservationHub,
-  ObservationSource,
-} from "../domain/observation.types.ts";
+import type { ObservationSource } from "../domain/observation.types.ts";
 import { createObservationHub } from "../domain/observation.ts";
 import {
   recordRecovery,

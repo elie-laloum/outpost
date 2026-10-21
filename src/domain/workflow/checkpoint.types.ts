@@ -1,8 +1,8 @@
-import type { JsonValue } from "../json.types.ts";
+import type { WorkflowJson } from "../json.types.ts";
 import type { TaskRecord, WorkflowExecutionState } from "../workflow.types.ts";
 import type { WorkflowUsage } from "./budget.types.ts";
 
-export type WorkflowJson = JsonValue;
+export type { WorkflowJson } from "../json.types.ts";
 export type WorkflowCheckpointValue =
   | { readonly kind: "undefined" }
   | { readonly kind: "json"; readonly value: WorkflowJson };

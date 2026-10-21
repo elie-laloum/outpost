@@ -3,3 +3,9 @@ export interface DeadlineOptions {
   readonly durationMs?: number;
   readonly reason?: unknown;
 }
+
+export interface Deadline {
+  readonly signal: AbortSignal;
+  readonly expired: AbortSignal;
+  close(): void;
+}

@@ -1,9 +1,9 @@
-import type { JsonValue, LosslessJsonOptions } from "./json.types.ts";
+import type { WorkflowJson, LosslessJsonOptions } from "./json.types.ts";
 
 export function losslessJson(
   value: unknown,
   options: LosslessJsonOptions = {},
-): JsonValue {
+): WorkflowJson {
   return jsonValue(value, new Set(), options.label ?? "JSON value");
 }
 
@@ -11,7 +11,7 @@ function jsonValue(
   value: unknown,
   ancestors: Set<object>,
   label: string,
-): JsonValue {
+): WorkflowJson {
   if (value === null || typeof value === "boolean" || typeof value === "string")
     return value;
   if (
@@ -50,7 +50,7 @@ function jsonValue(
         return jsonValue(descriptor.value, ancestors, label);
       });
     }
-    const result: Record<string, JsonValue> = Object.create(null);
+    const result: Record<string, WorkflowJson> = Object.create(null);
     for (const key of Reflect.ownKeys(value)) {
       const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
       if (

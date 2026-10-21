@@ -1,10 +1,10 @@
-export type JsonValue =
+export type WorkflowJson =
   | null
   | boolean
   | number
   | string
-  | readonly JsonValue[]
-  | { readonly [key: string]: JsonValue };
+  | readonly WorkflowJson[]
+  | { readonly [key: string]: WorkflowJson };
 
 export interface LosslessJsonOptions {
   readonly label?: string;

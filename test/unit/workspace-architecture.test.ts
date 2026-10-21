@@ -26,6 +26,10 @@ test("architecture check refuses static and dynamic workspace execution cycles w
   );
   const checker = join(root, "scripts", "check-architecture.mjs");
   await copyFile(resolve("scripts/check-architecture.mjs"), checker);
+  await copyFile(
+    resolve("scripts/architecture-local-type.mjs"),
+    join(root, "scripts", "architecture-local-type.mjs"),
+  );
   const check = () => promisify(execFile)(process.execPath, [checker]);
   await writeFile(join(application, "workspace.ts"), 'import "./sandbox.ts";');
   for (const dependency of [

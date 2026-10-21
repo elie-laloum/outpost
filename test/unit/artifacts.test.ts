@@ -152,7 +152,7 @@ test("schema validation runs on publish and read, including Standard Schema and 
   });
   await assert.rejects(
     publishArtifact(store, arbitrary, undefined, { producer }),
-    /must be JSON/,
+    /Artifact payload must be lossless JSON/,
   );
   await assert.rejects(
     publishArtifact(store, arbitrary, { bad: undefined }, { producer }),

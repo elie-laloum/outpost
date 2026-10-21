@@ -1,6 +1,6 @@
-import type { DeadlineOptions } from "./deadline.types.ts";
+import type { Deadline, DeadlineOptions } from "./deadline.types.ts";
 
-export function createDeadline(options: DeadlineOptions) {
+export function createDeadline(options: DeadlineOptions): Deadline {
   const deadline = new AbortController();
   const signal = options.parent
     ? AbortSignal.any([options.parent, deadline.signal])

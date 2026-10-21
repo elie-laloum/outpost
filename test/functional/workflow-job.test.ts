@@ -188,6 +188,8 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
   assert.equal(paused.status, "done");
   const value = plain(paused.result?.value) as {
     status: string;
+    workflowStatus: string;
+    nextAction: string;
     version: string;
     executionId: string;
     pauses: {
