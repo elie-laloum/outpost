@@ -1,3 +1,4 @@
+import { createDeadline } from "../deadline.ts";
 import { startTask, resumeTask } from "./task-state.ts";
 import { InputSuspension } from "./input.ts";
 import { loopDefinition } from "./loop-task.ts";
@@ -127,21 +128,15 @@ async function perform(
     let delayMs = 0;
     let completed = false;
     let value: unknown;
-    const deadline = new AbortController();
-    const timer =
-      item.timeoutMs === undefined
-        ? undefined
-        : setTimeout(
-            () =>
-              deadline.abort(
-                new OutpostError("timeout", `${item.key} timed out`, {
-                  key: item.key,
-                  timeoutMs: item.timeoutMs,
-                }),
-              ),
-            item.timeoutMs,
-          );
-    const taskSignal = AbortSignal.any([signal, deadline.signal]);
+    const deadline = createDeadline({
+      parent: signal,
+      ...(item.timeoutMs === undefined ? {} : { durationMs: item.timeoutMs }),
+      reason: new OutpostError("timeout", `${item.key} timed out`, {
+        key: item.key,
+        timeoutMs: item.timeoutMs,
+      }),
+    });
+    const taskSignal = deadline.signal;
     try {
       taskSignal.throwIfAborted();
       value = await item.perform(context(item, attempt, taskSignal));
@@ -165,12 +160,12 @@ async function perform(
         (options.onQuota && quotaFault(error)) ||
         item.retry?.accepts?.(error, attempt) === false
       )
-        throw deadline.signal.aborted ? deadline.signal.reason : error;
+        throw deadline.expired.aborted ? deadline.expired.reason : error;
       delayMs = retryDelay(item.retry, cycle, error);
       emit({ type: "retry", key: item.key, attempt, delayMs });
     } finally {
       runtime.closeAttempt(item);
-      clearTimeout(timer);
+      deadline.close();
     }
     if (completed) {
       await complete(item, runtime, cache, value);

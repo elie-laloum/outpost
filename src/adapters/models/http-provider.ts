@@ -1,3 +1,4 @@
+import { createDeadline } from "../../domain/deadline.ts";
 import { httpTransportFailure } from "../../infrastructure/http-transport.ts";
 import { invariant, OutpostError, positive } from "../../domain/errors.ts";
 import type {
@@ -151,20 +152,20 @@ export function httpModelProvider(
     async request(request: ModelRequest) {
       validateModelRequest(request);
       const context = { identity, model: request.model };
-      const deadline = new AbortController();
-      const signal = request.signal
-        ? AbortSignal.any([request.signal, deadline.signal])
-        : deadline.signal;
-      const timer = setTimeout(() => deadline.abort(), timeoutMs);
+      const deadline = createDeadline({
+        ...(request.signal ? { parent: request.signal } : {}),
+        durationMs: timeoutMs,
+      });
+      const signal = deadline.signal;
       try {
         const response = await post(protocol.build(request, context), signal);
         const value = await modelJson(response, maxBytes);
         signal.throwIfAborted();
         return protocol.read(value, context);
       } catch (error) {
-        throw failure(error, signal, deadline.signal, request);
+        throw failure(error, signal, deadline.expired, request);
       } finally {
-        clearTimeout(timer);
+        deadline.close();
       }
     },
   });
