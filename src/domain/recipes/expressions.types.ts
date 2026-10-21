@@ -18,3 +18,7 @@ export interface RecipeExpressionValidation {
   readonly document: RecipeDocument;
   readonly step: RecipeStep;
 }
+
+export type CompiledRecipeExpression = (
+  context: RecipeExpressionContext,
+) => WorkflowJson;

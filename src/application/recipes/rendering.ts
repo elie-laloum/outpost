@@ -9,6 +9,8 @@ import type { RecipeCompilationContext } from "./compilation.types.ts";
 export function recipeTextRenderer(
   version: RecipeDocument["version"],
   contextFor: (context: TaskContext) => RecipeExpressionContext,
+  evaluate: RecipeCompilationContext["evaluate"] = (value, context) =>
+    recipeExpression(value, contextFor(context)),
 ): RecipeCompilationContext["text"] {
   switch (version) {
     case 1:
@@ -32,7 +34,7 @@ export function recipeTextRenderer(
         });
     case 3:
       return (text, context) => {
-        const result = recipeExpression(text, contextFor(context));
+        const result = evaluate(text, context);
         if (typeof result !== "string")
           throw new Error("Recipe text requires a string");
         return result;

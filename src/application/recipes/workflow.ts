@@ -2,7 +2,7 @@ import { defineWorkflow } from "../../domain/workflow.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import {
   recipeCondition,
-  recipeExpression,
+  createRecipeExpressionEvaluator,
 } from "../../domain/recipes/expressions.ts";
 import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { normalizeRecipe } from "./normalize.ts";
@@ -72,9 +72,10 @@ export function bindRecipeWorkflow(
       return context.value(task);
     },
   });
+  const expression = createRecipeExpressionEvaluator(Object.keys(inputs), keys);
   const evaluate = (value: unknown, context: TaskContext) =>
-    recipeExpression(value, contextFor(context));
-  const text = recipeTextRenderer(program.version, contextFor);
+    expression(value, contextFor(context));
+  const text = recipeTextRenderer(program.version, contextFor, evaluate);
   for (const step of program.tasks) {
     const after = step.after.map((key) => {
       const task = tasks.get(key);

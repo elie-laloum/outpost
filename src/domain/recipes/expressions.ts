@@ -6,6 +6,7 @@ import { recipeValue } from "../recipe-inputs.ts";
 import { recipeObject } from "./values.ts";
 import type { WorkflowJson } from "../workflow/checkpoint.types.ts";
 import type {
+  CompiledRecipeExpression,
   RecipeExpressionContext,
   RecipeExpressionValidation,
 } from "./expressions.types.ts";
@@ -51,51 +52,87 @@ function select(value: unknown, path: unknown): WorkflowJson {
   return recipeJson(value);
 }
 
+export function compileRecipeExpression(
+  value: unknown,
+  inputs: readonly string[],
+  steps: readonly string[],
+): CompiledRecipeExpression {
+  const compile = (value: unknown) =>
+    compileRecipeExpression(value, inputs, steps);
+  if (typeof value === "string") {
+    const references = recipeTextReferences(value, inputs, steps);
+    return (context) => {
+      let index = 0;
+      return value.replace(recipeTemplatePattern, () => {
+        const reference = references[index++]!;
+        const result = select(
+          reference.kind === "inputs"
+            ? context.inputs[reference.key]
+            : context.output(reference.key),
+          reference.path,
+        );
+        if (!recipeValue(result))
+          throw new Error(
+            `Text interpolation requires a scalar: ${reference.source}`,
+          );
+        return String(result);
+      });
+    };
+  }
+  if (Array.isArray(value)) {
+    const items = value.map(compile);
+    return (context) => items.map((item) => item(context));
+  }
+  if (!recipeObject(value) || Object.hasOwn(value, "$literal")) {
+    const literal = recipeJson(recipeObject(value) ? value.$literal : value);
+    return () => recipeJson(literal);
+  }
+  if (typeof value.$input === "string") {
+    const key = value.$input,
+      path = value.path;
+    return (context) => select(context.inputs[key], path);
+  }
+  if (typeof value.$step === "string") {
+    const key = value.$step,
+      path = value.path;
+    return (context) => select(context.output(key), path);
+  }
+  if (recipeObject(value.$select)) {
+    const from = compile(value.$select.from),
+      path = value.$select.path;
+    return (context) => select(from(context), path);
+  }
+  const entries = Object.entries(value).map(
+    ([key, item]) => [key, compile(item)] as const,
+  );
+  return (context) =>
+    Object.fromEntries(entries.map(([key, item]) => [key, item(context)]));
+}
+
 export function recipeExpression(
   value: unknown,
   context: RecipeExpressionContext,
 ): WorkflowJson {
-  if (typeof value === "string") {
-    const references = recipeTextReferences(
-      value,
-      Object.keys(context.inputs),
-      context.steps,
-    );
-    let index = 0;
-    return value.replace(recipeTemplatePattern, () => {
-      const reference = references[index++]!;
-      const result = select(
-        reference.kind === "inputs"
-          ? context.inputs[reference.key]
-          : context.output(reference.key),
-        reference.path,
-      );
-      if (!recipeValue(result))
-        throw new Error(
-          `Text interpolation requires a scalar: ${reference.source}`,
-        );
-      return String(result);
-    });
-  }
-  if (Array.isArray(value))
-    return value.map((item) => recipeExpression(item, context));
-  if (!recipeObject(value)) return recipeJson(value);
-  if (Object.hasOwn(value, "$literal")) return recipeJson(value.$literal);
-  if (typeof value.$input === "string")
-    return select(context.inputs[value.$input], value.path);
-  if (typeof value.$step === "string")
-    return select(context.output(value.$step), value.path);
-  if (recipeObject(value.$select))
-    return select(
-      recipeExpression(value.$select.from, context),
-      value.$select.path,
-    );
-  return Object.fromEntries(
-    Object.entries(value).map(([key, item]) => [
-      key,
-      recipeExpression(item, context),
-    ]),
-  );
+  return compileRecipeExpression(
+    value,
+    Object.keys(context.inputs),
+    context.steps,
+  )(context);
+}
+
+export function createRecipeExpressionEvaluator(
+  inputs: readonly string[],
+  steps: readonly string[],
+) {
+  const compiled = new Map<unknown, CompiledRecipeExpression>();
+  return (value: unknown, context: RecipeExpressionContext): WorkflowJson => {
+    let expression = compiled.get(value);
+    if (!expression) {
+      expression = compileRecipeExpression(value, inputs, steps);
+      compiled.set(value, expression);
+    }
+    return expression(context);
+  };
 }
 
 export function validateRecipeExpression(

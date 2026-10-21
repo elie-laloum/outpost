@@ -137,3 +137,23 @@ test("the normalized compiler resumes a checkpoint produced by 7060dcc2 without 
   assert.equal(again.status, "done");
   assert.deepEqual(again.usage, resumed.usage);
 });
+
+test("compiled expressions reuse references but read fresh outputs and interpolate once", async () => {
+  const { compileRecipeExpression } =
+    await import("../../src/domain/recipes/expressions.ts");
+  const expression = compileRecipeExpression(
+    "{{ steps.review.text }}",
+    [],
+    ["review"],
+  );
+  const context = {
+    inputs: {},
+    steps: ["review"],
+    output: () => ({ text: "{{ inputs.secret }}" }),
+  };
+  assert.equal(expression(context), "{{ inputs.secret }}");
+  assert.equal(
+    expression({ ...context, output: () => ({ text: "updated" }) }),
+    "updated",
+  );
+});
