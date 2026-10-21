@@ -145,40 +145,30 @@ export async function readRecipeProject(
       ],
     });
     const directory = dirname(config);
-    let graph;
-    try {
-      graph = recipeComponentGraph(
-        normalizedConfiguration,
-        registry,
-        directory,
-        document,
+    const graph = recipeComponentGraph(
+      normalizedConfiguration,
+      registry,
+      directory,
+      document,
+    );
+    validateRecipeProjectExpressions(document, graph);
+    if (normalized.files) validateFileRecipeCapabilities(document, graph);
+    if (
+      normalized.files?.retention?.policy === "portable" &&
+      graph.nodes.get(normalized.files.retention.transporter)?.kind !==
+        "transport"
+    )
+      throw new Error(
+        "Portable workspace retention references an unknown Transport",
       );
-      validateRecipeProjectExpressions(document, graph);
-      if (normalized.files) validateFileRecipeCapabilities(document, graph);
+    for (const input of normalized.files?.inputs ?? [])
       if (
-        normalized.files?.retention?.policy === "portable" &&
-        graph.nodes.get(normalized.files.retention.transporter)?.kind !==
-          "transport"
+        "snapshot" in input &&
+        graph.nodes.get(input.transporter)?.kind !== "transport"
       )
         throw new Error(
-          "Portable workspace retention references an unknown Transport",
+          "Workspace snapshot input references an unknown Transport",
         );
-      for (const input of normalized.files?.inputs ?? [])
-        if (
-          "snapshot" in input &&
-          graph.nodes.get(input.transporter)?.kind !== "transport"
-        )
-          throw new Error(
-            "Workspace snapshot input references an unknown Transport",
-          );
-    } catch (error) {
-      if (
-        error instanceof ConfigurationError &&
-        ["tasks", "workflow"].includes(String(error.diagnostic.path[0]))
-      )
-        throw recipeFileError(file, source, error);
-      throw error;
-    }
     const reports = configuration.reports ?? [];
     if (!Array.isArray(reports)) throw new Error("reports must be a list");
     return {
@@ -200,8 +190,11 @@ export async function readRecipeProject(
       ),
     };
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith(`${file}:`))
-      throw error;
+    if (error instanceof ConfigurationError) {
+      if (error.diagnostic.file) throw error;
+      if (["tasks", "workflow"].includes(String(error.diagnostic.path[0])))
+        throw recipeFileError(file, source, error);
+    }
     throw recipeFileError(config, configurationSource, error);
   }
 }

@@ -451,3 +451,28 @@ test("static recipe plans inspect file work without allocating or resolving envi
     "recipe.yaml",
   ]);
 });
+
+test("unknown agent diagnostics identify the recipe rather than its configuration", async (t) => {
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-diagnostic-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml");
+  const config = join(directory, "execution.yaml");
+  await writeFile(
+    file,
+    "version: 3\nname: missing-agent\ntasks:\n  - key: review\n    agent: missing\n    brief: Review\n",
+  );
+  await writeFile(
+    config,
+    "version: 3\nworkspace:\n  kind: ephemeral\nsandbox:\n  provider: local\n",
+  );
+  await assert.rejects(readRecipeProject({ file, config }), (error) => {
+    assert.ok(error instanceof ConfigurationError);
+    assert.equal(error.diagnostic.code, "unknown-agent");
+    assert.equal(error.diagnostic.file, file);
+    assert.equal(error.diagnostic.line, 5);
+    assert.deepEqual(error.diagnostic.path, ["tasks", 0, "agent"]);
+    return true;
+  });
+});
