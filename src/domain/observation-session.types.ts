@@ -1,3 +1,4 @@
+import type { observationSessionFactory } from "./observation-session.constants.ts";
 import type { ObservationHub } from "./observation.types.ts";
 
 export interface ObservationSessionOptions {
@@ -15,3 +16,7 @@ export interface ObservationSession {
 export type ObservationSessionFactory = (
   options: ObservationSessionOptions,
 ) => Promise<ObservationSession>;
+
+export interface ObservationSessionCapability {
+  readonly [observationSessionFactory]?: ObservationSessionFactory;
+}

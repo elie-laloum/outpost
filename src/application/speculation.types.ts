@@ -23,7 +23,7 @@ export interface SpeculativeCandidate<T = undefined> {
 
 export type SpeculativeOutput<T> = Omit<
   WarmDispatchResult<T>,
-  "resume" | "fork" | "report"
+  "resume" | "fork" | "report" | "reportData"
 >;
 
 export interface SpeculativeValidation<T> {

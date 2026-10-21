@@ -1,8 +1,11 @@
+import { loopTaskDefinition } from "./loop-task.constants.ts";
 import { defineTask } from "./task.ts";
-import type { Task } from "../workflow.types.ts";
-import type { LoopDefinition, LoopTaskOptions } from "./loop-task.types.ts";
-
-const definitions = new WeakMap<Task, LoopDefinition>();
+import type { Task, TaskOptions } from "../workflow.types.ts";
+import type {
+  LoopDefinition,
+  LoopTaskOptions,
+  LoopTaskCapability,
+} from "./loop-task.types.ts";
 
 export class LoopTaskExhausted extends Error {
   readonly key: string;
@@ -27,24 +30,23 @@ export function defineLoopTask<T>(options: LoopTaskOptions<T>): Task<T> {
   )
     throw new Error("defineLoopTask requires attempt and check callbacks");
   const { maxRounds, attempt, check, ...base } = options;
-  const item = defineTask<T>({
+  const declaration: TaskOptions<T> & LoopTaskCapability = {
     ...base,
+    [loopTaskDefinition]: Object.freeze<LoopDefinition>({
+      maxRounds,
+      attempt,
+      // Paired callbacks share T; checkpoint versions bind restored outputs to that contract.
+      check: (context, result) => check(context, result as T),
+    }),
     perform() {
       throw new Error("defineLoopTask must be executed by a workflow");
     },
-  });
-  definitions.set(
-    item,
-    Object.freeze<LoopDefinition>({
-      maxRounds,
-      attempt,
-      // The task's paired callbacks share T; checkpoint versions bind restored outputs to that contract.
-      check: (context, result) => check(context, result as T),
-    }),
-  );
-  return item;
+  };
+  return defineTask(declaration);
 }
 
-export function loopDefinition(item: Task): LoopDefinition | undefined {
-  return definitions.get(item);
+export function loopDefinition(
+  item: Task & LoopTaskCapability,
+): LoopDefinition | undefined {
+  return item[loopTaskDefinition];
 }

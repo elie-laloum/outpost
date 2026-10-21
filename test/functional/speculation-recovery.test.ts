@@ -81,6 +81,11 @@ test("durable completion is reused without allocation and preserves structured e
   });
   assert.equal(first.status, "winner", String(first.candidates[0]?.error));
   assert.equal(second.id, first.id);
+  for (const execution of [first, second]) {
+    assert.ok(execution.winner?.result);
+    assert.equal("reportData" in execution.winner.result, false);
+    assert.equal("report" in execution.winner.result, false);
+  }
   assert.deepEqual(second.winner?.result?.value, { error: { nested: true } });
   assert.equal(second.usage.attempts, 1);
   assert.equal(second.integration?.status, "clean");

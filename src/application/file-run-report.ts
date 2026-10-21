@@ -1,9 +1,10 @@
 import { invariant } from "../domain/errors.ts";
 import type { FileDispatchResult } from "./file-sandbox.types.ts";
 import type { FileRunReport } from "../domain/run-report.types.ts";
-import type { RunReportRenderer } from "./run-report.types.ts";
-
-const snapshots = new WeakMap<RunReportRenderer, FileRunReport>();
+import type {
+  RunReportRenderer,
+  RunReportProjection,
+} from "./run-report.types.ts";
 
 export function fileRunReportData<T>(
   result: Pick<
@@ -29,7 +30,9 @@ export function fileRunReportData<T>(
   };
 }
 
-export function createFileRunReport(data: FileRunReport): RunReportRenderer {
+export function createFileRunReport(
+  data: FileRunReport,
+): RunReportProjection<FileRunReport> {
   const snapshot = structuredClone(data);
   const report: RunReportRenderer = (options = {}) => {
     if (options.format === undefined || options.format === "json")
@@ -40,13 +43,5 @@ export function createFileRunReport(data: FileRunReport): RunReportRenderer {
     );
     return `${snapshot.completed ? "Completed" : "Incomplete"} file execution\n\n${snapshot.text}\n\nWorkspace: ${snapshot.workspaceInfo.id}\nMode: ${snapshot.workspaceInfo.kind}\nGeneration: ${snapshot.workspaceInfo.generation}\nPublished outputs: ${snapshot.fileOutputs.length}\n`;
   };
-  snapshots.set(report, snapshot);
-  return report;
-}
-
-export function fileRunReportSnapshot(
-  report: RunReportRenderer,
-): FileRunReport | undefined {
-  const snapshot = snapshots.get(report);
-  return snapshot ? structuredClone(snapshot) : undefined;
+  return { reportData: structuredClone(snapshot), report };
 }

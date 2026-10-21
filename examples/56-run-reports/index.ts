@@ -47,7 +47,7 @@ await writeFile(
   join(directory, "run-report.json"),
   result.report({ format: "json" }),
 );
-const report: RunReport = JSON.parse(result.report({ format: "json" }));
+const report: RunReport = result.reportData;
 assert.equal(report.diff?.filesChanged, 1);
 assert.equal(report.failedTools.length, 1);
 assert.equal(report.usage.input, 300);

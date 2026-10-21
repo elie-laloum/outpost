@@ -6,11 +6,7 @@ import { createLocalTransport } from "../infrastructure/local-transport.ts";
 import { fileWorkspaces } from "./file-workspace-registry.ts";
 import { prepareWorkspaceOutputs } from "./workspace-output-baseline.ts";
 import { publishWorkspaceOutputs } from "./workspace-publication.ts";
-import {
-  createFileRunReport,
-  fileRunReportData,
-  fileRunReportSnapshot,
-} from "./file-run-report.ts";
+import { createFileRunReport } from "./file-run-report.ts";
 import { observeDispatch } from "./dispatch-observation.ts";
 import { validateFileAgent } from "./file-agent-validation.ts";
 import type { FileDispatchRuntime } from "./file-dispatch.types.ts";
@@ -135,9 +131,8 @@ async function dispatchFileOperation<T>(
       ...execution,
       workspaceInfo,
       fileOutputs: publications,
-      report: createFileRunReport({
-        ...(fileRunReportSnapshot(execution.report) ??
-          fileRunReportData(execution)),
+      ...createFileRunReport({
+        ...execution.reportData,
         workspaceInfo,
         fileOutputs: publications,
       }),

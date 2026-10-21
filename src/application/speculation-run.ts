@@ -179,13 +179,14 @@ export async function runSpeculation<T>(
           resume: _resume,
           fork: _fork,
           report: _report,
+          reportData: _reportData,
           ...output
         } = await sandbox.dispatch({
           ...candidate.request,
           ...(options.budget.prices ? { prices: options.budget.prices } : {}),
           ...(observation ? { observation } : {}),
           signal,
-          observe: usage.observe,
+          ...usage.dispatchOptions,
         });
         result = output;
         usage.reconcile(output.usage);

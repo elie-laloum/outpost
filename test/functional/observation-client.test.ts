@@ -28,7 +28,7 @@ function barrier() {
   return { promise, release };
 }
 
-test("observation records a dispatch and reads its masked events from another client", async (t) => {
+test("a copied observation client records a dispatch and reads its masked events from another client", async (t) => {
   const root = await repository(t);
   const transporter = createLocalTransport({ directory: join(root, "store") });
   const output: string[] = [];
@@ -48,7 +48,10 @@ test("observation records a dispatch and reads its masked events from another cl
   assert.equal(await observation.readRun("dispatch"), undefined);
   const result = await dispatch({
     runId: "dispatch",
-    observation,
+    observation: {
+      ...observation,
+      emit: (source, event) => observation.emit(source, event),
+    },
     repository: root,
     sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(emit("secret")),
@@ -382,7 +385,7 @@ test("file dispatch registration covers allocation failure and output publicatio
       modelProvider: {
         name: "offline",
         request: async () => ({
-          text: "ok",
+          text: "private answer",
           usage: { input: 1, cached: 0, output: 1 },
         }),
       },
@@ -396,9 +399,13 @@ test("file dispatch registration covers allocation failure and output publicatio
     brief: { text: "test" },
     observation,
     logging: false as const,
+    redact: [/private/g],
   };
   const result = await dispatch({ ...settings, runId: "file" });
   assert.equal(result.runId, "file");
+  assert.deepEqual(result.reportData, JSON.parse(result.report()));
+  assert.doesNotMatch(JSON.stringify(result.reportData), /private/);
+  assert.equal(result.reportData.usage.input, 1);
   assert.equal((await observation.readRun("file"))?.status, "done");
   await assert.rejects(
     dispatch({
@@ -511,7 +518,7 @@ test("closing a scoped client waits for descendants and refuses their next execu
       },
     }),
   ]);
-  const running = workflow.start({ observation: child });
+  const running = workflow.start({ observation: { ...child } });
   await entered.promise;
   let closed = false;
   const closing = parent.close().then(() => {

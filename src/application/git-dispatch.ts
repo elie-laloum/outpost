@@ -1,9 +1,5 @@
 import type { RunReportDiff } from "../domain/run-report.types.ts";
-import {
-  createRunReport,
-  runReportSnapshot,
-  collectRunReportDiff,
-} from "./run-report.ts";
+import { createRunReport, collectRunReportDiff } from "./run-report.ts";
 import type { Usage } from "../domain/agent.types.ts";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
 import { invariant, recordRecovery } from "../domain/errors.ts";
@@ -79,12 +75,10 @@ async function dispatchOperation<T>(
       if (output.completed) break;
     }
     const last = outputs.at(-1)!;
-    const firstReport = runReportSnapshot(outputs[0]!.report)!;
-    const lastReport = runReportSnapshot(last.report)!;
+    const firstReport = outputs[0]!.reportData;
+    const lastReport = last.reportData;
     let diff: RunReportDiff | null = null;
-    const warnings = outputs.flatMap(
-      (output) => runReportSnapshot(output.report)!.warnings,
-    );
+    const warnings = outputs.flatMap((output) => output.reportData.warnings);
     if (firstReport.diff && lastReport.diff) {
       try {
         diff = await collectRunReportDiff(
@@ -101,7 +95,7 @@ async function dispatchOperation<T>(
     }
     return {
       ...last,
-      report: createRunReport({ ...lastReport, diff, warnings }),
+      ...createRunReport({ ...lastReport, diff, warnings }),
       text: outputs.map((output) => output.text).join("\n"),
       turns: outputs.flatMap((output) => output.turns),
       commits: outputs.flatMap((output) => output.commits),

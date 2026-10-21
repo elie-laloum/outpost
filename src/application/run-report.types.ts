@@ -17,3 +17,8 @@ export interface RunReportTool {
 }
 
 export type RunReportRenderer = (options?: RunReportOptions) => string;
+
+export interface RunReportProjection<T> {
+  readonly reportData: T;
+  readonly report: RunReportRenderer;
+}

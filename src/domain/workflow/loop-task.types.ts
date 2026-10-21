@@ -1,3 +1,4 @@
+import type { loopTaskDefinition } from "./loop-task.constants.ts";
 import type { TaskContext, TaskOptions } from "../workflow.types.ts";
 import type { WorkflowCheckpointValue } from "./checkpoint.types.ts";
 
@@ -41,4 +42,8 @@ export interface LoopDefinition {
     context: LoopTaskContext,
     result: unknown,
   ) => LoopCheckResult | Promise<LoopCheckResult>;
+}
+
+export interface LoopTaskCapability {
+  readonly [loopTaskDefinition]?: LoopDefinition;
 }

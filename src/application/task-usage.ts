@@ -2,31 +2,8 @@ import type { AgentObservation, Usage } from "../domain/agent.types.ts";
 import { addUsage, usageDifference } from "../domain/usage.ts";
 import type { TaskContext } from "../domain/workflow.types.ts";
 import { notify } from "./observation.ts";
-import type {
-  TaskUsageObserver,
-  TaskUsageDelivery,
-} from "./task-usage.types.ts";
-
-const accountingObservers = new WeakMap<
-  (event: AgentObservation) => void,
-  TaskUsageDelivery
->();
-
-export function accountTaskUsage(
-  observer: ((event: AgentObservation) => void) | undefined,
-  event: AgentObservation,
-): void {
-  if (observer) accountingObservers.get(observer)?.account(event);
-}
-
-export function deliverTaskUsage(
-  observer: ((event: AgentObservation) => void) | undefined,
-  event: AgentObservation,
-): void {
-  const registered = observer && accountingObservers.get(observer);
-  if (registered) return registered.deliver(event);
-  observer?.(event);
-}
+import type { TaskUsageObserver } from "./task-usage.types.ts";
+import { taskUsageAccounting } from "./task-usage.constants.ts";
 
 export function taskUsage(
   context: Pick<TaskContext, "reportUsage">,
@@ -60,16 +37,11 @@ export function taskUsage(
       report(delta);
     }
   }
-  const observe = (event: AgentObservation) => {
-    account(event);
-    notify(observer, event);
-  };
-  accountingObservers.set(observe, {
-    account,
-    deliver: (event) => notify(observer, event),
-  });
   return {
-    observe,
+    dispatchOptions: {
+      [taskUsageAccounting]: account,
+      observe: (event) => notify(observer, event),
+    },
     reconcile(usage) {
       report(usageDifference(usage, total));
     },

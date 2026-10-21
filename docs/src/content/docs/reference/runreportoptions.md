@@ -13,9 +13,9 @@ import type { RunReportOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type                                | Presence | Meaning                                                                                                                                                   |
-| -------- | ----------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `format` | `"json" \| "markdown" \| undefined` | Optional | Output serialization: markdown by default, or json for a pretty-printed version-1 RunReport string. An unsupported format throws when report() is called. |
+| Name     | Type                                | Presence | Meaning                                                                                                                                                                              |
+| -------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `format` | `"json" \| "markdown" \| undefined` | Optional | Output serialization: markdown or json. Git reports default to Markdown (version 1); file reports default to JSON (version 2). An unsupported format throws when report() is called. |
 
 ## Signature
 

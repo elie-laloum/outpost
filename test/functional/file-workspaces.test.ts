@@ -592,7 +592,14 @@ test("scripted file dispatch has no Git result fields and repairs reuse one work
     assert.equal(result.usage.input, 2);
     assert.ok(!("branch" in result));
     assert.ok(!("commits" in result));
-    assert.equal(JSON.parse(result.report()).version, 2);
+    assert.deepEqual(result.reportData, JSON.parse(result.report()));
+    assert.equal(result.reportData.version, 2);
+    assert.deepEqual(result.reportData.fileOutputs, result.fileOutputs);
+    assert.deepEqual(result.reportData.workspaceInfo, result.workspaceInfo);
+    const rendered = result.report();
+    Object.assign(result.reportData, { text: "consumer edit" });
+    Object.assign(result.reportData.usage, { input: 999 });
+    assert.equal(result.report(), rendered);
     await sandbox.close();
     await assert.rejects(
       dispatch({

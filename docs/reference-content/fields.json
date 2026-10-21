@@ -7723,8 +7723,8 @@
     "Rend l’instantané immuable du run en Markdown (par défaut) ou en chaîne JSON, sans lecture du disque. Inclut les statistiques Git commitées, les outils échoués observés, la durée totale et l’usage déclaré ; les données indisponibles sont explicites. Le masquage s’applique à toutes les chaînes du rapport."
   ],
   "RunReportOptions.format": [
-    "Output serialization: markdown by default, or json for a pretty-printed version-1 RunReport string. An unsupported format throws when report() is called.",
-    "Sérialisation de sortie : markdown par défaut, ou json pour une chaîne RunReport version 1 indentée. Un format non pris en charge lève une erreur à l’appel de report()."
+    "Output serialization: markdown or json. Git reports default to Markdown (version 1); file reports default to JSON (version 2). An unsupported format throws when report() is called.",
+    "Sérialisation de sortie : markdown ou json. Les rapports Git utilisent le Markdown par défaut (version 1), ceux de fichiers le JSON (version 2). Un format non pris en charge lève une erreur à l’appel de report()."
   ],
   "RunReport.version": [
     "JSON snapshot schema version, currently 1.",
@@ -9471,8 +9471,8 @@
     "Résultats de publication vérifiés, séparés des commits Git et de l’intégration de branche."
   ],
   "FileDispatchResult.report": [
-    "Version-2 file execution report; legacy Git reports keep version 1.",
-    "Rapport d’exécution de fichiers version 2 ; les rapports Git legacy conservent la version 1."
+    "Render the saved version-2 FileRunReport as JSON by default or Markdown on request. Synchronous, without filesystem reads; independent of edits to reportData. Redaction applies to every string. Git reports keep version 1 and default to Markdown.",
+    "Rend le FileRunReport version 2 enregistré en JSON par défaut ou en Markdown sur demande. Synchrone, sans lecture du disque ; indépendant des modifications de reportData. Le masquage s’applique à toutes les chaînes. Les rapports Git conservent la version 1 et le Markdown par défaut."
   ],
   "FileDispatchResult.resume": [
     "Continue a captured conversation in the same retained file workspace without recopying initial inputs.",
@@ -11505,5 +11505,13 @@
   "RecipeReport.observationId": [
     "Tracking ID returned by a workflow using createObservation(); use it with observation.readRun/watchRun. Distinct from the durable recipe runId used by status and resume, especially after explicit recovery selects a new observation ID.",
     "Identifiant du suivi renvoyé par un workflow utilisant createObservation() ; à utiliser avec observation.readRun/watchRun. Distinct du runId durable utilisé par status et resume, notamment après récupération explicite avec un nouvel identifiant d’observation."
+  ],
+  "DispatchResult.reportData": [
+    "Version-1 RunReport data for direct typed access, available after cleanup and redacted exactly like report(). This independent snapshot shares no mutable data with the renderer or execution result; editing it does not change report(). Copied results retain it even when report is wrapped.",
+    "Données RunReport version 1 directement typées, disponibles après nettoyage et masquées comme report(). Cet instantané indépendant ne partage aucune donnée mutable avec le rendu ou le résultat d’exécution ; le modifier ne change pas report(). Les copies du résultat le conservent même si report est décoré."
+  ],
+  "FileDispatchResult.reportData": [
+    "Version-2 FileRunReport data with workspaceInfo and fileOutputs, without synthetic Git fields. Available after cleanup with the same redaction as report(); independent of the renderer and other result fields. Editing this snapshot does not change report().",
+    "Données FileRunReport version 2 avec workspaceInfo et fileOutputs, sans champs Git artificiels. Disponibles après nettoyage avec le même masquage que report() ; indépendantes du rendu et des autres champs du résultat. Modifier cet instantané ne change pas report()."
   ]
 }

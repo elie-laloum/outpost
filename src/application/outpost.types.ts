@@ -1,4 +1,7 @@
-import type { RunReportOptions } from "../domain/run-report.types.ts";
+import type {
+  RunReport,
+  RunReportOptions,
+} from "../domain/run-report.types.ts";
 import type {
   IntegrationOptions,
   ConflictResolution,
@@ -104,6 +107,7 @@ export interface AttachResult extends CommandResult, Disposal {
 }
 
 export interface DispatchResult<T> extends Execution<T> {
+  readonly reportData: RunReport;
   report(options?: RunReportOptions): string;
   readonly observerErrors?: readonly unknown[];
   readonly branch: string;

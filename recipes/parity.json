@@ -3904,6 +3904,7 @@
   ".:DispatchResult": {
     "signatures": [],
     "options": {
+      "reportData": "RunReport",
       "report": "(options?: RunReportOptions) => string",
       "observerErrors": "readonly unknown[] | undefined",
       "branch": "string",
@@ -3931,6 +3932,7 @@
     "test": null,
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
+      "reportData": "contract",
       "report": "contract",
       "observerErrors": "contract",
       "branch": "contract",
@@ -4340,6 +4342,7 @@
   ".:FileDispatchResult": {
     "signatures": [],
     "options": {
+      "reportData": "import(\"../domain/run-report.types.ts\").FileRunReport",
       "logReference": "import(\"../domain/transport.types.ts\").TransportReference | undefined",
       "observerErrors": "readonly unknown[] | undefined",
       "transcript": "string | undefined",
@@ -4366,6 +4369,7 @@
     "test": "test/functional/file-workspaces.test.ts",
     "reason": "Typed file resource, capability, options or result contract consumed by its owning API; legacy Git contracts remain unchanged.",
     "optionCoverage": {
+      "reportData": "contract",
       "logReference": "contract",
       "observerErrors": "contract",
       "transcript": "contract",
@@ -12229,6 +12233,7 @@
       "usage": "Usage",
       "fallback": "FallbackRecord | undefined",
       "branch": "string",
+      "reportData": "RunReport",
       "report": "(options?: RunReportOptions) => string",
       "observerErrors": "readonly unknown[] | undefined",
       "directory": "string",
@@ -12256,6 +12261,7 @@
       "usage": "contract",
       "fallback": "contract",
       "branch": "contract",
+      "reportData": "contract",
       "report": "contract",
       "observerErrors": "contract",
       "directory": "contract",

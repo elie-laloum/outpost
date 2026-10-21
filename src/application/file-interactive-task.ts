@@ -185,7 +185,7 @@ export function defineFileInteractiveAgentTask(
             brief: { text: `${input}\n\n${interactiveTurnInstructions}` },
             response: interactiveResponse,
             signal: context.signal,
-            observe: usage.observe,
+            ...usage.dispatchOptions,
             ...(context.observation
               ? { observation: context.observation }
               : {}),

@@ -45,6 +45,7 @@ export type FileSandboxOptions = FileSandboxSettings &
   );
 
 export interface FileDispatchResult<T> extends Execution<T> {
+  readonly reportData: import("../domain/run-report.types.ts").FileRunReport;
   readonly logReference?: import("../domain/transport.types.ts").TransportReference;
   readonly observerErrors?: readonly unknown[];
   readonly transcript?: string;

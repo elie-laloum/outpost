@@ -1,11 +1,14 @@
 import type { RunReport, RunReportDiff } from "../domain/run-report.types.ts";
 import { renderRunReport } from "../domain/run-report.ts";
 import { collectDiffStatistics } from "../infrastructure/git/diff-statistics.ts";
-import type { RunReportRenderer } from "./run-report.types.ts";
+import type {
+  RunReportRenderer,
+  RunReportProjection,
+} from "./run-report.types.ts";
 
-const snapshots = new WeakMap<RunReportRenderer, RunReport>();
-
-export function createRunReport(data: RunReport): RunReportRenderer {
+export function createRunReport(
+  data: RunReport,
+): RunReportProjection<RunReport> {
   const snapshot = structuredClone(data);
   const report: RunReportRenderer = (options = {}) => {
     if (options.format === "json")
@@ -14,15 +17,7 @@ export function createRunReport(data: RunReport): RunReportRenderer {
       return renderRunReport(snapshot);
     throw new Error("Run report format must be markdown or json");
   };
-  snapshots.set(report, snapshot);
-  return report;
-}
-
-export function runReportSnapshot(
-  report: RunReportRenderer,
-): RunReport | undefined {
-  const snapshot = snapshots.get(report);
-  return snapshot ? structuredClone(snapshot) : undefined;
+  return { reportData: structuredClone(snapshot), report };
 }
 
 export async function collectRunReportDiff(

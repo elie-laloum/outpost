@@ -241,3 +241,5 @@ Un tour interrompu n’est rejoué qu’avec `resume: "retry-incomplete"`, car i
 Chaque enregistrement de tâche liste ses `rounds`, et chaque phase émet un événement de workflow `loop`. `context.idempotencyKey` change à chaque tour et à chaque phase, pour dédupliquer les effets comme dans [Files de jobs et workers](../job-queues/).
 
 API : [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
+
+Une tâche copiée avec `{ ...task }`, y compris une tâche décorée avec `defineTask({ ...task, condition })`, conserve sa définition de boucle et sa limite de tours. Passez la tâche obtenue au workflow et utilisez ce même objet avec `result.value(task)` et les références de dépendance.

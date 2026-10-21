@@ -23,9 +23,13 @@ const result = await dispatch({
 });
 await writeFile("run-report.md", result.report({ format: "markdown" }));
 await writeFile("run-report.json", result.report({ format: "json" }));
+const report = result.reportData;
+console.log(report.usage, report.failedTools, report.diff);
 ```
 
 The Markdown contains the agent’s answer, branch, commit count, elapsed time, changed-file table, observed failed commands and tools, and reported tokens. Copy it into a PR description. JSON contains the same snapshot for your own Slack message formatting or automation; neither format publishes anything.
+
+For code that stores or transforms the report, read `result.reportData` directly. It is a typed `RunReport`, with the same redaction as the rendered report, so no JSON parsing is needed. It is an independent snapshot: modifying it does not change `result.report()` or other result fields.
 
 ## Read what the report proves
 
@@ -48,3 +52,5 @@ See [`DispatchResult.report`](../../reference/dispatchresult/), [`RunReport`](..
 ## File workspaces
 
 File dispatch reports use version 2 with discriminated `workspaceInfo` and `fileOutputs`. They preserve usage, observed tool failures, redaction and JSON/Markdown rendering, without synthetic branches or commits. Git report version 1 stays unchanged. See [file results](../workspaces/).
+
+For file results, `result.reportData` is a `FileRunReport` (version 2). `result.report()` defaults to JSON; request `{ format: "markdown" }` for Markdown. Git results continue to default to Markdown.

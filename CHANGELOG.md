@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Expose typed `result.reportData` on Git and file dispatches as a redacted snapshot independent of `report()` rendering. Preserve Markdown/JSON defaults and YAML workflow report/checkpoint projections.
+- Replace identity-keyed report, usage-accounting, observation-session and loop-definition registries with explicit internal data and capabilities. Copied observation clients retain session ownership, copied loop tasks retain rounds and checkpoint identity, and decorated observer callbacks cannot detach synchronous usage accounting from budget enforcement. Preserve observer isolation and independent tracking sessions.
+
 - Compile recipe formats 1, 2 and 3 through one typed internal representation and dedicated task compilers. Preserve literal and single-pass text handling, native versus JSON results, sandbox ownership and durable checkpoint identity; verify resumption against a checkpoint produced before the refactor. Conflicting format-3 actions now name the alternatives and point to the task's YAML location.
 - Consolidate agent preparation and conversation capture/restoration across Git and file execution. Separate dispatch and sandbox facades from their internal operations, remove the workspace/sandbox/dispatch import cycle and prevent its return with an architecture check. Preserve public APIs, warm authentication, continuation, fallback recovery, workspace ownership and mode-specific synchronization and publication.
 - Fix YAML reporter text suppression across interleaved dispatches, passes and subagents by connecting the native observation sink directly. Remove redundant reporter and OpenTelemetry adapters, preserve recipe-owned cleanup, and make custom reporter flushing wait for asynchronous handlers.

@@ -1,21 +1,13 @@
+import { observationSessionFactory } from "./observation-session.constants.ts";
 import type { ObservationHub } from "./observation.types.ts";
 import type {
-  ObservationSessionFactory,
+  ObservationSessionCapability,
   ObservationSessionOptions,
 } from "./observation-session.types.ts";
 
-const factories = new WeakMap<ObservationHub, ObservationSessionFactory>();
-
-export function registerObservationSessions(
-  observation: ObservationHub,
-  factory: ObservationSessionFactory,
-): void {
-  factories.set(observation, factory);
-}
-
 export function openObservationSession(
-  observation: ObservationHub | undefined,
+  observation: (ObservationHub & ObservationSessionCapability) | undefined,
   options: ObservationSessionOptions,
 ) {
-  return observation ? factories.get(observation)?.(options) : undefined;
+  return observation?.[observationSessionFactory]?.(options);
 }

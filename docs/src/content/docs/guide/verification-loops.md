@@ -241,3 +241,5 @@ An interrupted round replays only with `resume: "retry-incomplete"`, since it ma
 Each task record lists its `rounds`, and each phase emits a `loop` workflow event. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
 
 API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
+
+A task copied with `{ ...task }`, including one decorated with `defineTask({ ...task, condition })`, retains its loop definition and round limit. Pass that resulting task to the workflow and use the same object with `result.value(task)` and dependency references.

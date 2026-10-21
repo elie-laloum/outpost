@@ -3,7 +3,6 @@ import { test } from "node:test";
 import { createRunReportEvents } from "../../src/application/run-report-events.ts";
 import {
   createRunReport,
-  runReportSnapshot,
   collectRunReportDiff,
 } from "../../src/application/run-report.ts";
 import type { RunReport, Observation, AgentEvent } from "../../src/index.ts";
@@ -31,19 +30,16 @@ const observation = (event: AgentEvent): Observation => ({
 });
 
 test("report renders unavailable and partial data honestly and snapshots caller data", () => {
-  const report = createRunReport(empty);
+  const { report, reportData } = createRunReport(empty);
   assert.match(report(), /Diff statistics unavailable/);
   assert.match(report(), /No final answer recorded/);
   assert.match(report(), /not satisfied/);
   assert.throws(() => report({ format: "xml" as "json" }), /format/);
-  assert.equal(
-    runReportSnapshot(() => ""),
-    undefined,
-  );
-  const snapshot = runReportSnapshot(report)!;
+  assert.deepEqual(reportData, empty);
+  const snapshot = reportData;
   Object.assign(snapshot, { text: "mutated" });
   assert.equal(JSON.parse(report({ format: "json" })).text, "");
-  const partial = createRunReport({
+  const { report: partial } = createRunReport({
     ...empty,
     text: "<script>alert('x')</script>\n| forge |",
     usage: { ...empty.usage, complete: false },
@@ -161,7 +157,7 @@ test("unavailable Git statistics reject collection rather than fabricate an empt
 });
 
 test("Markdown keeps paths and commands readable while fencing embedded markup", () => {
-  const report = createRunReport({
+  const { report } = createRunReport({
     ...empty,
     branch: "outpost/run-report",
     diff: {
@@ -191,4 +187,44 @@ test("Markdown keeps paths and commands readable while fencing embedded markup",
   assert.ok(markdown.includes("`` printf '<script>`tick`</script>' ``"));
   assert.ok(markdown.includes("  ````text\n"));
   assert.ok(markdown.includes("  ````\n"));
+});
+
+test("a decorated report retains data for final observation enrichment and redaction", async () => {
+  const { observeDispatch } =
+    await import("../../src/application/dispatch-observation.ts");
+  const projection = createRunReport({
+    ...empty,
+    text: "secret",
+    warnings: ["secret warning"],
+  });
+  const result = await observeDispatch(
+    { brief: { text: "report" }, logging: false, redact: [/secret/g] },
+    async (options) => {
+      options.observation!.emit("agent", {
+        kind: "tool-result",
+        callId: "failure",
+        name: "shell",
+        isError: true,
+        preview: "secret failure",
+        characters: 14,
+      });
+      return {
+        ...projection,
+        report: (_options?: import("../../src/index.ts").RunReportOptions) =>
+          "decorated",
+        completed: true,
+        commits: [{ oid: "abc", subject: "secret commit" }],
+        usage: { input: 2, cached: 0, output: 1 },
+      };
+    },
+  );
+  assert.deepEqual(
+    JSON.parse(result.report({ format: "json" })),
+    result.reportData,
+  );
+  assert.equal(result.reportData.completed, true);
+  assert.equal(result.reportData.usage.input, 2);
+  assert.equal(result.reportData.warnings.length, 1);
+  assert.equal(result.reportData.failedTools.length, 1);
+  assert.doesNotMatch(JSON.stringify(result.reportData), /secret/);
 });

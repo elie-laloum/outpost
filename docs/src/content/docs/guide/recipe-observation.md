@@ -72,3 +72,5 @@ The engine creates the run record and stops its heartbeat when the workflow sett
 Read the report’s `observationId` with `createObservation({ transporter })`, then call `observation.readRun(id)` or `observation.watchRun(id)` as shown in [execution state](../run-state/). The observation projection covers the workflow and its scoped tasks; allocation before the workflow and integration or cleanup afterwards still reach configured sinks but are outside the workflow’s persisted projection. The final recipe report also covers those later stages. The legacy `sink.run` component keeps its manual, single-execution ownership contract and should not be combined with automatic persistence for the same ID.
 
 The report’s `runId` remains the checkpoint ID for resume commands; `observationId` identifies tracking, which can change after recovery.
+
+The final recipe report summarizes the workflow and its cleanup. The TypeScript dispatch property [`result.reportData`](../run-reports/) describes one agent execution and is not added to format-3 task output projections or existing checkpoints. YAML `reports` and `--json` keep their existing output contracts.

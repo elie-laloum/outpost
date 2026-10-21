@@ -610,7 +610,7 @@ export async function createFileSandbox(
                   ? { transcriptReference: captured.transcriptReference }
                   : {}),
                 ...(executed.fallback ? { fallback: executed.fallback } : {}),
-                report: createFileRunReport(
+                ...createFileRunReport(
                   fileRunReportData({
                     ...execution,
                     usage: addUsage(execution.usage, executed.failedUsage),

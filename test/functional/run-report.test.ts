@@ -21,8 +21,15 @@ import { git } from "../../src/infrastructure/git/command.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 const sandboxProvider = createLocalSandboxProvider();
-const parse = (result: Pick<DispatchResult<unknown>, "report">): RunReport =>
-  JSON.parse(result.report({ format: "json" }));
+const parse = (
+  result: Pick<DispatchResult<unknown>, "report" | "reportData">,
+): RunReport => {
+  assert.deepEqual(
+    result.reportData,
+    JSON.parse(result.report({ format: "json" })),
+  );
+  return result.reportData;
+};
 const change = `import {writeFileSync} from 'node:fs';import {execFileSync} from 'node:child_process';writeFileSync('base.txt','changed\\n');execFileSync('git',['add','base.txt']);execFileSync('git',['commit','-m','Change']);`;
 
 test("cold report survives integration, cleanup and later repository edits", async (t) => {
@@ -61,6 +68,11 @@ test("cold report survives integration, cleanup and later repository edits", asy
   result.commits.length &&
     Object.assign(result.commits[0]!, { subject: "mutated" });
   assert.deepEqual(parse(result), report);
+  const copied = { ...result, report: () => "custom rendering" };
+  assert.deepEqual(copied.reportData, report);
+  Object.assign(result.reportData.usage, { input: 999 });
+  Object.assign(result.reportData, { text: "consumer edit" });
+  assert.equal(result.report(), markdown);
 });
 
 test("warm reports measure only their own net committed changes and exclude dirty files", async (t) => {

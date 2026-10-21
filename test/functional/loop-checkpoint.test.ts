@@ -56,7 +56,8 @@ for (const interrupted of ["attempt", "check"]) {
             : { done: false, feedback: "feedback" };
         },
       });
-      return { fix, graph: defineWorkflow("fix", [fix]) };
+      const copied = { ...fix };
+      return { fix: copied, graph: defineWorkflow("fix", [copied]) };
     };
     const first = await definitions().graph.start({ checkpoint });
     assert.equal(first.status, "failed");

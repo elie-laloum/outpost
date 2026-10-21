@@ -248,7 +248,7 @@ export async function dispatchInSandbox<T>(
     warnings.push("Committed diff statistics could not be collected.");
   }
   return {
-    report: createRunReport({
+    ...createRunReport({
       version: 1,
       completed: execution.completed,
       text: execution.text,

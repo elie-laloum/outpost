@@ -3,12 +3,10 @@ import { performance } from "node:perf_hooks";
 import type { UsageCost } from "../domain/pricing.types.ts";
 import { calculateUsageCost } from "../domain/pricing.ts";
 import { createRunReportEvents } from "./run-report-events.ts";
-import { createRunReport, runReportSnapshot } from "./run-report.ts";
-import {
-  createFileRunReport,
-  fileRunReportSnapshot,
-} from "./file-run-report.ts";
-import { accountTaskUsage, deliverTaskUsage } from "./task-usage.ts";
+import { createRunReport } from "./run-report.ts";
+import { createFileRunReport } from "./file-run-report.ts";
+import { taskUsageAccounting } from "./task-usage.constants.ts";
+import type { TaskUsageCapability } from "./task-usage.types.ts";
 import { access } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { agentObservation } from "../domain/agent-observation.ts";
@@ -34,7 +32,7 @@ import type { DispatchOptions } from "./execution.types.ts";
 const active = new WeakSet<ObservationHub>();
 
 export async function observeDispatch<T, R extends ObservedDispatchResult>(
-  options: DispatchOptions<T>,
+  options: DispatchOptions<T> & TaskUsageCapability,
   action: (options: DispatchOptions<T>) => Promise<R>,
   repository = process.cwd(),
 ): Promise<R> {
@@ -58,7 +56,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
 }
 
 async function dispatchObservation<T, R extends ObservedDispatchResult>(
-  options: DispatchOptions<T>,
+  options: DispatchOptions<T> & TaskUsageCapability,
   action: (options: DispatchOptions<T>) => Promise<R>,
   repository: string,
 ): Promise<R> {
@@ -113,7 +111,7 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
         observe(value) {
           if (value.source !== "agent" && value.source !== "harness") return;
           const event = agentObservation(value);
-          if (event) return deliverTaskUsage(options.observe, event);
+          if (event) return options.observe?.(event);
         },
         async flush() {
           const observer = options.observe;
@@ -149,7 +147,7 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
       observation.emit("agent", { kind: "warning", message });
     },
     observe(event) {
-      accountTaskUsage(options.observe, event);
+      options[taskUsageAccounting]?.(event);
       if (event.kind === "phase" && event.name === "preparing prompt") {
         previous = addUsage(previous, current);
         current = empty();
@@ -188,8 +186,7 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
       failures.push(error);
     }
     await finish();
-    const snapshot = result.report && runReportSnapshot(result.report);
-    const fileSnapshot = result.report && fileRunReportSnapshot(result.report);
+    const snapshot = result.reportData;
     const warnings = [...(snapshot?.warnings ?? []), ...reportEvents.warnings];
     if (observation.dropped > initialDropped)
       warnings.push(
@@ -203,40 +200,26 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
         warnings.push("Usage cost could not be calculated.");
       }
     }
+    const reportData =
+      snapshot &&
+      observation.redact({
+        ...snapshot,
+        ...(snapshot.version === 1
+          ? { commits: result.commits ?? snapshot.commits }
+          : {}),
+        completed: result.completed,
+        text: result.text ?? snapshot.text,
+        usage: result.usage,
+        cost,
+        durationMs: performance.now() - started,
+        failedTools: reportEvents.failures,
+        omittedFailures: reportEvents.omittedFailures,
+        warnings,
+      });
+    const report = projectReport(reportData);
     return {
       ...result,
-      ...(snapshot
-        ? {
-            report: createRunReport(
-              observation.redact({
-                ...snapshot,
-                completed: result.completed,
-                text: result.text ?? snapshot.text,
-                commits: result.commits ?? snapshot.commits,
-                usage: result.usage,
-                cost,
-                durationMs: performance.now() - started,
-                failedTools: reportEvents.failures,
-                omittedFailures: reportEvents.omittedFailures,
-                warnings,
-              }),
-            ),
-          }
-        : fileSnapshot
-          ? {
-              report: createFileRunReport(
-                observation.redact({
-                  ...fileSnapshot,
-                  usage: result.usage,
-                  cost,
-                  durationMs: performance.now() - started,
-                  failedTools: reportEvents.failures,
-                  omittedFailures: reportEvents.omittedFailures,
-                  warnings,
-                }),
-              ),
-            }
-          : {}),
+      ...report,
       ...(log?.reference ? { logReference: log.reference } : {}),
       observerErrors: [...failures, ...observation.errors],
     };
@@ -299,4 +282,10 @@ function isCommit(
     "subject" in value &&
     typeof value.subject === "string"
   );
+}
+
+function projectReport(data: ObservedDispatchResult["reportData"]) {
+  if (!data) return {};
+  if (data.version === 2) return createFileRunReport(data);
+  return createRunReport(data);
 }

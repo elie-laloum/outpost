@@ -68,7 +68,7 @@ export async function executeInteractiveTurn(
         response: interactiveResponse,
         signal: context.signal,
         ...(context.observation ? { observation: context.observation } : {}),
-        observe: usage.observe,
+        ...usage.dispatchOptions,
         ...(conversation ? { continuation: { id: conversation } } : {}),
       });
       usage.reconcile(result.usage);

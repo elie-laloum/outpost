@@ -1,10 +1,13 @@
 import type { AgentObservation, Usage } from "../domain/agent.types.ts";
-export interface TaskUsageObserver {
-  observe(event: AgentObservation): void;
-  reconcile(usage: Usage): void;
+import type { taskUsageAccounting } from "./task-usage.constants.ts";
+
+export interface TaskUsageCapability {
+  readonly [taskUsageAccounting]?: (event: AgentObservation) => void;
 }
 
-export interface TaskUsageDelivery {
-  account(event: AgentObservation): void;
-  deliver(event: AgentObservation): void;
+export interface TaskUsageObserver {
+  readonly dispatchOptions: TaskUsageCapability & {
+    readonly observe: (event: AgentObservation) => void;
+  };
+  reconcile(usage: Usage): void;
 }

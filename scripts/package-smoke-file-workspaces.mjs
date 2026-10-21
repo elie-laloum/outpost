@@ -15,13 +15,15 @@ export function smokeFileWorkspaces(directory, checkTypes) {
   const consumer = join(directory, "file-workspaces.ts");
   writeFileSync(
     consumer,
-    `import {createWorkspace,createSandbox,dispatch,attach,defineIsolatedCommandTask,workspaceFingerprint,publishWorkspaceOutputs,type Workspace,type FileWorkspace,type FileDispatchResult,type DispatchResult} from '@elie-laloum/outpost';
+    `import {createWorkspace,createSandbox,dispatch,attach,defineIsolatedCommandTask,workspaceFingerprint,publishWorkspaceOutputs,type Workspace,type FileWorkspace,type FileDispatchResult,type FileRunReport,type DispatchResult} from '@elie-laloum/outpost';
 import {createLocalSandboxProvider} from '@elie-laloum/outpost/providers/local';
 import {scriptedAgent} from '@elie-laloum/outpost/testing';
 const sandboxProvider=createLocalSandboxProvider();
 const workspace:FileWorkspace=await createWorkspace({source:{kind:'ephemeral'},runtime:{directory:'./files'}});
 const sandbox=await createSandbox({workspace,sandboxProvider});
 const result:FileDispatchResult<undefined>=await dispatch({workspace,sandboxProvider,agent:scriptedAgent({turns:[{text:'ok'}]}),brief:{text:'work'}});
+const report:FileRunReport=result.reportData;
+const reportVersion:2=report.version;
 await workspaceFingerprint(workspace);
 await publishWorkspaceOutputs(workspace,{paths:['**/*.json'],destination:'./out',policy:'create'});
 defineIsolatedCommandTask({key:'command',request:()=>({workspaceSource:{kind:'ephemeral'},sandboxProvider,command:{executable:'node'}})});

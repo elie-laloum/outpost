@@ -23,9 +23,13 @@ const result = await dispatch({
 });
 await writeFile("run-report.md", result.report({ format: "markdown" }));
 await writeFile("run-report.json", result.report({ format: "json" }));
+const report = result.reportData;
+console.log(report.usage, report.failedTools, report.diff);
 ```
 
 Le Markdown contient la réponse de l’agent, la branche, le nombre de commits, la durée, un tableau des fichiers modifiés, les commandes et outils échoués observés et les tokens déclarés. Copiez-le dans une description de PR. Le JSON contient le même instantané pour composer votre message Slack ou votre automatisation ; aucun format ne publie quoi que ce soit.
+
+Pour enregistrer ou transformer les données du rapport, lisez directement `result.reportData`. Cet objet est typé `RunReport` et applique le même masquage que le rapport rendu, sans analyse de JSON. C’est un instantané indépendant : le modifier ne change ni `result.report()` ni les autres champs du résultat.
 
 ## Comprendre ce que le rapport établit
 
@@ -48,3 +52,5 @@ Consultez [`DispatchResult.report`](../../reference/dispatchresult/), [`RunRepor
 ## Workspaces de fichiers
 
 Les rapports de dispatch de fichiers utilisent la version 2 avec `workspaceInfo` discriminé et `fileOutputs`. Ils conservent consommation, échecs d’outils observés, masquage et rendu JSON/Markdown, sans branches ni commits artificiels. Les rapports Git version 1 restent inchangés. Voir [les résultats de fichiers](../workspaces/).
+
+Pour les résultats de fichiers, `result.reportData` est un `FileRunReport` (version 2). `result.report()` produit du JSON par défaut ; demandez `{ format: "markdown" }` pour le Markdown. Les résultats Git conservent le Markdown par défaut.

@@ -231,3 +231,36 @@ test("condition and observer failures preserve normal task behavior", async () =
   assert.equal(result.tasks[0]?.status, "skipped");
   assert.ok(result.observerErrors.length > 0);
 });
+
+test("copied and decorated loops retain rounds, conditions and exhaustion", async () => {
+  const original = defineLoopTask({
+    key: "fix",
+    maxRounds: 2,
+    attempt: (context) => context.round,
+    check: (_, value) => ({ done: value === 2, feedback: "again" }),
+  });
+  for (const task of [
+    { ...original },
+    defineTask({ ...original, condition: () => true }),
+  ]) {
+    const result = await defineWorkflow("copied", [task]).start();
+    result.unwrap();
+    assert.equal(result.value(task), 2);
+    assert.equal(result.tasks[0]?.rounds?.length, 2);
+  }
+  const skipped = defineTask({ ...original, condition: () => false });
+  assert.equal(
+    (await defineWorkflow("skipped", [skipped]).start()).tasks[0]?.status,
+    "skipped",
+  );
+  const exhausted = {
+    ...defineLoopTask({
+      key: "exhausted",
+      maxRounds: 1,
+      attempt: () => 1,
+      check: () => ({ done: false, feedback: "again" }),
+    }),
+  };
+  const failed = await defineWorkflow("exhausted", [exhausted]).start();
+  assert.ok(failed.errors[0] instanceof LoopTaskExhausted);
+});

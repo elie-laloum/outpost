@@ -1,6 +1,7 @@
 import { observationDefaults } from "../domain/observation.constants.ts";
 import { createObservationHub } from "../domain/observation.ts";
-import { registerObservationSessions } from "../domain/observation-session.ts";
+import { observationSessionFactory } from "../domain/observation-session.constants.ts";
+import type { ObservationSessionCapability } from "../domain/observation-session.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { RunObserver } from "../domain/run.types.ts";
@@ -79,7 +80,7 @@ function client(
     );
     return options.transporter;
   }
-  const observation: ObservationClient = {
+  const observation: ObservationClient & ObservationSessionCapability = {
     ...hub,
     get errors() {
       return [
@@ -134,83 +135,87 @@ function client(
     [Symbol.asyncDispose]() {
       return observation.close();
     },
-  };
-  registerObservationSessions(observation, async (settings) => {
-    invariant(active(), "Observation is closed");
-    let release!: () => void;
-    const settled = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    local.add(settled);
-    for (const owner of ancestors) owner.pending.add(settled);
-    state.pending.add(settled);
-    try {
-      const previous =
-        options.transporter && settings.resume
-          ? await readRun({ transporter: options.transporter, id: settings.id })
+    async [observationSessionFactory](settings) {
+      invariant(active(), "Observation is closed");
+      let release!: () => void;
+      const settled = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      local.add(settled);
+      for (const owner of ancestors) owner.pending.add(settled);
+      state.pending.add(settled);
+      try {
+        const previous =
+          options.transporter && settings.resume
+            ? await readRun({
+                transporter: options.transporter,
+                id: settings.id,
+              })
+            : undefined;
+        invariant(
+          !previous?.executionId ||
+            previous.executionId === settings.executionId,
+          "Run identity mismatch",
+        );
+        const receiver = options.transporter
+          ? await createRunObserver({
+              transporter: options.transporter,
+              ...settings,
+              resume: !!previous,
+              ...(options.heartbeatMs === undefined
+                ? {}
+                : { heartbeatMs: options.heartbeatMs }),
+              ...(options.abandonAfterMs === undefined
+                ? {}
+                : { abandonAfterMs: options.abandonAfterMs }),
+            })
           : undefined;
-      invariant(
-        !previous?.executionId || previous.executionId === settings.executionId,
-        "Run identity mismatch",
-      );
-      const receiver = options.transporter
-        ? await createRunObserver({
-            transporter: options.transporter,
-            ...settings,
-            resume: !!previous,
-            ...(options.heartbeatMs === undefined
-              ? {}
-              : { heartbeatMs: options.heartbeatMs }),
-            ...(options.abandonAfterMs === undefined
-              ? {}
-              : { abandonAfterMs: options.abandonAfterMs }),
-          })
-        : undefined;
-      const run = receiver
-        ? createObservationHub({
-            ...options,
-            sinks: [...(options.sinks ?? []), receiver],
-          })
-        : hub.child({});
-      if (receiver) state.hubs.add(run);
-      let completion: Promise<void> | undefined;
-      return {
-        observation: run,
-        close() {
-          completion ??= (async () => {
-            try {
-              await run.close();
-              if (receiver)
-                await closeReceiver(
-                  receiver,
-                  options.deliveryTimeoutMs ??
-                    observationDefaults.deliveryTimeoutMs,
-                );
-            } catch (error) {
-              remember(error);
-            } finally {
-              if (receiver) {
-                for (const error of run.errors) remember(error);
-                state.hubs.delete(run);
-                state.dropped += run.dropped;
+        const run = receiver
+          ? createObservationHub({
+              ...options,
+              sinks: [...(options.sinks ?? []), receiver],
+            })
+          : hub.child({});
+        if (receiver) state.hubs.add(run);
+        let completion: Promise<void> | undefined;
+        return {
+          observation: run,
+          close() {
+            completion ??= (async () => {
+              try {
+                await run.close();
+                if (receiver)
+                  await closeReceiver(
+                    receiver,
+                    options.deliveryTimeoutMs ??
+                      observationDefaults.deliveryTimeoutMs,
+                  );
+              } catch (error) {
+                remember(error);
+              } finally {
+                if (receiver) {
+                  for (const error of run.errors) remember(error);
+                  state.hubs.delete(run);
+                  state.dropped += run.dropped;
+                }
+                for (const owner of ancestors) owner.pending.delete(settled);
+                local.delete(settled);
+                state.pending.delete(settled);
+                release();
               }
-              for (const owner of ancestors) owner.pending.delete(settled);
-              local.delete(settled);
-              state.pending.delete(settled);
-              release();
-            }
-          })();
-          return completion;
-        },
-      };
-    } catch (error) {
-      for (const owner of ancestors) owner.pending.delete(settled);
-      local.delete(settled);
-      state.pending.delete(settled);
-      release();
-      throw error;
-    }
-  });
+            })();
+            return completion;
+          },
+        };
+      } catch (error) {
+        for (const owner of ancestors) owner.pending.delete(settled);
+        local.delete(settled);
+        state.pending.delete(settled);
+        release();
+        throw error;
+      }
+    },
+  };
   return observation;
 }
 

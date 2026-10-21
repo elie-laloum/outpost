@@ -77,7 +77,7 @@ export function defineAgentTask<T>(
           ...(context.prices ? { prices: context.prices } : {}),
           observation,
           signal: context.signal,
-          observe: usage.observe,
+          ...usage.dispatchOptions,
         });
         usage.reconcile(result.usage);
         return result;
@@ -199,7 +199,7 @@ export function defineIsolatedTask<T>(
               ...borrowed,
               workspace: resource?.workspace ?? requested.workspace!,
               signal: context.signal,
-              observe: usage.observe,
+              ...usage.dispatchOptions,
               ...(context.prices ? { prices: context.prices } : {}),
               ...(context.observation
                 ? { observation: context.observation }
@@ -231,7 +231,7 @@ export function defineIsolatedTask<T>(
           ...(context.prices ? { prices: context.prices } : {}),
           observation,
           signal: context.signal,
-          observe: usage.observe,
+          ...usage.dispatchOptions,
         });
         usage.reconcile(result.usage);
         return result;
