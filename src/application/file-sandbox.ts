@@ -1,140 +1,74 @@
-import { dispatchFiles as dispatchFileWorkspace } from "./file-dispatch.ts";
-import { validateFileAgent } from "./file-agent-validation.ts";
-export { validateFileAgent } from "./file-agent-validation.ts";
-import type {
-  FileWorkspace,
-  FileWorkspaceOptions,
-  FileWorkspaceRegistration,
-  RestoreFileWorkspaceOptions,
-} from "./file-workspace.types.ts";
-import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
-import { openCliHooks } from "./cli-hooks.ts";
-import { lstat, mkdir, rename, rm } from "node:fs/promises";
-import { dirname, basename, join, relative } from "node:path";
 import { randomUUID } from "node:crypto";
-import { createFileRunReport, fileRunReportData } from "./file-run-report.ts";
-import { dispatchCandidates } from "../domain/fallback-agent.ts";
-import { addUsage } from "../domain/usage.ts";
+import { mkdir } from "node:fs/promises";
+import { basename, dirname, join, relative } from "node:path";
 import { invariant, OutpostError, recordRecovery } from "../domain/errors.ts";
+import { dispatchCandidates } from "../domain/fallback-agent.ts";
+import type {
+  FileWorkspaceRecord,
+  WorkspaceAllocationRecord,
+} from "../domain/file-workspace.types.ts";
+import { observedOperation } from "../domain/observed-operation.ts";
+import type { TransportReference } from "../domain/transport.types.ts";
+import { addUsage } from "../domain/usage.ts";
+import { inside } from "../infrastructure/files.ts";
+import { createLocalTransport } from "../infrastructure/local-transport.ts";
+import { executeProcess } from "../infrastructure/process.ts";
+import { registerResourceActivity } from "../infrastructure/resource-activity.ts";
+import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
+import { boundedTransfers } from "../infrastructure/transfer.ts";
+import { archiveFiles } from "../infrastructure/transport-archive.ts";
+import { jsonBytes } from "../infrastructure/transport-json.ts";
 import {
-  copyWorkspaceManifest,
   workspaceManifest,
   workspaceManifestFingerprint,
 } from "../infrastructure/workspace-files.ts";
-import { authenticateAgent } from "./agent-authentication.ts";
-import { prepareAgentExecution } from "./agent-preparation.ts";
 import { configureAgent } from "./agent-configuration.ts";
-import { storageFor } from "./agent-storage.ts";
 import {
   createAgentConversations,
   restoreConversation,
 } from "./agent-conversations.ts";
-import { execute } from "./execution.ts";
 import { runWithFallback } from "./agent-fallback.ts";
-import { operationGate } from "./operation-gate.ts";
-import {
-  createFileWorkspace as allocateFileWorkspace,
-  checkpointFileWorkspace,
-  restoreFileWorkspace as reopenFileWorkspace,
-  recordFileWorkspace,
-} from "./file-workspace-lifecycle.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
+import { prepareAgentExecution } from "./agent-preparation.ts";
+import { storageFor } from "./agent-storage.ts";
+import { observeDispatch } from "./dispatch-observation.ts";
+import { diagnoseSandbox } from "./doctor-sandbox.ts";
+import { execute } from "./execution.ts";
+import { validateFileAgent } from "./file-agent-validation.ts";
+import { dispatchFiles as dispatchFileWorkspace } from "./file-dispatch.ts";
+import { createFileRunReport, fileRunReportData } from "./file-run-report.ts";
 import type {
   FileDispatchRequest,
   FileDispatchResult,
   FileSandbox,
   FileSandboxOptions,
 } from "./file-sandbox.types.ts";
-import type { SandboxOptions } from "./outpost.types.ts";
-import { diagnoseSandbox } from "./doctor-sandbox.ts";
-import { agentRequest } from "./agent-request.ts";
-import { renderBrief } from "./brief-renderer.ts";
-import { completeBrief } from "./interactive-brief.ts";
-import { restoreTerminal } from "../infrastructure/terminal.ts";
-import { executionDefaults } from "./execution.constants.ts";
-import { archiveFiles } from "../infrastructure/transport-archive.ts";
-import { inside } from "../infrastructure/files.ts";
-import { createLocalTransport } from "../infrastructure/local-transport.ts";
-import { registerResourceActivity } from "../infrastructure/resource-activity.ts";
-import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
-import { trackedSandboxLease } from "./sandbox-activity.ts";
-import { observedLease } from "./observed-lease.ts";
-import { observedOperation } from "../domain/observed-operation.ts";
-import { observeDispatch } from "./dispatch-observation.ts";
-import { jsonBytes } from "../infrastructure/transport-json.ts";
-import type { WorkspaceAllocationRecord } from "../domain/file-workspace.types.ts";
-import type { TransportReference } from "../domain/transport.types.ts";
-import { steeringScope } from "./steering-scope.ts";
+import {
+  createFileWorkspace as allocateFileWorkspace,
+  checkpointFileWorkspace,
+  recordFileWorkspace,
+  restoreFileWorkspace as reopenFileWorkspace,
+} from "./file-workspace-lifecycle.ts";
+import { fileWorkspaces } from "./file-workspace-registry.ts";
+import type {
+  FileWorkspace,
+  FileWorkspaceOptions,
+  FileWorkspaceRegistration,
+  RestoreFileWorkspaceOptions,
+} from "./file-workspace.types.ts";
 import { createLifecycleHookRunner } from "./lifecycle-hooks.ts";
-import { executeProcess } from "../infrastructure/process.ts";
-import { boundedTransfers } from "../infrastructure/transfer.ts";
+import { observedLease } from "./observed-lease.ts";
+import { operationGate } from "./operation-gate.ts";
+import { trackedSandboxLease } from "./sandbox-activity.ts";
+import { steeringScope } from "./steering-scope.ts";
+export { validateFileAgent } from "./file-agent-validation.ts";
+export {
+  isFileSandboxOptions,
+  validateFileSandbox,
+} from "./file-sandbox-validation.ts";
 
-export function isFileSandboxOptions(
-  options: SandboxOptions | FileSandboxOptions,
-): options is FileSandboxOptions {
-  return (
-    "workspaceSource" in options ||
-    !!(
-      options.workspace &&
-      "kind" in options.workspace &&
-      String(options.workspace.kind) !== "git"
-    )
-  );
-}
-
-export async function validateFileSandbox(
-  options: FileSandboxOptions,
-): Promise<void> {
-  options.signal?.throwIfAborted();
-  invariant(
-    !(options.workspace && options.workspaceSource),
-    "Provide either a workspace or a workspaceSource",
-  );
-  invariant(
-    !["repository", "branch", "guard", "copies", "includeUncommitted"].some(
-      (key) => key in options,
-    ),
-    "Git options are not supported by file sandboxes",
-  );
-  if (options.limits) {
-    invariant(
-      Object.keys(options.limits).every(
-        (key) => key === "copyMs" || key === "collectMs",
-      ),
-      "Git stage limits are unavailable for file workspaces",
-    );
-    invariant(
-      Object.values(options.limits).every(
-        (value) => Number.isFinite(value) && value > 0,
-      ),
-      "File stage limits must be positive",
-    );
-  }
-  invariant(
-    !options.logging ||
-      typeof options.logging !== "object" ||
-      !options.logging.replayable,
-    "Replayable file effects are not supported",
-  );
-  const capability = options.sandboxProvider.workspaces;
-  invariant(capability, "Sandbox provider does not support file workspaces");
-  const source = options.workspace?.source ?? options.workspaceSource;
-  invariant(source, "Provide a file workspace source");
-  let binding: "copy" | "ephemeral" | "mount-readonly" | "mount-write" =
-    "ephemeral";
-  if (source.kind === "directory") {
-    binding = "copy";
-    if (source.access.mode === "mount")
-      binding = source.access.readOnly ? "mount-readonly" : "mount-write";
-  }
-  invariant(
-    capability.bindings.includes(binding),
-    `Sandbox provider does not support ${binding} workspaces`,
-  );
-  if (options.agent)
-    for (const agent of dispatchCandidates(options.agent))
-      await validateFileAgent(agent);
-}
+import { createFileSandboxAttachment } from "./file-sandbox-attach.ts";
+import { synchronizeFileWorkspace } from "./file-sandbox-synchronization.ts";
+import { validateFileSandbox } from "./file-sandbox-validation.ts";
 
 export async function createFileSandbox(
   options: FileSandboxOptions,
@@ -311,54 +245,8 @@ export async function createFileSandbox(
     Promise<import("../domain/workspace.types.ts").Disposal> | undefined;
   const known = new Set<string>();
   let failed = false;
-  const synchronize = async () => {
-    if (options.sandboxProvider.placement !== "remote") return;
-    const incoming = join(staging, randomUUID());
-    await lease.download(`${lease.root}/.`, incoming, {
-      ...(options.limits?.collectMs
-        ? { deadlineMs: options.limits.collectMs }
-        : {}),
-    });
-    const collected = await workspaceManifest(incoming);
-    invariant(
-      workspaceManifestFingerprint(
-        await workspaceManifest(workspace.directory),
-      ) === state.record.fingerprint,
-      "Host workspace changed during remote execution",
-    );
-    const old = `${workspace.directory}.previous-${randomUUID()}`;
-    await rename(workspace.directory, old);
-    try {
-      invariant(
-        workspaceManifestFingerprint(await workspaceManifest(old)) ===
-          state.record.fingerprint,
-        "Host workspace changed before remote synchronization",
-      );
-      await mkdir(workspace.directory, { mode: 0o700 });
-      await copyWorkspaceManifest(incoming, workspace.directory, collected);
-      invariant(
-        workspaceManifestFingerprint(
-          await workspaceManifest(workspace.directory),
-        ) === workspaceManifestFingerprint(collected),
-        "Host workspace changed during remote synchronization",
-      );
-    } catch (error) {
-      recordRecovery(error, {
-        previousDirectory: old,
-        incomingDirectory: incoming,
-        directory: workspace.directory,
-      });
-      throw error;
-    }
-    await rm(old, { recursive: true });
-    await rm(incoming, { recursive: true });
-    const info = await lstat(workspace.directory);
-    state.record = {
-      ...state.record,
-      fingerprint: workspaceManifestFingerprint(collected),
-      materialization: { device: info.dev, inode: info.ino },
-    };
-  };
+  const synchronize = () =>
+    synchronizeFileWorkspace({ options, workspace, state, lease, staging });
   const checkpoint = async () => {
     const record = await checkpointFileWorkspace(workspace, true);
     await onSettled?.(record);
@@ -652,139 +540,18 @@ export async function createFileSandbox(
     fork(id, settings) {
       return result.dispatch({ ...settings, continuation: { id, fork: true } });
     },
-    attach(settings = {}) {
-      return gate.run(async () => {
-        const agent = settings.agent ?? options.agent;
-        invariant(
-          agent?.kind === "cli" && agent.fileWorkspaces?.interactive,
-          "Interactive CLI support for file workspaces has not been validated",
-        );
-        const brief = await completeBrief(
-          settings.brief,
-          settings.signal,
-          settings.ask,
-        );
-        if (brief)
-          await validateFileAgent(agent, {
-            brief,
-            ...(settings.continuation
-              ? { continuation: settings.continuation }
-              : {}),
-          });
-        const variables = {
-          ...options.sandboxProvider.variables,
-          ...options.variables,
-          ...agent.variables,
-        };
-        const credentials = await authenticateAgent(
-          agent,
-          variables,
-          lease,
-          options.sandboxProvider.placement,
-          signal,
-        );
-        await configureAgent(
-          agent,
-          variables,
-          lease,
-          options.sandboxProvider.placement,
-          signal,
-        );
-        if (settings.continuation && !known.has(settings.continuation.id)) {
-          const storage = storageFor(agent);
-          invariant(storage, "Agent does not support conversation restoration");
-          await restoreConversation(storage, settings.continuation.id, {
-            repository: workspace.runtime.directory,
-            runtimeDirectory: workspace.runtime.directory,
-            home: conversationHome,
-            staging,
-            sandbox: lease,
-            local: options.sandboxProvider.placement === "host",
-          });
-        }
-        const prompt = brief
-          ? await renderBrief(
-              brief,
-              {
-                directory: workspace.directory,
-                projectDirectory: workspace.runtime.directory,
-              },
-              lease,
-              options.sandboxProvider.placement === "host",
-              settings,
-            )
-          : undefined;
-        const command = await agentRequest(
-          agent,
-          {
-            interactive: true,
-            ...(prompt === undefined ? {} : { text: prompt }),
-            ...(settings.continuation
-              ? { continuation: settings.continuation }
-              : {}),
-          },
-          lease.invoke,
-        );
-        const hookStop = new AbortController();
-        const hookSignal = AbortSignal.any([
-          hookStop.signal,
-          signal,
-          ...(settings.signal ? [settings.signal] : []),
-        ]);
-        const hooks = agent.hooks?.handlers.length
-          ? await openCliHooks(agent.hooks, lease, hookSignal, (error) =>
-              hookStop.abort(error),
-            )
-          : undefined;
-        let hookFailure: unknown;
-        try {
-          const output = await settled(
-            () =>
-              lease.invoke({
-                ...(hooks
-                  ? hooks.command({
-                      ...command,
-                      variables: {
-                        ...variables,
-                        ...credentials,
-                        ...command.variables,
-                      },
-                    })
-                  : {
-                      ...command,
-                      variables: {
-                        ...variables,
-                        ...credentials,
-                        ...command.variables,
-                      },
-                    }),
-                signal: hookSignal,
-                deadlineMs: executionDefaults.attachMs,
-                ...(settings.terminal ? { terminal: settings.terminal } : {}),
-              }),
-            settings.signal,
-          );
-          hookSignal.throwIfAborted();
-          return {
-            ...output,
-            workspaceInfo: state.record,
-            directory: workspace.directory,
-          };
-        } catch (error) {
-          hookFailure = error;
-          throw error;
-        } finally {
-          restoreTerminal();
-          try {
-            await hooks?.close();
-          } catch (error) {
-            if (hookFailure)
-              recordRecovery(hookFailure, { hookCleanupError: error });
-            else throw error;
-          }
-        }
-      });
-    },
+    attach: createFileSandboxAttachment({
+      options,
+      workspace,
+      state,
+      lease,
+      staging,
+      conversationHome,
+      signal,
+      gate,
+      settled,
+      known,
+    }),
     close(settings = {}) {
       closing ??= (async () => {
         stop.abort(new OutpostError("aborted", "Sandbox disposed"));
