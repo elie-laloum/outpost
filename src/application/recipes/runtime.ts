@@ -1,4 +1,4 @@
-import { runCleanup } from "../../domain/cleanup.ts";
+import { withCleanup } from "../../domain/cleanup.ts";
 import { recipeRuntimeError } from "./errors.ts";
 import { recipeProjectIdentity } from "./durable-session.ts";
 import { serveRecipeProject, enqueueRecipeProject } from "./services.ts";
@@ -68,128 +68,128 @@ export function createRecipeProjectRuntime(
       project.directory,
       signal,
     );
-    const execution = (async () => {
-      let failure: unknown;
-      const observerErrors: unknown[] = [];
-      let securedObservation: ObservationHub | undefined;
-      try {
-        await scope.prepare();
-        let observation: ObservationHub | undefined;
-        if (project.graph.observation) {
-          const value = await scope.resolve(
-            project.graph.observation,
-            "observation",
-          );
-          if (!observationGuards.observation(value))
-            throw new Error("Invalid recipe observation hub");
-          observation = value;
-        }
-        if (project.files)
-          return await runFileRecipe(
-            project,
-            scope,
-            settings,
-            resume,
-            signal,
-            observation,
-          );
-        const configuration = await recipeExecutionConfiguration(
-          project,
-          scope,
-        );
-        if (project.document.version === 3) {
-          const components = {
-            ...(await prepareRecipeWorkflow(project.document, scope)),
-            identity: recipeProjectIdentity(project, inputs ?? {}),
-            sharedSandbox: configuration.sandbox,
-          };
-          securedObservation = observation?.child({}, [], scope.redactions);
-          signal.throwIfAborted();
-          if (components.workflow.checkpoint)
-            return await runDurableRecipe(
+    const observerErrors: unknown[] = [];
+    let securedObservation: ObservationHub | undefined;
+    const execution = withCleanup(
+      async () => {
+        try {
+          await scope.prepare();
+          let observation: ObservationHub | undefined;
+          if (project.graph.observation) {
+            const value = await scope.resolve(
+              project.graph.observation,
+              "observation",
+            );
+            if (!observationGuards.observation(value))
+              throw new Error("Invalid recipe observation hub");
+            observation = value;
+          }
+          if (project.files)
+            return await runFileRecipe(
               project,
-              configuration,
-              components,
               scope,
               settings,
               resume,
               signal,
-              securedObservation,
+              observation,
             );
-          if (resume || settings.runId)
-            throw new Error(
-              "Durable execution requires a configured workflow checkpoint",
+          const configuration = await recipeExecutionConfiguration(
+            project,
+            scope,
+          );
+          if (project.document.version === 3) {
+            const components = {
+              ...(await prepareRecipeWorkflow(project.document, scope)),
+              identity: recipeProjectIdentity(project, inputs ?? {}),
+              sharedSandbox: configuration.sandbox,
+            };
+            securedObservation = observation?.child({}, [], scope.redactions);
+            signal.throwIfAborted();
+            if (components.workflow.checkpoint)
+              return await runDurableRecipe(
+                project,
+                configuration,
+                components,
+                scope,
+                settings,
+                resume,
+                signal,
+                securedObservation,
+              );
+            if (resume || settings.runId)
+              throw new Error(
+                "Durable execution requires a configured workflow checkpoint",
+              );
+            return scope.redact(
+              await runRecipeWorkflow(
+                project.document,
+                configuration,
+                inputs ?? {},
+                components,
+                signal,
+                securedObservation,
+              ),
             );
-          return scope.redact(
-            await runRecipeWorkflow(
-              project.document,
-              configuration,
-              inputs ?? {},
-              components,
-              signal,
-              securedObservation,
-            ),
-          );
-        }
-        const requests: Record<string, RecipeDispatchSettings> = {};
-        for (const step of project.document.tasks) {
-          if (!step.dispatch) continue;
-          const request = await scope.resolve(
-            `tasks.${step.key}.dispatch`,
-            "dispatchOptions",
-          );
-          if (!isDispatchSettings(request))
-            throw new Error(`Invalid dispatch options: ${step.key}`);
-          requests[step.key] = request;
-        }
-        securedObservation = observation?.child({}, [], scope.redactions);
-        observation = securedObservation;
-        signal.throwIfAborted();
-        const { sandbox, ownedWorkspace } = await openRecipeSandbox(
-          configuration.sandbox,
-          signal,
-          observation,
-        );
-        return scope.redact(
-          await runRecipe(
-            project.document,
-            {
-              sandbox,
-              ...(configuration.agents ? { agents: configuration.agents } : {}),
-              inputs: inputs ?? {},
-            },
+          }
+          const requests: Record<string, RecipeDispatchSettings> = {};
+          for (const step of project.document.tasks) {
+            if (!step.dispatch) continue;
+            const request = await scope.resolve(
+              `tasks.${step.key}.dispatch`,
+              "dispatchOptions",
+            );
+            if (!isDispatchSettings(request))
+              throw new Error(`Invalid dispatch options: ${step.key}`);
+            requests[step.key] = request;
+          }
+          securedObservation = observation?.child({}, [], scope.redactions);
+          observation = securedObservation;
+          signal.throwIfAborted();
+          const { sandbox, ownedWorkspace } = await openRecipeSandbox(
+            configuration.sandbox,
             signal,
             observation,
-            requests,
-            configuration.integration,
-            ownedWorkspace,
-          ),
-        );
-      } catch (error) {
-        failure = recipeRuntimeError(error, scope);
-        throw failure;
-      } finally {
-        try {
-          await securedObservation?.close();
+          );
+          return scope.redact(
+            await runRecipe(
+              project.document,
+              {
+                sandbox,
+                ...(configuration.agents
+                  ? { agents: configuration.agents }
+                  : {}),
+                inputs: inputs ?? {},
+              },
+              signal,
+              observation,
+              requests,
+              configuration.integration,
+              ownedWorkspace,
+            ),
+          );
         } catch (error) {
-          observerErrors.push(error);
+          throw recipeRuntimeError(error, scope);
         }
-        await runCleanup(
-          [
-            async () => {
-              try {
-                await scope.close();
-              } catch (cleanup) {
-                throw recipeRuntimeError(cleanup, scope);
-              }
-            },
-          ],
-          failure === undefined ? [] : [failure],
-          "Recipe execution and cleanup failed",
-        );
-        scope.recordObserverErrors(observerErrors);
-      }
-    })();
+      },
+      [
+        async () => {
+          try {
+            await securedObservation?.close();
+          } catch (error) {
+            observerErrors.push(error);
+          }
+        },
+        async () => {
+          try {
+            await scope.close();
+          } catch (cleanup) {
+            throw recipeRuntimeError(cleanup, scope);
+          }
+        },
+        () => scope.recordObserverErrors(observerErrors),
+      ],
+      { message: "Recipe execution and cleanup failed" },
+    );
     active = execution;
     try {
       const result = await execution;

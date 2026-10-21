@@ -1,7 +1,7 @@
 import { agentRequest } from "./agent-request.ts";
 import { openCliHooks } from "./cli-hooks.ts";
-import { invariant, recordRecovery } from "../domain/errors.ts";
-import type { CommandResult } from "../domain/command.types.ts";
+import { withCleanup } from "../domain/cleanup.ts";
+import { invariant } from "../domain/errors.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
 import { restoreTerminal } from "../infrastructure/terminal.ts";
@@ -82,43 +82,25 @@ export async function attachInSandbox(
   const baseline = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();
-  let output: CommandResult;
   const hooks = adapter.hooks?.handlers.length
     ? await openCliHooks(adapter.hooks, executionLease, signal, (error) =>
         hookStop.abort(error),
       )
     : undefined;
-  let failure: unknown;
-  try {
-    output = await executionLease.invoke({
-      ...(hooks ? hooks.command(command) : command),
-      ...(settings.terminal ? { terminal: settings.terminal } : {}),
-      deadlineMs: executionDefaults.attachMs,
-      signal,
-    });
-    signal.throwIfAborted();
-  } catch (error) {
-    failure = error;
-    throw error;
-  } finally {
-    restoreTerminal();
-    let cleanupFailure: unknown;
-    try {
-      await hooks?.close();
-    } catch (error) {
-      cleanupFailure = error;
-    }
-    try {
-      await sync?.pull();
-    } catch (error) {
-      cleanupFailure ??= error;
-    }
-    if (cleanupFailure) {
-      if (failure)
-        recordRecovery(failure, { hookCleanupError: cleanupFailure });
-      else throw cleanupFailure;
-    }
-  }
+  const output = await withCleanup(
+    async () => {
+      const output = await executionLease.invoke({
+        ...(hooks ? hooks.command(command) : command),
+        ...(settings.terminal ? { terminal: settings.terminal } : {}),
+        deadlineMs: executionDefaults.attachMs,
+        signal,
+      });
+      signal.throwIfAborted();
+      return output;
+    },
+    [restoreTerminal, () => hooks?.close(), () => sync?.pull()],
+    { recovery: "hookCleanupError" },
+  );
   if (output.status === 0) await context.state.lease.checkGuard();
   return {
     ...output,

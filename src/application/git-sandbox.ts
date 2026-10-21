@@ -2,6 +2,7 @@ import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import type { ResourceOperationKind } from "../infrastructure/resource-activity.types.ts";
+import { withCleanup } from "../domain/cleanup.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -112,34 +113,36 @@ export async function createPreparedSandbox(
       closing = (async () => {
         stop.abort(new OutpostError("aborted", "Sandbox closed"));
         await gate.close();
-        let failure: unknown;
         await context.activity.phase("closing").catch(() => undefined);
-        try {
-          await runtime.release();
-          await observedOperation(
-            options.observation,
-            "transfer",
-            "repository.release",
-            async () => sync?.close(),
-          );
-          if (!(await context.activity.idle()))
-            throw new OutpostError(
-              "provider",
-              "Sandbox operations remain unsettled after release",
-            );
-        } catch (cause) {
-          failure = cause;
-        }
-        state.active = false;
-
-        unregister();
+        let released = false;
         let disposal: Disposal = {};
         try {
-          if (owned)
-            disposal = await workspace.close({
-              preserve: settings.preserve || !!failure,
-            });
-          if (failure) throw failure;
+          await withCleanup(async () => {
+            await runtime.release();
+            await observedOperation(
+              options.observation,
+              "transfer",
+              "repository.release",
+              async () => sync?.close(),
+            );
+            if (!(await context.activity.idle()))
+              throw new OutpostError(
+                "provider",
+                "Sandbox operations remain unsettled after release",
+              );
+            released = true;
+          }, [
+            () => {
+              state.active = false;
+              unregister();
+            },
+            async () => {
+              if (owned)
+                disposal = await workspace.close({
+                  preserve: settings.preserve || !released,
+                });
+            },
+          ]);
           await context.activity.remove();
           return disposal;
         } catch (cause) {

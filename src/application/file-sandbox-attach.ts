@@ -1,4 +1,5 @@
-import { invariant, recordRecovery } from "../domain/errors.ts";
+import { withCleanup } from "../domain/cleanup.ts";
+import { invariant } from "../domain/errors.ts";
 import { restoreTerminal } from "../infrastructure/terminal.ts";
 import { agentRequest } from "./agent-request.ts";
 import { renderBrief } from "./brief-renderer.ts";
@@ -76,37 +77,28 @@ export function createFileSandboxAttachment({
             hookStop.abort(error),
           )
         : undefined;
-      let hookFailure: unknown;
-      try {
-        const output = await settlement.settled(
-          () =>
-            executionLease.invoke({
-              ...(hooks ? hooks.command(command) : command),
-              signal: hookSignal,
-              deadlineMs: executionDefaults.attachMs,
-              ...(settings.terminal ? { terminal: settings.terminal } : {}),
-            }),
-          settings.signal,
-        );
-        hookSignal.throwIfAborted();
-        return {
-          ...output,
-          workspaceInfo: state.record,
-          directory: workspace.directory,
-        };
-      } catch (error) {
-        hookFailure = error;
-        throw error;
-      } finally {
-        restoreTerminal();
-        try {
-          await hooks?.close();
-        } catch (error) {
-          if (hookFailure)
-            recordRecovery(hookFailure, { hookCleanupError: error });
-          else throw error;
-        }
-      }
+      return withCleanup(
+        async () => {
+          const output = await settlement.settled(
+            () =>
+              executionLease.invoke({
+                ...(hooks ? hooks.command(command) : command),
+                signal: hookSignal,
+                deadlineMs: executionDefaults.attachMs,
+                ...(settings.terminal ? { terminal: settings.terminal } : {}),
+              }),
+            settings.signal,
+          );
+          hookSignal.throwIfAborted();
+          return {
+            ...output,
+            workspaceInfo: state.record,
+            directory: workspace.directory,
+          };
+        },
+        [restoreTerminal, () => hooks?.close()],
+        { recovery: "hookCleanupError" },
+      );
     });
   };
 }

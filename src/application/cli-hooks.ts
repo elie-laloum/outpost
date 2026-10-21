@@ -6,7 +6,8 @@ import type {
   AgentHookPlan,
 } from "../domain/agent-hook.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
-import { invariant, OutpostError, recordRecovery } from "../domain/errors.ts";
+import { runCleanup, withCleanup } from "../domain/cleanup.ts";
+import { invariant, OutpostError } from "../domain/errors.ts";
 import { hookSnapshot, hookSandbox, invokeHook } from "./hook-invocation.ts";
 import { hookBridgeScript, hookClientScript } from "./cli-hooks.constants.ts";
 
@@ -173,30 +174,19 @@ export async function openCliHooks(
       close() {
         return (closed ??= (async () => {
           await closeBridge();
-          let failure: unknown;
-          try {
-            await installation.close();
-          } catch (error) {
-            failure = error;
-          }
-          try {
-            await closeClient?.();
-          } catch (error) {
-            if (failure)
-              recordRecovery(failure, { hookClientCleanupError: error });
-            else throw error;
-          }
-          if (failure) throw failure;
+          await withCleanup(
+            () => installation.close(),
+            [() => closeClient?.()],
+            { recovery: "hookClientCleanupError" },
+          );
         })());
       },
     };
   } catch (error) {
     await closeBridge();
-    try {
-      await closeClient?.();
-    } catch (cleanupError) {
-      recordRecovery(error, { hookClientCleanupError: cleanupError });
-    }
+    await runCleanup([() => closeClient?.()], [error], {
+      recovery: "hookClientCleanupError",
+    });
     throw error;
   }
 }
