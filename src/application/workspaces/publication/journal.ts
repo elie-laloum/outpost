@@ -1,21 +1,24 @@
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
-import { invariant } from "../domain/errors.ts";
-import type { WorkspaceOutputOptions } from "../domain/file-workspace.types.ts";
+import { invariant } from "../../../domain/errors.ts";
+import type { WorkspaceOutputOptions } from "../../../domain/file-workspace.types.ts";
 import type {
   Transport,
   TransportReference,
-} from "../domain/transport.types.ts";
+} from "../../../domain/transport.types.ts";
 import {
   parseManifest,
   validateFilePaths,
-} from "../infrastructure/file-manifest.ts";
-import { jsonObject, readReference } from "../infrastructure/transport-json.ts";
-import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
+} from "../../../infrastructure/file-manifest.ts";
+import {
+  jsonObject,
+  readReference,
+} from "../../../infrastructure/transport-json.ts";
+import { workspaceFileLimits } from "../../../infrastructure/workspace-files.constants.ts";
 import type {
   PublicationDirectory,
   PublicationJournal,
   PublicationOperation,
-} from "./workspace-publication.types.ts";
+} from "../../workspace-publication.types.ts";
 
 function publicationJournal(value: unknown): PublicationJournal {
   invariant(

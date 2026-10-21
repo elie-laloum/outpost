@@ -1,8 +1,8 @@
 import { link, lstat, readlink, symlink } from "node:fs/promises";
-import { invariant } from "../domain/errors.ts";
-import type { WorkspaceFileEntry } from "../domain/file-workspace.types.ts";
-import { fileManifest } from "../infrastructure/file-manifest.ts";
-import { safeDestination } from "../infrastructure/files.ts";
+import { invariant } from "../../../domain/errors.ts";
+import type { WorkspaceFileEntry } from "../../../domain/file-workspace.types.ts";
+import { fileManifest } from "../../../infrastructure/file-manifest.ts";
+import { safeDestination } from "../../../infrastructure/files.ts";
 
 export function sameEntry(
   left: WorkspaceFileEntry | undefined,

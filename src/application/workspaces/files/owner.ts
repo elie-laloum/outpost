@@ -1,5 +1,5 @@
-import { invariant } from "../domain/errors.ts";
-import { readInspectionFile } from "../infrastructure/inspection-file.ts";
+import { invariant } from "../../../domain/errors.ts";
+import { readInspectionFile } from "../../../infrastructure/inspection-file.ts";
 
 export async function workspaceOwner(path: string) {
   const value: unknown = JSON.parse(

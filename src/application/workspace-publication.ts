@@ -1,3 +1,3 @@
-export { publishWorkspaceOutputs } from "./workspace-publication-apply.ts";
-export { inspectWorkspacePublication } from "./workspace-publication-journal.ts";
-export { recoverWorkspacePublication } from "./workspace-publication-recovery.ts";
+export { publishWorkspaceOutputs } from "./workspaces/publication/apply.ts";
+export { inspectWorkspacePublication } from "./workspaces/publication/journal.ts";
+export { recoverWorkspacePublication } from "./workspaces/publication/recovery.ts";

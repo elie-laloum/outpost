@@ -161,10 +161,12 @@ function checkCycles(file) {
   } while (member !== file);
   if (
     group.length > 1 &&
-    group.some((name) =>
-      /^application\/(?:(?:file|git)-)?(?:workspace|sandbox|dispatch|attach)(?:-|\.ts)/.test(
-        name,
-      ),
+    group.some(
+      (name) =>
+        name.startsWith("application/workspaces/") ||
+        /^application\/(?:(?:file|git)-)?(?:workspace|sandbox|dispatch|attach)(?:-|\.ts)/.test(
+          name,
+        ),
     )
   )
     failures.push(

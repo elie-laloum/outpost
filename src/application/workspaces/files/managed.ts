@@ -1,23 +1,20 @@
 import { lstat, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { invariant } from "../domain/errors.ts";
-import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
-import { createLocalTransport } from "../infrastructure/local-transport.ts";
-import { makeWorkspaceDirectoriesWritable } from "../infrastructure/workspace-cleanup.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
+import { invariant } from "../../../domain/errors.ts";
+import type { FileWorkspaceRecord } from "../../../domain/file-workspace.types.ts";
+import { createLocalTransport } from "../../../infrastructure/local-transport.ts";
+import { makeWorkspaceDirectoriesWritable } from "../../../infrastructure/workspace-cleanup.ts";
+import { fileWorkspaces } from "../../file-workspace-registry.ts";
 import type {
   FileWorkspace,
   FileWorkspaceOptions,
   FileWorkspaceState,
-} from "./file-workspace.types.ts";
-import type { FileWorkspaceExecution } from "./workspace-execution.types.ts";
-import { workspaceOutputIdentity } from "./workspace-output-baseline.ts";
+} from "../../file-workspace.types.ts";
+import type { FileWorkspaceExecution } from "../../workspace-execution.types.ts";
+import { workspaceOutputIdentity } from "../../workspace-output-baseline.ts";
 
-import {
-  checkpointFileWorkspace,
-  recordFileWorkspace,
-} from "./file-workspace-checkpoint.ts";
-import { workspaceOwner } from "./file-workspace-owner.ts";
+import { checkpointFileWorkspace, recordFileWorkspace } from "./checkpoint.ts";
+import { workspaceOwner } from "./owner.ts";
 export function managedFileWorkspace(
   record: FileWorkspaceRecord,
   options: FileWorkspaceOptions,

@@ -1,43 +1,43 @@
 import { createHash, randomUUID } from "node:crypto";
 import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { invariant, recordRecovery } from "../domain/errors.ts";
+import { invariant, recordRecovery } from "../../../domain/errors.ts";
 import type {
   FileWorkspaceRecord,
   WorkspaceFileEntry,
-} from "../domain/file-workspace.types.ts";
-import { validateFilePaths } from "../infrastructure/file-manifest.ts";
-import { directory, inside } from "../infrastructure/files.ts";
-import { createLocalTransport } from "../infrastructure/local-transport.ts";
-import { executeProcess } from "../infrastructure/process.ts";
-import type { StorageReservation } from "../infrastructure/storage-reservations.types.ts";
-import { jsonBytes } from "../infrastructure/transport-json.ts";
-import { reserveTransportStorage } from "../infrastructure/transport-reservations.ts";
-import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
+} from "../../../domain/file-workspace.types.ts";
+import { validateFilePaths } from "../../../infrastructure/file-manifest.ts";
+import { directory, inside } from "../../../infrastructure/files.ts";
+import { createLocalTransport } from "../../../infrastructure/local-transport.ts";
+import { executeProcess } from "../../../infrastructure/process.ts";
+import type { StorageReservation } from "../../../infrastructure/storage-reservations.types.ts";
+import { jsonBytes } from "../../../infrastructure/transport-json.ts";
+import { reserveTransportStorage } from "../../../infrastructure/transport-reservations.ts";
+import { workspaceFileLimits } from "../../../infrastructure/workspace-files.constants.ts";
 import {
   copyWorkspaceManifest,
   validateWorkspaceSelection,
   workspaceManifest,
   workspaceManifestFingerprint,
-} from "../infrastructure/workspace-files.ts";
+} from "../../../infrastructure/workspace-files.ts";
 import {
   canonicalWorkspacePath,
   lockWorkspaceCopySource,
   lockWorkspacePath,
-} from "../infrastructure/workspace-lock.ts";
-import { restoreWorkspaceFiles } from "../infrastructure/workspace-snapshot.ts";
-import { workspaceSourceDecoder } from "./file-workspace-decoders.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
+} from "../../../infrastructure/workspace-lock.ts";
+import { restoreWorkspaceFiles } from "../../../infrastructure/workspace-snapshot.ts";
+import { workspaceSourceDecoder } from "./decoders.ts";
+import { fileWorkspaces } from "../../file-workspace-registry.ts";
 import type {
   FileWorkspace,
   FileWorkspaceOptions,
   FileWorkspaceRegistration,
-} from "./file-workspace.types.ts";
-import { createLifecycleHookRunner } from "./lifecycle-hooks.ts";
-import type { FileWorkspaceExecution } from "./workspace-execution.types.ts";
+} from "../../file-workspace.types.ts";
+import { createLifecycleHookRunner } from "../../lifecycle-hooks.ts";
+import type { FileWorkspaceExecution } from "../../workspace-execution.types.ts";
 
-import { recordFileWorkspace } from "./file-workspace-checkpoint.ts";
-import { managedFileWorkspace } from "./file-workspace-managed.ts";
+import { recordFileWorkspace } from "./checkpoint.ts";
+import { managedFileWorkspace } from "./managed.ts";
 export async function createFileWorkspace(
   options: FileWorkspaceOptions,
   execution: FileWorkspaceExecution,

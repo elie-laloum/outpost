@@ -1,7 +1,7 @@
-export { createFileWorkspace } from "./file-workspace-allocation.ts";
-export { restoreFileWorkspace } from "./file-workspace-restoration.ts";
+export { createFileWorkspace } from "./workspaces/files/allocation.ts";
+export { restoreFileWorkspace } from "./workspaces/files/restoration.ts";
 export {
   checkpointFileWorkspace,
   recordFileWorkspace,
-} from "./file-workspace-checkpoint.ts";
-export { workspaceFingerprint } from "./file-workspace-fingerprint.ts";
+} from "./workspaces/files/checkpoint.ts";
+export { workspaceFingerprint } from "./workspaces/files/fingerprint.ts";

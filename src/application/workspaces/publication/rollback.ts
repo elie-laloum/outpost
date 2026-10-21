@@ -1,19 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { rename } from "node:fs/promises";
 import { join } from "node:path";
-import { invariant } from "../domain/errors.ts";
-import { safeDestination } from "../infrastructure/files.ts";
+import { invariant } from "../../../domain/errors.ts";
+import { safeDestination } from "../../../infrastructure/files.ts";
 import {
   preparePublicationRollback,
   rollbackPublicationDirectories,
-} from "./workspace-publication-directories.ts";
-import type { PublicationJournal } from "./workspace-publication.types.ts";
+} from "../../workspace-publication-directories.ts";
+import type { PublicationJournal } from "../../workspace-publication.types.ts";
 
-import {
-  currentEntry,
-  installExclusive,
-  sameEntry,
-} from "./workspace-publication-entries.ts";
+import { currentEntry, installExclusive, sameEntry } from "./entries.ts";
 export async function rollbackPublication(
   journal: PublicationJournal,
   save: () => Promise<void>,

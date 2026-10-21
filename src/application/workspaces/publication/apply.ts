@@ -1,49 +1,49 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, rename } from "node:fs/promises";
 import { dirname, join, matchesGlob } from "node:path";
-import { invariant, OutpostError, recordRecovery } from "../domain/errors.ts";
+import {
+  invariant,
+  OutpostError,
+  recordRecovery,
+} from "../../../domain/errors.ts";
 import type {
   WorkspaceOutputOptions,
   WorkspacePublication,
-} from "../domain/file-workspace.types.ts";
+} from "../../../domain/file-workspace.types.ts";
 import type {
   Transport,
   TransportReference,
-} from "../domain/transport.types.ts";
-import { inside, safeDestination } from "../infrastructure/files.ts";
-import { jsonBytes } from "../infrastructure/transport-json.ts";
+} from "../../../domain/transport.types.ts";
+import { inside, safeDestination } from "../../../infrastructure/files.ts";
+import { jsonBytes } from "../../../infrastructure/transport-json.ts";
 import {
   copyWorkspaceManifest,
   workspaceManifest,
-} from "../infrastructure/workspace-files.ts";
+} from "../../../infrastructure/workspace-files.ts";
 import {
   canonicalWorkspacePath,
   lockWorkspacePath,
-} from "../infrastructure/workspace-lock.ts";
-import { recordFileWorkspace } from "./file-workspace-lifecycle.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
-import type { FileWorkspace } from "./file-workspace.types.ts";
+} from "../../../infrastructure/workspace-lock.ts";
+import { recordFileWorkspace } from "../../file-workspace-lifecycle.ts";
+import { fileWorkspaces } from "../../file-workspace-registry.ts";
+import type { FileWorkspace } from "../../file-workspace.types.ts";
 import {
   captureWorkspaceOutputBaseline,
   workspaceOutputIdentity,
-} from "./workspace-output-baseline.ts";
+} from "../../workspace-output-baseline.ts";
 import {
   applyPublicationDirectories,
   planPublicationDirectories,
   settlePublicationDirectories,
   verifyPublicationDirectories,
-} from "./workspace-publication-directories.ts";
+} from "../../workspace-publication-directories.ts";
 import type {
   PublicationJournal,
   PublicationOperation,
-} from "./workspace-publication.types.ts";
+} from "../../workspace-publication.types.ts";
 
-import {
-  currentEntry,
-  installExclusive,
-  sameEntry,
-} from "./workspace-publication-entries.ts";
-import { rollbackPublication } from "./workspace-publication-rollback.ts";
+import { currentEntry, installExclusive, sameEntry } from "./entries.ts";
+import { rollbackPublication } from "./rollback.ts";
 export async function publishWorkspaceOutputs(
   workspace: FileWorkspace,
   declaration: WorkspaceOutputOptions,

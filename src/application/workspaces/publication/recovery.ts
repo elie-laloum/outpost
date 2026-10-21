@@ -1,31 +1,27 @@
 import { mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
-import { invariant } from "../domain/errors.ts";
+import { invariant } from "../../../domain/errors.ts";
 import type {
   Transport,
   TransportReference,
-} from "../domain/transport.types.ts";
-import { safeDestination } from "../infrastructure/files.ts";
-import { jsonBytes } from "../infrastructure/transport-json.ts";
+} from "../../../domain/transport.types.ts";
+import { safeDestination } from "../../../infrastructure/files.ts";
+import { jsonBytes } from "../../../infrastructure/transport-json.ts";
 import {
   inspectWorkspacePathLocks,
   lockWorkspacePath,
   recoverWorkspacePathLock,
-} from "../infrastructure/workspace-lock.ts";
+} from "../../../infrastructure/workspace-lock.ts";
 import {
   applyPublicationDirectories,
   settlePublicationDirectories,
   verifyPublicationDirectories,
-} from "./workspace-publication-directories.ts";
-import type { PublicationRecoveryOptions } from "./workspace-publication.types.ts";
+} from "../../workspace-publication-directories.ts";
+import type { PublicationRecoveryOptions } from "../../workspace-publication.types.ts";
 
-import {
-  currentEntry,
-  installExclusive,
-  sameEntry,
-} from "./workspace-publication-entries.ts";
-import { inspectWorkspacePublication } from "./workspace-publication-journal.ts";
-import { rollbackPublication } from "./workspace-publication-rollback.ts";
+import { currentEntry, installExclusive, sameEntry } from "./entries.ts";
+import { inspectWorkspacePublication } from "./journal.ts";
+import { rollbackPublication } from "./rollback.ts";
 export async function recoverWorkspacePublication(
   transporter: Transport,
   reference: TransportReference,

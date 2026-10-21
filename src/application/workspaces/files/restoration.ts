@@ -1,37 +1,41 @@
 import { randomUUID } from "node:crypto";
 import { lstat, mkdir, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
-import { invariant } from "../domain/errors.ts";
-import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
-import { validateFilePaths } from "../infrastructure/file-manifest.ts";
-import { directory, inside, safeDestination } from "../infrastructure/files.ts";
-import { createLocalTransport } from "../infrastructure/local-transport.ts";
-import { restoreArchiveFiles } from "../infrastructure/transport-archive.ts";
-import { jsonObject } from "../infrastructure/transport-json.ts";
-import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
+import { invariant } from "../../../domain/errors.ts";
+import type { FileWorkspaceRecord } from "../../../domain/file-workspace.types.ts";
+import { validateFilePaths } from "../../../infrastructure/file-manifest.ts";
+import {
+  directory,
+  inside,
+  safeDestination,
+} from "../../../infrastructure/files.ts";
+import { createLocalTransport } from "../../../infrastructure/local-transport.ts";
+import { restoreArchiveFiles } from "../../../infrastructure/transport-archive.ts";
+import { jsonObject } from "../../../infrastructure/transport-json.ts";
+import { workspaceFileLimits } from "../../../infrastructure/workspace-files.constants.ts";
 import {
   copyWorkspaceManifest,
   validateWorkspaceSelection,
   workspaceManifest,
   workspaceManifestFingerprint,
-} from "../infrastructure/workspace-files.ts";
+} from "../../../infrastructure/workspace-files.ts";
 import {
   canonicalWorkspacePath,
   lockWorkspacePath,
-} from "../infrastructure/workspace-lock.ts";
-import { restoreWorkspaceFiles } from "../infrastructure/workspace-snapshot.ts";
-import { workspaceRecordDecoder } from "./file-workspace-decoders.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
+} from "../../../infrastructure/workspace-lock.ts";
+import { restoreWorkspaceFiles } from "../../../infrastructure/workspace-snapshot.ts";
+import { workspaceRecordDecoder } from "./decoders.ts";
+import { fileWorkspaces } from "../../file-workspace-registry.ts";
 import type {
   FileWorkspace,
   RestoreFileWorkspaceOptions,
-} from "./file-workspace.types.ts";
-import type { FileWorkspaceExecution } from "./workspace-execution.types.ts";
+} from "../../file-workspace.types.ts";
+import type { FileWorkspaceExecution } from "../../workspace-execution.types.ts";
 
-import { recordFileWorkspace } from "./file-workspace-checkpoint.ts";
-import { workspaceFingerprint } from "./file-workspace-fingerprint.ts";
-import { managedFileWorkspace } from "./file-workspace-managed.ts";
-import { workspaceOwner } from "./file-workspace-owner.ts";
+import { recordFileWorkspace } from "./checkpoint.ts";
+import { workspaceFingerprint } from "./fingerprint.ts";
+import { managedFileWorkspace } from "./managed.ts";
+import { workspaceOwner } from "./owner.ts";
 export async function restoreFileWorkspace(
   record: FileWorkspaceRecord,
   execution: FileWorkspaceExecution,

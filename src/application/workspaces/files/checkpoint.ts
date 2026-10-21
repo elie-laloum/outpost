@@ -1,18 +1,18 @@
 import { randomUUID } from "node:crypto";
 import { lstat, rename, writeFile } from "node:fs/promises";
-import { invariant } from "../domain/errors.ts";
-import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
-import { jsonBytes } from "../infrastructure/transport-json.ts";
-import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
+import { invariant } from "../../../domain/errors.ts";
+import type { FileWorkspaceRecord } from "../../../domain/file-workspace.types.ts";
+import { jsonBytes } from "../../../infrastructure/transport-json.ts";
+import { workspaceFileLimits } from "../../../infrastructure/workspace-files.constants.ts";
 import {
   workspaceManifest,
   workspaceManifestFingerprint,
-} from "../infrastructure/workspace-files.ts";
-import { snapshotWorkspaceFiles } from "../infrastructure/workspace-snapshot.ts";
-import { fileWorkspaces } from "./file-workspace-registry.ts";
-import type { FileWorkspace } from "./file-workspace.types.ts";
+} from "../../../infrastructure/workspace-files.ts";
+import { snapshotWorkspaceFiles } from "../../../infrastructure/workspace-snapshot.ts";
+import { fileWorkspaces } from "../../file-workspace-registry.ts";
+import type { FileWorkspace } from "../../file-workspace.types.ts";
 
-import { workspaceOwner } from "./file-workspace-owner.ts";
+import { workspaceOwner } from "./owner.ts";
 export async function checkpointFileWorkspace(
   workspace: FileWorkspace,
   settled = false,
