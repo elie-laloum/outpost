@@ -1,3 +1,4 @@
+import { runCleanup } from "../domain/cleanup.ts";
 import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { dispatchCandidates } from "../domain/fallback-agent.ts";
@@ -149,9 +150,16 @@ async function dispatchFileOperation<T>(
       workspaceId: workspace.id,
       directory: workspace.directory,
     });
-    await sandbox?.close({ preserve: true });
-    if (owned && !fileWorkspaces.get(workspace)?.active)
-      await workspace.close({ preserve: true });
+    await runCleanup(
+      [
+        () => sandbox?.close({ preserve: true }),
+        async () => {
+          if (owned && !fileWorkspaces.get(workspace)?.active)
+            await workspace.close({ preserve: true });
+        },
+      ],
+      [error],
+    );
     throw error;
   }
 }

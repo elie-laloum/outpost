@@ -1,3 +1,4 @@
+import { runCleanup } from "../../domain/cleanup.ts";
 import { recipeRuntimeError } from "./errors.ts";
 import { recipeProjectIdentity } from "./durable-session.ts";
 import { serveRecipeProject, enqueueRecipeProject } from "./services.ts";
@@ -173,17 +174,19 @@ export function createRecipeProjectRuntime(
         } catch (error) {
           observerErrors.push(error);
         }
-        try {
-          await scope.close();
-        } catch (cleanup) {
-          if (failure !== undefined)
-            throw new AggregateError(
-              [failure, recipeRuntimeError(cleanup, scope)],
-              "Recipe execution and cleanup failed",
-              { cause: failure },
-            );
-          throw recipeRuntimeError(cleanup, scope);
-        }
+        await runCleanup(
+          [
+            async () => {
+              try {
+                await scope.close();
+              } catch (cleanup) {
+                throw recipeRuntimeError(cleanup, scope);
+              }
+            },
+          ],
+          failure === undefined ? [] : [failure],
+          "Recipe execution and cleanup failed",
+        );
         scope.recordObserverErrors(observerErrors);
       }
     })();

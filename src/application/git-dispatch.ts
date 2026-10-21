@@ -1,3 +1,4 @@
+import { runCleanup } from "../domain/cleanup.ts";
 import type { RunReportDiff } from "../domain/run-report.types.ts";
 import { createRunReport, collectRunReportDiff } from "./run-report.ts";
 import type { Usage } from "../domain/agent.types.ts";
@@ -169,8 +170,8 @@ async function dispatchOperation<T>(
       branch: sandbox.workspace.branch,
       directory: sandbox.workspace.directory,
     });
+    if (!successful)
+      await runCleanup([() => sandbox.close({ preserve: true })], [cause]);
     throw cause;
-  } finally {
-    if (!successful) await sandbox.close({ preserve: true });
   }
 }
