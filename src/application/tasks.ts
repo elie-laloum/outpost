@@ -1,4 +1,4 @@
-import { observationDefaults } from "../domain/observation.constants.ts";
+import { executeAgentTask, executeCommandTask } from "./task-execution.ts";
 import { taskObservation } from "./task-observation.ts";
 import { taskUsage } from "./task-usage.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -79,30 +79,18 @@ export function defineAgentTask<T>(
 ): Task<unknown> {
   uncached(options);
   const { sandbox, request, select, ...definition } = options;
-  const quotaResume =
-    "quotaResume" in options ? options.quotaResume : undefined;
   return defineTask({
     ...definition,
     async perform(context) {
-      const options = quotaContinuation(context, request(context), quotaResume);
-      const usage = taskUsage(context, undefined);
-      const observation = taskObservation(
-        context.observation ?? options.observation,
-        options.observe,
+      const result = await executeAgentTask(
+        {
+          sandbox,
+          request,
+          ...(options.quotaResume ? { quotaResume: options.quotaResume } : {}),
+        },
+        context,
       );
-      try {
-        const result = await sandbox.dispatch({
-          ...options,
-          ...(context.prices ? { prices: context.prices } : {}),
-          observation,
-          signal: context.signal,
-          ...usage.dispatchOptions,
-        });
-        usage.reconcile(result.usage);
-        return select ? await select(result) : result;
-      } finally {
-        await observation.close();
-      }
+      return select ? await select(result) : result;
     },
   });
 }
@@ -267,37 +255,6 @@ export function defineCommandTask(
   const { sandbox, command, ...definition } = options;
   return defineTask({
     ...definition,
-    async perform(context) {
-      const invocation =
-        typeof command === "function" ? command(context) : command;
-      const result = await sandbox.command({
-        ...invocation,
-        observe(channel, text) {
-          for (
-            let offset = 0;
-            offset < text.length;
-            offset += observationDefaults.outputCharacters
-          )
-            context.observation?.emit("sandbox", {
-              kind: "command-output",
-              channel,
-              text: text.slice(
-                offset,
-                offset + observationDefaults.outputCharacters,
-              ),
-            });
-          invocation.observe?.(
-            channel,
-            context.observation?.redact(text) ?? text,
-          );
-        },
-        signal: context.signal,
-      });
-      if (result.status !== 0)
-        throw new OutpostError("process", "Workflow command failed", {
-          ...result,
-        });
-      return result;
-    },
+    perform: (context) => executeCommandTask({ sandbox, command }, context),
   });
 }

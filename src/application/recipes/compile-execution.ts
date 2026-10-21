@@ -1,3 +1,4 @@
+import { executeAgentTask, executeCommandTask } from "../task-execution.ts";
 import { defineTask } from "../../domain/workflow.ts";
 import { recipeJson } from "../../domain/recipes/expressions.ts";
 import { renderRecipeCommand } from "../../domain/recipe-templates.ts";
@@ -30,13 +31,15 @@ export function compileCommand(
   return defineTask({
     ...common,
     perform: async (context) =>
-      defineCommandTask({
-        key: step.key,
-        sandbox: await sandbox(context),
-        command: renderRecipeCommand(step.command, (value) =>
-          text(value, context),
-        ),
-      }).perform(context),
+      executeCommandTask(
+        {
+          sandbox: await sandbox(context),
+          command: renderRecipeCommand(step.command, (value) =>
+            text(value, context),
+          ),
+        },
+        context,
+      ),
   });
 }
 
@@ -72,13 +75,15 @@ export function compileAgent(
         brief: { text: text(step.brief, context) },
       };
       await bindings.validateDispatch?.(request);
-      const task = defineAgentTask({
-        ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
-        key: step.key,
-        sandbox: await sandbox(context),
-        request: () => request,
-      });
-      return recipeDispatchProjection(await task.perform(context));
+      const result = await executeAgentTask(
+        {
+          ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
+          sandbox: await sandbox(context),
+          request: () => request,
+        },
+        context,
+      );
+      return recipeDispatchProjection(result);
     },
   });
 }
