@@ -1,3 +1,4 @@
+import { isPrivateLocalType } from "./architecture-local-type.mjs";
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
@@ -49,7 +50,8 @@ for (const file of files) {
         ts.isTypeAliasDeclaration(node) ||
         ts.isEnumDeclaration(node) ||
         ts.isTypeLiteralNode(node)) &&
-      !types
+      !types &&
+      !isPrivateLocalType(node, source)
     )
       fail(node, "Declare contracts in a dedicated .types.ts module");
     if (

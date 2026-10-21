@@ -86,7 +86,7 @@ Each sandbox owns one repository. Compose multiple repositories with `defineIsol
 ## Code conventions
 
 - Keep source identifiers, errors and project guidance in English.
-- Put interfaces, type aliases and object type declarations in adjacent `*.types.ts` modules. Use type-only imports; these files must have no runtime initialization.
+- Put public and shared interfaces, type aliases and object type declarations in adjacent `*.types.ts` modules. A non-exported type or interface of at most five lines may stay inside the single function that uses it. Use type-only imports; `.types.ts` files must have no runtime initialization.
 - Put configuration defaults, supported values, shared limits and reusable fixed recipes in adjacent `*.constants.ts` modules. Keep local variables, computed values and closures with their operation; do not create a global constants dumping ground.
 - Use guard clauses for validation and early exits. Use strategies or handler registries for behavioral alternatives. Do not introduce `if / else if / else` chains or disguise them as nested ternaries.
 - Keep simple conditions simple. Avoid abstraction layers that make a single operation harder to read.
