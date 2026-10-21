@@ -1,10 +1,9 @@
 import { invariant } from "../domain/errors.ts";
-import { fileWorkspaceRecordSchema } from "../domain/file-workspace.constants.ts";
 import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
 import type { TaskContext } from "../domain/workflow.types.ts";
 import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
-import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import { createFileWorkspace, restoreFileWorkspace } from "./file-workspace.ts";
+import { workspaceRecordDecoder } from "./workspaces/files/decoders.ts";
 import {
   inspectFileWorkspace,
   recoverFileWorkspace,
@@ -16,7 +15,7 @@ import type { TaskFileWorkspace } from "./task-file-workspace.types.ts";
 export function assertFileWorkspaceRecord(
   value: unknown,
 ): asserts value is FileWorkspaceRecord {
-  validateRecipeSchema(fileWorkspaceRecordSchema, value, "workspace record");
+  workspaceRecordDecoder.parse(value);
 }
 
 export async function restoreManagedFileWorkspace(

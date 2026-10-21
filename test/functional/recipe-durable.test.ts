@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 import type { RecipeReport } from "../../src/application/recipe-report.types.ts";
-import { validateRecipeSchema } from "../../src/infrastructure/recipes/schema.ts";
+import { createJsonDecoder } from "../../src/infrastructure/json-schema.ts";
 import { createRecipeRuntime } from "../../src/recipes.ts";
 
 test("a YAML checkpoint resumes in another process, retaining committed and uncommitted work without replaying completed tasks", async (t) => {
@@ -95,7 +95,7 @@ test("a YAML checkpoint resumes in another process, retaining committed and unco
       settingsFile,
     ]);
     assert.equal(result.stderr, "");
-    return validateRecipeSchema<RecipeReport>(
+    return createJsonDecoder<RecipeReport>(
       {
         type: "object",
         required: ["status", "tasks", "outputs"],
@@ -105,9 +105,8 @@ test("a YAML checkpoint resumes in another process, retaining committed and unco
           outputs: { type: "object" },
         },
       },
-      JSON.parse(result.stdout),
       "report",
-    );
+    ).parse(JSON.parse(result.stdout));
   }
   const paused = await invoke("run", {
     runId: "review-1",
@@ -587,7 +586,7 @@ test("YAML artifacts, task caches, signed gates and quota pauses reuse native pe
     defineJsonArtifact({
       name: "evidence",
       version: "1",
-      schema: (value) => validateRecipeSchema(jsonSchema, value, "evidence"),
+      schema: (value) => createJsonDecoder(jsonSchema, "evidence").parse(value),
     }),
     reference,
   );

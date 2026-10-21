@@ -6,7 +6,7 @@ import {
   recipeString,
 } from "../../domain/recipes/values.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 import {
   nativeRecipeSchemas,
   nativeRecipeFactoryParameters,
@@ -135,7 +135,7 @@ export async function resolveRecipeOptions(
   value: unknown,
   context: RecipeComponentContext,
 ): Promise<Record<string, unknown>> {
-  validateRecipeSchema(schema, value, "component options");
+  validateJsonSchema(schema, value, "component options");
   const pending: Promise<unknown>[] = [];
   const slots = new Map<unknown, number>();
   const mapped = mapRecipeSchema(

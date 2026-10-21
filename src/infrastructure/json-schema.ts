@@ -3,7 +3,9 @@ import {
   configurationPath,
 } from "../domain/configuration-diagnostic.ts";
 import { Ajv2020 } from "ajv/dist/2020.js";
+import type { ValidateFunction } from "ajv/dist/2020.js";
 import type { JsonSchema } from "../domain/tool.types.ts";
+import type { JsonDecoder } from "./json-schema.types.ts";
 
 const validator = new Ajv2020({
   allErrors: true,
@@ -30,23 +32,28 @@ validator.addKeyword({
   valid: true,
 });
 
-export function validateJsonSchema<T>(
+export function validateJsonSchema(
   schema: JsonSchema,
   value: unknown,
   label: string,
-): T {
-  return createJsonDecoder<T>(schema, label).parse(value);
+): void {
+  createJsonDecoder<unknown>(schema, label).parse(value);
 }
 
-export function createJsonDecoder<T>(schema: JsonSchema, label: string) {
-  const check = validator.compile<T>(schema);
+export function createJsonDecoder<T>(
+  schema: JsonSchema,
+  label: string,
+): JsonDecoder<T> {
+  let check: ValidateFunction<T> | undefined;
   return {
-    parse(value: unknown): T {
+    schema,
+    parse(value: unknown, path = label): T {
+      check ??= validator.compile<T>(schema);
       if (!check(value))
         throw configurationError(
-          `${label}: ${validator.errorsText(check.errors, { separator: "; " })}`,
+          `${path}: ${validator.errorsText(check.errors, { separator: "; " })}`,
           [
-            ...configurationPath(label),
+            ...configurationPath(path),
             ...(check.errors?.[0]?.instancePath
               .split("/")
               .slice(1)

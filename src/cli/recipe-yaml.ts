@@ -11,13 +11,20 @@ import {
   recipeInteractiveMode,
 } from "./recipe-terminal.ts";
 import { nativeRecipeSchemas } from "../application/recipes/native-schemas.constants.ts";
-import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
+import { createJsonDecoder } from "../infrastructure/json-schema.ts";
 import { readRecipeFile } from "../infrastructure/recipes/read.ts";
 import { workspaceRecoverySchema } from "../domain/file-workspace.constants.ts";
 import type { RecipeResumeOptions } from "../application/recipes/durable.types.ts";
 import type { WorkflowOptions } from "../domain/workflow.types.ts";
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { CliInvocation } from "./main.types.ts";
+
+const workflowIntervention = createJsonDecoder<
+  Pick<WorkflowOptions, "answers" | "decisions">
+>(nativeRecipeSchemas["workflow.options"]!, "workflow intervention");
+const workspaceRecoveries = createJsonDecoder<
+  NonNullable<RecipeResumeOptions["workspaceRecovery"]>
+>(workspaceRecoverySchema, "workspace recovery");
 
 export async function recipeYamlCommand(
   { values, positionals }: CliInvocation,
@@ -95,10 +102,7 @@ export async function recipeYamlCommand(
         throw new Error(
           `Recipe ${action} requires --${action === "answer" ? "answer" : "decision"} file.json`,
         );
-      intervention = validateRecipeSchema<
-        Pick<WorkflowOptions, "answers" | "decisions">
-      >(
-        nativeRecipeSchemas["workflow.options"]!,
+      intervention = workflowIntervention.parse(
         {
           [action === "answer" ? "answers" : "decisions"]: [
             JSON.parse(await readRecipeFile(path)),
@@ -113,12 +117,8 @@ export async function recipeYamlCommand(
       ...(values.json ? { report: "json" as const } : {}),
     };
     const workspaceRecovery = values["workspace-recovery"]
-      ? validateRecipeSchema<
-          NonNullable<RecipeResumeOptions["workspaceRecovery"]>
-        >(
-          workspaceRecoverySchema,
+      ? workspaceRecoveries.parse(
           JSON.parse(await readRecipeFile(values["workspace-recovery"])),
-          "workspace recovery",
         )
       : undefined;
     let report =

@@ -3,7 +3,10 @@ import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import { recipeJson } from "../../domain/recipes/expressions.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import { canonicalJson } from "../../domain/workflow/canonical-json.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import {
+  createJsonDecoder,
+  validateJsonSchema,
+} from "../../infrastructure/json-schema.ts";
 import { recipeMethods } from "./native.ts";
 import { recipeMetadataSchema } from "./durable-schema.constants.ts";
 import type { RecipeProject, RecipeRunOptions } from "./project.types.ts";
@@ -19,6 +22,35 @@ import type {
 } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeCheckpointStore } from "../../domain/recipes/checkpoint-store.types.ts";
 
+const checkpointMetadata = createJsonDecoder<RecipeCheckpointMetadata>(
+  recipeMetadataSchema,
+  "recipe checkpoint metadata",
+);
+const persistedCheckpoint = createJsonDecoder<RecipePersistedCheckpoint>(
+  {
+    type: "object",
+    required: [
+      "format",
+      "identity",
+      "executionId",
+      "records",
+      "values",
+      "usage",
+      "recipe",
+    ],
+    properties: {
+      format: { const: 1 },
+      identity: { type: "string" },
+      executionId: { type: "string" },
+      records: { type: "array", items: { type: "object" } },
+      values: { type: "object" },
+      usage: { type: "object" },
+      recipe: recipeMetadataSchema,
+    },
+  },
+  "recipe checkpoint",
+);
+
 export function inspectableRecipeStore(
   value: unknown,
 ): value is RecipeCheckpointStore {
@@ -29,11 +61,7 @@ export function recipeCheckpointMetadata(
   value: unknown,
 ): RecipeCheckpointMetadata {
   if (!recipeObject(value)) throw new Error("Invalid recipe checkpoint");
-  return validateRecipeSchema<RecipeCheckpointMetadata>(
-    recipeMetadataSchema,
-    value.recipe,
-    "recipe checkpoint metadata",
-  );
+  return checkpointMetadata.parse(value.recipe);
 }
 
 export function recipeProjectIdentity(
@@ -114,7 +142,7 @@ export async function openRecipeCheckpoint(
     );
     for (const [name, input] of Object.entries(project.document.inputs))
       if (input.schema)
-        validateRecipeSchema(input.schema, inputs[name], `inputs.${name}`);
+        validateJsonSchema(input.schema, inputs[name], `inputs.${name}`);
     const identity = recipeProjectIdentity(project, inputs);
     if (previousMetadata && previousMetadata.identity !== identity)
       throw new Error(
@@ -140,31 +168,7 @@ export async function openRecipeCheckpoint(
       )
         throw new Error("Invalid workflow checkpoint");
       // The scheduler validates the complete checkpoint before any task or allocation.
-      previous = validateRecipeSchema<RecipePersistedCheckpoint>(
-        {
-          type: "object",
-          required: [
-            "format",
-            "identity",
-            "executionId",
-            "records",
-            "values",
-            "usage",
-            "recipe",
-          ],
-          properties: {
-            format: { const: 1 },
-            identity: { type: "string" },
-            executionId: { type: "string" },
-            records: { type: "array", items: { type: "object" } },
-            values: { type: "object" },
-            usage: { type: "object" },
-            recipe: recipeMetadataSchema,
-          },
-        },
-        saved,
-        "recipe checkpoint",
-      );
+      previous = persistedCheckpoint.parse(saved);
       latest = previous;
     }
     let pending = Promise.resolve();

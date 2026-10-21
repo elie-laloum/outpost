@@ -1,16 +1,15 @@
 import { join } from "node:path";
 import { invariant } from "../domain/errors.ts";
-import { fileWorkspaceRecordSchema } from "../domain/file-workspace.constants.ts";
 import type { FileWorkspaceRecord } from "../domain/file-workspace.types.ts";
 import { createLocalTransport } from "../infrastructure/local-transport.ts";
 import { jsonBytes, jsonObject } from "../infrastructure/transport-json.ts";
 import { workspaceFileLimits } from "../infrastructure/workspace-files.constants.ts";
-import { validateRecipeSchema } from "../infrastructure/recipes/schema.ts";
 import {
   inspectWorkspacePathLocks,
   recoverWorkspacePathLock,
 } from "../infrastructure/workspace-lock.ts";
 import { restoreFileWorkspace } from "./file-workspace.ts";
+import { workspaceRecordDecoder } from "./workspaces/files/decoders.ts";
 import type {
   FileWorkspaceInspection,
   FileWorkspaceInspectionOptions,
@@ -36,11 +35,7 @@ export async function inspectFileWorkspace(
     maxBytes: workspaceFileLimits.manifestBytes,
   });
   invariant(stored, "Workspace record was not found");
-  const record = validateRecipeSchema<FileWorkspaceRecord>(
-    fileWorkspaceRecordSchema,
-    jsonObject(stored),
-    "workspace record",
-  );
+  const record = workspaceRecordDecoder.parse(jsonObject(stored));
   invariant(
     record.id === options.id &&
       record.runtime.namespace === options.runtime.namespace,

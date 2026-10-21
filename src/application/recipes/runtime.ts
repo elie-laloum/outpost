@@ -8,7 +8,7 @@ import type { RecipeResumeOptions } from "./durable.types.ts";
 import type { RecipeRunOptions } from "./project.types.ts";
 import { prepareRecipeWorkflow } from "./workflow-components.ts";
 import { runRecipeWorkflow } from "./workflow-run.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 import { openRecipeSandbox } from "./sandbox.ts";
 import { recipeExecutionConfiguration } from "./configuration.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
@@ -58,7 +58,7 @@ export function createRecipeProjectRuntime(
       : resolveRecipeInputs(project.document.inputs, settings.inputs);
     for (const [name, definition] of Object.entries(project.document.inputs))
       if (definition.schema && inputs)
-        validateRecipeSchema(definition.schema, inputs[name], `inputs.${name}`);
+        validateJsonSchema(definition.schema, inputs[name], `inputs.${name}`);
     const signal = settings.signal
       ? AbortSignal.any([settings.signal, stop.signal])
       : stop.signal;

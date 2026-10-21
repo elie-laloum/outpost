@@ -4,6 +4,7 @@
 
 - Compiler les tâches interactives des recettes par une entrée interne qui accepte les options Git et fichiers, ce qui supprime la dernière branche identique servant au rétrécissement de type.
 - Valider les états de routage du harness, les réponses de décision, les événements de décision rejoués, les entrées de recettes, les clés de cache de tâches et les empreintes de répétition comme du JSON sans perte étiqueté, et non plus comme des sorties de checkpoint. Les valeurs persistées dans les checkpoints gardent leur enveloppe, et les identités de cache existantes ne changent pas.
+- Lier chaque décodage typé par JSON Schema à un décodeur déclaré une seule fois avec son schéma et compilé au premier usage, et réserver la validation non typée aux schémas fournis par l’appelant. L’inspection et la récupération des workspaces réutilisent le décodeur des enregistrements de workspace ; l’alias interne `validateRecipeSchema` est supprimé.
 
 ## 13.0.0
 

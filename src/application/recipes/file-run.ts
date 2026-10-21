@@ -42,7 +42,7 @@ import type { Transport } from "../../domain/transport.types.ts";
 import type { WorkspaceRetention } from "../../domain/file-workspace.types.ts";
 import { refreshFilePublicationReport } from "./file-publication-report.ts";
 import { workspaceRecoverySchema } from "../../domain/file-workspace.constants.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -124,7 +124,7 @@ export async function runFileRecipe(
   const recoveries =
     "workspaceRecovery" in settings ? settings.workspaceRecovery : undefined;
   if (recoveries)
-    validateRecipeSchema(
+    validateJsonSchema(
       workspaceRecoverySchema,
       recoveries,
       "workspace recovery",

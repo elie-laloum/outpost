@@ -1,6 +1,6 @@
 import { recipeUsageSchema } from "./durable-schema.constants.ts";
 import { recipeObject, recipeReference } from "../../domain/recipes/values.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import { createJsonDecoder } from "../../infrastructure/json-schema.ts";
 import {
   inspectableRecipeStore,
   recipeCheckpointMetadata,
@@ -10,6 +10,36 @@ import type { RecipeComponentScope } from "./components.types.ts";
 import type { RecipeRunStatus } from "./durable.types.ts";
 import type { TaskRecord } from "../../domain/workflow.types.ts";
 import type { WorkflowUsage } from "../../domain/workflow/budget.types.ts";
+
+const checkpointTask = createJsonDecoder<TaskRecord>(
+  {
+    type: "object",
+    required: ["key", "status", "attempts"],
+    properties: {
+      key: { type: "string" },
+      status: {
+        enum: [
+          "waiting-input",
+          "waiting",
+          "active",
+          "done",
+          "failed",
+          "skipped",
+          "cancelled",
+          "paused",
+          "rejected",
+        ],
+      },
+      attempts: { type: "integer", minimum: 0 },
+    },
+    additionalProperties: false,
+  },
+  "checkpoint task",
+);
+const checkpointUsage = createJsonDecoder<WorkflowUsage>(
+  recipeUsageSchema,
+  "checkpoint usage",
+);
 
 export async function inspectRecipeRun(
   project: RecipeProject,
@@ -42,38 +72,13 @@ export async function inspectRecipeRun(
   const metadata = recipeCheckpointMetadata(saved);
   const tasks = saved.records.map((record) => {
     if (!recipeObject(record)) throw new Error("Invalid workflow task record");
-    return validateRecipeSchema<TaskRecord>(
-      {
-        type: "object",
-        required: ["key", "status", "attempts"],
-        properties: {
-          key: { type: "string" },
-          status: {
-            enum: [
-              "waiting-input",
-              "waiting",
-              "active",
-              "done",
-              "failed",
-              "skipped",
-              "cancelled",
-              "paused",
-              "rejected",
-            ],
-          },
-          attempts: { type: "integer", minimum: 0 },
-        },
-        additionalProperties: false,
-      },
-      { key: record.key, status: record.status, attempts: record.attempts },
-      "checkpoint task",
-    );
+    return checkpointTask.parse({
+      key: record.key,
+      status: record.status,
+      attempts: record.attempts,
+    });
   });
-  const usage = validateRecipeSchema<WorkflowUsage>(
-    recipeUsageSchema,
-    saved.usage,
-    "checkpoint usage",
-  );
+  const usage = checkpointUsage.parse(saved.usage);
   return {
     runId,
     revision: inspection.revision,

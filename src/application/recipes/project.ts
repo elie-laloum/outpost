@@ -12,10 +12,11 @@ import { readRecipeFile } from "../../infrastructure/recipes/read.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
 import { createRecipeRegistry } from "../../domain/recipes/component.ts";
+import { recipeJsonValidator } from "../../infrastructure/recipes/schema.ts";
 import {
-  validateRecipeSchema,
-  recipeJsonValidator,
-} from "../../infrastructure/recipes/schema.ts";
+  createJsonDecoder,
+  validateJsonSchema,
+} from "../../infrastructure/json-schema.ts";
 import { resolveRecipeConfiguration } from "../recipe-configuration.ts";
 import { recipeConfigurationKeys } from "../recipe-configuration.constants.ts";
 import { observationComponents } from "./observation.ts";
@@ -36,6 +37,11 @@ import type {
   RecipeReportDeclaration,
 } from "./project.types.ts";
 
+const reportDeclaration = createJsonDecoder<RecipeReportDeclaration>(
+  reportSchema,
+  "reports",
+);
+
 export async function readRecipeProject(
   options: RecipeProjectOptions,
 ): Promise<RecipeProject> {
@@ -54,7 +60,7 @@ export async function readRecipeProject(
       if (!input.schema) continue;
       recipeJsonValidator(input.schema);
       if (Object.hasOwn(input, "default"))
-        validateRecipeSchema(
+        validateJsonSchema(
           input.schema,
           input.default,
           `inputs.${name}.default`,
@@ -182,11 +188,7 @@ export async function readRecipeProject(
       registry,
       graph,
       reports: reports.map((value, index) =>
-        validateRecipeSchema<RecipeReportDeclaration>(
-          reportSchema,
-          value,
-          `reports.${index}`,
-        ),
+        reportDeclaration.parse(value, `reports.${index}`),
       ),
     };
   } catch (error) {

@@ -3,7 +3,7 @@ import { createRecipeComponentScope } from "./scope.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import { triggerQueueRequest } from "../../domain/trigger-job.ts";
 import { queueRequest } from "../../domain/task-queue.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 import type { RecipeProject } from "./project.types.ts";
 import type {
   RecipeEnqueueOptions,
@@ -58,7 +58,7 @@ export async function enqueueRecipeProject(
   const inputs = resolveRecipeInputs(project.document.inputs, settings.inputs);
   for (const [name, definition] of Object.entries(project.document.inputs))
     if (definition.schema)
-      validateRecipeSchema(definition.schema, inputs[name], `inputs.${name}`);
+      validateJsonSchema(definition.schema, inputs[name], `inputs.${name}`);
   const request = queueRequest({
     ...triggerQueueRequest(
       settings.id ?? `recipe:${settings.handler}:${settings.runId}`,

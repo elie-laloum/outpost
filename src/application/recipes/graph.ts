@@ -11,13 +11,21 @@ import type {
   RecipeExtensionDeclaration,
   RecipeRegistry,
 } from "../../domain/recipes/component.types.ts";
-import { validateRecipeSchema } from "../../infrastructure/recipes/schema.ts";
+import {
+  createJsonDecoder,
+  validateJsonSchema,
+} from "../../infrastructure/json-schema.ts";
 import { recipeModulePath } from "../../infrastructure/recipes/extensions.ts";
 import { extensionSchema } from "./schemas.constants.ts";
 import type {
   RecipeComponentGraph,
   RecipeComponentNode,
 } from "./components.types.ts";
+
+const extensionDeclaration = createJsonDecoder<RecipeExtensionDeclaration>(
+  extensionSchema,
+  "extensions",
+);
 
 export function recipeComponentGraph(
   configuration: Readonly<Record<string, unknown>>,
@@ -123,11 +131,7 @@ export function recipeComponentGraph(
   for (const [name, source] of Object.entries(
     recipeRecord(configuration.extensions ?? {}, "extensions"),
   )) {
-    const extension = validateRecipeSchema<RecipeExtensionDeclaration>(
-      extensionSchema,
-      source,
-      `extensions.${name}`,
-    );
+    const extension = extensionDeclaration.parse(source, `extensions.${name}`);
     recipeModulePath(extension.module, directory);
     if (extension.factory && !extension.schema)
       throw new Error(`Extension factory ${name} requires a static schema`);
@@ -194,7 +198,7 @@ export function recipeComponentGraph(
       ),
       name,
     );
-    validateRecipeSchema(schema, normalized, name);
+    validateJsonSchema(schema, normalized, name);
     return normalized;
   }
   function component(source: unknown, kind: string, name: string): string {
