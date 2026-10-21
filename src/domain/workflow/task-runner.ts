@@ -1,3 +1,4 @@
+import { startTask, resumeTask } from "./task-state.ts";
 import { InputSuspension } from "./input.ts";
 import { loopDefinition } from "./loop-task.ts";
 import { runLoopTask } from "./loop-runner.ts";
@@ -32,11 +33,7 @@ export async function runTask(
   } = runtime;
   const state = record(item);
   if (state.quota && !(await awaitQuotaReset(item, runtime, true))) return;
-  state.status = "active";
-  delete state.error;
-  delete state.finishedAt;
-  delete state.cacheHit;
-  state.startedAt = new Date().toISOString();
+  startTask(state, new Date().toISOString());
   emit({ type: "task", key: item.key, status: "active", attempt: 0 });
   try {
     await runtime.persist();
@@ -63,8 +60,7 @@ export async function runTask(
       } catch (error) {
         if (!(await pauseForQuota(item, runtime, error))) throw error;
         if (!(await awaitQuotaReset(item, runtime, false))) return;
-        state.status = "active";
-        delete state.finishedAt;
+        resumeTask(state);
         emit({ type: "task", key: item.key, status: "active", attempt: 0 });
         await runtime.persist();
       }

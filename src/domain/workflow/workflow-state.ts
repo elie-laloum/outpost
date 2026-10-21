@@ -1,3 +1,4 @@
+import { finishTask, restoredTaskStatus } from "./task-state.ts";
 import { interactionContext, immutableInput } from "./input.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { taskIdempotencyKey } from "./idempotency.ts";
@@ -92,14 +93,7 @@ export function workflowState(
           ? { decision: Object.freeze({ ...entry.decision }) }
           : {}),
         ...(entry.quota ? { quota: Object.freeze({ ...entry.quota }) } : {}),
-        status:
-          ["done", "paused", "rejected", "waiting-input"].includes(
-            entry.status,
-          ) ||
-          complete ||
-          (settledPause && entry.status === "skipped")
-            ? entry.status
-            : "waiting",
+        status: restoredTaskStatus(entry, complete, settledPause),
       });
       if (entry.status === "done") {
         const output = saved.values[item.key]!;
@@ -149,10 +143,7 @@ export function workflowState(
       .emit("workflow", { kind: "workflow", event: notification });
   }
   function finish(item: Task, status: TaskStatus): void {
-    Object.assign(record(item), {
-      status,
-      finishedAt: new Date().toISOString(),
-    });
+    finishTask(record(item), status, new Date().toISOString());
     emit({
       type: "task",
       key: item.key,
