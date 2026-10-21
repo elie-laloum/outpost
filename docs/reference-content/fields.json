@@ -11529,5 +11529,13 @@
   "TaskResultSelection.select": [
     "Project the completed dispatch result into the task output after usage accounting. Return lossless JSON for checkpointed workflows. This does not enable caching or change sandbox ownership.",
     "Projette le résultat du dispatch terminé après comptabilisation de sa consommation. Renvoyez du JSON sans perte pour un workflow avec checkpoints. Cette option n’active pas le cache et ne change pas la propriété de la sandbox."
+  ],
+  "TaskInputsOptions.inputs": [
+    "Named task dependencies whose typed outputs are passed to perform as context.inputs. Combined with after without duplicate edges.",
+    "Dépendances nommées dont les résultats typés sont transmis à perform via context.inputs. Combinées avec after sans arêtes en double."
+  ],
+  "TaskInputsOptions.perform": [
+    "Run the task with its named dependency outputs and ordinary task context.",
+    "Exécute la tâche avec les résultats de ses dépendances nommées et le contexte habituel."
   ]
 }

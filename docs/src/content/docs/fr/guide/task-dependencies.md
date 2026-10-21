@@ -15,14 +15,16 @@ Le premier exemple s’exécute entièrement dans Node.js : installez Outpost da
 
 Déclarez chaque étape avec une fonction de définition de tâche, puis passez les tâches à `defineWorkflow()`. Les dépendances déterminent l’ordre d’exécution et les résultats précédents qu’une tâche peut lire.
 
+Déclarez des `inputs` nommés lorsque la tâche consomme les résultats de ses dépendances. Outpost ajoute ces tâches à `after` et transmet leurs valeurs typées à `perform`. Gardez `after` pour les dépendances d’ordre ; chaque tâche est ajoutée une seule fois. La correspondance est copiée à la déclaration de la tâche.
+
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
 const report = defineTask({
   key: "report",
-  after: [files],
-  perform: (context) => ({ reviewed: context.value(files).length }),
+  inputs: { files },
+  perform: ({ inputs }) => ({ reviewed: inputs.files.length }),
 });
 const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();

@@ -324,3 +324,30 @@ test("successful and conditional workflows have no termination code", async () =
   assert.equal(result.status, "done");
   assert.equal(result.terminationCode, undefined);
 });
+
+test("named task inputs infer values and declare dependencies once", async () => {
+  const review = defineTask({
+    key: "review",
+    perform: () => ({ approved: true }),
+  });
+  const ready = defineTask({ key: "ready", perform: () => "ready" });
+  const inputs = { review };
+  const publish = defineTask({
+    key: "publish",
+    after: [review, ready],
+    inputs,
+    perform: ({ inputs }) => (inputs.review.approved ? "published" : "refused"),
+  });
+  inputs.review = defineTask({
+    key: "replacement",
+    perform: () => ({ approved: false }),
+  });
+  assert.deepEqual(publish.after, [review, ready]);
+  const result = await defineWorkflow("named-inputs", [
+    publish,
+    review,
+    ready,
+  ]).start();
+  result.unwrap();
+  assert.equal(result.value(publish), "published");
+});

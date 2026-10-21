@@ -211,3 +211,19 @@ export interface WorkflowExecutionState {
   finish(task: Task, status: TaskStatus): void;
   context(task: Task, attempt: number, signal: AbortSignal): TaskContext;
 }
+
+export type TaskInputValues<Inputs extends Readonly<Record<string, Task>>> = {
+  readonly [Key in keyof Inputs]: Inputs[Key] extends Task<infer Value>
+    ? Value
+    : never;
+};
+
+export type TaskInputsOptions<
+  T,
+  Inputs extends Readonly<Record<string, Task>>,
+> = Omit<TaskOptions<T>, "perform"> & {
+  readonly inputs: Inputs;
+  readonly perform: (
+    context: TaskContext & { readonly inputs: TaskInputValues<Inputs> },
+  ) => T | Promise<T>;
+};

@@ -15,14 +15,16 @@ The first example runs entirely in Node.js: install Outpost in an ESM project, s
 
 Declare each step with a task constructor, then give the tasks to `defineWorkflow()`. Dependencies determine execution order and which earlier results a task may read.
 
+Declare named `inputs` when the task consumes dependency results. Outpost adds those tasks to `after` and supplies their typed values to `perform`. Keep `after` for ordering-only dependencies; duplicate tasks are added once. The dependency mapping is copied when the task is defined.
+
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
 
 const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
 const report = defineTask({
   key: "report",
-  after: [files],
-  perform: (context) => ({ reviewed: context.value(files).length }),
+  inputs: { files },
+  perform: ({ inputs }) => ({ reviewed: inputs.files.length }),
 });
 const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();

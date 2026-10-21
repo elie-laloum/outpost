@@ -11800,13 +11800,16 @@
     "optionCoverage": {}
   },
   "./workflows:defineTask": {
-    "signatures": ["<T>(options: TaskOptions<T>): Task<T>"],
+    "signatures": [
+      "<T, Inputs extends Readonly<Record<string, Task>>>(options: TaskInputsOptions<T, Inputs>): Task<T>",
+      "<T>(options: TaskOptions<T>): Task<T>"
+    ],
     "options": {},
     "category": "native",
     "lot": 4,
     "status": "implemented",
     "test": "test/functional/recipe-workflow.test.ts",
-    "reason": "Composed by native recipe components or task/runtime syntax; option schemas derive from the owning TypeScript contracts.",
+    "reason": "Native task declarations; named dependency inputs are a TypeScript convenience compiled to existing dependency edges. YAML already names task results explicitly.",
     "optionCoverage": {}
   },
   "./workflows:defineWorkflow": {
