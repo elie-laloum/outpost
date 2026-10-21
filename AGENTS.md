@@ -149,6 +149,8 @@ Keep routine tests deterministic and independent of real account credentials or 
 
 ### Validation commands
 
+Use `bun run check:generated` for recipe catalogues, schemas and parity; `check:source` for source behavior and coverage; `check:package` for packed-package consumption; and `check:docs` for documentation, examples and browser checks. These commands retain the existing checks and do not replace real Docker/Podman or Redis validation. Regenerate derived files explicitly before checking them.
+
 Install root dependencies with `bun install --frozen-lockfile`; install documentation dependencies with `bun install --cwd docs --frozen-lockfile` when needed.
 
 | Change                                                                | Checks                                                                                                         |
