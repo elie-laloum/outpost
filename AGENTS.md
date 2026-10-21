@@ -138,6 +138,7 @@ Use `node:test` and `node:assert/strict`, following the existing suite. Test obs
 - `test/redis.test.ts`: real standalone Redis 7/8 queue behavior, including concurrent claims, stale leases, cancellation and interrupted publication/finalization. Run with `bun run test:redis`; `OUTPOST_REDIS_PORT` selects a dedicated local test server.
 - `test/container.test.ts` and `test/session-bundles-container.test.ts`: real Docker/Podman behavior. Mocks alone cannot validate process sessions, tmpfs, mounts, ownership or archive transfer.
 - `test/fixtures/container-terminal.ts`: real PTY input, exit status, cancellation and warm reuse.
+- `test/fixtures/lease-contract.ts`: ordered sandbox lease checks (exit status after closed outputs, exact output, cancellation and reuse, transfers verified inside the sandbox) shared by the local, Docker/Podman and live cloud runs. `defineLeaseContractSuite()` registers them for a provider and adds idempotent release.
 - Live checks are opt-in and require their documented credentials or runtime: `test/cli-continuations-native.test.ts`, `test/firecracker-live.test.ts`, `test/firecracker-jailer-live.test.ts`, `test/cloud-live.ts`, and `scripts/harness-live.mjs`. Inspect their prerequisites before running; offline mocks do not substitute for these checks.
 - `scripts/package-smoke.mjs`: the packed package as a consumer sees it, including exports and declarations.
 

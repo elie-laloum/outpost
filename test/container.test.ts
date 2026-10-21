@@ -38,6 +38,7 @@ import type { ModelRequest, HarnessToolContext } from "../src/harness.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { conversationStore, repository, scripted } from "./helpers.ts";
+import { defineLeaseContractSuite } from "./fixtures/lease-contract-suite.ts";
 import type {
   AgentEvent,
   AgentInput,
@@ -51,6 +52,16 @@ import { imageRecipeText, officialImages } from "../src/cli/image-recipes.ts";
 
 const containerImage =
   process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
+
+if (process.env.OUTPOST_CONTAINER_ENGINE)
+  defineLeaseContractSuite(process.env.OUTPOST_CONTAINER_ENGINE, () =>
+    (process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+      ? createPodmanSandboxProvider
+      : createDockerSandboxProvider)({
+      image: containerImage,
+      networks: "none",
+    }),
+  );
 
 test(
   "container tmpfs homes are private and writable by the configured user",
