@@ -1326,7 +1326,14 @@ for (const locale of ["", "fr/"]) {
     );
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/how-it-works/`);
-    await expect(page.locator(".sl-markdown-content table")).toHaveCount(0);
+    const ownership = page.locator(".sl-markdown-content table");
+    await expect(ownership).toHaveCount(1);
+    await expect(ownership.locator("tbody tr")).toHaveCount(3);
+    await expect(ownership.locator("tbody tr td:first-child")).toHaveText([
+      "dispatch()",
+      "createSandbox()",
+      "createWorkspace()",
+    ]);
     await expect(page.locator(".sl-markdown-content pre")).toHaveCount(0);
     await expect(page.locator("[data-canvas] .canvas-node")).toHaveCount(5);
     expect(
