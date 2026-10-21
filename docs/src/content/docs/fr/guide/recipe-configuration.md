@@ -5,6 +5,8 @@ description: "Configurer les rôles d’agents, l’exécution locale ou contene
 
 `recipe.yaml` décrit le travail ; `outpost.yaml` associe les rôles aux agents et choisit l’environnement. Partez du [tutoriel local](../yaml-recipes/). La page [workspaces](../recipe-workspaces/) couvre les dossiers, branches et fichiers de sortie.
 
+Utilisez les déclarations directes `sandbox` et `agents` pour les composants employés une seule fois. Introduisez `$ref` lorsque plusieurs rôles partagent un profil, un fournisseur ou des outils, ou qu’un composant mérite un nom stable. Les deux formes suivent les mêmes contrats de validation et d’exécution ; les composants nommés sont facultatifs.
+
 ## Ajouter un agent
 
 Pour cet exemple local, le CLI Codex doit déjà être installé et authentifié sur l’hôte ; suivez le [guide Codex](../codex/). Enregistrez ces deux fichiers complets. Commandes et agents utilisent les permissions de votre machine.

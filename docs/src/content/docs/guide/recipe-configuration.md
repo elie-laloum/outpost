@@ -5,6 +5,8 @@ description: "Configure agent roles, local or container execution and YAML edito
 
 `recipe.yaml` describes the work; `outpost.yaml` binds agent roles and chooses the environment. Start with the [local tutorial](../yaml-recipes/). Use [workspace configuration](../recipe-workspaces/) for directories, branches and output files.
 
+Use direct `sandbox` and `agents` declarations for components used once. Introduce `$ref` when several roles share a profile, provider or toolset, or when a component needs a stable name. Both forms use the same validation and execution contracts; named components are optional.
+
 ## Add an agent
 
 For this local example, the Codex CLI must already be installed and authenticated on the host; follow the [Codex guide](../codex/). Save these two complete files. Commands and agents run with your host permissions.
