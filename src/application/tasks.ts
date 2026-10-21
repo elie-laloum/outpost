@@ -8,6 +8,7 @@ import type { DispatchResult } from "./outpost.ts";
 import { quotaContinuation, quotaWorkspace } from "./quota-resume.ts";
 import { dispatch } from "./outpost.ts";
 import type {
+  TaskResultSelection,
   AgentTaskOptions,
   CommandTaskOptions,
   IsolatedTaskOptions,
@@ -36,6 +37,21 @@ function uncached(options: object): void {
     );
 }
 
+export function defineAgentTask<T, Output>(
+  options: Omit<TaskOptions<Output>, "perform" | "cache"> &
+    FileAgentTaskOptions<T> &
+    TaskResultSelection<FileDispatchResult<T>, Output>,
+): Task<Output>;
+export function defineAgentTask<T, Output>(
+  options: Omit<TaskOptions<Output>, "perform" | "cache"> &
+    AgentTaskOptions<T> &
+    TaskResultSelection<DispatchResult<T>, Output>,
+): Task<Output>;
+export function defineAgentTask<T, Output>(
+  options: Omit<TaskOptions<Output>, "perform" | "cache"> &
+    MixedAgentTaskOptions<T> &
+    TaskResultSelection<DispatchResult<T> | FileDispatchResult<T>, Output>,
+): Task<Output>;
 export function defineAgentTask<T>(
   options: Omit<TaskOptions<FileDispatchResult<T>>, "perform" | "cache"> &
     FileAgentTaskOptions<T>,
@@ -56,10 +72,13 @@ export function defineAgentTask<T>(
     TaskOptions<DispatchResult<T> | FileDispatchResult<T>>,
     "perform" | "cache"
   > &
-    MixedAgentTaskOptions<T>,
-): Task<DispatchResult<T> | FileDispatchResult<T>> {
+    MixedAgentTaskOptions<T> &
+    Partial<
+      TaskResultSelection<DispatchResult<T> | FileDispatchResult<T>, unknown>
+    >,
+): Task<unknown> {
   uncached(options);
-  const { sandbox, request, ...definition } = options;
+  const { sandbox, request, select, ...definition } = options;
   const quotaResume =
     "quotaResume" in options ? options.quotaResume : undefined;
   return defineTask({
@@ -80,7 +99,7 @@ export function defineAgentTask<T>(
           ...usage.dispatchOptions,
         });
         usage.reconcile(result.usage);
-        return result;
+        return select ? await select(result) : result;
       } finally {
         await observation.close();
       }

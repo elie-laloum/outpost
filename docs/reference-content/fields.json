@@ -11525,5 +11525,9 @@
   "SpeculationResult.terminationCode": [
     "Coordinator stop reason using the shared TerminationCode vocabulary: aborted for external cancellation, quota for quota-stopped races, limit for an exhausted budget, or usage-unavailable when token/cost accounting is incomplete. Absent for winner and no-winner; inspect candidates for individual failures and validation rejections. Persisted with new durable checkpoints; legacy budget-exhausted checkpoints without a saved reason use limit. Does not authorize recovery or replay.",
     "Motif d’arrêt du coordinateur utilisant le vocabulaire commun TerminationCode : aborted pour une annulation externe, quota pour une course arrêtée par quota, limit pour un budget épuisé, ou usage-unavailable si la consommation ou le coût est incomplet. Absent pour winner et no-winner ; consultez les candidats pour les échecs individuels et rejets de validation. Persisté dans les nouveaux checkpoints durables ; les anciens checkpoints budget-exhausted sans motif enregistré utilisent limit. N’autorise ni récupération ni rejeu."
+  ],
+  "TaskResultSelection.select": [
+    "Project the completed dispatch result into the task output after usage accounting. Return lossless JSON for checkpointed workflows. This does not enable caching or change sandbox ownership.",
+    "Projette le résultat du dispatch terminé après comptabilisation de sa consommation. Renvoyez du JSON sans perte pour un workflow avec checkpoints. Cette option n’active pas le cache et ne change pas la propriété de la sandbox."
   ]
 }

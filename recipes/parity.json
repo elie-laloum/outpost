@@ -11663,6 +11663,9 @@
   },
   "./workflows:defineAgentTask": {
     "signatures": [
+      "<T, Output>(options: Omit<TaskOptions<Output>, \"perform\" | \"cache\"> & FileAgentTaskOptions<T> & TaskResultSelection<FileDispatchResult<T>, Output>): Task<Output>",
+      "<T, Output>(options: Omit<TaskOptions<Output>, \"perform\" | \"cache\"> & AgentTaskOptions<T> & TaskResultSelection<DispatchResult<T>, Output>): Task<Output>",
+      "<T, Output>(options: Omit<TaskOptions<Output>, \"perform\" | \"cache\"> & MixedAgentTaskOptions<T> & TaskResultSelection<DispatchResult<T> | FileDispatchResult<T>, Output>): Task<Output>",
       "<T>(options: Omit<TaskOptions<FileDispatchResult<T>>, \"perform\" | \"cache\"> & FileAgentTaskOptions<T>): Task<FileDispatchResult<T>>",
       "<T>(options: Omit<TaskOptions<DispatchResult<T>>, \"perform\" | \"cache\"> & AgentTaskOptions<T>): Task<DispatchResult<T>>",
       "<T>(options: Omit<TaskOptions<DispatchResult<T> | FileDispatchResult<T>>, \"perform\" | \"cache\"> & MixedAgentTaskOptions<T>): Task<DispatchResult<T> | FileDispatchResult<T>>"

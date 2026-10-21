@@ -73,6 +73,8 @@ export const fix = defineTask({
 
 A checkpoint is limited to 16 MiB. Store large payloads as [artifacts](../artifacts/) and return their reference.
 
+Use `defineAgentTask({ sandbox, request, select: result => ({ text: result.text }) })` to project a shared sandbox task directly. The selector runs after usage accounting and can be asynchronous. It does not enable caching: saving the completed result and skipping future effects are separate decisions.
+
 ## Keep the checkpoint identity
 
 A checkpoint only resumes the workflow that wrote it. `start()` rejects a checkpoint whose identity differs.

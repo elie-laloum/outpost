@@ -73,6 +73,8 @@ export const fix = defineTask({
 
 Un checkpoint est limité à 16 Mio. Stockez les contenus volumineux comme [artefacts](../artifacts/) et renvoyez leur référence.
 
+Utilisez `defineAgentTask({ sandbox, request, select: result => ({ text: result.text }) })` pour projeter directement une tâche utilisant une sandbox partagée. Le sélecteur intervient après comptabilisation de la consommation et peut être asynchrone. Il n’active pas le cache : sauvegarder un résultat terminé et éviter de futurs effets sont deux décisions distinctes.
+
 ## Conserver l’identité du checkpoint
 
 Un checkpoint ne reprend que le workflow qui l’a écrit. `start()` refuse un checkpoint dont l’identité diffère.

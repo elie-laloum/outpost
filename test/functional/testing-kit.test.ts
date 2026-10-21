@@ -471,3 +471,51 @@ test("memory script boundaries reject malformed recipes before executing", async
     /own their/,
   );
 });
+
+test("agent task projections persist without replaying agent effects", async (t) => {
+  const { createWorkflowCheckpointStore } =
+    await import("../../src/workflows.ts");
+  const { createLocalTransport } = await import("../../src/core.ts");
+  const root = await repository(t);
+  await using sandbox = await createSandbox({
+    repository: root,
+    sandboxProvider: createMemorySandboxProvider(),
+    logging: false,
+  });
+  const agent = scriptedAgent({
+    turns: [{ text: "selected", usage: { input: 2, cached: 0, output: 3 } }],
+  });
+  const task = defineAgentTask({
+    key: "project",
+    sandbox,
+    request: () => ({ agent, brief }),
+    select: async (result) => ({ text: result.text }),
+  });
+  const workflow = defineWorkflow("projected-agent", [task]);
+  const checkpoint = {
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
+        directory: join(root, "checkpoints"),
+      }),
+    }),
+    runId: "projection",
+    version: "1",
+  };
+  const result = await workflow.start({ checkpoint });
+  result.unwrap();
+  assert.equal(result.value(task).text, "selected");
+  const resumed = await workflow.start({ checkpoint });
+  resumed.unwrap();
+  assert.equal(resumed.value(task).text, "selected");
+  assert.throws(
+    () =>
+      defineAgentTask({
+        key: "cached",
+        sandbox,
+        request: () => ({ agent, brief }),
+        select: (result) => result.text,
+        ...{ cache: { key: "unsafe" } },
+      }),
+    /JSON projection/,
+  );
+});

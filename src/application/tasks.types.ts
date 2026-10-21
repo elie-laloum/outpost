@@ -73,3 +73,7 @@ export type FileIsolatedCommandRequest = FileSandboxOptions & {
 
 export type IsolatedTaskRequest<T> = SandboxOptions &
   DispatchOptions<T> & { readonly agent: DispatchAgent };
+
+export interface TaskResultSelection<Result, Output> {
+  select(result: Result): Output | Promise<Output>;
+}
