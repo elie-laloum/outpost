@@ -7,6 +7,9 @@ on:
   workflow_call:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 jobs:
   documentation:
     uses: ./.github/workflows/documentation.yml
@@ -27,24 +30,7 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      - run: node scripts/recipe-catalog.mjs
-      - run: node scripts/recipe-schemas.mjs
-      - run: node scripts/recipe-native-schemas.mjs
-      - run: node --test scripts/recipe-parity-path.test.mjs
-      - run: node scripts/recipe-parity.mjs
-      - run: node scripts/recipe-component-docs.mjs
-      - run: bun run architecture
       - run: bun run build
-      - run: bun run typecheck
-      - name: Validate Windows file workspace and recipe portability
-        if: runner.os == 'Windows'
-        run: >-
-          node --test test/unit/publication-directory-modes.test.ts
-          test/functional/file-workspaces.test.ts
-          test/functional/file-workspace-recovery.test.ts
-          test/functional/file-publication-report.test.ts
-          test/functional/recipe-durable.test.ts
-          test/functional/recipe-services.test.ts
       - run: node --test examples/64-yaml-recipes/index.ts
       - run: node --test examples/65-recipe-observation/index.ts
       - run: node --test examples/66-recipe-components/index.ts
@@ -54,15 +40,71 @@ jobs:
       - run: node --test examples/70-recipe-services/index.ts
       - run: node --test examples/71-recipe-speculation/index.ts
       - run: node --test examples/72-recipe-cli-dialogue/index.ts
-      - run: bun run format:check
       - run: bun run test:package
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
       # braces <=3.0.3 (via @daytona/sdk) has no patched release yet; drop the ignore once one ships.
       - run: bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm
+      - run: node scripts/recipe-catalog.mjs
+      - run: node scripts/recipe-schemas.mjs
+      - run: node scripts/recipe-native-schemas.mjs
+      - run: node --test scripts/recipe-parity-path.test.mjs
+      - run: node --test scripts/publish-image.test.mjs
+      - run: node scripts/recipe-parity.mjs
+      - run: node scripts/recipe-component-docs.mjs
+      - run: bun run architecture
+      - run: bun run typecheck
+      - run: bun run format:check
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
       - run: bun run coverage
       - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
         with:
-          name: coverage-${{ matrix.os }}
+          name: coverage-ubuntu-latest
           path: coverage/lcov.info
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+        shard: [1, 2, 3]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Run unit and functional tests
+        run: node --test --test-shard=${{ matrix.shard }}/3 'test/unit/*.test.ts' 'test/functional/*.test.ts'
   redis:
     strategy:
       fail-fast: false
@@ -133,7 +175,6 @@ jobs:
       - run: node test/fixtures/codex-compatible.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
-      - run: bun run build
       - name: Validate installed file recipes on a host without Git
         if: matrix.engine == 'docker'
         run: bun run test:package

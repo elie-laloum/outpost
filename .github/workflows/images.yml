@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [harness, codex, claude, antigravity, copilot, kimi]
+        image: [harness, codex, claude, antigravity, copilot, kimi, egress]
         platform:
           - { runner: ubuntu-latest, arch: amd64 }
           - { runner: ubuntu-24.04-arm, arch: arm64 }
@@ -34,18 +34,44 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - name: Eject the official recipe
+        if: matrix.image != 'egress'
         run: node src/cli/main.ts image eject --image ${{ matrix.image }} --directory "$RUNNER_TEMP/image"
       - name: Build for the published agent user (1000:1000)
+        if: matrix.image != 'egress'
         run: node src/cli/main.ts image build --directory "$RUNNER_TEMP/image" --tag outpost-${{ matrix.image }}:ci --uid 1000 --gid 1000
-      - name: Smoke test with Docker
-        run: node scripts/image-smoke.mjs docker outpost-${{ matrix.image }}:ci ${{ matrix.image }}
-      - name: Smoke test with rootless Podman
+      - name: Build the egress companion
+        if: matrix.image == 'egress'
         run: |
-          docker save outpost-${{ matrix.image }}:ci | podman load
-          node scripts/image-smoke.mjs podman outpost-${{ matrix.image }}:ci ${{ matrix.image }}
-      - run: docker save outpost-${{ matrix.image }}:ci -o "$RUNNER_TEMP/image.tar"
+          bun run build
+          docker build -t outpost-egress:ci -f images/egress/Dockerfile .
+          docker pull docker.io/library/node:24-slim
+          podman pull docker.io/library/node:24-slim
+      - name: Smoke test with Docker
+        if: matrix.image != 'egress'
+        run: node scripts/image-smoke.mjs docker outpost-${{ matrix.image }}:ci ${{ matrix.image }}
+      - name: Validate egress with Docker
+        if: matrix.image == 'egress'
+        run: node --test test/container-egress.test.ts
+        env:
+          OUTPOST_CONTAINER_ENGINE: docker
+          OUTPOST_EGRESS_IMAGE: outpost-egress:ci
+      - name: Load the tested image into rootless Podman
+        run: docker save outpost-${{ matrix.image }}:ci | podman load
+      - name: Smoke test with rootless Podman
+        if: matrix.image != 'egress'
+        run: node scripts/image-smoke.mjs podman outpost-${{ matrix.image }}:ci ${{ matrix.image }}
+      - name: Validate egress with rootless Podman
+        if: matrix.image == 'egress'
+        run: node --test test/container-egress.test.ts
+        env:
+          OUTPOST_CONTAINER_ENGINE: podman
+          OUTPOST_EGRESS_IMAGE: outpost-egress:ci
+      - if: inputs.publish
+        run: docker save outpost-${{ matrix.image }}:ci -o "$RUNNER_TEMP/image.tar"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: inputs.publish
         with:
+          compression-level: 0
           name: image-${{ matrix.image }}-${{ matrix.platform.arch }}
           path: ${{ runner.temp }}/image.tar
           retention-days: 7
@@ -55,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [harness, codex, claude, antigravity, copilot, kimi]
+        image: [harness, codex, claude, antigravity, copilot, kimi, egress]
     runs-on: ubuntu-latest
     environment: images
     permissions:
@@ -83,20 +109,7 @@ jobs:
         env:
           REPOSITORY: ${{ github.repository }}
           NAME: ${{ matrix.image }}
-        run: |
-          image="ghcr.io/${REPOSITORY,,}/$NAME"
-          version=$(node -p 'require("./package.json").version')
-          run="sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          for arch in amd64 arm64; do
-            docker load -i "$RUNNER_TEMP/image-$NAME-$arch/image.tar"
-            docker tag "outpost-$NAME:ci" "$image:$run-$arch"
-            docker push "$image:$run-$arch"
-          done
-          docker buildx imagetools create -t "$image:$run" -t "$image:$version" "$image:$run-amd64" "$image:$run-arm64"
-          digest=$(docker buildx imagetools inspect "$image:$run" --format '{{.Manifest.Digest}}')
-          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
-          echo "image=$image" >> "$GITHUB_OUTPUT"
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+        run: bash scripts/publish-image.sh
       - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-name: ${{ steps.publish.outputs.image }}
@@ -126,7 +139,11 @@ jobs:
         with:
           pattern: digest-*
           path: ${{ runner.temp }}/digests
-      - name: Print the record command
+      - name: Print the record commands
+        env:
+          REPOSITORY: ${{ github.repository }}
         run: |
-          args=$(cat "$RUNNER_TEMP"/digests/*/digest.txt | sort | tr '\n' ' ')
+          args=$(cat "$RUNNER_TEMP"/digests/*/digest.txt | sort | sed '/^egress=/d' | tr '\n' ' ')
+          egress=$(sed 's/^egress=//' "$RUNNER_TEMP/digests/digest-egress/digest.txt")
           echo "Record the verified digests before releasing Outpost: node scripts/record-images.mjs $args" >> "$GITHUB_STEP_SUMMARY"
+          echo "Record the verified companion: node scripts/record-egress-image.mjs ghcr.io/${REPOSITORY,,}/egress@$egress" >> "$GITHUB_STEP_SUMMARY"

@@ -163,7 +163,7 @@ Install root dependencies with `bun install --frozen-lockfile`; install document
 | Documentation content or site configuration                           | `bun run build`, `bun run docs:check`, `bun run docs:build`, `bun run docs:test`, `bun run docs:test:browser`. |
 | Any changed tracked content                                           | Prettier check on changed files; full `bun run format:check` before release.                                   |
 
-CI checks Windows, macOS and Linux, real Docker/Podman execution, package consumption, coverage, formatting, documentation and dependency audits. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
+CI runs the full unit/functional suite with coverage on Linux and in three test shards without instrumentation on Windows and macOS. Static checks run once on Linux; package consumption and recipe examples run on all three systems. Real Docker/Podman execution, Redis, documentation and dependency audits remain required. New pushes cancel superseded branch/PR runs; release-tag verification is not cancelled. The `Images` workflow builds and publishes agent images and the egress companion together, testing the same image bytes with Docker and rootless Podman on amd64/arm64. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
 
 ## Documentation
 

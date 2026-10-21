@@ -18,7 +18,7 @@ Omitting `egressImage` uses the public Linux amd64/arm64 image pinned in `src/pr
 
 ## Publish and register a default
 
-The `Egress image` workflow builds and tests on Docker and Podman, on Linux amd64 and arm64 runners. Publication is explicit: enable `OUTPOST_EGRESS_IMAGE_PUBLISH`, configure the protected `egress-image` environment, and dispatch with `publish: true`. It publishes tested image bytes to `ghcr.io/elie-laloum/outpost/egress`, attests the digest and verifies the attestation. Ensure the package is public so ordinary consumers can pull it without registry credentials.
+The `Images` workflow includes `egress` in the same build and publication matrices as the agent images. Each Linux amd64/arm64 image is built once and tested with Docker and rootless Podman before publication. Publication is explicit: enable `OUTPOST_IMAGES_PUBLISH`, configure the protected `images` environment, and dispatch with `publish: true`. The former `OUTPOST_EGRESS_IMAGE_PUBLISH` variable and `egress-image` environment are no longer used. It publishes tested image bytes to `ghcr.io/elie-laloum/outpost/egress`, attests the digest and verifies the attestation. Ensure the package is public so ordinary consumers can pull it without registry credentials.
 
 After reviewing the workflow result, run its `node scripts/record-egress-image.mjs ghcr.io/elie-laloum/outpost/egress@sha256:...` instruction. Commit the actual verified digest before publishing Outpost. Do not invent a digest or label a local build as published. Publication assembles the two tested architectures into a manifest list. Verify the attestation and anonymous image availability before registering each new default. Source builds target the local architecture.
 
