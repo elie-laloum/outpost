@@ -1,19 +1,33 @@
 import assert from "node:assert/strict";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { authenticateAgent } from "../../src/application/agent-authentication.ts";
 import { credentialInstaller } from "../../src/application/credential-installer.constants.ts";
+import { configurationInstaller } from "../../src/application/configuration-installer.constants.ts";
 import { createAgent } from "../../src/domain/agent.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
 import type { Command } from "../../src/domain/command.types.ts";
-import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
+import type {
+  SandboxLease,
+  SandboxProvider,
+} from "../../src/domain/sandbox.types.ts";
 import {
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
   createKimiHarness,
   createSandbox,
+  createObservation,
 } from "../../src/index.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
@@ -248,6 +262,173 @@ test("sandboxes authenticate each selected adapter once and merge credentials in
   for (const selected of [first, first, second, first])
     await sandbox.dispatch({ agent: selected, brief: { text: "run" } });
   assert.deepEqual(plans, ["first", "second", "first"]);
+});
+
+test("Git preparation retries failed configuration and refreshes variables without repeating warm authentication", async (t) => {
+  const root = await repository(t);
+  await mkdir(join(root, ".outpost"), { recursive: true });
+  const environment = join(root, ".outpost", ".env");
+  await writeFile(environment, "OUTPOST_PREPARATION_VALUE=first\n");
+  let authentications = 0;
+  const configurations: string[] = [];
+  const operations: string[] = [];
+  await using observation = createObservation({
+    sinks: [
+      {
+        observe(value) {
+          if (
+            value.event.kind === "operation" &&
+            value.event.name.startsWith("agent.")
+          )
+            operations.push(`${value.event.name}:${value.event.status}`);
+        },
+      },
+    ],
+  });
+  const agent: CliAgent = {
+    ...scripted(
+      "console.log(JSON.stringify({kind:'result',text:process.env.OUTPOST_PREPARATION_VALUE + ':' + process.env.OUTPOST_PREPARATION_TOKEN}))",
+    ),
+    credentials() {
+      authentications++;
+      return {
+        variables: { OUTPOST_PREPARATION_TOKEN: "credential" },
+        host: [],
+        files: [],
+        commands: [],
+      };
+    },
+    configuration(variables) {
+      configurations.push(variables.OUTPOST_PREPARATION_VALUE!);
+      if (configurations.length === 1) throw new Error("configuration refused");
+      return { files: [] };
+    },
+  };
+  await using sandbox = await createSandbox({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    logging: false,
+    observation,
+  });
+  await assert.rejects(
+    sandbox.dispatch({ agent, brief: { text: "run" } }),
+    /configuration refused/,
+  );
+  assert.equal(
+    (await sandbox.dispatch({ agent, brief: { text: "run" } })).text,
+    "first:credential",
+  );
+  await writeFile(environment, "OUTPOST_PREPARATION_VALUE=second\n");
+  assert.equal(
+    (await sandbox.dispatch({ agent, brief: { text: "run" } })).text,
+    "second:credential",
+  );
+  assert.equal(authentications, 2);
+  assert.deepEqual(configurations, ["first", "first"]);
+  await observation.flush();
+  assert.equal(
+    operations.filter((event) => event === "agent.authenticate:finished")
+      .length,
+    2,
+  );
+  assert.equal(
+    operations.filter((event) => event === "agent.configure:failed").length,
+    1,
+  );
+  assert.equal(
+    operations.filter((event) => event === "agent.configure:finished").length,
+    1,
+  );
+});
+
+test("file preparation uses explicit variables on each dispatch and configures through the authenticated lease", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "outpost-file-authentication-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const directory = join(root, "runtime");
+  await mkdir(join(directory, ".outpost"), { recursive: true });
+  await writeFile(
+    join(directory, ".outpost", ".env"),
+    "OUTPOST_PREPARATION_UNDECLARED=forbidden\n",
+  );
+  const local = createLocalSandboxProvider({
+    variables: { OUTPOST_PREPARATION_VALUE: "provider" },
+  });
+  const installations: Command[] = [];
+  const sandboxProvider: SandboxProvider = {
+    ...local,
+    workspaces: {
+      ...local.workspaces!,
+      async acquire(context) {
+        const lease = await local.workspaces!.acquire(context);
+        return {
+          ...lease,
+          home: join(root, "home"),
+          invoke(command) {
+            if (command.arguments?.[1] === configurationInstaller)
+              installations.push(command);
+            return lease.invoke(command);
+          },
+        };
+      },
+    },
+  };
+  let authentications = 0;
+  const configurations: string[] = [];
+  const fixture = scripted(
+    "console.log(JSON.stringify({kind:'result',text:process.env.OUTPOST_PREPARATION_VALUE + ':' + process.env.OUTPOST_PREPARATION_TOKEN}))",
+  );
+  const agent: CliAgent = {
+    ...fixture,
+    fileWorkspaces: { dispatch: true },
+    variables: { OUTPOST_PREPARATION_VALUE: "agent" },
+    credentials(variables) {
+      assert.equal(variables.OUTPOST_PREPARATION_VALUE, "agent");
+      assert.equal(variables.OUTPOST_PREPARATION_UNDECLARED, undefined);
+      authentications++;
+      return {
+        variables: { OUTPOST_PREPARATION_TOKEN: "credential" },
+        host: [],
+        files: [],
+        commands: [],
+      };
+    },
+    configuration(variables) {
+      configurations.push(variables.OUTPOST_PREPARATION_VALUE!);
+      assert.equal(variables.OUTPOST_PREPARATION_TOKEN, undefined);
+      return {
+        files: [{ path: "settings.json", entries: { configured: true } }],
+      };
+    },
+    request(input) {
+      return {
+        ...fixture.request(input),
+        variables: { OUTPOST_PREPARATION_TOKEN: "command" },
+      };
+    },
+  };
+  await using sandbox = await createSandbox({
+    workspaceSource: { kind: "ephemeral" },
+    runtime: { directory },
+    sandboxProvider,
+    variables: { OUTPOST_PREPARATION_VALUE: "sandbox" },
+    logging: false,
+  });
+  for (let i = 0; i < 2; i++)
+    assert.equal(
+      (await sandbox.dispatch({ agent, brief: { text: "run" } })).text,
+      "agent:command",
+    );
+  assert.equal(authentications, 2);
+  assert.deepEqual(configurations, ["agent", "agent"]);
+  assert.equal(installations.length, 2);
+  for (const command of installations) {
+    assert.equal(command.variables?.OUTPOST_PREPARATION_TOKEN, "credential");
+    assert.equal(command.variables?.OUTPOST_PREPARATION_VALUE, "agent");
+  }
+  assert.deepEqual(
+    JSON.parse(await readFile(join(root, "home", "settings.json"), "utf8")),
+    { configured: true },
+  );
 });
 
 test("Kimi account defaults to global and installs the scoped OAuth file and provisions the matching region", async (t) => {

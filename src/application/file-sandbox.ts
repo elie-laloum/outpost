@@ -17,6 +17,7 @@ import {
   workspaceManifestFingerprint,
 } from "../infrastructure/workspace-files.ts";
 import { authenticateAgent } from "./agent-authentication.ts";
+import { prepareAgentExecution } from "./agent-preparation.ts";
 import { configureAgent } from "./agent-configuration.ts";
 import { storageFor } from "./agent-storage.ts";
 import { execute } from "./execution.ts";
@@ -518,30 +519,13 @@ export async function createFileSandbox(
                       ...options.variables,
                       ...agent.variables,
                     };
-                    const credentials =
-                      agent.kind === "cli"
-                        ? await authenticateAgent(
-                            agent,
-                            variables,
-                            lease,
-                            options.sandboxProvider.placement,
-                            signal,
-                          )
-                        : {};
-                    const executionLease = {
-                      ...lease,
-                      invoke: (
-                        command: import("../domain/command.types.ts").Command,
-                      ) =>
-                        lease.invoke({
-                          ...command,
-                          variables: {
-                            ...variables,
-                            ...credentials,
-                            ...command.variables,
-                          },
-                        }),
-                    };
+                    const { executionLease } = await prepareAgentExecution({
+                      agent,
+                      lease,
+                      placement: options.sandboxProvider.placement,
+                      variables,
+                      signal,
+                    });
                     if (agent.kind === "cli") {
                       await configureAgent(
                         agent,

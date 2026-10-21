@@ -1,10 +1,9 @@
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import type { Agent } from "../domain/agent.types.ts";
-import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { resolveVariables } from "../infrastructure/settings.ts";
-import { authenticateAgent } from "./agent-authentication.ts";
+import { prepareAgentExecution } from "./agent-preparation.ts";
 import { configureAgent } from "./agent-configuration.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { storageFor } from "./agent-storage.ts";
@@ -43,23 +42,19 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       sandboxProvider.variables,
     );
     const adapter = prepared.get(selected)!;
-    if (
-      adapter.kind === "cli" &&
-      authenticated.get(adapter.name)?.adapter !== adapter
-    ) {
-      const credentials = await observedOperation(
-        observation,
-        "sandbox",
-        "agent.authenticate",
-        async () =>
-          authenticateAgent(
-            adapter,
-            variables,
-            runtime,
-            sandboxProvider.placement,
-            signal,
-          ),
-      );
+    const cached = authenticated.get(adapter.name);
+    const { credentials, executionLease } = await prepareAgentExecution({
+      agent: adapter,
+      lease: runtime,
+      placement: sandboxProvider.placement,
+      variables,
+      signal,
+      ...(observation ? { observation } : {}),
+      ...(adapter.kind === "cli" && cached?.adapter === adapter
+        ? { credentials: cached.variables }
+        : {}),
+    });
+    if (adapter.kind === "cli" && cached?.adapter !== adapter) {
       if (adapter.configuration)
         await observedOperation(
           observation,
@@ -76,20 +71,10 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
         );
       authenticated.set(adapter.name, { adapter, variables: credentials });
     }
-    const credentials =
-      adapter.kind === "cli" ? authenticated.get(adapter.name)?.variables : {};
     return {
       selected,
       adapter,
-      executionLease: {
-        ...runtime,
-        invoke(command: Command) {
-          return runtime.invoke({
-            ...command,
-            variables: { ...variables, ...credentials, ...command.variables },
-          });
-        },
-      },
+      executionLease,
     };
   };
   const conversationKey = (agent: Agent, id: string) =>
