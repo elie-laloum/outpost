@@ -11537,5 +11537,25 @@
   "TaskInputsOptions.perform": [
     "Run the task with its named dependency outputs and ordinary task context.",
     "Exécute la tâche avec les résultats de ses dépendances nommées et le contexte habituel."
+  ],
+  "readWorkflowJob.job": [
+    "Queue record of a job handled by defineWorkflowJob(), such as the result of queue.get(); its input must carry the trigger runId.",
+    "Enregistrement de queue d’un job traité par defineWorkflowJob(), par exemple le résultat de queue.get() ; son entrée doit porter le runId du déclencheur."
+  ],
+  "WorkflowJobState.jobStatus": [
+    "Queue delivery status. done means the handler saved a settled workflow result, which may still be paused or waiting for input.",
+    "Statut de livraison dans la queue. done signifie que le handler a enregistré un résultat de workflow établi, qui peut encore être en pause ou attendre une réponse."
+  ],
+  "WorkflowJobState.runId": [
+    "Checkpoint run ID carried by the job input; use it to answer, decide or inspect the run.",
+    "Identifiant d’exécution de checkpoint porté par l’entrée du job ; il sert à répondre, décider ou inspecter l’exécution."
+  ],
+  "WorkflowJobState.workflowStatus": [
+    "Saved workflow status; absent while the job is pending or active, or when the handler failed before saving a summary.",
+    "Statut enregistré du workflow ; absent tant que le job est pending ou active, ou si le handler a échoué avant d’enregistrer un résumé."
+  ],
+  "WorkflowJobState.nextAction": [
+    "Operator action for the saved workflow status: none, answer, inspect-pause or inspect. inspect never authorizes replay or checkpoint-owner recovery.",
+    "Action attendue pour le statut enregistré du workflow : none, answer, inspect-pause ou inspect. inspect n’autorise jamais le rejeu ni la récupération du propriétaire d’un checkpoint."
   ]
 }

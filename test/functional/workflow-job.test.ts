@@ -19,6 +19,7 @@ import {
   serveTriggers,
   createSqliteTaskQueue,
   defineWorkflowJob,
+  readWorkflowJob,
 } from "../../src/queues.ts";
 import { createLocalTransport } from "../../src/core.ts";
 import type { QueueHandler, QueueJob, TaskQueue } from "../../src/queues.ts";
@@ -203,6 +204,12 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
   assert.equal(value.status, "paused");
   assert.equal(value.workflowStatus, "paused");
   assert.equal(value.nextAction, "inspect-pause");
+  assert.deepEqual(readWorkflowJob(paused), {
+    jobStatus: "done",
+    runId: "review",
+    workflowStatus: "paused",
+    nextAction: "inspect-pause",
+  });
   assert.deepEqual(
     value.pauses.map(({ key, kind, prompt, actors }) => ({
       key,
@@ -238,13 +245,38 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
   const conflict = await settle(queue, "review-2");
   assert.equal(conflict.status, "failed");
   assert.match(conflict.result?.error ?? "", /checkpoint|identity/i);
+  assert.deepEqual(readWorkflowJob(conflict), {
+    jobStatus: "failed",
+    runId: "review",
+  });
   await publish("broken-1", "broken", { runId: "broken", input: null });
   const failed = await settle(queue, "broken-1");
   assert.equal(failed.status, "failed");
   assert.match(failed.result?.error ?? "", /^Workflow failed: .*boom/);
-  assert.equal(
-    (plain(failed.result?.value) as { status: string }).status,
-    "failed",
+  assert.deepEqual(readWorkflowJob(failed), {
+    jobStatus: "failed",
+    runId: "broken",
+    workflowStatus: "failed",
+    nextAction: "inspect",
+  });
+  const idle = await publish("idle-1", "idle", { runId: "later", input: null });
+  assert.deepEqual(readWorkflowJob(idle), {
+    jobStatus: "pending",
+    runId: "later",
+  });
+  assert.deepEqual(
+    readWorkflowJob({
+      ...idle,
+      status: "done",
+      result: { value: { runId: "later", status: "waiting-input" } },
+    }),
+    {
+      jobStatus: "done",
+      runId: "later",
+      workflowStatus: "waiting-input",
+      nextAction: "answer",
+    },
+    "summaries saved before workflowStatus still project their status",
   );
   await publish("malformed", "broken", { input: null });
   assert.match((await settle(queue, "malformed")).result?.error ?? "", /runId/);

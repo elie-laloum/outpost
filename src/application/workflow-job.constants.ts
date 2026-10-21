@@ -1,3 +1,6 @@
+import type { WorkflowResult } from "../domain/workflow.types.ts";
+import type { WorkflowJobNextAction } from "./workflow-job.types.ts";
+
 export const workflowJobNextActions = {
   done: "none",
   failed: "inspect",
@@ -5,4 +8,6 @@ export const workflowJobNextActions = {
   rejected: "inspect",
   paused: "inspect-pause",
   "waiting-input": "answer",
-} as const;
+} as const satisfies Readonly<
+  Record<WorkflowResult["status"], WorkflowJobNextAction>
+>;

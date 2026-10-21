@@ -66,12 +66,17 @@ export type {
   TriggerCommand,
   TriggerLabel,
 } from "./adapters/triggers/triggers.types.ts";
-export { defineWorkflowJob } from "./application/workflow-job.ts";
+export {
+  defineWorkflowJob,
+  readWorkflowJob,
+} from "./application/workflow-job.ts";
 export type {
   WorkflowJobCheckpoint,
   WorkflowJobContext,
+  WorkflowJobNextAction,
   WorkflowJobOptions,
   WorkflowJobStartOptions,
+  WorkflowJobState,
 } from "./application/workflow-job.types.ts";
 export type {
   RunSchedulesOptions,

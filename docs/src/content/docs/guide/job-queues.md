@@ -137,6 +137,31 @@ API: [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue
 
 ## Distinguish job completion from workflow completion
 
-A job handled by `defineWorkflowJob()` can be `done` while its workflow is `paused` or `waiting-input`: the handler successfully saved that settled result. Read the queue record’s `status` for delivery and `job.result.value.workflowStatus` for the workflow. The summary retains its earlier `status` field and adds `nextAction` (`none`, `answer`, `inspect-pause` or `inspect`) alongside `runId`.
+A job handled by `defineWorkflowJob()` can be `done` while its workflow is `paused` or `waiting-input`: the handler saved that settled result. `readWorkflowJob(job)` returns both states with the run ID and the next action.
+
+```ts title="job-state.ts"
+import {
+  createSqliteTaskQueue,
+  readWorkflowJob,
+} from "@elie-laloum/outpost/queues";
+
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+try {
+  const job = await queue.get("trigger:/github:d-1");
+  // { jobStatus: "done", runId: "issue-42", workflowStatus: "waiting-input", nextAction: "answer" }
+  if (job) console.log(readWorkflowJob(job));
+} finally {
+  queue.close();
+}
+```
+
+| `nextAction`    | Workflow status                     | Next step                               |
+| --------------- | ----------------------------------- | --------------------------------------- |
+| `none`          | `done`                              | Nothing to do                           |
+| `answer`        | `waiting-input`                     | Answer the question with the run ID     |
+| `inspect-pause` | `paused`                            | Inspect the approval or quota pause     |
+| `inspect`       | `failed`, `cancelled` or `rejected` | Inspect the error before any new action |
+
+`workflowStatus` is absent while the job is pending or active, or when the handler failed before saving a summary. The stored summary keeps its `status` field for earlier readers.
 
 Answer questions or inspect approval and quota pauses using the workflow run ID. Delivery retries, task retries and checkpoint resumption remain separate operations. An `inspect` action does not authorize replay or checkpoint-owner recovery; stop the owner and provide the required authorization explicitly.

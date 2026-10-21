@@ -3538,6 +3538,11 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/readworkflowjob",
+        "label": "readWorkflowJob",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/triggeroutcome",
         "label": "TriggerOutcome",
         "attrs": { "data-api-kind": "type" }
@@ -3555,6 +3560,11 @@
       {
         "slug": "reference/workflowjobstartoptions",
         "label": "WorkflowJobStartOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workflowjobnextaction",
+        "label": "WorkflowJobNextAction",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -3680,6 +3690,11 @@
       {
         "slug": "reference/workflowjobcheckpoint",
         "label": "WorkflowJobCheckpoint",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowjobstate",
+        "label": "WorkflowJobState",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

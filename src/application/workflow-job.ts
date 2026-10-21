@@ -3,12 +3,14 @@ import { createHash } from "node:crypto";
 import { queueMaxStringLength } from "../domain/task-queue.constants.ts";
 import { triggerJobInput } from "../domain/trigger-job.ts";
 import { canonicalJson } from "../domain/workflow/canonical-json.ts";
-import type { QueueResult } from "../domain/task-queue.types.ts";
+import type { QueueJob, QueueResult } from "../domain/task-queue.types.ts";
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 import type { QueueHandler } from "./queue-worker.types.ts";
+import type { WorkflowResult } from "../domain/workflow.types.ts";
 import type {
   WorkflowJobOptions,
   WorkflowJobOutcome,
+  WorkflowJobState,
 } from "./workflow-job.types.ts";
 
 export function workflowJobVersion(
@@ -107,4 +109,29 @@ export function workflowJobResult(
     usage: result.usage.tokens,
     ...(failed ? { error: failure(result) } : {}),
   };
+}
+
+/** Projects a workflow job's delivery state beside the saved workflow state. */
+export function readWorkflowJob(job: QueueJob): WorkflowJobState {
+  const { runId } = triggerJobInput(job.input);
+  const value = job.result?.value;
+  const summary = Object.fromEntries(
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Object.entries(value)
+      : [],
+  );
+  const saved = summary.workflowStatus ?? summary.status;
+  if (!isWorkflowStatus(saved)) return { jobStatus: job.status, runId };
+  return {
+    jobStatus: job.status,
+    runId,
+    workflowStatus: saved,
+    nextAction: workflowJobNextActions[saved],
+  };
+}
+
+function isWorkflowStatus(value: unknown): value is WorkflowResult["status"] {
+  return (
+    typeof value === "string" && Object.hasOwn(workflowJobNextActions, value)
+  );
 }

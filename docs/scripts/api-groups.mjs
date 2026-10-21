@@ -206,7 +206,7 @@ export const groups = [
     title: ["Triggers", "Déclencheurs"],
     guide: "guide/webhooks",
     names:
-      "createCronSchedule runSchedules serveTriggers createGithubWebhook createGitlabWebhook createSlackSource createStandardWebhook labelAdded commandIssued defineWorkflowJob CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure TriggerJob TriggerJobInput TriggerRoute TriggerServerOptions TriggerServer TriggerFailure TriggerEvent TriggerHttpRequest TriggerOutcome TriggerReply TriggerSecret TriggerSource GithubWebhookOptions GitlabWebhookOptions GitlabSigningOptions GitlabTokenOptions SlackRequestOptions StandardWebhookOptions TriggerLabel TriggerCommand WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
+      "createCronSchedule runSchedules serveTriggers createGithubWebhook createGitlabWebhook createSlackSource createStandardWebhook labelAdded commandIssued defineWorkflowJob readWorkflowJob CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure TriggerJob TriggerJobInput TriggerRoute TriggerServerOptions TriggerServer TriggerFailure TriggerEvent TriggerHttpRequest TriggerOutcome TriggerReply TriggerSecret TriggerSource GithubWebhookOptions GitlabWebhookOptions GitlabSigningOptions GitlabTokenOptions SlackRequestOptions StandardWebhookOptions TriggerLabel TriggerCommand WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions WorkflowJobState WorkflowJobNextAction",
   },
   {
     id: "speculation",
@@ -309,7 +309,7 @@ const guidePages = {
   "cron-schedules":
     "createCronSchedule runSchedules CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure",
   "queued-workflows":
-    "defineWorkflowJob WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
+    "defineWorkflowJob readWorkflowJob WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions WorkflowJobState WorkflowJobNextAction",
 };
 
 export const symbolGuides = Object.fromEntries(

@@ -167,7 +167,7 @@ try {
     assert.equal(replaying.remainingTurns,1);
     assert.equal(new api.ReplayDivergence({kind:'exhausted',turn:2}).code,'replay');
     assert.equal(api.createCronSchedule('0 2 * * *',{timeZone:'Europe/Paris'}).next(new Date('2026-06-30T12:00:00Z')).toISOString(),'2026-07-01T00:00:00.000Z');
-    for (const name of ['runSchedules','serveTriggers','createGithubWebhook','createGitlabWebhook','createSlackSource','createStandardWebhook','labelAdded','commandIssued','defineWorkflowJob'])
+    for (const name of ['runSchedules','serveTriggers','createGithubWebhook','createGitlabWebhook','createSlackSource','createStandardWebhook','labelAdded','commandIssued','defineWorkflowJob','readWorkflowJob'])
       assert.equal(typeof api[name],'function',name);
     assert.equal(api.createGithubWebhook({secret:'smoke'}).name,'github');
     const transporter=api.createLocalTransport({directory:'consumer-store'});
@@ -347,7 +347,7 @@ const recordedCommits: WorkspaceCommitsEvent['kind'] = 'workspace-commits';
 const replayCoder: Agent | undefined = replaying;
 const replayLogging: Parameters<typeof dispatch>[0]['logging'] = {replayable:true};
 void readJournal;
-import { createCronSchedule, runSchedules, serveTriggers, createGithubWebhook, createGitlabWebhook, createSlackSource, createStandardWebhook, labelAdded, commandIssued, defineWorkflowJob, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type QueueHandler } from '@elie-laloum/outpost/queues'; import { createWorkflowCheckpointStore as triggerCheckpoints } from '@elie-laloum/outpost/workflows';
+import { createCronSchedule, runSchedules, serveTriggers, createGithubWebhook, createGitlabWebhook, createSlackSource, createStandardWebhook, labelAdded, commandIssued, defineWorkflowJob, readWorkflowJob, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type WorkflowJobState, type QueueHandler } from '@elie-laloum/outpost/queues'; import { createWorkflowCheckpointStore as triggerCheckpoints } from '@elie-laloum/outpost/workflows';
 const cronOptions: CronOptions = {timeZone:'UTC'};
 const nightly: CronSchedule = createCronSchedule('0 2 * * *',cronOptions);
 const triggerSchedule: TriggerSchedule = {name:'nightly',cron:nightly,handler:'audit',runId:(slot)=>slot.toISOString()};
@@ -371,8 +371,9 @@ const checkpoint: WorkflowJobCheckpoint = {store:triggerCheckpoints({transporter
 const jobStart: WorkflowJobStartOptions = {concurrency:1};
 const jobOptions: WorkflowJobOptions = {checkpoint,start:jobStart,workflow:(input,context: WorkflowJobContext)=>defineWorkflow(context.runId,[defineTask({key:'echo',perform:()=>input})])};
 const jobHandler: QueueHandler = defineWorkflowJob(jobOptions);
+const readJob: (job: Parameters<typeof readWorkflowJob>[0]) => WorkflowJobState = readWorkflowJob;
 const triggerServer: ((options: TriggerServerOptions)=>Promise<TriggerServer>) = serveTriggers;
-void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,triggerServer,runSchedules];
+void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,readJob,triggerServer,runSchedules];
 import { defineAgentProfile, type AgentProfile, type AgentProfileOptions, type AgentProfileHooks, type AgentProfileTool } from '@elie-laloum/outpost/core';
 const profileHooks: AgentProfileHooks = {claude:[defineClaudeHook({on:'PreToolUse',run:({event})=>{const tool:string=event.tool_name;void tool;}})],codex:[defineCodexHook({on:'Stop',run:()=>undefined})]};
 createClaudeHarness({profile:defineAgentProfile({hooks:profileHooks})});

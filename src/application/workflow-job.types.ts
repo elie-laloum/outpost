@@ -6,6 +6,7 @@ import type {
   WorkflowResult,
 } from "../domain/workflow.types.ts";
 import type { QueueHandlerContext } from "./queue-worker.types.ts";
+import type { QueueJob } from "../domain/task-queue.types.ts";
 
 export interface WorkflowJobContext extends QueueHandlerContext {
   readonly runId: string;
@@ -44,3 +45,15 @@ export type WorkflowJobOutcome = Pick<
   | "tasks"
   | "inputRequests"
 >;
+
+export type WorkflowJobNextAction =
+  "none" | "answer" | "inspect-pause" | "inspect";
+
+export interface WorkflowJobState {
+  /** Queue delivery state; `done` means the handler saved a settled workflow result. */
+  readonly jobStatus: QueueJob["status"];
+  readonly runId: string;
+  /** Absent until a handler saved the workflow result. */
+  readonly workflowStatus?: WorkflowResult["status"];
+  readonly nextAction?: WorkflowJobNextAction;
+}

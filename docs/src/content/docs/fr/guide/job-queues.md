@@ -135,6 +135,31 @@ API : [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueu
 
 ## Distinguer la fin du job de celle du workflow
 
-Un job traité par `defineWorkflowJob()` peut être `done` alors que son workflow est `paused` ou `waiting-input` : le handler a sauvegardé cet état arrêté avec succès. Lisez le `status` du job pour la livraison et `job.result.value.workflowStatus` pour le workflow. Le résumé conserve son ancien champ `status` et ajoute `nextAction` (`none`, `answer`, `inspect-pause` ou `inspect`) aux côtés de `runId`.
+Un job traité par `defineWorkflowJob()` peut être `done` alors que son workflow est `paused` ou `waiting-input` : le handler a sauvegardé cet état arrêté. `readWorkflowJob(job)` renvoie les deux états avec l’identifiant d’exécution et la prochaine action.
+
+```ts title="job-state.ts"
+import {
+  createSqliteTaskQueue,
+  readWorkflowJob,
+} from "@elie-laloum/outpost/queues";
+
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+try {
+  const job = await queue.get("trigger:/github:d-1");
+  // { jobStatus: "done", runId: "issue-42", workflowStatus: "waiting-input", nextAction: "answer" }
+  if (job) console.log(readWorkflowJob(job));
+} finally {
+  queue.close();
+}
+```
+
+| `nextAction`    | Statut du workflow                  | Étape suivante                                |
+| --------------- | ----------------------------------- | --------------------------------------------- |
+| `none`          | `done`                              | Rien à faire                                  |
+| `answer`        | `waiting-input`                     | Répondre à la question avec l’identifiant     |
+| `inspect-pause` | `paused`                            | Examiner la pause d’approbation ou de quota   |
+| `inspect`       | `failed`, `cancelled` ou `rejected` | Examiner l’erreur avant toute nouvelle action |
+
+`workflowStatus` est absent tant que le job est pending ou active, ou si le handler a échoué avant d’enregistrer un résumé. Le résumé enregistré conserve son champ `status` pour les lecteurs existants.
 
 Répondez aux questions ou examinez les pauses d’approbation et de quota avec l’identifiant du workflow. Les nouvelles tentatives de livraison, les retries de tâche et la reprise de checkpoint restent distincts. L’action `inspect` n’autorise ni le rejeu ni la récupération du propriétaire : arrêtez ce dernier et fournissez les autorisations explicites nécessaires.

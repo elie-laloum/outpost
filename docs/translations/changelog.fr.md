@@ -7,6 +7,7 @@
 - Lier chaque décodage typé par JSON Schema à un décodeur déclaré une seule fois avec son schéma et compilé au premier usage, et réserver la validation non typée aux schémas fournis par l’appelant. L’inspection et la récupération des workspaces réutilisent le décodeur des enregistrements de workspace ; l’alias interne `validateRecipeSchema` est supprimé.
 - Faire passer les derniers changements du cycle de vie des tâches (tentatives, résultats en cache, échecs, attente et réponses d’entrée, pauses de quota, pauses et décisions de gate) par des transitions nommées, pour que chaque changement de statut de workflow ait un seul responsable. Les statuts, événements et checkpoints ne changent pas.
 - Utiliser l’échéance totale partagée pour les appels d’outils, les hooks, les délais des workflows et des tâches en boucle, et les décisions System One ; fermer une échéance avec une raison arrête aussi le travail qui en dépend encore. Partager la validation des nombres de tokens entre adaptateurs de modèles, lecteurs de sessions, tours du harness, décisions et consommation déclarée. Les limites d’inactivité du streaming gardent leurs propres minuteurs renouvelables.
+- Ajouter `readWorkflowJob(job)` pour projeter le `jobStatus` d’un job de workflow dans la queue à côté de son `runId`, du `workflowStatus` enregistré et de `nextAction`, y compris pour les résumés enregistrés avant l’ajout de `workflowStatus`. Typer les prochaines actions avec `WorkflowJobNextAction` et documenter les nouveaux champs du résumé dans la référence de `defineWorkflowJob`.
 
 ## 13.0.0
 

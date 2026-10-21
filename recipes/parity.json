@@ -8731,6 +8731,16 @@
       "onError": "contract"
     }
   },
+  "./queues:readWorkflowJob": {
+    "signatures": ["(job: QueueJob): WorkflowJobState"],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/functional/workflow-job.test.ts",
+    "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
   "./queues:runQueueWorker": {
     "signatures": ["(options: QueueWorkerOptions): Promise<void>"],
     "options": {},
@@ -9183,6 +9193,16 @@
       "job": "contract"
     }
   },
+  "./queues:WorkflowJobNextAction": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {}
+  },
   "./queues:WorkflowJobOptions": {
     "signatures": [],
     "options": {
@@ -9233,6 +9253,26 @@
       "stopOnError": "contract",
       "telemetry": "contract",
       "observe": "contract"
+    }
+  },
+  "./queues:WorkflowJobState": {
+    "signatures": [],
+    "options": {
+      "jobStatus": "\"failed\" | \"active\" | \"done\" | \"cancelled\" | \"pending\"",
+      "runId": "string",
+      "workflowStatus": "\"rejected\" | \"failed\" | \"waiting-input\" | \"done\" | \"cancelled\" | \"paused\" | undefined",
+      "nextAction": "WorkflowJobNextAction | undefined"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "jobStatus": "contract",
+      "runId": "contract",
+      "workflowStatus": "contract",
+      "nextAction": "contract"
     }
   },
   "./queues/bullmq:BullMQTaskQueue": {
