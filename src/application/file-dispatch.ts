@@ -1,3 +1,5 @@
+import { dispatchInContext } from "./dispatch-context.ts";
+import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
 import { runCleanup } from "../domain/cleanup.ts";
 import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -45,12 +47,13 @@ export async function dispatchFiles<T>(
         };
   return observeDispatch(
     { ...options, logging },
-    (observed) =>
+    (observed, executionContext) =>
       dispatchFileOperation(
         { ...options, ...observed },
         onSettled,
         options.observation,
         factories,
+        executionContext,
       ),
     runtime,
   );
@@ -62,6 +65,7 @@ async function dispatchFileOperation<T>(
   continuationObservation:
     import("../domain/observation.types.ts").ObservationHub | undefined,
   factories: FileDispatchRuntime,
+  executionContext: DispatchExecutionContext,
 ): Promise<FileDispatchResult<T>> {
   for (const agent of dispatchCandidates(options.agent))
     await validateFileAgent(agent, options);
@@ -81,7 +85,11 @@ async function dispatchFileOperation<T>(
       { ...settings, workspace },
       onSettled,
     );
-    const execution = await sandbox.dispatch(options);
+    const execution = await dispatchInContext(
+      sandbox,
+      options,
+      executionContext,
+    );
     await sandbox.close({ preserve: true });
     const publications = [];
     for (const output of options.outputs ?? [])

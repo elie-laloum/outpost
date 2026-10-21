@@ -1,3 +1,5 @@
+import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
+import type { DispatchOptions } from "./execution.types.ts";
 import { observedOperation } from "../domain/observed-operation.ts";
 import type { ResourceOperationKind } from "../infrastructure/resource-activity.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -34,7 +36,10 @@ export async function createPreparedSandbox(
   const result: Sandbox = {
     workspace,
     root: runtime.root,
-    dispatch(settings) {
+    dispatch<T>(
+      settings: DispatchOptions<T>,
+      executionContext?: DispatchExecutionContext,
+    ) {
       validateDispatch(settings);
       return steeringScope(settings.steering, () =>
         exclusive("dispatch", () =>
@@ -50,6 +55,7 @@ export async function createPreparedSandbox(
             },
             (observed) => dispatchInSandbox(context, agents, result, observed),
             workspace.repository,
+            executionContext,
           ),
         ),
       );

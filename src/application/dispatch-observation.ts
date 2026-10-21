@@ -1,3 +1,4 @@
+import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
 import { openObservationSession } from "../domain/observation-session.ts";
 import { performance } from "node:perf_hooks";
 import type { UsageCost } from "../domain/pricing.types.ts";
@@ -29,15 +30,16 @@ import type { Journal } from "../infrastructure/journal.types.ts";
 import type { ObservedDispatchResult } from "./dispatch-observation.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 
-const active = new WeakSet<ObservationHub>();
-
 export async function observeDispatch<T, R extends ObservedDispatchResult>(
   options: DispatchOptions<T> & TaskUsageCapability,
-  action: (options: DispatchOptions<T>) => Promise<R>,
+  action: (
+    options: DispatchOptions<T>,
+    context: DispatchExecutionContext,
+  ) => Promise<R>,
   repository = process.cwd(),
+  context: DispatchExecutionContext = {},
 ): Promise<R> {
-  if (options.observation && active.has(options.observation))
-    return action(options);
+  if (context.observing) return action(options, context);
   const runId = options.runId ?? randomUUID();
   const owned = await openObservationSession(options.observation, {
     id: runId,
@@ -57,7 +59,10 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
 
 async function dispatchObservation<T, R extends ObservedDispatchResult>(
   options: DispatchOptions<T> & TaskUsageCapability,
-  action: (options: DispatchOptions<T>) => Promise<R>,
+  action: (
+    options: DispatchOptions<T>,
+    context: DispatchExecutionContext,
+  ) => Promise<R>,
   repository: string,
 ): Promise<R> {
   const started = performance.now();
@@ -127,7 +132,6 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
     options.redact,
   );
   const initialDropped = observation.dropped;
-  active.add(observation);
   observation.emit("sandbox", { kind: "dispatch-start" });
   const empty = (): Usage => ({ input: 0, cached: 0, output: 0 });
   let previous = empty(),
@@ -165,7 +169,7 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
     },
   };
   try {
-    const result = await action(observed);
+    const result = await action(observed, { observing: true });
     observation.emit("sandbox", {
       kind: "dispatch-finished",
       status: "done",
@@ -262,7 +266,6 @@ async function dispatchObservation<T, R extends ObservedDispatchResult>(
   async function finish(): Promise<void> {
     finishing = true;
     await observation.close();
-    active.delete(observation);
   }
 }
 

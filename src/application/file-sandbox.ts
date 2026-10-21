@@ -1,3 +1,5 @@
+import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
+import type { DispatchOptions } from "./execution.types.ts";
 import { createAgentConversationIndex } from "./agent-conversation-index.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
@@ -322,7 +324,10 @@ export async function createFileSandbox(
         ),
       );
     },
-    dispatch(settings) {
+    dispatch<T>(
+      settings: DispatchOptions<T>,
+      executionContext?: DispatchExecutionContext,
+    ) {
       const logging = settings.logging ?? options.logging;
       const log =
         logging === false || logging === "stdout"
@@ -532,6 +537,7 @@ export async function createFileSandbox(
               return outcome;
             },
             workspace.runtime.directory,
+            executionContext,
           ),
         ),
       );

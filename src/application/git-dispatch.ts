@@ -1,3 +1,5 @@
+import { dispatchInContext } from "./dispatch-context.ts";
+import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
 import { runCleanup } from "../domain/cleanup.ts";
 import type { RunReportDiff } from "../domain/run-report.types.ts";
 import { createRunReport, collectRunReportDiff } from "./run-report.ts";
@@ -26,11 +28,12 @@ export function dispatchGit<T = undefined>(
   return steeringScope(options.steering, () =>
     observeDispatch(
       options,
-      (observed) =>
+      (observed, executionContext) =>
         dispatchOperation(
           { ...configuration, ...observed },
           options,
           createSandbox,
+          executionContext,
         ),
       options.workspace?.repository ?? options.repository ?? process.cwd(),
     ),
@@ -41,6 +44,7 @@ async function dispatchOperation<T>(
   options: DispatchRequest<T>,
   original: DispatchRequest<T>,
   createSandbox: SandboxFactory,
+  executionContext: DispatchExecutionContext,
 ): Promise<DispatchResult<T>> {
   options.signal?.throwIfAborted();
   invariant(
@@ -70,6 +74,7 @@ async function dispatchOperation<T>(
         },
         original,
         createSandbox,
+        executionContext,
       );
       offset += passes;
       outputs.push(output);
@@ -128,7 +133,7 @@ async function dispatchOperation<T>(
   } = original;
   let successful = false;
   try {
-    const output = await sandbox.dispatch(options);
+    const output = await dispatchInContext(sandbox, options, executionContext);
     await sandbox.workspace.integrate();
     successful = true;
     const disposed = await sandbox.close();
