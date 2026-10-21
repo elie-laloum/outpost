@@ -62,7 +62,7 @@ function schema(type, component, path = "", ancestors = new Set()) {
   }
   if (path.endsWith(".client") || path === "client") return reference("object");
   const name = type.aliasSymbol?.name ?? type.symbol?.name;
-  if (name === "WorkflowJson") return {};
+  if (name === "WorkflowJson" || name === "JsonValue") return {};
   if (
     type.symbol?.declarations?.some((declaration) =>
       ts.isClassDeclaration(declaration),
@@ -301,3 +301,8 @@ for (const [file, code] of [
 console.log(
   `${Object.keys(contracts).length} native option contracts checked.`,
 );
+
+if (process.argv.includes("--write"))
+  console.log(
+    "Edit native-catalog.constants.ts and the owning TypeScript contracts; native schemas and factory descriptors are generated.",
+  );

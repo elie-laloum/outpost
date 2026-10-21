@@ -25,7 +25,7 @@ agents:
     authentication: account
 ```
 
-The recipe selects the configured `writer` role. Use a Git repository at `./project` with a `main` branch. The agent creates `welcome.md` on a separate branch. The current YAML validator still refuses native CLI harnesses in file workspaces, even where the TypeScript API advertises file capabilities; use the [Outpost harness](../recipe-harness/) for a file-only recipe.
+The recipe selects the configured `writer` role. Use a Git repository at `./project` with a `main` branch. The agent creates `welcome.md` on a separate branch. File recipes accept native CLI harnesses with demonstrated file-workspace capabilities. Unsupported dispatch, continuation and interactive combinations are refused; the [Outpost harness](../recipe-harness/) also supports file-only recipes with filesystem tools.
 
 ```yaml title="recipe.yaml"
 version: 3

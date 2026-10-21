@@ -56,7 +56,7 @@ API : [CliHarness](../../reference/cliharness/) · [AgentAdapter](../../referenc
 
 ## Choisir un point d’entrée du paquet
 
-Importez chaque fonction et type depuis le module qui le fournit. Tous les modules ci-dessous appartiennent au même paquet npm : aucun paquet supplémentaire à installer. L’import à la racine `@elie-laloum/outpost` est retiré dans la prochaine version majeure ; remplacez tous ses imports avant de mettre à jour. Les guides et exemples de cette version utilisent directement les nouveaux chemins.
+Importez chaque fonction et type depuis le module qui le fournit. Tous les modules ci-dessous appartiennent au même paquet npm : aucun paquet supplémentaire à installer. Outpost 13 supprime l’import à la racine `@elie-laloum/outpost` ; remplacez ces imports avant de quitter la version 12. Les guides et exemples utilisent directement les sous-chemins correspondants.
 
 | Import après `@elie-laloum/outpost/` | Contenu                                                                                                  |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |

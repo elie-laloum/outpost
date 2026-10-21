@@ -25,7 +25,7 @@ agents:
     authentication: account
 ```
 
-La recette sélectionne le rôle `writer` configuré. Utilisez un dépôt Git dans `./project` avec une branche `main`. L’agent crée `welcome.md` sur une branche séparée. Le validateur YAML actuel refuse encore les harnesses CLI natifs dans les workspaces de fichiers, même lorsque l’API TypeScript annonce ces capacités ; utilisez le [harness Outpost](../recipe-harness/) pour une recette sans Git.
+La recette sélectionne le rôle `writer` configuré. Utilisez un dépôt Git dans `./project` avec une branche `main`. L’agent crée `welcome.md` sur une branche séparée. Les recettes de fichiers acceptent les harnesses CLI natifs dont les capacités ont été démontrées. Les combinaisons de dispatch, continuation et terminal non prises en charge sont refusées ; le [harness Outpost](../recipe-harness/) accepte aussi les recettes sans Git avec des outils de fichiers.
 
 ```yaml title="recipe.yaml"
 version: 3

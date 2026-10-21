@@ -331,3 +331,8 @@ if (unused.length)
 console.log(
   `${publicNames.size} public symbols and ${symbols.size - publicNames.size} supporting contracts synchronized in English and French.`,
 );
+
+if (!process.argv.includes("--check"))
+  console.log(
+    "Edit docs/reference-content, CHANGELOG.md and docs/translations/changelog.fr.md; reference pages and site changelogs are generated.",
+  );
