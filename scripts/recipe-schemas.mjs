@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
+import { generatedFiles } from "./generated-files.mjs";
 import { workflowOptionComponents } from "../src/application/recipes/workflow-components.ts";
 import { observationComponents } from "../src/application/recipes/observation.ts";
 import { nativeRecipeComponents } from "../src/application/recipes/native.ts";
@@ -495,6 +496,14 @@ recipe.$defs = {
   inputV3,
 };
 recipe.oneOf.push(version3);
+const generated = generatedFiles({
+  script: "recipe-schemas.mjs",
+  outputs: ["recipe.schema.json", "recipe-configuration.schema.json"],
+  sources: [
+    "the component descriptors in src/application/recipes",
+    "recipes/schemas/*.json",
+  ],
+});
 for (const [file, value] of [
   ["recipe-configuration.schema.json", configSchema],
   ["recipe.schema.json", recipe],
@@ -506,7 +515,8 @@ for (const [file, value] of [
     assert.deepEqual(
       JSON.parse(await readFile(path, "utf8")),
       value,
-      `Stale generated schema: ${file}`,
+      generated.stale(file),
     );
 }
 console.log("Recipe editor schemas match their component descriptors.");
+generated.describe();

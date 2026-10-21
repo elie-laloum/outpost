@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import prettier from "prettier";
+import { generatedFiles } from "./generated-files.mjs";
 import { referenceSidebar } from "../docs/scripts/reference-navigation.mjs";
 import { nativeRecipeTypes } from "../src/application/recipes/native-catalog.constants.ts";
 import {
@@ -95,6 +96,17 @@ for (const definition of definitions.toSorted((a, b) =>
   };
   await readFile(new URL(`../${index[definition.name].test}`, import.meta.url));
 }
+const generated = generatedFiles({
+  script: "recipe-component-docs.mjs",
+  outputs: [
+    "recipes/components.json",
+    "docs/src/content/docs/{,fr/}guide/yaml-components.md",
+  ],
+  sources: [
+    "src/application/recipes/native-catalog.constants.ts",
+    "the component descriptors in src/application/recipes",
+  ],
+});
 async function output(path, content, parser) {
   const url = new URL(`../${path}`, import.meta.url);
   const formatted = await prettier.format(content, {
@@ -103,7 +115,7 @@ async function output(path, content, parser) {
   });
   if (process.argv.includes("--write")) await writeFile(url, formatted);
   else if ((await readFile(url, "utf8")) !== formatted)
-    throw new Error(`Stale descriptor output: ${path}`);
+    throw new Error(generated.stale(path));
 }
 await output("recipes/components.json", JSON.stringify(index), "json");
 for (const fr of [false, true]) {
@@ -183,3 +195,4 @@ for (const fr of [false, true]) {
 console.log(
   `${definitions.length} component mappings and YAML guides checked.`,
 );
+generated.describe();

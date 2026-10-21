@@ -24,14 +24,23 @@ The recommended path uses Codex in Docker on a Git repository. You need Node.js 
 
 Prefer a declarative file? After installation, follow [Your first YAML recipe](../yaml-recipes/). A recipe declares the work; a separate local configuration selects the repository, sandbox and credentials.
 
+## Continue in order
+
+Follow these guides in order once your first workflow runs.
+
+<!-- path -->
+
+1. [Run tests on the agent’s changes](../sandbox-sessions/): Keep the agent and your test command in the same environment.
+2. [Receive validated data](../typed-responses/): Check a JSON answer before your application uses it.
+3. [Save and resume a workflow](../durable-runs/): Resume after a pause or interruption without repeating finished tasks.
+4. [Automate your runs](../unattended-runs/): Start work from CI, a queue, a schedule or a webhook.
+
 ## Choose your next task
 
 You do not need a complete workflow to use the following guides.
 
 <!-- features -->
 
-- [Run tests on the agent’s changes](../sandbox-sessions/): Keep the agent and your test command in the same environment.
-- [Receive validated data](../typed-responses/): Check a JSON answer before your application uses it.
 - [Review a branch](../git-workspaces/): Keep changes separate and decide when to integrate them.
 - [Save a report](../run-reports/): Turn the result into a document for review.
 - [Continue a conversation](../conversations/): Send a follow-up without losing the earlier discussion.

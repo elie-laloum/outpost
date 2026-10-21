@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { isSourceFile } from "./recipe-parity-path.mjs";
+import { generatedFiles } from "./generated-files.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const manifest = JSON.parse(
@@ -82,6 +83,13 @@ for (const [entry, file] of entries) {
   }
 }
 const path = resolve(root, "recipes/parity.json");
+const generated = generatedFiles({
+  script: "recipe-parity.mjs",
+  outputs: ["the signatures and options in recipes/parity.json"],
+  sources: [
+    "its category, lot, status, test, reason and optionCoverage fields",
+  ],
+});
 let previous = {};
 try {
   previous = JSON.parse(await readFile(path, "utf8"));
@@ -121,7 +129,7 @@ if (process.argv.includes("--write")) {
   assert.deepEqual(
     Object.keys(previous).sort(),
     Object.keys(inventory).sort(),
-    "Classify added or removed public exports with recipe-parity.mjs --write",
+    generated.stale("recipes/parity.json"),
   );
   for (const [key, contract] of Object.entries(inventory)) {
     assert.deepEqual(
@@ -168,3 +176,4 @@ if (process.argv.includes("--write")) {
 console.log(
   `${Object.keys(inventory).length} public recipe parity contracts checked.`,
 );
+generated.describe();

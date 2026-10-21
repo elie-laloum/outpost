@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import prettier from "prettier";
+import { generatedFiles } from "./generated-files.mjs";
 import {
   nativeRecipeTypes,
   nativeRecipeKinds,
@@ -275,6 +276,17 @@ const factories = nativeRecipeTypes
         .join(",")} }`,
   )
   .join(",\n");
+const generated = generatedFiles({
+  script: "recipe-native-schemas.mjs",
+  outputs: [
+    "src/application/recipes/native-schemas.constants.ts",
+    "src/application/recipes/native-factories.ts",
+  ],
+  sources: [
+    "src/application/recipes/native-catalog.constants.ts",
+    "the owning TypeScript contracts",
+  ],
+});
 for (const [file, code] of [
   [
     "src/application/recipes/native-schemas.constants.ts",
@@ -295,14 +307,11 @@ for (const [file, code] of [
     assert.equal(
       await readFile(path, "utf8"),
       formatted,
-      `Stale native schema: ${file}`,
+      generated.stale(file),
     );
 }
 console.log(
   `${Object.keys(contracts).length} native option contracts checked.`,
 );
 
-if (process.argv.includes("--write"))
-  console.log(
-    "Edit native-catalog.constants.ts and the owning TypeScript contracts; native schemas and factory descriptors are generated.",
-  );
+generated.describe();

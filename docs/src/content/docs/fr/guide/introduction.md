@@ -24,14 +24,23 @@ Le parcours recommandé utilise Codex dans Docker sur un dépôt Git. Il vous fa
 
 Vous préférez un fichier déclaratif ? Après l’installation, suivez [Votre première recette YAML](../yaml-recipes/). La recette décrit le travail ; une configuration locale séparée choisit le dépôt, la sandbox et les identifiants.
 
+## Continuer dans l’ordre
+
+Suivez ces guides dans l’ordre une fois votre premier workflow exécuté.
+
+<!-- path -->
+
+1. [Tester les changements de l’agent](../sandbox-sessions/) : Exécuter l’agent et vos tests dans le même environnement.
+2. [Recevoir des données validées](../typed-responses/) : Vérifier une réponse JSON avant de l’utiliser.
+3. [Enregistrer et reprendre un workflow](../durable-runs/) : Reprendre après une pause ou une interruption sans répéter les tâches terminées.
+4. [Automatiser les exécutions](../unattended-runs/) : Lancer du travail depuis la CI, une file, une planification ou un webhook.
+
 ## Choisir la suite
 
 Ces guides sont utilisables sans construire un workflow complet.
 
 <!-- features -->
 
-- [Tester les changements de l’agent](../sandbox-sessions/) : Exécuter l’agent et vos tests dans le même environnement.
-- [Recevoir des données validées](../typed-responses/) : Vérifier une réponse JSON avant de l’utiliser.
 - [Relire une branche](../git-workspaces/) : Garder les changements séparés et décider de leur intégration.
 - [Enregistrer un rapport](../run-reports/) : Préparer un document pour la relecture.
 - [Continuer une conversation](../conversations/) : Envoyer une nouvelle demande en conservant le contexte.

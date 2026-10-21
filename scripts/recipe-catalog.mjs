@@ -1,6 +1,13 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { parseRecipe } from "../src/infrastructure/recipe.ts";
+import { generatedFiles } from "./generated-files.mjs";
+
+const generated = generatedFiles({
+  script: "recipe-catalog.mjs",
+  outputs: ["recipes/catalog.json"],
+  sources: ["recipes/*.yaml"],
+});
 
 const directory = new URL("../recipes/", import.meta.url);
 const names = (await readdir(directory))
@@ -30,7 +37,6 @@ const content = `${JSON.stringify({ version: 1, recipes }, null, 2)}\n`;
 const file = new URL("catalog.json", directory);
 if (process.argv.includes("--write")) await writeFile(file, content);
 else if ((await readFile(file, "utf8")) !== content)
-  throw new Error(
-    "Recipe catalogue is stale; run node scripts/recipe-catalog.mjs --write",
-  );
+  throw new Error(generated.stale("recipes/catalog.json"));
 process.stdout.write(`${recipes.length} catalogue recipes validated.\n`);
+generated.describe();
