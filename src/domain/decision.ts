@@ -1,5 +1,5 @@
 import { invariant, OutpostError } from "./errors.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import {
   DECISION_MAX_CHOICES,
   DECISION_MAX_LEVELS,
@@ -104,7 +104,7 @@ export function defineDecision<const Q extends DecisionQuestions>(
 
 export function decisionJson(value: unknown): void {
   try {
-    checkpointValue(value);
+    if (value !== undefined) losslessJson(value, { label: "Decision value" });
   } catch {
     throw new OutpostError(
       "configuration",

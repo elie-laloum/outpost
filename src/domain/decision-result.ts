@@ -1,5 +1,5 @@
 import { OutpostError } from "./errors.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import {
   DECISION_PROBABILITY_TOLERANCE,
   DECISION_ROUNDING_ERROR,
@@ -172,7 +172,7 @@ export function decisionAnswers<Q extends DecisionQuestions>(
   });
   if (result.metadata !== undefined) {
     try {
-      checkpointValue(result.metadata);
+      losslessJson(result.metadata, { label: "Decision metadata" });
     } catch {
       throw new OutpostError(
         "response",

@@ -14,7 +14,7 @@ import {
   queueMinLeaseMs,
   queueMaxHandlers,
 } from "./task-queue.constants.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 
 export function queueObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -42,11 +42,10 @@ export function queueLeaseMs(value: unknown): number {
   return ms;
 }
 export function queueJson(value: unknown) {
-  const checked = checkpointValue(value);
-  if (checked.kind !== "json") throw new Error("Queue values must be JSON");
-  if (Buffer.byteLength(JSON.stringify(checked.value)) > queueMaxValueBytes)
+  const checked = losslessJson(value, { label: "Queue values" });
+  if (Buffer.byteLength(JSON.stringify(checked)) > queueMaxValueBytes)
     throw new Error("Queue value exceeds size limit");
-  return checked.value;
+  return checked;
 }
 export function queueRequest(value: unknown): QueueRequest {
   const data = queueObject(value);

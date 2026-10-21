@@ -1,4 +1,4 @@
-import { checkpointValue } from "../workflow/checkpoint-value.ts";
+import { losslessJson } from "../lossless-json.ts";
 import { canonicalJson } from "../workflow/canonical-json.ts";
 import { recipeTextReferences } from "./expression-text.ts";
 import { recipeTemplatePattern } from "../recipe.constants.ts";
@@ -12,10 +12,7 @@ import type {
 } from "./expressions.types.ts";
 
 export function recipeJson(value: unknown): WorkflowJson {
-  const result = checkpointValue(value);
-  if (result.kind !== "json")
-    throw new Error("Recipe values must be lossless JSON");
-  return plainJson(result.value);
+  return plainJson(losslessJson(value, { label: "Recipe values" }));
 }
 
 function plainJson(value: WorkflowJson): WorkflowJson {

@@ -3,7 +3,7 @@ import { isStandardJsonSchema } from "./standard-schema.ts";
 import { STANDARD_JSON_SCHEMA_TARGET } from "./standard-schema.constants.ts";
 import type { JsonResponseOptions } from "./response.types.ts";
 import type { JsonSchema } from "./tool.types.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import { inputObject } from "./workflow/input-validation.ts";
 
 export function responseJsonSchema<T>(
@@ -45,10 +45,9 @@ export function snapshotResponseSchema(schema: unknown): JsonSchema {
       Object.getPrototypeOf(schema),
       descriptors,
     );
-    const snapshot = checkpointValue(portable);
-    invariant(snapshot.kind === "json", "Response JSON Schema must be JSON");
+    const snapshot = losslessJson(portable, { label: "Response JSON Schema" });
     // Serialization produces ordinary objects after validating lossless JSON.
-    const copy: unknown = JSON.parse(JSON.stringify(snapshot.value));
+    const copy: unknown = JSON.parse(JSON.stringify(snapshot));
     invariant(inputObject(copy), "Response JSON Schema must be an object");
     freezeSchema(copy);
     return copy;

@@ -4,7 +4,7 @@ import {
   artifactId,
   validateArtifactReference,
 } from "./artifact-reference.ts";
-import { checkpointValue } from "./workflow/checkpoint-value.ts";
+import { losslessJson } from "./lossless-json.ts";
 import type {
   ArtifactContract,
   ArtifactContractOptions,
@@ -45,10 +45,10 @@ export function defineJsonArtifact<T>(
     ...identity(options),
     encoding: "json",
     async encode(value: T) {
-      const checked = checkpointValue(await validate(value));
-      if (checked.kind !== "json")
-        throw new Error("Artifact payload must be JSON");
-      return Buffer.from(JSON.stringify(checked.value));
+      const checked = losslessJson(await validate(value), {
+        label: "Artifact payload",
+      });
+      return Buffer.from(JSON.stringify(checked));
     },
     async decode(bytes: Uint8Array) {
       return validate(
