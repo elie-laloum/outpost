@@ -1,3 +1,4 @@
+import { ConfigurationError } from "../../domain/configuration-diagnostic.ts";
 import { isNode } from "yaml";
 import { parseRecipeYaml } from "../recipe.ts";
 
@@ -9,14 +10,8 @@ export function recipeFileError(
   const message = cause instanceof Error ? cause.message : String(cause);
   try {
     const { document, lineCounter } = parseRecipeYaml(source);
-    const match =
-      /\b(?:tasks|workflow|inputs|observation|observations|sinks|extensions|reports|agents|sandbox|workspace|repository|profiles|harnesses|models|tools|toolsets|permissions|hooks|skills|contexts|instructions|conversations|responses|decisions|questions|routings|subagents|transports|stores|secrets|variables|queues|verifiers|guards|artifacts|services|functions|steerings)(?:\.[\w-]+)*/.exec(
-        message,
-      );
-    const keys = (match?.[0] ?? "")
-      .split(".")
-      .filter(Boolean)
-      .map((key) => (/^\d+$/.test(key) ? Number(key) : key));
+    const keys =
+      cause instanceof ConfigurationError ? [...cause.diagnostic.path] : [];
     if (keys[0] === "tasks" && typeof keys[1] === "string") {
       const taskNode = document.get("tasks");
       const entries: unknown = isNode(taskNode) ? taskNode.toJSON() : undefined;
@@ -39,6 +34,17 @@ export function recipeFileError(
     const position = lineCounter.linePos(
       isNode(node) ? (node.range?.[0] ?? 0) : 0,
     );
+    if (cause instanceof ConfigurationError)
+      return new ConfigurationError(
+        {
+          ...cause.diagnostic,
+          file,
+          line: position.line,
+          column: position.col,
+          message: `${file}:${position.line}:${position.col}: ${message}`,
+        },
+        { cause },
+      );
     return new Error(`${file}:${position.line}:${position.col}: ${message}`, {
       cause,
     });

@@ -1,3 +1,7 @@
+import {
+  configurationError,
+  ConfigurationError,
+} from "../../domain/configuration-diagnostic.ts";
 import { validateRecipeProjectExpressions } from "./project-expressions.ts";
 import { validateRecipeConcurrency } from "./workflow.ts";
 import { workflowOptionComponents } from "./workflow-components.ts";
@@ -130,7 +134,11 @@ export async function readRecipeProject(
           step.agent,
         )
       )
-        throw new Error(`Unknown recipe agent: ${step.agent}`);
+        throw configurationError(
+          `Unknown recipe agent: ${step.agent}`,
+          ["tasks", document.tasks.indexOf(step), "agent"],
+          "unknown-agent",
+        );
     }
     const registry = createRecipeRegistry({
       components: [
@@ -172,8 +180,8 @@ export async function readRecipeProject(
           );
     } catch (error) {
       if (
-        error instanceof Error &&
-        /(?:tasks\.[\w.-]+|workflow)(?:\.|:)/.test(error.message)
+        error instanceof ConfigurationError &&
+        ["tasks", "workflow"].includes(String(error.diagnostic.path[0]))
       )
         throw recipeFileError(file, source, error);
       throw error;

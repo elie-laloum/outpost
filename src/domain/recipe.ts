@@ -1,3 +1,4 @@
+import { configurationError } from "./configuration-diagnostic.ts";
 import { recipeAction } from "./recipes/actions.ts";
 import {
   recipeJson,
@@ -16,7 +17,7 @@ import { SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
 
 function object(value: unknown, path: string): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new Error(`${path} must be a mapping`);
+    throw configurationError(`${path} must be a mapping`, path);
   return Object.fromEntries(Object.entries(value));
 }
 
@@ -28,22 +29,26 @@ function fields(
   const record = object(value, path);
   for (const key of Object.keys(record))
     if (!keys.includes(key))
-      throw new Error(`Unknown recipe field: ${path}.${key}`);
+      throw configurationError(
+        `Unknown recipe field: ${path}.${key}`,
+        `${path}.${key}`,
+        "unknown-field",
+      );
   return record;
 }
 
 function text(value: unknown, path: string): string {
   if (typeof value !== "string" || !value.trim())
-    throw new Error(`${path} must be a nonempty string`);
+    throw configurationError(`${path} must be a nonempty string`, path);
   return value;
 }
 
 function strings(value: unknown, path: string): string[] {
   if (!Array.isArray(value))
-    throw new Error(`${path} must be a list of strings`);
+    throw configurationError(`${path} must be a list of strings`, path);
   return value.map((item, index) => {
     if (typeof item !== "string")
-      throw new Error(`${path}[${index}] must be a string`);
+      throw configurationError(`${path}[${index}] must be a string`, path);
     return item;
   });
 }
@@ -54,7 +59,7 @@ function integer(value: unknown, path: string, minimum = 1): number {
     !Number.isSafeInteger(value) ||
     value < minimum
   )
-    throw new Error(`${path} must be an integer >= ${minimum}`);
+    throw configurationError(`${path} must be an integer >= ${minimum}`, path);
   return value;
 }
 
@@ -69,7 +74,10 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
   const after =
     item.after === undefined ? [] : strings(item.after, `${path}.after`);
   if (new Set(after).size !== after.length)
-    throw new Error(`${path}.after contains duplicate dependencies`);
+    throw configurationError(
+      `${path}.after contains duplicate dependencies`,
+      path,
+    );
   const timeoutMs =
     item.timeoutMs === undefined
       ? undefined
@@ -100,11 +108,17 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
     item.quotaResume !== undefined &&
     !["continue", "restart"].includes(String(item.quotaResume))
   )
-    throw new Error(`${path}.quotaResume must be continue or restart`);
+    throw configurationError(
+      `${path}.quotaResume must be continue or restart`,
+      path,
+    );
   if (item.quotaResume !== undefined && !item.agent && !item.isolated)
-    throw new Error(`${path}.quotaResume requires an agent or isolated task`);
+    throw configurationError(
+      `${path}.quotaResume requires an agent or isolated task`,
+      path,
+    );
   if (item.data !== undefined && !item.artifact)
-    throw new Error(`${path}.data requires an artifact task`);
+    throw configurationError(`${path}.data requires an artifact task`, path);
   const quotaResume = item.quotaResume === "restart" ? "restart" : "continue";
   const additions: Pick<
     RecipeStep,
@@ -136,11 +150,17 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
     ]) {
       if (item[field] === undefined) continue;
       if (item.brief !== undefined || item.dispatch !== undefined)
-        throw new Error(`${path}: brief and dispatch require an agent task`);
+        throw configurationError(
+          `${path}: brief and dispatch require an agent task`,
+          path,
+        );
       if (item.arguments !== undefined && !["call", "queued"].includes(field))
-        throw new Error(`${path}: arguments require call or queued`);
+        throw configurationError(
+          `${path}: arguments require call or queued`,
+          path,
+        );
       if (item.state !== undefined && field !== "decision")
-        throw new Error(`${path}: state requires decision`);
+        throw configurationError(`${path}: state requires decision`, path);
       return {
         ...common,
         ...additions,
@@ -152,10 +172,16 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       };
     }
     if (item.arguments !== undefined || item.state !== undefined)
-      throw new Error(`${path}: arguments/state require call/decision`);
+      throw configurationError(
+        `${path}: arguments/state require call/decision`,
+        path,
+      );
     if (Object.hasOwn(item, "value")) {
       if (item.brief !== undefined || item.dispatch !== undefined)
-        throw new Error(`${path}: value cannot include brief or dispatch`);
+        throw configurationError(
+          `${path}: value cannot include brief or dispatch`,
+          path,
+        );
       return { ...common, ...additions, value: recipeJson(item.value) };
     }
   }
@@ -165,7 +191,10 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       item.brief !== undefined ||
       item.dispatch !== undefined
     )
-      throw new Error(`${path} must select either command or agent with brief`);
+      throw configurationError(
+        `${path} must select either command or agent with brief`,
+        path,
+      );
     const command = fields(item.command, `${path}.command`, recipeKeys.command);
     const variables =
       command.variables === undefined
@@ -177,14 +206,15 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
         : Object.fromEntries(
             Object.entries(variables).map(([name, value]) => {
               if (!SECRET_VARIABLE_NAME.test(name) || typeof value !== "string")
-                throw new Error(
+                throw configurationError(
                   `${path}.command.variables requires variable names and string values`,
+                  path,
                 );
               return [name, value];
             }),
           );
     if (command.stdin !== undefined && typeof command.stdin !== "string")
-      throw new Error(`${path}.command.stdin must be a string`);
+      throw configurationError(`${path}.command.stdin must be a string`, path);
     return {
       ...common,
       command: {

@@ -1,3 +1,4 @@
+import { configurationError } from "../configuration-diagnostic.ts";
 import type { JsonSchema } from "../tool.types.ts";
 
 export function recipeObject(value: unknown): value is Record<string, unknown> {
@@ -8,13 +9,14 @@ export function recipeRecord(
   value: unknown,
   label: string,
 ): Record<string, unknown> {
-  if (!recipeObject(value)) throw new Error(`${label} must be a mapping`);
+  if (!recipeObject(value))
+    throw configurationError(`${label} must be a mapping`, label);
   return value;
 }
 
 export function recipeString(value: unknown, label: string): string {
   if (typeof value !== "string" || !value.trim())
-    throw new Error(`${label} must be a nonempty string`);
+    throw configurationError(`${label} must be a nonempty string`, label);
   return value;
 }
 

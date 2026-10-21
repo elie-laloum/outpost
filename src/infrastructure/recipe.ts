@@ -1,3 +1,4 @@
+import { ConfigurationError } from "../domain/configuration-diagnostic.ts";
 import { parseDocument, isAlias, isNode, visit, LineCounter } from "yaml";
 import { validateRecipe } from "../domain/recipe.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
@@ -32,16 +33,8 @@ export function parseRecipe(source: string): RecipeDocument {
     return validateRecipe(parsed);
   } catch (error) {
     if (!(error instanceof Error)) throw error;
-    const path =
-      /\b(?:tasks\[\d+\](?:\.[A-Za-z]+)*|inputs\.[A-Za-z0-9_-]+(?:\.[A-Za-z]+)*|recipe\.[A-Za-z]+)(?!\w)/.exec(
-        error.message,
-      )?.[0];
-    const keys = (path ?? "")
-      .replace(/^recipe\./, "")
-      .replace(/\[(\d+)\]/g, ".$1")
-      .split(".")
-      .filter(Boolean)
-      .map((key) => (/^\d+$/.test(key) ? Number(key) : key));
+    const keys =
+      error instanceof ConfigurationError ? [...error.diagnostic.path] : [];
     let node: unknown = document.getIn(keys, true);
     while (!isNode(node) && keys.length) {
       keys.pop();
@@ -50,8 +43,12 @@ export function parseRecipe(source: string): RecipeDocument {
     const { line, col } = lineCounter.linePos(
       isNode(node) ? (node.range?.[0] ?? 0) : 0,
     );
-    throw new Error(`${error.message} (line ${line}, column ${col})`, {
-      cause: error,
-    });
+    const message = `${error.message} (line ${line}, column ${col})`;
+    if (error instanceof ConfigurationError)
+      throw new ConfigurationError(
+        { ...error.diagnostic, message, line, column: col },
+        { cause: error },
+      );
+    throw new Error(message, { cause: error });
   }
 }
