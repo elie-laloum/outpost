@@ -16,16 +16,16 @@
     "Ouvre un workspace sur un checkout Git hôte : prend son verrou, prépare le checkout ou le worktree choisi par la politique de branche, copie copies, puis exécute workspaceReady. Il sert des sandboxes successives, une à la fois, jusqu’à close(). Un verrou détenu par un processus actif échoue avec le code conflict au lieu d’attendre."
   ],
   "defineTask": [
-    "Declare a workflow node from its key, after dependencies and perform callback, with optional condition, retry, timeoutMs, cache, gate or interaction. It allocates no sandbox, and nothing runs until Workflow.start(). Throws on a key outside [A-Za-z0-9][A-Za-z0-9._-]*, invalid retry or cache settings, or a cache combined with a gate or interaction.",
-    "Déclare un nœud de workflow à partir de sa clé, de ses dépendances after et de son callback perform, avec en option condition, retry, timeoutMs, cache, gate ou interaction. Elle n’alloue aucune sandbox, et rien ne s’exécute avant Workflow.start(). Lève une erreur pour une clé hors de [A-Za-z0-9][A-Za-z0-9._-]*, des réglages retry ou cache invalides, ou un cache combiné à une gate ou une interaction."
+    "Declare a workflow node from its key, after dependencies and perform callback, with optional condition, retry, timeoutMs, cache, gate or interaction. It allocates no sandbox, and nothing runs until Workflow.start(). Throws on a key outside [A-Za-z0-9][A-Za-z0-9._-]*, invalid retry or cache settings, or a cache combined with a gate or interaction. Named inputs add dependency edges and supply inferred values to perform through context.inputs. They combine with after without duplicate edges; the mapping is copied at declaration.",
+    "Déclare un nœud de workflow à partir de sa clé, de ses dépendances after et de son callback perform, avec en option condition, retry, timeoutMs, cache, gate ou interaction. Elle n’alloue aucune sandbox, et rien ne s’exécute avant Workflow.start(). Lève une erreur pour une clé hors de [A-Za-z0-9][A-Za-z0-9._-]*, des réglages retry ou cache invalides, ou un cache combiné à une gate ou une interaction. Les inputs nommés ajoutent les dépendances et transmettent leurs valeurs typées à perform via context.inputs. Ils se combinent avec after sans doublons ; la correspondance est copiée à la déclaration."
   ],
   "defineWorkflow": [
     "Validate a named task list and return a frozen Workflow whose start() runs the graph and diagram() draws it as Mermaid. Throws on an empty name, a duplicate key, a dependency missing from the list, a cycle, or a gate with a condition, retry, timeout or cache.",
     "Valide une liste de tâches nommée et renvoie un Workflow figé dont start() exécute le graphe et diagram() le dessine en Mermaid. Lève une erreur pour un nom vide, une clé en double, une dépendance absente de la liste, un cycle, ou une gate avec condition, retry, délai ou cache."
   ],
   "defineAgentTask": [
-    "Declare a task that runs sandbox.dispatch() in a sandbox you opened and keep open; request builds the dispatch options at each attempt. The output is the dispatch result with its resume() and fork() methods, so a checkpointed run must wrap the task in a defineTask() that returns JSON. Usage joins the workflow budget; cache is rejected.",
-    "Déclare une tâche qui exécute sandbox.dispatch() dans une sandbox que vous avez ouverte et gardez ouverte ; request construit les options du dispatch à chaque tentative. La sortie est le résultat du dispatch avec ses méthodes resume() et fork() : une exécution avec checkpoint doit envelopper la tâche dans une defineTask() qui renvoie du JSON. L’usage s’ajoute au budget du workflow ; cache est refusé."
+    "Declare a task that runs sandbox.dispatch() in a borrowed sandbox; request builds dispatch options at each attempt. By default it returns the full dispatch result. select optionally projects the result after usage accounting and may be asynchronous; return lossless JSON for checkpoints. The sandbox remains caller-owned and cache stays rejected, including with select. Selector failures follow the task's configured retry policy.",
+    "Déclare une tâche exécutant sandbox.dispatch() dans une sandbox empruntée ; request construit les options à chaque tentative. Elle renvoie par défaut le résultat complet. select peut le projeter après comptabilisation de l’usage, de façon synchrone ou asynchrone ; renvoyez du JSON sans perte pour les checkpoints. La sandbox reste à l’appelant et le cache est refusé, même avec select. Les erreurs du sélecteur suivent la politique de retry de la tâche."
   ],
   "defineCommandTask": [
     "Declare a task that runs a command in a sandbox you opened and keep open; command may be a factory reading dependency values. A nonzero exit status fails the attempt with OutpostError code process, so retry applies. The output is the CommandResult.",
@@ -910,5 +910,9 @@
   "TerminationCode": [
     "Shared termination reason vocabulary for workflow results and speculation coordinator stops. Includes FaultCode, failed for unclassified errors and usage-unavailable for incomplete budget accounting. Each result documents its applicable codes; dispatch continues to throw OutpostError with its existing code. Budget exhaustion uses limit, not the speculation status budget-exhausted.",
     "Vocabulaire commun des motifs de terminaison des workflows et d’arrêt des coordinateurs de spéculation. Inclut FaultCode, failed pour une erreur non classée et usage-unavailable pour une comptabilité de budget incomplète. Chaque résultat décrit les codes applicables ; le dispatch continue de lever OutpostError avec son code existant. Un budget épuisé utilise limit, et non le statut de spéculation budget-exhausted."
+  ],
+  "TaskInputValues": [
+    "Read-only mapping from each named task dependency to its inferred output type. Used by the named-input overload of defineTask().",
+    "Correspondance en lecture seule de chaque dépendance nommée vers son type de résultat inféré, utilisée par la surcharge à inputs nommés de defineTask()."
   ]
 }
