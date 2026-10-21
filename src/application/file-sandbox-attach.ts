@@ -1,10 +1,6 @@
 import { invariant, recordRecovery } from "../domain/errors.ts";
 import { restoreTerminal } from "../infrastructure/terminal.ts";
-import { authenticateAgent } from "./agent-authentication.ts";
-import { configureAgent } from "./agent-configuration.ts";
-import { restoreConversation } from "./agent-conversations.ts";
 import { agentRequest } from "./agent-request.ts";
-import { storageFor } from "./agent-storage.ts";
 import { renderBrief } from "./brief-renderer.ts";
 import { openCliHooks } from "./cli-hooks.ts";
 import { executionDefaults } from "./execution.constants.ts";
@@ -19,12 +15,10 @@ export function createFileSandboxAttachment({
   workspace,
   state,
   lease,
-  staging,
-  conversationHome,
   signal,
   gate,
   settled,
-  known,
+  agents,
 }: FileSandboxAttachmentContext): FileSandbox["attach"] {
   return (settings = {}) => {
     return gate.run(async () => {
@@ -45,40 +39,9 @@ export function createFileSandboxAttachment({
             ? { continuation: settings.continuation }
             : {}),
         });
-      const variables = {
-        ...options.sandboxProvider.variables,
-        ...options.variables,
-        ...agent.variables,
-      };
-      const credentials = await authenticateAgent(
-        agent,
-        variables,
-        lease,
-        options.sandboxProvider.placement,
-        signal,
-      );
-      await configureAgent(
-        agent,
-        variables,
-        lease,
-        options.sandboxProvider.placement,
-        signal,
-      );
-      if (
-        settings.continuation &&
-        !known.has(agent, settings.continuation.id)
-      ) {
-        const storage = storageFor(agent);
-        invariant(storage, "Agent does not support conversation restoration");
-        await restoreConversation(storage, settings.continuation.id, {
-          repository: workspace.runtime.directory,
-          runtimeDirectory: workspace.runtime.directory,
-          home: conversationHome,
-          staging,
-          sandbox: lease,
-          local: options.sandboxProvider.placement === "host",
-        });
-      }
+      const { executionLease } = await agents.prepare(agent, signal);
+      if (settings.continuation)
+        await agents.restore(settings.continuation.id, agent, executionLease);
       const prompt = brief
         ? await renderBrief(
             brief,
@@ -117,24 +80,8 @@ export function createFileSandboxAttachment({
       try {
         const output = await settled(
           () =>
-            lease.invoke({
-              ...(hooks
-                ? hooks.command({
-                    ...command,
-                    variables: {
-                      ...variables,
-                      ...credentials,
-                      ...command.variables,
-                    },
-                  })
-                : {
-                    ...command,
-                    variables: {
-                      ...variables,
-                      ...credentials,
-                      ...command.variables,
-                    },
-                  }),
+            executionLease.invoke({
+              ...(hooks ? hooks.command(command) : command),
               signal: hookSignal,
               deadlineMs: executionDefaults.attachMs,
               ...(settings.terminal ? { terminal: settings.terminal } : {}),

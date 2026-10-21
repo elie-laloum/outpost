@@ -1,4 +1,4 @@
-import type { createAgentConversationIndex } from "./agent-conversation-index.ts";
+import type { AgentSessions } from "./agent-sessions.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { FileSandboxOptions } from "./file-sandbox.types.ts";
 import type {
@@ -16,9 +16,8 @@ export interface FileSandboxSynchronizationContext {
 }
 
 export interface FileSandboxAttachmentContext extends FileSandboxSynchronizationContext {
-  readonly conversationHome: string;
   readonly signal: AbortSignal;
   readonly gate: ReturnType<typeof operationGate>;
-  readonly known: ReturnType<typeof createAgentConversationIndex>;
+  readonly agents: AgentSessions;
   settled<T>(action: () => Promise<T>, signal?: AbortSignal): Promise<T>;
 }

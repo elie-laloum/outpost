@@ -1,6 +1,5 @@
 import type { DispatchExecutionContext } from "./dispatch-context.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
-import { createAgentConversationIndex } from "./agent-conversation-index.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
@@ -25,14 +24,9 @@ import {
   workspaceManifest,
   workspaceManifestFingerprint,
 } from "../infrastructure/workspace-files.ts";
-import { configureAgent } from "./agent-configuration.ts";
-import {
-  createAgentConversations,
-  restoreConversation,
-} from "./agent-conversations.ts";
+import { createAgentConversations } from "./agent-conversations.ts";
 import { runWithFallback } from "./agent-fallback.ts";
-import { prepareAgentExecution } from "./agent-preparation.ts";
-import { storageFor } from "./agent-storage.ts";
+import { createAgentSessions } from "./agent-sessions.ts";
 import { observeDispatch } from "./dispatch-observation.ts";
 import { diagnoseSandbox } from "./doctor-sandbox.ts";
 import { execute } from "./execution.ts";
@@ -97,7 +91,6 @@ export async function createFileSandbox(
     ? AbortSignal.any([options.signal, stop.signal])
     : stop.signal;
   const staging = join(workspace.runtime.directory, "staging", workspace.id);
-  const conversationHome = join(workspace.runtime.directory, "conversations");
   let runtime;
   let activity: ResourceActivity | undefined;
   const recoveryTransport =
@@ -246,7 +239,23 @@ export async function createFileSandbox(
   const gate = operationGate();
   let closing:
     Promise<import("../domain/workspace.types.ts").Disposal> | undefined;
-  const known = createAgentConversationIndex();
+  const agents = createAgentSessions({
+    lease,
+    placement: options.sandboxProvider.placement,
+    authentication: "per-dispatch",
+    conversation: {
+      repository: workspace.runtime.directory,
+      runtimeDirectory: workspace.runtime.directory,
+      home: join(workspace.runtime.directory, "conversations"),
+      staging,
+      local: options.sandboxProvider.placement === "host",
+    },
+    variables: (agent) => ({
+      ...options.sandboxProvider.variables,
+      ...options.variables,
+      ...agent.variables,
+    }),
+  });
   let failed = false;
   const synchronize = () =>
     synchronizeFileWorkspace({ options, workspace, state, lease, staging });
@@ -365,54 +374,20 @@ export async function createFileSandbox(
                   settings.observe,
                   signal,
                   async (agent, observe) => {
-                    const variables = {
-                      ...options.sandboxProvider.variables,
-                      ...options.variables,
-                      ...agent.variables,
-                    };
-                    const { executionLease } = await prepareAgentExecution({
+                    const { executionLease } = await agents.prepare(
                       agent,
-                      lease,
-                      placement: options.sandboxProvider.placement,
-                      variables,
                       signal,
-                    });
-                    if (agent.kind === "cli") {
-                      await configureAgent(
-                        agent,
-                        variables,
-                        executionLease,
-                        options.sandboxProvider.placement,
-                        signal,
-                      );
-                    }
-                    const conversationContext = {
-                      repository: workspace.runtime.directory,
-                      runtimeDirectory: workspace.runtime.directory,
-                      home: conversationHome,
-                      staging,
-                      sandbox: executionLease,
-                      local: options.sandboxProvider.placement === "host",
-                    };
+                    );
                     const conversations = createAgentConversations({
                       agent,
-                      context: conversationContext,
+                      context: agents.conversationContext(executionLease),
                     });
-                    const storage = storageFor(agent);
-                    if (
-                      settings.continuation &&
-                      !known.has(agent, settings.continuation.id)
-                    ) {
-                      invariant(
-                        storage,
-                        "Agent does not support conversation restoration",
-                      );
-                      await restoreConversation(
-                        storage,
+                    if (settings.continuation)
+                      await agents.restore(
                         settings.continuation.id,
-                        conversationContext,
+                        agent,
+                        executionLease,
                       );
-                    }
                     const execution = await execute(
                       {
                         directory: workspace.directory,
@@ -432,7 +407,7 @@ export async function createFileSandbox(
                       async (turn) => {
                         await synchronize();
                         if (turn.conversation)
-                          known.remember(agent, turn.conversation);
+                          agents.remember(agent, turn.conversation);
                         const capturedTurn =
                           await conversations.captureTurn(turn);
                         const captured = turn.conversation
@@ -476,7 +451,7 @@ export async function createFileSandbox(
                               ],
                             };
                           }
-                          known.remember(agent, turn.conversation);
+                          agents.remember(agent, turn.conversation);
                           await checkpoint();
                           return capturedTurn;
                         }
@@ -554,11 +529,10 @@ export async function createFileSandbox(
       state,
       lease,
       staging,
-      conversationHome,
       signal,
       gate,
       settled,
-      known,
+      agents,
     }),
     close(settings = {}) {
       closing ??= (async () => {

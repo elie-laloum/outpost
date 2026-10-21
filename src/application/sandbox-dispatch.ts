@@ -32,7 +32,7 @@ export async function dispatchInSandbox<T>(
   result: Sandbox,
   dispatch: DispatchOptions<T>,
 ): Promise<WarmDispatchResult<T>> {
-  const { options, sandboxProvider, workspace, sync, stop, staging } = context;
+  const { options, sandboxProvider, workspace, sync, stop } = context;
   const { selectAgent, restore } = agents;
   const requested = dispatch.agent ?? options.agent;
   invariant(requested, "Provide an agent on the sandbox or this operation");
@@ -59,13 +59,9 @@ export async function dispatchInSandbox<T>(
       agent: selected,
       ...(dispatch.continuation ? { continuation: dispatch.continuation } : {}),
       context: {
-        repository: workspace.repository,
+        ...agents.conversationContext(executionLease),
         ...(dispatch.observation ? { observation: dispatch.observation } : {}),
-        sandbox: executionLease,
-        staging,
-        ...(options.conversationHome ? { home: options.conversationHome } : {}),
         ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-        local: sandboxProvider.placement === "host",
       },
       onCapture(record) {
         transcript = record;

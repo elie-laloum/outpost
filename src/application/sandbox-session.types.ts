@@ -1,9 +1,12 @@
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type { AgentConversations } from "./agent-conversations.types.ts";
+import type {
+  AgentSessions,
+  PreparedAgentSession,
+} from "./agent-sessions.types.ts";
 import type { FallbackRecord } from "../domain/fallback-agent.types.ts";
 import type { Execution } from "./execution.types.ts";
-import type { Variables } from "../domain/command.types.ts";
 import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import type { LifecycleHooks } from "../domain/workspace.types.ts";
 import type { WorkspaceLease } from "../infrastructure/git/workspace.types.ts";
@@ -36,34 +39,22 @@ export interface ProvisionedSandbox {
   readonly staging: string;
 }
 
-export interface SelectedAgent {
-  readonly selected: Agent;
-  readonly adapter: Agent;
-  readonly executionLease: SandboxLease;
-}
+export type SelectedAgent = PreparedAgentSession;
 
-export interface SandboxAgents {
+export interface SandboxAgents extends Pick<
+  AgentSessions,
+  "restore" | "remember" | "conversationContext"
+> {
   selectAgent(
     agent: Agent | undefined,
     signal: AbortSignal,
     observation?: import("../domain/observation.types.ts").ObservationHub,
   ): Promise<SelectedAgent>;
-  restore(
-    id: string,
-    agent: Agent,
-    executionLease: SandboxLease,
-  ): Promise<void>;
-  remember(agent: Agent, id: string): void;
 }
 
 export interface OperationGate {
   run<T>(action: () => Promise<T>): Promise<T>;
   close(): Promise<void>;
-}
-
-export interface AuthenticatedAgent {
-  readonly adapter: Agent;
-  readonly variables: Variables;
 }
 
 export type CandidateSession = AgentConversations;
