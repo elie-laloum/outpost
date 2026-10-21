@@ -21,6 +21,12 @@ export async function createSandbox(
   options:
     SandboxOptions | FileSandboxOptions | GitWorkspaceSandboxOptions = {},
 ): Promise<Sandbox | FileSandbox> {
+  return createSandboxForOptions(options);
+}
+
+export async function createSandboxForOptions(
+  options: SandboxOptions | FileSandboxOptions | GitWorkspaceSandboxOptions,
+): Promise<Sandbox | FileSandbox> {
   if (isGitWorkspaceSandboxOptions(options))
     return createPreparedSandbox(gitWorkspaceSandboxOptions(options));
   if (isFileSandboxOptions(options)) return createFileSandbox(options);

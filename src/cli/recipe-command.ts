@@ -15,8 +15,7 @@ import type {
   MixedRecipeBindings,
 } from "../application/recipe.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
-import { createSandbox } from "../application/sandbox.ts";
-import { isFileSandboxOptions } from "../application/file-sandbox.ts";
+import { createSandboxForOptions } from "../application/sandbox.ts";
 import { readRecipeInputs } from "./recipe-inputs.ts";
 import { initializeRecipe } from "./recipe-init.ts";
 import { recipeCatalogCommand } from "./recipe-catalog.ts";
@@ -198,9 +197,7 @@ export async function recipeCommand({
       requireAgents(document, module.default.agents);
       const settings = { ...module.default.sandbox, signal: controller.signal };
       bindings = {
-        sandbox: isFileSandboxOptions(settings)
-          ? await createSandbox(settings)
-          : await createSandbox(settings),
+        sandbox: await createSandboxForOptions(settings),
         agents: module.default.agents,
       };
     }
