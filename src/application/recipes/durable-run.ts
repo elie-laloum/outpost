@@ -14,6 +14,11 @@ import type { RecipeWorkflowComponents } from "./workflow-components.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
 import type { WorkflowResult } from "../../domain/workflow.types.ts";
+import {
+  recipeSandboxZone,
+  recipeWorkspaceOptions,
+  recipeZoneWorkspace,
+} from "./zones.ts";
 
 export async function runDurableRecipe(
   project: RecipeProject,
@@ -33,11 +38,13 @@ export async function runDurableRecipe(
     settings,
     resume,
   );
+  const sandboxes = components.sandboxes ?? {};
   const resources = createRecipeDurableResources(
     session,
     configuration,
     signal,
     observation,
+    sandboxes,
   );
   try {
     for (const [key, saved] of Object.entries(
@@ -46,10 +53,13 @@ export async function runDurableRecipe(
       if (saved.state === "closed") continue;
       if (!saved.record || saved.state === "allocating")
         throw new Error(`Recipe workspace ${key} requires explicit recovery`);
-      const settings =
-        key === "shared"
-          ? configuration.sandbox
-          : components.steps[key.slice("isolated.".length)]?.isolated;
+      const settings = key.startsWith("isolated.")
+        ? components.steps[key.slice("isolated.".length)]?.isolated
+        : recipeWorkspaceOptions(
+            configuration,
+            sandboxes,
+            recipeZoneWorkspace(key),
+          );
       if (!settings)
         throw new Error(`Unknown persisted recipe workspace: ${key}`);
       if (isFileSandboxOptions(settings))
@@ -61,11 +71,8 @@ export async function runDurableRecipe(
       {
         ...(configuration.agents ? { agents: configuration.agents } : {}),
         inputs: session.inputs,
-        acquireSandbox(context, name) {
-          if (name !== undefined)
-            throw new Error("Durable recipes cannot run named sandboxes yet");
-          return resources.shared(context);
-        },
+        acquireSandbox: (context, name) =>
+          resources.shared(context, recipeSandboxZone(name, sandboxes)),
         prepareIsolated: (key, request, context) =>
           isFileSandboxOptions(request)
             ? Promise.resolve(request)
@@ -107,6 +114,7 @@ export async function runDurableRecipe(
       }
     }
     const integration = resources.integration();
+    const workspaces = resources.workspaces();
     const report = scope.redact({
       ...recipeWorkflowReport(
         workflow,
@@ -117,6 +125,7 @@ export async function runDurableRecipe(
       ),
       runId: session.options.runId,
       ...(integration ? { integration } : {}),
+      ...(workspaces ? { workspaces } : {}),
     });
     if (result) await session.saveReport(report);
     return report;

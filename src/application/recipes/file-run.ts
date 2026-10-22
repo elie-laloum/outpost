@@ -46,7 +46,7 @@ import {
   prepareRecipeFileZones,
 } from "./file-zones.ts";
 import type { RecipeFileZone } from "./file-zones.types.ts";
-import { refreshFilePublicationReport } from "./file-publication-report.ts";
+import { refreshRecipeFilePublications } from "./file-publication-report.ts";
 import { workspaceRecoverySchema } from "../../domain/file-workspace.constants.ts";
 import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 
@@ -67,8 +67,8 @@ export async function runFileRecipe(
 ): Promise<RecipeReport> {
   const files = project.files;
   invariant(files, "Missing recipe file configuration");
+  const runtimeOptions = files.runtime;
   const fileZones = await prepareRecipeFileZones(project, scope);
-  const main = fileZones.get("workspace")!;
   const agents: Record<string, DispatchAgent> = {};
   for (const role of project.model.agents) {
     const agent = await scope.resolve(`agents.${role}`, "agent");
@@ -176,19 +176,7 @@ export async function runFileRecipe(
         !saved || saved.state !== "closed",
         "Completed workspace cannot be silently reconstructed",
       );
-      const recovery = recoveries?.[zone.resource];
-      if (saved?.fileRecord) {
-        zone.workspace = await restoreManagedFileWorkspace(
-          saved.fileRecord,
-          {
-            runtime: files.runtime,
-            ...(zone.retention ? { retention: zone.retention } : {}),
-            ...(recovery ? { recovery } : {}),
-          },
-          provider,
-        );
-        await persist(zone, await zone.workspace.checkpoint());
-      }
+      if (saved?.fileRecord) await restore(zone, saved.fileRecord, provider);
       if (!zone.workspace) {
         await session?.saveResource(zone.resource, { state: "allocating" });
         zone.workspace = await createFileWorkspace(
@@ -226,7 +214,10 @@ export async function runFileRecipe(
       );
     },
   });
-  const opened = () => recipeZoneOrder(zones.workspaces);
+  // Workspaces recorded earlier that no resumed task reopened still publish and close.
+  const settled = new Map<string, RecipeFileZone>();
+  const opened = () =>
+    recipeZoneOrder(new Map([...zones.workspaces, ...settled]));
   const release = (preserve: boolean) =>
     runCleanup(
       [
@@ -248,12 +239,19 @@ export async function runFileRecipe(
         (error) => error.publicationId,
       )
     ) {
-      const report = await refreshFilePublicationReport(
+      const report = await refreshRecipeFilePublications(
         session.previous.recipe.report,
-        files.outputs.length,
-        main.retention?.policy === "portable"
-          ? main.retention.transporter
-          : undefined,
+        Object.fromEntries(
+          [...fileZones].map(([key, zone]) => [
+            key,
+            {
+              outputs: zone.declaration.outputs.length,
+              ...(zone.retention?.policy === "portable"
+                ? { transporter: zone.retention.transporter }
+                : {}),
+            },
+          ]),
+        ),
       );
       await session.saveReport(report);
       return scope.redact(report);
@@ -314,6 +312,14 @@ export async function runFileRecipe(
       for (const zone of fileZones.values()) zone.context = undefined;
       errors.push(...result.errors);
       await zones.release();
+      if (result.status === "done")
+        for (const [key, zone] of fileZones) {
+          const saved = session?.resource(zone.resource);
+          if (zones.workspaces.has(key) || saved?.state === "closed") continue;
+          if (!saved?.fileRecord) continue;
+          await restore(zone, saved.fileRecord);
+          settled.set(key, zone);
+        }
       if (result.status === "done")
         for (const [key, zone] of opened()) {
           const published: WorkspacePublication[] = [];
@@ -391,6 +397,24 @@ export async function runFileRecipe(
       sandboxProvider: provider,
     });
     return provider;
+  }
+
+  async function restore(
+    zone: RecipeFileZone,
+    record: FileWorkspaceRecord,
+    provider?: SandboxProvider,
+  ) {
+    const recovery = recoveries?.[zone.resource];
+    zone.workspace = await restoreManagedFileWorkspace(
+      record,
+      {
+        runtime: runtimeOptions,
+        ...(zone.retention ? { retention: zone.retention } : {}),
+        ...(recovery ? { recovery } : {}),
+      },
+      provider,
+    );
+    await persist(zone, await zone.workspace.checkpoint());
   }
 
   async function persist(zone: RecipeFileZone, record: FileWorkspaceRecord) {

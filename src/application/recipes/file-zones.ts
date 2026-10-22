@@ -6,6 +6,7 @@ import type {
 import type { Transport } from "../../domain/transport.types.ts";
 import { captureWorkspaceOutputBaseline } from "../workspace-output-baseline.ts";
 import { nativeRecipeGuards } from "./native.ts";
+import { recipeZoneResource } from "./zones.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type { RecipeCheckpointSession } from "./durable.types.ts";
 import type { RecipeFileWorkspaceDeclaration } from "./file-configuration.types.ts";
@@ -14,11 +15,6 @@ import type { RecipeFileZone } from "./file-zones.types.ts";
 
 function isTransport(value: unknown): value is Transport {
   return nativeRecipeGuards.transport!(value);
-}
-
-/** Checkpoint resource of a workspace key; the configuration workspace keeps its historical name. */
-export function recipeFileResource(key: string): string {
-  return key === "workspace" ? "shared" : key;
 }
 
 /** Resolves the Transports of each file workspace before any allocation. */
@@ -73,7 +69,7 @@ export async function prepareRecipeFileZones(
     );
     zones.set(key, {
       key,
-      resource: recipeFileResource(key),
+      resource: recipeZoneResource(key),
       declaration,
       ...(retention ? { retention } : {}),
       inputs,

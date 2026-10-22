@@ -5,6 +5,7 @@ import type {
   WorkflowResult,
 } from "../../domain/workflow.types.ts";
 import type { RecipeGitIsolatedSettings } from "./workflow-components.types.ts";
+import type { RecipeTaskZone } from "./zones.types.ts";
 
 export interface RecipeDurableWorkspace {
   readonly workspace: Workspace;
@@ -12,7 +13,8 @@ export interface RecipeDurableWorkspace {
 }
 
 export interface RecipeDurableResources {
-  shared(context: TaskContext): Promise<Sandbox>;
+  /** Sandbox of a zone; the configuration sandbox when `zone` is absent. */
+  shared(context: TaskContext, zone?: RecipeTaskZone): Promise<Sandbox>;
   isolated(
     key: string,
     request: RecipeGitIsolatedSettings,
@@ -23,4 +25,5 @@ export interface RecipeDurableResources {
   close(): Promise<void>;
   integration(): RecipeReport["integration"];
   workspace(): RecipeReport["workspace"];
+  workspaces(): RecipeReport["workspaces"];
 }

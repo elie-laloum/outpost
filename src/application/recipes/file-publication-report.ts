@@ -6,7 +6,12 @@ import { inspectWorkspacePublication } from "../workspace-publication.ts";
 import { inspectFileWorkspace } from "../file-workspace-recovery.ts";
 import { workspaceOutputIdentity } from "../workspace-output-baseline.ts";
 import { pendingFilePublicationsMessage } from "./file-publication-report.constants.ts";
-import type { RecipeReport, RecipeDiagnostic } from "../recipe-report.types.ts";
+import type {
+  RecipeReport,
+  RecipeDiagnostic,
+  RecipeWorkspaceReport,
+} from "../recipe-report.types.ts";
+import type { RecipePublicationExpectation } from "./file-publication-report.types.ts";
 import type { WorkspacePublication } from "../../domain/file-workspace.types.ts";
 import type {
   Transport,
@@ -144,5 +149,72 @@ export async function refreshFilePublicationReport(
     fileOutputs: [...fileOutputs.values()],
     errors: remainingErrors,
     status: remainingErrors.length ? "failed" : "done",
+  };
+}
+
+/** Refreshes each file workspace's publications; errors belong to the workspace that recorded them. */
+export async function refreshRecipeFilePublications(
+  report: RecipeReport,
+  expected: Readonly<Record<string, RecipePublicationExpectation>>,
+): Promise<RecipeReport> {
+  const named = Object.entries(report.workspaces ?? {});
+  if (!named.length)
+    return refreshFilePublicationReport(
+      report,
+      expected.workspace?.outputs ?? 0,
+      expected.workspace?.transporter,
+    );
+  const owners = new Map<string, string>();
+  for (const [name, workspace] of named)
+    if (workspace.kind === "files")
+      for (const publication of workspace.workspaceInfo?.publications ?? [])
+        owners.set(publication.id, name);
+  const owned = (name: string) =>
+    report.errors.filter(
+      (error) =>
+        error.publicationId !== undefined &&
+        owners.get(error.publicationId) === name,
+    );
+  const own = report.errors.filter(
+    (error) =>
+      error.publicationId === undefined || !owners.has(error.publicationId),
+  );
+  const main = report.workspaceInfo
+    ? await refreshFilePublicationReport(
+        { ...report, errors: own },
+        expected.workspace?.outputs ?? 0,
+        expected.workspace?.transporter,
+      )
+    : { ...report, errors: own };
+  const errors = [...main.errors];
+  const workspaces: Record<string, RecipeWorkspaceReport> = {};
+  for (const [name, workspace] of named) {
+    workspaces[name] = workspace;
+    if (workspace.kind !== "files" || !workspace.workspaceInfo) continue;
+    const key = `workspaces.${name}`;
+    const refreshed = await refreshFilePublicationReport(
+      {
+        ...report,
+        workspaceInfo: workspace.workspaceInfo,
+        fileOutputs: workspace.fileOutputs,
+        errors: owned(name),
+      },
+      expected[key]?.outputs ?? 0,
+      expected[key]?.transporter,
+    );
+    errors.push(...refreshed.errors);
+    workspaces[name] = {
+      kind: "files",
+      ...(refreshed.workspaceInfo
+        ? { workspaceInfo: refreshed.workspaceInfo }
+        : {}),
+      fileOutputs: refreshed.fileOutputs ?? [],
+    };
+  }
+  return {
+    ...main,
+    workspaces,
+    errors,
+    status: errors.length ? "failed" : "done",
   };
 }

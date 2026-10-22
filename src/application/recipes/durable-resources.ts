@@ -3,7 +3,21 @@ import { createSandbox } from "../sandbox.ts";
 import { restoreRecipeWorkspace, recipeWorkspaceRecord } from "./workspace.ts";
 import type { SandboxOptions, Workspace, Sandbox } from "../outpost.types.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
-import type { RecipeCheckpointSession } from "./durable.types.ts";
+import type {
+  RecipeCheckpointSession,
+  RecipeWorkspaceCheckpoint,
+} from "./durable.types.ts";
+import type { WorkspaceRecord } from "../../domain/workspace.types.ts";
+import type { ConflictResolution } from "../conflict-resolution.types.ts";
+import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
+import { createRecipeZoneSandboxes } from "./zone-sandboxes.ts";
+import {
+  recipeSandboxZone,
+  recipeWorkspaceOptions,
+  recipeZoneOptions,
+  recipeZoneResource,
+  recipeZoneWorkspace,
+} from "./zones.ts";
 import type {
   RecipeDurableResources,
   RecipeDurableWorkspace,
@@ -15,15 +29,36 @@ export function createRecipeDurableResources(
   configuration: RecipeRuntimeConfiguration,
   signal: AbortSignal,
   observation?: ObservationHub,
+  sandboxes: RecipeConfigurationModel["sandboxes"] = {},
 ): RecipeDurableResources {
   const open = new Map<string, RecipeDurableWorkspace>();
-  let shared: Promise<Sandbox> | undefined;
-  let sharedSandbox: Sandbox | undefined;
-  let integration =
-    session.resource("shared")?.integration ??
-    session.previous?.recipe.report?.integration;
-  let disposedShared = false;
+  const integrations = new Map<string, ConflictResolution | undefined>([
+    [
+      "shared",
+      session.resource("shared")?.integration ??
+        session.previous?.recipe.report?.integration,
+    ],
+  ]);
   const observed = observation ? { observation } : {};
+  const touched = new Set(
+    Object.keys(session.previous?.recipe.resources ?? {}),
+  );
+  const zones = createRecipeZoneSandboxes<Workspace, Sandbox>({
+    workspace(zone, context) {
+      touched.add(recipeZoneResource(zone.workspace));
+      return workspace(
+        recipeZoneResource(zone.workspace),
+        recipeZoneOptions(configuration, zone),
+        context?.signal,
+      );
+    },
+    sandbox(lease, zone, _switched, context) {
+      return createSandbox({
+        ...sandboxOptions(recipeZoneOptions(configuration, zone), lease),
+        ...(context ? { signal: context.signal } : {}),
+      });
+    },
+  });
   async function workspace(
     key: string,
     options: SandboxOptions,
@@ -83,28 +118,9 @@ export function createRecipeDurableResources(
       signal,
     };
   }
-  async function releaseShared(): Promise<void> {
-    if (disposedShared || !sharedSandbox) return;
-    disposedShared = true;
-    await sharedSandbox.close({ preserve: true });
-  }
   const resources: RecipeDurableResources = {
-    shared(context) {
-      shared ??= (async () => {
-        const lease = await workspace(
-          "shared",
-          configuration.sandbox,
-          context.signal,
-        );
-        const sandbox = await createSandbox({
-          ...sandboxOptions(configuration.sandbox, lease),
-          signal: context.signal,
-        });
-        sharedSandbox = sandbox;
-        return sandbox;
-      })();
-      return shared;
-    },
+    shared: (context, zone = recipeSandboxZone(undefined, {})) =>
+      zones.acquire(zone, context),
     async isolated(key, request, context) {
       const lease = await workspace(`isolated.${key}`, request, context.signal);
       const {
@@ -130,7 +146,7 @@ export function createRecipeDurableResources(
       await resource.workspace.close({ preserve: true });
     },
     async settle(result) {
-      await releaseShared();
+      await zones.release();
       const keys = new Set([
         ...(session.previous
           ? Object.keys(session.previous.recipe.resources)
@@ -143,19 +159,25 @@ export function createRecipeDurableResources(
       for (const key of keys) {
         const saved = session.resource(key);
         if (!saved?.record || saved.state === "closed") continue;
-        const complete =
-          key === "shared"
-            ? result.status === "done"
-            : result.tasks.some(
-                (task) =>
-                  `isolated.${task.key}` === key && task.status === "done",
-              );
+        const zoned = !key.startsWith("isolated.");
+        const complete = zoned
+          ? result.status === "done"
+          : result.tasks.some(
+              (task) =>
+                `isolated.${task.key}` === key && task.status === "done",
+            );
         if (!complete) continue;
         const settings =
           open.get(key)?.options ??
-          (key === "shared"
-            ? configuration.sandbox
+          (zoned
+            ? recipeWorkspaceOptions(
+                configuration,
+                sandboxes,
+                recipeZoneWorkspace(key),
+              )
             : { repository: saved.record.repository });
+        if (!settings)
+          throw new Error(`Unknown persisted recipe workspace: ${key}`);
         let resource = open.get(key);
         if (!resource) {
           resource = {
@@ -168,32 +190,35 @@ export function createRecipeDurableResources(
           };
           open.set(key, resource);
         }
-        if (key === "shared" && saved.state !== "integrated") {
+        if (zoned && saved.state !== "integrated") {
           signal.throwIfAborted();
-          integration =
+          integrations.set(
+            key,
             (await resource.workspace.integrate({
               ...configuration.integration,
               signal,
-            })) ?? undefined;
+            })) ?? undefined,
+          );
         }
+        const integration = integrations.get(key) ?? saved.integration;
         await session.saveResource(key, {
           state: "integrated",
           record: saved.record,
-          ...(key === "shared" && integration ? { integration } : {}),
+          ...(zoned && integration ? { integration } : {}),
         });
         const disposal = await resource.workspace.close();
         open.delete(key);
         await session.saveResource(key, {
           state: disposal.retainedDirectory ? "integrated" : "closed",
           record: saved.record,
-          ...(key === "shared" && integration ? { integration } : {}),
+          ...(zoned && integration ? { integration } : {}),
         });
       }
     },
     async close() {
       const errors: unknown[] = [];
       try {
-        await releaseShared();
+        await zones.release();
       } catch (error) {
         errors.push(error);
       }
@@ -208,18 +233,43 @@ export function createRecipeDurableResources(
       if (errors.length)
         throw new AggregateError(errors, "Recipe workspace cleanup failed");
     },
-    integration: () => integration,
+    integration: () => integrations.get("shared"),
     workspace() {
       const saved = session.resource("shared");
       if (!saved?.record) return undefined;
-      return {
-        branch: saved.record.branch,
-        directory: saved.record.directory,
-        ...(saved.state !== "closed" && saved.record.policy.mode !== "current"
-          ? { retainedDirectory: saved.record.directory }
-          : {}),
-      };
+      return workspaceReport(saved, saved.record);
+    },
+    workspaces() {
+      const reports = [...touched].flatMap((key) => {
+        const saved = session.resource(key);
+        if (!key.startsWith("workspaces.") || !saved?.record) return [];
+        const integration = integrations.get(key) ?? saved.integration;
+        return [
+          [
+            key.slice("workspaces.".length),
+            {
+              kind: "git" as const,
+              ...workspaceReport(saved, saved.record),
+              ...(integration ? { integration } : {}),
+            },
+          ] as const,
+        ];
+      });
+      return reports.length ? Object.fromEntries(reports) : undefined;
     },
   };
   return resources;
+}
+
+function workspaceReport(
+  saved: RecipeWorkspaceCheckpoint,
+  record: WorkspaceRecord,
+) {
+  return {
+    branch: record.branch,
+    directory: record.directory,
+    ...(saved.state !== "closed" && record.policy.mode !== "current"
+      ? { retainedDirectory: record.directory }
+      : {}),
+  };
 }

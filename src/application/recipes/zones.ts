@@ -11,6 +11,16 @@ export function recipeWorkspaceKey(name: string | undefined): string {
   return name === undefined ? "workspace" : `workspaces.${name}`;
 }
 
+/** Checkpoint resource of a workspace key; the configuration workspace keeps its historical name. */
+export function recipeZoneResource(workspace: string): string {
+  return workspace === "workspace" ? "shared" : workspace;
+}
+
+/** Workspace key recorded by a zone checkpoint resource. */
+export function recipeZoneWorkspace(resource: string): string {
+  return resource === "shared" ? "workspace" : resource;
+}
+
 /** Zone of a command or agent task; other tasks borrow no shared sandbox. */
 export function recipeTaskZone(
   step: RecipeStep,
@@ -74,4 +84,17 @@ export function recipeZoneOrder<T>(
   return [...workspaces].sort(([left], [right]) =>
     rank(left) < rank(right) ? -1 : 1,
   );
+}
+
+/** Options that open a workspace key, read from a sandbox that names it. */
+export function recipeWorkspaceOptions(
+  configuration: RecipeRuntimeConfiguration,
+  sandboxes: RecipeConfigurationModel["sandboxes"],
+  workspace: string,
+): SandboxOptions | undefined {
+  if (workspace === "workspace") return configuration.sandbox;
+  const name = Object.keys(sandboxes).find(
+    (sandbox) => recipeSandboxZone(sandbox, sandboxes).workspace === workspace,
+  );
+  return name === undefined ? undefined : configuration.sandboxes?.[name];
 }

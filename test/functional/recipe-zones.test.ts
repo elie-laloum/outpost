@@ -446,3 +446,308 @@ test("workspaces progress in parallel when the recipe allows concurrency", async
   const report = await runtime.run();
   assert.equal(report.status, "done", JSON.stringify(report.errors));
 });
+
+test("a durable run resumes each workspace and reopens the sandbox the next task selects", async (t) => {
+  const { file, config, write } = await project(t);
+  const repo = await repository(t);
+  const commit = (paths: string) =>
+    `git add ${paths} && git commit -qm "$ZONE"`;
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell(
+          "draft",
+          `echo "$ZONE" > zone.txt && ${commit("zone.txt")} && echo unfinished > draft.txt`,
+          { sandbox: "a" },
+        ),
+        shell("other", `echo "$ZONE" > other.txt && ${commit("other.txt")}`, {
+          sandbox: "c",
+        }),
+        {
+          key: "approve",
+          after: ["draft", "other"],
+          gate: {
+            kind: "approval",
+            prompt: "Continue?",
+            actors: ["maintainer"],
+          },
+        },
+        shell(
+          "review",
+          `cat draft.txt && echo "$ZONE" >> zone.txt && ${commit("zone.txt draft.txt")}`,
+          { sandbox: "b", after: ["approve"] },
+        ),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local" },
+      workspaces: {
+        side: {
+          kind: "git",
+          repository: repo,
+          branch: { mode: "named", name: "side" },
+        },
+      },
+      sandboxes: {
+        a: { provider: "local", variables: { ZONE: "a" } },
+        b: { provider: "local", variables: { ZONE: "b" } },
+        c: {
+          workspace: { $ref: "workspaces.side" },
+          provider: "local",
+          variables: { ZONE: "c" },
+        },
+      },
+      transports: { state: { type: "local", directory: "./storage" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const paused = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    return await runtime.run({ runId: "zones" });
+  })();
+  assert.equal(paused.status, "paused", JSON.stringify(paused.errors));
+  assert.ok(paused.workspace?.retainedDirectory);
+  const side = paused.workspaces?.side;
+  assert.ok(side?.kind === "git" && side.retainedDirectory);
+  const approval = paused.tasks.find((task) => task.key === "approve")?.pause;
+  assert.ok(approval);
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "zones",
+    decisions: [
+      {
+        executionId: paused.executionId!,
+        key: "approve",
+        requestId: approval.id,
+        action: "approve",
+        actor: "maintainer",
+        reason: "Reviewed",
+      },
+    ],
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.outputs.review?.stdout, "unfinished\n");
+  assert.equal(resumed.tasks.find((task) => task.key === "draft")?.attempts, 1);
+  const show = (revision: string) =>
+    promisify(execFile)("git", ["-C", repo, "show", revision], {
+      encoding: "utf8",
+    }).then(({ stdout }) => stdout);
+  assert.equal(await show("main:zone.txt"), "a\nb\n");
+  assert.equal(await show("main:draft.txt"), "unfinished\n");
+  assert.equal(await show("side:other.txt"), "c\n");
+  assert.equal(resumed.workspace?.retainedDirectory, undefined);
+  assert.equal(resumed.workspaces?.side?.kind, "git");
+});
+
+test("a durable file run resumes each workspace and publishes after the switch", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  await mkdir(join(directory, "source"));
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell("draft", 'echo "$ZONE" > zone.txt', { sandbox: "a" }),
+        shell("other", 'echo "$ZONE" > result.txt', { sandbox: "c" }),
+        {
+          key: "approve",
+          after: ["draft", "other"],
+          gate: {
+            kind: "approval",
+            prompt: "Continue?",
+            actors: ["maintainer"],
+          },
+        },
+        shell("review", 'cat zone.txt && echo "$ZONE" >> zone.txt', {
+          sandbox: "b",
+          after: ["approve"],
+        }),
+      ],
+    },
+    {
+      version: 3,
+      runtime: { directory: "./control", namespace: "zones" },
+      workspace: {
+        kind: "directory",
+        directory: "./source",
+        retention: { policy: "local" },
+      },
+      outputs: [
+        { paths: ["zone.txt"], destination: "./published", policy: "create" },
+      ],
+      workspaces: {
+        scratch: {
+          kind: "ephemeral",
+          retention: { policy: "local" },
+          outputs: [
+            {
+              paths: ["result.txt"],
+              destination: "./scratch",
+              policy: "create",
+            },
+          ],
+        },
+      },
+      sandboxes: {
+        a: { provider: "local", variables: { ZONE: "a" } },
+        b: { provider: "local", variables: { ZONE: "b" } },
+        c: {
+          workspace: { $ref: "workspaces.scratch" },
+          provider: "local",
+          variables: { ZONE: "c" },
+        },
+      },
+      transports: { state: { type: "local", directory: "./state" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const paused = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    return await runtime.run({ runId: "zones" });
+  })();
+  assert.equal(paused.status, "paused", JSON.stringify(paused.errors));
+  await assert.rejects(readFile(join(directory, "published", "zone.txt")), {
+    code: "ENOENT",
+  });
+  const approval = paused.tasks.find((task) => task.key === "approve")?.pause;
+  assert.ok(approval);
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "zones",
+    decisions: [
+      {
+        executionId: paused.executionId!,
+        key: "approve",
+        requestId: approval.id,
+        action: "approve",
+        actor: "maintainer",
+        reason: "Reviewed",
+      },
+    ],
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.outputs.review?.stdout, "a\n");
+  assert.equal(
+    await readFile(join(directory, "published", "zone.txt"), "utf8"),
+    "a\nb\n",
+  );
+  assert.equal(
+    await readFile(join(directory, "scratch", "result.txt"), "utf8"),
+    "c\n",
+  );
+  const status = await runtime.status("zones");
+  assert.deepEqual(
+    Object.entries(status?.workspaces ?? {})
+      .map(([key, resource]) => [key, resource.state])
+      .sort(),
+    [
+      ["shared", "closed"],
+      ["workspaces.scratch", "closed"],
+    ],
+  );
+});
+
+test("a resumed file run publishes the configuration workspace that no remaining task reopens", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell("draft", "echo ready > result.txt"),
+        {
+          key: "approve",
+          after: ["draft"],
+          gate: {
+            kind: "approval",
+            prompt: "Publish?",
+            actors: ["maintainer"],
+          },
+        },
+        { key: "done", after: ["approve"], value: true },
+      ],
+    },
+    {
+      version: 3,
+      runtime: { directory: "./control", namespace: "zones" },
+      workspace: { kind: "ephemeral", retention: { policy: "local" } },
+      sandbox: { provider: "local" },
+      outputs: [
+        { paths: ["result.txt"], destination: "./published", policy: "create" },
+      ],
+      transports: { state: { type: "local", directory: "./state" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const paused = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    return await runtime.run({ runId: "publish" });
+  })();
+  assert.equal(paused.status, "paused", JSON.stringify(paused.errors));
+  const approval = paused.tasks.find((task) => task.key === "approve")?.pause;
+  assert.ok(approval);
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "publish",
+    decisions: [
+      {
+        executionId: paused.executionId!,
+        key: "approve",
+        requestId: approval.id,
+        action: "approve",
+        actor: "maintainer",
+        reason: "Reviewed",
+      },
+    ],
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.fileOutputs?.length, 1);
+  assert.equal(
+    await readFile(join(directory, "published", "result.txt"), "utf8"),
+    "ready\n",
+  );
+  assert.equal(
+    (await runtime.status("publish"))?.workspaces?.shared?.state,
+    "closed",
+  );
+});
