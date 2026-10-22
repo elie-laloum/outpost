@@ -203,6 +203,8 @@ tasks:
       (await nodes.allInnerTexts()).map((text) => text.includes("done")),
       [true, true, true],
     );
+    const sandbox = page.locator('[data-testid="zone-sandbox"] header');
+    assert.match(await sandbox.innerText(), /done[\s\S]*1\/1/);
     assert.equal(
       await readFile(join(project, ".outpost/editor/.gitignore"), "utf8"),
       "*\n",

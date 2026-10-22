@@ -46,7 +46,10 @@ export type {
   RecipeEditorRunRequest,
 } from "../../../src/application/recipe-editor/runs.types.ts";
 export type { RecipeRunStatus } from "../../../src/application/recipes/durable.types.ts";
-export type { RecipeReport } from "../../../src/application/recipe-report.types.ts";
+export type {
+  RecipeReport,
+  RecipeWorkspaceReport,
+} from "../../../src/application/recipe-report.types.ts";
 export type { Observation } from "../../../src/domain/observation.types.ts";
 export type {
   TaskRecord,

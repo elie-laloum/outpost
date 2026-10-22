@@ -14,13 +14,18 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
+import { useMemo } from "react";
+import { useRuns } from "@/lib/runs";
 import type { Size } from "@/lib/scene-layout";
+import { useEditor } from "@/lib/store";
 import type {
   RecipeEditorDiagnostic,
   RecipeEditorFeature,
   RecipeEditorZone,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { type ZoneRun, zoneRuns } from "@/lib/zone-runs";
+import { StatusBadge, statusBorders } from "../runs/run-status";
 
 export interface ZoneFrame {
   readonly x: number;
@@ -59,9 +64,22 @@ function zoneIcon(zone: RecipeEditorZone) {
   return zone.mode === "git" ? FolderGit2 : Folder;
 }
 
+/** What the run shown on the canvas did inside the zone. */
+function useZoneRun(zone: RecipeEditorZone): ZoneRun | undefined {
+  const scene = useEditor((store) => store.state?.scene);
+  const statuses = useRuns((store) => store.tasks);
+  const report = useRuns((store) => store.detail?.report);
+  return useMemo(
+    () => scene && zoneRuns(scene, statuses, report)[zone.id],
+    [scene, statuses, report, zone.id],
+  );
+}
+
 /** A workspace or sandbox drawn as a frame around the zones or tasks it contains. */
 export function ZoneNode({ data, selected }: NodeProps<ZoneFlowNode>) {
   const { zone, problems, collapsed, editable, minimum, drop } = data;
+  const run = useZoneRun(zone);
+  const status = run?.status;
   const Icon = zoneIcon(zone);
   const Toggle = collapsed ? ChevronRight : ChevronDown;
   return (
@@ -73,6 +91,7 @@ export function ZoneNode({ data, selected }: NodeProps<ZoneFlowNode>) {
           : "border-border bg-secondary/25",
         selected && "border-primary",
         problems.length > 0 && !selected && "border-destructive/70",
+        status && !selected && statusBorders[status],
         data.found && "ring-2 ring-warning",
         drop === "allowed" && "ring-2 ring-primary",
         drop === "refused" && "ring-2 ring-destructive",
@@ -104,6 +123,15 @@ export function ZoneNode({ data, selected }: NodeProps<ZoneFlowNode>) {
         <span className="text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
           {zone.type ?? (zone.declared ? "reference" : "implied")}
         </span>
+        {status && <StatusBadge status={status} />}
+        {status && run.total > 0 && (
+          <span
+            className="text-xs text-muted-foreground"
+            title="Finished tasks in this zone"
+          >
+            {run.finished}/{run.total}
+          </span>
+        )}
         {collapsed && data.count > 0 && (
           <span className="text-xs text-muted-foreground">
             {data.count} inside
@@ -139,6 +167,11 @@ export function ZoneNode({ data, selected }: NodeProps<ZoneFlowNode>) {
           ))}
         </span>
       </header>
+      {!!run?.details.length && (
+        <p className="-mt-2 truncate px-3 pb-1 font-mono text-[0.6875rem] text-muted-foreground">
+          {run.details.join(" · ")}
+        </p>
+      )}
       <Handle
         type="source"
         id="ref"

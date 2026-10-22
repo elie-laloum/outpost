@@ -22,6 +22,7 @@ import {
   zoneFrame,
 } from "../../editor/src/lib/scene-layout.ts";
 import { componentName } from "../../editor/src/lib/scene-templates.ts";
+import { zoneRuns } from "../../editor/src/lib/zone-runs.ts";
 import {
   type JsonSchema,
   constantOf,
@@ -414,4 +415,82 @@ test("schema forms follow the configuration schema through maps, variants and re
   );
   assert.deepEqual(fieldKind(root, { type: "integer" }), { kind: "number" });
   assert.deepEqual(fieldKind(root, {}), { kind: "yaml" });
+});
+
+test("zone runs gather the statuses of their tasks and the workspace reports", () => {
+  const runs = zoneRuns(
+    zoned,
+    {
+      a: "done",
+      b: "done",
+      c: "active",
+      docs: "failed",
+      gate: "waiting-input",
+    },
+    {
+      name: "zones",
+      status: "failed",
+      tasks: [],
+      outputs: {},
+      errors: [],
+      fileOutputs: [],
+      workspaces: {
+        notes: {
+          kind: "files",
+          fileOutputs: [
+            {
+              id: "p",
+              destination: "./out",
+              state: "complete",
+              created: [],
+              replaced: [],
+              deleted: [],
+              reference: { kind: "local", key: "k" } as never,
+            },
+          ],
+        },
+      },
+    },
+  );
+  assert.deepEqual(runs.sandbox, {
+    status: "active",
+    finished: 2,
+    total: 4,
+    details: [],
+  });
+  assert.deepEqual(runs.workspace, {
+    status: "active",
+    finished: 2,
+    total: 4,
+    details: ["0 publications"],
+  });
+  assert.equal(runs["workspaces.notes"]?.status, "failed");
+  assert.deepEqual(runs["workspaces.notes"]?.details, ["1 publication"]);
+  assert.deepEqual(runs["sandboxes.stray"], {
+    finished: 0,
+    total: 0,
+    details: [],
+  });
+  const finished = zoneRuns(
+    zoned,
+    { a: "done", b: "skipped", c: "done", d: "done" },
+    {
+      name: "zones",
+      status: "done",
+      tasks: [],
+      outputs: {},
+      errors: [],
+      workspace: {
+        branch: "main",
+        directory: "/w",
+        retainedDirectory: "/kept",
+      },
+    },
+  );
+  assert.equal(finished.sandbox?.status, "done");
+  assert.deepEqual(finished.workspace?.details, [
+    "branch main",
+    "kept in /kept",
+  ]);
+  assert.equal(zoneRuns(zoned, {}).workspace?.status, undefined);
 });
