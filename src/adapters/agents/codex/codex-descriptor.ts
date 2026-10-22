@@ -11,6 +11,7 @@ export const codexAgent = {
   executable: "codex",
   version: "0.156.1",
   harnessExport: "createCodexHarness",
+  guide: "codex",
   harness: createCodexHarness,
   install: { kind: "npm", package: "@openai/codex" },
   doctor: { diagnostics: codexDiagnostics },

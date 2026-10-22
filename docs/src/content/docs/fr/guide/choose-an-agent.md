@@ -57,27 +57,27 @@ Référence API : [ModelSpec](../../reference/modelspec/) et [AgentModel](../../
 
 Choisissez les identifiants dont vous disposez. La page [Authentification](../authentication/) explique comment les transmettre à la sandbox et distingue la facturation par compte de celle par API.
 
-| Agent                          | Connexion au compte | Jeton de compte dans une variable | Clé d’API                     |
-| ------------------------------ | ------------------- | --------------------------------- | ----------------------------- |
-| [Claude Code](../claude-code/) | Oui                 | Oui                               | Oui                           |
-| [Codex](../codex/)             | Oui                 | Non                               | Oui                           |
-| [Copilot CLI](../copilot-cli/) | Oui                 | Oui                               | Non                           |
-| [Kimi Code](../kimi-code/)     | Oui                 | Non                               | Oui, avec un modèle explicite |
-| [Antigravity](../antigravity/) | Oui                 | Non                               | Oui                           |
-| [Harness intégré](../harness/) | Non                 | Non                               | Oui                           |
+| Agent                                 | Connexion au compte | Jeton de compte dans une variable | Clé d’API                     |
+| ------------------------------------- | ------------------- | --------------------------------- | ----------------------------- |
+| [Antigravity](../antigravity/)        | Oui                 | Non                               | Oui                           |
+| [Claude Code](../claude-code/)        | Oui                 | Oui                               | Oui                           |
+| [Codex](../codex/)                    | Oui                 | Non                               | Oui                           |
+| [GitHub Copilot CLI](../copilot-cli/) | Oui                 | Oui                               | Non                           |
+| [Kimi Code](../kimi-code/)            | Oui                 | Non                               | Oui, avec un modèle explicite |
+| [Harness intégré](../harness/)        | Non                 | Non                               | Oui                           |
 
 ### Poursuivre le travail
 
 Tous les agents peuvent poursuivre une conversation tant que leur sandbox reste ouverte. Pour reprendre dans une nouvelle sandbox, Outpost doit aussi pouvoir enregistrer et restaurer la conversation. Un fork crée une conversation distincte à partir du même contexte.
 
-| Agent           | Reprise dans une nouvelle sandbox | Fork | Mode de réorientation |
-| --------------- | --------------------------------- | ---- | --------------------- |
-| Claude Code     | Oui                               | Oui  | `injected`            |
-| Codex           | Oui                               | Oui  | `injected`            |
-| Copilot CLI     | Oui                               | Non  | `injected`            |
-| Kimi Code       | Oui                               | Oui  | `injected`            |
-| Antigravity     | Non                               | Non  | `resumed`             |
-| Harness intégré | Oui                               | Oui  | `injected`            |
+| Agent              | Reprise dans une nouvelle sandbox | Fork | Mode de réorientation |
+| ------------------ | --------------------------------- | ---- | --------------------- |
+| Antigravity        | Non                               | Non  | `resumed`             |
+| Claude Code        | Oui                               | Oui  | `injected`            |
+| Codex              | Oui                               | Oui  | `injected`            |
+| GitHub Copilot CLI | Oui                               | Non  | `injected`            |
+| Kimi Code          | Oui                               | Oui  | `injected`            |
+| Harness intégré    | Oui                               | Oui  | `injected`            |
 
 Avec `injected`, les nouvelles consignes arrivent pendant l’échange en cours. Avec `resumed`, Outpost arrête l’échange puis reprend sa conversation. La page [Réorienter un agent](../steering/) montre comment envoyer ces consignes ; [Poursuivre une conversation](../conversations/) explique la reprise et le fork.
 

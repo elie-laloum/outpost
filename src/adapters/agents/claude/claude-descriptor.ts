@@ -11,6 +11,7 @@ export const claudeAgent = {
   executable: "claude",
   version: "2.1.280",
   harnessExport: "createClaudeHarness",
+  guide: "claude-code",
   harness: createClaudeHarness,
   install: {
     kind: "npm",

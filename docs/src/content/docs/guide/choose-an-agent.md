@@ -57,27 +57,27 @@ API reference: [ModelSpec](../../reference/modelspec/) and [AgentModel](../../re
 
 Choose the credential you already have. [Authentication](../authentication/) explains how to pass it to the sandbox and how account access differs from API billing.
 
-| Agent                           | Account login | Account token in a variable | API key                     |
-| ------------------------------- | ------------- | --------------------------- | --------------------------- |
-| [Claude Code](../claude-code/)  | Yes           | Yes                         | Yes                         |
-| [Codex](../codex/)              | Yes           | No                          | Yes                         |
-| [Copilot CLI](../copilot-cli/)  | Yes           | Yes                         | No                          |
-| [Kimi Code](../kimi-code/)      | Yes           | No                          | Yes, with an explicit model |
-| [Antigravity](../antigravity/)  | Yes           | No                          | Yes                         |
-| [Built-in harness](../harness/) | No            | No                          | Yes                         |
+| Agent                                 | Account login | Account token in a variable | API key                     |
+| ------------------------------------- | ------------- | --------------------------- | --------------------------- |
+| [Antigravity](../antigravity/)        | Yes           | No                          | Yes                         |
+| [Claude Code](../claude-code/)        | Yes           | Yes                         | Yes                         |
+| [Codex](../codex/)                    | Yes           | No                          | Yes                         |
+| [GitHub Copilot CLI](../copilot-cli/) | Yes           | Yes                         | No                          |
+| [Kimi Code](../kimi-code/)            | Yes           | No                          | Yes, with an explicit model |
+| [Built-in harness](../harness/)       | No            | No                          | Yes                         |
 
 ### Continue work
 
 Every agent can continue a conversation while its sandbox remains open. To resume in a new sandbox, Outpost also needs to capture and restore that conversation. A fork starts a separate conversation from the same context.
 
-| Agent            | Resume in a new sandbox | Fork | Steering mode |
-| ---------------- | ----------------------- | ---- | ------------- |
-| Claude Code      | Yes                     | Yes  | `injected`    |
-| Codex            | Yes                     | Yes  | `injected`    |
-| Copilot CLI      | Yes                     | No   | `injected`    |
-| Kimi Code        | Yes                     | Yes  | `injected`    |
-| Antigravity      | No                      | No   | `resumed`     |
-| Built-in harness | Yes                     | Yes  | `injected`    |
+| Agent              | Resume in a new sandbox | Fork | Steering mode |
+| ------------------ | ----------------------- | ---- | ------------- |
+| Antigravity        | No                      | No   | `resumed`     |
+| Claude Code        | Yes                     | Yes  | `injected`    |
+| Codex              | Yes                     | Yes  | `injected`    |
+| GitHub Copilot CLI | Yes                     | No   | `injected`    |
+| Kimi Code          | Yes                     | Yes  | `injected`    |
+| Built-in harness   | Yes                     | Yes  | `injected`    |
 
 With `injected`, new instructions reach the running turn. With `resumed`, Outpost stops the turn and resumes its conversation. See [steering](../steering/) to send instructions and [conversations](../conversations/) to resume or fork.
 

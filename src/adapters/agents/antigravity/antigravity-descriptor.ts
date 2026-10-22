@@ -15,6 +15,7 @@ export const antigravityAgent = {
   executable: "agy",
   version: "1.2.12",
   harnessExport: "createAntigravityHarness",
+  guide: "antigravity",
   harness: createAntigravityHarness,
   install: {
     kind: "script",

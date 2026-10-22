@@ -14,6 +14,7 @@ export const copilotAgent = {
   executable: "copilot",
   version: "1.0.88",
   harnessExport: "createCopilotHarness",
+  guide: "copilot-cli",
   harness: createCopilotHarness,
   install: { kind: "npm", package: "@github/copilot" },
   image: {

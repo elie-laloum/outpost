@@ -12,6 +12,8 @@ export interface AuthenticationChoice {
   readonly label: string;
   readonly instructions: string;
   readonly variable?: string;
+  /** The agent refuses this credential unless createAgent() names a model. */
+  readonly requiresModel?: boolean;
 }
 
 export type AgentInstaller =
@@ -54,6 +56,8 @@ export interface AgentDescriptor {
   readonly version: string;
   /** Public export that generated workflows import to build the harness. */
   readonly harnessExport: string;
+  /** Slug of the agent's Guide page, used by generated documentation. */
+  readonly guide: string;
   harness(settings?: AgentPresetSettings): CliHarness;
   readonly install: AgentInstaller;
   readonly image?: AgentImage;

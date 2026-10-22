@@ -63,6 +63,7 @@ jobs:
       - run: node --test scripts/publish-image.test.mjs
       - run: node scripts/recipe-parity.mjs
       - run: node scripts/recipe-component-docs.mjs
+      - run: node scripts/agent-capability-docs.mjs
       - run: bun run architecture
       - run: bun run typecheck
       - run: bun run format:check
