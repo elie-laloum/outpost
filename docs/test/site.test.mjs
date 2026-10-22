@@ -1015,7 +1015,7 @@ for (const locale of ["", "fr/"]) {
         "guide/working-with-files/",
         "guide/harness-hooks/",
         "guide/host-process/",
-        "guide/speculation/",
+        "guide/observability/",
       ]) {
         await page.goto(`${locale}${route}`);
         const article = page.locator(".sl-markdown-content");
