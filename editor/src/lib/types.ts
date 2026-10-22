@@ -13,9 +13,22 @@ export type {
   RecipeEditorEdge,
   RecipeEditorGraph,
   RecipeEditorLayout,
+  RecipeEditorLayoutNode,
   RecipeEditorNode,
   RecipeEditorOperation,
 } from "../../../src/domain/recipes/editor.types.ts";
+export type {
+  RecipeEditorCompatibility,
+  RecipeEditorEntity,
+  RecipeEditorFeature,
+  RecipeEditorPlacementItem,
+  RecipeEditorPlacementTarget,
+  RecipeEditorReference,
+  RecipeEditorScene,
+  RecipeEditorSceneOperation,
+  RecipeEditorSceneTask,
+  RecipeEditorZone,
+} from "../../../src/domain/recipes/editor-scene.types.ts";
 export type {
   EditorDirectoryEntry,
   EditorFile,
@@ -41,6 +54,11 @@ export type {
 } from "../../../src/domain/workflow.types.ts";
 export type { WorkflowInputRequest } from "../../../src/domain/workflow/input.types.ts";
 import type { inspectRecipeExecution } from "../../../src/application/recipes/plan.ts";
+import type { RecipeEditorAction } from "../../../src/domain/recipes/editor.types.ts";
+import type {
+  RecipeEditorFeature,
+  RecipeEditorZone,
+} from "../../../src/domain/recipes/editor-scene.types.ts";
 
 /** Static execution plan of the drafts, as `outpost recipe plan --json` reports it. */
 export type RecipePlan = Awaited<ReturnType<typeof inspectRecipeExecution>>;
@@ -67,3 +85,21 @@ export interface ConfigurationNames {
 }
 
 export type EditorView = "canvas" | "yaml" | "config" | "plan" | "runs";
+
+/** Something the palette adds, by click or by drop on the canvas. */
+export type PaletteItem =
+  | { readonly type: "task"; readonly action: RecipeEditorAction }
+  | {
+      readonly type: "zone";
+      readonly kind: RecipeEditorZone["kind"];
+      /** Workspace kind or sandbox provider. */
+      readonly value: string;
+    }
+  | { readonly type: "feature"; readonly feature: RecipeEditorFeature }
+  | { readonly type: "component"; readonly family: string };
+
+/** Optional canvas layers the toolbar shows or hides. */
+export interface CanvasLayers {
+  readonly components: boolean;
+  readonly references: boolean;
+}

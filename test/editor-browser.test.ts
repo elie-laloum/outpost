@@ -106,13 +106,18 @@ tasks:
     assert.ok(box);
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 + 160, box.y + 120, {
-      steps: 8,
-    });
+    // Inside its sandbox zone, so the move only changes the layout.
+    await page.mouse.move(
+      box.x + box.width / 2 + 60,
+      box.y + box.height / 2 + 40,
+      {
+        steps: 8,
+      },
+    );
     await page.mouse.up();
     await build.click();
     await page
-      .getByRole("complementary", { name: "Task kinds" })
+      .getByRole("complementary", { name: "Palette" })
       .getByRole("button", { name: "Command", exact: true })
       .click();
     await page.locator(".react-flow__node", { hasText: "command" }).waitFor();
@@ -192,7 +197,7 @@ tasks:
         .first()
         .waitFor({ timeout: 30_000 });
     await page.getByRole("tab", { name: "Canvas" }).click();
-    const nodes = page.locator(".react-flow__node");
+    const nodes = page.locator('.react-flow__node [data-testid^="task-"]');
     await nodes.first().waitFor();
     assert.deepEqual(
       (await nodes.allInnerTexts()).map((text) => text.includes("done")),

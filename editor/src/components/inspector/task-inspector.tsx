@@ -1,4 +1,4 @@
-import { Trash2, TriangleAlert, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,12 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { diagnosticsByTask } from "@/lib/diagnostics";
+import { diagnosticsByNode } from "@/lib/diagnostics";
 import { taskTemplates } from "@/lib/templates";
-import type { RecipeEditorDiagnostic, RecipeEditorNode } from "@/lib/types";
+import type { RecipeEditorNode } from "@/lib/types";
 import { useRecipe } from "@/lib/use-recipe";
 import { actionIcon } from "../canvas/action-icons";
 import { ActionForm, type TaskSetter, record } from "./action-forms";
+import { Problems } from "./problems";
+import {
+  EntityInspector,
+  RunInspector,
+  ZoneInspector,
+} from "./scene-inspector";
 import {
   type FieldValue,
   NumberField,
@@ -32,35 +38,6 @@ const keyPattern = {
 function taskAt(recipe: unknown, index: number) {
   const tasks = record(recipe).tasks;
   return record(Array.isArray(tasks) ? tasks[index] : undefined);
-}
-
-function Problems({
-  problems,
-}: {
-  readonly problems: readonly RecipeEditorDiagnostic[];
-}) {
-  if (!problems.length) return null;
-  return (
-    <ul className="flex flex-col gap-2" aria-label="Problems">
-      {problems.map((problem, index) => (
-        <li
-          key={index}
-          className="flex gap-2 border border-destructive/40 bg-destructive/10 p-2 text-xs"
-        >
-          <TriangleAlert
-            className="mt-0.5 size-3.5 shrink-0 text-destructive"
-            aria-hidden
-          />
-          <div className="flex flex-col gap-1">
-            <span>{problem.message}</span>
-            {problem.hint && (
-              <span className="text-muted-foreground">{problem.hint}</span>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 function Dependencies({
@@ -131,7 +108,7 @@ function TaskInspector({ node }: { readonly node: RecipeEditorNode }) {
   const { recipe, state, names, edit, select, editable } = useRecipe();
   const task = taskAt(recipe?.value, node.index);
   const problems =
-    diagnosticsByTask(state?.diagnostics ?? []).get(node.index) ?? [];
+    diagnosticsByNode(state?.diagnostics ?? []).get(`task:${node.id}`) ?? [];
   const set: TaskSetter = (path, value) =>
     void edit("recipe", [
       {
@@ -178,7 +155,7 @@ function TaskInspector({ node }: { readonly node: RecipeEditorNode }) {
           if (!node.key) return set(["key"], to);
           void edit("recipe", [
             { type: "rename-task", key: node.key, to },
-          ]).then((renamed) => renamed && select(to));
+          ]).then((renamed) => renamed && select(`task:${to}`));
         }}
       />
       <Dependencies node={node} after={after} />
@@ -259,22 +236,31 @@ function RecipeInspector() {
         onCommit={(next) => set("inputs", next)}
       />
       <p className="text-xs text-muted-foreground">
-        Select a task to edit it, or press Delete to remove the selection.
+        Select a task, zone or component to edit it, or press Delete to remove
+        the selection.
       </p>
     </fieldset>
   );
 }
 
-/** Properties of the selected task, or of the recipe when nothing is selected. */
+/** Properties of the selected node, or of the recipe when nothing is selected. */
 export function Inspector() {
-  const { graph, selected } = useRecipe();
-  const node = graph?.nodes.find((item) => item.id === selected);
+  const { graph, scene, selected } = useRecipe();
+  const task = graph?.nodes.find((item) => `task:${item.id}` === selected);
+  const zone = scene?.zones.find((item) => `zone:${item.id}` === selected);
+  const entity = scene?.entities.find(
+    (item) => `entity:${item.id}` === selected,
+  );
   return (
     <aside
       className="w-80 shrink-0 overflow-y-auto border-l bg-background p-4"
       aria-label="Properties"
     >
-      {node ? <TaskInspector key={node.id} node={node} /> : <RecipeInspector />}
+      {task && <TaskInspector key={task.id} node={task} />}
+      {zone && <ZoneInspector key={zone.id} zone={zone} />}
+      {entity && <EntityInspector key={entity.id} entity={entity} />}
+      {selected === "run" && <RunInspector />}
+      {!task && !zone && !entity && selected !== "run" && <RecipeInspector />}
     </aside>
   );
 }

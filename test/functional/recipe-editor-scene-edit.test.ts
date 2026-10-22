@@ -6,6 +6,17 @@ import { test } from "node:test";
 import { openEditorRoot } from "../../src/infrastructure/editor-files.ts";
 import { createRecipeEditorSession } from "../../src/application/recipe-editor/session.ts";
 import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
+import {
+  componentName,
+  componentTemplate,
+  featureTemplate,
+  sandboxTemplate,
+  workspaceTemplates,
+} from "../../editor/src/lib/scene-templates.ts";
+import type {
+  RecipeEditorFeature,
+  RecipeEditorSceneOperation,
+} from "../../src/domain/recipes/editor-scene.types.ts";
 
 const recipe = `version: 3
 name: scene
@@ -283,4 +294,91 @@ agents:
     ),
     refusal("duplicate-key", /transports\.state already exists/),
   );
+});
+
+test("palette templates declare zones, features and components that validate", async (t) => {
+  const files = await open(t, {
+    recipe,
+    config:
+      "version: 3\nworkspace: { kind: ephemeral }\nsandbox: { provider: local }\n",
+  });
+  const feature = (
+    zone: string,
+    name: RecipeEditorFeature,
+  ): RecipeEditorSceneOperation => ({
+    type: "set-feature",
+    zone,
+    feature: name,
+    value: featureTemplate(name, {
+      id: zone,
+      kind: zone.includes("sandbox") ? "sandbox" : "workspace",
+      name: zone.split(".")[1]!,
+      path: [],
+      features: [],
+      declared: true,
+    }),
+  });
+  let state = await files.editScene(
+    [
+      {
+        type: "add-zone",
+        kind: "workspace",
+        name: "scratch",
+        declaration: workspaceTemplates.directory!("scratch"),
+      },
+      {
+        type: "add-zone",
+        kind: "sandbox",
+        name: "box",
+        workspace: "workspaces.scratch",
+        declaration: sandboxTemplate("docker"),
+      },
+      ...(["inputs", "outputs", "retention"] as const).map((name) =>
+        feature("workspaces.scratch", name),
+      ),
+      ...(["variables", "egress", "caches", "volumes"] as const).map((name) =>
+        feature("sandboxes.box", name),
+      ),
+      ...["agents", "transports"].map((family): RecipeEditorSceneOperation => ({
+        type: "add-entity",
+        family,
+        name: componentName(family),
+        declaration: componentTemplate(family, undefined),
+      })),
+    ],
+    files.state().revision,
+  );
+  assert.deepEqual(state.diagnostics, []);
+  assert.deepEqual(
+    state.scene?.zones.find((zone) => zone.id === "sandboxes.box")?.features,
+    ["variables", "egress", "caches", "volumes"],
+  );
+  const git = await open(t, {
+    recipe,
+    config: "version: 3\nsandbox: { provider: local }\n",
+  });
+  state = await git.editScene(
+    [
+      {
+        type: "add-zone",
+        kind: "workspace",
+        declaration: { kind: "git", repository: "." },
+      },
+      {
+        type: "add-zone",
+        kind: "workspace",
+        name: "app",
+        declaration: workspaceTemplates.git!("app"),
+      },
+      {
+        type: "add-zone",
+        kind: "workspace",
+        name: "docs",
+        declaration: { kind: "git", repository: "." },
+      },
+      feature("workspaces.docs", "branch"),
+    ],
+    git.state().revision,
+  );
+  assert.deepEqual(state.diagnostics, []);
 });

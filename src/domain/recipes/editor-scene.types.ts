@@ -1,6 +1,7 @@
 import type { RecipeSourcePath } from "./expressions.types.ts";
 import type {
   DocumentMutation,
+  RecipeEditorAction,
   RecipeEditorEdge,
   RecipeEditorLayout,
   RecipeEditorNode,
@@ -80,9 +81,12 @@ export interface RecipeEditorCompatibility {
   >;
 }
 
+/** An existing task or zone, or a task, zone or feature dropped from the palette. */
 export type RecipeEditorPlacementItem =
   | { readonly type: "task"; readonly id: string }
+  | { readonly type: "action"; readonly action: RecipeEditorAction }
   | { readonly type: "zone"; readonly id: string }
+  | { readonly type: "new-zone"; readonly kind: RecipeEditorZone["kind"] }
   | { readonly type: "feature"; readonly feature: RecipeEditorFeature };
 
 export type RecipeEditorPlacementTarget =

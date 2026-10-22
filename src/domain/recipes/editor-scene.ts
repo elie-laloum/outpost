@@ -6,6 +6,7 @@ import {
 } from "./editor-scene.constants.ts";
 import { recipeFamilies } from "./schema.constants.ts";
 import { recipeObject } from "./values.ts";
+import type { RecipeEditorAction } from "./editor.types.ts";
 import type { RecipeSourcePath } from "./expressions.types.ts";
 import type {
   RecipeEditorCompatibility,
@@ -137,8 +138,12 @@ function sandboxZone(
   };
 }
 
+function sandboxAction(action: RecipeEditorAction | undefined): boolean {
+  return recipeEditorSandboxActions.some((item) => item === action);
+}
+
 function sandboxTask(task: RecipeEditorSceneTask): boolean {
-  return recipeEditorSandboxActions.some((action) => action === task.action);
+  return sandboxAction(task.action);
 }
 
 function entity(family: string, name: string, value: unknown) {
@@ -257,36 +262,54 @@ function refused(reason: string): RecipeEditorPlacement {
   return { allowed: false, reason };
 }
 
+function actionPlacement(
+  action: RecipeEditorAction | undefined,
+  target: RecipeEditorZone | undefined,
+): RecipeEditorPlacement {
+  if (sandboxAction(action))
+    return target?.kind === "sandbox"
+      ? allowed
+      : refused("Command and agent tasks run in a sandbox zone");
+  if (!target) return allowed;
+  return refused(
+    action === "isolated"
+      ? "Isolated tasks open their own workspace and sandbox"
+      : "Only command and agent tasks run in a sandbox; keep this task outside zones",
+  );
+}
+
+function zonePlacement(
+  kind: RecipeEditorZone["kind"],
+  target: RecipeEditorZone | undefined,
+): RecipeEditorPlacement {
+  if (kind === "workspace")
+    return target ? refused("Workspaces stay at the top level") : allowed;
+  return target?.kind === "workspace"
+    ? allowed
+    : refused("A sandbox opens a workspace; drop it in a workspace zone");
+}
+
 const placers: RecipeEditorPlacers = {
   task: (scene, _compatibility, { id }, target) => {
     const task = scene.tasks.find((item) => item.id === id);
     if (!task) return refused(`Unknown task ${id}`);
-    if (sandboxTask(task))
-      return target?.kind === "sandbox"
-        ? allowed
-        : refused("Command and agent tasks run in a sandbox zone");
-    if (!target) return allowed;
-    return refused(
-      task.action === "isolated"
-        ? "Isolated tasks open their own workspace and sandbox"
-        : "Only command and agent tasks run in a sandbox; keep this task outside zones",
-    );
+    return actionPlacement(task.action, target);
   },
+  action: (_scene, _compatibility, { action }, target) =>
+    actionPlacement(action, target),
   zone: (scene, _compatibility, { id }, target) => {
     const zone = scene.zones.find((item) => item.id === id);
     if (!zone) return refused(`Unknown zone ${id}`);
-    if (zone.kind === "workspace")
-      return target ? refused("Workspaces stay at the top level") : allowed;
-    if (target?.kind !== "workspace")
-      return refused(
-        "A sandbox opens a workspace; drop it in a workspace zone",
-      );
-    if (!zone.name && target.name)
+    const placement = zonePlacement(zone.kind, target);
+    if (!placement.allowed || zone.kind === "workspace") return placement;
+    if (!zone.name && target?.name)
       return refused(
         "The configuration sandbox always opens the configuration workspace",
       );
     return allowed;
   },
+  "new-zone": (_scene, _compatibility, { kind }, target) =>
+    zonePlacement(kind, target),
   feature: (_scene, compatibility, { feature }, target) => {
     const declaration: RecipeEditorFeatureDeclaration =
       recipeEditorFeatures[feature];

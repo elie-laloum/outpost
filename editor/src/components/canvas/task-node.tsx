@@ -1,6 +1,6 @@
 import { Handle, type Node, type NodeProps, Position } from "@xyflow/react";
 import { GitBranch, TriangleAlert } from "lucide-react";
-import { nodeSize } from "@/lib/layout";
+import { nodeSize } from "@/lib/scene-layout";
 import { useRuns } from "@/lib/runs";
 import { taskTemplates } from "@/lib/templates";
 import type { RecipeEditorDiagnostic, RecipeEditorNode } from "@/lib/types";
@@ -12,6 +12,8 @@ export type TaskNodeData = {
   readonly task: RecipeEditorNode;
   readonly problems: readonly RecipeEditorDiagnostic[];
   readonly connectable: boolean;
+  /** Matches the canvas search. */
+  readonly found: boolean;
 };
 
 export type TaskFlowNode = Node<TaskNodeData, "task">;
@@ -24,7 +26,7 @@ function kindLabel(task: RecipeEditorNode): string {
 }
 
 export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
-  const { task, problems, connectable } = data;
+  const { task, problems, connectable, found } = data;
   const Icon = actionIcon(task.action);
   const status = useRuns((store) =>
     task.key ? store.tasks[task.key] : undefined,
@@ -38,11 +40,13 @@ export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
         problems.length > 0 && !selected && "border-destructive/70",
         status && !selected && statusBorders[status],
         status === "active" && "animate-pulse",
+        found && "ring-2 ring-warning",
       )}
       data-testid={`task-${task.id}`}
     >
       <Handle
         type="target"
+        id="after"
         position={Position.Left}
         isConnectable={connectable}
       />
@@ -95,8 +99,17 @@ export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
       )}
       <Handle
         type="source"
+        id="after"
         position={Position.Right}
         isConnectable={connectable}
+      />
+      <Handle
+        type="source"
+        id="ref"
+        position={Position.Bottom}
+        isConnectable={connectable && task.action === "agent"}
+        className={cn(!(connectable && task.action === "agent") && "opacity-0")}
+        title="Connect to an agent"
       />
     </div>
   );

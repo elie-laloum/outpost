@@ -2,11 +2,13 @@ import { create } from "zustand";
 import { ApiError, api, streamEvents } from "./api.ts";
 import { useRuns } from "./runs.ts";
 import type {
+  CanvasLayers,
   EditorFailure,
+  RecipeEditorLayoutNode,
   RecipeEditorRunEvent,
-  Position,
   RecipeEditorOperation,
   RecipeEditorRole,
+  RecipeEditorSceneOperation,
   RecipeEditorSessionInfo,
   RecipeEditorState,
 } from "./types.ts";
@@ -21,11 +23,16 @@ interface EditorStore {
   /** Files changed on disk that a save would overwrite. */
   readonly conflict?: readonly string[];
   readonly pending: number;
+  /** Scene id of the selected node, such as `task:build` or `zone:sandbox`. */
   readonly selected?: string;
+  readonly layers: CanvasLayers;
   start(): () => void;
   /** Accepts a state returned by a request outside the edit queue. */
   receive(state: RecipeEditorState): void;
   select(id: string | undefined): void;
+  toggleLayer(layer: keyof CanvasLayers): void;
+  /** Shows a refusal decided in the browser, such as an invalid drop. */
+  notify(message: string): void;
   dismiss(): void;
   open(request: {
     recipe: string;
@@ -37,8 +44,13 @@ interface EditorStore {
     operations: readonly RecipeEditorOperation[],
   ): Promise<boolean>;
   replaceText(role: RecipeEditorRole, text: string): Promise<boolean>;
+  editScene(
+    operations: readonly RecipeEditorSceneOperation[],
+    positions?: Readonly<Record<string, RecipeEditorLayoutNode>>,
+  ): Promise<boolean>;
+  /** Saves layout entries keyed by scene id; `replace` drops the entries not given. */
   moveNodes(
-    positions: Readonly<Record<string, Position>>,
+    entries: Readonly<Record<string, RecipeEditorLayoutNode>>,
     replace?: boolean,
   ): Promise<boolean>;
   undo(): Promise<boolean>;
@@ -94,6 +106,7 @@ export const useEditor = create<EditorStore>()((set, get) => {
   return {
     connection: "connecting",
     pending: 0,
+    layers: { components: true, references: false },
     start() {
       const controller = new AbortController();
       api<RecipeEditorSessionInfo>("/api/session")
@@ -134,6 +147,11 @@ export const useEditor = create<EditorStore>()((set, get) => {
     },
     receive: (next) => receive(next),
     select: (selected) => set({ selected }),
+    toggleLayer: (layer) =>
+      set((store) => ({
+        layers: { ...store.layers, [layer]: !store.layers[layer] },
+      })),
+    notify: (message) => set({ failure: { status: 0, message } }),
     dismiss: () => set({ failure: undefined, conflict: undefined }),
     open: (request) => mutate("/api/project/open", () => request),
     edit: (role, operations) =>
@@ -144,19 +162,20 @@ export const useEditor = create<EditorStore>()((set, get) => {
       })),
     replaceText: (role, text) =>
       mutate("/api/project/text", (revision) => ({ role, text, revision })),
-    moveNodes: (positions, replace = false) =>
+    editScene: (operations, positions = {}) =>
+      mutate("/api/project/scene", (revision) => ({
+        revision,
+        operations,
+        positions,
+      })),
+    moveNodes: (entries, replace = false) =>
       mutate("/api/project/layout", (revision) => ({
         revision,
         layout: {
           version: 2,
           nodes: {
             ...(replace ? {} : get().state?.layout.nodes),
-            ...Object.fromEntries(
-              Object.entries(positions).map(([id, position]) => [
-                `task:${id}`,
-                position,
-              ]),
-            ),
+            ...entries,
           },
         },
       })),

@@ -19,7 +19,7 @@ import { Toolbar } from "@/components/toolbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { YamlView } from "@/components/yaml-view";
 import { useEditor } from "@/lib/store";
-import type { EditorView } from "@/lib/types";
+import type { EditorView, PaletteItem } from "@/lib/types";
 import { useRecipe } from "@/lib/use-recipe";
 
 const views: readonly EditorView[] = [
@@ -77,10 +77,32 @@ function useShortcuts(onOpen: () => void) {
 }
 
 function CanvasView() {
-  const { editable, addTask } = useRecipe();
+  const {
+    editable,
+    configEditable,
+    addTask,
+    addZone,
+    addFeature,
+    addComponent,
+  } = useRecipe();
+  const clicks: {
+    readonly [Type in PaletteItem["type"]]: (
+      item: Extract<PaletteItem, { type: Type }>,
+    ) => void;
+  } = {
+    task: ({ action }) => void addTask(action),
+    zone: ({ kind, value }) => void addZone(kind, value),
+    feature: ({ feature }) => void addFeature(feature),
+    component: ({ family }) => void addComponent(family),
+  };
   return (
     <ReactFlowProvider>
-      <Palette disabled={!editable} onAdd={(action) => void addTask(action)} />
+      <Palette
+        disabled={{ recipe: !editable, config: !configEditable }}
+        onAdd={(item) =>
+          (clicks[item.type] as (item: PaletteItem) => void)(item)
+        }
+      />
       <RecipeCanvas />
       <Inspector />
     </ReactFlowProvider>
@@ -98,8 +120,8 @@ function Workbench() {
   const [running, setRunning] = useState(false);
   useEffect(() => start(), [start]);
   useShortcuts(() => setChoosing(true));
-  const show = (next: EditorView, task?: string) => {
-    if (task) select(task);
+  const show = (next: EditorView, node?: string) => {
+    if (node) select(node);
     void navigate({ search: next === "canvas" ? {} : { view: next } });
   };
   return (

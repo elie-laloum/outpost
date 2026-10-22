@@ -1,19 +1,16 @@
 import type { RecipeEditorDiagnostic } from "./types.ts";
 
-/** Recipe diagnostics grouped by the index of the task they locate. */
-export function diagnosticsByTask(
+/** Diagnostics grouped by the scene node they belong to, such as `task:build`. */
+export function diagnosticsByNode(
   diagnostics: readonly RecipeEditorDiagnostic[],
-): Map<number, RecipeEditorDiagnostic[]> {
-  const grouped = new Map<number, RecipeEditorDiagnostic[]>();
+): Map<string, RecipeEditorDiagnostic[]> {
+  const grouped = new Map<string, RecipeEditorDiagnostic[]>();
   for (const diagnostic of diagnostics) {
-    const [section, index] = diagnostic.path;
-    if (
-      diagnostic.file !== "recipe" ||
-      section !== "tasks" ||
-      typeof index !== "number"
-    )
-      continue;
-    grouped.set(index, [...(grouped.get(index) ?? []), diagnostic]);
+    if (!diagnostic.node) continue;
+    grouped.set(diagnostic.node, [
+      ...(grouped.get(diagnostic.node) ?? []),
+      diagnostic,
+    ]);
   }
   return grouped;
 }

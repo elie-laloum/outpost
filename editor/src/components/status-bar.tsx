@@ -19,7 +19,8 @@ function location(diagnostic: RecipeEditorDiagnostic): string {
 export function StatusBar({
   onShow,
 }: {
-  readonly onShow: (view: EditorView, task?: string) => void;
+  /** Opens a view, selecting the scene node a diagnostic belongs to. */
+  readonly onShow: (view: EditorView, node?: string) => void;
 }) {
   const state = useEditor((store) => store.state);
   const connection = useEditor((store) => store.connection);
@@ -28,14 +29,8 @@ export function StatusBar({
   const diagnostics = state?.diagnostics ?? [];
   const summary =
     diagnostics.length === 1 ? "1 problem" : `${diagnostics.length} problems`;
-  const tasks = state?.recipe?.graph.nodes ?? [];
   const show = (diagnostic: RecipeEditorDiagnostic) => {
-    const [section, index] = diagnostic.path;
-    const task =
-      section === "tasks" && typeof index === "number"
-        ? tasks.find((node) => node.index === index)
-        : undefined;
-    if (diagnostic.file === "recipe" && task) return onShow("canvas", task.id);
+    if (diagnostic.node) return onShow("canvas", diagnostic.node);
     onShow(diagnostic.file === "config" ? "config" : "yaml");
   };
   return (

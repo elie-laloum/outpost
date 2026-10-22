@@ -195,6 +195,28 @@ test("placement keeps executing tasks in sandboxes, sandboxes in workspaces and 
   });
   assert.equal(place(feature("variables"), "workspace").allowed, false);
   assert.equal(place(task("missing")).allowed, false);
+  assert.deepEqual(place({ type: "action", action: "agent" }, "sandbox"), {
+    allowed: true,
+  });
+  assert.deepEqual(place({ type: "action", action: "isolated" }, "sandbox"), {
+    allowed: false,
+    reason: "Isolated tasks open their own workspace and sandbox",
+  });
+  assert.deepEqual(place({ type: "action", action: "gate" }), {
+    allowed: true,
+  });
+  assert.deepEqual(place({ type: "new-zone", kind: "sandbox" }, "sandbox"), {
+    allowed: false,
+    reason: "A sandbox opens a workspace; drop it in a workspace zone",
+  });
+  assert.deepEqual(
+    place({ type: "new-zone", kind: "sandbox" }, "workspaces.docs"),
+    { allowed: true },
+  );
+  assert.equal(
+    place({ type: "new-zone", kind: "workspace" }, "workspace").allowed,
+    false,
+  );
   assert.equal(place(task("build"), "sandboxes.missing").allowed, false);
 });
 
