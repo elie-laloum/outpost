@@ -5,22 +5,34 @@ import {
   locateConfiguration,
 } from "../../domain/configuration-diagnostic.ts";
 import { recipeTaskSourcePath } from "../../domain/recipe.ts";
-import { recipeRecord } from "../../domain/recipes/values.ts";
+import { recipeRecord, recipeReference } from "../../domain/recipes/values.ts";
 import type {
   FileWorkspaceSource,
   WorkspaceOutputOptions,
+  WorkspaceRuntimeOptions,
 } from "../../domain/file-workspace.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import { validateWorkspaceSelection } from "../../infrastructure/workspace-files.ts";
+import { configurationBranch } from "../recipe-configuration-values.ts";
 import { planFileWorkspace } from "./execution-plan.ts";
-import type { NormalizedRecipeConfiguration } from "./file-configuration.types.ts";
-import type { RecipeFileConfiguration } from "./file-configuration.types.ts";
+import type {
+  NormalizedRecipeConfiguration,
+  RecipeConfigurationPath as Path,
+  RecipeFileWorkspaceDeclaration,
+  RecipeNamedSandboxes,
+  RecipeWorkspaceOutputsDeclaration,
+} from "./file-configuration.types.ts";
+import type {
+  RecipeSandboxModel,
+  RecipeWorkspaceDeclaration,
+} from "./configuration-model.types.ts";
 import { transportReference } from "../../infrastructure/transport-json.ts";
+import { recipeWorkspaceKeys } from "./file-configuration.constants.ts";
 
 function onlyKeys(
   value: Readonly<Record<string, unknown>>,
   allowed: readonly string[],
-  path: readonly (string | number)[],
+  path: Path,
 ): void {
   const label = path.filter((key) => typeof key === "string").join(".");
   for (const key of Object.keys(value))
@@ -33,10 +45,7 @@ function onlyKeys(
     );
 }
 
-function stringPaths(
-  value: unknown,
-  path: readonly (string | number)[],
-): readonly string[] {
+function stringPaths(value: unknown, path: Path): readonly string[] {
   configurationInvariant(
     Array.isArray(value) &&
       value.every((item: unknown) => typeof item === "string"),
@@ -45,6 +54,389 @@ function stringPaths(
   );
   locateConfiguration(path, () => validateWorkspaceSelection(value));
   return value;
+}
+
+function workspaceInputs(
+  value: unknown,
+  at: Path,
+  directory: string,
+): RecipeFileWorkspaceDeclaration["inputs"] {
+  configurationInvariant(
+    Array.isArray(value),
+    "Workspace inputs must be a list",
+    [...at, "inputs"],
+  );
+  return value.map((entry: unknown, index: number) => {
+    const path = [...at, "inputs", index] as const;
+    const input = recipeRecord(entry, `${at.join(".")}.inputs[${index}]`);
+    onlyKeys(input, ["directory", "paths", "snapshot", "transporter"], path);
+    if (input.directory !== undefined) {
+      const message = "Directory workspace inputs cannot declare snapshots";
+      configurationInvariant(typeof input.directory === "string", message, [
+        ...path,
+        "directory",
+      ]);
+      for (const key of ["snapshot", "transporter"])
+        configurationInvariant(
+          input[key] === undefined,
+          message,
+          [...path, key],
+          "invalid-value",
+          "Remove snapshot and transporter from a directory input.",
+        );
+      return {
+        directory: resolve(directory, input.directory),
+        ...(input.paths === undefined
+          ? {}
+          : { paths: stringPaths(input.paths, [...path, "paths"]) }),
+      };
+    }
+    const reference = recipeRecord(
+      input.transporter,
+      [...path, "transporter"].join("."),
+    );
+    configurationInvariant(
+      typeof reference.$ref === "string" && input.paths === undefined,
+      "Snapshot input requires an explicit Transport reference",
+      [...path, input.paths === undefined ? "transporter" : "paths"],
+      "invalid-value",
+      "Reference a declared Transport with { $ref: transports.<name> } and omit paths.",
+    );
+    return {
+      snapshot: locateConfiguration([...path, "snapshot"], () =>
+        transportReference(input.snapshot),
+      ),
+      transporter: reference.$ref,
+    };
+  });
+}
+
+function workspaceRetention(
+  value: unknown,
+  at: Path,
+  runtime: WorkspaceRuntimeOptions,
+): RecipeFileWorkspaceDeclaration["retention"] {
+  const path = [...at, "retention"];
+  const declaration = recipeRecord(value, path.join("."));
+  onlyKeys(declaration, ["policy", "transporter"], path);
+  configurationInvariant(
+    declaration.policy === "run" ||
+      declaration.policy === "local" ||
+      declaration.policy === "portable",
+    "Invalid workspace retention policy",
+    [...path, "policy"],
+    "invalid-value",
+    "Use run, local or portable.",
+  );
+  if (declaration.policy === "portable") {
+    const reference = recipeRecord(
+      declaration.transporter,
+      [...path, "transporter"].join("."),
+    );
+    configurationInvariant(
+      typeof reference.$ref === "string",
+      "Portable retention requires an explicit Transport reference and namespace",
+      [...path, "transporter"],
+      "invalid-value",
+      "Reference a declared Transport with { $ref: transports.<name> }.",
+    );
+    configurationInvariant(
+      runtime.namespace,
+      "Portable retention requires an explicit Transport reference and namespace",
+      path,
+      "missing-field",
+      "Declare runtime.namespace to name the portable records.",
+    );
+    return { policy: "portable", transporter: reference.$ref };
+  }
+  configurationInvariant(
+    declaration.transporter === undefined,
+    "Local retention cannot declare a Transport",
+    [...path, "transporter"],
+    "invalid-value",
+    "Remove transporter, or use policy: portable.",
+  );
+  return { policy: declaration.policy };
+}
+
+function directorySource(
+  workspace: Readonly<Record<string, unknown>>,
+  at: Path,
+  directory: string,
+  paths: readonly string[] | undefined,
+): FileWorkspaceSource {
+  const label = at.join(".");
+  configurationInvariant(
+    typeof workspace.directory === "string",
+    "Directory workspace requires directory",
+    [...at, "directory"],
+    "missing-field",
+    `Declare ${label}.directory with the source directory.`,
+  );
+  const access =
+    workspace.access === undefined || workspace.access === "copy"
+      ? { mode: "copy" }
+      : recipeRecord(workspace.access, `${label}.access`);
+  onlyKeys(access, ["mode", "target", "readOnly"], [...at, "access"]);
+  if (access.mode === "copy") {
+    for (const key of ["target", "readOnly"])
+      configurationInvariant(
+        access[key] === undefined,
+        "Copy access cannot declare mount options",
+        [...at, "access", key],
+        "invalid-value",
+        "Remove target and readOnly, or use mode: mount.",
+      );
+    return {
+      kind: "directory",
+      directory: resolve(directory, workspace.directory),
+      access: { mode: "copy" },
+    };
+  }
+  configurationInvariant(
+    access.mode === "mount",
+    "Unsupported workspace kind or access mode",
+    [...at, "access", "mode"],
+    "invalid-value",
+    "Use kind git, directory or ephemeral; directory access is copy or mount.",
+  );
+  const message = "Mount requires target and explicit readOnly, without paths";
+  const hint = `Declare access.target and access.readOnly, and remove ${label}.paths.`;
+  configurationInvariant(
+    typeof access.target === "string",
+    message,
+    [...at, "access", "target"],
+    "missing-field",
+    hint,
+  );
+  configurationInvariant(
+    typeof access.readOnly === "boolean",
+    message,
+    [...at, "access", "readOnly"],
+    "missing-field",
+    hint,
+  );
+  configurationInvariant(
+    !paths,
+    message,
+    [...at, "paths"],
+    "invalid-value",
+    hint,
+  );
+  const target = access.target;
+  locateConfiguration([...at, "access", "target"], () =>
+    validateWorkspaceSelection([target]),
+  );
+  return {
+    kind: "directory",
+    directory: resolve(directory, workspace.directory),
+    access: { mode: "mount", target: access.target, readOnly: access.readOnly },
+  };
+}
+
+function workspaceOutputs(
+  value: unknown,
+  at: Path,
+  directory: string,
+): readonly WorkspaceOutputOptions[] {
+  configurationInvariant(
+    value === undefined || Array.isArray(value),
+    "Workspace outputs must be a list",
+    at,
+  );
+  return (value ?? []).map((declaration: unknown, index: number) => {
+    const path = [...at, index] as const;
+    const output = recipeRecord(declaration, `${at.join(".")}[${index}]`);
+    onlyKeys(output, ["paths", "destination", "policy", "deleteMissing"], path);
+    const message = "Invalid workspace publication declaration";
+    configurationInvariant(
+      typeof output.destination === "string",
+      message,
+      [...path, "destination"],
+      "missing-field",
+      "Declare destination with the host directory that receives the files.",
+    );
+    configurationInvariant(
+      output.policy === "create" || output.policy === "update",
+      message,
+      [...path, "policy"],
+      "invalid-value",
+      "Use policy create or update.",
+    );
+    configurationInvariant(
+      output.deleteMissing === undefined ||
+        typeof output.deleteMissing === "boolean",
+      message,
+      [...path, "deleteMissing"],
+      "invalid-value",
+      "Use true or false.",
+    );
+    return {
+      paths: stringPaths(output.paths, [...path, "paths"]),
+      destination: resolve(directory, output.destination),
+      policy: output.policy,
+      ...(output.deleteMissing === undefined
+        ? {}
+        : { deleteMissing: output.deleteMissing }),
+    };
+  });
+}
+
+/** Reads one file workspace declaration; `outputs` is its own list or the configuration's. */
+function fileWorkspace(
+  workspace: Readonly<Record<string, unknown>> | undefined,
+  at: Path,
+  directory: string,
+  runtime: WorkspaceRuntimeOptions,
+  outputs: RecipeWorkspaceOutputsDeclaration,
+): RecipeFileWorkspaceDeclaration {
+  let source: FileWorkspaceSource | undefined;
+  let retention: RecipeFileWorkspaceDeclaration["retention"];
+  let paths: readonly string[] | undefined;
+  let inputs: RecipeFileWorkspaceDeclaration["inputs"];
+  if (workspace) {
+    if (workspace.inputs !== undefined)
+      inputs = workspaceInputs(workspace.inputs, at, directory);
+    if (workspace.retention !== undefined)
+      retention = workspaceRetention(workspace.retention, at, runtime);
+    if (workspace.paths !== undefined)
+      paths = stringPaths(workspace.paths, [...at, "paths"]);
+    if (workspace.kind === "ephemeral") {
+      configurationInvariant(
+        workspace.directory === undefined &&
+          workspace.access === undefined &&
+          !paths,
+        "Ephemeral workspace cannot declare directory inputs",
+        [
+          ...at,
+          ["directory", "access", "paths"].find(
+            (key) => workspace[key] !== undefined,
+          ) ?? "kind",
+        ],
+        "invalid-value",
+        "Remove directory, access and paths, or use kind: directory.",
+      );
+      source = { kind: "ephemeral" };
+    }
+    if (workspace.kind === "directory")
+      source = directorySource(workspace, at, directory, paths);
+    configurationInvariant(
+      source,
+      "Unsupported workspace kind or access mode",
+      [...at, "kind"],
+      "invalid-value",
+      "Use kind git, directory or ephemeral; directory access is copy or mount.",
+    );
+  }
+  const published = workspaceOutputs(outputs.value, outputs.path, directory);
+  configurationInvariant(
+    source || !published.length,
+    "Workspace outputs require a workspace source",
+    outputs.path,
+    "missing-field",
+    "Declare a workspace source, or remove outputs.",
+  );
+  return {
+    ...(source ? { source } : {}),
+    ...(retention ? { retention } : {}),
+    ...(paths ? { paths } : {}),
+    ...(inputs ? { inputs } : {}),
+    outputs: published,
+  };
+}
+
+function gitWorkspace(
+  workspace: Readonly<Record<string, unknown>>,
+  at: Path,
+  directory: string,
+) {
+  onlyKeys(workspace, recipeWorkspaceKeys.git, at);
+  const { kind: _kind, repository, branch, ...options } = workspace;
+  configurationInvariant(
+    typeof repository === "string",
+    "Git workspace requires repository",
+    [...at, "repository"],
+    "missing-field",
+    `Declare ${at.join(".")}.repository with the repository path.`,
+  );
+  return {
+    declaration: {
+      kind: "git" as const,
+      repository: resolve(directory, repository),
+      branch: locateConfiguration([...at, "branch"], () =>
+        configurationBranch(branch),
+      ),
+    },
+    branch,
+    repository,
+    options,
+  };
+}
+
+/** Rejects two Git workspaces that would check out the same branch of one repository. */
+function distinctBranches(
+  workspaces: Readonly<Record<string, RecipeWorkspaceDeclaration>>,
+): void {
+  const used = new Map<string, string>();
+  for (const [name, workspace] of Object.entries(workspaces)) {
+    if (workspace.kind !== "git") continue;
+    const branch = workspace.branch;
+    const checkout =
+      branch.mode === "current"
+        ? "current"
+        : "name" in branch && branch.name
+          ? `named:${branch.name}`
+          : undefined;
+    if (!checkout) continue;
+    const key = `${workspace.repository}\0${checkout}`;
+    const other = used.get(key);
+    configurationInvariant(
+      other === undefined,
+      `Workspaces ${other} and ${name} check out the same branch`,
+      name === "" ? ["workspace", "branch"] : ["workspaces", name, "branch"],
+      "invalid-value",
+      "Give each Git workspace on one repository its own branch.",
+    );
+    used.set(key, name || "workspace");
+  }
+}
+
+function namedSandboxes(
+  configuration: Readonly<Record<string, unknown>>,
+  workspaces: Readonly<Record<string, RecipeWorkspaceDeclaration>>,
+): RecipeNamedSandboxes {
+  const declarations: Record<string, Readonly<Record<string, unknown>>> = {};
+  const models: Record<string, RecipeSandboxModel> = {};
+  for (const [name, value] of Object.entries(
+    recipeRecord(configuration.sandboxes ?? {}, "sandboxes"),
+  )) {
+    const { workspace, ...declaration } = recipeRecord(
+      value,
+      `sandboxes.${name}`,
+    );
+    const path = ["sandboxes", name, "workspace"];
+    if (workspace === undefined) {
+      models[name] = {};
+      declarations[name] = declaration;
+      continue;
+    }
+    const reference = locateConfiguration(path, () =>
+      recipeReference(workspace),
+    );
+    const target = reference?.startsWith("workspaces.")
+      ? reference.slice("workspaces.".length)
+      : undefined;
+    configurationInvariant(
+      target !== undefined && Object.hasOwn(workspaces, target),
+      `Sandbox ${name} references an unknown workspace`,
+      path,
+      "unknown-reference",
+      "Reference a declared workspace with { $ref: workspaces.<name> }, or omit workspace to use the configuration workspace.",
+    );
+    models[name] = { workspace: target };
+    declarations[name] = declaration;
+  }
+  return { declarations, models };
 }
 
 export function normalizeRecipeWorkspaceConfiguration(
@@ -65,7 +457,24 @@ export function normalizeRecipeWorkspaceConfiguration(
     configuration.workspace === undefined
       ? undefined
       : recipeRecord(configuration.workspace, "workspace");
-  if (workspace?.kind === "git") {
+  const declared = Object.entries(
+    recipeRecord(configuration.workspaces ?? {}, "workspaces"),
+  ).map(
+    ([name, value]) =>
+      [name, recipeRecord(value, `workspaces.${name}`)] as const,
+  );
+  const git = workspace?.kind === "git";
+  for (const [name, value] of declared)
+    configurationInvariant(
+      (value.kind === "git") === git,
+      `Workspace ${name} uses a different mode than the configuration workspace`,
+      ["workspaces", name, "kind"],
+      "mixed-workspaces",
+      git
+        ? "Use kind: git for every workspace of this configuration."
+        : "Use kind: directory or ephemeral for every workspace of this configuration.",
+    );
+  if (git) {
     configurationInvariant(
       configuration.runtime === undefined &&
         configuration.outputs === undefined,
@@ -74,36 +483,27 @@ export function normalizeRecipeWorkspaceConfiguration(
       "file-workspace-only",
       "Remove runtime and outputs, or declare a file workspace.",
     );
-    onlyKeys(
-      workspace,
-      [
-        "kind",
-        "repository",
-        "branch",
-        "copies",
-        "guard",
-        "hooks",
-        "limits",
-        "label",
-        "storageQuota",
-      ],
-      ["workspace"],
-    );
-    const { kind: _kind, repository, branch, ...options } = workspace;
-    configurationInvariant(
-      typeof repository === "string",
-      "Git workspace requires repository",
-      ["workspace", "repository"],
-      "missing-field",
-      "Declare workspace.repository with the repository path.",
-    );
+    const main = gitWorkspace(workspace, ["workspace"], directory);
+    const workspaces: Record<string, RecipeWorkspaceDeclaration> = {};
+    const options: Record<string, Readonly<Record<string, unknown>>> = {};
+    for (const [name, value] of declared) {
+      const named = gitWorkspace(value, ["workspaces", name], directory);
+      workspaces[name] = named.declaration;
+      options[name] = named.options;
+    }
+    distinctBranches({ "": main.declaration, ...workspaces });
+    const sandboxes = namedSandboxes(configuration, workspaces);
     return {
       configuration: {
         ...configuration,
-        repository,
-        ...(branch ? { branch } : {}),
-        workspace: options,
+        repository: main.repository,
+        ...(main.branch ? { branch: main.branch } : {}),
+        workspace: main.options,
+        workspaces: options,
+        sandboxes: sandboxes.declarations,
       },
+      workspaces,
+      sandboxes: sandboxes.models,
     };
   }
   configurationInvariant(
@@ -161,226 +561,30 @@ export function normalizeRecipeWorkspaceConfiguration(
     "invalid-value",
     "Use 1 to 128 letters, digits, dots, underscores or hyphens, starting with a letter or digit.",
   );
-  let source: FileWorkspaceSource | undefined;
-  let retention: RecipeFileConfiguration["retention"];
-  let paths: readonly string[] | undefined;
-  let inputs: RecipeFileConfiguration["inputs"];
-  if (workspace) {
-    onlyKeys(
-      workspace,
-      ["kind", "directory", "access", "paths", "retention", "inputs"],
-      ["workspace"],
-    );
-    if (workspace.inputs !== undefined) {
-      configurationInvariant(
-        Array.isArray(workspace.inputs),
-        "Workspace inputs must be a list",
-        ["workspace", "inputs"],
-      );
-      inputs = workspace.inputs.map((value: unknown, index: number) => {
-        const path = ["workspace", "inputs", index] as const;
-        const input = recipeRecord(value, `workspace.inputs[${index}]`);
-        onlyKeys(
-          input,
-          ["directory", "paths", "snapshot", "transporter"],
-          path,
-        );
-        if (input.directory !== undefined) {
-          const message = "Directory workspace inputs cannot declare snapshots";
-          configurationInvariant(typeof input.directory === "string", message, [
-            ...path,
-            "directory",
-          ]);
-          for (const key of ["snapshot", "transporter"])
-            configurationInvariant(
-              input[key] === undefined,
-              message,
-              [...path, key],
-              "invalid-value",
-              "Remove snapshot and transporter from a directory input.",
-            );
-          return {
-            directory: resolve(directory, input.directory),
-            ...(input.paths === undefined
-              ? {}
-              : { paths: stringPaths(input.paths, [...path, "paths"]) }),
-          };
-        }
-        const reference = recipeRecord(
-          input.transporter,
-          `workspace.inputs[${index}].transporter`,
-        );
-        configurationInvariant(
-          typeof reference.$ref === "string" && input.paths === undefined,
-          "Snapshot input requires an explicit Transport reference",
-          [...path, input.paths === undefined ? "transporter" : "paths"],
-          "invalid-value",
-          "Reference a declared Transport with { $ref: transports.<name> } and omit paths.",
-        );
-        return {
-          snapshot: locateConfiguration([...path, "snapshot"], () =>
-            transportReference(input.snapshot),
-          ),
-          transporter: reference.$ref,
-        };
-      });
-    }
-    if (workspace.retention !== undefined) {
-      const declaration = recipeRecord(
-        workspace.retention,
-        "workspace.retention",
-      );
-      onlyKeys(
-        declaration,
-        ["policy", "transporter"],
-        ["workspace", "retention"],
-      );
-      configurationInvariant(
-        declaration.policy === "run" ||
-          declaration.policy === "local" ||
-          declaration.policy === "portable",
-        "Invalid workspace retention policy",
-        ["workspace", "retention", "policy"],
-        "invalid-value",
-        "Use run, local or portable.",
-      );
-      if (declaration.policy === "portable") {
-        const reference = recipeRecord(
-          declaration.transporter,
-          "workspace.retention.transporter",
-        );
-        configurationInvariant(
-          typeof reference.$ref === "string",
-          "Portable retention requires an explicit Transport reference and namespace",
-          ["workspace", "retention", "transporter"],
-          "invalid-value",
-          "Reference a declared Transport with { $ref: transports.<name> }.",
-        );
-        configurationInvariant(
-          runtime.namespace,
-          "Portable retention requires an explicit Transport reference and namespace",
-          ["workspace", "retention"],
-          "missing-field",
-          "Declare runtime.namespace to name the portable records.",
-        );
-        retention = { policy: "portable", transporter: reference.$ref };
-      }
-      if (declaration.policy === "run" || declaration.policy === "local") {
-        configurationInvariant(
-          declaration.transporter === undefined,
-          "Local retention cannot declare a Transport",
-          ["workspace", "retention", "transporter"],
-          "invalid-value",
-          "Remove transporter, or use policy: portable.",
-        );
-        retention = { policy: declaration.policy };
-      }
-    }
-    if (workspace.paths !== undefined)
-      paths = stringPaths(workspace.paths, ["workspace", "paths"]);
-    if (workspace.kind === "ephemeral") {
-      configurationInvariant(
-        workspace.directory === undefined &&
-          workspace.access === undefined &&
-          !paths,
-        "Ephemeral workspace cannot declare directory inputs",
-        [
-          "workspace",
-          ["directory", "access", "paths"].find(
-            (key) => workspace[key] !== undefined,
-          ) ?? "kind",
-        ],
-        "invalid-value",
-        "Remove directory, access and paths, or use kind: directory.",
-      );
-      source = { kind: "ephemeral" };
-    }
-    if (workspace.kind === "directory") {
-      configurationInvariant(
-        typeof workspace.directory === "string",
-        "Directory workspace requires directory",
-        ["workspace", "directory"],
-        "missing-field",
-        "Declare workspace.directory with the source directory.",
-      );
-      const access =
-        workspace.access === undefined || workspace.access === "copy"
-          ? { mode: "copy" }
-          : recipeRecord(workspace.access, "workspace.access");
-      onlyKeys(access, ["mode", "target", "readOnly"], ["workspace", "access"]);
-      if (access.mode === "copy") {
-        for (const key of ["target", "readOnly"])
-          configurationInvariant(
-            access[key] === undefined,
-            "Copy access cannot declare mount options",
-            ["workspace", "access", key],
-            "invalid-value",
-            "Remove target and readOnly, or use mode: mount.",
-          );
-        source = {
-          kind: "directory",
-          directory: resolve(directory, workspace.directory),
-          access: { mode: "copy" },
-        };
-      }
-      if (access.mode === "mount") {
-        const message =
-          "Mount requires target and explicit readOnly, without paths";
-        const hint =
-          "Declare access.target and access.readOnly, and remove workspace.paths.";
-        configurationInvariant(
-          typeof access.target === "string",
-          message,
-          ["workspace", "access", "target"],
-          "missing-field",
-          hint,
-        );
-        configurationInvariant(
-          typeof access.readOnly === "boolean",
-          message,
-          ["workspace", "access", "readOnly"],
-          "missing-field",
-          hint,
-        );
-        configurationInvariant(
-          !paths,
-          message,
-          ["workspace", "paths"],
-          "invalid-value",
-          hint,
-        );
-        const target = access.target;
-        locateConfiguration(["workspace", "access", "target"], () =>
-          validateWorkspaceSelection([target]),
-        );
-        source = {
-          kind: "directory",
-          directory: resolve(directory, workspace.directory),
-          access: {
-            mode: "mount",
-            target: access.target,
-            readOnly: access.readOnly,
-          },
-        };
-      }
-    }
-    configurationInvariant(
-      source,
-      "Unsupported workspace kind or access mode",
-      workspace.kind === "directory"
-        ? ["workspace", "access", "mode"]
-        : ["workspace", "kind"],
-      "invalid-value",
-      "Use kind git, directory or ephemeral; directory access is copy or mount.",
-    );
+  if (workspace) onlyKeys(workspace, recipeWorkspaceKeys.file, ["workspace"]);
+  const main = fileWorkspace(workspace, ["workspace"], directory, runtime, {
+    value: configuration.outputs,
+    path: ["outputs"],
+  });
+  const workspaces: Record<string, RecipeWorkspaceDeclaration> = {};
+  for (const [name, value] of declared) {
+    const at = ["workspaces", name];
+    onlyKeys(value, [...recipeWorkspaceKeys.file, "outputs"], at);
+    workspaces[name] = {
+      kind: "files",
+      files: fileWorkspace(value, at, directory, runtime, {
+        value: value.outputs,
+        path: [...at, "outputs"],
+      }),
+    };
   }
   const needsSandbox = document.tasks.some(
-    (step) => step.command || step.agent,
+    (step) => (step.command || step.agent) && step.sandbox === undefined,
   );
   configurationInvariant(
-    !needsSandbox || (source && configuration.sandbox),
+    !needsSandbox || (main.source && configuration.sandbox),
     "Sandbox tasks require an explicit workspace source and sandbox",
-    [source ? "sandbox" : "workspace"],
+    [main.source ? "sandbox" : "workspace"],
     "missing-field",
     "Declare workspace and sandbox for command and agent tasks.",
   );
@@ -388,74 +592,45 @@ export function normalizeRecipeWorkspaceConfiguration(
     configuration.sandbox ?? { provider: "local" },
     "sandbox",
   );
-  const plan = planFileWorkspace(source, sandbox);
+  const plan = planFileWorkspace(main.source, sandbox);
   const [diagnostic] = plan.diagnostics;
   if (diagnostic) throw new ConfigurationError(diagnostic);
-  configurationInvariant(
-    configuration.outputs === undefined || Array.isArray(configuration.outputs),
-    "Workspace outputs must be a list",
-    ["outputs"],
-  );
-  const outputs: WorkspaceOutputOptions[] = (configuration.outputs ?? []).map(
-    (declaration: unknown, index: number) => {
-      const path = ["outputs", index] as const;
-      const output = recipeRecord(declaration, `outputs[${index}]`);
-      onlyKeys(
-        output,
-        ["paths", "destination", "policy", "deleteMissing"],
-        path,
-      );
-      const message = "Invalid workspace publication declaration";
-      configurationInvariant(
-        typeof output.destination === "string",
-        message,
-        [...path, "destination"],
-        "missing-field",
-        "Declare destination with the host directory that receives the files.",
-      );
-      configurationInvariant(
-        output.policy === "create" || output.policy === "update",
-        message,
-        [...path, "policy"],
-        "invalid-value",
-        "Use policy create or update.",
-      );
-      configurationInvariant(
-        output.deleteMissing === undefined ||
-          typeof output.deleteMissing === "boolean",
-        message,
-        [...path, "deleteMissing"],
-        "invalid-value",
-        "Use true or false.",
-      );
-      return {
-        paths: stringPaths(output.paths, [...path, "paths"]),
-        destination: resolve(directory, output.destination),
-        policy: output.policy,
-        ...(output.deleteMissing === undefined
-          ? {}
-          : { deleteMissing: output.deleteMissing }),
-      };
-    },
-  );
-  configurationInvariant(
-    source || !outputs.length,
-    "Workspace outputs require a workspace source",
-    ["outputs"],
-    "missing-field",
-    "Declare a workspace source, or remove outputs.",
-  );
-  const { runtime: _runtime, outputs: _outputs, ...components } = configuration;
+  const sandboxes = namedSandboxes(configuration, workspaces);
+  for (const [name, model] of Object.entries(sandboxes.models)) {
+    const target = model.workspace
+      ? workspaces[model.workspace]
+      : { kind: "files" as const, files: main };
+    const source = target?.kind === "files" ? target.files.source : undefined;
+    configurationInvariant(
+      source,
+      `Sandbox ${name} requires a workspace source`,
+      ["sandboxes", name, model.workspace ? "workspace" : "provider"],
+      "missing-field",
+      "Declare the configuration workspace, or reference a declared workspace with { $ref: workspaces.<name> }.",
+    );
+    const planned = planFileWorkspace(source, sandboxes.declarations[name]!, [
+      "sandboxes",
+      name,
+    ]);
+    const [problem] = planned.diagnostics;
+    if (problem) throw new ConfigurationError(problem);
+    sandboxes.models[name] = { ...model, plan: planned };
+  }
+  const {
+    runtime: _runtime,
+    outputs: _outputs,
+    workspaces: _workspaces,
+    ...components
+  } = configuration;
   return {
-    configuration: { ...components, workspace: {}, sandbox },
-    files: {
-      plan,
-      runtime,
-      ...(source ? { source } : {}),
-      ...(retention ? { retention } : {}),
-      ...(paths ? { paths } : {}),
-      ...(inputs ? { inputs } : {}),
-      outputs,
+    configuration: {
+      ...components,
+      workspace: {},
+      sandbox,
+      sandboxes: sandboxes.declarations,
     },
+    files: { ...main, plan, runtime },
+    workspaces,
+    sandboxes: sandboxes.models,
   };
 }

@@ -305,6 +305,35 @@ config3.properties.outputs = {
     },
   },
 };
+const namedWorkspace = structuredClone(config3.properties.workspace);
+for (const variant of namedWorkspace.oneOf.slice(0, 2))
+  variant.properties.outputs = config3.properties.outputs;
+config3.properties.workspaces = {
+  type: "object",
+  additionalProperties: namedWorkspace,
+};
+const placed = (shape) =>
+  shape.anyOf
+    ? { ...shape, anyOf: shape.anyOf.map(placed) }
+    : {
+        ...shape,
+        properties: {
+          ...shape.properties,
+          workspace: recipeScalarSchemas.reference,
+        },
+      };
+config3.properties.sandboxes = {
+  type: "object",
+  additionalProperties: {
+    anyOf: current.properties.sandbox.anyOf
+      .flatMap((variant) =>
+        variant.$ref === "#/$defs/sandboxProvider"
+          ? definitions.sandboxProvider.anyOf
+          : [variant],
+      )
+      .map(placed),
+  },
+};
 const configSchema = {
   $schema: configuration.$schema,
   title: configuration.title,
@@ -428,6 +457,7 @@ taskV3.properties.call = clean(
 for (const field of ["value", "state", "arguments", "data"])
   taskV3.properties[field] = { $ref: "#/$defs/expression" };
 taskV3.properties.quotaResume = { enum: ["continue", "restart"] };
+taskV3.properties.sandbox = { type: "string", minLength: 1 };
 taskV3.properties.when = { $ref: "#/$defs/condition" };
 const actions = [
   "speculation",
@@ -475,6 +505,12 @@ taskV3.allOf = [
   {
     if: { not: { required: ["decision"] } },
     then: { not: { required: ["state"] } },
+  },
+  {
+    if: {
+      not: { anyOf: [{ required: ["command"] }, { required: ["agent"] }] },
+    },
+    then: { not: { required: ["sandbox"] } },
   },
 ];
 const inputV3 = structuredClone(recipe.$defs.input);

@@ -6,6 +6,10 @@ import type {
 import type { TransportReference } from "../../domain/transport.types.ts";
 import type { ConfigurationDiagnostic } from "../../domain/configuration-diagnostic.types.ts";
 import type {
+  RecipeSandboxModel,
+  RecipeWorkspaceDeclaration,
+} from "./configuration-model.types.ts";
+import type {
   FileWorkspaceBinding,
   SandboxProvider,
 } from "../../domain/sandbox.types.ts";
@@ -27,19 +31,39 @@ export interface RecipeFileWorkspacePlan {
   readonly diagnostics: readonly ConfigurationDiagnostic[];
 }
 
-export interface RecipeFileConfiguration {
-  readonly plan: RecipeFileWorkspacePlan;
+/** A file workspace declaration, independent of the sandboxes that open it. */
+export interface RecipeFileWorkspaceDeclaration {
   readonly retention?:
     | { readonly policy: "run" | "local" }
     | { readonly policy: "portable"; readonly transporter: string };
-  readonly runtime: WorkspaceRuntimeOptions;
   readonly source?: FileWorkspaceSource;
   readonly paths?: readonly string[];
   readonly inputs?: readonly RecipeWorkspaceInput[];
   readonly outputs: readonly WorkspaceOutputOptions[];
 }
 
+export interface RecipeFileConfiguration extends RecipeFileWorkspaceDeclaration {
+  readonly plan: RecipeFileWorkspacePlan;
+  readonly runtime: WorkspaceRuntimeOptions;
+}
+
 export interface NormalizedRecipeConfiguration {
   readonly configuration: Readonly<Record<string, unknown>>;
   readonly files?: RecipeFileConfiguration;
+  readonly workspaces?: Readonly<Record<string, RecipeWorkspaceDeclaration>>;
+  readonly sandboxes?: Readonly<Record<string, RecipeSandboxModel>>;
+}
+
+export type RecipeConfigurationPath = readonly (string | number)[];
+
+/** Publications of one file workspace: its own `outputs` or the configuration's. */
+export interface RecipeWorkspaceOutputsDeclaration {
+  readonly value: unknown;
+  readonly path: RecipeConfigurationPath;
+}
+
+/** Named sandboxes split into component declarations and their workspace models. */
+export interface RecipeNamedSandboxes {
+  readonly declarations: Record<string, Readonly<Record<string, unknown>>>;
+  readonly models: Record<string, RecipeSandboxModel>;
 }

@@ -26,6 +26,8 @@ export interface RecipeStep {
   readonly retry?: Retry;
   readonly command?: Command;
   readonly agent?: string;
+  /** Named sandbox of the execution configuration that runs this command or agent task. */
+  readonly sandbox?: string;
   readonly brief?: string;
 }
 

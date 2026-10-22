@@ -100,15 +100,30 @@ export function recipeComponentGraph(
           "misplaced-field",
           `Move ${key} out of workspace to the top level.`,
         );
-    const provider = recipeRecord(configuration.sandbox, "sandbox");
-    const { provider: shorthand, ...options } = provider;
-    declarations.set(
-      "sandbox",
-      shorthand ? { ...options, type: shorthand } : provider,
-    );
-    expected.set("sandbox", "sandboxProvider");
+    const sandboxes = Object.entries(
+      recipeRecord(configuration.sandboxes ?? {}, "sandboxes"),
+    ).map(([name, value]) => [`sandboxes.${name}`, value] as const);
+    for (const [key, value] of [
+      ["sandbox", configuration.sandbox] as const,
+      ...sandboxes,
+    ]) {
+      const provider = recipeRecord(value, key);
+      const { provider: shorthand, ...options } = provider;
+      declarations.set(
+        key,
+        shorthand ? { ...options, type: shorthand } : provider,
+      );
+      expected.set(key, "sandboxProvider");
+    }
     declarations.set("workspace", { ...workspace, type: "options" });
     expected.set("workspace", "sandboxOptions");
+    for (const [name, options] of Object.entries(
+      recipeRecord(configuration.workspaces ?? {}, "workspaces"),
+    )) {
+      const key = `workspaces.${name}`;
+      declarations.set(key, { ...recipeRecord(options, key), type: "options" });
+      expected.set(key, "sandboxOptions");
+    }
   }
   for (const [family, kind] of Object.entries(recipeFamilies)) {
     if (configuration[family] === undefined) continue;

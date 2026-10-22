@@ -8,6 +8,7 @@ import type { RecipeFileWorkspacePlan } from "./file-configuration.types.ts";
 export function planFileWorkspace(
   source: FileWorkspaceSource | undefined,
   sandbox: Readonly<Record<string, unknown>>,
+  path: readonly string[] = ["sandbox"],
 ): RecipeFileWorkspacePlan {
   const type = sandbox.provider ?? sandbox.type;
   const capabilities =
@@ -24,14 +25,14 @@ export function planFileWorkspace(
   )
     diagnostics.push({
       code: "missing-field",
-      path: ["sandbox", "image"],
+      path: [...path, "image"],
       message: "File workspaces require an explicit container image",
-      hint: "Declare sandbox.image with the container image to run.",
+      hint: `Declare ${path.join(".")}.image with the container image to run.`,
     });
   if (binding && capabilities && !capabilities.bindings.includes(binding))
     diagnostics.push({
       code: "unsupported-binding",
-      path: ["sandbox"],
+      path,
       message: binding.startsWith("mount")
         ? "Sandbox provider cannot mount workspace sources"
         : `Sandbox provider does not support ${binding} workspaces`,

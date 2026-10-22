@@ -135,13 +135,23 @@ export async function recipeCommand({
       file: values.file,
       config: values.config,
     });
-    const sandbox = plan.sandbox?.placement
-      ? `${plan.sandbox.provider} (${plan.sandbox.placement}; supports ${plan.sandbox.bindings?.join(", ")})`
-      : `${plan.sandbox?.provider} (capabilities checked at execution)`;
+    const described = (sandbox: typeof plan.sandbox) =>
+      sandbox?.placement
+        ? `${sandbox.provider} (${sandbox.placement}; supports ${sandbox.bindings?.join(", ")})`
+        : `${sandbox?.provider} (capabilities checked at execution)`;
     const lines = [
       `${plan.name}: static plan`,
       `Workspace: ${plan.workspace.kind}`,
-      ...(plan.binding ? [`Binding: ${plan.binding} on ${sandbox}`] : []),
+      ...(plan.binding
+        ? [`Binding: ${plan.binding} on ${described(plan.sandbox)}`]
+        : []),
+      ...Object.entries(plan.workspaces).map(
+        ([name, workspace]) => `Workspace ${name}: ${workspace.kind}`,
+      ),
+      ...Object.entries(plan.sandboxes).map(
+        ([name, sandbox]) =>
+          `Sandbox ${name}: on ${sandbox.workspace}${sandbox.binding ? `, ${sandbox.binding} on ${described(sandbox.sandbox)}` : ""}`,
+      ),
       ...(plan.agents ?? []).map(
         (agent) =>
           `Agent ${agent.component}: ${agent.candidates
@@ -153,7 +163,13 @@ export async function recipeCommand({
             .join("; or ")}`,
       ),
       `Environment: ${plan.environment.join(", ") || "none"}`,
-      `Tasks: ${plan.tasks.map((task) => task.key).join(", ")}`,
+      `Tasks: ${plan.tasks
+        .map((task) =>
+          task.zone?.sandbox.startsWith("sandboxes.")
+            ? `${task.key} (${task.zone.sandbox})`
+            : task.key,
+        )
+        .join(", ")}`,
       `Components: ${plan.requirements.map((item) => item.name).join(", ") || "none"}`,
       `Publications: ${plan.outputs.length}`,
       "Runtime capabilities are checked again before execution.",

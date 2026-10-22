@@ -120,6 +120,17 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
     );
   if (item.data !== undefined && !item.artifact)
     throw configurationError(`${path}.data requires an artifact task`, path);
+  const sandbox =
+    item.sandbox === undefined
+      ? undefined
+      : text(item.sandbox, `${path}.sandbox`);
+  if (sandbox !== undefined && item.command === undefined && !item.agent)
+    throw configurationError(
+      `${path}.sandbox requires a command or agent task`,
+      `${path}.sandbox`,
+      "invalid-value",
+      "Remove sandbox; isolated and interactive tasks declare their own sandbox provider.",
+    );
   const quotaResume = item.quotaResume === "restart" ? "restart" : "continue";
   const additions: Pick<
     RecipeStep,
@@ -218,6 +229,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       throw configurationError(`${path}.command.stdin must be a string`, path);
     return {
       ...common,
+      ...(sandbox === undefined ? {} : { sandbox }),
       command: {
         executable: text(command.executable, `${path}.command.executable`),
         ...(command.arguments === undefined
@@ -248,6 +260,7 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
   }
   return {
     ...common,
+    ...(sandbox === undefined ? {} : { sandbox }),
     agent: text(item.agent, `${path}.agent`),
     brief: text(item.brief, `${path}.brief`),
     ...(item.dispatch === undefined

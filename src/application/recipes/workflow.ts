@@ -1,3 +1,4 @@
+import { configurationError } from "../../domain/configuration-diagnostic.ts";
 import { defineWorkflow } from "../../domain/workflow.ts";
 import { resolveRecipeInputs } from "../../domain/recipe-inputs.ts";
 import {
@@ -9,7 +10,7 @@ import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { normalizeRecipe } from "./normalize.ts";
 import { compileRecipeStep } from "./compile-step.ts";
 import { recipeTextRenderer } from "./rendering.ts";
-import type { RecipeDocument } from "../../domain/recipe.types.ts";
+import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
 import type {
   Task,
   TaskContext,
@@ -25,9 +26,11 @@ export function recipeHasSharedSandbox(document: RecipeDocument): boolean {
   return document.tasks.some((step) => step.command || step.agent);
 }
 
+/** `workspaceOf` groups shared tasks; only tasks of one workspace must be ordered. */
 export function validateRecipeConcurrency(
   document: RecipeDocument,
   concurrency?: number,
+  workspaceOf: (step: RecipeStep) => string = () => "workspace",
 ): void {
   if (concurrency === undefined || concurrency === 1) return;
   const ancestors = new Map<string, Set<string>>();
@@ -41,9 +44,15 @@ export function validateRecipeConcurrency(
   const shared = document.tasks.filter((step) => step.command || step.agent);
   for (const [index, left] of shared.entries())
     for (const right of shared.slice(index + 1))
-      if (!ancestors.get(right.key)?.has(left.key))
-        throw new Error(
-          `Concurrent recipe tasks ${left.key} and ${right.key} share one sandbox; add dependency edges or use isolated tasks`,
+      if (
+        workspaceOf(left) === workspaceOf(right) &&
+        !ancestors.get(right.key)?.has(left.key)
+      )
+        throw configurationError(
+          `Concurrent recipe tasks ${left.key} and ${right.key} share one workspace; add dependency edges or use isolated tasks`,
+          ["workflow", "concurrency"],
+          "invalid-value",
+          "Order the tasks of each workspace with after, isolate them, or set concurrency: 1.",
         );
 }
 

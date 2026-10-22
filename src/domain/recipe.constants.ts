@@ -37,6 +37,7 @@ export const recipeKeys = {
     "decision",
     "state",
     "isolated",
+    "sandbox",
   ],
   command: [
     "executable",

@@ -34,11 +34,17 @@ const readers: Readonly<
       dirname(resolve(file)),
       document,
     );
-    if (!normalized.files) return gitModel(3, normalized.configuration, file);
+    const named = {
+      workspaces: normalized.workspaces ?? {},
+      sandboxes: normalized.sandboxes ?? {},
+    };
+    if (!normalized.files)
+      return { ...gitModel(3, normalized.configuration, file), ...named };
     return {
       version: 3,
       components: normalized.configuration,
       workspace: { kind: "files", files: normalized.files },
+      ...named,
       environment: declaredEnvironment(record),
       agents: declaredAgents(record),
     };
@@ -96,6 +102,8 @@ function gitModel(
     version,
     components: record,
     workspace,
+    workspaces: {},
+    sandboxes: {},
     environment,
     agents: declaredAgents(record),
   };

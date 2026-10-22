@@ -30,6 +30,7 @@ import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
 import { readRecipeConfigurationModel } from "./configuration-model.ts";
 import { validateFileRecipeCapabilities } from "./file-validation.ts";
+import { recipeTaskWorkspace, validateRecipeZones } from "./zones.ts";
 import type {
   RecipeProject,
   RecipeProjectOptions,
@@ -37,6 +38,8 @@ import type {
   RecipeProjectValidation,
   RecipeReportDeclaration,
 } from "./project.types.ts";
+import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
+import type { RecipeFileWorkspaceDeclaration } from "./file-configuration.types.ts";
 
 const reportDeclaration = createJsonDecoder<RecipeReportDeclaration>(
   reportSchema,
@@ -69,8 +72,6 @@ export async function readRecipeProject(
           `inputs.${name}.default`,
         );
     }
-    if (typeof document.workflow?.concurrency === "number")
-      validateRecipeConcurrency(document, document.workflow.concurrency);
   } catch (error) {
     throw recipeFileError(file, source, error);
   }
@@ -106,6 +107,8 @@ export async function readRecipeProject(
       "workspace",
       "runtime",
       "outputs",
+      "workspaces",
+      "sandboxes",
       ...Object.keys(recipeFamilies),
     ]);
     for (const key of Object.keys(configuration)) {
@@ -114,7 +117,7 @@ export async function readRecipeProject(
       if (
         configuration.version === 2 &&
         extra.has(key) &&
-        !["runtime", "outputs"].includes(key)
+        !["runtime", "outputs", "workspaces", "sandboxes"].includes(key)
       )
         continue;
       if (configuration.version === 3 && extra.has(key)) continue;
@@ -141,6 +144,13 @@ export async function readRecipeProject(
           `Declare agents.${step.agent} in the execution configuration.`,
         );
     }
+    validateRecipeZones(document, model);
+    if (typeof document.workflow?.concurrency === "number")
+      validateRecipeConcurrency(
+        document,
+        document.workflow.concurrency,
+        recipeTaskWorkspace(model.sandboxes),
+      );
     const registry = createRecipeRegistry({
       components: [
         ...observationComponents,
@@ -161,27 +171,29 @@ export async function readRecipeProject(
     );
     validateRecipeProjectExpressions(document, graph);
     if (files) validateFileRecipeCapabilities(document, graph);
-    if (
-      files?.retention?.policy === "portable" &&
-      graph.nodes.get(files.retention.transporter)?.kind !== "transport"
-    )
-      throw configurationError(
-        "Portable workspace retention references an unknown Transport",
-        ["workspace", "retention", "transporter"],
-        "unknown-reference",
-        `Declare ${files.retention.transporter} as a Transport in the execution configuration.`,
-      );
-    for (const [index, input] of (files?.inputs ?? []).entries())
+    for (const [path, declaration] of fileWorkspaceDeclarations(model)) {
       if (
-        "snapshot" in input &&
-        graph.nodes.get(input.transporter)?.kind !== "transport"
+        declaration.retention?.policy === "portable" &&
+        graph.nodes.get(declaration.retention.transporter)?.kind !== "transport"
       )
         throw configurationError(
-          "Workspace snapshot input references an unknown Transport",
-          ["workspace", "inputs", index, "transporter"],
+          "Portable workspace retention references an unknown Transport",
+          [...path, "retention", "transporter"],
           "unknown-reference",
-          `Declare ${input.transporter} as a Transport in the execution configuration.`,
+          `Declare ${declaration.retention.transporter} as a Transport in the execution configuration.`,
         );
+      for (const [index, input] of (declaration.inputs ?? []).entries())
+        if (
+          "snapshot" in input &&
+          graph.nodes.get(input.transporter)?.kind !== "transport"
+        )
+          throw configurationError(
+            "Workspace snapshot input references an unknown Transport",
+            [...path, "inputs", index, "transporter"],
+            "unknown-reference",
+            `Declare ${input.transporter} as a Transport in the execution configuration.`,
+          );
+    }
     const reports = configuration.reports ?? [];
     if (!Array.isArray(reports))
       throw configurationError("reports must be a list", ["reports"]);
@@ -206,6 +218,20 @@ export async function readRecipeProject(
     }
     throw recipeFileError(config, configurationSource, error);
   }
+}
+
+/** File workspace declarations with their configuration path, the default one first. */
+function fileWorkspaceDeclarations(
+  model: RecipeConfigurationModel,
+): (readonly [readonly string[], RecipeFileWorkspaceDeclaration])[] {
+  const named = Object.entries(model.workspaces).flatMap(([name, workspace]) =>
+    workspace.kind === "files"
+      ? [[["workspaces", name], workspace.files] as const]
+      : [],
+  );
+  return model.workspace.kind === "files"
+    ? [[["workspace"], model.workspace.files], ...named]
+    : named;
 }
 
 export async function validateRecipeProject(

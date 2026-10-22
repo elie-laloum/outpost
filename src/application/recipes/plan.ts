@@ -1,5 +1,6 @@
 import { planRecipeAgents } from "./agent-plan.ts";
 import { readRecipeProject } from "./project.ts";
+import { recipeTaskZone, recipeWorkspaceKey } from "./zones.ts";
 import type {
   RecipeProjectOptions,
   RecipeProjectSources,
@@ -10,6 +11,7 @@ export async function inspectRecipeExecution(
   sources?: RecipeProjectSources,
 ) {
   const project = await readRecipeProject(options, sources);
+  const { model } = project;
   return {
     name: project.document.name,
     workspace:
@@ -23,6 +25,24 @@ export async function inspectRecipeExecution(
           agents: planRecipeAgents(project.document, project.graph),
         }
       : {}),
+    workspaces: Object.fromEntries(
+      Object.entries(model.workspaces).map(([name, workspace]) => [
+        name,
+        workspace.kind === "git"
+          ? { kind: "git", repository: workspace.repository }
+          : (workspace.files.source ?? { kind: "none" }),
+      ]),
+    ),
+    sandboxes: Object.fromEntries(
+      Object.entries(model.sandboxes).map(([name, sandbox]) => [
+        name,
+        {
+          workspace: recipeWorkspaceKey(sandbox.workspace),
+          ...(sandbox.plan?.binding ? { binding: sandbox.plan.binding } : {}),
+          ...(sandbox.plan ? { sandbox: sandbox.plan.sandbox } : {}),
+        },
+      ]),
+    ),
     environment: Object.keys(project.model.environment),
     requirements: [...project.graph.nodes.values()].map((node) => ({
       name: node.name,
@@ -31,10 +51,10 @@ export async function inspectRecipeExecution(
       extension: !!node.extension,
     })),
     outputs: project.files?.outputs ?? [],
-    tasks: project.document.tasks.map((task) => ({
-      key: task.key,
-      after: task.after,
-    })),
+    tasks: project.document.tasks.map((task) => {
+      const zone = recipeTaskZone(task, model.sandboxes);
+      return { key: task.key, after: task.after, ...(zone ? { zone } : {}) };
+    }),
     validation: "static",
   };
 }

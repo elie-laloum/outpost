@@ -39720,6 +39720,10 @@
         "quotaResume": {
           "enum": ["continue", "restart"]
         },
+        "sandbox": {
+          "type": "string",
+          "minLength": 1
+        },
         "when": {
           "$ref": "#/$defs/condition"
         }
@@ -40285,6 +40289,25 @@
           "then": {
             "not": {
               "required": ["state"]
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["command"]
+                },
+                {
+                  "required": ["agent"]
+                }
+              ]
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["sandbox"]
             }
           }
         }
