@@ -11557,5 +11557,57 @@
   "WorkflowJobState.nextAction": [
     "Operator action for the saved workflow status: none, answer, inspect-pause or inspect. inspect never authorizes replay or checkpoint-owner recovery.",
     "Action attendue pour le statut enregistré du workflow : none, answer, inspect-pause ou inspect. inspect n’autorise jamais le rejeu ni la récupération du propriétaire d’un checkpoint."
+  ],
+  "inspectExecution.options": [
+    "Options that createSandbox() would receive: Git options with repository or workspace, or file options with workspaceSource or a file workspace. The agent declared here is inspected unless settings selects another one.",
+    "Options que recevrait createSandbox() : options Git avec repository ou workspace, ou options fichiers avec workspaceSource ou un workspace de fichiers. L’agent déclaré ici est inspecté, sauf si settings en choisit un autre."
+  ],
+  "inspectExecution.settings": [
+    "Optional dispatch settings whose agent, continuation, response repairs and steering add the matching agent requirements. Defaults to a plain dispatch, which only requires file dispatch support.",
+    "Réglages de dispatch facultatifs dont l’agent, la continuation, les réparations de réponse et le pilotage ajoutent les exigences d’agent correspondantes. Par défaut, un dispatch simple n’exige que la prise en charge du dispatch en mode fichiers."
+  ],
+  "ExecutionPlan.workspace": [
+    "Workspace kind (git, directory or ephemeral) and, for file workspaces, the binding its source needs: copy, ephemeral, mount-readonly or mount-write.",
+    "Type de workspace (git, directory ou ephemeral) et, pour un workspace de fichiers, le mode de liaison requis par sa source : copy, ephemeral, mount-readonly ou mount-write."
+  ],
+  "ExecutionPlan.sandbox": [
+    "Provider name, placement (host, mounted or remote) and the file workspace bindings the provider supports. Git options without a provider describe the default Docker provider with no bindings listed.",
+    "Nom du fournisseur, emplacement (host, mounted ou remote) et modes de liaison des workspaces de fichiers pris en charge. Des options Git sans fournisseur décrivent le fournisseur Docker par défaut, sans mode listé."
+  ],
+  "ExecutionPlan.agents": [
+    "Each agent that would run, fallback candidates included, with its name, kind and, for CLI agents, the file workspace features it has declared.",
+    "Chaque agent qui s’exécuterait, candidats de repli compris, avec son nom, son type et, pour les agents CLI, les capacités de workspace de fichiers qu’il a déclarées."
+  ],
+  "ExecutionPlan.requirements": [
+    "What the execution needs: the workspace binding from the sandbox, then each capability every agent must have demonstrated. Empty for Git workspaces.",
+    "Ce dont l’exécution a besoin : le mode de liaison attendu de la sandbox, puis chaque capacité que chaque agent doit avoir démontrée. Vide pour un workspace Git."
+  ],
+  "ExecutionPlan.diagnostics": [
+    "Incompatibilities found before allocation, in the order execution checks them. Empty when createSandbox() and dispatch() would accept these options and settings.",
+    "Incompatibilités trouvées avant l’allocation, dans l’ordre où l’exécution les vérifie. Vide lorsque createSandbox() et dispatch() accepteraient ces options et ces réglages."
+  ],
+  "ExecutionRequirement.kind": [
+    "binding for a workspace binding the sandbox provider must support, agent for a capability an agent must have declared.",
+    "binding pour un mode de liaison que le fournisseur de sandbox doit prendre en charge, agent pour une capacité qu’un agent doit avoir déclarée."
+  ],
+  "ExecutionRequirement.binding": [
+    "With kind binding: the binding the workspace source needs, compared with the provider's workspaces.bindings.",
+    "Avec kind binding : le mode de liaison requis par la source du workspace, comparé à workspaces.bindings du fournisseur."
+  ],
+  "ExecutionRequirement.agent": [
+    "With kind agent: the name of the agent that must provide the capability.",
+    "Avec kind agent : le nom de l’agent qui doit fournir la capacité."
+  ],
+  "ExecutionRequirement.capability": [
+    "With kind agent: the file workspace capability required, such as dispatch for every run or continuation when settings resumes a conversation.",
+    "Avec kind agent : la capacité de workspace de fichiers requise, par exemple dispatch pour toute exécution ou continuation lorsque settings reprend une conversation."
+  ],
+  "ExecutionDiagnostic.code": [
+    "Stable identifier of the incompatibility, independent of the wording: unsupported-provider, missing-source, unsupported-binding, unsupported-capability or git-workspace-only.",
+    "Identifiant stable de l’incompatibilité, indépendant de la formulation : unsupported-provider, missing-source, unsupported-binding, unsupported-capability ou git-workspace-only."
+  ],
+  "ExecutionDiagnostic.message": [
+    "The message createSandbox() or dispatch() raises for this incompatibility.",
+    "Le message que createSandbox() ou dispatch() lève pour cette incompatibilité."
   ]
 }

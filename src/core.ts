@@ -53,6 +53,14 @@ export type {
   Execution,
   Turn,
 } from "./application/execution.ts";
+export { inspectExecution } from "./application/execution-inspection.ts";
+export type { ExecutionInspectionSettings } from "./application/execution-inspection.types.ts";
+export type {
+  ExecutionDiagnostic,
+  ExecutionPlan,
+  ExecutionRequirement,
+  FileAgentCapability,
+} from "./domain/execution-plan.types.ts";
 export {
   createAntigravityHarness,
   createClaudeHarness,

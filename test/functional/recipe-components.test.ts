@@ -699,3 +699,82 @@ test("file workspace configuration errors locate the declaration they reject", a
     });
   }
 });
+
+test("file recipe plans read agent capabilities from the catalog and refuse undemonstrated ones", async (t) => {
+  const { inspectRecipeExecution } =
+    await import("../../src/application/recipes/plan.ts");
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-agent-plan-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "execution.yaml");
+  await writeFile(
+    file,
+    "version: 3\nname: dialogue\ntasks:\n  - key: interview\n    interactive:\n      workspaceSource: { kind: ephemeral }\n      sandboxProvider: { $ref: sandbox }\n      agent: { $ref: agents.interviewer }\n      actors: [owner]\n      brief: Ask\n",
+  );
+  const configuration = (harness: string) =>
+    `version: 3\nworkspace:\n  kind: ephemeral\nsandbox:\n  provider: local\nagents:\n  interviewer:\n    harness: ${harness}\n`;
+  await writeFile(config, configuration("claude"));
+  const plan = await inspectRecipeExecution({ file, config });
+  assert.deepEqual(plan.agents, [
+    {
+      component: "agents.interviewer",
+      tasks: ["interview"],
+      requires: ["dispatch", "continuation"],
+      candidates: [
+        {
+          component: "agents.interviewer.harness",
+          harness: "claude",
+          fileWorkspaces: {
+            dispatch: true,
+            repairs: true,
+            continuation: true,
+            liveInput: true,
+            interactive: true,
+          },
+          continuation: true,
+        },
+      ],
+    },
+  ]);
+  const { stdout } = await promisify(execFile)(
+    process.execPath,
+    [
+      resolve("src/cli/main.ts"),
+      "recipe",
+      "plan",
+      "--file",
+      file,
+      "--config",
+      config,
+    ],
+    { encoding: "utf8" },
+  );
+  assert.match(
+    stdout,
+    /Agent agents\.interviewer: claude, continuation supported\n/,
+  );
+  await writeFile(
+    config,
+    `${configuration("claude")}    saveConversations: false\n`,
+  );
+  await assert.rejects(
+    inspectRecipeExecution({ file, config }),
+    /Interactive tasks require portable conversation capture and resume/,
+  );
+  await writeFile(config, configuration("agy"));
+  await assert.rejects(readRecipeProject({ file, config }), (error) => {
+    assert.ok(error instanceof ConfigurationError);
+    assert.equal(error.diagnostic.code, "unsupported-capability");
+    assert.deepEqual(error.diagnostic.path, [
+      "agents",
+      "interviewer",
+      "harness",
+    ]);
+    assert.equal(error.diagnostic.file, config);
+    assert.equal(error.diagnostic.line, 8);
+    assert.match(error.diagnostic.hint ?? "", /keep saveConversations enabled/);
+    return true;
+  });
+});

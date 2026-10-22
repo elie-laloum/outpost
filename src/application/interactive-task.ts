@@ -1,3 +1,4 @@
+import { interactiveCaptureRefusal } from "../domain/file-agent-capabilities.constants.ts";
 import { executeInteractiveTurn } from "./interactive-task-execution.ts";
 import { defineFileInteractiveAgentTask } from "./file-interactive-task.ts";
 import { createHash } from "node:crypto";
@@ -50,7 +51,7 @@ export function defineInteractiveAgentTaskForOptions(
     selected.resumable !== false &&
       selected.capture !== false &&
       storageFor(selected),
-    "Interactive tasks require portable conversation capture and resume",
+    interactiveCaptureRefusal,
   );
   const settings = {
     ...options,

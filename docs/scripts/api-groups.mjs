@@ -66,7 +66,8 @@ export const groups = [
     id: "sandboxes",
     title: ["Sandboxes", "Sandboxes"],
     guide: "guide/sandbox-sessions",
-    names: "createSandbox Sandbox SandboxOptions",
+    names:
+      "createSandbox inspectExecution Sandbox SandboxOptions ExecutionInspectionSettings ExecutionRequirement FileAgentCapability ExecutionPlan ExecutionDiagnostic",
   },
   {
     id: "dispatch",

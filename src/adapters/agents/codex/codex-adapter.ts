@@ -12,6 +12,7 @@ import {
   codexModelSupport,
   codexQuotaPatterns,
   codexUnavailablePatterns,
+  codexFileWorkspaces,
 } from "./codex.constants.ts";
 import { codexMcpLogins } from "./codex-mcp.ts";
 import {
@@ -68,13 +69,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     bootstrap: "codex",
     ...conversationStorage(settings, createCodexConversations),
     resumable: true,
-    fileWorkspaces: Object.freeze({
-      dispatch: true,
-      repairs: true,
-      continuation: true,
-      liveInput: true,
-      interactive: true,
-    }),
+    fileWorkspaces: codexFileWorkspaces,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
     request: (input) => codexRequest(settings, input),

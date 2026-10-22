@@ -62,3 +62,12 @@ export const KIMI_MCP_OAUTH_FILES = Object.freeze([
   { suffix: "-discovery.json", required: false },
   { suffix: "-meta.json", required: false },
 ]);
+
+/** File workspace features this CLI has demonstrated; adapter and catalog both read them. */
+export const kimiFileWorkspaces = Object.freeze({
+  dispatch: true,
+  repairs: true,
+  continuation: true,
+  interactive: true,
+  liveInput: true,
+});

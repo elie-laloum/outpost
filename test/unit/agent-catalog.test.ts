@@ -22,6 +22,7 @@ test("built-in agents have unique names and bind adapters under the same name", 
     assert.equal(adapter.name, descriptor.name);
     assert.equal(adapter.bootstrap, descriptor.name);
     assert.equal(adapter.storage?.format, descriptor.conversations?.().format);
+    assert.deepEqual(adapter.fileWorkspaces, descriptor.fileWorkspaces);
     assert.equal(
       descriptor.conversations?.().format ?? descriptor.name,
       descriptor.name,

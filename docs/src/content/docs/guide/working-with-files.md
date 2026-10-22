@@ -94,6 +94,37 @@ Host-wide locks coordinate overlapping sources and publication destinations acro
 
 File dispatch supports the Outpost harness and compatible custom/scripted adapters. Native CLI dispatch, interactive attachment, continuation, repairs and live input require a declared, validated capability for the pinned adapter variant. Undemonstrated native variants are refused. Cloud and Firecracker live validation remains separate. Isolated container/cloud providers do not acquire an automatic abandoned-allocation recovery capability merely because files can be restored.
 
+### Inspect before allocating
+
+`inspectExecution()` reads the same options as `createSandbox()`, plus optional dispatch settings, and returns the plan without allocating a sandbox or starting an agent.
+
+```ts title="inspect-mount.ts"
+import {
+  createAgent,
+  createClaudeHarness,
+  inspectExecution,
+} from "@elie-laloum/outpost/core";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+const plan = inspectExecution(
+  {
+    workspaceSource: {
+      kind: "directory",
+      directory: "./documents",
+      access: { mode: "mount", target: "input", readOnly: true },
+    },
+    sandboxProvider: createDockerSandboxProvider({ image: "outpost-claude" }),
+    agent: createAgent({ harness: createClaudeHarness() }),
+  },
+  { continuation: { id: "previous-session" } },
+);
+
+for (const diagnostic of plan.diagnostics)
+  console.error(`${diagnostic.code}: ${diagnostic.message}`);
+```
+
+`plan.workspace.binding` is `mount-readonly`; `plan.sandbox.bindings` lists what the provider supports; `plan.requirements` adds `dispatch` and `continuation` for `claude`. An empty `plan.diagnostics` means sandbox creation and dispatch would accept these options. Otherwise each entry carries a stable `code` and the exact message execution would raise. Extension providers are inspected through their declared runtime capabilities.
+
 ### Native CLI validation status
 
 Live Docker validation covers all four bindings: ephemeral workspaces, directory copies, read-only source mounts and writable source mounts. The declarations below belong to each pinned adapter; no wrapper around `harness.bind` is needed. Git-workspace support and a successful container preflight do not establish file-mode support.

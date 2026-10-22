@@ -1,23 +1,8 @@
 import { invariant } from "../domain/errors.ts";
-import { dispatchCandidates } from "../domain/fallback-agent.ts";
-import { fileWorkspaceBinding } from "../domain/file-workspace-binding.ts";
-import { validateFileAgent } from "./file-agent-validation.ts";
+import { inspectExecution } from "./execution-inspection.ts";
 import type { FileSandboxOptions } from "./file-sandbox.types.ts";
-import type { SandboxOptions } from "./outpost.types.ts";
 export { validateFileAgent } from "./file-agent-validation.ts";
-
-export function isFileSandboxOptions(
-  options: SandboxOptions | FileSandboxOptions,
-): options is FileSandboxOptions {
-  return (
-    "workspaceSource" in options ||
-    !!(
-      options.workspace &&
-      "kind" in options.workspace &&
-      String(options.workspace.kind) !== "git"
-    )
-  );
-}
+export { isFileSandboxOptions } from "./file-sandbox-options.ts";
 
 export async function validateFileSandbox(
   options: FileSandboxOptions,
@@ -53,16 +38,6 @@ export async function validateFileSandbox(
       !options.logging.replayable,
     "Replayable file effects are not supported",
   );
-  const capability = options.sandboxProvider.workspaces;
-  invariant(capability, "Sandbox provider does not support file workspaces");
-  const source = options.workspace?.source ?? options.workspaceSource;
-  invariant(source, "Provide a file workspace source");
-  const binding = fileWorkspaceBinding(source);
-  invariant(
-    capability.bindings.includes(binding),
-    `Sandbox provider does not support ${binding} workspaces`,
-  );
-  if (options.agent)
-    for (const agent of dispatchCandidates(options.agent))
-      await validateFileAgent(agent);
+  const [diagnostic] = inspectExecution(options).diagnostics;
+  invariant(diagnostic === undefined, diagnostic?.message ?? "");
 }

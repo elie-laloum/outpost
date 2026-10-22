@@ -14,6 +14,7 @@ import {
   claudeUnavailablePatterns,
   CLAUDE_MAX_OUTPUT_VARIABLE,
   CLAUDE_MCP_TIMEOUT_VARIABLE,
+  claudeFileWorkspaces,
 } from "./claude.constants.ts";
 import { claudeMcpLogins } from "./claude-mcp.ts";
 import {
@@ -81,13 +82,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     bootstrap: "claude",
     ...conversationStorage(settings, createClaudeConversations),
     resumable: true,
-    fileWorkspaces: Object.freeze({
-      dispatch: true,
-      repairs: true,
-      continuation: true,
-      liveInput: true,
-      interactive: true,
-    }),
+    fileWorkspaces: claudeFileWorkspaces,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({
       ...settings.variables,

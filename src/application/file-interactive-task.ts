@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { invariant } from "../domain/errors.ts";
+import { interactiveCaptureRefusal } from "../domain/file-agent-capabilities.constants.ts";
 import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
 import { defineTask } from "../domain/workflow/task.ts";
 import { positive } from "../domain/workflow/validation.ts";
@@ -102,7 +103,7 @@ export function defineFileInteractiveAgentTask(
     options.agent.resumable !== false &&
       options.agent.capture !== false &&
       storageFor(options.agent),
-    "Interactive tasks require portable conversation capture and resume",
+    interactiveCaptureRefusal,
   );
   const maxTurns = options.maxTurns ?? interactiveTaskDefaults.maxTurns;
   positive(maxTurns, "maxTurns");

@@ -52,3 +52,12 @@ export const claudeDiagnosticUsage = {
   resume: "Usage: claude [",
   fork: "Usage: claude [",
 } as const;
+
+/** File workspace features this CLI has demonstrated; adapter and catalog both read them. */
+export const claudeFileWorkspaces = Object.freeze({
+  dispatch: true,
+  repairs: true,
+  continuation: true,
+  liveInput: true,
+  interactive: true,
+});

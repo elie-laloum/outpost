@@ -1,6 +1,10 @@
 import type { AgentDescriptor } from "../agent-descriptor.types.ts";
 import { createCodexHarness } from "./codex-adapter.ts";
-import { codexCredentialVariables, codexLabel } from "./codex.constants.ts";
+import {
+  codexCredentialVariables,
+  codexLabel,
+  codexFileWorkspaces,
+} from "./codex.constants.ts";
 import { createCodexConversations } from "./codex-conversations.ts";
 import { codexDiagnostics } from "./codex-diagnostics.ts";
 import { codexProtocolFixtures } from "./codex-protocol.constants.ts";
@@ -12,6 +16,7 @@ export const codexAgent = {
   version: "0.156.1",
   harnessExport: "createCodexHarness",
   guide: "codex",
+  fileWorkspaces: codexFileWorkspaces,
   harness: createCodexHarness,
   install: { kind: "npm", package: "@openai/codex" },
   doctor: { diagnostics: codexDiagnostics },

@@ -3,6 +3,7 @@ import { createCopilotHarness } from "./copilot-adapter.ts";
 import {
   copilotCredentialVariables,
   copilotLabel,
+  copilotFileWorkspaces,
 } from "./copilot.constants.ts";
 import { createCopilotConversations } from "./copilot-conversations.ts";
 import { copilotDiagnostics } from "./copilot-diagnostics.ts";
@@ -15,6 +16,7 @@ export const copilotAgent = {
   version: "1.0.88",
   harnessExport: "createCopilotHarness",
   guide: "copilot-cli",
+  fileWorkspaces: copilotFileWorkspaces,
   harness: createCopilotHarness,
   install: { kind: "npm", package: "@github/copilot" },
   image: {

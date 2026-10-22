@@ -45,3 +45,12 @@ export const codexDiagnosticUsage = {
   resume: "Usage: codex exec resume [",
   fork: "Usage: codex exec fork [",
 } as const;
+
+/** File workspace features this CLI has demonstrated; adapter and catalog both read them. */
+export const codexFileWorkspaces = Object.freeze({
+  dispatch: true,
+  repairs: true,
+  continuation: true,
+  liveInput: true,
+  interactive: true,
+});

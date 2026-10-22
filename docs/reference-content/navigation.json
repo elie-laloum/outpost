@@ -1108,6 +1108,26 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/inspectexecution",
+        "label": "inspectExecution",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/executioninspectionsettings",
+        "label": "ExecutionInspectionSettings",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/executionrequirement",
+        "label": "ExecutionRequirement",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/fileagentcapability",
+        "label": "FileAgentCapability",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/sandbox",
         "label": "Sandbox",
         "attrs": { "data-api-kind": "interface" }
@@ -1115,6 +1135,16 @@
       {
         "slug": "reference/sandboxoptions",
         "label": "SandboxOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/executionplan",
+        "label": "ExecutionPlan",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/executiondiagnostic",
+        "label": "ExecutionDiagnostic",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

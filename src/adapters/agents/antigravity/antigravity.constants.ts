@@ -38,3 +38,10 @@ export const antigravityUnavailablePatterns = Object.freeze([
   /\bUNAVAILABLE\b/,
   /\bmodel is overloaded\b/i,
 ]);
+
+/** File workspace features this CLI has demonstrated; adapter and catalog both read them. */
+export const antigravityFileWorkspaces = Object.freeze({
+  dispatch: true,
+  repairs: true,
+  interactive: true,
+});

@@ -94,6 +94,37 @@ Les verrous communs à l'hôte coordonnent les sources et les destinations qui s
 
 Le dispatch de fichiers prend en charge le harness Outpost et les adapters custom/scriptés compatibles. Dispatch CLI natif, attachement interactif, continuation, réparation et live input exigent une capacité déclarée et validée pour la variante épinglée de l'adapter. Les variantes natives non démontrées sont refusées. Les validations live cloud et Firecracker restent séparées. La restauration de fichiers n'ajoute pas une récupération automatique d'allocation abandonnée aux fournisseurs isolés ou cloud.
 
+### Inspecter avant d’allouer
+
+`inspectExecution()` lit les mêmes options que `createSandbox()`, ainsi que des réglages de dispatch facultatifs, et renvoie le plan sans allouer de sandbox ni démarrer d’agent.
+
+```ts title="inspect-mount.ts"
+import {
+  createAgent,
+  createClaudeHarness,
+  inspectExecution,
+} from "@elie-laloum/outpost/core";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+const plan = inspectExecution(
+  {
+    workspaceSource: {
+      kind: "directory",
+      directory: "./documents",
+      access: { mode: "mount", target: "input", readOnly: true },
+    },
+    sandboxProvider: createDockerSandboxProvider({ image: "outpost-claude" }),
+    agent: createAgent({ harness: createClaudeHarness() }),
+  },
+  { continuation: { id: "previous-session" } },
+);
+
+for (const diagnostic of plan.diagnostics)
+  console.error(`${diagnostic.code}: ${diagnostic.message}`);
+```
+
+`plan.workspace.binding` vaut `mount-readonly` ; `plan.sandbox.bindings` liste ce que le fournisseur prend en charge ; `plan.requirements` ajoute `dispatch` et `continuation` pour `claude`. Un `plan.diagnostics` vide signifie que la création de la sandbox et le dispatch accepteraient ces options. Sinon, chaque entrée porte un `code` stable et le message exact que l’exécution lèverait. Les fournisseurs d’extension sont inspectés à travers leurs capacités d’exécution déclarées.
+
 ### État de validation des CLI natives
 
 Les validations réelles dans Docker couvrent les quatre variantes : workspaces éphémères, copies de répertoires, montages de sources en lecture seule et montages en écriture. Les déclarations ci-dessous appartiennent à chaque adapter épinglé ; aucun wrapper autour de `harness.bind` n’est nécessaire. La prise en charge de Git et un précontrôle de conteneur réussi ne démontrent pas le fonctionnement en mode fichiers.

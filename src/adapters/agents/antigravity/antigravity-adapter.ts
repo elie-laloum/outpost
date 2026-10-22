@@ -20,6 +20,7 @@ import {
   antigravityModelSupport,
   antigravityQuotaPatterns,
   antigravityUnavailablePatterns,
+  antigravityFileWorkspaces,
 } from "./antigravity.constants.ts";
 import { antigravityEvents } from "./antigravity-events.ts";
 import { antigravityRequest } from "./antigravity-request.ts";
@@ -56,11 +57,7 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     ...(configuration ? { configuration } : {}),
     bootstrap: "antigravity",
     resumable: true,
-    fileWorkspaces: Object.freeze({
-      dispatch: true,
-      repairs: true,
-      interactive: true,
-    }),
+    fileWorkspaces: antigravityFileWorkspaces,
     forkable: false,
     capture: false,
     requiresFinishedEvent: true,

@@ -4,6 +4,7 @@ import {
   antigravityCredentialVariables,
   antigravityLabel,
   antigravityVariables,
+  antigravityFileWorkspaces,
 } from "./antigravity.constants.ts";
 import { antigravityDiagnostics } from "./antigravity-diagnostics.ts";
 import { antigravityInstall } from "./antigravity-install.ts";
@@ -16,6 +17,7 @@ export const antigravityAgent = {
   version: "1.2.12",
   harnessExport: "createAntigravityHarness",
   guide: "antigravity",
+  fileWorkspaces: antigravityFileWorkspaces,
   harness: createAntigravityHarness,
   install: {
     kind: "script",

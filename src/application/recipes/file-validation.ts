@@ -1,4 +1,8 @@
-import { configurationInvariant } from "../../domain/configuration-diagnostic.ts";
+import {
+  configurationInvariant,
+  ConfigurationError,
+} from "../../domain/configuration-diagnostic.ts";
+import { planRecipeAgents, recipeAgentDiagnostics } from "./agent-plan.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 
@@ -37,4 +41,8 @@ export function validateFileRecipeCapabilities(
     if (step.isolated) visit(`tasks.${step.key}.isolated`);
     if (step.interactive) visit(`tasks.${step.key}.interactive`);
   }
+  const [diagnostic] = recipeAgentDiagnostics(
+    planRecipeAgents(document, graph),
+  );
+  if (diagnostic) throw new ConfigurationError(diagnostic);
 }

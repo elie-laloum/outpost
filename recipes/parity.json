@@ -1937,6 +1937,84 @@
       "completion": "contract"
     }
   },
+  "./core:ExecutionDiagnostic": {
+    "signatures": [],
+    "options": {
+      "code": "string",
+      "message": "string"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "code": "contract",
+      "message": "contract"
+    }
+  },
+  "./core:ExecutionInspectionSettings": {
+    "signatures": [],
+    "options": {
+      "agent": "DispatchAgent | undefined",
+      "steering": "Steering | undefined",
+      "continuation": "{ readonly id: string; readonly fork?: boolean; } | undefined",
+      "response": "ResponseSpec<unknown> | undefined"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "agent": "contract",
+      "steering": "contract",
+      "continuation": "contract",
+      "response": "contract"
+    }
+  },
+  "./core:ExecutionPlan": {
+    "signatures": [],
+    "options": {
+      "workspace": "{ readonly kind: \"git\" | \"directory\" | \"ephemeral\"; readonly binding?: FileWorkspaceBinding; }",
+      "sandbox": "{ readonly provider: string; readonly placement: SandboxProvider[\"placement\"]; readonly bindings: readonly FileWorkspaceBinding[]; }",
+      "agents": "readonly { readonly name: string; readonly kind: Agent[\"kind\"]; readonly fileWorkspaces?: AgentFeatures[\"fileWorkspaces\"]; }[]",
+      "requirements": "readonly ExecutionRequirement[]",
+      "diagnostics": "readonly ExecutionDiagnostic[]"
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "workspace": "contract",
+      "sandbox": "contract",
+      "agents": "contract",
+      "requirements": "contract",
+      "diagnostics": "contract"
+    }
+  },
+  "./core:ExecutionRequirement": {
+    "signatures": [],
+    "options": {
+      "kind": "\"agent\"",
+      "binding": "FileWorkspaceBinding",
+      "agent": "string",
+      "capability": "\"continuation\" | \"dispatch\" | \"interactive\" | \"liveInput\" | \"repairs\""
+    },
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "kind": "contract",
+      "binding": "contract",
+      "agent": "contract",
+      "capability": "contract"
+    }
+  },
   "./core:FallbackAgent": {
     "signatures": [],
     "options": {
@@ -2044,6 +2122,16 @@
     "lot": 7,
     "status": "implemented",
     "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {}
+  },
+  "./core:FileAgentCapability": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {}
   },
@@ -2406,6 +2494,18 @@
       "directory": "contract",
       "variables": "contract"
     }
+  },
+  "./core:inspectExecution": {
+    "signatures": [
+      "(options: SandboxOptions | FileSandboxOptions, settings?: ExecutionInspectionSettings): ExecutionPlan"
+    ],
+    "options": {},
+    "category": "contract",
+    "lot": 7,
+    "status": "implemented",
+    "test": "test/unit/execution-inspection.test.ts",
+    "reason": "Immediate operation or inspection utility; recipe plan reports the static equivalent for file workspaces.",
+    "optionCoverage": {}
   },
   "./core:KimiHook": {
     "signatures": [],
@@ -6509,7 +6609,7 @@
       "deadlineMs": "number | undefined",
       "signal": "AbortSignal | undefined",
       "transfers": "boolean | undefined",
-      "sandboxProvider": "Pick<SandboxProvider, \"name\" | \"placement\"> | undefined"
+      "sandboxProvider": "Pick<SandboxProvider, \"placement\" | \"name\"> | undefined"
     },
     "category": "contract",
     "lot": 7,
@@ -6530,7 +6630,7 @@
     "options": {
       "scope": "\"owned-sandbox\"",
       "ownership": "\"caller\"",
-      "sandboxProvider": "Pick<SandboxProvider, \"name\" | \"placement\"> | undefined",
+      "sandboxProvider": "Pick<SandboxProvider, \"placement\" | \"name\"> | undefined",
       "capabilities": "readonly DiagnosticCapability[]",
       "checks": "readonly DiagnosticCheck[]",
       "modelCompatibility": "\"unverified\"",
@@ -7594,7 +7694,7 @@
     "options": {
       "transporter": "Transport",
       "id": "string",
-      "kind": "\"workflow\" | \"dispatch\"",
+      "kind": "\"dispatch\" | \"workflow\"",
       "heartbeatMs": "number | undefined",
       "abandonAfterMs": "number | undefined",
       "resume": "boolean | undefined"
@@ -7634,7 +7734,7 @@
     "options": {
       "version": "1",
       "id": "string",
-      "kind": "\"workflow\" | \"dispatch\"",
+      "kind": "\"dispatch\" | \"workflow\"",
       "executionId": "string | undefined",
       "workflow": "string | undefined",
       "status": "RunStatus",

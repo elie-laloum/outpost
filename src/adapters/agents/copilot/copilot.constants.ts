@@ -35,3 +35,12 @@ export const copilotUnavailablePatterns = Object.freeze([
   ...connectionPatterns,
   /\bserver error\b.*\b5\d\d\b/i,
 ]);
+
+/** File workspace features this CLI has demonstrated; adapter and catalog both read them. */
+export const copilotFileWorkspaces = Object.freeze({
+  dispatch: true,
+  repairs: true,
+  continuation: true,
+  interactive: true,
+  liveInput: true,
+});

@@ -1,3 +1,4 @@
+import { planRecipeAgents } from "./agent-plan.ts";
 import { readRecipeProject } from "./project.ts";
 import type { RecipeProjectOptions } from "./project.types.ts";
 
@@ -13,6 +14,7 @@ export async function inspectRecipeExecution(options: RecipeProjectOptions) {
       ? {
           binding: project.files.plan.binding,
           sandbox: project.files.plan.sandbox,
+          agents: planRecipeAgents(project.document, project.graph),
         }
       : {}),
     environment: Object.keys(project.model.environment),

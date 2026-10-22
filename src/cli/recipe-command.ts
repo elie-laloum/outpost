@@ -136,6 +136,16 @@ export async function recipeCommand({
       `${plan.name}: static plan`,
       `Workspace: ${plan.workspace.kind}`,
       ...(plan.binding ? [`Binding: ${plan.binding} on ${sandbox}`] : []),
+      ...(plan.agents ?? []).map(
+        (agent) =>
+          `Agent ${agent.component}: ${agent.candidates
+            .map((candidate) =>
+              candidate.harness
+                ? `${candidate.harness}, continuation ${candidate.continuation ? "supported" : "unsupported"}`
+                : `${candidate.component}, capabilities checked at execution`,
+            )
+            .join("; or ")}`,
+      ),
       `Environment: ${plan.environment.join(", ") || "none"}`,
       `Tasks: ${plan.tasks.map((task) => task.key).join(", ")}`,
       `Components: ${plan.requirements.map((item) => item.name).join(", ") || "none"}`,

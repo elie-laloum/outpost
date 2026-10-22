@@ -926,5 +926,13 @@
   "FileWorkspaceBinding": [
     "How a file workspace reaches its sandbox: copy transfers the files, ephemeral starts empty, mount-readonly and mount-write expose the source directory. Providers list the bindings they support in workspaces.bindings, and recipe plans report the one a workspace requires.",
     "Manière dont un workspace de fichiers atteint sa sandbox : copy transfère les fichiers, ephemeral démarre vide, mount-readonly et mount-write exposent le répertoire source. Les fournisseurs listent les modes pris en charge dans workspaces.bindings, et les plans de recettes indiquent celui qu’un workspace exige."
+  ],
+  "inspectExecution": [
+    "Plans an execution from sandbox options without allocating, uploading files or starting an agent. For file workspaces it reports the binding the source needs, what the sandbox provider offers, each agent's declared file features, the requirements of the optional dispatch settings and every incompatibility; createSandbox() and dispatch() refuse the first diagnostic with the same message. Git options return the sandbox and agents with no file requirements. Extension providers are read from their runtime capabilities.",
+    "Planifie une exécution à partir des options de sandbox sans allouer, transférer de fichiers ni démarrer d’agent. Pour un workspace de fichiers, elle indique le mode de liaison requis par la source, ce que propose le fournisseur de sandbox, les capacités fichiers déclarées par chaque agent, les exigences des réglages de dispatch facultatifs et chaque incompatibilité ; createSandbox() et dispatch() refusent le premier diagnostic avec le même message. Les options Git renvoient la sandbox et les agents sans exigence fichiers. Les fournisseurs d’extension sont lus depuis leurs capacités d’exécution."
+  ],
+  "FileAgentCapability": [
+    "A file workspace feature a CLI agent must have demonstrated: dispatch, continuation, repairs, liveInput or interactive. Outpost refuses an undeclared capability instead of trying it.",
+    "Capacité de workspace de fichiers qu’un agent CLI doit avoir démontrée : dispatch, continuation, repairs, liveInput ou interactive. Outpost refuse une capacité non déclarée au lieu de l’essayer."
   ]
 }

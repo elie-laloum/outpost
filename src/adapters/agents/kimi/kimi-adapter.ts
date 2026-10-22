@@ -30,6 +30,7 @@ import {
   kimiModelSupport,
   kimiQuotaPatterns,
   kimiUnavailablePatterns,
+  kimiFileWorkspaces,
 } from "./kimi.constants.ts";
 import type { AgentModel } from "../../../domain/model.types.ts";
 import { credentialPlanner } from "../authentication.ts";
@@ -72,13 +73,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
       ? {}
       : { liveInput: kimiServerInput }),
     resumable: true,
-    fileWorkspaces: Object.freeze({
-      dispatch: true,
-      repairs: true,
-      continuation: true,
-      interactive: true,
-      liveInput: true,
-    }),
+    fileWorkspaces: kimiFileWorkspaces,
     forkable: true,
     fork: forkKimi,
     ...conversationStorage(settings, createKimiConversations),

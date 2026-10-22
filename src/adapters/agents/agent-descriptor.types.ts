@@ -1,5 +1,6 @@
 import type {
   AgentAuthentication,
+  AgentFeatures,
   CliHarness,
 } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
@@ -58,6 +59,8 @@ export interface AgentDescriptor {
   readonly harnessExport: string;
   /** Slug of the agent's Guide page, used by generated documentation. */
   readonly guide: string;
+  /** File workspace features the CLI has demonstrated, known without composing the agent. */
+  readonly fileWorkspaces: NonNullable<AgentFeatures["fileWorkspaces"]>;
   harness(settings?: AgentPresetSettings): CliHarness;
   readonly install: AgentInstaller;
   readonly image?: AgentImage;
