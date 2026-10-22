@@ -241,7 +241,7 @@ for (const locale of ["", "fr/"]) {
       }),
     );
     const [callbackRecipe, callbackConfiguration] = await blocks(
-      "recipe-callbacks",
+      "recipe-extensions",
       locale,
     );
     const files = await project(
@@ -249,7 +249,7 @@ for (const locale of ["", "fr/"]) {
       callbackRecipe.source,
       callbackConfiguration.source,
     );
-    const [module] = await blocks("recipe-callbacks", locale, "ts");
+    const [module] = await blocks("recipe-extensions", locale, "ts");
     await writeFile(join(files.directory, "steps.ts"), module.source);
     const report = JSON.parse((await command(files, "run", "--json")).stdout);
     assert.deepEqual(report.outputs.summarize.value, {

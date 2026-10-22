@@ -115,7 +115,7 @@ workflow:
 
 Les commandes et agents ordinaires partagent le workspace configuré. Ordonnez-les avec `after` ; la validation refuse leur utilisation concurrente de ce workspace. Utilisez des tâches isolées pour les travaux indépendants.
 
-Continuez avec les [callbacks et boucles](../recipe-callbacks/), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
+Continuez avec les [callbacks et boucles](../recipe-extensions/#déclarer-des-actions-locales), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
 
 <!-- Retained section anchors for existing bookmarks. -->
 

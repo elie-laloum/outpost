@@ -224,6 +224,41 @@ export async function reviewChanges(
 
 Passez-la comme `check: reviewChanges`. L’`agent` de la requête remplace celui de la sandbox pour ce seul dispatch.
 
+## Relancer le brief jusqu’à ce que l’agent le déclare terminé
+
+`passes` renvoie le brief quand une passe se termine sans marqueur de fin. Demandez le marqueur dans le brief : Outpost ne l’ajoute pas.
+
+```ts
+import { dispatch } from "@elie-laloum/outpost/core";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/flaky-tests" },
+  brief: {
+    text: "Fix the flaky tests and commit. When every test passes, end your answer with READY_FOR_REVIEW.",
+  },
+  passes: 3,
+  until: "READY_FOR_REVIEW",
+});
+console.log(result.completed, result.completion);
+// Example output: true READY_FOR_REVIEW
+```
+
+Chaque passe démarre une nouvelle conversation et voit les commits conservés ou intégrés par la passe précédente. Outpost s’arrête à la première passe dont la réponse contient un marqueur. `until` accepte aussi une liste ; `until: []` désactive la recherche et exécute toutes les passes.
+
+Référence API : [DispatchResult](../../reference/dispatchresult/).
+
+:::caution
+Un marqueur est une déclaration de l’agent, pas une preuve. Lancez vos tests avant de vous y fier ; les [boucles ci-dessus](#recommencer-jusquà-validation) relancent l’agent jusqu’à ce que votre contrôle passe.
+:::
+
+Si l’agent écrit son marqueur mais continue de tourner, Outpost l’arrête `settleMs` après sa dernière sortie. Le résultat est conservé et `warn` reçoit un message.
+
+Avec `dispatch()` au niveau supérieur, chaque passe alloue une nouvelle sandbox et exécute ses hooks de préparation. Une branche nommée conserve ses commits ; `integrate` crée et intègre une branche distincte par passe. Avec `sandbox.dispatch()`, les passes réutilisent la sandbox et le workspace ouverts. Choisissez cette forme pour ne préparer l’environnement qu’une fois.
+
 ## Limites
 
 | Limite ou événement             | Ce qui se passe                                                                                               |

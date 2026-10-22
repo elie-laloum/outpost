@@ -224,6 +224,41 @@ export async function reviewChanges(
 
 Pass it as `check: reviewChanges`. The request's `agent` replaces the sandbox's agent for this dispatch only.
 
+## Repeat the brief until the agent declares it done
+
+`passes` sends the brief again when a pass ends without a completion marker. Ask for the marker in the brief: Outpost does not add it.
+
+```ts
+import { dispatch } from "@elie-laloum/outpost/core";
+import { coder, repository, sandboxProvider } from "./outpost.config.ts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/flaky-tests" },
+  brief: {
+    text: "Fix the flaky tests and commit. When every test passes, end your answer with READY_FOR_REVIEW.",
+  },
+  passes: 3,
+  until: "READY_FOR_REVIEW",
+});
+console.log(result.completed, result.completion);
+// Example output: true READY_FOR_REVIEW
+```
+
+Each pass starts a new conversation and sees the commits retained or integrated by the preceding pass. Outpost stops at the first pass whose answer contains a marker. `until` also accepts a list; `until: []` disables matching and runs every pass.
+
+API reference: [DispatchResult](../../reference/dispatchresult/).
+
+:::caution
+A marker is the agent’s declaration, not proof. Run your tests before relying on it; the [loops above](#repeat-until-a-check-accepts) repeat the agent until your check passes.
+:::
+
+If the agent writes its marker but keeps running, Outpost stops it `settleMs` after its last output. The result is kept and `warn` receives a message.
+
+With top-level `dispatch()`, each pass allocates a fresh sandbox and runs its preparation hooks. A named branch keeps its commits across passes; `integrate` creates and integrates a separate branch for each pass. With `sandbox.dispatch()`, passes reuse the open sandbox and workspace. Choose that form when preparation must run only once.
+
 ## Limits
 
 | Limit or event         | What happens                                                                                     |

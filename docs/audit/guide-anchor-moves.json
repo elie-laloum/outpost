@@ -222,12 +222,12 @@
   {
     "source": "guide/observability/#export-to-opentelemetry",
     "retained": "guide/observability/#export-to-opentelemetry",
-    "destination": "guide/opentelemetry/#export-to-opentelemetry"
+    "destination": "guide/observability/#export-to-opentelemetry"
   },
   {
     "source": "guide/observability/#without-a-hub",
     "retained": "guide/observability/#without-a-hub",
-    "destination": "guide/opentelemetry/#without-a-hub"
+    "destination": "guide/observability/#without-a-hub"
   },
   {
     "source": "guide/job-queues/#expose-a-queue-over-http",
@@ -617,12 +617,12 @@
   {
     "source": "fr/guide/observability/#exporter-vers-opentelemetry",
     "retained": "fr/guide/observability/#exporter-vers-opentelemetry",
-    "destination": "fr/guide/opentelemetry/#exporter-vers-opentelemetry"
+    "destination": "fr/guide/observability/#exporter-vers-opentelemetry"
   },
   {
     "source": "fr/guide/observability/#sans-hub",
     "retained": "fr/guide/observability/#sans-hub",
-    "destination": "fr/guide/opentelemetry/#sans-hub"
+    "destination": "fr/guide/observability/#sans-hub"
   },
   {
     "source": "fr/guide/job-queues/#exposer-une-file-via-http",
@@ -867,17 +867,17 @@
   {
     "source": "guide/speculation/#resume-after-a-crash",
     "retained": "guide/speculation/#resume-after-a-crash",
-    "destination": "guide/resuming-speculation/"
+    "destination": "guide/speculation/"
   },
   {
     "source": "guide/speculation/#recover-after-a-crash",
     "retained": "guide/speculation/#recover-after-a-crash",
-    "destination": "guide/resuming-speculation/"
+    "destination": "guide/speculation/"
   },
   {
     "source": "guide/speculation/#resume-after-a-quota",
     "retained": "guide/speculation/#resume-after-a-quota",
-    "destination": "guide/resuming-speculation/"
+    "destination": "guide/speculation/"
   },
   {
     "source": "guide/observability/#delivery-and-failures",
@@ -1052,17 +1052,17 @@
   {
     "source": "fr/guide/speculation/#reprendre-après-un-arrêt-brutal",
     "retained": "fr/guide/speculation/#reprendre-après-un-arrêt-brutal",
-    "destination": "fr/guide/resuming-speculation/"
+    "destination": "fr/guide/speculation/"
   },
   {
     "source": "fr/guide/speculation/#récupérer-après-un-arrêt-brutal",
     "retained": "fr/guide/speculation/#récupérer-après-un-arrêt-brutal",
-    "destination": "fr/guide/resuming-speculation/"
+    "destination": "fr/guide/speculation/"
   },
   {
     "source": "fr/guide/speculation/#reprendre-après-un-quota",
     "retained": "fr/guide/speculation/#reprendre-après-un-quota",
-    "destination": "fr/guide/resuming-speculation/"
+    "destination": "fr/guide/speculation/"
   },
   {
     "source": "fr/guide/observability/#livraison-et-erreurs",
@@ -1292,12 +1292,12 @@
   {
     "source": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent",
     "retained": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent",
-    "destination": "guide/resolving-conflicts/#resolve-merge-conflicts-with-an-agent"
+    "destination": "guide/integrating-changes/#resolve-merge-conflicts-with-an-agent"
   },
   {
     "source": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent",
     "retained": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent",
-    "destination": "fr/guide/resolving-conflicts/#résoudre-les-conflits-de-fusion-avec-un-agent"
+    "destination": "fr/guide/integrating-changes/#résoudre-les-conflits-de-fusion-avec-un-agent"
   },
   {
     "source": "guide/webhooks/#read-the-http-response",
@@ -1362,22 +1362,22 @@
   {
     "source": "guide/durable-runs/#recover-a-run-after-a-crash",
     "retained": "guide/durable-runs/#recover-a-run-after-a-crash",
-    "destination": "guide/recovering-workflows/#recover-a-run-after-a-crash"
+    "destination": "guide/durable-runs/#recover-a-run-after-a-crash"
   },
   {
     "source": "fr/guide/durable-runs/#récupérer-une-exécution-après-un-plantage",
     "retained": "fr/guide/durable-runs/#récupérer-une-exécution-après-un-plantage",
-    "destination": "fr/guide/recovering-workflows/#récupérer-une-exécution-après-un-plantage"
+    "destination": "fr/guide/durable-runs/#récupérer-une-exécution-après-un-plantage"
   },
   {
     "source": "guide/recipe-workflows/#declare-local-actions",
     "retained": "guide/recipe-workflows/#declare-local-actions",
-    "destination": "guide/recipe-callbacks/#declare-local-actions"
+    "destination": "guide/recipe-extensions/#declare-local-actions"
   },
   {
     "source": "fr/guide/recipe-workflows/#déclarer-des-actions-locales",
     "retained": "fr/guide/recipe-workflows/#déclarer-des-actions-locales",
-    "destination": "fr/guide/recipe-callbacks/#déclarer-des-actions-locales"
+    "destination": "fr/guide/recipe-extensions/#déclarer-des-actions-locales"
   },
   {
     "source": "guide/sandbox-sessions/#open-an-interactive-terminal",
@@ -1392,22 +1392,22 @@
   {
     "source": "guide/limits-and-cancellation/#repeat-the-brief-until-the-agent-declares-it-done",
     "retained": "guide/limits-and-cancellation/#repeat-the-brief-until-the-agent-declares-it-done",
-    "destination": "guide/agent-passes/#repeat-the-brief-until-the-agent-declares-it-done"
+    "destination": "guide/verification-loops/#repeat-the-brief-until-the-agent-declares-it-done"
   },
   {
     "source": "fr/guide/limits-and-cancellation/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé",
     "retained": "fr/guide/limits-and-cancellation/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé",
-    "destination": "fr/guide/agent-passes/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé"
+    "destination": "fr/guide/verification-loops/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé"
   },
   {
     "source": "guide/briefs/#insert-command-output",
     "retained": "guide/briefs/#insert-command-output",
-    "destination": "guide/prompt-commands/#insert-command-output"
+    "destination": "guide/briefs/#insert-command-output"
   },
   {
     "source": "fr/guide/briefs/#insérer-la-sortie-dune-commande",
     "retained": "fr/guide/briefs/#insérer-la-sortie-dune-commande",
-    "destination": "fr/guide/prompt-commands/#insérer-la-sortie-dune-commande"
+    "destination": "fr/guide/briefs/#insérer-la-sortie-dune-commande"
   },
   {
     "source": "guide/conversations/#where-conversations-are-stored",

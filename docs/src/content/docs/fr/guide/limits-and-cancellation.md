@@ -73,7 +73,7 @@ Pour changer la direction de l’agent sans l’arrêter, [réorientez-le](../st
 
 <span id="relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé"></span>
 
-Pour cette étape, suivez [Répéter un brief sur plusieurs passes](../agent-passes/).
+Pour cette étape, suivez [Relancer le brief jusqu’à ce que l’agent le déclare terminé](../verification-loops/#relancer-le-brief-jusquà-ce-que-lagent-le-déclare-terminé).
 
 ## Limiter la durée des opérations Git et fichiers
 

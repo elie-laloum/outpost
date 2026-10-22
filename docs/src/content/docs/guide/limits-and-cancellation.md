@@ -73,7 +73,7 @@ To change the agent’s direction without stopping it, [steer it](../steering/) 
 
 <span id="repeat-the-brief-until-the-agent-declares-it-done"></span>
 
-For this step, follow [Repeat a brief across passes](../agent-passes/).
+For this step, follow [Repeat the brief until the agent declares it done](../verification-loops/#repeat-the-brief-until-the-agent-declares-it-done).
 
 ## Set Git and file operation deadlines
 

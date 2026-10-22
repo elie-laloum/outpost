@@ -156,9 +156,32 @@ Le script affiche `failed`, puis `done`. Sans `resume`, le second `start()` est 
 
 Une tâche relancée repart pour une nouvelle série de tentatives `retry`. Une tâche `done` ne s’exécute jamais à nouveau. Une exécution arrêtée par son [budget](../budgets/) reprend de la même façon ; passez un `budget` plus large, car la consommation continue de s’additionner.
 
-<span id="récupérer-une-exécution-après-un-plantage"></span>
+## Récupérer une exécution après un plantage
 
-Pour cette étape, suivez [Récupérer un workflow après un plantage](../recovering-workflows/).
+Une exécution possède son checkpoint pendant `start()` et le libère quand `start()` se termine. Si le processus meurt, la propriété reste : tout `start()` suivant pour ce `runId` est refusé jusqu’à ce que vous la libériez.
+
+1. Arrêtez l’ancien processus et confirmez sa fin. L’absence d’un PID local ne prouve pas l’arrêt d’un processus distant.
+2. Lisez la révision actuelle du checkpoint, puis transmettez-la à `recoverWorkflowCheckpoint()`. La récupération conserve la progression et refuse une révision modifiée.
+3. Redémarrez le même workflow et checkpoint avec `resume: "retry-incomplete"` pour autoriser explicitement une nouvelle tentative des tâches interrompues.
+
+```ts
+import { createHash } from "node:crypto";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost/workflows";
+
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
+const runId = "scan-2026-09";
+const digest = createHash("sha256").update(runId).digest("hex");
+const saved = await transporter.read(`checkpoints/${digest}.json`);
+if (saved)
+  await recoverWorkflowCheckpoint({
+    transporter,
+    runId,
+    revision: saved.revision,
+  });
+```
+
+La clé du checkpoint est `checkpoints/` suivi du SHA-256 du `runId`. La progression reste intacte ; relancez l’exécution avec `resume: "retry-incomplete"`.
 
 ## Reprendre un workflow lancé depuis une file
 

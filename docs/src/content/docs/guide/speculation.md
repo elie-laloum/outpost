@@ -135,6 +135,96 @@ Read `result.terminationCode` for a coordinator stop: `aborted`, `quota`, `limit
 
 The race’s `id` identifies its coordinator. Observation follows candidate dispatches; the race does not return a single aggregate `observationId`.
 
+## Resume after a crash
+
+Add durability before the race starts. It preserves progress; replay after a crash still needs explicit authorization.
+
+Pass `durability` to `speculate()`. Attempts, usage, outputs and allocated resources are saved through a [transport](../storage/), and a finished race is returned without running again.
+
+```ts title="durability.ts"
+import { join } from "node:path";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { type SpeculationDurability } from "@elie-laloum/outpost/speculation";
+import { repository } from "./outpost.config.ts";
+
+export const durability: SpeculationDurability = {
+  transporter: createLocalTransport({
+    directory: join(repository, ".outpost", "storage"),
+  }),
+  runId: "parser-race",
+  version: "1",
+};
+```
+
+Reuse `candidates.ts` and `validate.ts` from [the first race](#race-candidates). This entry point uses the same budget on every call.
+
+```ts title="durable-race.ts"
+import { speculate } from "@elie-laloum/outpost/speculation";
+import { repository, sandboxProvider } from "./outpost.config.ts";
+import { candidates } from "./candidates.ts";
+import { validate } from "./validate.ts";
+import { durability } from "./durability.ts";
+
+const result = await speculate({
+  repository,
+  sandboxProvider,
+  candidates,
+  validate,
+  budget: { attempts: 2, usage: { output: 20_000 } },
+  durability: {
+    ...durability,
+    ...(process.argv.includes("--retry-incomplete")
+      ? { resume: "retry-incomplete" as const }
+      : {}),
+  },
+});
+console.log(result.status, result.winner?.branch);
+```
+
+`node durable-race.ts` starts the race or reads its completed result. After the inspection and ownership recovery below, `node durable-race.ts --retry-incomplete` authorizes interrupted candidates to run again.
+
+Change `version` when you change the agents, `validate` or `score`. A saved race whose briefs, budget, provider, selection mode or `version` differ is rejected: start it under a new `runId`.
+
+Durable races need a provider that can find and stop its sandboxes after a crash. Docker and Podman in their default mounted mode can; other providers are rejected unless you [implement recovery](../custom-sandbox-providers/).
+
+### Recover after a crash
+
+A crashed race stays owned by its coordinator, the process that ran `speculate()`. Release it before replaying.
+
+1. Stop the old coordinator and confirm it has exited; a timeout or missing PID is insufficient.
+2. Read the saved race through the transport. Inspect candidate resource IDs and keep the current revision.
+3. Call `recoverSpeculation()` with that revision to release ownership. A changed revision is refused; this call deletes nothing.
+4. Run the same race with `durability.resume: "retry-incomplete"`. Outpost reconciles registered sandboxes, then restarts interrupted candidates on new branches.
+
+```ts
+import { createHash } from "node:crypto";
+import { join } from "node:path";
+import { createLocalTransport } from "@elie-laloum/outpost/core";
+import { recoverSpeculation } from "@elie-laloum/outpost/speculation";
+import { repository } from "./outpost.config.ts";
+const transporter = createLocalTransport({
+  directory: join(repository, ".outpost", "storage"),
+});
+const key = `speculations/${createHash("sha256").update("parser-race").digest("hex")}.json`;
+const saved = await transporter.read(key);
+if (saved) {
+  console.log(new TextDecoder().decode(saved.bytes));
+  // Example output: {"runId":"parser-race",…}
+  await recoverSpeculation({
+    transporter,
+    runId: "parser-race",
+    revision: saved.revision,
+    coordinatorStopped: true,
+  });
+}
+```
+
+An interrupted candidate runs again as a new attempt, on `…/<key>/2`, from the original commit. Its earlier branch and worktree are listed in `result.previousAttempts`. Candidates validated and scored before the crash keep their saved scores; best selection still waits for the remaining admitted candidates. A crash during scoring requires an explicitly authorized new attempt.
+
+## Resume after a quota
+
+A durable race that ends with status `quota` is not final. Calling `speculate()` again with the same `durability` reruns only the candidates a usage or rate limit stopped, as new attempts. `result.quota.resetAt` gives the reset time when the agent reports it; [Quota pauses](../quota-pauses/) covers waiting for it.
+
 ## Limits
 
 - `speculate()` never merges, pushes or opens a pull request.
@@ -146,14 +236,6 @@ The race’s `id` identifies its coordinator. Observation follows candidate disp
 
 API: [speculate](../../reference/speculate/) · [SpeculationOptions](../../reference/speculationoptions/) · [SpeculationResult](../../reference/speculationresult/) · [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) · [SpeculativeValidation](../../reference/speculativevalidation/) · [checkSpeculationIntegration](../../reference/checkspeculationintegration/) · [SpeculationDurability](../../reference/speculationdurability/) · [recoverSpeculation](../../reference/recoverspeculation/).
 
-## Continue
-
-- [Resume a saved race](../resuming-speculation/)
-
 <span id="read-the-result"></span>
 
 [Run competing candidates](../speculation/).
-
-<span id="resume-after-a-crash"></span>
-<span id="recover-after-a-crash"></span>
-<span id="resume-after-a-quota"></span>

@@ -222,15 +222,13 @@ export const groups = [
 const guidePages = {
   "custom-harness-tools": "defineHarnessTool",
   "harness-hooks": "defineHarnessHook",
-  "recipe-callbacks": "RecipeComponentContext",
+  "recipe-extensions": "RecipeComponentContext",
   "agent-profiles":
     "defineAgentProfile AgentProfile AgentProfileOptions AgentProfileHooks AgentProfileTool",
   "resuming-file-workspaces":
     "restoreFileWorkspace inspectFileWorkspace recoverFileWorkspace FileWorkspaceRecoveryOptions WorkspaceRetention",
   "publishing-files":
     "prepareWorkspaceOutputs publishWorkspaceOutputs inspectWorkspacePublication recoverWorkspacePublication WorkspaceOutputOptions PublicationRecoveryOptions",
-  "resuming-speculation":
-    "recoverSpeculation SpeculationDurability SpeculationRecoveryOptions",
   "operating-workers": "QueueWorkerOptions QueueHandlerContext",
   "observation-delivery":
     "ObservationHubOptions ObservationSink CustomReporterOptions",
@@ -356,5 +354,5 @@ Object.assign(symbolGuides, {
   AgentHookContext: "guide/cli-hooks",
   HookCommand: "guide/cli-hooks",
 
-  createAgentConflictResolver: "guide/resolving-conflicts",
+  createAgentConflictResolver: "guide/integrating-changes",
 });

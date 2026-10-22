@@ -414,5 +414,19 @@
   "/guide/isolation/": "/guide/security/",
   "/fr/guide/isolation/": "/fr/guide/security/",
   "/guide/recipe-linear-development/": "/guide/development-workflow/",
-  "/fr/guide/recipe-linear-development/": "/fr/guide/development-workflow/"
+  "/fr/guide/recipe-linear-development/": "/fr/guide/development-workflow/",
+  "/guide/prompt-commands/": "/guide/briefs/",
+  "/fr/guide/prompt-commands/": "/fr/guide/briefs/",
+  "/guide/resolving-conflicts/": "/guide/integrating-changes/",
+  "/fr/guide/resolving-conflicts/": "/fr/guide/integrating-changes/",
+  "/guide/agent-passes/": "/guide/verification-loops/",
+  "/fr/guide/agent-passes/": "/fr/guide/verification-loops/",
+  "/guide/recovering-workflows/": "/guide/durable-runs/",
+  "/fr/guide/recovering-workflows/": "/fr/guide/durable-runs/",
+  "/guide/resuming-speculation/": "/guide/speculation/",
+  "/fr/guide/resuming-speculation/": "/fr/guide/speculation/",
+  "/guide/recipe-callbacks/": "/guide/recipe-extensions/",
+  "/fr/guide/recipe-callbacks/": "/fr/guide/recipe-extensions/",
+  "/guide/opentelemetry/": "/guide/observability/",
+  "/fr/guide/opentelemetry/": "/fr/guide/observability/"
 }

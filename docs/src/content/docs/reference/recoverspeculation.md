@@ -15,7 +15,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost/speculation";
 
 Release the ownership of a durable race whose coordinator has stopped, provided its saved object is still at the given revision; otherwise rejects with TransportConflict. It stops and deletes nothing: the next speculate() call stops registered resources and needs resume: retry-incomplete to replay interrupted candidates.
 
-[Complete example and detailed rules](../../guide/resuming-speculation/).
+[Complete example and detailed rules](../../guide/speculation/).
 
 ## Parameters and properties
 

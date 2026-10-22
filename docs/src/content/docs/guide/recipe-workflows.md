@@ -115,7 +115,7 @@ workflow:
 
 Ordinary command and agent tasks share the configured workspace. Order them with `after`; validation refuses overlapping use of that shared workspace. Use isolated tasks for independent work.
 
-Continue with [local callbacks and loops](../recipe-callbacks/), [structured agent answers](../recipe-harness/) or [checkpoints](../recipe-durability/).
+Continue with [local callbacks and loops](../recipe-extensions/#declare-local-actions), [structured agent answers](../recipe-harness/) or [checkpoints](../recipe-durability/).
 
 <!-- Retained section anchors for existing bookmarks. -->
 
