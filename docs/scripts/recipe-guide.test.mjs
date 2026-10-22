@@ -136,6 +136,72 @@ for (const locale of ["", "fr/"]) {
     }
   });
 
+  test(`${locale}sandbox examples share one workspace and named workspaces keep their branches`, async (t) => {
+    const named = Object.fromEntries(
+      (await blocks("recipe-workspaces", locale)).map((block) => [
+        block.title,
+        block.source,
+      ]),
+    );
+    const files = await project(
+      t,
+      named["recipe.yaml — sandboxes"],
+      named["outpost.yaml — sandboxes"],
+    );
+    // Host sandboxes stand in for Docker and Podman; test:container runs real engines.
+    const local = parse(named["outpost.yaml — sandboxes"]);
+    for (const sandbox of Object.values(local.sandboxes)) {
+      sandbox.provider = "local";
+      delete sandbox.image;
+    }
+    await writeFile(files.config, stringify(local));
+    const report = JSON.parse((await command(files, "run", "--json")).stdout);
+    assert.equal(report.status, "done");
+    assert.equal(report.outputs.review.stdout, "drafted in Docker\n");
+    assert.equal(
+      await readFile(join(files.directory, "results", "notes.txt"), "utf8"),
+      "drafted in Docker\nreviewed in Podman\n",
+    );
+    const branches = await project(
+      t,
+      stringify({
+        version: 3,
+        name: "branches",
+        tasks: [
+          { key: "app", command: { executable: "git", arguments: ["status"] } },
+          {
+            key: "docs",
+            sandbox: "writer",
+            command: { executable: "git", arguments: ["status"] },
+          },
+        ],
+      }),
+      named["outpost.yaml — workspaces"],
+    );
+    const repository = join(branches.directory, "project");
+    await mkdir(repository);
+    await execute("git", ["init", "-b", "main"], { cwd: repository });
+    await execute(
+      "git",
+      [
+        "-c",
+        "user.name=Guide",
+        "-c",
+        "user.email=guide@example.invalid",
+        "commit",
+        "--allow-empty",
+        "-m",
+        "Initial",
+      ],
+      { cwd: repository },
+    );
+    const run = JSON.parse((await command(branches, "run", "--json")).stdout);
+    assert.equal(run.status, "done");
+    assert.match(run.outputs.app.stdout, /On branch feature\/app/);
+    assert.match(run.outputs.docs.stdout, /On branch feature\/docs/);
+    assert.equal(run.workspaces.docs.branch, "feature/docs");
+  });
+
   test(`${locale}workflow examples validate typed inputs and separate branches`, async (t) => {
     const [, configuration] = await blocks("yaml-recipes", locale);
     const [recipe, isolated, isolatedConfiguration] = await blocks(

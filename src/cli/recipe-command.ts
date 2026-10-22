@@ -146,7 +146,8 @@ export async function recipeCommand({
         ? [`Binding: ${plan.binding} on ${described(plan.sandbox)}`]
         : []),
       ...Object.entries(plan.workspaces).map(
-        ([name, workspace]) => `Workspace ${name}: ${workspace.kind}`,
+        ([name, workspace]) =>
+          `Workspace ${name}: ${workspace.kind}${plan.workspaceOutputs[name] ? ` (publications: ${plan.workspaceOutputs[name].length})` : ""}`,
       ),
       ...Object.entries(plan.sandboxes).map(
         ([name, sandbox]) =>
@@ -171,7 +172,7 @@ export async function recipeCommand({
         )
         .join(", ")}`,
       `Components: ${plan.requirements.map((item) => item.name).join(", ") || "none"}`,
-      `Publications: ${plan.outputs.length}`,
+      `Publications: ${plan.outputs.length + Object.values(plan.workspaceOutputs).flat().length}`,
       "Runtime capabilities are checked again before execution.",
     ];
     process.stdout.write(

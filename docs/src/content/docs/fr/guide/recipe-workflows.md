@@ -113,7 +113,7 @@ workflow:
   budget: { attempts: 10 }
 ```
 
-Les commandes et agents ordinaires partagent le workspace configuré. Ordonnez-les avec `after` ; la validation refuse leur utilisation concurrente de ce workspace. Utilisez des tâches isolées pour les travaux indépendants.
+Les commandes et agents ordinaires partagent leur workspace. Ordonnez avec `after` les tâches d’un même workspace ; la validation refuse leur utilisation concurrente de celui-ci. Les tâches de [workspaces différents](../recipe-workspaces/#utiliser-plusieurs-workspaces) et les tâches isolées peuvent s’exécuter en parallèle.
 
 Continuez avec les [callbacks et boucles](../recipe-extensions/#déclarer-des-actions-locales), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
 

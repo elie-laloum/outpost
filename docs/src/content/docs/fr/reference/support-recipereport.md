@@ -25,6 +25,7 @@ sidebar:
 | `outputs`        | `Readonly<Record<string, Readonly<Record<string, WorkflowJson>>>>`                                           | Requis    | Sorties des tâches terminées : textes bornés pour les anciens formats, projections JSON explicites pour le format 3. Les tâches de valeur, callback, boucle et décision exposent leur résultat dans value ; les dispatch conservent leurs références de conversation et de workspace sans méthodes. |
 | `errors`         | `readonly RecipeDiagnostic[]`                                                                                | Requis    | Diagnostics bornés des échecs de tâches, intégration et nettoyage.                                                                                                                                                                                                                                  |
 | `workspace`      | `{ readonly branch: string; readonly directory: string; readonly retainedDirectory?: string; } \| undefined` | Optionnel | Workspace partagé et répertoire conservé lorsque cette exécution a alloué une sandbox partagée. Absent des workflows de données et de tâches exclusivement isolées.                                                                                                                                 |
+| `workspaces`     | `Readonly<Record<string, RecipeWorkspaceReport>> \| undefined`                                               | Optionnel | Workspaces nommés de la configuration ouverts par l’exécution, indexés par nom. Le workspace par défaut reste sous workspace, integration, workspaceInfo et fileOutputs.                                                                                                                            |
 
 ## Signature
 
@@ -52,11 +53,13 @@ export interface RecipeReport {
     readonly directory: string;
     readonly retainedDirectory?: string;
   };
+  readonly workspaces?: Readonly<Record<string, RecipeWorkspaceReport>>;
 }
 ```
 
 ## Contrats associés
 
 - [RecipeDiagnostic](../support-recipediagnostic/)
+- [RecipeWorkspaceReport](../support-recipeworkspacereport/)
 - [WorkflowJson](../workflowjson/)
 - [WorkflowResult](../workflowresult/)

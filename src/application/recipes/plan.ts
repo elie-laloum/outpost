@@ -51,6 +51,13 @@ export async function inspectRecipeExecution(
       extension: !!node.extension,
     })),
     outputs: project.files?.outputs ?? [],
+    workspaceOutputs: Object.fromEntries(
+      Object.entries(model.workspaces).flatMap(([name, workspace]) =>
+        workspace.kind === "files" && workspace.files.outputs.length
+          ? [[name, workspace.files.outputs]]
+          : [],
+      ),
+    ),
     tasks: project.document.tasks.map((task) => {
       const zone = recipeTaskZone(task, model.sandboxes);
       return { key: task.key, after: task.after, ...(zone ? { zone } : {}) };

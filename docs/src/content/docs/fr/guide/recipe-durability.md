@@ -61,7 +61,7 @@ Utilisez `recipe run --run-id another-run` pour une nouvelle exécution, et `res
 
 ## Conserver les fichiers de travail
 
-Pour les tâches de commandes ou d’agents, ajoutez un [workspace et une sandbox](../recipe-workspaces/) à `outpost.yaml`. Les checkpoints conservent le workspace original et le vérifient avant reprise ; un workspace absent n’est pas recréé silencieusement. Les snapshots de fichiers sont conservés avant un checkpoint stabilisé. Les sources montées doivent rester disponibles.
+Pour les tâches de commandes ou d’agents, ajoutez un [workspace et une sandbox](../recipe-workspaces/) à `outpost.yaml`. Les checkpoints conservent le workspace original et le vérifient avant reprise ; un workspace absent n’est pas recréé silencieusement. Chaque [workspace nommé](../recipe-workspaces/#utiliser-plusieurs-workspaces) est conservé séparément ; la reprise le rouvre avec la sandbox choisie par la tâche suivante. Les snapshots de fichiers sont conservés avant un checkpoint stabilisé. Les sources montées doivent rester disponibles.
 
 Les workspaces Git conservent leur branche et leur référence de diff. Les workspaces de fichiers utilisent la configuration 3 avec `runtime.directory`, `runtime.namespace` et les réglages facultatifs de conservation ; voir [la restauration de fichiers](../resuming-file-workspaces/). Les workspaces empruntés ne sont pas restaurés automatiquement.
 

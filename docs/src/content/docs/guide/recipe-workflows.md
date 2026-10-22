@@ -113,7 +113,7 @@ workflow:
   budget: { attempts: 10 }
 ```
 
-Ordinary command and agent tasks share the configured workspace. Order them with `after`; validation refuses overlapping use of that shared workspace. Use isolated tasks for independent work.
+Ordinary command and agent tasks share their workspace. Order the tasks of one workspace with `after`; validation refuses overlapping use of it. Tasks of [different workspaces](../recipe-workspaces/#use-several-workspaces) and isolated tasks can run concurrently.
 
 Continue with [local callbacks and loops](../recipe-extensions/#declare-local-actions), [structured agent answers](../recipe-harness/) or [checkpoints](../recipe-durability/).
 

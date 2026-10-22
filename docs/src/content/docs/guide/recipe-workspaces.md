@@ -64,7 +64,7 @@ sandbox:
 
 `from` selects the starting commit when the branch is created. `named` retains the worktree without merging it into your checkout; `integrate` requests integration after success, and `current` works directly in the selected checkout. Always choose the policy explicitly. File `outputs` are not available for a Git workspace.
 
-Use a distinct branch name for independent work. For several branches in the same recipe, use [isolated tasks](../recipe-workflows/#work-on-separate-branches); changing agent roles alone does not create separate workspaces.
+Use a distinct branch name for independent work. For several branches in the same recipe, declare [several workspaces](#use-several-workspaces) or use [isolated tasks](../recipe-workflows/#work-on-separate-branches); changing agent roles alone does not create separate workspaces.
 
 ## Mount a directory in a container
 
@@ -85,6 +85,70 @@ sandbox:
 ```
 
 Set `readOnly: false` only to modify source files immediately. Output-publication rollback cannot undo those writes. Source mounts require a compatible provider; `local` does not support them. See [working with files](../working-with-files/) for mount behavior.
+
+## Switch sandboxes on one workspace
+
+Name each sandbox under `sandboxes`, then select one on a task with `sandbox:`. Tasks without `sandbox:` use the top-level `sandbox`. Docker and Podman must be running; both can download the public `node:24` image.
+
+```yaml title="outpost.yaml — sandboxes"
+version: 3
+workspace: { kind: ephemeral }
+sandbox: { provider: local }
+outputs:
+  - paths: [notes.txt]
+    destination: ./results
+    policy: create
+sandboxes:
+  docker: { provider: docker, image: node:24 }
+  podman: { provider: podman, image: node:24 }
+```
+
+When a task selects another sandbox of the same workspace, Outpost closes the current sandbox and opens the next one on the same files. `review` therefore reads the `notes.txt` that `draft` wrote; a Git worktree keeps uncommitted changes the same way. One sandbox per workspace is open at a time, so order those tasks with `after`.
+
+```yaml title="recipe.yaml — sandboxes"
+version: 3
+name: two-sandboxes
+tasks:
+  - key: draft
+    sandbox: docker
+    command:
+      executable: sh
+      arguments: [-c, "echo drafted in Docker > notes.txt"]
+  - key: review
+    sandbox: podman
+    after: [draft]
+    command:
+      executable: sh
+      arguments: [-c, "cat notes.txt && echo reviewed in Podman >> notes.txt"]
+```
+
+After the run, `results/notes.txt` holds both lines. Only command and agent tasks select a sandbox; isolated tasks keep their own.
+
+## Use several workspaces
+
+Declare more workspaces under `workspaces`, in the same mode as the top-level one: all Git or all files. A sandbox opens the top-level workspace unless its `workspace` references another one.
+
+```yaml title="outpost.yaml — workspaces"
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+  branch: { mode: named, name: feature/app, from: main }
+sandbox: { provider: local }
+workspaces:
+  docs:
+    kind: git
+    repository: ./project
+    branch: { mode: named, name: feature/docs, from: main }
+sandboxes:
+  writer:
+    workspace: { $ref: workspaces.docs }
+    provider: local
+```
+
+A task with `sandbox: writer` works on the `feature/docs` worktree; other tasks keep `feature/app`. Two workspaces on one repository need distinct branches. After the run, each workspace is integrated or retained on its own, and the report lists named ones under `workspaces`.
+
+With `workflow.concurrency`, tasks of different workspaces can run at the same time; tasks of one workspace must still be ordered. A configuration that mixes Git and file workspaces is refused.
 
 ## Run an agent on files
 

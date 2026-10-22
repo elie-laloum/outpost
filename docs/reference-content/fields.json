@@ -11629,5 +11629,69 @@
   "ExecutionDiagnostic.message": [
     "The message createSandbox() or dispatch() raises for this incompatibility.",
     "Le message que createSandbox() ou dispatch() lève pour cette incompatibilité."
+  ],
+  "RecipeReport.workspaces": [
+    "Named configuration workspaces the run opened, keyed by name. The default workspace stays under workspace, integration, workspaceInfo and fileOutputs.",
+    "Workspaces nommés de la configuration ouverts par l’exécution, indexés par nom. Le workspace par défaut reste sous workspace, integration, workspaceInfo et fileOutputs."
+  ],
+  "RecipeGitWorkspaceReport.kind": [
+    "Identifies a named Git workspace report.",
+    "Identifie le rapport d’un workspace Git nommé."
+  ],
+  "RecipeGitWorkspaceReport.branch": [
+    "Branch of the named workspace’s managed worktree.",
+    "Branche du worktree géré du workspace nommé."
+  ],
+  "RecipeGitWorkspaceReport.directory": [
+    "Worktree directory shared by every sandbox of this workspace.",
+    "Répertoire du worktree partagé par toutes les sandboxes de ce workspace."
+  ],
+  "RecipeGitWorkspaceReport.retainedDirectory": [
+    "Worktree kept for review when this workspace was not integrated, for example after a failure, cancellation or a named branch policy.",
+    "Worktree conservé pour revue lorsque ce workspace n’a pas été intégré, par exemple après un échec, une annulation ou une politique de branche named."
+  ],
+  "RecipeGitWorkspaceReport.integration": [
+    "Conflict resolution of this workspace’s integration, reported separately from workflow usage.",
+    "Résolution de conflit de l’intégration de ce workspace, rapportée séparément de la consommation du workflow."
+  ],
+  "RecipeFileWorkspaceReport.kind": [
+    "Identifies a named file workspace report.",
+    "Identifie le rapport d’un workspace de fichiers nommé."
+  ],
+  "RecipeFileWorkspaceReport.workspaceInfo": [
+    "Versioned description of this workspace retaining ownership, settled generation and recovery references.",
+    "Description versionnée de ce workspace conservant sa propriété, sa génération settled et ses références de récupération."
+  ],
+  "RecipeFileWorkspaceReport.fileOutputs": [
+    "Verified publications of the outputs this workspace declares.",
+    "Publications vérifiées des sorties déclarées par ce workspace."
+  ],
+  "RecipeWorkspaceReport.kind": [
+    "git for a named Git workspace, files for a named file workspace; selects the other fields.",
+    "git pour un workspace Git nommé, files pour un workspace de fichiers nommé ; détermine les autres champs."
+  ],
+  "RecipeWorkspaceReport.branch": [
+    "Git workspaces: branch of the managed worktree.",
+    "Workspaces Git : branche du worktree géré."
+  ],
+  "RecipeWorkspaceReport.directory": [
+    "Git workspaces: worktree directory shared by every sandbox of this workspace.",
+    "Workspaces Git : répertoire du worktree partagé par toutes les sandboxes de ce workspace."
+  ],
+  "RecipeWorkspaceReport.retainedDirectory": [
+    "Git workspaces: worktree kept for review when the workspace was not integrated.",
+    "Workspaces Git : worktree conservé pour revue lorsque le workspace n’a pas été intégré."
+  ],
+  "RecipeWorkspaceReport.integration": [
+    "Git workspaces: conflict resolution of this workspace’s integration.",
+    "Workspaces Git : résolution de conflit de l’intégration de ce workspace."
+  ],
+  "RecipeWorkspaceReport.workspaceInfo": [
+    "File workspaces: versioned description retaining ownership, settled generation and recovery references.",
+    "Workspaces de fichiers : description versionnée conservant la propriété, la génération settled et les références de récupération."
+  ],
+  "RecipeWorkspaceReport.fileOutputs": [
+    "File workspaces: verified publications of the outputs this workspace declares.",
+    "Workspaces de fichiers : publications vérifiées des sorties déclarées par ce workspace."
   ]
 }

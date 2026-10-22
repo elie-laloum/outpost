@@ -141,7 +141,10 @@ export function PlanView() {
                 ))}
               </div>
             </Row>
-            <Row label="Publications">{plan.outputs.length}</Row>
+            <Row label="Publications">
+              {plan.outputs.length +
+                Object.values(plan.workspaceOutputs).flat().length}
+            </Row>
           </dl>
         )}
       </div>

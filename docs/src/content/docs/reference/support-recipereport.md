@@ -25,6 +25,7 @@ sidebar:
 | `outputs`        | `Readonly<Record<string, Readonly<Record<string, WorkflowJson>>>>`                                           | Required | Completed task outputs: bounded text fields for legacy recipes, explicit JSON projections for format 3. Value, callback, loop and decision tasks expose their result under value; dispatch results retain conversation and workspace references without methods. |
 | `errors`         | `readonly RecipeDiagnostic[]`                                                                                | Required | Bounded diagnostics for task, integration and cleanup failures.                                                                                                                                                                                                  |
 | `workspace`      | `{ readonly branch: string; readonly directory: string; readonly retainedDirectory?: string; } \| undefined` | Optional | Shared workspace and retained-directory information when this execution allocated a shared sandbox. Absent for data-only and exclusively isolated workflows.                                                                                                     |
+| `workspaces`     | `Readonly<Record<string, RecipeWorkspaceReport>> \| undefined`                                               | Optional | Named configuration workspaces the run opened, keyed by name. The default workspace stays under workspace, integration, workspaceInfo and fileOutputs.                                                                                                           |
 
 ## Signature
 
@@ -52,11 +53,13 @@ export interface RecipeReport {
     readonly directory: string;
     readonly retainedDirectory?: string;
   };
+  readonly workspaces?: Readonly<Record<string, RecipeWorkspaceReport>>;
 }
 ```
 
 ## Related contracts
 
 - [RecipeDiagnostic](../support-recipediagnostic/)
+- [RecipeWorkspaceReport](../support-recipeworkspacereport/)
 - [WorkflowJson](../workflowjson/)
 - [WorkflowResult](../workflowresult/)

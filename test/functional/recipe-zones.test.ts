@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 import { inspectRecipeExecution } from "../../src/application/recipes/plan.ts";
@@ -126,10 +126,33 @@ test("static plans show each task's workspace and sandbox", async (t) => {
         { key: "done", value: true, after: ["review"] },
       ],
     },
-    configuration,
+    {
+      ...configuration,
+      workspaces: {
+        other: {
+          kind: "ephemeral",
+          outputs: [
+            {
+              paths: ["result.txt"],
+              destination: "./published",
+              policy: "create",
+            },
+          ],
+        },
+      },
+    },
   );
   const plan = await inspectRecipeExecution({ file, config });
   assert.deepEqual(plan.workspaces, { other: { kind: "ephemeral" } });
+  assert.deepEqual(plan.workspaceOutputs, {
+    other: [
+      {
+        paths: ["result.txt"],
+        destination: join(dirname(config), "published"),
+        policy: "create",
+      },
+    ],
+  });
   assert.deepEqual(plan.sandboxes.elsewhere, {
     workspace: "workspaces.other",
     binding: "ephemeral",
@@ -161,7 +184,8 @@ test("static plans show each task's workspace and sandbox", async (t) => {
     ],
     { encoding: "utf8" },
   );
-  assert.match(stdout, /\nWorkspace other: ephemeral\n/);
+  assert.match(stdout, /\nWorkspace other: ephemeral \(publications: 1\)\n/);
+  assert.match(stdout, /\nPublications: 1\n/);
   assert.match(
     stdout,
     /\nSandbox elsewhere: on workspaces\.other, ephemeral on local \(host; supports copy, ephemeral\)\n/,
@@ -750,4 +774,88 @@ test("a resumed file run publishes the configuration workspace that no remaining
     (await runtime.status("publish"))?.workspaces?.shared?.state,
     "closed",
   );
+});
+
+test("a run cancelled after a sandbox switch keeps the workspace and resumes in the selected sandbox", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  const marker = join(directory, "started");
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell(
+          "draft",
+          'echo "$ZONE" > zone.txt && git add zone.txt && git commit -qm "$ZONE"',
+          { sandbox: "a" },
+        ),
+        shell(
+          "review",
+          'if [ -f "$MARKER" ]; then cat zone.txt && echo "$ZONE" >> zone.txt && git add zone.txt && git commit -qm "$ZONE"; else touch "$MARKER" && sleep 30; fi',
+          { sandbox: "b", after: ["draft"] },
+        ),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local" },
+      sandboxes: {
+        a: { provider: "local", variables: { ZONE: "a" } },
+        b: { provider: "local", variables: { ZONE: "b", MARKER: marker } },
+      },
+      transports: { state: { type: "local", directory: "./storage" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const controller = new AbortController();
+  const cancelled = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    const run = runtime.run({ runId: "cancel", signal: controller.signal });
+    const deadline = Date.now() + 20_000;
+    while (
+      !(await readFile(marker).then(
+        () => true,
+        () => false,
+      ))
+    ) {
+      assert.ok(Date.now() < deadline, "review never started");
+      await new Promise((settle) => setTimeout(settle, 20));
+    }
+    controller.abort();
+    return await run;
+  })();
+  assert.equal(cancelled.status, "cancelled", JSON.stringify(cancelled.errors));
+  assert.ok(cancelled.workspace?.retainedDirectory);
+  assert.equal(
+    await readFile(join(cancelled.workspace.directory, "zone.txt"), "utf8"),
+    "a\n",
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "cancel",
+    retryIncomplete: true,
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.outputs.review?.stdout, "a\n");
+  assert.equal(resumed.tasks.find((task) => task.key === "draft")?.attempts, 1);
+  const { stdout } = await promisify(execFile)(
+    "git",
+    ["-C", repo, "show", "main:zone.txt"],
+    { encoding: "utf8" },
+  );
+  assert.equal(stdout, "a\nb\n");
 });

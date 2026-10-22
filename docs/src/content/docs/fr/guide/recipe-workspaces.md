@@ -64,7 +64,7 @@ sandbox:
 
 `from` choisit le commit de départ lors de la création de la branche. `named` conserve le worktree sans le fusionner dans votre checkout ; `integrate` demande une intégration après réussite, et `current` travaille directement dans le checkout choisi. Déclarez toujours cette politique explicitement. Les `outputs` de fichiers ne s’appliquent pas à un workspace Git.
 
-Donnez un nom de branche distinct aux travaux indépendants. Pour plusieurs branches dans une recette, utilisez des [tâches isolées](../recipe-workflows/#travailler-sur-des-branches-séparées) ; changer de rôle d’agent ne crée pas de workspace supplémentaire.
+Donnez un nom de branche distinct aux travaux indépendants. Pour plusieurs branches dans une recette, déclarez [plusieurs workspaces](#utiliser-plusieurs-workspaces) ou utilisez des [tâches isolées](../recipe-workflows/#travailler-sur-des-branches-séparées) ; changer de rôle d’agent ne crée pas de workspace supplémentaire.
 
 ## Monter un dossier dans un conteneur
 
@@ -85,6 +85,70 @@ sandbox:
 ```
 
 Passez à `readOnly: false` uniquement pour modifier immédiatement les fichiers source. Un retour arrière de la publication ne peut pas annuler ces écritures. Le montage demande un fournisseur compatible ; `local` ne le prend pas en charge. Voir [travailler sur des fichiers](../working-with-files/).
+
+## Changer de sandbox sur un même workspace
+
+Nommez chaque sandbox sous `sandboxes`, puis choisissez-en une sur une tâche avec `sandbox:`. Les tâches sans `sandbox:` utilisent la `sandbox` de premier niveau. Docker et Podman doivent être démarrés ; tous deux peuvent télécharger l’image publique `node:24`.
+
+```yaml title="outpost.yaml — sandboxes"
+version: 3
+workspace: { kind: ephemeral }
+sandbox: { provider: local }
+outputs:
+  - paths: [notes.txt]
+    destination: ./results
+    policy: create
+sandboxes:
+  docker: { provider: docker, image: node:24 }
+  podman: { provider: podman, image: node:24 }
+```
+
+Quand une tâche choisit une autre sandbox du même workspace, Outpost ferme la sandbox courante et ouvre la suivante sur les mêmes fichiers. `review` lit donc le `notes.txt` écrit par `draft` ; un worktree Git conserve de la même façon les modifications non commitées. Une seule sandbox par workspace est ouverte à la fois : ordonnez ces tâches avec `after`.
+
+```yaml title="recipe.yaml — sandboxes"
+version: 3
+name: two-sandboxes
+tasks:
+  - key: draft
+    sandbox: docker
+    command:
+      executable: sh
+      arguments: [-c, "echo drafted in Docker > notes.txt"]
+  - key: review
+    sandbox: podman
+    after: [draft]
+    command:
+      executable: sh
+      arguments: [-c, "cat notes.txt && echo reviewed in Podman >> notes.txt"]
+```
+
+Après l’exécution, `results/notes.txt` contient les deux lignes. Seules les tâches de commande et d’agent choisissent une sandbox ; les tâches isolées gardent la leur.
+
+## Utiliser plusieurs workspaces
+
+Déclarez d’autres workspaces sous `workspaces`, dans le même mode que celui de premier niveau : tous Git ou tous de fichiers. Une sandbox ouvre le workspace de premier niveau, sauf si son champ `workspace` en référence un autre.
+
+```yaml title="outpost.yaml — workspaces"
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+  branch: { mode: named, name: feature/app, from: main }
+sandbox: { provider: local }
+workspaces:
+  docs:
+    kind: git
+    repository: ./project
+    branch: { mode: named, name: feature/docs, from: main }
+sandboxes:
+  writer:
+    workspace: { $ref: workspaces.docs }
+    provider: local
+```
+
+Une tâche avec `sandbox: writer` travaille sur le worktree `feature/docs` ; les autres tâches gardent `feature/app`. Deux workspaces d’un même dépôt exigent des branches distinctes. Après l’exécution, chaque workspace est intégré ou conservé séparément, et le rapport liste les workspaces nommés sous `workspaces`.
+
+Avec `workflow.concurrency`, les tâches de workspaces différents peuvent s’exécuter en même temps ; celles d’un même workspace doivent rester ordonnées. Une configuration qui mélange workspaces Git et workspaces de fichiers est refusée.
 
 ## Exécuter un agent sur des fichiers
 

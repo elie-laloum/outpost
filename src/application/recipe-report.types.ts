@@ -35,7 +35,6 @@ export interface RecipeReport {
     readonly directory: string;
     readonly retainedDirectory?: string;
   };
-  /** Named workspaces of the configuration that the run opened. */
   readonly workspaces?: Readonly<Record<string, RecipeWorkspaceReport>>;
 }
 
