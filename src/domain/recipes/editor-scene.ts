@@ -327,3 +327,29 @@ export function recipeEditorPlacement(
   const place = placers[item.type] as RecipeEditorPlacers["task"];
   return place(scene, compatibility, item as never, zone);
 }
+
+/** Scene node a diagnostic belongs to, read from its file and path. */
+export function recipeEditorSceneNode(
+  scene: RecipeEditorScene,
+  file: "recipe" | "config" | "layout",
+  path: RecipeSourcePath,
+): RecipeEditorSceneId | undefined {
+  const [first, second] = path;
+  if (file === "recipe") {
+    const task = scene.tasks.find((item) => item.index === second);
+    if (first === "tasks" && task) return `task:${task.id}`;
+    return first === "workflow" ? "run" : undefined;
+  }
+  if (file !== "config" || typeof first !== "string") return undefined;
+  if (first === "environment") return "run";
+  const zone = scene.zones.find(
+    (item) =>
+      item.path.every((part, index) => path[index] === part) ||
+      (first === "outputs" && item.id === "workspace"),
+  );
+  if (zone) return `zone:${zone.id}`;
+  const entity = scene.entities.find(
+    (item) => item.family === first && item.name === second,
+  );
+  return entity ? `entity:${entity.id}` : undefined;
+}

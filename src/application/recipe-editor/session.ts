@@ -13,6 +13,10 @@ import {
   updateRecipeEditorSceneLayout,
 } from "../../domain/recipes/editor.ts";
 import { planRecipeSceneEdit } from "../../domain/recipes/editor-scene-edit.ts";
+import {
+  recipeEditorScene,
+  recipeEditorSceneNode,
+} from "../../domain/recipes/editor-scene.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import {
   readEditorFile,
@@ -161,6 +165,8 @@ export function createRecipeEditorSession(
   let revision = 0;
   let diagnostics: readonly RecipeEditorDiagnostic[] = [];
   let compatibility: RecipeEditorCompatibility | undefined;
+  const compatibilityMap = () =>
+    (compatibility ??= recipeEditorCompatibility(options.registry));
   const undoStack: RecipeEditorSnapshot[] = [];
   const redoStack: RecipeEditorSnapshot[] = [];
   const listeners = new Set<(state: RecipeEditorState) => void>();
@@ -267,6 +273,9 @@ export function createRecipeEditorSession(
 
   function state(): RecipeEditorState {
     const recipeState = recipe && draftState(recipe);
+    const configState = config && draftState(config);
+    const scene =
+      recipeState && recipeEditorScene(recipeState.value, configState?.value);
     return {
       revision,
       directory: root.directory,
@@ -278,11 +287,17 @@ export function createRecipeEditorSession(
             },
           }
         : {}),
-      ...(config ? { config: draftState(config) } : {}),
+      ...(configState ? { config: configState } : {}),
+      ...(scene ? { scene } : {}),
       layout,
       layoutDirty: !!recipe && serializeLayout(layout) !== layoutSaved,
       editable: { recipe: editable(recipe), config: editable(config) },
-      diagnostics,
+      diagnostics: diagnostics.map((diagnostic) => {
+        const node =
+          scene &&
+          recipeEditorSceneNode(scene, diagnostic.file, diagnostic.path);
+        return node ? { ...diagnostic, node } : diagnostic;
+      }),
       canUndo: undoStack.length > 0,
       canRedo: redoStack.length > 0,
     };
@@ -389,7 +404,6 @@ export function createRecipeEditorSession(
       recipe: editableTarget("recipe"),
       config: editableTarget("config"),
     };
-    compatibility ??= recipeEditorCompatibility(options.registry);
     for (const operation of operations) {
       const planned = planRecipeSceneEdit(
         {
@@ -397,7 +411,7 @@ export function createRecipeEditorSession(
           config: editableYamlValue(drafts.config.editable!),
         },
         operation,
-        compatibility,
+        compatibilityMap(),
       );
       for (const role of ["recipe", "config"] as const) {
         if (!planned[role].length) continue;
@@ -519,6 +533,7 @@ export function createRecipeEditorSession(
       }),
     edit: (role, operations, seen) =>
       change(seen, () => editDraft(role, operations)),
+    compatibility: compatibilityMap,
     editScene: (operations, seen, positions = {}) =>
       change(seen, () => editScene(operations, positions)),
     replaceText: (role, text, seen) =>

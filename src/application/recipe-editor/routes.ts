@@ -20,6 +20,7 @@ import type {
   RecipeEditorRevisionRequest,
   RecipeEditorRoutesOptions,
   RecipeEditorSaveRequest,
+  RecipeEditorSceneRequest,
   RecipeEditorSessionInfo,
   RecipeEditorTextRequest,
 } from "./routes.types.ts";
@@ -31,6 +32,10 @@ const decoders = {
   ),
   edit: createJsonDecoder<RecipeEditorEditRequest>(
     recipeEditorRequestSchemas.edit,
+    "request",
+  ),
+  scene: createJsonDecoder<RecipeEditorSceneRequest>(
+    recipeEditorRequestSchemas.scene,
     "request",
   ),
   text: createJsonDecoder<RecipeEditorTextRequest>(
@@ -107,6 +112,7 @@ export function recipeEditorRoutes(
           ]),
         ),
         families: Object.keys(recipeFamilies),
+        compatibility: session.compatibility(),
         starters: Object.entries(recipeEditorStarters).map(
           ([name, starter]) => ({
             name,
@@ -134,6 +140,15 @@ export function recipeEditorRoutes(
     "POST /api/project/edit": recipeEditorRoute(({ body }) => {
       const request = decoders.edit.parse(body);
       return session.edit(request.role, request.operations, request.revision);
+    }),
+    "POST /api/project/scene": recipeEditorRoute(({ body }) => {
+      const request = decoders.scene.parse(body);
+      return session.editScene(
+        request.operations,
+        request.revision,
+        recipeEditorLayout({ version: 2, nodes: request.positions ?? {} })
+          .nodes,
+      );
     }),
     "POST /api/project/text": recipeEditorRoute(({ body }) => {
       const request = decoders.text.parse(body);

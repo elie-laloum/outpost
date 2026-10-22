@@ -1,5 +1,9 @@
 import type { RecipeEditorRuns } from "./runs.types.ts";
 import type { RecipeEditorOperation } from "../../domain/recipes/editor.types.ts";
+import type {
+  RecipeEditorCompatibility,
+  RecipeEditorSceneOperation,
+} from "../../domain/recipes/editor-scene.types.ts";
 import type { RecipeEditorRole, RecipeEditorSession } from "./session.types.ts";
 
 export interface RecipeEditorRoutesOptions {
@@ -22,6 +26,13 @@ export interface RecipeEditorEditRequest {
   readonly role: RecipeEditorRole;
   readonly operations: readonly RecipeEditorOperation[];
   readonly revision: number;
+}
+
+export interface RecipeEditorSceneRequest {
+  readonly operations: readonly RecipeEditorSceneOperation[];
+  readonly revision: number;
+  /** Layout entries of the moved nodes, saved in the same undo step. */
+  readonly positions?: unknown;
 }
 
 export interface RecipeEditorTextRequest {
@@ -58,6 +69,8 @@ export interface RecipeEditorSessionInfo {
   readonly files: RecipeEditorFiles;
   /** Configuration component families, such as `queues` or `hooks`. */
   readonly families: readonly string[];
+  /** Provider features and family types the canvas offers and checks drops against. */
+  readonly compatibility: RecipeEditorCompatibility;
   readonly starters: readonly {
     readonly name: string;
     readonly description: string;

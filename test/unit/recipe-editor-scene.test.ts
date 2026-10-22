@@ -4,6 +4,7 @@ import {
   recipeEditorFeaturePath,
   recipeEditorPlacement,
   recipeEditorScene,
+  recipeEditorSceneNode,
 } from "../../src/domain/recipes/editor-scene.ts";
 import { recipeEditorCompatibility } from "../../src/application/recipe-editor/compatibility.ts";
 
@@ -207,4 +208,31 @@ test("the compatibility map reads provider features and family types from the re
   assert.deepEqual(compatibility.providers.local, ["variables"]);
   assert.equal(compatibility.families.stores?.kind, "checkpointStore");
   assert.ok(compatibility.families.agents?.types.includes("composed"));
+});
+
+test("diagnostics are attached to the task, zone, entity or run their path designates", () => {
+  const scene = recipeEditorScene(recipe, configuration);
+  const node = (
+    file: "recipe" | "config" | "layout",
+    ...path: (string | number)[]
+  ) => recipeEditorSceneNode(scene, file, path);
+  assert.equal(node("recipe", "tasks", 2, "agent"), "task:write");
+  assert.equal(node("recipe", "workflow", "concurrency"), "run");
+  assert.equal(node("recipe", "tasks", 9), undefined);
+  assert.equal(node("recipe", "name"), undefined);
+  assert.equal(node("config", "workspace", "branch"), "zone:workspace");
+  assert.equal(node("config", "outputs", 0), "zone:workspace");
+  assert.equal(node("config", "workspaces", "docs"), "zone:workspaces.docs");
+  assert.equal(
+    node("config", "sandboxes", "writer", "provider"),
+    "zone:sandboxes.writer",
+  );
+  assert.equal(node("config", "sandbox"), "zone:sandbox");
+  assert.equal(
+    node("config", "stores", "checkpoint"),
+    "entity:stores.checkpoint",
+  );
+  assert.equal(node("config", "environment", "TOKEN"), "run");
+  assert.equal(node("config", "version"), undefined);
+  assert.equal(node("layout", "nodes"), undefined);
 });

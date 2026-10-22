@@ -4,7 +4,12 @@ import type {
   RecipeEditorOperation,
 } from "../../domain/recipes/editor.types.ts";
 import type { RecipeSourcePath } from "../../domain/recipes/expressions.types.ts";
-import type { RecipeEditorSceneOperation } from "../../domain/recipes/editor-scene.types.ts";
+import type {
+  RecipeEditorCompatibility,
+  RecipeEditorScene,
+  RecipeEditorSceneId,
+  RecipeEditorSceneOperation,
+} from "../../domain/recipes/editor-scene.types.ts";
 import type { EditorRoot } from "../../infrastructure/editor-files.types.ts";
 import type { EditableYaml } from "../../infrastructure/recipes/editor-document.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
@@ -22,6 +27,8 @@ export interface RecipeEditorDiagnostic {
   readonly path: RecipeSourcePath;
   readonly line?: number;
   readonly column?: number;
+  /** Scene node the located value belongs to, when there is one. */
+  readonly node?: RecipeEditorSceneId;
 }
 
 export interface RecipeEditorDraftState {
@@ -45,6 +52,8 @@ export interface RecipeEditorState {
     readonly graph: RecipeEditorGraph;
   };
   readonly config?: RecipeEditorDraftState;
+  /** Zones, tasks and entities projected from both drafts. */
+  readonly scene?: RecipeEditorScene;
   readonly layout: RecipeEditorLayout;
   readonly layoutDirty: boolean;
   /** Structured edits require recipe format 3 and configuration version 3. */
@@ -80,6 +89,8 @@ export interface RecipeEditorSession {
     operations: readonly RecipeEditorOperation[],
     revision: number,
   ): Promise<RecipeEditorState>;
+  /** Provider features and family types derived from the session registry. */
+  compatibility(): RecipeEditorCompatibility;
   /** Applies canvas edits to the recipe and configuration together, as one undo step. */
   editScene(
     operations: readonly RecipeEditorSceneOperation[],

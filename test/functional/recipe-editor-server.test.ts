@@ -264,6 +264,67 @@ test("the editor API opens, edits and saves drafts with conflict detection", asy
   assert.equal(typeof schema.body.title, "string");
 });
 
+test("the editor API projects the scene, edits it across both files and locates diagnostics on nodes", async (t) => {
+  const { project, api } = await editor(t);
+  await writeFile(
+    join(project, "recipe.yaml"),
+    'version: 3\nname: zones\ntasks:\n  - key: draft\n    command: { executable: "true" }\n',
+  );
+  await writeFile(
+    join(project, "outpost.yaml"),
+    "version: 3\nworkspace: { kind: ephemeral }\nsandbox: { provider: local }\n",
+  );
+  const info = await api<{
+    compatibility: { providers: Record<string, readonly string[]> };
+  }>("/api/session");
+  assert.ok(info.body.compatibility.providers.docker?.includes("volumes"));
+  let state = (
+    await api<RecipeEditorState>("/api/project/open", {
+      recipe: "recipe.yaml",
+      config: "outpost.yaml",
+    })
+  ).body;
+  assert.deepEqual(
+    state.scene?.zones.map((zone) => zone.id),
+    ["workspace", "sandbox"],
+  );
+  const response = await api<RecipeEditorState>("/api/project/scene", {
+    revision: state.revision,
+    operations: [
+      {
+        type: "add-zone",
+        kind: "sandbox",
+        name: "box",
+        declaration: { provider: "docker" },
+      },
+      { type: "place-task", key: "draft", zone: "sandboxes.box" },
+    ],
+    positions: { "zone:sandboxes.box": { x: 4, y: 5 }, bad: { x: "no" } },
+  });
+  assert.equal(response.status, 200);
+  state = response.body;
+  assert.equal(state.scene?.tasks[0]?.zone, "sandboxes.box");
+  assert.deepEqual(state.layout.nodes, {
+    "zone:sandboxes.box": { x: 4, y: 5 },
+  });
+  assert.deepEqual(
+    state.diagnostics.map((diagnostic) => diagnostic.node),
+    ["zone:sandboxes.box"],
+  );
+  const refused = await api("/api/project/scene", {
+    revision: state.revision,
+    operations: [{ type: "place-task", key: "draft", zone: "workspace" }],
+  });
+  assert.equal(refused.status, 422);
+  assert.equal(refused.body.error.diagnostic.code, "invalid-placement");
+  const malformed = await api("/api/project/scene", {
+    revision: state.revision,
+    operations: [{ type: "set-feature", zone: "sandbox", feature: "unknown" }],
+  });
+  assert.equal(malformed.status, 422);
+  assert.match(malformed.body.error.message, /request/);
+});
+
 test("editor events stream the state and disk changes until the server closes", async (t) => {
   const { project, server, api } = await editor(t);
   await writeFile(
