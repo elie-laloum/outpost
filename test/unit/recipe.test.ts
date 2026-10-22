@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 import { parseRecipe } from "../../src/infrastructure/recipe.ts";
 
 const command = { key: "check", command: { executable: "node" } };
@@ -98,6 +99,33 @@ test("recipe validates fields, task alternatives and command arguments", () => {
     { ...command, command: { executable: "node", deadlineMs: 1.5 } },
   ])
     assert.throws(() => parseRecipe(recipe([step])), JSON.stringify(step));
+});
+
+test("dependency errors locate the task that declares them", () => {
+  const located = (steps: readonly unknown[]) => {
+    try {
+      parseRecipe(recipe(steps));
+    } catch (error) {
+      assert.ok(error instanceof ConfigurationError);
+      return error.diagnostic;
+    }
+    assert.fail("Expected a configuration error");
+  };
+  assert.deepEqual(
+    located([command, { ...command, key: "next", after: ["check", "gone"] }])
+      .path,
+    ["tasks", 1, "after", 1],
+  );
+  const duplicate = located([command, command]);
+  assert.equal(duplicate.code, "duplicate-key");
+  assert.deepEqual(duplicate.path, ["tasks", 1, "key"]);
+  const cycle = located([
+    { ...command, key: "first", after: ["second"] },
+    { ...command, key: "second", after: ["first"] },
+  ]);
+  assert.equal(cycle.code, "dependency-cycle");
+  assert.deepEqual(cycle.path, ["tasks", 0, "after"]);
+  assert.ok(cycle.line);
 });
 
 test("recipe refuses duplicate keys, missing dependencies and cycles", () => {

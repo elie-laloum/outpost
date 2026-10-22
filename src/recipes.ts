@@ -22,6 +22,7 @@ export { validateRecipeProject } from "./application/recipes/project.ts";
 export { createRecipeRuntime } from "./application/recipes/runtime.ts";
 export type {
   RecipeProjectOptions,
+  RecipeProjectSources,
   RecipeProjectValidation,
   RecipeRunOptions,
   RecipeRuntime,

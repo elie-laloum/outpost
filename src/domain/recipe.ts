@@ -289,13 +289,26 @@ export function validateRecipe(value: unknown): RecipeDocument {
   const tasks = record.tasks.map((value, index) =>
     step(value, index, record.version),
   );
-  const keys = new Set(tasks.map((task) => task.key));
-  if (keys.size !== tasks.length)
-    throw new Error("Recipe contains duplicate task keys");
-  for (const task of tasks)
-    for (const dependency of task.after)
+  const keys = new Set<string>();
+  for (const [index, task] of tasks.entries()) {
+    if (keys.has(task.key))
+      throw configurationError(
+        "Recipe contains duplicate task keys",
+        ["tasks", index, "key"],
+        "duplicate-key",
+        `Rename one of the tasks using ${task.key}.`,
+      );
+    keys.add(task.key);
+  }
+  for (const [index, task] of tasks.entries())
+    for (const [position, dependency] of task.after.entries())
       if (!keys.has(dependency))
-        throw new Error(`Unknown recipe dependency: ${dependency}`);
+        throw configurationError(
+          `Unknown recipe dependency: ${dependency}`,
+          ["tasks", index, "after", position],
+          "unknown-reference",
+          `Declare a task with key ${dependency} or remove it from after.`,
+        );
   const ordered: RecipeStep[] = [];
   const remaining = new Set(tasks);
   const ready = new Set<string>();
@@ -307,8 +320,14 @@ export function validateRecipe(value: unknown): RecipeDocument {
       ready.add(task.key);
       remaining.delete(task);
     }
-    if (size === remaining.size)
-      throw new Error("Recipe dependencies contain a cycle");
+    const blocked = [...remaining][0];
+    if (size === remaining.size && blocked)
+      throw configurationError(
+        "Recipe dependencies contain a cycle",
+        ["tasks", tasks.indexOf(blocked), "after"],
+        "dependency-cycle",
+        `Remove one of the after entries that lead back to ${blocked.key}.`,
+      );
   }
   if (record.$schema !== undefined) text(record.$schema, "recipe.$schema");
   const document: RecipeDocument = {

@@ -1,9 +1,15 @@
 import { planRecipeAgents } from "./agent-plan.ts";
 import { readRecipeProject } from "./project.ts";
-import type { RecipeProjectOptions } from "./project.types.ts";
+import type {
+  RecipeProjectOptions,
+  RecipeProjectSources,
+} from "./project.types.ts";
 
-export async function inspectRecipeExecution(options: RecipeProjectOptions) {
-  const project = await readRecipeProject(options);
+export async function inspectRecipeExecution(
+  options: RecipeProjectOptions,
+  sources?: RecipeProjectSources,
+) {
+  const project = await readRecipeProject(options, sources);
   return {
     name: project.document.name,
     workspace:

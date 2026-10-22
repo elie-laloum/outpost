@@ -61,12 +61,9 @@ function addOptions(
         value,
       ]);
     command.addOption(option);
-    if (configuration.type === "boolean" && key === "interactive")
+    if ("negation" in configuration)
       command.addOption(
-        new Option(
-          "--no-interactive",
-          "Leave dialogue questions pending without prompting",
-        ).default(undefined),
+        new Option(`--no-${key}`, configuration.negation).default(undefined),
       );
   }
   for (const [legacy, current] of Object.entries(renames))

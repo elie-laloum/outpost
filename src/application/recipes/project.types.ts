@@ -17,6 +17,12 @@ export interface RecipeProjectOptions {
   readonly registry?: RecipeRegistry;
 }
 
+/** Unsaved recipe and configuration texts read in place of their files. */
+export interface RecipeProjectSources {
+  readonly recipe?: string;
+  readonly config?: string;
+}
+
 export interface RecipeProjectValidation {
   readonly name: string;
   readonly version: number;

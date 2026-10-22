@@ -19,4 +19,6 @@ export type CommandDefinition =
 export interface CliOptionConfiguration {
   readonly type: string;
   readonly description: string;
+  /** Help for the `--no-<option>` form of a boolean option. */
+  readonly negation?: string;
 }

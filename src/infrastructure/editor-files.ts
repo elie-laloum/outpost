@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   lstat,
   mkdir,
+  readdir,
   readFile,
   realpath,
   rm,
@@ -10,7 +11,11 @@ import {
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 import { replaceFile } from "./file-replacement.ts";
-import type { EditorFile, EditorRoot } from "./editor-files.types.ts";
+import type {
+  EditorDirectoryEntry,
+  EditorFile,
+  EditorRoot,
+} from "./editor-files.types.ts";
 
 export function editorFileHash(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
@@ -106,4 +111,32 @@ export async function writeEditorFile(
     await rm(temporary, { force: true });
   }
   return { path: root.relative(path), text, hash: editorFileHash(text) };
+}
+
+/** Lists one directory for the file chooser, hiding dependencies, Git metadata and dotfiles. */
+export async function listEditorDirectory(
+  root: EditorRoot,
+  directory: string,
+  limit: number,
+): Promise<readonly EditorDirectoryEntry[]> {
+  const path = directory ? await root.locate(directory) : root.directory;
+  const entries = await readdir(path, { withFileTypes: true });
+  return entries
+    .filter(
+      (entry) =>
+        !entry.name.startsWith(".") &&
+        entry.name !== "node_modules" &&
+        (entry.isDirectory() || entry.isFile()),
+    )
+    .map((entry) => ({
+      name: entry.name,
+      path: root.relative(join(path, entry.name)),
+      kind: entry.isDirectory() ? ("directory" as const) : ("file" as const),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.kind === "directory") - Number(a.kind === "directory") ||
+        a.name.localeCompare(b.name),
+    )
+    .slice(0, limit);
 }

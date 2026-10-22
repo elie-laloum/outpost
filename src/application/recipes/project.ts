@@ -33,6 +33,7 @@ import { validateFileRecipeCapabilities } from "./file-validation.ts";
 import type {
   RecipeProject,
   RecipeProjectOptions,
+  RecipeProjectSources,
   RecipeProjectValidation,
   RecipeReportDeclaration,
 } from "./project.types.ts";
@@ -42,16 +43,18 @@ const reportDeclaration = createJsonDecoder<RecipeReportDeclaration>(
   "reports",
 );
 
+/** `sources` replaces file contents, so an editor can validate unsaved drafts at their paths. */
 export async function readRecipeProject(
   options: RecipeProjectOptions,
+  sources: RecipeProjectSources = {},
 ): Promise<RecipeProject> {
   const file = resolve(options.file),
     config = resolve(options.config);
   if (file === config)
     throw new Error("Recipe and configuration require separate files");
   const [source, configurationSource] = await Promise.all([
-    readRecipeFile(file),
-    readRecipeFile(config),
+    sources.recipe ?? readRecipeFile(file),
+    sources.config ?? readRecipeFile(config),
   ]);
   let document;
   try {
@@ -207,8 +210,9 @@ export async function readRecipeProject(
 
 export async function validateRecipeProject(
   options: RecipeProjectOptions,
+  sources?: RecipeProjectSources,
 ): Promise<RecipeProjectValidation> {
-  const project = await readRecipeProject(options);
+  const project = await readRecipeProject(options, sources);
   return {
     name: project.document.name,
     version: project.document.version,

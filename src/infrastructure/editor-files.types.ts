@@ -12,3 +12,9 @@ export interface EditorRoot {
   locate(file: string): Promise<string>;
   relative(path: string): string;
 }
+
+export interface EditorDirectoryEntry {
+  readonly name: string;
+  readonly path: string;
+  readonly kind: "directory" | "file";
+}

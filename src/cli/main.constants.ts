@@ -5,6 +5,16 @@ export const cliOptions = {
     type: "boolean",
     description:
       "Answer recipe questions and review unsigned gates in the terminal (automatic on a TTY without --json)",
+    negation: "Leave dialogue questions pending without prompting",
+  },
+  open: {
+    type: "boolean",
+    description: "Open the editor in the default browser (default)",
+    negation: "Only print the editor URL",
+  },
+  port: {
+    type: "string",
+    description: "Loopback port for the editor (default: a free port)",
   },
   actor: {
     type: "string",
@@ -293,6 +303,15 @@ export const commandOptions = {
       "Create a recipe starter with editor schema support; never overwrite an existing file",
     options: ["file", "config", "workspace-kind", "json"],
     examples: [`outpost recipe init ${recipeFile}`],
+  },
+  "recipe editor": {
+    description:
+      "Edit recipes, configurations and extensions in a local web editor, and follow their runs",
+    options: ["directory", "file", "config", "port", "open", "json"],
+    examples: [
+      "outpost recipe editor",
+      `outpost recipe editor ${recipeFile} --no-open`,
+    ],
   },
   "recipe plan": {
     description:

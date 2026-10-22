@@ -122,6 +122,11 @@ export async function recipeCommand({
     return recipeCatalogCommand({ values, positionals });
   if (positionals[1] === "init")
     return initializeRecipe({ values, positionals });
+  if (positionals[1] === "editor")
+    return (await import("./recipe-editor-command.ts")).recipeEditorCommand({
+      values,
+      positionals,
+    });
   if (positionals[1] === "plan") {
     if (!values.file || !values.config || !/\.ya?ml$/.test(values.config))
       throw new Error("Recipe plan requires --file and a YAML --config");
