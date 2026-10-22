@@ -1,6 +1,10 @@
 import { planRecipeAgents } from "./agent-plan.ts";
 import { readRecipeProject } from "./project.ts";
-import { recipeTaskZone, recipeWorkspaceKey } from "./zones.ts";
+import {
+  recipeFileTasks,
+  recipeTaskZone,
+  recipeWorkspaceKey,
+} from "./zones.ts";
 import type {
   RecipeProjectOptions,
   RecipeProjectSources,
@@ -12,6 +16,7 @@ export async function inspectRecipeExecution(
 ) {
   const project = await readRecipeProject(options, sources);
   const { model } = project;
+  const files = recipeFileTasks(project.document, model);
   return {
     name: project.document.name,
     workspace:
@@ -22,8 +27,10 @@ export async function inspectRecipeExecution(
       ? {
           binding: project.files.plan.binding,
           sandbox: project.files.plan.sandbox,
-          agents: planRecipeAgents(project.document, project.graph),
         }
+      : {}),
+    ...(files.tasks.length
+      ? { agents: planRecipeAgents(files, project.graph) }
       : {}),
     workspaces: Object.fromEntries(
       Object.entries(model.workspaces).map(([name, workspace]) => [

@@ -30,7 +30,11 @@ import { recipeComponentGraph } from "./graph.ts";
 import { reportSchema } from "./schemas.constants.ts";
 import { readRecipeConfigurationModel } from "./configuration-model.ts";
 import { validateFileRecipeCapabilities } from "./file-validation.ts";
-import { recipeTaskWorkspace, validateRecipeZones } from "./zones.ts";
+import {
+  recipeFileTasks,
+  recipeTaskWorkspace,
+  validateRecipeZones,
+} from "./zones.ts";
 import type {
   RecipeProject,
   RecipeProjectOptions,
@@ -176,7 +180,7 @@ export async function readRecipeProject(
       document,
     );
     validateRecipeProjectExpressions(document, graph);
-    if (files) validateFileRecipeCapabilities(document, graph);
+    validateFileRecipeCapabilities(recipeFileTasks(document, model), graph);
     for (const [path, declaration] of fileWorkspaceDeclarations(model)) {
       if (
         declaration.retention?.policy === "portable" &&

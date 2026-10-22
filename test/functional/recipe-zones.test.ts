@@ -859,3 +859,222 @@ test("a run cancelled after a sandbox switch keeps the workspace and resumes in 
   );
   assert.equal(stdout, "a\nb\n");
 });
+
+test("a Git configuration publishes the file workspace it declares beside its worktree", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  await write(
+    {
+      version: 3,
+      name: "mixed",
+      tasks: [
+        shell(
+          "build",
+          'echo "$ZONE" > zone.txt && git add zone.txt && git commit -qm "$ZONE"',
+        ),
+        shell("note", 'echo "$ZONE" > note.md && ls', { sandbox: "writer" }),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local", variables: { ZONE: "git" } },
+      runtime: { directory: "./state" },
+      workspaces: {
+        notes: {
+          kind: "ephemeral",
+          outputs: [
+            { paths: ["note.md"], destination: "./notes", policy: "create" },
+          ],
+        },
+      },
+      sandboxes: {
+        writer: {
+          workspace: { $ref: "workspaces.notes" },
+          provider: "local",
+          variables: { ZONE: "files" },
+        },
+      },
+    },
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const report = await runtime.run();
+  assert.equal(report.status, "done", JSON.stringify(report.errors));
+  assert.equal(report.outputs.note?.stdout, "note.md\n");
+  const { stdout } = await promisify(execFile)(
+    "git",
+    ["-C", repo, "show", "main:zone.txt"],
+    { encoding: "utf8" },
+  );
+  assert.equal(stdout, "git\n");
+  assert.equal(
+    await readFile(join(directory, "notes", "note.md"), "utf8"),
+    "files\n",
+  );
+  assert.ok(report.workspace?.branch);
+  const notes = report.workspaces?.notes;
+  assert.equal(notes?.kind, "files");
+  assert.equal(notes?.kind === "files" && notes.fileOutputs.length, 1);
+});
+
+test("a file configuration integrates the Git workspace it declares and publishes its files", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  await write(
+    {
+      version: 3,
+      name: "mixed",
+      tasks: [
+        shell("draft", 'echo "$ZONE" > out.txt'),
+        shell(
+          "code",
+          'echo "$ZONE" > app.txt && git add app.txt && git commit -qm "$ZONE"',
+          { sandbox: "coder" },
+        ),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "ephemeral" },
+      sandbox: { provider: "local", variables: { ZONE: "files" } },
+      outputs: [
+        { paths: ["out.txt"], destination: "./published", policy: "create" },
+      ],
+      workspaces: {
+        app: {
+          kind: "git",
+          repository: repo,
+          branch: { mode: "named", name: "app" },
+        },
+      },
+      sandboxes: {
+        coder: {
+          workspace: { $ref: "workspaces.app" },
+          provider: "local",
+          variables: { ZONE: "git" },
+        },
+      },
+    },
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const report = await runtime.run();
+  assert.equal(report.status, "done", JSON.stringify(report.errors));
+  assert.equal(
+    await readFile(join(directory, "published", "out.txt"), "utf8"),
+    "files\n",
+  );
+  const { stdout } = await promisify(execFile)(
+    "git",
+    ["-C", repo, "show", "app:app.txt"],
+    { encoding: "utf8" },
+  );
+  assert.equal(stdout, "git\n");
+  assert.equal(report.fileOutputs?.length, 1);
+  const app = report.workspaces?.app;
+  assert.equal(app?.kind === "git" && app.branch, "app");
+});
+
+test("a durable mixed run records both kinds in one checkpoint and settles them on resume", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  await write(
+    {
+      version: 3,
+      name: "mixed",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell(
+          "build",
+          'echo "$ZONE" > zone.txt && git add zone.txt && git commit -qm "$ZONE"',
+        ),
+        shell("note", 'echo "$ZONE" > note.md', { sandbox: "writer" }),
+        {
+          key: "approve",
+          after: ["build", "note"],
+          gate: {
+            kind: "approval",
+            prompt: "Continue?",
+            actors: ["maintainer"],
+          },
+        },
+        shell("append", 'cat note.md && echo "$ZONE" >> note.md', {
+          sandbox: "writer",
+          after: ["approve"],
+        }),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local", variables: { ZONE: "git" } },
+      runtime: { directory: "./state" },
+      workspaces: {
+        notes: {
+          kind: "ephemeral",
+          outputs: [
+            { paths: ["note.md"], destination: "./notes", policy: "create" },
+          ],
+        },
+      },
+      sandboxes: {
+        writer: {
+          workspace: { $ref: "workspaces.notes" },
+          provider: "local",
+          variables: { ZONE: "files" },
+        },
+      },
+      transports: { state: { type: "local", directory: "./storage" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const paused = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    return await runtime.run({ runId: "mixed" });
+  })();
+  assert.equal(paused.status, "paused", JSON.stringify(paused.errors));
+  assert.ok(paused.workspace?.retainedDirectory);
+  await assert.rejects(readFile(join(directory, "notes", "note.md")), {
+    code: "ENOENT",
+  });
+  const approval = paused.tasks.find((task) => task.key === "approve")?.pause;
+  assert.ok(approval);
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "mixed",
+    decisions: [
+      {
+        executionId: paused.executionId!,
+        key: "approve",
+        requestId: approval.id,
+        action: "approve",
+        actor: "maintainer",
+        reason: "Reviewed",
+      },
+    ],
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.outputs.append?.stdout, "files\n");
+  assert.equal(
+    await readFile(join(directory, "notes", "note.md"), "utf8"),
+    "files\nfiles\n",
+  );
+  const { stdout } = await promisify(execFile)(
+    "git",
+    ["-C", repo, "show", "main:zone.txt"],
+    { encoding: "utf8" },
+  );
+  assert.equal(stdout, "git\n");
+  assert.equal(resumed.workspace?.retainedDirectory, undefined);
+  assert.equal(resumed.workspaces?.notes?.kind, "files");
+});

@@ -47,7 +47,7 @@ export function compileAgent(
   step: RecipeStepOf<"agent">,
   context: RecipeCompilationContext,
 ): Task {
-  const { common, bindings, sandbox, text } = context;
+  const { common, bindings, sandbox, sandboxName, text } = context;
   const agent =
     bindings.agents && Object.hasOwn(bindings.agents, step.agent)
       ? bindings.agents[step.agent]
@@ -74,7 +74,7 @@ export function compileAgent(
         agent,
         brief: { text: text(step.brief, context) },
       };
-      await bindings.validateDispatch?.(request);
+      await bindings.validateDispatch?.(request, sandboxName);
       const result = await executeAgentTask(
         {
           ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { readRecipeConfigurationModel } from "../../src/application/recipes/configuration-model.ts";
 import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 import { parseRecipe } from "../../src/infrastructure/recipe.ts";
@@ -102,7 +102,7 @@ test("named Git workspaces on one repository need their own branch", async () =>
   );
 });
 
-test("sandboxes reference declared workspaces of the same mode", async () => {
+test("sandboxes reference declared workspaces", async () => {
   await assert.rejects(
     readRecipeConfigurationModel(
       {
@@ -124,21 +124,99 @@ test("sandboxes reference declared workspaces of the same mode", async () => {
       "workspace",
     ]),
   );
+});
+
+test("configurations mix Git and file workspaces, each read by its own kind", async () => {
+  const git = await readRecipeConfigurationModel(
+    {
+      version: 3,
+      workspace: { kind: "git", repository: "../app" },
+      runtime: { directory: "./state" },
+      workspaces: {
+        notes: {
+          kind: "ephemeral",
+          outputs: [
+            { paths: ["*.md"], destination: "./notes", policy: "create" },
+          ],
+        },
+      },
+      sandboxes: {
+        writer: { workspace: { $ref: "workspaces.notes" }, provider: "local" },
+        builder: { provider: "local" },
+      },
+    },
+    file,
+    document,
+  );
+  assert.equal(git.workspace.kind, "git");
+  assert.equal(git.workspaces.notes?.kind, "files");
+  assert.ok(git.sandboxes.writer?.plan);
+  assert.equal(git.sandboxes.builder?.plan, undefined);
+  assert.equal(git.runtime?.directory, resolve(dirname(file), "state"));
+  assert.deepEqual(git.components.workspaces, {});
+  assert.equal(git.components.runtime, undefined);
+  const files = await readRecipeConfigurationModel(
+    {
+      version: 3,
+      workspace: { kind: "ephemeral" },
+      sandbox: { provider: "local" },
+      integration: { strategy: "merge" },
+      workspaces: {
+        app: { kind: "git", repository: "../app", copies: "auto" },
+      },
+      sandboxes: {
+        coder: { workspace: { $ref: "workspaces.app" }, provider: "local" },
+      },
+    },
+    file,
+    document,
+  );
+  assert.equal(files.workspace.kind, "files");
+  assert.equal(files.workspaces.app?.kind, "git");
+  assert.equal(files.sandboxes.coder?.plan, undefined);
+  assert.deepEqual(files.components.workspaces, { app: { copies: "auto" } });
   await assert.rejects(
     readRecipeConfigurationModel(
       {
         version: 3,
         workspace: { kind: "git", repository: "../app" },
-        workspaces: { files: { kind: "ephemeral" } },
+        runtime: { directory: "./state" },
       },
       file,
       document,
     ),
-    diagnostic(/Workspace files uses a different mode/, [
-      "workspaces",
-      "files",
-      "kind",
+    diagnostic(/file runtime and outputs require a file workspace/, [
+      "runtime",
     ]),
+  );
+  await assert.rejects(
+    readRecipeConfigurationModel(
+      {
+        version: 3,
+        workspace: { kind: "git", repository: "../app" },
+        workspaces: { notes: { kind: "ephemeral" } },
+        outputs: [
+          { paths: ["*.md"], destination: "./notes", policy: "create" },
+        ],
+      },
+      file,
+      document,
+    ),
+    diagnostic(/file runtime and outputs require a file workspace/, [
+      "outputs",
+    ]),
+  );
+  await assert.rejects(
+    readRecipeConfigurationModel(
+      {
+        version: 3,
+        workspace: { kind: "ephemeral" },
+        integration: { strategy: "merge" },
+      },
+      file,
+      document,
+    ),
+    diagnostic(/Git integration is unavailable/, ["integration"]),
   );
 });
 

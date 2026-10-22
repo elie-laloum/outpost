@@ -9,6 +9,7 @@ import type { RecipeResumeOptions } from "./durable.types.ts";
 import type { RecipeRunOptions } from "./project.types.ts";
 import { prepareRecipeWorkflow } from "./workflow-components.ts";
 import { runRecipeWorkflow } from "./workflow-run.ts";
+import { prepareRecipeNamedFileZones } from "./zone-kinds.ts";
 import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
 import { openRecipeSandbox } from "./sandbox.ts";
 import { recipeExecutionConfiguration } from "./configuration.ts";
@@ -129,14 +130,21 @@ export function createRecipeProjectRuntime(
               throw new Error(
                 "Durable execution requires a configured workflow checkpoint",
               );
+            const files = await prepareRecipeNamedFileZones(
+              project,
+              scope,
+              configuration.agents ?? {},
+              signal,
+            );
             return scope.redact(
               await runRecipeWorkflow(
-                project.document,
+                project,
                 configuration,
                 inputs ?? {},
                 components,
                 signal,
                 securedObservation,
+                files,
               ),
             );
           }

@@ -37,6 +37,7 @@ const readers: Readonly<
     const named = {
       workspaces: normalized.workspaces ?? {},
       sandboxes: normalized.sandboxes ?? {},
+      ...(normalized.runtime ? { runtime: normalized.runtime } : {}),
     };
     if (!normalized.files)
       return { ...gitModel(3, normalized.configuration, file), ...named };

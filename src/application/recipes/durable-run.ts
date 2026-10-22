@@ -1,7 +1,6 @@
 import { inspectRecipeWorkspace } from "../../infrastructure/recipes/workspace.ts";
 import { bindRecipeWorkflow } from "./workflow.ts";
 import { recipeWorkflowReport } from "./workflow-report.ts";
-import { createRecipeDurableResources } from "./durable-resources.ts";
 import { isFileSandboxOptions } from "../file-sandbox.ts";
 import {
   openRecipeCheckpoint,
@@ -15,10 +14,25 @@ import type { RecipeComponentScope } from "./components.types.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
 import type { WorkflowResult } from "../../domain/workflow.types.ts";
 import {
-  recipeSandboxZone,
+  recipeWorkspaceKind,
   recipeWorkspaceOptions,
   recipeZoneWorkspace,
 } from "./zones.ts";
+import { runCleanup } from "../../domain/cleanup.ts";
+import {
+  createRecipeDurableResources,
+  recipeDurableGitZones,
+} from "./durable-resources.ts";
+import {
+  recipeFileDispatchCheck,
+  validateRecipeWorkspaceRecoveries,
+} from "./file-zones.ts";
+import {
+  acquireRecipeZone,
+  prepareRecipeNamedFileZones,
+  recipeNamedZoneReports,
+} from "./zone-kinds.ts";
+import type { RecipeZoneKinds } from "./zone-sandboxes.types.ts";
 
 export async function runDurableRecipe(
   project: RecipeProject,
@@ -46,11 +60,31 @@ export async function runDurableRecipe(
     observation,
     sandboxes,
   );
+  const recoveries =
+    "workspaceRecovery" in settings ? settings.workspaceRecovery : undefined;
+  if (project.model.runtime) validateRecipeWorkspaceRecoveries(recoveries);
+  const files = await prepareRecipeNamedFileZones(
+    project,
+    scope,
+    configuration.agents ?? {},
+    signal,
+    session,
+    recoveries,
+  );
+  const kinds: RecipeZoneKinds = {
+    git: recipeDurableGitZones(resources),
+    ...(files ? { files } : {}),
+  };
   try {
     for (const [key, saved] of Object.entries(
       session.previous?.recipe.resources ?? {},
     )) {
       if (saved.state === "closed") continue;
+      // File workspaces restore themselves with their own records and recoveries.
+      if (
+        recipeWorkspaceKind(project.model, recipeZoneWorkspace(key)) === "files"
+      )
+        continue;
       if (!saved.record || saved.state === "allocating")
         throw new Error(`Recipe workspace ${key} requires explicit recovery`);
       const settings = key.startsWith("isolated.")
@@ -72,7 +106,10 @@ export async function runDurableRecipe(
         ...(configuration.agents ? { agents: configuration.agents } : {}),
         inputs: session.inputs,
         acquireSandbox: (context, name) =>
-          resources.shared(context, recipeSandboxZone(name, sandboxes)),
+          acquireRecipeZone(project.model, kinds, context, name),
+        ...(files
+          ? { validateDispatch: recipeFileDispatchCheck(project.model) }
+          : {}),
         prepareIsolated: (key, request, context) =>
           isFileSandboxOptions(request)
             ? Promise.resolve(request)
@@ -103,7 +140,9 @@ export async function runDurableRecipe(
           : {}),
       });
       errors.push(...result.errors);
+      await files?.release();
       await resources.settle(result);
+      await files?.settle(result);
     } catch (error) {
       errors.push(error);
     } finally {
@@ -112,9 +151,14 @@ export async function runDurableRecipe(
       } catch (error) {
         errors.push(error);
       }
+      try {
+        await files?.close(result?.status === "done" && !errors.length);
+      } catch (error) {
+        errors.push(error);
+      }
     }
     const integration = resources.integration();
-    const workspaces = resources.workspaces();
+    const workspaces = recipeNamedZoneReports(kinds);
     const report = scope.redact({
       ...recipeWorkflowReport(
         workflow,
@@ -131,7 +175,11 @@ export async function runDurableRecipe(
     return report;
   } finally {
     try {
-      await resources.close();
+      await runCleanup(
+        [() => resources.close(), async () => files?.close(false)],
+        [],
+        { message: "Recipe workspace cleanup failed" },
+      );
     } finally {
       await session.close();
     }

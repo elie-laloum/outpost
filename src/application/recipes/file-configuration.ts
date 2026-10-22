@@ -439,6 +439,113 @@ function namedSandboxes(
   return { declarations, models };
 }
 
+/** Reads the runtime directory and namespace that file workspaces keep their state under. */
+function fileRuntime(
+  configuration: Readonly<Record<string, unknown>>,
+  directory: string,
+): WorkspaceRuntimeOptions {
+  const runtimeDeclaration = recipeRecord(
+    configuration.runtime ?? {},
+    "runtime",
+  );
+  onlyKeys(runtimeDeclaration, ["directory", "namespace"], ["runtime"]);
+  configurationInvariant(
+    runtimeDeclaration.directory === undefined ||
+      typeof runtimeDeclaration.directory === "string",
+    "Runtime directory must be a string",
+    ["runtime", "directory"],
+  );
+  configurationInvariant(
+    runtimeDeclaration.namespace === undefined ||
+      typeof runtimeDeclaration.namespace === "string",
+    "Runtime namespace must be a string",
+    ["runtime", "namespace"],
+  );
+  configurationInvariant(
+    runtimeDeclaration.namespace === undefined ||
+      /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(runtimeDeclaration.namespace),
+    "Invalid runtime namespace",
+    ["runtime", "namespace"],
+    "invalid-value",
+    "Use 1 to 128 letters, digits, dots, underscores or hyphens, starting with a letter or digit.",
+  );
+  return {
+    directory: resolve(directory, runtimeDeclaration.directory ?? ".outpost"),
+    ...(runtimeDeclaration.namespace
+      ? { namespace: runtimeDeclaration.namespace }
+      : {}),
+  };
+}
+
+/** Reads each workspace under `workspaces` with the reader of its own kind. */
+function namedWorkspaces(
+  declared: readonly (readonly [string, Readonly<Record<string, unknown>>])[],
+  directory: string,
+  runtime: WorkspaceRuntimeOptions,
+) {
+  const workspaces: Record<string, RecipeWorkspaceDeclaration> = {};
+  const options: Record<string, Readonly<Record<string, unknown>>> = {};
+  for (const [name, value] of declared) {
+    const at = ["workspaces", name];
+    if (value.kind === "git") {
+      const named = gitWorkspace(value, at, directory);
+      workspaces[name] = named.declaration;
+      options[name] = named.options;
+      continue;
+    }
+    onlyKeys(value, [...recipeWorkspaceKeys.file, "outputs"], at);
+    workspaces[name] = {
+      kind: "files",
+      files: fileWorkspace(value, at, directory, runtime, {
+        value: value.outputs,
+        path: [...at, "outputs"],
+      }),
+    };
+  }
+  return { workspaces, options };
+}
+
+/** Plans the sandboxes that open a file workspace; Git sandboxes need no plan. */
+function planFileSandboxes(
+  sandboxes: RecipeNamedSandboxes,
+  workspaces: Readonly<Record<string, RecipeWorkspaceDeclaration>>,
+  main: RecipeWorkspaceDeclaration,
+): void {
+  for (const [name, model] of Object.entries(sandboxes.models)) {
+    const target = model.workspace ? workspaces[model.workspace] : main;
+    if (target?.kind !== "files") continue;
+    const source = target.files.source;
+    configurationInvariant(
+      source,
+      `Sandbox ${name} requires a workspace source`,
+      ["sandboxes", name, model.workspace ? "workspace" : "provider"],
+      "missing-field",
+      "Declare the configuration workspace, or reference a declared workspace with { $ref: workspaces.<name> }.",
+    );
+    const planned = planFileWorkspace(source, sandboxes.declarations[name]!, [
+      "sandboxes",
+      name,
+    ]);
+    const [problem] = planned.diagnostics;
+    if (problem) throw new ConfigurationError(problem);
+    sandboxes.models[name] = { ...model, plan: planned };
+  }
+}
+
+/** True when a task works in a file workspace: its sandbox's, or the configuration one. */
+function fileTask(
+  step: RecipeDocument["tasks"][number],
+  sandboxes: RecipeNamedSandboxes,
+  workspaces: Readonly<Record<string, RecipeWorkspaceDeclaration>>,
+  main: RecipeWorkspaceDeclaration,
+): boolean {
+  const named =
+    step.sandbox === undefined
+      ? undefined
+      : sandboxes.models[step.sandbox]?.workspace;
+  return (named ? workspaces[named] : main)?.kind === "files";
+}
+
 export function normalizeRecipeWorkspaceConfiguration(
   configuration: Readonly<Record<string, unknown>>,
   directory: string,
@@ -464,38 +571,30 @@ export function normalizeRecipeWorkspaceConfiguration(
       [name, recipeRecord(value, `workspaces.${name}`)] as const,
   );
   const git = workspace?.kind === "git";
-  for (const [name, value] of declared)
-    configurationInvariant(
-      (value.kind === "git") === git,
-      `Workspace ${name} uses a different mode than the configuration workspace`,
-      ["workspaces", name, "kind"],
-      "mixed-workspaces",
-      git
-        ? "Use kind: git for every workspace of this configuration."
-        : "Use kind: directory or ephemeral for every workspace of this configuration.",
-    );
+  const namedFiles = declared.some(([, value]) => value.kind !== "git");
   if (git) {
     configurationInvariant(
-      configuration.runtime === undefined &&
-        configuration.outputs === undefined,
+      configuration.outputs === undefined &&
+        (configuration.runtime === undefined || namedFiles),
       "Git configuration retains repository control storage and integration; file runtime and outputs require a file workspace",
-      [configuration.runtime === undefined ? "outputs" : "runtime"],
+      [configuration.outputs === undefined ? "runtime" : "outputs"],
       "file-workspace-only",
-      "Remove runtime and outputs, or declare a file workspace.",
+      "Remove runtime and outputs, or declare a file workspace; a named file workspace declares its own outputs.",
     );
+    const runtime = fileRuntime(configuration, directory);
     const main = gitWorkspace(workspace, ["workspace"], directory);
-    const workspaces: Record<string, RecipeWorkspaceDeclaration> = {};
-    const options: Record<string, Readonly<Record<string, unknown>>> = {};
-    for (const [name, value] of declared) {
-      const named = gitWorkspace(value, ["workspaces", name], directory);
-      workspaces[name] = named.declaration;
-      options[name] = named.options;
-    }
+    const { workspaces, options } = namedWorkspaces(
+      declared,
+      directory,
+      runtime,
+    );
     distinctBranches({ "": main.declaration, ...workspaces });
     const sandboxes = namedSandboxes(configuration, workspaces);
+    planFileSandboxes(sandboxes, workspaces, main.declaration);
+    const { runtime: _runtime, ...components } = configuration;
     return {
       configuration: {
-        ...configuration,
+        ...components,
         repository: main.repository,
         ...(main.branch ? { branch: main.branch } : {}),
         workspace: main.options,
@@ -504,10 +603,12 @@ export function normalizeRecipeWorkspaceConfiguration(
       },
       workspaces,
       sandboxes: sandboxes.models,
+      ...(namedFiles ? { runtime } : {}),
     };
   }
+  const namedGit = declared.some(([, value]) => value.kind === "git");
   configurationInvariant(
-    configuration.integration === undefined,
+    configuration.integration === undefined || namedGit,
     "Git integration is unavailable for file workspaces",
     ["integration"],
     "git-workspace-only",
@@ -521,63 +622,14 @@ export function normalizeRecipeWorkspaceConfiguration(
       "git-workspace-only",
       "Run speculation with a Git workspace, or remove it.",
     );
-  for (const step of document.tasks)
-    if (step.brief !== undefined)
-      configurationInvariant(
-        !/\{\{\s*(WORK_BRANCH|BASE_BRANCH)\s*\}\}/.test(step.brief),
-        "Git branch variables are unavailable in file workspaces",
-        [...recipeTaskSourcePath(document, step), "brief"],
-        "git-workspace-only",
-        "Remove {{ WORK_BRANCH }} and {{ BASE_BRANCH }}; file workspaces have no branches.",
-      );
-  const runtimeDeclaration = recipeRecord(
-    configuration.runtime ?? {},
-    "runtime",
-  );
-  onlyKeys(runtimeDeclaration, ["directory", "namespace"], ["runtime"]);
-  configurationInvariant(
-    runtimeDeclaration.directory === undefined ||
-      typeof runtimeDeclaration.directory === "string",
-    "Runtime directory must be a string",
-    ["runtime", "directory"],
-  );
-  configurationInvariant(
-    runtimeDeclaration.namespace === undefined ||
-      typeof runtimeDeclaration.namespace === "string",
-    "Runtime namespace must be a string",
-    ["runtime", "namespace"],
-  );
-  const runtime = {
-    directory: resolve(directory, runtimeDeclaration.directory ?? ".outpost"),
-    ...(runtimeDeclaration.namespace
-      ? { namespace: runtimeDeclaration.namespace }
-      : {}),
-  };
-  configurationInvariant(
-    runtimeDeclaration.namespace === undefined ||
-      /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(runtimeDeclaration.namespace),
-    "Invalid runtime namespace",
-    ["runtime", "namespace"],
-    "invalid-value",
-    "Use 1 to 128 letters, digits, dots, underscores or hyphens, starting with a letter or digit.",
-  );
+  const runtime = fileRuntime(configuration, directory);
   if (workspace) onlyKeys(workspace, recipeWorkspaceKeys.file, ["workspace"]);
   const main = fileWorkspace(workspace, ["workspace"], directory, runtime, {
     value: configuration.outputs,
     path: ["outputs"],
   });
-  const workspaces: Record<string, RecipeWorkspaceDeclaration> = {};
-  for (const [name, value] of declared) {
-    const at = ["workspaces", name];
-    onlyKeys(value, [...recipeWorkspaceKeys.file, "outputs"], at);
-    workspaces[name] = {
-      kind: "files",
-      files: fileWorkspace(value, at, directory, runtime, {
-        value: value.outputs,
-        path: [...at, "outputs"],
-      }),
-    };
-  }
+  const { workspaces, options } = namedWorkspaces(declared, directory, runtime);
+  distinctBranches(workspaces);
   const needsSandbox = document.tasks.some(
     (step) => (step.command || step.agent) && step.sandbox === undefined,
   );
@@ -596,26 +648,20 @@ export function normalizeRecipeWorkspaceConfiguration(
   const [diagnostic] = plan.diagnostics;
   if (diagnostic) throw new ConfigurationError(diagnostic);
   const sandboxes = namedSandboxes(configuration, workspaces);
-  for (const [name, model] of Object.entries(sandboxes.models)) {
-    const target = model.workspace
-      ? workspaces[model.workspace]
-      : { kind: "files" as const, files: main };
-    const source = target?.kind === "files" ? target.files.source : undefined;
-    configurationInvariant(
-      source,
-      `Sandbox ${name} requires a workspace source`,
-      ["sandboxes", name, model.workspace ? "workspace" : "provider"],
-      "missing-field",
-      "Declare the configuration workspace, or reference a declared workspace with { $ref: workspaces.<name> }.",
-    );
-    const planned = planFileWorkspace(source, sandboxes.declarations[name]!, [
-      "sandboxes",
-      name,
-    ]);
-    const [problem] = planned.diagnostics;
-    if (problem) throw new ConfigurationError(problem);
-    sandboxes.models[name] = { ...model, plan: planned };
-  }
+  const declaration = { kind: "files" as const, files: main };
+  planFileSandboxes(sandboxes, workspaces, declaration);
+  for (const step of document.tasks)
+    if (
+      step.brief !== undefined &&
+      fileTask(step, sandboxes, workspaces, declaration)
+    )
+      configurationInvariant(
+        !/\{\{\s*(WORK_BRANCH|BASE_BRANCH)\s*\}\}/.test(step.brief),
+        "Git branch variables are unavailable in file workspaces",
+        [...recipeTaskSourcePath(document, step), "brief"],
+        "git-workspace-only",
+        "Remove {{ WORK_BRANCH }} and {{ BASE_BRANCH }}; file workspaces have no branches.",
+      );
   const {
     runtime: _runtime,
     outputs: _outputs,
@@ -626,11 +672,13 @@ export function normalizeRecipeWorkspaceConfiguration(
     configuration: {
       ...components,
       workspace: {},
+      ...(namedGit ? { workspaces: options } : {}),
       sandbox,
       sandboxes: sandboxes.declarations,
     },
     files: { ...main, plan, runtime },
     workspaces,
     sandboxes: sandboxes.models,
+    runtime,
   };
 }

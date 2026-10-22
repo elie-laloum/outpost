@@ -20,6 +20,8 @@ export interface RecipeCompilationContext {
   readonly bindings: RecipeExecutionBindings;
   readonly components: RecipeWorkflowComponents;
   sandbox(context: TaskContext): Promise<Sandbox | FileSandbox>;
+  /** Configuration sandbox the task selects, if any. */
+  readonly sandboxName?: string;
   evaluate(value: unknown, context: TaskContext): WorkflowJson;
   text(value: string, context: TaskContext): string;
 }

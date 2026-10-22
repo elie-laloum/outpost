@@ -15,6 +15,8 @@ export interface RecipeDurableWorkspace {
 export interface RecipeDurableResources {
   /** Sandbox of a zone; the configuration sandbox when `zone` is absent. */
   shared(context: TaskContext, zone?: RecipeTaskZone): Promise<Sandbox>;
+  /** Closes the open zone sandboxes, preserving their work. */
+  release(): Promise<void>;
   isolated(
     key: string,
     request: RecipeGitIsolatedSettings,

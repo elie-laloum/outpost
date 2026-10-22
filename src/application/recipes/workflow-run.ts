@@ -1,77 +1,51 @@
 import { runCleanup } from "../../domain/cleanup.ts";
 import { recipeWorkflowReport } from "./workflow-report.ts";
 import { bindRecipeWorkflow } from "./workflow.ts";
-import { createSandbox } from "../sandbox.ts";
-import { openWorkspace } from "../workspace.ts";
-import { createRecipeZoneSandboxes } from "./zone-sandboxes.ts";
-import {
-  recipeSandboxZone,
-  recipeZoneOptions,
-  recipeZoneOrder,
-} from "./zones.ts";
-import type { RecipeDocument, RecipeValue } from "../../domain/recipe.types.ts";
+import { createRecipeGitZones } from "./git-zones.ts";
+import { recipeFileDispatchCheck } from "./file-zones.ts";
+import { acquireRecipeZone, recipeNamedZoneReports } from "./zone-kinds.ts";
+import { recipeSandboxZone } from "./zones.ts";
+import type { RecipeValue } from "../../domain/recipe.types.ts";
 import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
 import type { RecipeWorkflowComponents } from "./workflow-components.types.ts";
-import type {
-  RecipeGitWorkspaceReport,
-  RecipeReport,
-} from "../recipe-report.types.ts";
+import type { RecipeReport } from "../recipe-report.types.ts";
 import type { ObservationHub } from "../../domain/observation.types.ts";
-import type { Sandbox, Workspace } from "../outpost.types.ts";
 import type { WorkflowResult } from "../../domain/workflow.types.ts";
-import type { ConflictResolution } from "../conflict-resolution.types.ts";
+import type { FileSandbox } from "../file-sandbox.types.ts";
+import type { RecipeProject } from "./project.types.ts";
+import type {
+  RecipeZoneKind,
+  RecipeZoneKinds,
+} from "./zone-sandboxes.types.ts";
 
 export async function runRecipeWorkflow(
-  document: RecipeDocument,
+  project: RecipeProject,
   configuration: RecipeRuntimeConfiguration,
   inputs: Readonly<Record<string, RecipeValue>>,
   components: RecipeWorkflowComponents,
   signal: AbortSignal,
   observation?: ObservationHub,
+  files?: RecipeZoneKind<FileSandbox>,
 ): Promise<RecipeReport> {
-  const observed = observation ? { observation } : {};
-  const owned = new Set<Workspace>();
-  const zones = createRecipeZoneSandboxes<Workspace, Sandbox>({
-    async workspace(zone) {
-      const options = recipeZoneOptions(configuration, zone);
-      if (options.workspace) return options.workspace;
-      const workspace = await openWorkspace({
-        ...options,
-        signal,
-        ...observed,
-      });
-      owned.add(workspace);
-      return workspace;
-    },
-    sandbox(workspace, zone, switched) {
-      const {
-        repository: _repository,
-        branch: _branch,
-        guard: _guard,
-        copies: _copies,
-        storageQuota: _storageQuota,
-        ...settings
-      } = recipeZoneOptions(configuration, zone);
-      // A later sandbox must see the work earlier sandboxes left in the worktree.
-      return createSandbox({
-        ...settings,
-        ...(switched ? { includeUncommitted: true } : {}),
-        workspace,
-        signal,
-        ...observed,
-      });
-    },
-  });
+  const { document, model } = project;
+  const git = createRecipeGitZones(configuration, signal, observation);
+  const kinds: RecipeZoneKinds = { git, ...(files ? { files } : {}) };
+  const close = (complete: boolean) =>
+    runCleanup(
+      Object.values(kinds).map((kind) => () => kind.close(complete)),
+      [],
+      { message: "Recipe workspace cleanup failed" },
+    );
   let result: WorkflowResult | undefined;
-  const integrations = new Map<string, ConflictResolution | undefined>();
   const errors: unknown[] = [];
   const workflow = bindRecipeWorkflow(
     document,
     {
       ...(configuration.agents ? { agents: configuration.agents } : {}),
       inputs,
-      acquireSandbox: (_context, name) =>
-        zones.acquire(recipeSandboxZone(name, components.sandboxes ?? {})),
+      acquireSandbox: (context, name) =>
+        acquireRecipeZone(model, kinds, context, name),
+      ...(files ? { validateDispatch: recipeFileDispatchCheck(model) } : {}),
     },
     components,
   );
@@ -82,15 +56,11 @@ export async function runRecipeWorkflow(
     )
   )
     try {
-      await zones.acquire(recipeSandboxZone(undefined, {}));
+      await git.acquire(recipeSandboxZone(undefined, {}));
     } catch (error) {
-      await runCleanup(
-        [...owned].map(
-          (workspace) => () => workspace.close({ preserve: true }),
-        ),
-        [error],
-        { message: "Recipe allocation and cleanup failed" },
-      );
+      await runCleanup([() => close(false)], [error], {
+        message: "Recipe allocation and cleanup failed",
+      });
       throw error;
     }
   try {
@@ -99,78 +69,42 @@ export async function runRecipeWorkflow(
       ...(observation ? { observation } : {}),
     });
     errors.push(...result.errors);
-    await zones.release();
-    if (result.status === "done")
-      for (const [key, workspace] of recipeZoneOrder(zones.workspaces)) {
-        signal.throwIfAborted();
-        integrations.set(
-          key,
-          (await workspace.integrate({
-            ...configuration.integration,
-            signal,
-          })) ?? undefined,
-        );
-      }
+    for (const kind of Object.values(kinds)) await kind.release();
+    for (const kind of Object.values(kinds)) await kind.settle(result);
   } catch (error) {
     errors.push(error);
   }
-  const reports = new Map<string, RecipeGitWorkspaceReport>();
   try {
-    await zones.release();
+    for (const kind of Object.values(kinds)) await kind.release();
   } catch (error) {
     errors.push(error);
   }
-  for (const [key, workspace] of recipeZoneOrder(zones.workspaces)) {
-    const integrated = integrations.has(key);
-    const integration = integrations.get(key);
-    let report: RecipeGitWorkspaceReport = {
-      kind: "git",
-      branch: workspace.branch,
-      directory: workspace.directory,
-      ...(integration ? { integration } : {}),
-    };
-    try {
-      const disposal = owned.has(workspace)
-        ? await workspace.close({ preserve: !integrated || signal.aborted })
-        : {};
-      report = {
-        ...report,
-        ...disposal,
-        ...(!integrated && workspace.policy.mode !== "current"
-          ? { retainedDirectory: workspace.directory }
-          : {}),
-      };
-    } catch (error) {
-      errors.push(error);
-    }
-    reports.set(key, report);
+  try {
+    await close(result?.status === "done" && !errors.length);
+  } catch (error) {
+    errors.push(error);
   }
-  const main = reports.get("workspace");
-  const named = [...reports].filter(([key]) => key !== "workspace");
+  const main = git.reports().get("workspace");
+  const workspaces = recipeNamedZoneReports(kinds);
   return {
     ...recipeWorkflowReport(
       workflow,
       result,
       errors,
       signal,
-      main && {
-        branch: main.branch,
-        directory: main.directory,
-        ...(main.retainedDirectory
-          ? { retainedDirectory: main.retainedDirectory }
-          : {}),
-      },
+      main?.kind === "git"
+        ? {
+            branch: main.branch,
+            directory: main.directory,
+            ...(main.retainedDirectory
+              ? { retainedDirectory: main.retainedDirectory }
+              : {}),
+          }
+        : undefined,
     ),
-    ...(main?.integration ? { integration: main.integration } : {}),
-    ...(named.length
-      ? {
-          workspaces: Object.fromEntries(
-            named.map(([key, report]) => [
-              key.slice("workspaces.".length),
-              report,
-            ]),
-          ),
-        }
+    ...(main?.kind === "git" && main.integration
+      ? { integration: main.integration }
       : {}),
+    ...(workspaces ? { workspaces } : {}),
   };
 }

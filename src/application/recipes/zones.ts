@@ -2,9 +2,9 @@ import { configurationInvariant } from "../../domain/configuration-diagnostic.ts
 import { recipeTaskSourcePath } from "../../domain/recipe.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
 import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
-import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
+import type { RecipeGitZoneOptions } from "./advanced-components.types.ts";
 import type { SandboxOptions } from "../outpost.types.ts";
-import type { RecipeTaskZone } from "./zones.types.ts";
+import type { RecipeTaskZone, RecipeZoneKindName } from "./zones.types.ts";
 
 /** Configuration key of a named workspace, or of the configuration workspace. */
 export function recipeWorkspaceKey(name: string | undefined): string {
@@ -42,6 +42,48 @@ export function recipeSandboxZone(
   };
 }
 
+/** Kind of the workspace a key names; unknown keys follow the configuration workspace. */
+export function recipeWorkspaceKind(
+  model: Pick<RecipeConfigurationModel, "workspace" | "workspaces">,
+  workspace: string,
+): RecipeZoneKindName {
+  if (workspace === "workspace") return model.workspace.kind;
+  return (
+    model.workspaces[workspace.slice("workspaces.".length)]?.kind ??
+    model.workspace.kind
+  );
+}
+
+/** Kind of workspace a task works in; tasks without a zone follow the configuration workspace. */
+export function recipeTaskKind(
+  model: Pick<
+    RecipeConfigurationModel,
+    "workspace" | "workspaces" | "sandboxes"
+  >,
+  step: RecipeStep,
+): RecipeZoneKindName {
+  return recipeWorkspaceKind(
+    model,
+    recipeTaskZone(step, model.sandboxes)?.workspace ?? "workspace",
+  );
+}
+
+/** The recipe restricted to the tasks that work in file workspaces. */
+export function recipeFileTasks(
+  document: RecipeDocument,
+  model: Pick<
+    RecipeConfigurationModel,
+    "workspace" | "workspaces" | "sandboxes"
+  >,
+): RecipeDocument {
+  return {
+    ...document,
+    tasks: document.tasks.filter(
+      (step) => recipeTaskKind(model, step) === "files",
+    ),
+  };
+}
+
 /** Workspace key used to order shared tasks; tasks without a zone share none. */
 export function recipeTaskWorkspace(
   sandboxes: RecipeConfigurationModel["sandboxes"],
@@ -66,12 +108,13 @@ export function validateRecipeZones(
 
 /** Options of the configuration sandbox a zone names. */
 export function recipeZoneOptions(
-  configuration: RecipeRuntimeConfiguration,
+  configuration: RecipeGitZoneOptions,
   zone: RecipeTaskZone,
 ): SandboxOptions {
-  if (zone.sandbox === "sandbox") return configuration.sandbox;
   const options =
-    configuration.sandboxes?.[zone.sandbox.slice("sandboxes.".length)];
+    zone.sandbox === "sandbox"
+      ? configuration.sandbox
+      : configuration.sandboxes?.[zone.sandbox.slice("sandboxes.".length)];
   if (!options) throw new Error(`Unknown recipe sandbox: ${zone.sandbox}`);
   return options;
 }
@@ -88,7 +131,7 @@ export function recipeZoneOrder<T>(
 
 /** Options that open a workspace key, read from a sandbox that names it. */
 export function recipeWorkspaceOptions(
-  configuration: RecipeRuntimeConfiguration,
+  configuration: RecipeGitZoneOptions,
   sandboxes: RecipeConfigurationModel["sandboxes"],
   workspace: string,
 ): SandboxOptions | undefined {

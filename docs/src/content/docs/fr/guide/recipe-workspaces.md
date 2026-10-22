@@ -126,7 +126,7 @@ Après l’exécution, `results/notes.txt` contient les deux lignes. Seules les 
 
 ## Utiliser plusieurs workspaces
 
-Déclarez d’autres workspaces sous `workspaces`, dans le même mode que celui de premier niveau : tous Git ou tous de fichiers. Une sandbox ouvre le workspace de premier niveau, sauf si son champ `workspace` en référence un autre.
+Déclarez d’autres workspaces Git ou de fichiers sous `workspaces`. Une sandbox ouvre le workspace de premier niveau, sauf si son champ `workspace` en référence un autre.
 
 ```yaml title="outpost.yaml — workspaces"
 version: 3
@@ -148,7 +148,38 @@ sandboxes:
 
 Une tâche avec `sandbox: writer` travaille sur le worktree `feature/docs` ; les autres tâches gardent `feature/app`. Deux workspaces d’un même dépôt exigent des branches distinctes. Après l’exécution, chaque workspace est intégré ou conservé séparément, et le rapport liste les workspaces nommés sous `workspaces`.
 
-Avec `workflow.concurrency`, les tâches de workspaces différents peuvent s’exécuter en même temps ; celles d’un même workspace doivent rester ordonnées. Une configuration qui mélange workspaces Git et workspaces de fichiers est refusée.
+Avec `workflow.concurrency`, les tâches de workspaces différents peuvent s’exécuter en même temps ; celles d’un même workspace doivent rester ordonnées.
+
+### Mélanger workspaces Git et de fichiers
+
+```yaml title="outpost.yaml — workspaces Git et de fichiers"
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+sandbox: { provider: local }
+runtime: { directory: .outpost }
+workspaces:
+  notes:
+    kind: ephemeral
+    outputs:
+      - paths: ["*.md"]
+        destination: ./notes
+        policy: create
+sandboxes:
+  writer:
+    workspace: { $ref: workspaces.notes }
+    provider: local
+```
+
+Les tâches sans `sandbox` travaillent sur le worktree Git ; celles avec `sandbox: writer` travaillent sur les fichiers éphémères. Chaque workspace se termine selon son type : les workspaces Git sont intégrés, ceux de fichiers publient leurs `outputs`. Les exécutions durables enregistrent les deux types dans le même checkpoint.
+
+| Workspace de premier niveau | Déclare pour l’autre type                           |
+| --------------------------- | --------------------------------------------------- |
+| Git                         | `runtime` pour l’état de ses workspaces de fichiers |
+| Fichiers                    | `integration` pour ses workspaces Git               |
+
+Les vérifications de chaque type suivent le workspace de la tâche : une tâche d’agent dans un workspace de fichiers exige un agent qui prend en charge les fichiers et ne peut pas utiliser `{{ WORK_BRANCH }}`. Les tâches isolées, interactives et de spéculation gardent le type du workspace de premier niveau.
 
 ## Exécuter un agent sur des fichiers
 

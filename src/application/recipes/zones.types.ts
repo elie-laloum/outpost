@@ -5,3 +5,6 @@ export interface RecipeTaskZone {
   /** `sandbox` or `sandboxes.<name>`. */
   readonly sandbox: string;
 }
+
+/** Workspace kind that opens, settles and reports a zone. */
+export type RecipeZoneKindName = "git" | "files";

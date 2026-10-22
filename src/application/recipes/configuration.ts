@@ -3,6 +3,7 @@ import { resolveRecipeConfiguration } from "../recipe-configuration.ts";
 import type { RecipeProject } from "./project.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type {
+  RecipeGitZoneOptions,
   RecipeRuntimeConfiguration,
   RecipeIntegrationSettings,
 } from "./advanced-components.types.ts";
@@ -13,7 +14,7 @@ import { invariant } from "../../domain/errors.ts";
 import { resolveRecipeEnvironment } from "./configuration-model.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
-import { recipeWorkspaceKey } from "./zones.ts";
+import { recipeTaskKind, recipeWorkspaceKey } from "./zones.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -27,6 +28,88 @@ function isAgent(value: unknown): value is DispatchAgent {
 
 function isIntegration(value: unknown): value is RecipeIntegrationSettings {
   return typeof value === "object" && value !== null;
+}
+
+/** Options of the named sandboxes that open a Git workspace; file sandboxes have their own. */
+async function gitSandboxes(
+  project: RecipeProject,
+  scope: RecipeComponentScope,
+  environment: Readonly<Record<string, string>>,
+): Promise<Record<string, SandboxOptions>> {
+  const { model } = project;
+  const sandboxes: Record<string, SandboxOptions> = {};
+  for (const [name, declaration] of Object.entries(model.sandboxes)) {
+    const target =
+      declaration.workspace === undefined
+        ? model.workspace
+        : model.workspaces[declaration.workspace];
+    if (target?.kind !== "git") continue;
+    const [named, settings] = await Promise.all([
+      scope.resolve(`sandboxes.${name}`, "sandboxProvider"),
+      scope.resolve(
+        recipeWorkspaceKey(declaration.workspace),
+        "sandboxOptions",
+      ),
+    ]);
+    if (!isProvider(named) || !isSandboxOptions(settings))
+      throw new Error(`Invalid sandbox configuration: ${name}`);
+    sandboxes[name] = {
+      repository: target.repository,
+      branch: target.branch,
+      logging: false,
+      ...settings,
+      sandboxProvider: {
+        ...named,
+        variables: { ...named.variables, ...environment },
+      },
+    };
+  }
+  return sandboxes;
+}
+
+/** Resolves the variables of each agent task that runs in a Git zone before anything opens. */
+async function preflightGitAgents(
+  project: RecipeProject,
+  scope: RecipeComponentScope,
+  agents: Readonly<Record<string, DispatchAgent>>,
+  sandboxes: Readonly<Record<string, SandboxOptions>>,
+  main?: readonly [string, Readonly<Record<string, string>>],
+): Promise<void> {
+  const preflights = new Map<
+    string,
+    readonly [string, string, Readonly<Record<string, string>>]
+  >();
+  for (const task of project.document.tasks) {
+    if (!task.agent || recipeTaskKind(project.model, task) !== "git") continue;
+    const zone =
+      task.sandbox === undefined ? undefined : sandboxes[task.sandbox];
+    const repository = zone?.repository ?? main?.[0];
+    const variables = zone?.sandboxProvider?.variables ?? main?.[1];
+    if (repository && variables)
+      preflights.set(`${task.agent}\0${task.sandbox ?? ""}`, [
+        task.agent,
+        repository,
+        variables,
+      ]);
+  }
+  for (const [role, repository, variables] of preflights.values())
+    await preflightRecipeAgent(agents[role]!, repository, variables, scope);
+}
+
+/** Git sandboxes and integration of a file configuration that also declares Git workspaces. */
+export async function recipeGitZoneOptions(
+  project: RecipeProject,
+  scope: RecipeComponentScope,
+  agents: Readonly<Record<string, DispatchAgent>>,
+): Promise<RecipeGitZoneOptions> {
+  const environment = resolveRecipeEnvironment(project.model.environment);
+  const sandboxes = await gitSandboxes(project, scope, environment);
+  if (!Object.keys(sandboxes).length) return {};
+  const integration = await scope.resolve("integration", "integrationOptions");
+  if (!isIntegration(integration))
+    throw new Error("Invalid integration options");
+  await preflightGitAgents(project, scope, agents, sandboxes);
+  return { integration, sandboxes };
 }
 
 export async function recipeExecutionConfiguration(
@@ -61,53 +144,11 @@ export async function recipeExecutionConfiguration(
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
     agents[role] = agent;
   }
-  const sandboxes: Record<string, SandboxOptions> = {};
-  for (const [name, declaration] of Object.entries(model.sandboxes)) {
-    const target =
-      declaration.workspace === undefined
-        ? model.workspace
-        : model.workspaces[declaration.workspace];
-    invariant(
-      target?.kind === "git",
-      `Sandbox ${name} requires a Git workspace`,
-    );
-    const [named, settings] = await Promise.all([
-      scope.resolve(`sandboxes.${name}`, "sandboxProvider"),
-      scope.resolve(
-        recipeWorkspaceKey(declaration.workspace),
-        "sandboxOptions",
-      ),
-    ]);
-    if (!isProvider(named) || !isSandboxOptions(settings))
-      throw new Error(`Invalid sandbox configuration: ${name}`);
-    sandboxes[name] = {
-      repository: target.repository,
-      branch: target.branch,
-      logging: false,
-      ...settings,
-      sandboxProvider: {
-        ...named,
-        variables: { ...named.variables, ...environment },
-      },
-    };
-  }
-  const preflights = new Map<string, [string, SandboxOptions | undefined]>();
-  for (const task of project.document.tasks)
-    if (task.agent)
-      preflights.set(`${task.agent}\0${task.sandbox ?? ""}`, [
-        task.agent,
-        task.sandbox === undefined ? undefined : sandboxes[task.sandbox],
-      ]);
-  for (const [role, zone] of preflights.values())
-    await preflightRecipeAgent(
-      agents[role]!,
-      zone?.repository ?? repository,
-      zone?.sandboxProvider?.variables ?? {
-        ...provider.variables,
-        ...environment,
-      },
-      scope,
-    );
+  const sandboxes = await gitSandboxes(project, scope, environment);
+  await preflightGitAgents(project, scope, agents, sandboxes, [
+    repository,
+    { ...provider.variables, ...environment },
+  ]);
 
   if (options.workspace) {
     if (model.components.branch !== undefined)

@@ -52,6 +52,8 @@ export interface NormalizedRecipeConfiguration {
   readonly files?: RecipeFileConfiguration;
   readonly workspaces?: Readonly<Record<string, RecipeWorkspaceDeclaration>>;
   readonly sandboxes?: Readonly<Record<string, RecipeSandboxModel>>;
+  /** Runtime of the file workspaces, when the configuration declares any. */
+  readonly runtime?: WorkspaceRuntimeOptions;
 }
 
 export type RecipeConfigurationPath = readonly (string | number)[];

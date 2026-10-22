@@ -1,5 +1,6 @@
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { BranchPolicy } from "../../domain/workspace.types.ts";
+import type { WorkspaceRuntimeOptions } from "../../domain/file-workspace.types.ts";
 import type {
   RecipeFileConfiguration,
   RecipeFileWorkspaceDeclaration,
@@ -38,8 +39,10 @@ export interface RecipeConfigurationModel {
   /** Declarations resolved by the component graph, in the shape shared by versions 2 and 3. */
   readonly components: Readonly<Record<string, unknown>>;
   readonly workspace: RecipeGitWorkspaceModel | RecipeFileWorkspaceModel;
-  /** Workspaces declared beside the default `workspace`, in the same mode. */
+  /** Git or file workspaces declared beside the default `workspace`. */
   readonly workspaces: Readonly<Record<string, RecipeWorkspaceDeclaration>>;
+  /** Runtime of the file workspaces, when the configuration declares any. */
+  readonly runtime?: WorkspaceRuntimeOptions;
   readonly sandboxes: Readonly<Record<string, RecipeSandboxModel>>;
   /** Agent roles that recipe tasks may reference. */
   readonly agents: readonly string[];

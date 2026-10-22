@@ -126,7 +126,7 @@ After the run, `results/notes.txt` holds both lines. Only command and agent task
 
 ## Use several workspaces
 
-Declare more workspaces under `workspaces`, in the same mode as the top-level one: all Git or all files. A sandbox opens the top-level workspace unless its `workspace` references another one.
+Declare more Git or file workspaces under `workspaces`. A sandbox opens the top-level workspace unless its `workspace` references another one.
 
 ```yaml title="outpost.yaml — workspaces"
 version: 3
@@ -148,7 +148,38 @@ sandboxes:
 
 A task with `sandbox: writer` works on the `feature/docs` worktree; other tasks keep `feature/app`. Two workspaces on one repository need distinct branches. After the run, each workspace is integrated or retained on its own, and the report lists named ones under `workspaces`.
 
-With `workflow.concurrency`, tasks of different workspaces can run at the same time; tasks of one workspace must still be ordered. A configuration that mixes Git and file workspaces is refused.
+With `workflow.concurrency`, tasks of different workspaces can run at the same time; tasks of one workspace must still be ordered.
+
+### Mix Git and file workspaces
+
+```yaml title="outpost.yaml — Git and file workspaces"
+version: 3
+workspace:
+  kind: git
+  repository: ./project
+sandbox: { provider: local }
+runtime: { directory: .outpost }
+workspaces:
+  notes:
+    kind: ephemeral
+    outputs:
+      - paths: ["*.md"]
+        destination: ./notes
+        policy: create
+sandboxes:
+  writer:
+    workspace: { $ref: workspaces.notes }
+    provider: local
+```
+
+Tasks without `sandbox` work on the Git worktree; tasks with `sandbox: writer` work on the ephemeral files. Each workspace settles with its own kind: Git ones are integrated, file ones publish their `outputs`. Durable runs record both kinds in the same checkpoint.
+
+| Top-level workspace | Declares for the other kind                    |
+| ------------------- | ---------------------------------------------- |
+| Git                 | `runtime` for the state of its file workspaces |
+| Files               | `integration` for its Git workspaces           |
+
+The checks of each kind follow the task's workspace: an agent task in a file workspace needs an agent that supports files and cannot use `{{ WORK_BRANCH }}`. Isolated, interactive and speculation tasks keep the kind of the top-level workspace.
 
 ## Run an agent on files
 

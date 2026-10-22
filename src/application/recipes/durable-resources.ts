@@ -11,6 +11,8 @@ import type { WorkspaceRecord } from "../../domain/workspace.types.ts";
 import type { ConflictResolution } from "../conflict-resolution.types.ts";
 import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
 import { createRecipeZoneSandboxes } from "./zone-sandboxes.ts";
+import type { RecipeZoneKind } from "./zone-sandboxes.types.ts";
+import { invariant } from "../../domain/errors.ts";
 import {
   recipeSandboxZone,
   recipeWorkspaceOptions,
@@ -22,11 +24,11 @@ import type {
   RecipeDurableResources,
   RecipeDurableWorkspace,
 } from "./durable-resources.types.ts";
-import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
+import type { RecipeGitZoneOptions } from "./advanced-components.types.ts";
 
 export function createRecipeDurableResources(
   session: RecipeCheckpointSession,
-  configuration: RecipeRuntimeConfiguration,
+  configuration: RecipeGitZoneOptions,
   signal: AbortSignal,
   observation?: ObservationHub,
   sandboxes: RecipeConfigurationModel["sandboxes"] = {},
@@ -121,6 +123,7 @@ export function createRecipeDurableResources(
   const resources: RecipeDurableResources = {
     shared: (context, zone = recipeSandboxZone(undefined, {})) =>
       zones.acquire(zone, context),
+    release: () => zones.release(),
     async isolated(key, request, context) {
       const lease = await workspace(`isolated.${key}`, request, context.signal);
       const {
@@ -271,5 +274,27 @@ function workspaceReport(
     ...(saved.state !== "closed" && record.policy.mode !== "current"
       ? { retainedDirectory: record.directory }
       : {}),
+  };
+}
+
+/** Named Git workspaces of a durable file run, recorded in the same checkpoint as its file ones. */
+export function recipeDurableGitZones(
+  resources: RecipeDurableResources,
+): RecipeZoneKind<Sandbox> {
+  return {
+    acquire(zone, context) {
+      invariant(context, "Durable Git zones require a task context");
+      return resources.shared(context, zone);
+    },
+    release: () => resources.release(),
+    settle: (result) => resources.settle(result),
+    close: () => resources.close(),
+    reports: () =>
+      new Map(
+        Object.entries(resources.workspaces() ?? {}).map(([name, report]) => [
+          `workspaces.${name}`,
+          report,
+        ]),
+      ),
   };
 }

@@ -78,10 +78,12 @@ export interface RecipeWorkflowComponents {
   readonly steps: Readonly<Record<string, RecipeWorkflowStepComponents>>;
 }
 export type RecipeExecutionBindings = Omit<RecipeBindings, "sandbox"> & {
+  /** `sandbox` names the configuration sandbox the dispatching task selects, if any. */
   validateDispatch?(
     request: import("../execution.types.ts").DispatchOptions<unknown> & {
       readonly agent: import("../../domain/fallback-agent.types.ts").DispatchAgent;
     },
+    sandbox?: string,
   ): Promise<void>;
   readonly sandbox?: Sandbox | FileSandbox | undefined;
   /** `sandbox` names the configuration sandbox the task selects, if any. */

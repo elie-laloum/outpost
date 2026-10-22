@@ -1,5 +1,11 @@
-import type { TaskContext } from "../../domain/workflow.types.ts";
-import type { RecipeTaskZone } from "./zones.types.ts";
+import type {
+  TaskContext,
+  WorkflowResult,
+} from "../../domain/workflow.types.ts";
+import type { RecipeWorkspaceReport } from "../recipe-report.types.ts";
+import type { RecipeTaskZone, RecipeZoneKindName } from "./zones.types.ts";
+import type { Sandbox } from "../outpost.types.ts";
+import type { FileSandbox } from "../file-sandbox.types.ts";
 
 export interface RecipeZoneSandbox {
   close(options?: { readonly preserve?: boolean }): Promise<unknown>;
@@ -32,3 +38,21 @@ export interface RecipeZoneSlot<W, S> {
   switched: boolean;
   queue: Promise<unknown>;
 }
+
+/** The workspaces of one kind that a recipe run opens, settles and reports. */
+export interface RecipeZoneKind<S> {
+  acquire(zone: RecipeTaskZone, context?: TaskContext): Promise<S>;
+  /** Closes the open sandboxes, preserving their work. */
+  release(): Promise<void>;
+  /** Integrates or publishes the workspaces a completed workflow worked in. */
+  settle(result: WorkflowResult): Promise<void>;
+  /** Closes the workspaces once; `complete` is true when the whole run succeeded. */
+  close(complete: boolean): Promise<void>;
+  /** Reports by workspace key, `workspace` or `workspaces.<name>`, once closed. */
+  reports(): ReadonlyMap<string, RecipeWorkspaceReport>;
+}
+
+/** The kinds a run opens zones with, by workspace kind; a mixed configuration uses both. */
+export type RecipeZoneKinds = Readonly<
+  Partial<Record<RecipeZoneKindName, RecipeZoneKind<Sandbox | FileSandbox>>>
+>;

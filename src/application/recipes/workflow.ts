@@ -118,6 +118,7 @@ export function bindRecipeWorkflow(
               evaluateRecipeCondition(condition, contextFor(context)),
           }),
     };
+    const selected = named.get(step.key);
     tasks.set(
       step.key,
       compileRecipeStep(step, {
@@ -125,7 +126,8 @@ export function bindRecipeWorkflow(
         common,
         bindings,
         components,
-        sandbox: (context) => sandbox(context, named.get(step.key)),
+        sandbox: (context) => sandbox(context, selected),
+        ...(selected === undefined ? {} : { sandboxName: selected }),
         evaluate,
         text,
       }),
