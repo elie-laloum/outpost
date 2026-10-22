@@ -13,12 +13,13 @@ import type { RecipeRunOptions } from "@elie-laloum/outpost/recipes";
 
 ## Paramètres et propriétés
 
-| Nom      | Type                                                  | Présence  | Rôle                                                                                                                                                |
-| -------- | ----------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `runId`  | `string \| undefined`                                 | Optionnel | Remplace le run ID configuré du checkpoint pour une nouvelle exécution durable. Une exécution existante nécessite resume.                           |
-| `inputs` | `Readonly<Record<string, WorkflowJson>> \| undefined` | Optionnel | Valeurs des paramètres déclarés ; le format 3 accepte aussi objets, tableaux et null JSON sans perte. Les paramètres sont validés avant les tâches. |
-| `signal` | `AbortSignal \| undefined`                            | Optionnel | Annule cette invocation en attendant le nettoyage des ressources possédées.                                                                         |
-| `report` | `"json" \| undefined`                                 | Optionnel | Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation.                                  |
+| Nom      | Type                                                  | Présence  | Rôle                                                                                                                                                                                                                  |
+| -------- | ----------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runId`  | `string \| undefined`                                 | Optionnel | Remplace le run ID configuré du checkpoint pour une nouvelle exécution durable. Une exécution existante nécessite resume.                                                                                             |
+| `inputs` | `Readonly<Record<string, WorkflowJson>> \| undefined` | Optionnel | Valeurs des paramètres déclarés ; le format 3 accepte aussi objets, tableaux et null JSON sans perte. Les paramètres sont validés avant les tâches.                                                                   |
+| `signal` | `AbortSignal \| undefined`                            | Optionnel | Annule cette invocation en attendant le nettoyage des ressources possédées.                                                                                                                                           |
+| `report` | `"json" \| undefined`                                 | Optionnel | Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation.                                                                                                    |
+| `sinks`  | `readonly ObservationSink[] \| undefined`             | Optionnel | Sinks d’observation ajoutés pour cette invocation, en plus de l’observation configurée. Ils reçoivent les événements après rédaction de chaque valeur secrète résolue par l’exécution et sont vidés avant le rapport. |
 
 ## Signature
 
@@ -28,9 +29,12 @@ export interface RecipeRunOptions {
   readonly inputs?: Readonly<Record<string, WorkflowJson>>;
   readonly signal?: AbortSignal;
   readonly report?: "json";
+  /** Observation sinks added for this execution; they receive events after secret redaction. */
+  readonly sinks?: readonly ObservationSink[];
 }
 ```
 
 ## Contrats associés
 
+- [ObservationSink](../observationsink/)
 - [WorkflowJson](../workflowjson/)

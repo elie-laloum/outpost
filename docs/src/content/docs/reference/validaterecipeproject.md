@@ -19,12 +19,13 @@ Read the separate recipe and configuration files and validate graph, named compo
 
 ## Parameters and properties
 
-| Name               | Type                          | Presence | Meaning                                                                                            |
-| ------------------ | ----------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `options`          | `RecipeProjectOptions`        | Required | Paths of the two YAML files and optional descriptors used to validate named components.            |
-| `options.file`     | `string`                      | Required | Recipe YAML path resolved from the process working directory.                                      |
-| `options.config`   | `string`                      | Required | Required separate local execution YAML path; its directory anchors repository and extension paths. |
-| `options.registry` | `RecipeRegistry \| undefined` | Optional | Additional trusted descriptors combined with native components; duplicate factory names fail.      |
+| Name               | Type                                | Presence | Meaning                                                                                                                                       |
+| ------------------ | ----------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`          | `RecipeProjectOptions`              | Required | Paths of the two YAML files and optional descriptors used to validate named components.                                                       |
+| `options.file`     | `string`                            | Required | Recipe YAML path resolved from the process working directory.                                                                                 |
+| `options.config`   | `string`                            | Required | Required separate local execution YAML path; its directory anchors repository and extension paths.                                            |
+| `options.registry` | `RecipeRegistry \| undefined`       | Optional | Additional trusted descriptors combined with native components; duplicate factory names fail.                                                 |
+| `sources`          | `RecipeProjectSources \| undefined` | Optional | Unsaved recipe and configuration texts validated in place of the files at the same paths; relative references still resolve from those paths. |
 
 ## Returns
 
@@ -35,10 +36,12 @@ Read the separate recipe and configuration files and validate graph, named compo
 ```ts
 export declare function validateRecipeProject(
   options: RecipeProjectOptions,
+  sources?: RecipeProjectSources,
 ): Promise<RecipeProjectValidation>;
 ```
 
 ## Related contracts
 
 - [RecipeProjectOptions](../recipeprojectoptions/)
+- [RecipeProjectSources](../recipeprojectsources/)
 - [RecipeProjectValidation](../recipeprojectvalidation/)

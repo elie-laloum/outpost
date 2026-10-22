@@ -8610,6 +8610,10 @@
     "Paths of the two YAML files and optional descriptors used to validate named components.",
     "Chemins des deux YAML et descripteurs optionnels utilisés pour valider les composants nommés."
   ],
+  "validateRecipeProject.sources": [
+    "Unsaved recipe and configuration texts validated in place of the files at the same paths; relative references still resolve from those paths.",
+    "Textes de recette et de configuration non enregistrés validés à la place des fichiers aux mêmes chemins ; les références relatives se résolvent toujours depuis ces chemins."
+  ],
   "createRecipeRuntime.options": [
     "Recipe and local configuration paths, plus optional caller-provided component descriptors.",
     "Chemins de recette et de configuration locale, avec descripteurs optionnels fournis par l’appelant."
@@ -8682,6 +8686,14 @@
     "Additional trusted descriptors combined with native components; duplicate factory names fail.",
     "Descripteurs de confiance supplémentaires combinés aux composants natifs ; les noms dupliqués échouent."
   ],
+  "RecipeProjectSources.recipe": [
+    "Recipe YAML text read instead of the file named by `file`; diagnostics still name that file.",
+    "Texte YAML de recette lu à la place du fichier désigné par `file` ; les diagnostics nomment toujours ce fichier."
+  ],
+  "RecipeProjectSources.config": [
+    "Configuration YAML text read instead of the file named by `config`; its directory still anchors repository and extension paths.",
+    "Texte YAML de configuration lu à la place du fichier désigné par `config` ; son dossier ancre toujours les chemins du dépôt et des extensions."
+  ],
   "RecipeProjectValidation.name": [
     "Validated recipe name.",
     "Nom de la recette validée."
@@ -8717,6 +8729,10 @@
   "RecipeRunOptions.report": [
     "Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.",
     "Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation."
+  ],
+  "RecipeRunOptions.sinks": [
+    "Observation sinks added for this invocation, alongside configured observation. They receive events after redaction of every secret value the run resolves, and are flushed before the report.",
+    "Sinks d’observation ajoutés pour cette invocation, en plus de l’observation configurée. Ils reçoivent les événements après rédaction de chaque valeur secrète résolue par l’exécution et sont vidés avant le rapport."
   ],
   "RecipeRuntime.run": [
     "Run one invocation at a time; close its owned resources before returning its report.",
@@ -8889,6 +8905,10 @@
   "RecipeResumeOptions.report": [
     "Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.",
     "Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation."
+  ],
+  "RecipeResumeOptions.sinks": [
+    "Observation sinks added for this resumed invocation; they receive events after secret redaction and are flushed before the report.",
+    "Sinks d’observation ajoutés pour cette reprise ; ils reçoivent les événements après rédaction des secrets et sont vidés avant le rapport."
   ],
   "RecipeRuntime.enqueue": [
     "Publish a typed recipe parameter mapping to a named queue without starting a workflow or service; close only runtime-owned queue resources.",

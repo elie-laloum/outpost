@@ -24,6 +24,7 @@ import type { RecipeResumeOptions } from "@elie-laloum/outpost/recipes";
 | `inputs`            | `Readonly<Record<string, WorkflowJson>> \| undefined`                       | Optionnel | Paramètres d’origine facultatifs ; leur absence recharge le checkpoint et toute modification refuse la reprise.                                                                        |
 | `signal`            | `AbortSignal \| undefined`                                                  | Optionnel | Annule cette invocation en attendant le nettoyage des ressources possédées.                                                                                                            |
 | `report`            | `"json" \| undefined`                                                       | Optionnel | Remplace explicitement les rapports finaux configurés par un rapport JSON sur stdout ; n’active pas l’observation.                                                                     |
+| `sinks`             | `readonly ObservationSink[] \| undefined`                                   | Optionnel | Sinks d’observation ajoutés pour cette reprise ; ils reçoivent les événements après rédaction des secrets et sont vidés avant le rapport.                                              |
 
 ## Signature
 

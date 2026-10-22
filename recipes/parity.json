@@ -9657,6 +9657,22 @@
       "registry": "contract"
     }
   },
+  "./recipes:RecipeProjectSources": {
+    "signatures": [],
+    "options": {
+      "recipe": "string | undefined",
+      "config": "string | undefined"
+    },
+    "category": "contract",
+    "lot": 1,
+    "status": "implemented",
+    "test": "test/functional/recipe-editor-server.test.ts",
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "recipe": "contract",
+      "config": "contract"
+    }
+  },
   "./recipes:RecipeProjectValidation": {
     "signatures": [],
     "options": {
@@ -9722,7 +9738,8 @@
       "recoverRevision": "string | undefined",
       "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
       "signal": "AbortSignal | undefined",
-      "report": "\"json\" | undefined"
+      "report": "\"json\" | undefined",
+      "sinks": "readonly ObservationSink[] | undefined"
     },
     "category": "contract",
     "lot": 5,
@@ -9738,7 +9755,8 @@
       "recoverRevision": "contract",
       "inputs": "contract",
       "signal": "contract",
-      "report": "contract"
+      "report": "contract",
+      "sinks": "contract"
     }
   },
   "./recipes:RecipeRunOptions": {
@@ -9747,18 +9765,20 @@
       "runId": "string | undefined",
       "inputs": "Readonly<Record<string, WorkflowJson>> | undefined",
       "signal": "AbortSignal | undefined",
-      "report": "\"json\" | undefined"
+      "report": "\"json\" | undefined",
+      "sinks": "readonly ObservationSink[] | undefined"
     },
     "category": "contract",
     "lot": 1,
     "status": "implemented",
-    "test": "test/functional/recipe-runtime.test.ts",
+    "test": "test/functional/recipe-events.test.ts",
     "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
     "optionCoverage": {
       "runId": "contract",
       "inputs": "contract",
       "signal": "contract",
-      "report": "contract"
+      "report": "contract",
+      "sinks": "contract"
     }
   },
   "./recipes:RecipeRunStatus": {
@@ -9847,7 +9867,7 @@
   },
   "./recipes:validateRecipeProject": {
     "signatures": [
-      "(options: RecipeProjectOptions): Promise<RecipeProjectValidation>"
+      "(options: RecipeProjectOptions, sources?: RecipeProjectSources): Promise<RecipeProjectValidation>"
     ],
     "options": {},
     "category": "native",

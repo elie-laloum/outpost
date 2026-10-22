@@ -24,6 +24,7 @@ import type { RecipeResumeOptions } from "@elie-laloum/outpost/recipes";
 | `inputs`            | `Readonly<Record<string, WorkflowJson>> \| undefined`                       | Optional | Optional original input values; omitted values reload from the checkpoint and changed values reject resume.                                                           |
 | `signal`            | `AbortSignal \| undefined`                                                  | Optional | Cancel this invocation while awaiting owned-resource cleanup.                                                                                                         |
 | `report`            | `"json" \| undefined`                                                       | Optional | Explicitly replace configured final reports with one JSON report on stdout; does not enable observation.                                                              |
+| `sinks`             | `readonly ObservationSink[] \| undefined`                                   | Optional | Observation sinks added for this resumed invocation; they receive events after secret redaction and are flushed before the report.                                    |
 
 ## Signature
 

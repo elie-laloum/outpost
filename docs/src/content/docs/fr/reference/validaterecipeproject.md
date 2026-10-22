@@ -19,12 +19,13 @@ Lit la recette et la configuration séparées, puis valide graphe, références 
 
 ## Paramètres et propriétés
 
-| Nom                | Type                          | Présence  | Rôle                                                                                                            |
-| ------------------ | ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------- |
-| `options`          | `RecipeProjectOptions`        | Requis    | Chemins des deux YAML et descripteurs optionnels utilisés pour valider les composants nommés.                   |
-| `options.file`     | `string`                      | Requis    | Chemin de recette YAML résolu depuis le dossier courant du processus.                                           |
-| `options.config`   | `string`                      | Requis    | Chemin obligatoire du YAML local d’exécution séparé ; son dossier ancre les chemins du dépôt et des extensions. |
-| `options.registry` | `RecipeRegistry \| undefined` | Optionnel | Descripteurs de confiance supplémentaires combinés aux composants natifs ; les noms dupliqués échouent.         |
+| Nom                | Type                                | Présence  | Rôle                                                                                                                                                                         |
+| ------------------ | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`          | `RecipeProjectOptions`              | Requis    | Chemins des deux YAML et descripteurs optionnels utilisés pour valider les composants nommés.                                                                                |
+| `options.file`     | `string`                            | Requis    | Chemin de recette YAML résolu depuis le dossier courant du processus.                                                                                                        |
+| `options.config`   | `string`                            | Requis    | Chemin obligatoire du YAML local d’exécution séparé ; son dossier ancre les chemins du dépôt et des extensions.                                                              |
+| `options.registry` | `RecipeRegistry \| undefined`       | Optionnel | Descripteurs de confiance supplémentaires combinés aux composants natifs ; les noms dupliqués échouent.                                                                      |
+| `sources`          | `RecipeProjectSources \| undefined` | Optionnel | Textes de recette et de configuration non enregistrés validés à la place des fichiers aux mêmes chemins ; les références relatives se résolvent toujours depuis ces chemins. |
 
 ## Retour
 
@@ -35,10 +36,12 @@ Lit la recette et la configuration séparées, puis valide graphe, références 
 ```ts
 export declare function validateRecipeProject(
   options: RecipeProjectOptions,
+  sources?: RecipeProjectSources,
 ): Promise<RecipeProjectValidation>;
 ```
 
 ## Contrats associés
 
 - [RecipeProjectOptions](../recipeprojectoptions/)
+- [RecipeProjectSources](../recipeprojectsources/)
 - [RecipeProjectValidation](../recipeprojectvalidation/)
