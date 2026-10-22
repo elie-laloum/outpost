@@ -163,6 +163,7 @@ function worker(
   name: string,
   handlers: Record<string, QueueHandler>,
   leaseMs = 30_000,
+  onError?: (error: unknown) => void,
 ) {
   const stop = new AbortController();
   const done = runQueueWorker({
@@ -172,6 +173,7 @@ function worker(
     signal: stop.signal,
     leaseMs,
     pollMs: 10,
+    ...(onError ? { onError } : {}),
   });
   return { stop, done };
 }
@@ -734,6 +736,7 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
     },
   });
   await queue.enqueue({ id: "rotation", handler: "work", input: null });
+  const errors: unknown[] = [];
   let enter!: () => void;
   let finish!: () => void;
   const entered = {
@@ -760,7 +763,9 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
         return { value: "done" };
       },
     },
-    300,
+    // A stall longer than the lease loses it and stops renewal, as it should.
+    3_000,
+    (error) => errors.push(error),
   );
   t.after(async () => {
     release.resolve();
@@ -784,7 +789,10 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
     i++
   )
     await delay(10);
-  assert.ok((await queue.get("rotation"))!.expires! > before);
+  assert.ok(
+    (await queue.get("rotation"))!.expires! > before,
+    `The lease was not renewed after rotation; worker errors: ${errors.map(String).join("; ") || "none"}`,
+  );
   release.resolve();
   assert.equal((await until(queue, "rotation", "done")).result?.value, "done");
   runner.stop.abort();

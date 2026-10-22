@@ -402,7 +402,8 @@ test("child tool deadlines abort model calls and cannot produce a late parent re
         return done();
       },
     ]),
-    { tools: [child], toolExecution: { deadlineMs: 100 } },
+    // The deadline must outlast child setup: an expired child never calls its model.
+    { tools: [child], toolExecution: { deadlineMs: 1_000 } },
   );
   await dispatch({
     repository: root,
