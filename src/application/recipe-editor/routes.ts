@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { ConfigurationError } from "../../domain/configuration-diagnostic.ts";
 import { OutpostError } from "../../domain/errors.ts";
+import { recipeEditorExtensionRoutes } from "./extension-routes.ts";
+import { recipeEditorRoute } from "./route-handler.ts";
 import { recipeEditorLayout } from "../../domain/recipes/editor.ts";
 import { listEditorDirectory } from "../../infrastructure/editor-files.ts";
 import { createJsonDecoder } from "../../infrastructure/json-schema.ts";
@@ -9,11 +10,8 @@ import {
   recipeEditorServerDefaults,
 } from "./routes.constants.ts";
 import { recipeEditorStarters } from "./starters.constants.ts";
-import type {
-  EditorRequest,
-  EditorResponse,
-  EditorRoute,
-} from "../../infrastructure/editor-server.types.ts";
+import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
+import type { EditorRoute } from "../../infrastructure/editor-server.types.ts";
 import type { RecipeEditorOpenOptions } from "./session.types.ts";
 import type {
   RecipeEditorEditRequest,
@@ -51,44 +49,6 @@ const decoders = {
     "request",
   ),
 };
-
-const faultStatus: Readonly<Partial<Record<string, number>>> = {
-  conflict: 409,
-  configuration: 400,
-};
-
-/** Maps expected editor failures to client errors; anything else stays a server error. */
-export function recipeEditorFailure(error: unknown): EditorResponse {
-  if (error instanceof ConfigurationError)
-    return {
-      status: 422,
-      json: { error: { message: error.message, diagnostic: error.diagnostic } },
-    };
-  if (error instanceof OutpostError && faultStatus[error.code])
-    return {
-      status: faultStatus[error.code]!,
-      json: {
-        error: {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-        },
-      },
-    };
-  throw error;
-}
-
-export function recipeEditorRoute(
-  run: (request: EditorRequest) => Promise<unknown>,
-): EditorRoute {
-  return async (request) => {
-    try {
-      return { json: await run(request) };
-    } catch (error) {
-      return recipeEditorFailure(error);
-    }
-  };
-}
 
 function aborted(signal: AbortSignal): Promise<void> {
   return new Promise((done) => {
@@ -132,6 +92,7 @@ export function recipeEditorRoutes(
   }
 
   return {
+    ...recipeEditorExtensionRoutes(options),
     "GET /api/session": recipeEditorRoute(
       async (): Promise<RecipeEditorSessionInfo> => ({
         directory: session.root.directory,
@@ -143,6 +104,7 @@ export function recipeEditorRoutes(
             session.root.relative(file),
           ]),
         ),
+        families: Object.keys(recipeFamilies),
         starters: Object.entries(recipeEditorStarters).map(
           ([name, starter]) => ({
             name,

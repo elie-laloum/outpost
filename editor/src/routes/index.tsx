@@ -8,8 +8,10 @@ import { Suspense, useEffect, useState } from "react";
 import { Palette } from "@/components/canvas/palette";
 import { RecipeCanvas } from "@/components/canvas/recipe-canvas";
 import { Inspector } from "@/components/inspector/task-inspector";
+import { ConfigView } from "@/components/config/config-view";
 import { ConflictDialog, Notices } from "@/components/notices";
 import { OpenDialog } from "@/components/open-dialog";
+import { PlanView } from "@/components/plan-view";
 import { StatusBar } from "@/components/status-bar";
 import { Toolbar } from "@/components/toolbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,7 +20,7 @@ import { useEditor } from "@/lib/store";
 import type { EditorView } from "@/lib/types";
 import { useRecipe } from "@/lib/use-recipe";
 
-const views: readonly EditorView[] = ["canvas", "yaml", "config"];
+const views: readonly EditorView[] = ["canvas", "yaml", "config", "plan"];
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { view?: EditorView } => {
@@ -45,7 +47,7 @@ function useShortcuts(onOpen: () => void) {
   const { undo, redo, save } = useEditor.getState();
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey)) return;
+      if (event.defaultPrevented || !(event.ctrlKey || event.metaKey)) return;
       const key = event.key.toLowerCase();
       if (key === "s") {
         event.preventDefault();
@@ -103,7 +105,8 @@ function Workbench() {
         <main className="flex min-h-0 flex-1">
           {view === "canvas" && opened && <CanvasView />}
           {view === "yaml" && <YamlView role="recipe" />}
-          {view === "config" && <YamlView role="config" />}
+          {view === "config" && <ConfigView />}
+          {view === "plan" && <PlanView />}
           {view === "canvas" && !opened && (
             <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
               Open or create a recipe to start.

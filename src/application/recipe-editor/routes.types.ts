@@ -11,6 +11,8 @@ export interface RecipeEditorRoutesOptions {
   /** Files named on the command line, proposed when the editor opens nothing yet. */
   readonly suggested?: RecipeEditorFiles;
   readonly diskPollMs?: number;
+  /** Command that starts the Outpost CLI for verifications and runs. */
+  readonly cli?: readonly string[];
 }
 
 export interface RecipeEditorEditRequest {
@@ -51,8 +53,17 @@ export interface RecipeEditorSessionInfo {
   readonly suggested: RecipeEditorFiles;
   /** Files currently open in the session. */
   readonly files: RecipeEditorFiles;
+  /** Configuration component families, such as `queues` or `hooks`. */
+  readonly families: readonly string[];
   readonly starters: readonly {
     readonly name: string;
     readonly description: string;
   }[];
+}
+
+export interface RecipeEditorModuleRequest {
+  readonly path: string;
+  readonly text: string;
+  /** Hash of the text last read; null to create the file. */
+  readonly hash: string | null;
 }

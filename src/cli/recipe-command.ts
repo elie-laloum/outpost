@@ -8,7 +8,8 @@ import {
   printRecipeErrors,
 } from "../application/recipes/reports.ts";
 import { recipeYamlCommand } from "./recipe-yaml.ts";
-import { validateRecipeProject } from "../application/recipes/project.ts";
+import { readRecipeProject } from "../application/recipes/project.ts";
+import { verifyRecipeExtensions } from "../application/recipes/extension-check.ts";
 import type {
   RecipeBindings,
   RecipeConfiguration,
@@ -165,11 +166,22 @@ export async function recipeCommand({
   if (positionals[1] === "validate") {
     if (!values.file)
       throw new Error("Recipe validate requires --file recipe.yaml");
+    if (values.extensions && !values.config)
+      throw new Error("Recipe validate --extensions requires --config");
     const document = parseRecipe(await readRecipe(resolve(values.file)));
+    let loaded: readonly string[] | undefined;
     if (values.config) {
       if (!/\.ya?ml$/.test(values.config))
         throw new Error("Recipe validate only accepts YAML configuration");
-      await validateRecipeProject({ file: values.file, config: values.config });
+      const project = await readRecipeProject({
+        file: values.file,
+        config: values.config,
+      });
+      if (values.extensions)
+        loaded = await verifyRecipeExtensions(
+          project,
+          new AbortController().signal,
+        );
     }
     const report = {
       name: document.name,
@@ -183,11 +195,15 @@ export async function recipeCommand({
         ),
       ],
       tasks: document.tasks.map((task) => task.key),
+      ...(loaded ? { extensions: loaded } : {}),
     };
+    const summary = loaded
+      ? `${document.tasks.length} tasks, ${loaded.length} extensions loaded`
+      : `${document.tasks.length} tasks`;
     process.stdout.write(
       values.json
         ? `${JSON.stringify(report)}\n`
-        : `${document.name}: valid (${document.tasks.length} tasks)\n`,
+        : `${document.name}: valid (${summary})\n`,
     );
     return;
   }

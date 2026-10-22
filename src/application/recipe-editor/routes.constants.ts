@@ -93,6 +93,30 @@ export const recipeEditorRequestSchemas = {
     required: ["revision"],
     properties: { revision },
   },
+  extension: {
+    type: "object",
+    additionalProperties: false,
+    required: ["name", "kind", "module", "export", "revision"],
+    properties: {
+      name: key,
+      kind: key,
+      contract: key,
+      module: { type: "string", minLength: 1, maxLength: 4096 },
+      export: key,
+      function: key,
+      revision,
+    },
+  },
+  module: {
+    type: "object",
+    additionalProperties: false,
+    required: ["path", "text", "hash"],
+    properties: {
+      path: { type: "string", minLength: 1, maxLength: 4096 },
+      text: { type: "string" },
+      hash: { anyOf: [{ type: "string" }, { type: "null" }] },
+    },
+  },
   save: {
     type: "object",
     additionalProperties: false,

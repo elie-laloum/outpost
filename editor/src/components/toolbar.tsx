@@ -1,6 +1,7 @@
 import {
   FileCode2,
   FolderOpen,
+  ListChecks,
   Network,
   Redo2,
   Save,
@@ -111,6 +112,9 @@ export function Toolbar({
           </TabsTrigger>
           <TabsTrigger value="config" disabled={!state?.config}>
             <Settings2 /> Configuration
+          </TabsTrigger>
+          <TabsTrigger value="plan" disabled={!state?.config}>
+            <ListChecks /> Plan
           </TabsTrigger>
         </TabsList>
       </Tabs>

@@ -374,3 +374,46 @@ test("the recipe editor command refuses an invalid port", async () => {
   assert.equal(code, 1);
   assert.match(stderr, /--port must be an integer between 0 and 65535/);
 });
+
+test("route signals abort on client disconnects, not once the body is read", async (t) => {
+  let release!: () => void;
+  const held = new Promise<void>((done) => (release = done));
+  const observed: boolean[] = [];
+  const server = await serveEditor({
+    token,
+    routes: {
+      "POST /api/slow": async ({ signal }) => {
+        await new Promise((done) => setTimeout(done, 30));
+        observed.push(signal.aborted);
+        return { json: { aborted: signal.aborted } };
+      },
+      "POST /api/held": async ({ signal }) => {
+        await new Promise((done) => signal.addEventListener("abort", done));
+        release();
+        return { json: {} };
+      },
+    },
+  });
+  t.after(() => server.close());
+  const headers = {
+    authorization: `Bearer ${token}`,
+    "content-type": "application/json",
+  };
+  const slow = await fetch(`${server.url}/api/slow`, {
+    method: "POST",
+    headers,
+    body: "{}",
+  });
+  assert.deepEqual(await slow.json(), { aborted: false });
+  const client = new AbortController();
+  const pending = fetch(`${server.url}/api/held`, {
+    method: "POST",
+    headers,
+    body: "{}",
+    signal: client.signal,
+  });
+  setTimeout(() => client.abort(), 30);
+  await assert.rejects(pending);
+  await held;
+  assert.deepEqual(observed, [false]);
+});

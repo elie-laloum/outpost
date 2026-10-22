@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
-import { relative, resolve } from "node:path";
+import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRecipeEditorSession } from "../application/recipe-editor/session.ts";
 import { recipeEditorRoutes } from "../application/recipe-editor/routes.ts";
@@ -9,6 +9,11 @@ import { openEditorRoot } from "../infrastructure/editor-files.ts";
 import { serveEditor } from "../infrastructure/editor-server.ts";
 import { packageVersion } from "./package-version.ts";
 import type { CliInvocation } from "./main.types.ts";
+
+const cliEntry = new URL(
+  `./main${extname(fileURLToPath(import.meta.url))}`,
+  import.meta.url,
+);
 
 const packageFile = (name: string) =>
   fileURLToPath(new URL(`../../${name}`, import.meta.url));
@@ -53,6 +58,7 @@ export async function recipeEditorCommand({
       schemas,
       suggested,
       version: packageVersion(),
+      cli: [process.execPath, fileURLToPath(cliEntry)],
     }),
     token,
     ...(existsSync(assets) ? { assets } : {}),

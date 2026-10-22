@@ -1,6 +1,7 @@
 import { indentWithTab } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
 import { yaml } from "@codemirror/lang-yaml";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { type Diagnostic, lintGutter, setDiagnostics } from "@codemirror/lint";
 import {
   Annotation,
@@ -9,6 +10,7 @@ import {
   type Extension,
 } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { tags } from "@lezer/highlight";
 import { basicSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { diagnosticOffset } from "@/lib/diagnostics";
@@ -51,6 +53,40 @@ const theme = EditorView.theme(
   { dark: true },
 );
 
+const highlight = HighlightStyle.define([
+  {
+    tag: [tags.keyword, tags.operatorKeyword, tags.modifier],
+    color: "oklch(78% 0.14 55)",
+  },
+  {
+    tag: [tags.string, tags.special(tags.string)],
+    color: "oklch(80% 0.12 150)",
+  },
+  {
+    tag: [tags.number, tags.bool, tags.null, tags.atom],
+    color: "oklch(80% 0.11 210)",
+  },
+  {
+    tag: [tags.comment, tags.meta],
+    color: "oklch(62% 0.02 260)",
+    fontStyle: "italic",
+  },
+  {
+    tag: [tags.propertyName, tags.definition(tags.propertyName)],
+    color: "oklch(83% 0.08 240)",
+  },
+  { tag: [tags.typeName, tags.className], color: "oklch(82% 0.1 300)" },
+  {
+    tag: [tags.function(tags.variableName), tags.definition(tags.variableName)],
+    color: "oklch(86% 0.1 90)",
+  },
+  {
+    tag: [tags.punctuation, tags.separator, tags.bracket],
+    color: "oklch(70.7% 0.022 261.325)",
+  },
+  { tag: tags.invalid, color: "var(--destructive)" },
+]);
+
 interface CodeEditorProps {
   readonly value: string;
   readonly language: keyof typeof languages;
@@ -59,6 +95,8 @@ interface CodeEditorProps {
   readonly readOnly?: boolean;
   readonly className?: string;
   readonly label?: string;
+  /** Called on Mod-S inside the editor instead of the page-wide save. */
+  readonly onSave?: () => void;
 }
 
 /** CodeMirror editor that accepts outside updates without losing the cursor while focused. */
@@ -70,10 +108,13 @@ export function CodeEditor({
   readOnly = false,
   className,
   label,
+  onSave,
 }: CodeEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const change = useRef(onChange);
+  const save = useRef(onSave);
+  save.current = onSave;
   const editable = useRef(new Compartment());
   change.current = onChange;
 
@@ -81,10 +122,21 @@ export function CodeEditor({
     if (!host.current) return;
     const extensions: Extension[] = [
       basicSetup,
-      keymap.of([indentWithTab]),
+      keymap.of([
+        indentWithTab,
+        {
+          key: "Mod-s",
+          run: () => {
+            if (!save.current) return false;
+            save.current();
+            return true;
+          },
+        },
+      ]),
       languages[language](),
       lintGutter(),
       theme,
+      syntaxHighlighting(highlight),
       editable.current.of(EditorState.readOnly.of(readOnly)),
       EditorView.contentAttributes.of(label ? { "aria-label": label } : {}),
       EditorView.updateListener.of((update) => {

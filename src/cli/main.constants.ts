@@ -7,6 +7,11 @@ export const cliOptions = {
       "Answer recipe questions and review unsigned gates in the terminal (automatic on a TTY without --json)",
     negation: "Leave dialogue questions pending without prompting",
   },
+  extensions: {
+    type: "boolean",
+    description:
+      "Also import declared extensions and check their exports; this runs their module code",
+  },
   open: {
     type: "boolean",
     description: "Open the editor in the default browser (default)",
@@ -322,8 +327,11 @@ export const commandOptions = {
   "recipe validate": {
     description:
       "Validate a recipe and optional YAML configuration without allocating a sandbox",
-    options: ["file", "config", "json"],
-    examples: [`outpost recipe validate ${recipeFile}`],
+    options: ["file", "config", "extensions", "json"],
+    examples: [
+      `outpost recipe validate ${recipeFile}`,
+      `outpost recipe validate ${recipeFile} --extensions`,
+    ],
   },
   "recipe run": {
     description:

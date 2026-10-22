@@ -133,11 +133,7 @@ export async function serveEditor(
       throw new HttpFailure(415, "API requests must send application/json");
   }
 
-  async function stream(
-    request: IncomingMessage,
-    response: ServerResponse,
-    reply: EditorEventsResponse,
-  ) {
+  async function stream(response: ServerResponse, reply: EditorEventsResponse) {
     const controller = new AbortController();
     const signal = AbortSignal.any([controller.signal, closing.signal]);
     response.writeHead(200, {
@@ -152,7 +148,7 @@ export async function serveEditor(
       editorServerLimits.heartbeatMs,
     );
     heartbeat.unref();
-    request.once("close", () => controller.abort());
+    response.once("close", () => controller.abort());
     const events: EditorEventStream = {
       send: (event, data) => {
         if (signal.aborted) return;
@@ -221,7 +217,10 @@ export async function serveEditor(
         const route = options.routes[`${request.method} ${url.pathname}`];
         if (!route) throw new HttpFailure(404, "Unknown API route");
         const disconnected = new AbortController();
-        request.once("close", () => disconnected.abort());
+        // The request closes once its body is read; only an unfinished response means a disconnect.
+        response.once("close", () => {
+          if (!response.writableFinished) disconnected.abort();
+        });
         const reply = await route({
           method: request.method ?? "GET",
           path: url.pathname,
@@ -229,7 +228,7 @@ export async function serveEditor(
           body: await body(request, limit),
           signal: AbortSignal.any([disconnected.signal, closing.signal]),
         });
-        if ("events" in reply) return await stream(request, response, reply);
+        if ("events" in reply) return await stream(response, reply);
         json(response, reply.status ?? 200, reply.json);
       } catch (error) {
         request.resume();

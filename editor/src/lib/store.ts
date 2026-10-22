@@ -21,6 +21,8 @@ interface EditorStore {
   readonly pending: number;
   readonly selected?: string;
   start(): () => void;
+  /** Accepts a state returned by a request outside the edit queue. */
+  receive(state: RecipeEditorState): void;
   select(id: string | undefined): void;
   dismiss(): void;
   open(request: {
@@ -124,6 +126,7 @@ export const useEditor = create<EditorStore>()((set, get) => {
       void connect(0);
       return () => controller.abort();
     },
+    receive: (next) => receive(next),
     select: (selected) => set({ selected }),
     dismiss: () => set({ failure: undefined, conflict: undefined }),
     open: (request) => mutate("/api/project/open", () => request),
