@@ -38,6 +38,7 @@ import type {
   RecipeProjectValidation,
   RecipeReportDeclaration,
 } from "./project.types.ts";
+import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
 import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
 import type { RecipeFileWorkspaceDeclaration } from "./file-configuration.types.ts";
 
@@ -47,6 +48,21 @@ const reportDeclaration = createJsonDecoder<RecipeReportDeclaration>(
 );
 
 /** `sources` replaces file contents, so an editor can validate unsaved drafts at their paths. */
+/** Native components, followed by the caller's additions, that recipe projects resolve against. */
+export function recipeProjectRegistry(extra?: RecipeRegistry): RecipeRegistry {
+  return createRecipeRegistry({
+    components: [
+      ...observationComponents,
+      ...nativeRecipeComponents,
+      ...workflowOptionComponents,
+      sandboxOptionsComponent,
+      dispatchOptionsComponent,
+      secretSelectionComponent,
+      ...(extra?.components ?? []),
+    ],
+  });
+}
+
 export async function readRecipeProject(
   options: RecipeProjectOptions,
   sources: RecipeProjectSources = {},
@@ -151,17 +167,7 @@ export async function readRecipeProject(
         document.workflow.concurrency,
         recipeTaskWorkspace(model.sandboxes),
       );
-    const registry = createRecipeRegistry({
-      components: [
-        ...observationComponents,
-        ...nativeRecipeComponents,
-        ...workflowOptionComponents,
-        sandboxOptionsComponent,
-        dispatchOptionsComponent,
-        secretSelectionComponent,
-        ...(options.registry?.components ?? []),
-      ],
-    });
+    const registry = recipeProjectRegistry(options.registry);
     const directory = dirname(config);
     const graph = recipeComponentGraph(
       model.components,
