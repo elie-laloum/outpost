@@ -132,7 +132,7 @@ Treat these as review and regression-test obligations when changing the affected
 
 ## Tests and coverage
 
-Use `node:test` and `node:assert/strict`, following the existing suite. Test observable contracts and failures rather than mirroring implementation details.
+Use `node:test` and `node:assert/strict`, following the existing suite. Test observable contracts and failures rather than mirroring implementation details. Test scripts preload `test/setup.ts`, which removes host CLI home variables such as `CLAUDE_CONFIG_DIR`; run a single file with `node --import ./test/setup.ts --test <file>`.
 
 - `test/unit/`: domain rules, protocol adapters, boundaries and isolated infrastructure behavior.
 - `test/functional/`: lifecycle, Git, synchronization, recovery, CLI and workflow behavior using temporary resources.
