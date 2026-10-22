@@ -14,6 +14,18 @@ Run `node scripts/benchmark-simplifications.mjs` with Node.js 24 or later. The s
 
 The filesystem counts include named imports in loaded modules; synchronous `fs` calls and child processes are not counted.
 
+## Lazy command handlers, 22 October 2026
+
+The CLI now imports a command's handler only when that command runs. Same environment as below, `cli` case on the previous and new commit:
+
+| Case             | Operation (ms) | Peak RSS (KiB) |
+| ---------------- | -------------- | -------------- |
+| cli, before      | 363.8          | 156472         |
+| cli, after       | 127.4          | 104980         |
+| validation, both | 503–532        | 182252–191436  |
+
+`--help` and `--version` now load 139 source modules instead of 625; the agent catalog, which the help text names, accounts for most of them. `recipe validate` still imports the recipe handler, so its cost is unchanged.
+
 ## Local observation, 22 October 2026
 
 Environment: v24.15.0 on linux (WSL2), with no other validation running. Medians of three fresh processes.

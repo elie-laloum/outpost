@@ -1,8 +1,4 @@
 import { Command, CommanderError, Option } from "commander";
-import { recoveryCommand } from "./recovery-command.ts";
-import { doctorCommand } from "./doctor-command.ts";
-import { imageCommand } from "./image-command.ts";
-import { recipeCommand } from "./recipe-command.ts";
 import {
   cliOptions,
   commandGroups,
@@ -18,11 +14,14 @@ import type {
   CommandDefinition,
 } from "./main.types.ts";
 
-const handlers: Readonly<Record<keyof typeof commandGroups, CliCommand>> = {
-  doctor: doctorCommand,
-  image: imageCommand,
-  recipe: recipeCommand,
-  recovery: recoveryCommand,
+// Help, version and parsing errors never import a command's handler.
+const handlers: Readonly<
+  Record<keyof typeof commandGroups, () => Promise<CliCommand>>
+> = {
+  doctor: async () => (await import("./doctor-command.ts")).doctorCommand,
+  image: async () => (await import("./image-command.ts")).imageCommand,
+  recipe: async () => (await import("./recipe-command.ts")).recipeCommand,
+  recovery: async () => (await import("./recovery-command.ts")).recoveryCommand,
 };
 
 function find(parent: Command, part: string, hidden = false): Command {
@@ -136,10 +135,8 @@ function register(
       process.stderr.write(
         `Warning: outpost ${legacy} is deprecated; use outpost ${name}.\n`,
       );
-    await handlers[path[0] as keyof typeof handlers]({
-      values,
-      positionals: path,
-    });
+    const handler = await handlers[path[0] as keyof typeof handlers]();
+    await handler({ values, positionals: path });
   });
 }
 

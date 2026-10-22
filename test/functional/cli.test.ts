@@ -50,6 +50,30 @@ test("CLI groups commands in help, prints its version and reports unknown comman
   assert.doesNotMatch(recovery.stdout, /^\s+verify/m);
 });
 
+test("CLI help, version and unknown commands import no command handler", async () => {
+  const preload = resolve("test/fixtures/loaded-modules.ts");
+  for (const args of [
+    ["--version"],
+    ["--help"],
+    ["recipe", "run", "--help"],
+    ["unknown"],
+  ]) {
+    const output = await executeProcess({
+      executable: process.execPath,
+      arguments: ["--import", preload, cli, ...args],
+    });
+    const loaded: string[] = JSON.parse(
+      output.stderr.trim().split("\n").at(-1)!,
+    );
+    assert.ok(loaded.some((url) => url.endsWith("/src/cli/commands.ts")));
+    assert.deepEqual(
+      loaded.filter((url) => url.includes("/src/application/")),
+      [],
+      `outpost ${args.join(" ")} imported application modules`,
+    );
+  }
+});
+
 test("image eject writes the official recipe and lockfiles, then refuses to overwrite", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "outpost-eject-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
