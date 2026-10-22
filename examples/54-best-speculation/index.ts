@@ -10,7 +10,7 @@ import {
   createHarnessFileTools,
   createHarnessShellTools,
 } from "@elie-laloum/outpost/harness";
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 import { score } from "./score.ts";

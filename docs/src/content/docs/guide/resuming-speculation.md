@@ -3,7 +3,7 @@ title: "Resume a candidate race"
 description: "Add durability to competing candidates before the run starts."
 ---
 
-Add durability to [competing candidates](../speculation/) before the run starts. This experimental feature preserves progress; replay after a crash still needs explicit authorization.
+Add durability to [competing candidates](../speculation/) before the run starts. Durability preserves progress; replay after a crash still needs explicit authorization.
 
 ## Resume after a crash
 
@@ -12,7 +12,7 @@ Pass `durability` to `speculate()`. Attempts, usage, outputs and allocated resou
 ```ts title="durability.ts"
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
+import { type SpeculationDurability } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {
@@ -29,7 +29,7 @@ Reuse `candidates.ts` and `validate.ts` from [the first race](../speculation/). 
 <!-- example:include speculation candidates.ts validate.ts -->
 
 ```ts title="durable-race.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -70,7 +70,7 @@ A crashed race stays owned by its coordinator, the process that ran `speculate()
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { recoverSpeculation } from "@elie-laloum/outpost/experimental/speculation";
+import { recoverSpeculation } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),

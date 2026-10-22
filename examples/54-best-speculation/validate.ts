@@ -1,4 +1,4 @@
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,

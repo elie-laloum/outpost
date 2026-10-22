@@ -5,11 +5,7 @@ description: "Essayez plusieurs candidats avec une validation, des budgets et un
 
 ## Mettre des candidats en concurrence
 
-:::caution[Expérimental]
-`speculate()` est expérimental : ses options et son résultat peuvent encore changer. Il sélectionne une branche ; il ne la fusionne jamais.
-:::
-
-Utilisez `speculate()` pour lancer plusieurs candidats sur une même tâche et valider explicitement chaque résultat. Les candidats ont des branches et des sandboxes séparées ; un gagnant est choisi uniquement si votre vérification l’accepte.
+Utilisez `speculate()` pour lancer plusieurs candidats sur une même tâche et valider explicitement chaque résultat. Les candidats ont des branches et des sandboxes séparées ; un gagnant est choisi uniquement si votre vérification l’accepte. `speculate()` sélectionne une branche ; il ne la fusionne jamais.
 
 Référence API : [SpeculationOptions](../../reference/speculationoptions/).
 
@@ -30,7 +26,7 @@ export const candidates = ["minimal", "refactor"].map((key) => ({
 ```
 
 ```ts title="validate.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -48,7 +44,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -69,7 +65,7 @@ console.log(result.status, result.terminationCode, result.winner?.branch);
 Utilisez `select: "best"` pour laisser finir tous les candidats admis. `score` s’exécute uniquement après l’acceptation par `validate`, dans la sandbox encore ouverte. Renvoyez un nombre fini : le score le plus élevé gagne après un nettoyage réussi. Les scores égaux suivent l’ordre de déclaration. Le mode par défaut `select: "first"` conserve le premier candidat accepté et annule les autres.
 
 ```ts title="best.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -124,7 +120,7 @@ Référence API : [SpeculationIntegration](../../reference/speculationintegratio
 Votre checkout peut changer après la course. Vérifiez à nouveau juste avant de fusionner :
 
 ```ts
-import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export async function canMerge(branch: string, commit?: string) {

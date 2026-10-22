@@ -131,20 +131,20 @@ Un composant indiqué « runtime » est fermé par le runtime ; « valeur » dé
 
 ## Options de tâches et workflows
 
-| Identifiant                   | Contrat                                        | Fermeture | Statut       |
-| ----------------------------- | ---------------------------------------------- | --------- | ------------ |
-| `artifactTaskOptions.options` | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `callOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `decisionTaskOptions.options` | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `dispatchOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `gateOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `integrationOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `interactiveOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `isolatedOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `loopOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `queuedOptions.options`       | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `speculationOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | expérimental |
-| `taskOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
-| `workflowOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté   |
+| Identifiant                   | Contrat                                        | Fermeture | Statut     |
+| ----------------------------- | ---------------------------------------------- | --------- | ---------- |
+| `artifactTaskOptions.options` | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `callOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `decisionTaskOptions.options` | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `dispatchOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `gateOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `integrationOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `interactiveOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `isolatedOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `loopOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `queuedOptions.options`       | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `speculationOptions.options`  | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `taskOptions.options`         | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
+| `workflowOptions.options`     | [Configuration YAML](../recipe-configuration/) | valeur    | implémenté |
 
 La couverture décrit la composition locale, pas une validation de chaque service distant. Les tests utilisent des agents simulés, des modèles HTTP locaux, Git, Docker et Redis réels ; les appels payants, clouds et gestionnaires de secrets distants restent sans validation live.

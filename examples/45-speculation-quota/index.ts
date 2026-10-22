@@ -24,7 +24,7 @@ import {
   defineWorkflow,
   type WorkflowEvent,
 } from "@elie-laloum/outpost/workflows";
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 import { quotaProxy } from "../39-quota-pauses/quota-proxy.ts";

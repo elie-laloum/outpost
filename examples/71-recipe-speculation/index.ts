@@ -1,4 +1,4 @@
-// Compose experimental speculation from YAML and keep the winning branch without integrating it.
+// Compose speculation from YAML and keep the winning branch without integrating it.
 // Build Outpost and run with Node.js 24+; the agent is scripted and all Git work is temporary.
 
 import assert from "node:assert/strict";

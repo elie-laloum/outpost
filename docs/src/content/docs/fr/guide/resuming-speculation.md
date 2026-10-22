@@ -3,7 +3,7 @@ title: "Reprendre une compétition de candidats"
 description: "Ajoutez la conservation de l’état à une compétition de candidats avant son démarrage."
 ---
 
-Ajoutez la conservation de l’état à une [compétition de candidats](../speculation/) avant son démarrage. Cette fonctionnalité expérimentale conserve la progression ; rejouer après un arrêt brutal demande toujours une autorisation explicite.
+Ajoutez la conservation de l’état à une [compétition de candidats](../speculation/) avant son démarrage. La conservation de l’état préserve la progression ; rejouer après un arrêt brutal demande toujours une autorisation explicite.
 
 ## Reprendre après un arrêt brutal
 
@@ -12,7 +12,7 @@ Passez `durability` à `speculate()`. Tentatives, usage, sorties et ressources a
 ```ts title="durability.ts"
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
+import { type SpeculationDurability } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {
@@ -29,7 +29,7 @@ Reprenez `candidates.ts` et `validate.ts` de [la première compétition](../spec
 <!-- example:include speculation candidates.ts validate.ts -->
 
 ```ts title="durable-race.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -70,7 +70,7 @@ Une course interrompue par un arrêt brutal reste détenue par son coordinateur,
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { recoverSpeculation } from "@elie-laloum/outpost/experimental/speculation";
+import { recoverSpeculation } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 const transporter = createLocalTransport({
   directory: join(repository, ".outpost", "storage"),

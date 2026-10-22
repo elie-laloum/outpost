@@ -27,11 +27,7 @@ description: "Run candidates on separate branches and use a check to select a re
 
 ## What this example covers
 
-:::caution[Experimental]
-`speculate()` is experimental: its options and result can still change. It selects a branch; it never merges it.
-:::
-
-Use this example to try several fixes for the same bug. Each candidate works in its own sandbox and branch; your test command decides which result can be accepted.
+Use this example to try several fixes for the same bug. Each candidate works in its own sandbox and branch; your test command decides which result can be accepted. `speculate()` selects a branch; it never merges it.
 
 <!-- features -->
 
@@ -78,7 +74,7 @@ export const candidates = [
 ```
 
 ```ts title="candidate-check.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -96,7 +92,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="run-candidates.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidate-briefs.ts";
 import { validate } from "./candidate-check.ts";
@@ -114,8 +110,8 @@ export function runCandidates() {
 ```
 
 ```ts title="merge-check.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
-import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationResult } from "@elie-laloum/outpost/speculation";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export function verifyWinner(winner: NonNullable<SpeculationResult["winner"]>) {
@@ -128,7 +124,7 @@ Ask for confirmation in `compete.ts`, then check integration again before mergin
 <!-- tabs -->
 
 ```ts title="merge-winner.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationResult } from "@elie-laloum/outpost/speculation";
 import { verifyWinner } from "./merge-check.ts";
 import { execFileSync } from "node:child_process";
 import { repository } from "./outpost.config.ts";
@@ -216,7 +212,7 @@ export const candidates = Object.entries(approaches).map(([key, text]) => ({
 ```
 
 ```ts title="check-approach.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   sandbox,
@@ -232,7 +228,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
 import { validate } from "./check-approach.ts";
@@ -294,7 +290,7 @@ export const verdict = defineJsonResponse({
 ```
 
 ```ts title="test-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/speculation";
 
 export async function testBranch({
   sandbox,
@@ -310,7 +306,7 @@ export async function testBranch({
 ```
 
 ```ts title="review-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/speculation";
 import { testBranch } from "./test-candidate.ts";
 import { reviewer } from "./review-agent.ts";
 import { verdict } from "./review-verdict.ts";
@@ -339,7 +335,7 @@ Pass `durability` to `speculate()`: attempts, usage and outputs are saved throug
 ```ts
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
+import { type SpeculationDurability } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {

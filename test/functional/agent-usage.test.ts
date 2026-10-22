@@ -14,7 +14,7 @@ import {
   createWorkflowCheckpointStore,
   WorkflowUsageUnavailable,
 } from "../../src/workflows.ts";
-import { speculate } from "../../src/experimental/speculation.ts";
+import { speculate } from "../../src/speculation.ts";
 import { type AgentObservation } from "../../src/integrations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";

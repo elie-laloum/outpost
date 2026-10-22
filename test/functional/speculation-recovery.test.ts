@@ -14,13 +14,13 @@ import {
   speculate,
   recoverSpeculation,
   checkSpeculationIntegration,
-} from "../../src/experimental/speculation.ts";
+} from "../../src/speculation.ts";
 import { createLocalTransport, defineJsonResponse } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 import type { SandboxProvider } from "../../src/integrations.ts";
-import type { SpeculativeValidation } from "../../src/experimental/speculation.ts";
+import type { SpeculativeValidation } from "../../src/speculation.ts";
 import type { Transport } from "../../src/storage.ts";
 
 function recoverable(recovered: string[] = []): SandboxProvider {

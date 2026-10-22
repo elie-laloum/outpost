@@ -131,20 +131,20 @@ A component marked “runtime” is closed by the runtime; “value” denotes c
 
 ## Task and workflow options
 
-| Identifier                    | Contract                                       | Cleanup | Status       |
-| ----------------------------- | ---------------------------------------------- | ------- | ------------ |
-| `artifactTaskOptions.options` | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `callOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `decisionTaskOptions.options` | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `dispatchOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `gateOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `integrationOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `interactiveOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `isolatedOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `loopOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `queuedOptions.options`       | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `speculationOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | experimental |
-| `taskOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented  |
-| `workflowOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented  |
+| Identifier                    | Contract                                       | Cleanup | Status      |
+| ----------------------------- | ---------------------------------------------- | ------- | ----------- |
+| `artifactTaskOptions.options` | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `callOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `decisionTaskOptions.options` | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `dispatchOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `gateOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `integrationOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `interactiveOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `isolatedOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `loopOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `queuedOptions.options`       | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `speculationOptions.options`  | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `taskOptions.options`         | [YAML configuration](../recipe-configuration/) | value   | implemented |
+| `workflowOptions.options`     | [YAML configuration](../recipe-configuration/) | value   | implemented |
 
 Coverage describes local composition, not validation of every remote service. Tests use simulated agents, local HTTP models, real Git, Docker and Redis; paid calls, clouds and remote secret managers remain without live validation.

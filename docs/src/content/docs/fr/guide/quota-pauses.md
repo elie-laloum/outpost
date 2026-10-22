@@ -147,9 +147,9 @@ Quand des limites arrêtent des candidats et qu’aucun ne gagne, `speculate()` 
 
 ```ts
 import { OutpostError } from "@elie-laloum/outpost/core";
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { defineTask } from "@elie-laloum/outpost/workflows";
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 function race(options: SpeculationOptions) {
   return defineTask({

@@ -10,7 +10,7 @@ import * as workspaces from "../../src/workspaces.ts";
 import * as recipes from "../../src/recipes.ts";
 import * as integrations from "../../src/integrations.ts";
 import * as queues from "../../src/queues.ts";
-import * as speculation from "../../src/experimental/speculation.ts";
+import * as speculation from "../../src/speculation.ts";
 const api = {
   ...core,
   ...harness,

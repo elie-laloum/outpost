@@ -8,7 +8,7 @@ import {
   createRecipeRuntime,
   validateRecipeProject,
 } from "../../src/recipes.ts";
-import { speculate } from "../../src/experimental/speculation.ts";
+import { speculate } from "../../src/speculation.ts";
 import { createLocalTransport, createSandbox } from "../../src/core.ts";
 import { defineRecipe } from "../../src/recipes.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
@@ -48,11 +48,10 @@ async function files(repo: string, recipe: unknown, configuration: unknown) {
   return { file, config };
 }
 
-test("experimental recipe speculation matches native results, usage and explicit observation", async (t) => {
+test("recipe speculation matches native results, usage and explicit observation without experimental activation", async (t) => {
   const repo = await repository(t);
   const configuration = {
     version: 2,
-    experimental: true,
     repository: repo,
     sandbox: { provider: "local" },
     extensions: {
@@ -180,7 +179,7 @@ test("experimental recipe speculation matches native results, usage and explicit
     options.config,
     JSON.stringify({ ...configuration, experimental: false }),
   );
-  await assert.rejects(validateRecipeProject(options), /experimental: true/);
+  await validateRecipeProject(options);
   await writeFile(
     options.config,
     JSON.stringify({ ...configuration, experimental: "true" }),
@@ -310,7 +309,6 @@ test("durable speculation survives process boundaries without replaying a comple
     },
     {
       version: 2,
-      experimental: true,
       repository: repo,
       sandbox: { provider: "local" },
       transports: {

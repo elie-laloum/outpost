@@ -27,11 +27,7 @@ description: "Lancez plusieurs candidats sur des branches séparées et choisiss
 
 ## Ce que montre l’exemple
 
-:::caution[Expérimental]
-`speculate()` est expérimental : ses options et son résultat peuvent encore changer. Il sélectionne une branche ; il ne la fusionne jamais.
-:::
-
-Cet exemple permet d’essayer plusieurs corrections pour un même bug. Chaque candidat dispose de sa sandbox et de sa branche ; votre commande de test décide quel résultat peut être accepté.
+Cet exemple permet d’essayer plusieurs corrections pour un même bug. Chaque candidat dispose de sa sandbox et de sa branche ; votre commande de test décide quel résultat peut être accepté. `speculate()` sélectionne une branche ; il ne la fusionne jamais.
 
 <!-- features -->
 
@@ -78,7 +74,7 @@ export const candidates = [
 ```
 
 ```ts title="candidate-check.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -96,7 +92,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="run-candidates.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidate-briefs.ts";
 import { validate } from "./candidate-check.ts";
@@ -114,8 +110,8 @@ export function runCandidates() {
 ```
 
 ```ts title="merge-check.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
-import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationResult } from "@elie-laloum/outpost/speculation";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export function verifyWinner(winner: NonNullable<SpeculationResult["winner"]>) {
@@ -128,7 +124,7 @@ Demandez la confirmation dans `compete.ts`, puis vérifiez à nouveau l’intég
 <!-- tabs -->
 
 ```ts title="merge-winner.ts"
-import type { SpeculationResult } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationResult } from "@elie-laloum/outpost/speculation";
 import { verifyWinner } from "./merge-check.ts";
 import { execFileSync } from "node:child_process";
 import { repository } from "./outpost.config.ts";
@@ -218,7 +214,7 @@ export const candidates = Object.entries(approaches).map(([key, text]) => ({
 ```
 
 ```ts title="check-approach.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   sandbox,
@@ -234,7 +230,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="try-approaches.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./approaches.ts";
 import { validate } from "./check-approach.ts";
@@ -296,7 +292,7 @@ export const verdict = defineJsonResponse({
 ```
 
 ```ts title="test-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/speculation";
 
 export async function testBranch({
   sandbox,
@@ -312,7 +308,7 @@ export async function testBranch({
 ```
 
 ```ts title="review-candidate.ts"
-import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/speculation";
 import { testBranch } from "./test-candidate.ts";
 import { reviewer } from "./review-agent.ts";
 import { verdict } from "./review-verdict.ts";
@@ -341,7 +337,7 @@ Passez `durability` à `speculate()` : tentatives, usage et résultats sont enre
 ```ts
 import { join } from "node:path";
 import { createLocalTransport } from "@elie-laloum/outpost/core";
-import { type SpeculationDurability } from "@elie-laloum/outpost/experimental/speculation";
+import { type SpeculationDurability } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export const durability: SpeculationDurability = {

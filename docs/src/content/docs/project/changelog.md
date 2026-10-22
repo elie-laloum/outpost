@@ -12,6 +12,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.
 - Compile interactive recipe tasks through an internal entry that accepts Git and file options, removing the last identical type-narrowing branch.
 - Validate harness routing states, decision responses, replayed decision events, recipe inputs, task cache keys and repetition fingerprints as labelled lossless JSON rather than checkpoint outputs. Persisted checkpoint values keep their envelope, and existing cache identities are unchanged.
 - Bind every typed JSON Schema decode to a decoder declared once with its schema, compiled on first use, and keep untyped validation for caller-supplied schemas. Workspace inspection and recovery reuse the workspace record decoder; the internal `validateRecipeSchema` alias is removed.

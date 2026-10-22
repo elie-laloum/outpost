@@ -70,6 +70,6 @@ Import each function and type from its owning module. All modules below belong t
 | `recovery`                           | Inspection, restoration, retention and storage reservation recovery.                   |
 | `integrations`                       | Agent and sandbox ports, native conversation formats and diagnostics.                  |
 | `recipes`                            | Recipe compilation, runtime and local extension registration.                          |
-| `experimental/speculation`           | Candidate races, merge preflight and durable coordinator recovery.                     |
+| `speculation`                        | Candidate races, merge preflight and durable coordinator recovery.                     |
 
 The `/providers/*`, `/secrets/*`, `/transports/s3`, `/queues/bullmq`, `/opentelemetry` and `/testing` paths retain their names. Functions, options and persisted data retain their behavior. YAML recipe syntax stays the same; update imports in local TypeScript extensions. Each API reference page gives the exact import for its symbol.

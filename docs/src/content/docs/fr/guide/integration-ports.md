@@ -70,6 +70,6 @@ Importez chaque fonction et type depuis le module qui le fournit. Tous les modul
 | `recovery`                           | Inspection, restauration, rétention et récupération des réservations de stockage.                        |
 | `integrations`                       | Contrats d’agents et de sandboxes, formats natifs des conversations et diagnostics.                      |
 | `recipes`                            | Compilation des recettes, runtime et enregistrement des extensions locales.                              |
-| `experimental/speculation`           | Courses entre candidats, vérification préalable à l’intégration et récupération du coordinateur durable. |
+| `speculation`                        | Courses entre candidats, vérification préalable à l’intégration et récupération du coordinateur durable. |
 
 Les chemins `/providers/*`, `/secrets/*`, `/transports/s3`, `/queues/bullmq`, `/opentelemetry` et `/testing` restent identiques. Les fonctions, leurs options et les données persistées conservent leur comportement. La syntaxe des recipes YAML reste identique ; mettez à jour les imports TypeScript de leurs extensions locales. La référence API indique le chemin exact de chaque symbole.

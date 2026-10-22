@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { recoverSpeculation } from "@elie-laloum/outpost/experimental/speculation";
+import { recoverSpeculation } from "@elie-laloum/outpost/speculation";
 ```
 
 ## Rôle et comportement

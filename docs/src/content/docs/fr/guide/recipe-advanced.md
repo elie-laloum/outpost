@@ -26,10 +26,9 @@ tasks:
     speculation: { $ref: speculations.compare }
 ```
 
-La spéculation exige `experimental: true` dans la configuration. Ses règles natives de budget, validation et sélection restent applicables. Pour `select: best`, fournissez une fonction de notation en plus de la validation. Déclarez ces fonctions avec les contrats `speculation.options.validate` et `speculation.options.score` ; consultez les [extensions locales](../recipe-extensions/).
+La spéculation conserve ses règles natives de budget, validation et sélection. Pour `select: best`, fournissez une fonction de notation en plus de la validation. Déclarez ces fonctions avec les contrats `speculation.options.validate` et `speculation.options.score` ; consultez les [extensions locales](../recipe-extensions/).
 
 ```yaml title="outpost.yaml — candidats"
-experimental: true
 speculations:
   compare:
     repository: ../project

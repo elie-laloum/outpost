@@ -6,7 +6,7 @@ import { test } from "node:test";
 import {
   checkSpeculationIntegration,
   speculate,
-} from "../../src/experimental/speculation.ts";
+} from "../../src/speculation.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { emit, repository, scripted } from "../helpers.ts";

@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=../../recipe-configuration.schema.json
 version: 2
-experimental: true
 repository: .
 sandbox: { provider: local }
 extensions:

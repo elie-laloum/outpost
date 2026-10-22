@@ -17,7 +17,7 @@ import {
   quotaFault,
   unavailableFault,
 } from "../../src/core.ts";
-import { speculate } from "../../src/experimental/speculation.ts";
+import { speculate } from "../../src/speculation.ts";
 import type {
   AgentInput,
   AgentObservation,

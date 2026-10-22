@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 ```
 
 ## Purpose and behavior

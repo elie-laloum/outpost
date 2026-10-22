@@ -5,11 +5,7 @@ description: "Try several candidates with explicit validation, budgets and integ
 
 ## Race candidates
 
-:::caution[Experimental]
-`speculate()` is experimental: its options and result can still change. It selects a branch; it never merges it.
-:::
-
-Use `speculate()` to run several candidates for the same task and validate each result explicitly. Candidates have separate branches and sandboxes; the race returns a winner only when your validation accepts one.
+Use `speculate()` to run several candidates for the same task and validate each result explicitly. Candidates have separate branches and sandboxes; the race returns a winner only when your validation accepts one. It selects a branch; it never merges it.
 
 API reference: [SpeculationOptions](../../reference/speculationoptions/).
 
@@ -30,7 +26,7 @@ export const candidates = ["minimal", "refactor"].map((key) => ({
 ```
 
 ```ts title="validate.ts"
-import type { SpeculationOptions } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculationOptions } from "@elie-laloum/outpost/speculation";
 
 export const validate: SpeculationOptions["validate"] = async ({
   result,
@@ -48,7 +44,7 @@ export const validate: SpeculationOptions["validate"] = async ({
 ```
 
 ```ts title="compete.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -69,7 +65,7 @@ console.log(result.status, result.terminationCode, result.winner?.branch);
 Use `select: "best"` to let all admitted candidates finish. `score` runs only after `validate` accepts a candidate, while its sandbox is still open. Return a finite number: the highest score wins after cleanup succeeds. Equal scores follow candidate declaration order. The default `select: "first"` keeps the first accepted candidate and cancels the others.
 
 ```ts title="best.ts"
-import { speculate } from "@elie-laloum/outpost/experimental/speculation";
+import { speculate } from "@elie-laloum/outpost/speculation";
 import { repository, sandboxProvider } from "./outpost.config.ts";
 import { candidates } from "./candidates.ts";
 import { validate } from "./validate.ts";
@@ -124,7 +120,7 @@ API reference: [SpeculationIntegration](../../reference/speculationintegration/)
 Your checkout can change after the race. Check again right before you merge:
 
 ```ts
-import { checkSpeculationIntegration } from "@elie-laloum/outpost/experimental/speculation";
+import { checkSpeculationIntegration } from "@elie-laloum/outpost/speculation";
 import { repository } from "./outpost.config.ts";
 
 export async function canMerge(branch: string, commit?: string) {

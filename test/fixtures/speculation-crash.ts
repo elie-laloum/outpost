@@ -1,4 +1,4 @@
-import { speculate } from "../../src/experimental/speculation.ts";
+import { speculate } from "../../src/speculation.ts";
 import { createLocalTransport } from "../../src/core.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { scripted, emit } from "../helpers.ts";

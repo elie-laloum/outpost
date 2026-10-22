@@ -49,9 +49,9 @@
       "types": "./dist/queues.d.ts",
       "import": "./dist/queues.js"
     },
-    "./experimental/speculation": {
-      "types": "./dist/experimental/speculation.d.ts",
-      "import": "./dist/experimental/speculation.js"
+    "./speculation": {
+      "types": "./dist/speculation.d.ts",
+      "import": "./dist/speculation.js"
     },
     "./providers/docker": {
       "types": "./dist/providers/docker.d.ts",

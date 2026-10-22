@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { SpeculativeValidation } from "@elie-laloum/outpost/experimental/speculation";
+import type { SpeculativeValidation } from "@elie-laloum/outpost/speculation";
 ```
 
 ## Parameters and properties

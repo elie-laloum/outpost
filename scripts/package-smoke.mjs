@@ -116,7 +116,7 @@ try {
       "-e",
       `
     import assert from 'node:assert/strict';
-    const modules = await Promise.all(["core", "harness", "storage", "workflows", "observation", "recovery", "workspaces", "recipes", "integrations", "queues", "experimental/speculation"].map(name => import('@elie-laloum/outpost/' + name)));
+    const modules = await Promise.all(["core", "harness", "storage", "workflows", "observation", "recovery", "workspaces", "recipes", "integrations", "queues", "speculation"].map(name => import('@elie-laloum/outpost/' + name)));
     const api = Object.assign({}, ...modules);
     await assert.rejects(import('@elie-laloum/outpost'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
     const core = await import('@elie-laloum/outpost/core');
@@ -289,8 +289,10 @@ try {
     consumer,
     `// @ts-expect-error The package root was removed in the major entry-point migration.
 import { dispatch as retiredRootDispatch } from '@elie-laloum/outpost';
-// @ts-expect-error Experimental orchestration is not part of core.
+// @ts-expect-error Speculation is not part of core.
 import { speculate as misplacedSpeculation } from '@elie-laloum/outpost/core';
+// @ts-expect-error Speculation left the experimental subpath.
+import { speculate as retiredExperimentalSpeculation } from '@elie-laloum/outpost/experimental/speculation';
 import { createAgent as composeAgent, dispatch, createCodexHarness, createClaudeHarness, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineJsonResponse, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost/core';
 import { defineClaudeHook, defineCodexHook, defineCopilotHook, defineKimiHook, defineAntigravityHook } from '@elie-laloum/outpost/core';
 createClaudeHarness({hooks:[defineClaudeHook({on:'PreToolUse',run:()=>({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny'}})})]});
@@ -402,7 +404,7 @@ const cacheHit: true | undefined=verified.tasks[0]?.cacheHit;
 const cacheOutcome: TaskCacheOutcome | undefined=({} as WorkflowEvent).cache;
 import { repositoryFingerprint } from '@elie-laloum/outpost/workflows';
 const fingerprintKey=async (): Promise<string>=>repositoryFingerprint('.');
-import { defineAgentTask, defineIsolatedTask, type TaskContext, type WorkflowTerminationCode } from '@elie-laloum/outpost/workflows'; import { type QueueQuota, type QueueRequest } from '@elie-laloum/outpost/queues'; import { type SpeculationResult } from '@elie-laloum/outpost/experimental/speculation'; import { type TerminationCode } from '@elie-laloum/outpost/core';
+import { defineAgentTask, defineIsolatedTask, type TaskContext, type WorkflowTerminationCode } from '@elie-laloum/outpost/workflows'; import { type QueueQuota, type QueueRequest } from '@elie-laloum/outpost/queues'; import { type SpeculationResult } from '@elie-laloum/outpost/speculation'; import { type TerminationCode } from '@elie-laloum/outpost/core';
 const resumedConversation=(context: TaskContext): string | undefined=>context.quota?.conversation;
 const queueQuota: QueueQuota={resetAt:'2026-01-01T00:00:00.000Z',conversation:'c'};
 const resumedJob: QueueRequest={id:'job:quota:2',idempotencyKey:'job',handler:'work',input:null};

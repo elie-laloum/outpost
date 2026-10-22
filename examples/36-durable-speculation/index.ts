@@ -9,7 +9,7 @@ import {
   checkSpeculationIntegration,
   recoverSpeculation,
   speculate,
-} from "@elie-laloum/outpost/experimental/speculation";
+} from "@elie-laloum/outpost/speculation";
 import {
   createAgent,
   createLocalTransport,

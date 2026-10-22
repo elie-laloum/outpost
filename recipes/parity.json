@@ -3679,7 +3679,7 @@
       "onStuck": "contract"
     }
   },
-  "./experimental/speculation:checkSpeculationIntegration": {
+  "./speculation:checkSpeculationIntegration": {
     "signatures": [
       "(repository: string, branch: string, expectedCommit?: string): Promise<SpeculationIntegration>"
     ],
@@ -3691,7 +3691,7 @@
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
     "optionCoverage": {}
   },
-  "./experimental/speculation:recoverSpeculation": {
+  "./speculation:recoverSpeculation": {
     "signatures": ["(options: SpeculationRecoveryOptions): Promise<void>"],
     "options": {},
     "category": "contract",
@@ -3701,19 +3701,19 @@
     "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
     "optionCoverage": {}
   },
-  "./experimental/speculation:speculate": {
+  "./speculation:speculate": {
     "signatures": [
       "<T = undefined>(options: SpeculationOptions<T>): Promise<SpeculationResult<T>>"
     ],
     "options": {},
-    "category": "experimental",
+    "category": "native",
     "lot": 7,
     "status": "implemented",
     "test": "test/functional/recipe-advanced.test.ts",
-    "reason": "Native declarative composition with explicit experimental activation; native recovery and validation limits apply.",
+    "reason": "Native declarative composition; native recovery and validation limits apply.",
     "optionCoverage": {}
   },
-  "./experimental/speculation:SpeculationDurability": {
+  "./speculation:SpeculationDurability": {
     "signatures": [],
     "options": {
       "transporter": "Transport",
@@ -3733,7 +3733,7 @@
       "resume": "contract"
     }
   },
-  "./experimental/speculation:SpeculationIntegration": {
+  "./speculation:SpeculationIntegration": {
     "signatures": [],
     "options": {
       "status": "\"conflict\" | \"clean\" | \"blocked\"",
@@ -3755,7 +3755,7 @@
       "reason": "contract"
     }
   },
-  "./experimental/speculation:SpeculationOptions": {
+  "./speculation:SpeculationOptions": {
     "signatures": [],
     "options": {
       "durability": "SpeculationDurability | undefined",
@@ -3793,7 +3793,7 @@
       "validate": "contract"
     }
   },
-  "./experimental/speculation:SpeculationRecoveryOptions": {
+  "./speculation:SpeculationRecoveryOptions": {
     "signatures": [],
     "options": {
       "runId": "string",
@@ -3813,7 +3813,7 @@
       "transporter": "contract"
     }
   },
-  "./experimental/speculation:SpeculationResult": {
+  "./speculation:SpeculationResult": {
     "signatures": [],
     "options": {
       "terminationCode": "import(\"../domain/termination.types.ts\").TerminationCode | undefined",
@@ -3849,7 +3849,7 @@
       "error": "contract"
     }
   },
-  "./experimental/speculation:SpeculativeCandidate": {
+  "./speculation:SpeculativeCandidate": {
     "signatures": [],
     "options": {
       "key": "string",
@@ -3867,7 +3867,7 @@
       "request": "contract"
     }
   },
-  "./experimental/speculation:SpeculativeCandidateResult": {
+  "./speculation:SpeculativeCandidateResult": {
     "signatures": [],
     "options": {
       "key": "string",
@@ -3905,7 +3905,7 @@
       "error": "contract"
     }
   },
-  "./experimental/speculation:SpeculativeHostSnapshot": {
+  "./speculation:SpeculativeHostSnapshot": {
     "signatures": [],
     "options": {
       "head": "string",
@@ -3925,7 +3925,7 @@
       "dirty": "contract"
     }
   },
-  "./experimental/speculation:SpeculativeOutput": {
+  "./speculation:SpeculativeOutput": {
     "signatures": [],
     "options": {
       "usage": "Usage",
@@ -3973,7 +3973,7 @@
       "completion": "contract"
     }
   },
-  "./experimental/speculation:SpeculativeValidation": {
+  "./speculation:SpeculativeValidation": {
     "signatures": [],
     "options": {
       "key": "string",

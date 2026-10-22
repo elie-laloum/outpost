@@ -2956,7 +2956,7 @@
   "speculationOptions.options": {
     "kind": "speculationOptions",
     "lot": 7,
-    "experimental": true,
+    "experimental": false,
     "owned": false,
     "options": {
       "durability": "native",

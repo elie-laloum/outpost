@@ -29,7 +29,6 @@ export const workflowOptionComponents: readonly RecipeComponentDefinition[] = [
   "call",
 ].map((type) => ({
   name: `${type}Options.options`,
-  ...(type === "speculation" ? { experimental: true } : {}),
   kind: `${type}Options`,
   schema: nativeRecipeSchemas[`${type}.options`]!,
   accepts: recipeObject,

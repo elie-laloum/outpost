@@ -4,7 +4,7 @@ import { trace, metrics } from "@opentelemetry/api";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { emit, scripted } from "../helpers.ts";
-import type { SpeculativeValidation } from "../../src/experimental/speculation.ts";
+import type { SpeculativeValidation } from "../../src/speculation.ts";
 import type {
   SandboxProvider,
   AgentObservation,
