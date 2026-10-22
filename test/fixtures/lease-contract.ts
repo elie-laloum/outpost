@@ -84,6 +84,8 @@ export const leaseContractChecks: readonly LeaseContractCheck[] = [
   {
     name: "binary-paths-permissions-symlinks",
     async run(lease, directory, signal) {
+      // The fixture's POSIX mode and symlink are created on the host.
+      if (process.platform === "win32") return "unix-host-required";
       const { bytes, filename, remote } = await uploadFixture(
         lease,
         directory,
@@ -117,6 +119,7 @@ export const leaseContractChecks: readonly LeaseContractCheck[] = [
     name: "batch-transfer",
     async run(lease, directory, signal) {
       if (!lease.fileTransfers) return "capability-unavailable";
+      if (process.platform === "win32") return "unix-host-required";
       const { bytes, filename, remote } = fixture(lease, directory);
       const entries = await lease.fileTransfers.manifest(
         remote,

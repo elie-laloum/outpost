@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import {
   buildImage,
@@ -51,7 +52,10 @@ test("CLI groups commands in help, prints its version and reports unknown comman
 });
 
 test("CLI help, version and unknown commands import no command handler", async () => {
-  const preload = resolve("test/fixtures/loaded-modules.ts");
+  // A Windows drive path is not a valid --import specifier.
+  const preload = pathToFileURL(
+    resolve("test/fixtures/loaded-modules.ts"),
+  ).href;
   for (const args of [
     ["--version"],
     ["--help"],
