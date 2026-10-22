@@ -88,53 +88,6 @@ try {
 }
 ```
 
-## Choose a backend
-
-| Backend      | Create                                                              | Use it for                                     | Close                 |
-| ------------ | ------------------------------------------------------------------- | ---------------------------------------------- | --------------------- |
-| SQLite       | `createSqliteTaskQueue(path)`                                       | Processes on one machine sharing a file.       | `queue.close()`       |
-| HTTP         | `createHttpTaskQueue({ url, token })`                               | Clients of a queue served by `serveTaskQueue`. | Nothing to close      |
-| Redis/BullMQ | `createBullMQTaskQueue()` from `@elie-laloum/outpost/queues/bullmq` | Workers spread across machines.                | `await queue.close()` |
-
-The BullMQ backend has its own setup: see [Redis and BullMQ](../redis-workers/).
-
-## File workspaces
-
-Workers also execute configuration-3 file recipes through the same recipe runtime. Each owned job gets a distinct materialization; shared publication destinations still coordinate through host-wide locks. See [independent file jobs](../queued-workflows/#run-independent-jobs).
-
-## Limits
-
-- Inputs and values are JSON, up to 256 KiB each. IDs and handler names are at most 512 characters, a `runId` at most 256.
-- A worker registers at most 100 handlers.
-- A failed job keeps its result. A retried or resumed `defineQueuedTask()` finds the same failed job, so retry inside the handler.
-- One job at a time per `runId`: a second job for a run still in progress fails.
-- The queue fences stale writes but does not make external effects exactly-once.
-- An HTTP token grants every queue operation. Serve it behind TLS on a private network, and keep tokens out of URLs and logs.
-
-API: [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
-
-## Next steps
-
-- [Share the queue over HTTP](../http-queues/)
-
-<!-- Retained section anchors for existing bookmarks. -->
-
-<span id="expose-a-queue-over-http"></span>
-
-## Continue
-
-- [Save workflow progress](../queued-workflows/)
-- [Operate workers](../operating-workers/)
-
-<span id="wait-for-a-job-inside-a-workflow"></span>
-<span id="run-a-checkpointed-workflow-per-job"></span>
-<span id="resume-a-run"></span>
-<span id="approve-or-answer-a-paused-run"></span>
-
-<span id="leases-and-retries"></span>
-<span id="deduplicate-effects-with-idempotency-keys"></span>
-<span id="operate-workers"></span>
-
 ## Distinguish job completion from workflow completion
 
 A job handled by `defineWorkflowJob()` can be `done` while its workflow is `paused` or `waiting-input`: the handler saved that settled result. `readWorkflowJob(job)` returns both states with the run ID and the next action.
@@ -165,3 +118,49 @@ try {
 `workflowStatus` is absent while the job is pending or active, or when the handler failed before saving a summary. The stored summary keeps its `status` field for earlier readers.
 
 Answer questions or inspect approval and quota pauses using the workflow run ID. Delivery retries, task retries and checkpoint resumption remain separate operations. An `inspect` action does not authorize replay or checkpoint-owner recovery; stop the owner and provide the required authorization explicitly.
+
+## Choose a backend
+
+| Backend      | Create                                                              | Use it for                                     | Close                 |
+| ------------ | ------------------------------------------------------------------- | ---------------------------------------------- | --------------------- |
+| SQLite       | `createSqliteTaskQueue(path)`                                       | Processes on one machine sharing a file.       | `queue.close()`       |
+| HTTP         | `createHttpTaskQueue({ url, token })`                               | Clients of a queue served by `serveTaskQueue`. | Nothing to close      |
+| Redis/BullMQ | `createBullMQTaskQueue()` from `@elie-laloum/outpost/queues/bullmq` | Workers spread across machines.                | `await queue.close()` |
+
+The BullMQ backend has its own setup: see [Redis and BullMQ](../redis-workers/).
+
+## File workspaces
+
+Workers also execute configuration-3 file recipes through the same recipe runtime. Each owned job gets a distinct materialization; shared publication destinations still coordinate through host-wide locks. See [independent file jobs](../queued-workflows/#run-independent-jobs).
+
+## Limits
+
+- Inputs and values are JSON, up to 256 KiB each. IDs and handler names are at most 512 characters, a `runId` at most 256.
+- A worker registers at most 100 handlers.
+- A failed job keeps its result. A retried or resumed `defineQueuedTask()` finds the same failed job, so retry inside the handler.
+- One job at a time per `runId`: a second job for a run still in progress fails.
+- The queue fences stale writes but does not make external effects exactly-once.
+- An HTTP token grants every queue operation. Serve it behind TLS on a private network, and keep tokens out of URLs and logs.
+
+API: [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
+
+## Next steps
+
+- [Share the queue over HTTP](../http-queues/)
+- [Save workflow progress](../queued-workflows/)
+- [Operate workers](../operating-workers/)
+
+<span id="continue"></span>
+
+<!-- Retained section anchors for existing bookmarks. -->
+
+<span id="expose-a-queue-over-http"></span>
+
+<span id="wait-for-a-job-inside-a-workflow"></span>
+<span id="run-a-checkpointed-workflow-per-job"></span>
+<span id="resume-a-run"></span>
+<span id="approve-or-answer-a-paused-run"></span>
+
+<span id="leases-and-retries"></span>
+<span id="deduplicate-effects-with-idempotency-keys"></span>
+<span id="operate-workers"></span>

@@ -120,17 +120,6 @@ if (tests.status === 0) await sandbox.workspace.integrate();
 
 With other branch modes, `integrate()` does nothing. A merge conflict, or a host branch switched during the run, rejects with code `conflict` and keeps the worktree. `close({ preserve: true })` also keeps it for inspection ([Recover work](../recovery/)).
 
-## File workspaces
-
-File sandboxes borrow an open `FileWorkspace` or own an explicit `workspaceSource`. Closing a borrowed sandbox leaves its workspace open. [File workspaces](../workspaces/) explains provider bindings, output publication and retention.
-
-## Limits
-
-- A sandbox runs one operation at a time: a second call made while one runs is rejected, not queued. Use separate sandboxes for parallel work.
-- Output is captured as text. Move binary files with the provider’s transfer methods ([Cloud sandboxes](../cloud-sandboxes/)).
-
-API: [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
-
 ## Share a sandbox between tasks
 
 `defineAgentTask()` and `defineCommandTask()` run in a sandbox you opened with [`createSandbox()`](../sandbox-sessions/). The tasks share its files; you close it.
@@ -191,3 +180,14 @@ result.unwrap();
 `test` runs `npm test` on the agent’s edits. A nonzero exit status fails the task.
 
 Host, container and Firecracker process cancellation allow 500 ms after SIGTERM before escalating to SIGKILL. Cleanup remains bounded; this grace period is not a guarantee that a non-cooperative program can finish saving its work.
+
+## File workspaces
+
+File sandboxes borrow an open `FileWorkspace` or own an explicit `workspaceSource`. Closing a borrowed sandbox leaves its workspace open. [File workspaces](../workspaces/) explains provider bindings, output publication and retention.
+
+## Limits
+
+- A sandbox runs one operation at a time: a second call made while one runs is rejected, not queued. Use separate sandboxes for parallel work.
+- Output is captured as text. Move binary files with the provider’s transfer methods ([Cloud sandboxes](../cloud-sandboxes/)).
+
+API: [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).

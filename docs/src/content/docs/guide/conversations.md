@@ -103,6 +103,10 @@ await plan.resume({
 
 `sandbox.resume(id, options)` and `sandbox.fork(id, options)` take an ID instead, including one captured by an earlier dispatch.
 
+## Resume a routed harness
+
+[Model routing](../model-routing/) records each effective selection in version-2 transcripts while retaining the `harness` storage format. Version-1 transcripts remain readable and are upgraded when routing is enabled on continuation. Resume and fork restore messages; the next step evaluates the router again without replaying completed model or tool calls. Journal replay emits recorded selections without contacting Jev or Laya.
+
 ## Which agents support what
 
 Cold means a new sandbox (`dispatch()`, `result.resume()` on a `dispatch()` result); warm means the same open sandbox. [Choose an agent](../choose-an-agent/) compares the other capabilities.
@@ -131,7 +135,3 @@ For this step, follow [Store and share conversations](../conversation-storage/).
 - **Fallback agents**: A [fallback agent](../fallback-agents/) takes no `continuation`. `result.resume()` continues with the candidate that answered.
 
 API: [DispatchResult](../../reference/dispatchresult/) · [WarmDispatchResult](../../reference/warmdispatchresult/) · [Sandbox](../../reference/sandbox/) · [ConversationStore](../../reference/conversationstore/) · [createTransportConversations](../../reference/createtransportconversations/) · [createKimiConversations](../../reference/createkimiconversations/) · [createHarnessConversations](../../reference/createharnessconversations/).
-
-## Resume a routed harness
-
-[Model routing](../model-routing/) records each effective selection in version-2 transcripts while retaining the `harness` storage format. Version-1 transcripts remain readable and are upgraded when routing is enabled on continuation. Resume and fork restore messages; the next step evaluates the router again without replaying completed model or tool calls. Journal replay emits recorded selections without contacting Jev or Laya.

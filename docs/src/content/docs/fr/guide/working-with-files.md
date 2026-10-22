@@ -150,11 +150,10 @@ Branches, commits, guards Git, intégration, conflits et spéculation restent de
 ## Pour continuer
 
 - [Publier les fichiers produits](../publishing-files/)
-
-## Pour aller plus loin
-
 - [Conserver et reprendre les fichiers](../resuming-file-workspaces/)
 - [Exécuter des tâches de fichiers indépendantes](../queued-workflows/)
+
+<span id="pour-aller-plus-loin"></span>
 
 <span id="conserver-et-reprendre-les-fichiers"></span>
 

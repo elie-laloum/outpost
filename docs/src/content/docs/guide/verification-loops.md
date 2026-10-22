@@ -224,6 +224,18 @@ export async function reviewChanges(
 
 Pass it as `check: reviewChanges`. The request's `agent` replaces the sandbox's agent for this dispatch only.
 
+## Checkpoint and resume
+
+With a [checkpoint](../durable-runs/), each candidate is saved before `check`. On resume, a saved candidate goes straight to `check`, and rejected rounds are not rerun.
+
+An interrupted round replays only with `resume: "retry-incomplete"`, since it may already have changed files. Changing `maxRounds` makes the checkpoint incompatible.
+
+Each task record lists its `rounds`, and each phase emits a `loop` workflow event. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
+
+API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
+
+A task copied with `{ ...task }`, including one decorated with `defineTask({ ...task, condition })`, retains its loop definition and round limit. Pass that resulting task to the workflow and use the same object with `result.value(task)` and dependency references.
+
 ## Repeat the brief until the agent declares it done
 
 `passes` sends the brief again when a pass ends without a completion marker. Ask for the marker in the brief: Outpost does not add it.
@@ -270,15 +282,3 @@ With top-level `dispatch()`, each pass allocates a fresh sandbox and runs its pr
 | The last check rejects | The task fails with `LoopTaskExhausted`, which holds the last `feedback`. Dependents do not run. |
 
 [Fix a failing CI build](../fix-failing-ci/) handles each outcome in a complete script.
-
-## Checkpoint and resume
-
-With a [checkpoint](../durable-runs/), each candidate is saved before `check`. On resume, a saved candidate goes straight to `check`, and rejected rounds are not rerun.
-
-An interrupted round replays only with `resume: "retry-incomplete"`, since it may already have changed files. Changing `maxRounds` makes the checkpoint incompatible.
-
-Each task record lists its `rounds`, and each phase emits a `loop` workflow event. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
-
-API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
-
-A task copied with `{ ...task }`, including one decorated with `defineTask({ ...task, condition })`, retains its loop definition and round limit. Pass that resulting task to the workflow and use the same object with `result.value(task)` and dependency references.

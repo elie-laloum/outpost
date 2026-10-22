@@ -157,6 +157,10 @@ await dispatch({
 
 `tool-output` streams command output, correlated with its call by `callId`. Full `model-request` and `model-response` payloads exist only with a verbose [observation hub](../observability/). They hold the whole conversation, and the normal journal leaves them out.
 
+## Route each model step
+
+Add an optional `routing` declaration to select among models of this harness model provider after compaction and before model hooks. Tools and hooks see the selected model while the sandbox and history remain available. See [model routing](../model-routing/) for candidate validation, state, fallback and usage behavior.
+
 ## Go further
 
 <!-- features -->
@@ -175,7 +179,3 @@ await dispatch({
 - Model requests leave from your process, so the sandbox’s [network restrictions](../network-restrictions/) do not apply to them.
 
 API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservation](../../reference/createobservation/).
-
-## Route each model step
-
-Add an optional `routing` declaration to select among models of this harness model provider after compaction and before model hooks. Tools and hooks see the selected model while the sandbox and history remain available. See [model routing](../model-routing/) for candidate validation, state, fallback and usage behavior.

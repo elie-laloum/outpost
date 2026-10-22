@@ -65,6 +65,12 @@ L’enveloppe de l’événement inclut le contexte de l’exécution.
 
 Référence API : [Observation](../../reference/observation/).
 
+## Un seul objet pour les sorties et la lecture
+
+`createObservation()` compose les sorties et, avec `transporter`, enregistre automatiquement les exécutions lancées par `dispatch()` ou `workflow.start()`. Le moteur possède le suivi ; l’objet observation ne lance aucun travail. Partagez-le entre plusieurs exécutions : chaque exécution persistée possède sa séquence d’événements. `observation.readRun(id)` et `observation.watchRun(id)` consultent le stockage depuis ce processus ou un autre ; voir [l’état d’exécution](../run-state/).
+
+Placez directement les objets de `createReporter()`, `createCustomReporter()` ou `createOpenTelemetryObserver()` dans `sinks`. L’observation les emprunte : elle vide leurs livraisons mais leur fermeture reste à leur propriétaire. Fermez l’observation après les exécutions, puis l’observateur OpenTelemetry et son SDK. `await using` attend les suivis actifs sans annuler le travail. Les callbacks historiques et `createObservationHub()` restent compatibles.
+
 ## Transmettre le contexte à vos propres tâches
 
 `defineAgentTask` et `defineIsolatedTask` rattachent leur dispatch au contexte de la tâche. Dans une tâche écrite avec `defineTask`, passez `context.observation` à chaque dispatch.
@@ -184,11 +190,10 @@ Passez directement l’observateur dans `createObservation({ sinks: [telemetry] 
 ## Pour continuer
 
 - [Lire une exécution depuis un autre processus](../run-state/)
-
-## Pour aller plus loin
-
 - [Gérer les erreurs de livraison](../observation-delivery/)
 - [Masquer les données sensibles](../redacting-secrets/)
+
+<span id="pour-aller-plus-loin"></span>
 
 <span id="livraison-et-erreurs"></span>
 <span id="traiter-une-sortie-trop-volumineuse"></span>
@@ -196,9 +201,3 @@ Passez directement l’observateur dans `createObservation({ sinks: [telemetry] 
 <span id="limites"></span>
 
 <span id="masquer-les-secrets-avant-sauvegarde-ou-observation"></span>
-
-## Un seul objet pour les sorties et la lecture
-
-`createObservation()` compose les sorties et, avec `transporter`, enregistre automatiquement les exécutions lancées par `dispatch()` ou `workflow.start()`. Le moteur possède le suivi ; l’objet observation ne lance aucun travail. Partagez-le entre plusieurs exécutions : chaque exécution persistée possède sa séquence d’événements. `observation.readRun(id)` et `observation.watchRun(id)` consultent le stockage depuis ce processus ou un autre ; voir [l’état d’exécution](../run-state/).
-
-Placez directement les objets de `createReporter()`, `createCustomReporter()` ou `createOpenTelemetryObserver()` dans `sinks`. L’observation les emprunte : elle vide leurs livraisons mais leur fermeture reste à leur propriétaire. Fermez l’observation après les exécutions, puis l’observateur OpenTelemetry et son SDK. `await using` attend les suivis actifs sans annuler le travail. Les callbacks historiques et `createObservationHub()` restent compatibles.

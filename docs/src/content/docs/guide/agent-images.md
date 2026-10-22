@@ -97,6 +97,10 @@ console.log(agentVersions.codex);
 
 The script prints the Codex version pinned by your installed Outpost. After upgrading Outpost, eject the image again with `--force` into a fresh directory, carry over your project lines and rebuild.
 
+## Upgrade from the shared image
+
+Outpost 12 removes `outpost init` and the shared `agents` image. Keep your existing TypeScript workflows, install `@elie-laloum/outpost` in their project, and eject/build the image for each CLI they use. Update each sandbox provider’s `image` to the resulting tag. To start a YAML recipe, use `outpost recipe init`.
+
 ## Check the image
 
 `doctor` starts a temporary container with the network disabled. It checks `node`, `git`, the writable home and the agent CLI, and warns when the CLI version differs from the pinned one. An official image name selects its published reference and agent; it uses local images only and does not test sign-in ([Diagnostics](../diagnostics/)).
@@ -128,7 +132,3 @@ Docker and Podman with a mounted checkout never install a CLI: the image must co
 API: [agentVersions](../../reference/agentversions/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [SandboxOptions](../../reference/sandboxoptions/).
 
 UID/GID zero are accepted for explicitly selected root images. Root has more privileges inside the container; choose a nonzero UID for normal agent work. This option does not turn mounted Git metadata into a security boundary.
-
-## Upgrade from the shared image
-
-Outpost 12 removes `outpost init` and the shared `agents` image. Keep your existing TypeScript workflows, install `@elie-laloum/outpost` in their project, and eject/build the image for each CLI they use. Update each sandbox provider’s `image` to the resulting tag. To start a YAML recipe, use `outpost recipe init`.

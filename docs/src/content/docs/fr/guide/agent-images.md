@@ -97,6 +97,10 @@ console.log(agentVersions.codex);
 
 Le script affiche la version de Codex épinglée par votre Outpost. Après une mise à jour d’Outpost, éjectez de nouveau l’image avec `--force` dans un dossier neuf, reportez vos lignes de projet et reconstruisez.
 
+## Remplacer l’ancienne image commune
+
+Outpost 12 retire `outpost init` et l’image commune `agents`. Conservez vos workflows TypeScript, installez `@elie-laloum/outpost` dans leur projet et générez puis construisez l’image de chaque CLI utilisée. Remplacez le champ `image` de chaque fournisseur de sandbox par le tag obtenu. Pour démarrer une recette YAML, utilisez `outpost recipe init`.
+
 ## Vérifier l’image
 
 `doctor` démarre un conteneur temporaire sans réseau. Il vérifie `node`, `git`, le répertoire personnel accessible en écriture et la CLI de l’agent, et avertit lorsque la version de la CLI diffère de la version épinglée. Un nom d’image officielle sélectionne sa référence publiée et son agent ; seules les images locales sont utilisées et la connexion n’est pas testée ([Diagnostic](../diagnostics/)).
@@ -128,7 +132,3 @@ Docker et Podman avec un dépôt monté n’installent jamais de CLI : l’image
 API : [agentVersions](../../reference/agentversions/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [SandboxOptions](../../reference/sandboxoptions/).
 
 Les UID/GID zéro sont acceptés pour des images root choisies explicitement. Root dispose de plus de privilèges dans le conteneur ; choisissez un UID non nul pour le travail normal des agents. Cette option ne fait pas des métadonnées Git montées une frontière de sécurité.
-
-## Remplacer l’ancienne image commune
-
-Outpost 12 retire `outpost init` et l’image commune `agents`. Conservez vos workflows TypeScript, installez `@elie-laloum/outpost` dans leur projet et générez puis construisez l’image de chaque CLI utilisée. Remplacez le champ `image` de chaque fournisseur de sandbox par le tag obtenu. Pour démarrer une recette YAML, utilisez `outpost recipe init`.

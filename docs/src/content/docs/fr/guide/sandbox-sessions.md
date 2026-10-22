@@ -120,19 +120,6 @@ if (tests.status === 0) await sandbox.workspace.integrate();
 
 Avec les autres modes de branche, `integrate()` ne fait rien. Un conflit de fusion, ou une branche de l’hôte changée pendant l’exécution, rejette avec le code `conflict` et conserve le worktree. `close({ preserve: true })` le conserve aussi pour inspection ([Récupérer du travail](../recovery/)).
 
-## Workspaces de fichiers
-
-Les sandboxes de fichiers empruntent un `FileWorkspace` ouvert ou possèdent un `workspaceSource` explicite. Fermer une sandbox empruntée laisse son workspace ouvert. [Les workspaces de fichiers](../workspaces/) détaillent les bindings fournisseurs, la restitution et la conservation.
-
-## Limites
-
-- Une sandbox exécute une opération à la fois : un second appel lancé pendant qu’une opération tourne est rejeté, pas mis en file. Utilisez des sandboxes distinctes pour le travail parallèle.
-- La sortie est capturée sous forme de texte. Déplacez les fichiers binaires avec les méthodes de transfert du fournisseur ([Sandboxes cloud](../cloud-sandboxes/)).
-
-API : [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
-
-<span id="partager-une-sandbox-entre-les-tâches"></span>
-
 ## Partager une sandbox
 
 `defineAgentTask()` et `defineCommandTask()` s’exécutent dans une sandbox que vous avez ouverte avec [`createSandbox()`](../sandbox-sessions/). Les tâches partagent ses fichiers ; c’est vous qui la fermez.
@@ -193,3 +180,16 @@ result.unwrap();
 `test` lance `npm test` sur les modifications de l’agent. Un code de sortie non nul fait échouer la tâche.
 
 L’annulation des processus hôtes, conteneurs et Firecracker laisse 500 ms après SIGTERM avant SIGKILL. Le nettoyage reste borné ; ce délai ne garantit pas qu’un programme non coopératif pourra finir de sauvegarder son travail.
+
+## Workspaces de fichiers
+
+Les sandboxes de fichiers empruntent un `FileWorkspace` ouvert ou possèdent un `workspaceSource` explicite. Fermer une sandbox empruntée laisse son workspace ouvert. [Les workspaces de fichiers](../workspaces/) détaillent les bindings fournisseurs, la restitution et la conservation.
+
+## Limites
+
+- Une sandbox exécute une opération à la fois : un second appel lancé pendant qu’une opération tourne est rejeté, pas mis en file. Utilisez des sandboxes distinctes pour le travail parallèle.
+- La sortie est capturée sous forme de texte. Déplacez les fichiers binaires avec les méthodes de transfert du fournisseur ([Sandboxes cloud](../cloud-sandboxes/)).
+
+API : [createSandbox](../../reference/createsandbox/) · [Sandbox](../../reference/sandbox/) · [Command](../../reference/command/) · [CommandResult](../../reference/commandresult/) · [AttachOptions](../../reference/attachoptions/) · [attach](../../reference/attach/).
+
+<span id="partager-une-sandbox-entre-les-tâches"></span>

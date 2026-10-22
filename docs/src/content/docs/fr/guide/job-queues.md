@@ -88,51 +88,6 @@ try {
 }
 ```
 
-## Choisir le stockage de la file
-
-| Backend      | Création                                                              | Usage                                               | Fermeture             |
-| ------------ | --------------------------------------------------------------------- | --------------------------------------------------- | --------------------- |
-| SQLite       | `createSqliteTaskQueue(path)`                                         | Des processus d’une machine partageant un fichier.  | `queue.close()`       |
-| HTTP         | `createHttpTaskQueue({ url, token })`                                 | Les clients d’une file servie par `serveTaskQueue`. | Rien à fermer         |
-| Redis/BullMQ | `createBullMQTaskQueue()` depuis `@elie-laloum/outpost/queues/bullmq` | Des workers répartis sur plusieurs machines.        | `await queue.close()` |
-
-Le système de stockage BullMQ a sa propre configuration : voir [Redis et BullMQ](../redis-workers/).
-
-## Workspaces de fichiers
-
-Les workers exécutent aussi les recettes de fichiers de configuration 3 via le même runtime. Chaque job possédé reçoit une matérialisation distincte ; les destinations partagées se coordonnent par des verrous communs à l’hôte. Voir [les jobs de fichiers indépendants](../queued-workflows/#exécuter-des-jobs-indépendants).
-
-## Limites
-
-- Les entrées et les valeurs sont du JSON, jusqu’à 256 Kio chacune. Les identifiants et noms de traitements font au plus 512 caractères, un `runId` au plus 256.
-- Un worker enregistre au plus 100 traitements.
-- Un job échoué garde son résultat. Un `defineQueuedTask()` relancé ou repris retrouve le même job échoué : relancez plutôt dans le traitement.
-- Un seul job à la fois par `runId` : un second job pour une exécution encore en cours échoue.
-- La file bloque les écritures périmées mais ne garantit pas qu’un effet externe n’ait lieu qu’une fois.
-- Un jeton HTTP autorise toutes les opérations de la file. Servez-la derrière TLS sur un réseau privé, et gardez les jetons hors des URL et des logs.
-
-API : [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
-
-## Pour continuer
-
-- [Partager la file par HTTP](../http-queues/)
-
-<span id="exposer-une-file-via-http"></span>
-
-## Pour aller plus loin
-
-- [Conserver la progression d’un workflow](../queued-workflows/)
-- [Exploiter les workers](../operating-workers/)
-
-<span id="attendre-un-job-dans-un-workflow"></span>
-<span id="associer-un-checkpoint-à-chaque-job"></span>
-<span id="reprendre-une-exécution"></span>
-<span id="approuver-ou-répondre-à-une-exécution-en-pause"></span>
-
-<span id="réservation-des-jobs-et-nouvelles-tentatives"></span>
-<span id="dédupliquer-les-effets-avec-les-clés-didempotence"></span>
-<span id="exploiter-les-workers"></span>
-
 ## Distinguer la fin du job de celle du workflow
 
 Un job traité par `defineWorkflowJob()` peut être `done` alors que son workflow est `paused` ou `waiting-input` : le handler a sauvegardé cet état arrêté. `readWorkflowJob(job)` renvoie les deux états avec l’identifiant d’exécution et la prochaine action.
@@ -163,3 +118,47 @@ try {
 `workflowStatus` est absent tant que le job est pending ou active, ou si le handler a échoué avant d’enregistrer un résumé. Le résumé enregistré conserve son champ `status` pour les lecteurs existants.
 
 Répondez aux questions ou examinez les pauses d’approbation et de quota avec l’identifiant du workflow. Les nouvelles tentatives de livraison, les retries de tâche et la reprise de checkpoint restent distincts. L’action `inspect` n’autorise ni le rejeu ni la récupération du propriétaire : arrêtez ce dernier et fournissez les autorisations explicites nécessaires.
+
+## Choisir le stockage de la file
+
+| Backend      | Création                                                              | Usage                                               | Fermeture             |
+| ------------ | --------------------------------------------------------------------- | --------------------------------------------------- | --------------------- |
+| SQLite       | `createSqliteTaskQueue(path)`                                         | Des processus d’une machine partageant un fichier.  | `queue.close()`       |
+| HTTP         | `createHttpTaskQueue({ url, token })`                                 | Les clients d’une file servie par `serveTaskQueue`. | Rien à fermer         |
+| Redis/BullMQ | `createBullMQTaskQueue()` depuis `@elie-laloum/outpost/queues/bullmq` | Des workers répartis sur plusieurs machines.        | `await queue.close()` |
+
+Le système de stockage BullMQ a sa propre configuration : voir [Redis et BullMQ](../redis-workers/).
+
+## Workspaces de fichiers
+
+Les workers exécutent aussi les recettes de fichiers de configuration 3 via le même runtime. Chaque job possédé reçoit une matérialisation distincte ; les destinations partagées se coordonnent par des verrous communs à l’hôte. Voir [les jobs de fichiers indépendants](../queued-workflows/#exécuter-des-jobs-indépendants).
+
+## Limites
+
+- Les entrées et les valeurs sont du JSON, jusqu’à 256 Kio chacune. Les identifiants et noms de traitements font au plus 512 caractères, un `runId` au plus 256.
+- Un worker enregistre au plus 100 traitements.
+- Un job échoué garde son résultat. Un `defineQueuedTask()` relancé ou repris retrouve le même job échoué : relancez plutôt dans le traitement.
+- Un seul job à la fois par `runId` : un second job pour une exécution encore en cours échoue.
+- La file bloque les écritures périmées mais ne garantit pas qu’un effet externe n’ait lieu qu’une fois.
+- Un jeton HTTP autorise toutes les opérations de la file. Servez-la derrière TLS sur un réseau privé, et gardez les jetons hors des URL et des logs.
+
+API : [runQueueWorker](../../reference/runqueueworker/) · [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [TaskQueue](../../reference/taskqueue/) · [QueueHandler](../../reference/queuehandler/) · [QueueHandlerContext](../../reference/queuehandlercontext/) · [defineQueuedTask](../../reference/definequeuedtask/) · [defineWorkflowJob](../../reference/defineworkflowjob/) · [serveTaskQueue](../../reference/servetaskqueue/) · [createHttpTaskQueue](../../reference/createhttptaskqueue/).
+
+## Pour continuer
+
+- [Partager la file par HTTP](../http-queues/)
+- [Conserver la progression d’un workflow](../queued-workflows/)
+- [Exploiter les workers](../operating-workers/)
+
+<span id="pour-aller-plus-loin"></span>
+
+<span id="exposer-une-file-via-http"></span>
+
+<span id="attendre-un-job-dans-un-workflow"></span>
+<span id="associer-un-checkpoint-à-chaque-job"></span>
+<span id="reprendre-une-exécution"></span>
+<span id="approuver-ou-répondre-à-une-exécution-en-pause"></span>
+
+<span id="réservation-des-jobs-et-nouvelles-tentatives"></span>
+<span id="dédupliquer-les-effets-avec-les-clés-didempotence"></span>
+<span id="exploiter-les-workers"></span>

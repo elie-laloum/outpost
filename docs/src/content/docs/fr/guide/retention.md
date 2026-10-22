@@ -114,16 +114,6 @@ Référence API : [RecoveryQuotaOptions](../../reference/recoveryquotaoptions/) 
 
 Une réservation refusée rejette avec le code `configuration` ; un `assertRecoveryQuota()` en échec rejette avec le code `workspace` ([Erreurs](../error-handling/)).
 
-## Limites
-
-- Les réservations coordonnent les processus d’écriture qui les utilisent. Ce n’est pas un quota du système de fichiers : tout autre processus peut encore écrire dans `.outpost`.
-- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Utilisez `inspectStorageReservations()` pour identifier son propriétaire, puis `recoverStorageReservation()` avec la révision inspectée et `processesStopped: true` après son arrêt. Une modification concurrente exige une nouvelle inspection.
-- La rétention ne supprime jamais les branches, checkpoints, artefacts, conversations, transferts de récupération ni verrous.
-- Un transport distant ne peut pas utiliser le périmètre `clean-workspaces` ni `maxWorkspaces`.
-- Ne supprimez pas `.outpost` à la main : il peut contenir la seule copie d’un travail inachevé.
-
-API : [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).
-
 ## Inspecter et récupérer les réservations
 
 Les nouvelles entrées enregistrent l’identifiant d’instance du processus, le nom d’hôte, le PID, la date de création et le dépôt, avec l’identité Linux si disponible. Ces informations identifient le propriétaire sans prouver son activité distante. Choisissez l’entrée exacte et arrêtez son propriétaire avant récupération. Une modification concurrente du registre refuse la récupération et exige une nouvelle inspection. L’exemple utilise le Transport par défaut du dépôt ; utilisez votre Transport d’origine si le stockage est personnalisé.
@@ -153,3 +143,13 @@ export async function recoverStoppedOwner(id: string) {
 ```
 
 Le registre écrit le format 2 et lit l’ancien format 1. Les réservations anciennes restent comptabilisées, sans métadonnées de propriétaire ; arrêtez tous les écrivains potentiels avant d’en récupérer une. Arrêtez les écrivains d’ancienne version avant la migration d’un registre partagé : ils ne peuvent pas lire le format 2. Ni la récupération ni la libération ne recréent une réservation retirée ; la récupération préserve les autres entrées par écriture conditionnelle.
+
+## Limites
+
+- Les réservations coordonnent les processus d’écriture qui les utilisent. Ce n’est pas un quota du système de fichiers : tout autre processus peut encore écrire dans `.outpost`.
+- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Utilisez `inspectStorageReservations()` pour identifier son propriétaire, puis `recoverStorageReservation()` avec la révision inspectée et `processesStopped: true` après son arrêt. Une modification concurrente exige une nouvelle inspection.
+- La rétention ne supprime jamais les branches, checkpoints, artefacts, conversations, transferts de récupération ni verrous.
+- Un transport distant ne peut pas utiliser le périmètre `clean-workspaces` ni `maxWorkspaces`.
+- Ne supprimez pas `.outpost` à la main : il peut contenir la seule copie d’un travail inachevé.
+
+API : [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).

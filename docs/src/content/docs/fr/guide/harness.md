@@ -157,6 +157,10 @@ await dispatch({
 
 `tool-output` diffuse la sortie des commandes, rattachée à son appel par `callId`. Les contenus complets de `model-request` et `model-response` n’existent qu’avec un [hub d’observation](../observability/) détaillé. Ils contiennent toute la conversation, et le journal normal les écarte.
 
+## Router chaque étape de modèle
+
+Ajoutez une déclaration `routing` facultative pour choisir parmi les modèles du fournisseur de ce harness après compaction et avant les hooks du modèle. Outils et hooks voient le modèle sélectionné tandis que la sandbox et l’historique restent disponibles. Consultez le [routage de modèles](../model-routing/) pour la validation des candidats, l’état, le repli et l’usage.
+
 ## Aller plus loin
 
 <!-- features -->
@@ -175,7 +179,3 @@ await dispatch({
 - Les requêtes au modèle partent de votre processus : les [restrictions réseau](../network-restrictions/) de la sandbox ne s’y appliquent pas.
 
 API : [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservation](../../reference/createobservation/).
-
-## Router chaque étape de modèle
-
-Ajoutez une déclaration `routing` facultative pour choisir parmi les modèles du fournisseur de ce harness après compaction et avant les hooks du modèle. Outils et hooks voient le modèle sélectionné tandis que la sandbox et l’historique restent disponibles. Consultez le [routage de modèles](../model-routing/) pour la validation des candidats, l’état, le repli et l’usage.

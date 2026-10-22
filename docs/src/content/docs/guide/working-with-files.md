@@ -150,11 +150,10 @@ Branches, commits, Git guards, integration, conflict resolution and speculation 
 ## Next steps
 
 - [Publish the files you produced](../publishing-files/)
-
-## Continue
-
 - [Preserve and resume files](../resuming-file-workspaces/)
 - [Run independent file tasks](../queued-workflows/)
+
+<span id="continue"></span>
 
 <span id="preserve-and-resume-files"></span>
 

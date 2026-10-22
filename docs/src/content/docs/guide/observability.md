@@ -63,6 +63,12 @@ The sink prints workflow transitions, sandbox and Git operations and the agentâ€
 
 API reference: [Observation](../../reference/observation/).
 
+## One object for outputs and reading
+
+`createObservation()` composes sinks and, with `transporter`, automatically records executions started by `dispatch()` or `workflow.start()`. The engine owns tracking; the observation object starts no work. Share it between executions: each persisted execution has its own event sequence. `observation.readRun(id)` and `observation.watchRun(id)` read storage from this process or another; see [execution state](../run-state/).
+
+Pass objects from `createReporter()`, `createCustomReporter()` or `createOpenTelemetryObserver()` directly in `sinks`. Observation borrows them: it flushes delivery but their owner still closes them. Close observation after executions, then the OpenTelemetry observer and its SDK. `await using` waits for active sessions without cancelling work. Historical callbacks and `createObservationHub()` remain compatible.
+
 ## Carry the scope into your own tasks
 
 `defineAgentTask` and `defineIsolatedTask` attach their dispatch to the taskâ€™s scope. In a task you write with `defineTask`, pass `context.observation` to each dispatch.
@@ -180,11 +186,10 @@ Wire the observer once per run: passing `telemetry` and an observation client ho
 ## Next steps
 
 - [Read a run from another process](../run-state/)
-
-## Continue
-
 - [Handle delivery failures](../observation-delivery/)
 - [Mask sensitive data](../redacting-secrets/)
+
+<span id="continue"></span>
 
 <span id="delivery-and-failures"></span>
 <span id="when-agent-output-is-too-large"></span>
@@ -192,9 +197,3 @@ Wire the observer once per run: passing `telemetry` and an observation client ho
 <span id="limits"></span>
 
 <span id="mask-secrets-before-saving-or-observing"></span>
-
-## One object for outputs and reading
-
-`createObservation()` composes sinks and, with `transporter`, automatically records executions started by `dispatch()` or `workflow.start()`. The engine owns tracking; the observation object starts no work. Share it between executions: each persisted execution has its own event sequence. `observation.readRun(id)` and `observation.watchRun(id)` read storage from this process or another; see [execution state](../run-state/).
-
-Pass objects from `createReporter()`, `createCustomReporter()` or `createOpenTelemetryObserver()` directly in `sinks`. Observation borrows them: it flushes delivery but their owner still closes them. Close observation after executions, then the OpenTelemetry observer and its SDK. `await using` waits for active sessions without cancelling work. Historical callbacks and `createObservationHub()` remain compatible.

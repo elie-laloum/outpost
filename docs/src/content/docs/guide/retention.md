@@ -114,16 +114,6 @@ API reference: [RecoveryQuotaOptions](../../reference/recoveryquotaoptions/) and
 
 A refused reservation rejects with code `configuration`; a failed `assertRecoveryQuota()` rejects with code `workspace` ([Errors](../error-handling/)).
 
-## Limits
-
-- Reservations coordinate writers that use them. They are not a filesystem quota: any other process can still write to `.outpost`.
-- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Use `inspectStorageReservations()` to identify its owner, then `recoverStorageReservation()` with the inspected revision and `processesStopped: true` after stopping that owner. A concurrent ledger change refuses recovery and requires fresh inspection.
-- Retention never removes branches, checkpoints, artifacts, conversations, recovery transfers or locks.
-- A remote transport cannot use the `clean-workspaces` scope or `maxWorkspaces`.
-- Do not delete `.outpost` by hand: it can hold the only copy of unfinished work.
-
-API: [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).
-
 ## Inspect and recover reservations
 
 New reservation entries record a process instance ID, host name, PID, creation time and repository, with Linux process identity when available. These are owner identifiers, not proof of remote liveness. Select the exact entry and stop its owner before recovery. The example uses the default repository Transport; use your original Transport when storage is customized.
@@ -153,3 +143,13 @@ export async function recoverStoppedOwner(id: string) {
 ```
 
 The ledger writes format 2 and reads legacy format 1. Existing legacy byte claims remain counted and have no owner metadata; stop every potential writer before recovering such an entry. Stop old-version writers before upgrading a shared ledger: older versions cannot read format 2. Neither recovery nor release recreates a removed reservation, and recovery preserves every other entry through a conditional write.
+
+## Limits
+
+- Reservations coordinate writers that use them. They are not a filesystem quota: any other process can still write to `.outpost`.
+- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Use `inspectStorageReservations()` to identify its owner, then `recoverStorageReservation()` with the inspected revision and `processesStopped: true` after stopping that owner. A concurrent ledger change refuses recovery and requires fresh inspection.
+- Retention never removes branches, checkpoints, artifacts, conversations, recovery transfers or locks.
+- A remote transport cannot use the `clean-workspaces` scope or `maxWorkspaces`.
+- Do not delete `.outpost` by hand: it can hold the only copy of unfinished work.
+
+API: [planRecoveryRetention](../../reference/planrecoveryretention/) · [pruneRecoveryRetention](../../reference/prunerecoveryretention/) · [RecoveryRetentionPolicy](../../reference/recoveryretentionpolicy/) · [RecoveryRetentionPlan](../../reference/recoveryretentionplan/) · [reserveRecoveryStorage](../../reference/reserverecoverystorage/) · [assertRecoveryQuota](../../reference/assertrecoveryquota/) · [WorkspaceOptions](../../reference/workspaceoptions/).
