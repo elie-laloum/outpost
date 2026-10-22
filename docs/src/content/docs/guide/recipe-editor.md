@@ -19,21 +19,41 @@ The terminal prints the address, for example `http://127.0.0.1:41873/#token=…`
 
 The toolbar switches between five views of the same drafts. Every view validates the drafts after each change and lists problems in the status bar.
 
-| View          | What you do there                                                                                   |
-| ------------- | --------------------------------------------------------------------------------------------------- |
-| Canvas        | Add tasks from the palette, connect dependencies, rename tasks and edit their options in the panel. |
-| Recipe YAML   | Edit the recipe text directly; problems are underlined at their line.                               |
-| Configuration | Edit workspace, sandbox, agents, environment and extensions with forms, or the whole YAML.          |
-| Plan          | Read the static plan `outpost recipe plan` would print for the unsaved drafts.                      |
-| Runs          | Start, follow, stop and resume runs, and answer what they wait for.                                 |
+| View       | What you do there                                                                        |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| Canvas     | Arrange workspaces, sandboxes, tasks and components, connect them and edit them.         |
+| YAML       | Edit the recipe and its configuration side by side; problems are underlined at the line. |
+| Extensions | Declare extension modules, edit them and verify their exports.                           |
+| Plan       | Read the static plan `outpost recipe plan` would print for the unsaved drafts.           |
+| Runs       | Start, follow, stop and resume runs, and answer what they wait for.                      |
 
-Canvas and form changes rewrite only the YAML values they touch: comments, key order and formatting elsewhere stay as they were. New tasks are placed automatically; once you move a node, its position is saved in `recipe.editor.json` next to the recipe, which you can commit or ignore. Ctrl+Z undoes a change, Ctrl+Shift+Z redoes it and Ctrl+S saves both files. When a file changes on disk while you edit, the editor offers to reload it and replaces it only after you confirm.
+Canvas and panel changes rewrite only the YAML values they touch: comments, key order and formatting elsewhere stay as they were. Ctrl+Z undoes a change, Ctrl+Shift+Z redoes it and Ctrl+S saves both files. When a file changes on disk while you edit, the editor offers to reload it and replaces it only after you confirm.
 
-The canvas and forms edit recipe format 3 and configuration version 3. Other formats open read-only on the canvas and stay editable in the YAML views. A plain string written over several lines is put back on one line when a structured edit rewrites the file; quote it or use a block scalar (`|` or `>`) to keep its line breaks.
+The canvas and panels edit recipe format 3 and configuration version 3. Other formats open read-only on the canvas and stay editable in the YAML view. A plain string written over several lines is put back on one line when a structured edit rewrites the file; quote it or use a block scalar (`|` or `>`) to keep its line breaks.
+
+## Place tasks in workspaces and sandboxes
+
+Everything the recipe and its configuration declare is a node you can move. Workspaces and sandboxes are zones that contain other nodes:
+
+| Node           | Declares                                                    | Holds                                  |
+| -------------- | ----------------------------------------------------------- | -------------------------------------- |
+| Workspace zone | `workspace` or `workspaces.<name>`                          | Sandboxes that open its files          |
+| Sandbox zone   | `sandbox` or `sandboxes.<name>`                             | Command and agent tasks that run in it |
+| Task           | A recipe task                                               | —                                      |
+| Component      | `agents.<name>`, `transports.<name>` and other named values | —                                      |
+| Run            | `workflow` options and the configuration `environment`      | —                                      |
+
+Drag a task into another sandbox to change where it runs: the editor writes `sandbox:` on the task. Within one workspace the task keeps the files earlier tasks left, as described in [switching sandboxes on one workspace](../recipe-workspaces/#switch-sandboxes-on-one-workspace). Drag a sandbox into another workspace to write its `workspace` reference. A drop the configuration would refuse, such as a gate inside a sandbox, is highlighted as unavailable and the node returns to its place with the reason.
+
+The palette adds tasks, workspaces of each kind, sandboxes of each provider and components. Features such as `branch`, `outputs`, `egress` or `volumes` are dropped on a zone that accepts them and appear as chips on its header. New zones and components receive a unique name; renaming one in the panel updates every reference to it. Search, the Components and References layers, Arrange and the minimap help in larger graphs, and a collapsed zone shows how many nodes it holds.
+
+Selecting a zone, a component or the Run node opens a form built from the configuration schema: a choice for its type, provider or kind, the fields it sets and the others under More fields. Values without a simple form stay editable as YAML. Task panels keep their own forms and list every other option of their operation.
+
+Positions, sizes and collapsed zones are saved in `recipe.editor.json` beside the recipe, which you can commit or ignore. Nodes you never moved are placed automatically. Files written by earlier versions of the editor are read and saved in the current layout format.
 
 ## Add and verify extensions
 
-The Extensions page of the configuration lists declared [extensions](../recipe-extensions/) and their modules. New extension declares `extensions.<name>` for the kind and contract you choose, optionally adds a `functions.<name>` alias for call and loop tasks, and creates the module with a starting export when the file does not exist. Select an extension to edit its module, then save it with Ctrl+S.
+The Extensions view lists declared [extensions](../recipe-extensions/) and their modules. New extension declares `extensions.<name>` for the kind and contract you choose, optionally adds a `functions.<name>` alias for call and loop tasks, and creates the module with a starting export when the file does not exist. Select an extension to edit its module, then save it with Ctrl+S.
 
 Validation never imports extensions. Verify saves the drafts, then runs this command in a separate process and reports the extensions it loaded or the first export it could not accept:
 
@@ -47,7 +67,7 @@ Verifying executes the code of every declared module, as a run would. Use it on 
 
 Run saves the drafts, asks for the recipe inputs and starts `outpost recipe run` on the saved files in a separate process. The run uses the sandbox and agents of your configuration, so it can change files and spend model usage exactly like the same command in a terminal.
 
-While it runs, each task on the canvas shows its status and the Runs view shows the event log. Stop asks the run to cancel: the CLI releases its sandbox and exits with status 143; stopping a second time ends the process. On Windows, Stop ends the process immediately. Only one run is active at a time.
+While it runs, each task on the canvas shows its status, each zone shows the most pressing status of its tasks with a finished count, and the Runs view shows the event log. Once the run reports, workspaces show their branch, kept directory or publications. Stop asks the run to cancel: the CLI releases its sandbox and exits with status 143; stopping a second time ends the process. On Windows, Stop ends the process immediately. Only one run is active at a time.
 
 Each run is kept under `.outpost/editor/runs/` with its events, final report and error output. The editor writes a `.gitignore` in `.outpost/editor/` so this history stays out of Git.
 

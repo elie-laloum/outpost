@@ -28,6 +28,7 @@ interface Editor {
 async function openEditor(
   t: { after(run: () => Promise<void>): void },
   recipe: string,
+  config = configuration,
 ): Promise<Editor> {
   assert.ok(
     existsSync(resolve("dist/editor/index.html")),
@@ -35,7 +36,7 @@ async function openEditor(
   );
   const project = await mkdtemp(join(tmpdir(), "outpost-editor-browser-"));
   await writeFile(join(project, "recipe.yaml"), recipe);
-  await writeFile(join(project, "outpost.yaml"), configuration);
+  await writeFile(join(project, "outpost.yaml"), config);
   const child = spawn(
     process.execPath,
     [
@@ -71,6 +72,31 @@ async function openEditor(
   await page.goto(url);
   await page.locator(".react-flow__node").first().waitFor();
   return { page, project, errors };
+}
+
+/** Drags a node by its center onto the center of another element. */
+async function drag(page: Page, node: string, target: string): Promise<void> {
+  const from = await page.locator(node).boundingBox();
+  const to = await page.locator(target).boundingBox();
+  assert.ok(from && to);
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2 + 20, {
+    steps: 12,
+  });
+  await page.mouse.up();
+}
+
+/** Whether a node's center lies inside a zone, as React Flow draws child nodes beside their parent. */
+async function inside(page: Page, node: string, zone: string) {
+  const [a, b] = await Promise.all([
+    page.locator(node).boundingBox(),
+    page.locator(zone).boundingBox(),
+  ]);
+  if (!a || !b) return false;
+  const x = a.x + a.width / 2,
+    y = a.y + a.height / 2;
+  return x > b.x && x < b.x + b.width && y > b.y && y < b.y + b.height;
 }
 
 async function waitForFile(
@@ -209,6 +235,83 @@ tasks:
       await readFile(join(project, ".outpost/editor/.gitignore"), "utf8"),
       "*\n",
     );
+    assert.deepEqual(errors, []);
+  },
+);
+
+test(
+  "tasks move between sandbox zones and a renamed sandbox keeps its tasks",
+  { timeout: 120_000 },
+  async (t) => {
+    const { page, project, errors } = await openEditor(
+      t,
+      `version: 3
+name: zones
+tasks:
+  - key: build
+    command:
+      executable: node
+      arguments: [--version]
+  - key: approve
+    after: [build]
+    gate: { kind: approval, prompt: Continue?, actors: [maintainer] }
+`,
+      `version: 3
+workspace: { kind: ephemeral }
+sandbox: { provider: local }
+sandboxes:
+  other: { provider: local }
+`,
+    );
+    const other = '[data-testid="zone-sandboxes.other"]';
+    await page.locator(other).waitFor();
+    await drag(page, '[data-testid="task-build"]', other);
+    await page.getByLabel("Unsaved changes").first().waitFor();
+    assert.ok(await inside(page, '[data-testid="task-build"]', other));
+
+    await drag(page, '[data-testid="task-approve"]', other);
+    await page
+      .getByText("Only command and agent tasks run in a sandbox", {
+        exact: false,
+      })
+      .waitFor();
+    assert.equal(
+      await inside(page, '[data-testid="task-approve"]', other),
+      false,
+    );
+
+    await page.locator(`${other} header`).first().click();
+    const name = page.getByLabel("Name");
+    await name.fill("fast");
+    await name.press("Enter");
+    await page.locator('[data-testid="zone-sandboxes.fast"]').waitFor();
+    await page.keyboard.press("Control+s");
+
+    const recipe = await waitForFile(join(project, "recipe.yaml"), (text) =>
+      text.includes("sandbox: fast"),
+    );
+    const config = await waitForFile(join(project, "outpost.yaml"), (text) =>
+      text.includes("fast:"),
+    );
+    const tasks = (
+      parse(recipe) as { tasks: { key: string; sandbox?: string }[] }
+    ).tasks;
+    assert.deepEqual(
+      tasks.map((task) => [task.key, task.sandbox]),
+      [
+        ["build", "fast"],
+        ["approve", undefined],
+      ],
+    );
+    assert.deepEqual(
+      Object.keys((parse(config) as { sandboxes: object }).sandboxes),
+      ["fast"],
+    );
+    const layout = await waitForFile(
+      join(project, "recipe.editor.json"),
+      (text) => text.includes('"zone:sandboxes.fast"'),
+    );
+    assert.equal(JSON.parse(layout).version, 2);
     assert.deepEqual(errors, []);
   },
 );

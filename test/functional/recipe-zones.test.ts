@@ -1078,3 +1078,107 @@ test("a durable mixed run records both kinds in one checkpoint and settles them 
   assert.equal(resumed.workspace?.retainedDirectory, undefined);
   assert.equal(resumed.workspaces?.notes?.kind, "files");
 });
+
+test("a durable file run keeps its Git workspace across a pause and integrates it on resume", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  await write(
+    {
+      version: 3,
+      name: "mixed",
+      workflow: {
+        checkpoint: {
+          store: { $ref: "stores.checkpoint" },
+          runId: "default",
+          version: "1",
+        },
+      },
+      tasks: [
+        shell("draft", 'echo "$ZONE" > out.txt'),
+        shell("code", 'echo "$ZONE" > app.txt && echo unfinished > wip.txt', {
+          sandbox: "coder",
+        }),
+        {
+          key: "approve",
+          after: ["draft", "code"],
+          gate: {
+            kind: "approval",
+            prompt: "Continue?",
+            actors: ["maintainer"],
+          },
+        },
+        shell(
+          "commit",
+          'cat wip.txt && git add app.txt wip.txt && git commit -qm "$ZONE"',
+          { sandbox: "coder", after: ["approve"] },
+        ),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "ephemeral" },
+      sandbox: { provider: "local", variables: { ZONE: "files" } },
+      outputs: [
+        { paths: ["out.txt"], destination: "./published", policy: "create" },
+      ],
+      workspaces: {
+        app: {
+          kind: "git",
+          repository: repo,
+          branch: { mode: "named", name: "app" },
+        },
+      },
+      sandboxes: {
+        coder: {
+          workspace: { $ref: "workspaces.app" },
+          provider: "local",
+          variables: { ZONE: "git" },
+        },
+      },
+      transports: { state: { type: "local", directory: "./storage" } },
+      stores: {
+        checkpoint: {
+          type: "transport",
+          transporter: { $ref: "transports.state" },
+        },
+      },
+    },
+  );
+  const paused = await (async () => {
+    await using runtime = await createRecipeRuntime({ file, config });
+    return await runtime.run({ runId: "mixed" });
+  })();
+  assert.equal(paused.status, "paused", JSON.stringify(paused.errors));
+  const kept = paused.workspaces?.app;
+  assert.ok(kept?.kind === "git" && kept.retainedDirectory);
+  const approval = paused.tasks.find((task) => task.key === "approve")?.pause;
+  assert.ok(approval);
+  await using runtime = await createRecipeRuntime({ file, config });
+  const resumed = await runtime.resume({
+    runId: "mixed",
+    decisions: [
+      {
+        executionId: paused.executionId!,
+        key: "approve",
+        requestId: approval.id,
+        action: "approve",
+        actor: "maintainer",
+        reason: "Reviewed",
+      },
+    ],
+  });
+  assert.equal(resumed.status, "done", JSON.stringify(resumed.errors));
+  assert.equal(resumed.outputs.commit?.stdout, "unfinished\n");
+  const { stdout } = await promisify(execFile)(
+    "git",
+    ["-C", repo, "show", "app:app.txt"],
+    { encoding: "utf8" },
+  );
+  assert.equal(stdout, "git\n");
+  assert.equal(
+    await readFile(join(directory, "published", "out.txt"), "utf8"),
+    "files\n",
+  );
+  const app = resumed.workspaces?.app;
+  assert.equal(app?.kind === "git" && app.retainedDirectory, undefined);
+});
