@@ -64,7 +64,14 @@ test("zones are added, placed, renamed and removed across the recipe and its con
       { type: "place-task", key: "review", zone: "sandboxes.check" },
     ],
     editor.state().revision,
+    { "zone:sandboxes.check": { x: 10, y: 20, width: 400, height: 200 } },
   );
+  assert.deepEqual(state.layout.nodes["zone:sandboxes.check"], {
+    x: 10,
+    y: 20,
+    width: 400,
+    height: 200,
+  });
   assert.deepEqual(state.diagnostics, []);
   assert.match(
     state.recipe!.text,
@@ -82,6 +89,7 @@ test("zones are added, placed, renamed and removed across the recipe and its con
     state.revision,
   );
   assert.match(state.recipe!.text, /sandbox: verify\n/);
+  assert.deepEqual(Object.keys(state.layout.nodes), ["zone:sandboxes.verify"]);
   assert.match(
     state.config!.text,
     /# Named zones keep their comments\.\nworkspaces:\n {2}notes: \{ kind: ephemeral \}\n/,

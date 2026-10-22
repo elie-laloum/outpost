@@ -66,12 +66,12 @@ test("unsaved tasks are placed beside their dependency without overlapping", () 
     ],
   });
   assert.deepEqual(
-    placeGraph(graph, { version: 1, nodes: {} }),
+    placeGraph(graph, { version: 2, nodes: {} }),
     arrangeGraph(graph),
   );
   const placed = placeGraph(graph, {
-    version: 1,
-    nodes: { a: { x: 100, y: 50 }, gone: { x: 0, y: 0 } },
+    version: 2,
+    nodes: { "task:a": { x: 100, y: 50 }, "task:gone": { x: 0, y: 0 } },
   });
   assert.deepEqual(placed.a, { x: 100, y: 50 });
   assert.equal(placed.b!.y, 50);

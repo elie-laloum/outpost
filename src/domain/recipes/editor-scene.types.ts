@@ -2,6 +2,7 @@ import type { RecipeSourcePath } from "./expressions.types.ts";
 import type {
   DocumentMutation,
   RecipeEditorEdge,
+  RecipeEditorLayout,
   RecipeEditorNode,
 } from "./editor.types.ts";
 import type { recipeEditorFeatures } from "./editor-scene.constants.ts";
@@ -171,4 +172,12 @@ export type RecipeEditorScenePlanners = {
     operation: Extract<RecipeEditorSceneOperation, { type: Type }>,
     compatibility: RecipeEditorCompatibility,
   ) => RecipeEditorSceneMutations;
+};
+
+/** Layout changes that follow zone and entity renames or removals. */
+export type RecipeEditorSceneLayoutUpdates = {
+  readonly [Type in RecipeEditorSceneOperation["type"]]?: (
+    layout: RecipeEditorLayout,
+    operation: Extract<RecipeEditorSceneOperation, { type: Type }>,
+  ) => RecipeEditorLayout;
 };

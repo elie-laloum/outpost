@@ -69,8 +69,18 @@ test("edits validate, undo, save and keep positions beside the recipe", async (t
   assert.match(state.recipe!.text, /after: \[create\]/);
   state = await editor.setLayout(
     {
-      version: 1,
-      nodes: { create: { x: 10.4, y: 20 }, read: { x: 300, y: 20 } },
+      version: 2,
+      nodes: {
+        "task:create": { x: 10.4, y: 20 },
+        "task:read": { x: 300, y: 20 },
+        "zone:sandbox": {
+          x: 0,
+          y: 0,
+          width: 640.2,
+          height: 320,
+          collapsed: true,
+        },
+      },
     },
     state.revision,
   );
@@ -126,8 +136,18 @@ test("edits validate, undo, save and keep positions beside the recipe", async (t
       ),
     ),
     {
-      version: 1,
-      nodes: { create: { x: 10, y: 20 }, read: { x: 300, y: 20 } },
+      version: 2,
+      nodes: {
+        "task:create": { x: 10, y: 20 },
+        "task:read": { x: 300, y: 20 },
+        "zone:sandbox": {
+          x: 0,
+          y: 0,
+          width: 640,
+          height: 320,
+          collapsed: true,
+        },
+      },
     },
   );
   state = await editor.edit(
@@ -135,7 +155,10 @@ test("edits validate, undo, save and keep positions beside the recipe", async (t
     [{ type: "remove-task", key: "read" }],
     state.revision,
   );
-  assert.deepEqual(Object.keys(state.layout.nodes), ["create"]);
+  assert.deepEqual(Object.keys(state.layout.nodes), [
+    "task:create",
+    "zone:sandbox",
+  ]);
 });
 
 test("disk changes reload clean drafts and block overwriting dirty ones", async (t) => {

@@ -6,6 +6,7 @@ import {
   planRecipeEdit,
   recipeEditorGraph,
   recipeEditorLayout,
+  updateRecipeEditorSceneLayout,
   updateRecipeEditorLayout,
 } from "../../src/domain/recipes/editor.ts";
 import {
@@ -255,20 +256,23 @@ test("unchanged recipes serialize byte for byte", () => {
   );
 });
 
-test("layouts follow renamed and removed tasks", () => {
+test("version 1 layouts become task positions and follow renamed and removed tasks", () => {
   const layout = recipeEditorLayout({
     version: 1,
     nodes: { a: { x: 1, y: 2 }, b: { x: "3", y: 4 }, c: { x: 5, y: 6 } },
   });
-  assert.deepEqual(layout.nodes, { a: { x: 1, y: 2 }, c: { x: 5, y: 6 } });
+  assert.deepEqual(layout, {
+    version: 2,
+    nodes: { "task:a": { x: 1, y: 2 }, "task:c": { x: 5, y: 6 } },
+  });
   assert.deepEqual(
     updateRecipeEditorLayout(layout, { type: "rename-task", key: "a", to: "z" })
       .nodes,
-    { c: { x: 5, y: 6 }, z: { x: 1, y: 2 } },
+    { "task:c": { x: 5, y: 6 }, "task:z": { x: 1, y: 2 } },
   );
   assert.deepEqual(
     updateRecipeEditorLayout(layout, { type: "remove-task", key: "c" }).nodes,
-    { a: { x: 1, y: 2 } },
+    { "task:a": { x: 1, y: 2 } },
   );
   assert.equal(
     updateRecipeEditorLayout(layout, {
@@ -278,8 +282,67 @@ test("layouts follow renamed and removed tasks", () => {
     }),
     layout,
   );
-  assert.deepEqual(recipeEditorLayout({ version: 2 }), {
-    version: 1,
+  assert.deepEqual(recipeEditorLayout({ version: 3, nodes: {} }), {
+    version: 2,
     nodes: {},
   });
+});
+
+test("version 2 layouts keep zone sizes and follow zone and entity renames", () => {
+  const layout = recipeEditorLayout({
+    version: 2,
+    nodes: {
+      "zone:sandboxes.a": {
+        x: 1,
+        y: 2,
+        width: 300,
+        height: 200,
+        collapsed: true,
+      },
+      "zone:workspace": { x: 0, y: 0, width: -1, height: 10, collapsed: "yes" },
+      "entity:agents.coder": { x: 7, y: 8 },
+      run: { x: 9, y: 9 },
+    },
+  });
+  assert.deepEqual(layout.nodes["zone:sandboxes.a"], {
+    x: 1,
+    y: 2,
+    width: 300,
+    height: 200,
+    collapsed: true,
+  });
+  assert.deepEqual(layout.nodes["zone:workspace"], { x: 0, y: 0 });
+  const renamed = updateRecipeEditorSceneLayout(
+    updateRecipeEditorSceneLayout(layout, {
+      type: "rename-zone",
+      zone: "sandboxes.a",
+      to: "b",
+    }),
+    { type: "rename-entity", entity: "agents.coder", to: "writer" },
+  );
+  assert.deepEqual(Object.keys(renamed.nodes).sort(), [
+    "entity:agents.writer",
+    "run",
+    "zone:sandboxes.b",
+    "zone:workspace",
+  ]);
+  const removed = updateRecipeEditorSceneLayout(
+    updateRecipeEditorSceneLayout(renamed, {
+      type: "remove-zone",
+      zone: "sandboxes.b",
+    }),
+    { type: "remove-entity", entity: "agents.writer" },
+  );
+  assert.deepEqual(Object.keys(removed.nodes).sort(), [
+    "run",
+    "zone:workspace",
+  ]);
+  assert.equal(
+    updateRecipeEditorSceneLayout(layout, {
+      type: "place-task",
+      key: "a",
+      zone: "sandbox",
+    }),
+    layout,
+  );
 });

@@ -84,6 +84,8 @@ export interface RecipeEditorSession {
   editScene(
     operations: readonly RecipeEditorSceneOperation[],
     revision: number,
+    /** Positions of the moved nodes, saved in the same undo step. */
+    positions?: RecipeEditorLayout["nodes"],
   ): Promise<RecipeEditorState>;
   replaceText(
     role: RecipeEditorRole,

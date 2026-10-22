@@ -85,12 +85,20 @@ export type DocumentMutation =
       readonly to: string;
     };
 
-/** Canvas positions saved beside a recipe in `<name>.editor.json`. */
+export interface RecipeEditorLayoutNode {
+  readonly x: number;
+  readonly y: number;
+  /** Size of a zone the user resized. */
+  readonly width?: number;
+  readonly height?: number;
+  readonly collapsed?: boolean;
+}
+
+/** Canvas layout saved beside a recipe in `<name>.editor.json`; version 1 files are read as task positions. */
 export interface RecipeEditorLayout {
-  readonly version: 1;
-  readonly nodes: Readonly<
-    Record<string, { readonly x: number; readonly y: number }>
-  >;
+  readonly version: 2;
+  /** Keyed by scene id (`task:<key>`, `zone:<id>`, `entity:<id>`, `run`); nodes inside a zone are relative to it. */
+  readonly nodes: Readonly<Record<string, RecipeEditorLayoutNode>>;
 }
 
 export type RecipeEditorPlanner = (

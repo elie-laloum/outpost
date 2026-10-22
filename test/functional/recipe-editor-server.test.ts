@@ -226,7 +226,7 @@ test("the editor API opens, edits and saves drafts with conflict detection", asy
     JSON.parse(
       await readFile(join(project, "recipes", "hello.editor.json"), "utf8"),
     ),
-    { version: 1, nodes: { show: { x: 1, y: 2 } } },
+    { version: 2, nodes: { "task:show": { x: 1, y: 2 } } },
   );
   state = (
     await api<RecipeEditorState>("/api/project/undo", {

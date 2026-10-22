@@ -49,14 +49,14 @@ export function placeGraph(
   layout: RecipeEditorLayout,
 ): Record<string, Position> {
   const saved = graph.nodes.flatMap((node) => {
-    const position = layout.nodes[node.id];
+    const position = layout.nodes[`task:${node.id}`];
     return position ? [position] : [];
   });
   if (!saved.length) return arrangeGraph(graph);
   const positions: Record<string, Position> = {};
   for (const node of graph.nodes) {
-    const position = layout.nodes[node.id];
-    if (position) positions[node.id] = position;
+    const position = layout.nodes[`task:${node.id}`];
+    if (position) positions[node.id] = { x: position.x, y: position.y };
   }
   const occupied = (candidate: Position) =>
     Object.values(positions).some(

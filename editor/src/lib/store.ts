@@ -148,10 +148,15 @@ export const useEditor = create<EditorStore>()((set, get) => {
       mutate("/api/project/layout", (revision) => ({
         revision,
         layout: {
-          version: 1,
+          version: 2,
           nodes: {
             ...(replace ? {} : get().state?.layout.nodes),
-            ...positions,
+            ...Object.fromEntries(
+              Object.entries(positions).map(([id, position]) => [
+                `task:${id}`,
+                position,
+              ]),
+            ),
           },
         },
       })),

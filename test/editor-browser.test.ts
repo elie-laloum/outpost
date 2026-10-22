@@ -123,7 +123,7 @@ tasks:
     );
     const layout = await waitForFile(
       join(project, "recipe.editor.json"),
-      (text) => text.includes('"build"'),
+      (text) => text.includes('"task:build"'),
     );
     assert.match(saved, /^# Build before anything else\.$/m);
     assert.match(saved, /- key: build # compile$/m);
@@ -141,7 +141,7 @@ tasks:
       nodes: Record<string, { x: number; y: number }>;
     };
     assert.ok(
-      nodes.build && nodes.build.x > 0,
+      nodes["task:build"] && nodes["task:build"].x > 0,
       "the moved node keeps its place",
     );
     assert.deepEqual(errors, []);

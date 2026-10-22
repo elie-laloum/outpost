@@ -10,6 +10,7 @@ import {
   recipeEditorGraph,
   recipeEditorLayout,
   updateRecipeEditorLayout,
+  updateRecipeEditorSceneLayout,
 } from "../../domain/recipes/editor.ts";
 import { planRecipeSceneEdit } from "../../domain/recipes/editor-scene-edit.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
@@ -52,7 +53,7 @@ import type {
   RecipeEditorState,
 } from "./session.types.ts";
 
-const emptyLayout: RecipeEditorLayout = { version: 1, nodes: {} };
+const emptyLayout: RecipeEditorLayout = { version: 2, nodes: {} };
 
 function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -103,9 +104,19 @@ function serializeLayout(layout: RecipeEditorLayout): string {
   const nodes = Object.fromEntries(
     Object.entries(layout.nodes)
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      .map(([key, { x, y }]) => [key, { x: Math.round(x), y: Math.round(y) }]),
+      .map(([key, { x, y, width, height, collapsed }]) => [
+        key,
+        {
+          x: Math.round(x),
+          y: Math.round(y),
+          ...(width && height
+            ? { width: Math.round(width), height: Math.round(height) }
+            : {}),
+          ...(collapsed ? { collapsed } : {}),
+        },
+      ]),
   );
-  return `${JSON.stringify({ version: 1, nodes }, null, 2)}\n`;
+  return `${JSON.stringify({ version: 2, nodes }, null, 2)}\n`;
 }
 
 /** Removes the location the engine appends or prepends, which the diagnostic carries separately. */
@@ -370,7 +381,10 @@ export function createRecipeEditorSession(
     return item;
   }
 
-  function editScene(operations: readonly RecipeEditorSceneOperation[]): void {
+  function editScene(
+    operations: readonly RecipeEditorSceneOperation[],
+    positions: RecipeEditorLayout["nodes"],
+  ): void {
     const drafts = {
       recipe: editableTarget("recipe"),
       config: editableTarget("config"),
@@ -392,7 +406,9 @@ export function createRecipeEditorSession(
         item.text = serializeEditableYaml(item.editable!);
         parse(item);
       }
+      layout = updateRecipeEditorSceneLayout(layout, operation);
     }
+    layout = { version: 2, nodes: { ...layout.nodes, ...positions } };
   }
 
   function editDraft(
@@ -503,7 +519,8 @@ export function createRecipeEditorSession(
       }),
     edit: (role, operations, seen) =>
       change(seen, () => editDraft(role, operations)),
-    editScene: (operations, seen) => change(seen, () => editScene(operations)),
+    editScene: (operations, seen, positions = {}) =>
+      change(seen, () => editScene(operations, positions)),
     replaceText: (role, text, seen) =>
       change(seen, () => {
         if (Buffer.byteLength(text, "utf8") > recipeLimits.bytes)

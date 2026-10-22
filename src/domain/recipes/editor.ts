@@ -10,12 +10,17 @@ import type {
   RecipeEditorEdge,
   RecipeEditorGraph,
   RecipeEditorLayout,
+  RecipeEditorLayoutNode,
   RecipeEditorNode,
   RecipeEditorOperation,
   RecipeEditorPlanner,
   RecipeEditorPlanners,
   RecipeTaskRename,
 } from "./editor.types.ts";
+import type {
+  RecipeEditorSceneLayoutUpdates,
+  RecipeEditorSceneOperation,
+} from "./editor-scene.types.ts";
 
 function tasksOf(document: unknown): readonly unknown[] {
   if (!recipeObject(document) || !Array.isArray(document.tasks)) return [];
@@ -384,18 +389,57 @@ export function planRecipeEdit(
   return plan(document, operation);
 }
 
-/** Reads a saved layout, keeping only well-formed finite positions. */
-export function recipeEditorLayout(value: unknown): RecipeEditorLayout {
-  if (!recipeObject(value) || value.version !== 1 || !recipeObject(value.nodes))
-    return { version: 1, nodes: {} };
-  const nodes = Object.entries(value.nodes).flatMap(([key, position]) =>
-    recipeObject(position) &&
-    Number.isFinite(position.x) &&
-    Number.isFinite(position.y)
-      ? [[key, { x: Number(position.x), y: Number(position.y) }] as const]
-      : [],
+const emptyLayout: RecipeEditorLayout = { version: 2, nodes: {} };
+
+function layoutNode(value: unknown): RecipeEditorLayoutNode | undefined {
+  if (
+    !recipeObject(value) ||
+    !Number.isFinite(value.x) ||
+    !Number.isFinite(value.y)
+  )
+    return undefined;
+  const sized = [value.width, value.height].every(
+    (size) => Number.isFinite(size) && Number(size) > 0,
   );
-  return { version: 1, nodes: Object.fromEntries(nodes) };
+  return {
+    x: Number(value.x),
+    y: Number(value.y),
+    ...(sized
+      ? { width: Number(value.width), height: Number(value.height) }
+      : {}),
+    ...(value.collapsed === true ? { collapsed: true } : {}),
+  };
+}
+
+/** Reads a saved layout, keeping only well-formed entries; version 1 keys become task ids. */
+export function recipeEditorLayout(value: unknown): RecipeEditorLayout {
+  if (!recipeObject(value) || !recipeObject(value.nodes)) return emptyLayout;
+  const legacy = value.version === 1;
+  if (!legacy && value.version !== 2) return emptyLayout;
+  const nodes = Object.entries(value.nodes).flatMap(([key, entry]) => {
+    const node = layoutNode(entry);
+    return node ? [[legacy ? `task:${key}` : key, node] as const] : [];
+  });
+  return { version: 2, nodes: Object.fromEntries(nodes) };
+}
+
+function renameNode(
+  layout: RecipeEditorLayout,
+  from: string,
+  to: string,
+): RecipeEditorLayout {
+  const node = layout.nodes[from];
+  if (node === undefined) return layout;
+  const { [from]: _renamed, ...nodes } = layout.nodes;
+  return { version: 2, nodes: { ...nodes, [to]: node } };
+}
+
+function removeNode(
+  layout: RecipeEditorLayout,
+  id: string,
+): RecipeEditorLayout {
+  const { [id]: _removed, ...nodes } = layout.nodes;
+  return { version: 2, nodes };
 }
 
 /** Keeps saved positions aligned with a rename or removal planned on the recipe. */
@@ -403,13 +447,32 @@ export function updateRecipeEditorLayout(
   layout: RecipeEditorLayout,
   operation: RecipeEditorOperation,
 ): RecipeEditorLayout {
-  if (operation.type === "remove-task") {
-    const { [operation.key]: _removed, ...nodes } = layout.nodes;
-    return { version: 1, nodes };
-  }
+  if (operation.type === "remove-task")
+    return removeNode(layout, `task:${operation.key}`);
   if (operation.type !== "rename-task") return layout;
-  const position = layout.nodes[operation.key];
-  if (position === undefined) return layout;
-  const { [operation.key]: _renamed, ...nodes } = layout.nodes;
-  return { version: 1, nodes: { ...nodes, [operation.to]: position } };
+  return renameNode(layout, `task:${operation.key}`, `task:${operation.to}`);
+}
+
+function sibling(id: string, name: string): string {
+  return `${id.slice(0, id.lastIndexOf(".") + 1)}${name}`;
+}
+
+const sceneLayoutUpdates: RecipeEditorSceneLayoutUpdates = {
+  "remove-zone": (layout, { zone }) => removeNode(layout, `zone:${zone}`),
+  "remove-entity": (layout, { entity }) =>
+    removeNode(layout, `entity:${entity}`),
+  "rename-zone": (layout, { zone, to }) =>
+    renameNode(layout, `zone:${zone}`, `zone:${sibling(zone, to)}`),
+  "rename-entity": (layout, { entity, to }) =>
+    renameNode(layout, `entity:${entity}`, `entity:${sibling(entity, to)}`),
+};
+
+/** Keeps saved positions aligned with a zone or entity rename or removal. */
+export function updateRecipeEditorSceneLayout(
+  layout: RecipeEditorLayout,
+  operation: RecipeEditorSceneOperation,
+): RecipeEditorLayout {
+  const update = sceneLayoutUpdates[operation.type] as
+    RecipeEditorSceneLayoutUpdates["rename-zone"] | undefined;
+  return update ? update(layout, operation as never) : layout;
 }
