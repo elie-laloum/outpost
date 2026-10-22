@@ -1,7 +1,6 @@
 import { mkdtemp, rm, writeFile, realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { TestContext } from "node:test";
 import type {
   CliAgent,
   AgentEvent,
@@ -29,7 +28,10 @@ export function conversationStore(format: keyof typeof conversationStores) {
 export const linuxHostMounts =
   process.platform === "win32" ? { label: false as const } : {};
 
-export async function repository(t: TestContext): Promise<string> {
+/** Creates a committed repository removed by the caller's cleanup scope. */
+export async function repository(t: {
+  after(cleanup: () => Promise<unknown>): void;
+}): Promise<string> {
   const path = await mkdtemp(join(tmpdir(), "outpost-test-"));
   t.after(() => rm(path, { recursive: true, force: true, maxRetries: 5 }));
   await git(path, ["init", "-b", "main"]);

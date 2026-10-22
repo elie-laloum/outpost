@@ -39,6 +39,10 @@ import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { conversationStore, repository, scripted } from "./helpers.ts";
 import { defineLeaseContractSuite } from "./fixtures/lease-contract-suite.ts";
+import {
+  defineWorkspaceContractSuite,
+  workspaceContractTargets,
+} from "./fixtures/workspace-contract.ts";
 import type {
   AgentEvent,
   AgentInput,
@@ -62,6 +66,26 @@ if (process.env.OUTPOST_CONTAINER_ENGINE)
       networks: "none",
     }),
   );
+
+if (process.env.OUTPOST_CONTAINER_ENGINE) {
+  const factory =
+    process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+      ? createPodmanSandboxProvider
+      : createDockerSandboxProvider;
+  for (const target of workspaceContractTargets({
+    name: process.env.OUTPOST_CONTAINER_ENGINE,
+    node: "node",
+    gitProvider: () => factory({ image: containerImage, networks: "none" }),
+    fileProvider: () =>
+      factory({
+        image:
+          process.env.OUTPOST_FILE_CONTAINER_IMAGE ??
+          "docker.io/library/node:24-slim",
+        networks: "none",
+      }),
+  }))
+    defineWorkspaceContractSuite(target);
+}
 
 test(
   "container tmpfs homes are private and writable by the configured user",
