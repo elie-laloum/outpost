@@ -1,5 +1,9 @@
 import type { RecipeSourcePath } from "./expressions.types.ts";
-import type { RecipeEditorEdge, RecipeEditorNode } from "./editor.types.ts";
+import type {
+  DocumentMutation,
+  RecipeEditorEdge,
+  RecipeEditorNode,
+} from "./editor.types.ts";
 import type { recipeEditorFeatures } from "./editor-scene.constants.ts";
 
 export type RecipeEditorFeature = keyof typeof recipeEditorFeatures;
@@ -101,4 +105,70 @@ export type RecipeEditorPlacers = {
     item: Extract<RecipeEditorPlacementItem, { type: Type }>,
     target: RecipeEditorZone | undefined,
   ) => RecipeEditorPlacement;
+};
+
+/** A canvas edit that may change the recipe and its configuration together. */
+export type RecipeEditorSceneOperation =
+  | { readonly type: "place-task"; readonly key: string; readonly zone: string }
+  | {
+      readonly type: "place-sandbox";
+      readonly sandbox: string;
+      readonly workspace: string;
+    }
+  | {
+      readonly type: "add-zone";
+      readonly kind: RecipeEditorZone["kind"];
+      /** Omitted to declare the configuration `workspace` or `sandbox`. */
+      readonly name?: string;
+      readonly declaration: Readonly<Record<string, unknown>>;
+      /** Workspace zone a new named sandbox opens. */
+      readonly workspace?: string;
+    }
+  | { readonly type: "remove-zone"; readonly zone: string }
+  | { readonly type: "rename-zone"; readonly zone: string; readonly to: string }
+  | {
+      readonly type: "set-feature";
+      readonly zone: string;
+      readonly feature: RecipeEditorFeature;
+      /** Omitted to remove the feature. */
+      readonly value?: unknown;
+    }
+  | {
+      readonly type: "add-entity";
+      readonly family: string;
+      readonly name: string;
+      readonly declaration: unknown;
+    }
+  | { readonly type: "remove-entity"; readonly entity: string }
+  | {
+      readonly type: "rename-entity";
+      readonly entity: string;
+      readonly to: string;
+    }
+  | {
+      /** Moves an inline component to a named configuration entity referenced in its place. */
+      readonly type: "extract";
+      readonly role: "recipe" | "config";
+      readonly path: RecipeSourcePath;
+      readonly family: string;
+      readonly name: string;
+    };
+
+export interface RecipeEditorSceneDocuments {
+  readonly recipe: unknown;
+  readonly config: unknown;
+}
+
+export interface RecipeEditorSceneMutations {
+  readonly recipe: readonly DocumentMutation[];
+  readonly config: readonly DocumentMutation[];
+}
+
+/** One planner per scene operation type. */
+export type RecipeEditorScenePlanners = {
+  readonly [Type in RecipeEditorSceneOperation["type"]]: (
+    documents: RecipeEditorSceneDocuments,
+    operation: Extract<RecipeEditorSceneOperation, { type: Type }>,
+    compatibility: RecipeEditorCompatibility,
+  ) => RecipeEditorSceneMutations;
 };

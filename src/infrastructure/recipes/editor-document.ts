@@ -1,11 +1,13 @@
 import {
   isCollection,
+  isMap,
   isScalar,
   isSeq,
   LineCounter,
   parseDocument,
   visit,
   type Document,
+  type Pair,
   type YAMLSeq,
 } from "yaml";
 import { configurationError } from "../../domain/configuration-diagnostic.ts";
@@ -75,7 +77,20 @@ function created(
   value: unknown,
   flow: boolean | undefined,
 ) {
-  return document.createNode(value, flow ? { flow: true } : {});
+  const node = document.createNode(value, flow ? { flow: true } : {});
+  // Component references read as one value, so they stay inline in block maps.
+  visit(node, {
+    Map: (_, map) => {
+      const [pair] = map.items;
+      if (
+        map.items.length === 1 &&
+        isScalar(pair?.key) &&
+        pair.key.value === "$ref"
+      )
+        map.flow = true;
+    },
+  });
+  return node;
 }
 
 const mutators: DocumentMutators = {
@@ -108,6 +123,25 @@ const mutators: DocumentMutators = {
       );
     const [item] = list.items.splice(from, 1);
     list.items.splice(to, 0, item);
+  },
+  rename: (editable, { path, to }) => {
+    const parent = editable.document.getIn(path.slice(0, -1), true);
+    const key = path.at(-1);
+    const keyOf = (pair: Pair) =>
+      isScalar(pair.key) ? pair.key.value : pair.key;
+    const pair = isMap(parent)
+      ? parent.items.find((item) => keyOf(item) === key)
+      : undefined;
+    if (!isMap(parent) || !pair)
+      throw configurationError("Unknown map entry", [...path], "invalid-value");
+    if (parent.items.some((item) => keyOf(item) === to))
+      throw configurationError(
+        `${to} already exists`,
+        [...path.slice(0, -1), to],
+        "duplicate-key",
+      );
+    if (isScalar(pair.key)) pair.key.value = to;
+    else pair.key = editable.document.createNode(to);
   },
 };
 

@@ -4,6 +4,7 @@ import type {
   RecipeEditorOperation,
 } from "../../domain/recipes/editor.types.ts";
 import type { RecipeSourcePath } from "../../domain/recipes/expressions.types.ts";
+import type { RecipeEditorSceneOperation } from "../../domain/recipes/editor-scene.types.ts";
 import type { EditorRoot } from "../../infrastructure/editor-files.types.ts";
 import type { EditableYaml } from "../../infrastructure/recipes/editor-document.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
@@ -77,6 +78,11 @@ export interface RecipeEditorSession {
   edit(
     role: RecipeEditorRole,
     operations: readonly RecipeEditorOperation[],
+    revision: number,
+  ): Promise<RecipeEditorState>;
+  /** Applies canvas edits to the recipe and configuration together, as one undo step. */
+  editScene(
+    operations: readonly RecipeEditorSceneOperation[],
     revision: number,
   ): Promise<RecipeEditorState>;
   replaceText(

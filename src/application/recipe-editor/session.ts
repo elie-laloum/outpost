@@ -11,6 +11,7 @@ import {
   recipeEditorLayout,
   updateRecipeEditorLayout,
 } from "../../domain/recipes/editor.ts";
+import { planRecipeSceneEdit } from "../../domain/recipes/editor-scene-edit.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import {
   readEditorFile,
@@ -25,6 +26,7 @@ import {
 } from "../../infrastructure/recipes/editor-document.ts";
 import { inspectRecipeExecution } from "../recipes/plan.ts";
 import { validateRecipeProject } from "../recipes/project.ts";
+import { recipeEditorCompatibility } from "./compatibility.ts";
 import {
   recipeEditorDefaults,
   recipeEditorStarters,
@@ -33,6 +35,10 @@ import type {
   RecipeEditorLayout,
   RecipeEditorOperation,
 } from "../../domain/recipes/editor.types.ts";
+import type {
+  RecipeEditorCompatibility,
+  RecipeEditorSceneOperation,
+} from "../../domain/recipes/editor-scene.types.ts";
 import type {
   RecipeEditorDiagnostic,
   RecipeEditorDraft,
@@ -143,6 +149,7 @@ export function createRecipeEditorSession(
   let layoutBase: string | null = null;
   let revision = 0;
   let diagnostics: readonly RecipeEditorDiagnostic[] = [];
+  let compatibility: RecipeEditorCompatibility | undefined;
   const undoStack: RecipeEditorSnapshot[] = [];
   const redoStack: RecipeEditorSnapshot[] = [];
   const listeners = new Set<(state: RecipeEditorState) => void>();
@@ -343,10 +350,7 @@ export function createRecipeEditorSession(
     return item;
   }
 
-  function editDraft(
-    role: RecipeEditorRole,
-    operations: readonly RecipeEditorOperation[],
-  ): void {
+  function editableTarget(role: RecipeEditorRole): RecipeEditorDraft {
     const item = target(role);
     if (!item.editable)
       throw configurationError(
@@ -363,6 +367,39 @@ export function createRecipeEditorSession(
         "unsupported-version",
         "Edit the YAML text directly, or declare version: 3 after converting the file.",
       );
+    return item;
+  }
+
+  function editScene(operations: readonly RecipeEditorSceneOperation[]): void {
+    const drafts = {
+      recipe: editableTarget("recipe"),
+      config: editableTarget("config"),
+    };
+    compatibility ??= recipeEditorCompatibility(options.registry);
+    for (const operation of operations) {
+      const planned = planRecipeSceneEdit(
+        {
+          recipe: editableYamlValue(drafts.recipe.editable!),
+          config: editableYamlValue(drafts.config.editable!),
+        },
+        operation,
+        compatibility,
+      );
+      for (const role of ["recipe", "config"] as const) {
+        if (!planned[role].length) continue;
+        const item = drafts[role];
+        applyDocumentMutations(item.editable!, planned[role]);
+        item.text = serializeEditableYaml(item.editable!);
+        parse(item);
+      }
+    }
+  }
+
+  function editDraft(
+    role: RecipeEditorRole,
+    operations: readonly RecipeEditorOperation[],
+  ): void {
+    const item = editableTarget(role);
     for (const operation of operations) {
       if (role === "config" && operation.type !== "set")
         throw configurationError(
@@ -466,6 +503,7 @@ export function createRecipeEditorSession(
       }),
     edit: (role, operations, seen) =>
       change(seen, () => editDraft(role, operations)),
+    editScene: (operations, seen) => change(seen, () => editScene(operations)),
     replaceText: (role, text, seen) =>
       change(seen, () => {
         if (Buffer.byteLength(text, "utf8") > recipeLimits.bytes)

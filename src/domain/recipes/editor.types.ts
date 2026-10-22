@@ -77,6 +77,12 @@ export type DocumentMutation =
       readonly path: RecipeSourcePath;
       readonly from: number;
       readonly to: number;
+    }
+  /** Renames the map key at the end of `path`, keeping its value, comments and position. */
+  | {
+      readonly op: "rename";
+      readonly path: RecipeSourcePath;
+      readonly to: string;
     };
 
 /** Canvas positions saved beside a recipe in `<name>.editor.json`. */
