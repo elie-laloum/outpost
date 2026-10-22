@@ -25,10 +25,11 @@ outpost recipe run --file recipe.yaml --config outpost.yaml \
 | `--interactive`    | Automatic on a terminal without `--json`   | Collect dialogue answers and explicit unsigned gate decisions on stdin, display their prompts on stderr and resume. Requires terminal stdin and stderr and a YAML configuration. |
 | `--no-interactive` | Off                                        | Leave questions pending for a later invocation or an external client.                                                                                                            |
 | `--actor`          | Sole declared actor, otherwise a selection | Trusted local actor submitting answers; the engine checks task authorization.                                                                                                    |
+| `--events`         | None                                       | Append each observation event to this file as one JSON line, after redaction. Requires a YAML configuration.                                                                     |
 
 With terminal stdin and stderr, run handles interactive questions without a TypeScript runner. Choices use a selection menu; free-text questions use a text prompt. Each answer is persisted before another question is displayed. `--json` disables automatic prompting; explicitly combine `--interactive --json` to keep prompts on stderr and receive one final JSON report on stdout. Without a terminal, execution leaves input requests pending.
 
-Paths are relative to the current directory. Apart from dialogue prompts, successful execution is silent unless observation or reports are declared in configuration version 2 or 3. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr.
+Paths are relative to the current directory. `--events` creates the file with owner-only permissions when it is missing and appends to it otherwise; events carry the values the run resolved only after redaction. Apart from dialogue prompts, successful execution is silent unless observation or reports are declared in configuration version 2 or 3. `--json` explicitly requests one final JSON report; failures still print diagnostics on stderr.
 
 Text fields are limited to 16,384 characters with a truncation marker. Command diagnostics include the original exit status, stdout and stderr.
 
@@ -49,7 +50,7 @@ outpost recipe decide --file recipe.yaml --config outpost.yaml --run-id change -
 
 Answer and decide read one native WorkflowAnswer or WorkflowDecision from a bounded JSON file; signed gates require the original proof. `resume --input` must match the persisted inputs; omit it to reload them. Run also accepts `--run-id` for a new checkpoint. Run, resume, answer and decide print a final report only when declared or requested through `--json`; status always prints its requested result. See [durable recipes](../recipe-durability/) for state, ownership and recovery behavior.
 
-Resume, answer and decide accept the same `--interactive`, `--no-interactive` and `--actor` flags. Ctrl+C or closed terminal input while a question is displayed leaves it pending and exits 130; resume asks it again without replaying completed turns.
+Resume, answer and decide accept the same `--interactive`, `--no-interactive`, `--actor` and `--events` flags. Ctrl+C or closed terminal input while a question is displayed leaves it pending and exits 130; resume asks it again without replaying completed turns.
 
 Actor selection declares a trusted local identity, not a login.
 
@@ -85,10 +86,12 @@ outpost recipe init --file recipe.yaml --config outpost.yaml \
 Validate YAML, dependencies and references without importing configuration, resolving input values or allocating a sandbox. Use this in contribution checks and before running a downloaded recipe.
 
 ```sh
-outpost recipe validate --file recipe.yaml [--config outpost.yaml] [--json]
+outpost recipe validate --file recipe.yaml [--config outpost.yaml] [--extensions] [--json]
 ```
 
 `--file` is required. Optional `--config` validates a YAML configuration and required agent roles without allocating resources or reading declared secret values; executable configuration modules are refused by this command. `--json` reports the recipe name, format version, metadata, declared input definitions, required agent names and ordered task keys. Validation does not execute tools or verify their installation.
+
+`--extensions` requires `--config`. It also imports every declared [extension](../recipe-extensions/) module and checks that each export matches its kind and contract, then lists the loaded extensions (`extensions` in the JSON report). Importing a module runs its code, so use this flag only on modules you trust.
 
 A rejected file reports the line and column of the faulty value. When the correction is known, a `Hint:` line follows the message:
 
@@ -98,6 +101,25 @@ Hint: Remove unexpected or move it under the section that declares it.
 ```
 
 With `--json`, the `error` object carries the same `code`, `path`, `message`, `hint`, `file`, `line` and `column` fields. `code` names the kind of problem independently of the wording, for example `unknown-field`, `missing-field`, `invalid-value`, `unknown-reference`, `missing-dependency`, `unsupported-binding` or `git-workspace-only`. An error about a task, such as a Git-only feature in a file workspace, points at the recipe file even when it is detected while reading the execution configuration.
+
+## `outpost recipe editor`
+
+Open the [local recipe editor](../recipe-editor/) on a directory. It serves the recipe, configuration and extension files below that directory and runs recipes through the same commands as this page.
+
+```sh
+outpost recipe editor --file recipe.yaml --config outpost.yaml [--no-open]
+```
+
+| Flag          | Default           | Effect                                                                           |
+| ------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `--directory` | Current directory | Directory the editor may read and write; files outside it are refused.           |
+| `--file`      | None              | Recipe to open, or the path suggested for a new recipe when it does not exist.   |
+| `--config`    | None              | YAML configuration to open with the recipe, or the path suggested for a new one. |
+| `--port`      | A free port       | Loopback port to listen on.                                                      |
+| `--no-open`   | Off               | Print the address without opening the default browser.                           |
+| `--json`      | Off               | Print `{ "url", "directory" }` as one JSON line instead of the text banner.      |
+
+The editor listens on `127.0.0.1` until SIGINT or SIGTERM, then stops an active run and exits. The printed address contains the session token; anyone who has it can edit and run recipes in the directory while the editor runs.
 
 ## `outpost recipe list` and `outpost recipe fetch`
 

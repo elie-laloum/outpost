@@ -72,6 +72,7 @@ In the report, `outputs.read.stdout` contains `Hello from Outpost!`. The workspa
 | Pass inputs and results between tasks                      | [Compose steps](../recipe-workflows/)           |
 | See progress and final results                             | [Follow a run](../recipe-observation/)          |
 | Pause for approval and resume                              | [Save progress](../recipe-durability/)          |
+| Edit the task graph and run it from a browser              | [Edit recipes visually](../recipe-editor/)      |
 
 The [recipe CLI reference](../recipe-cli/) lists commands and flags.
 

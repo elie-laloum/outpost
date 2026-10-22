@@ -51,6 +51,7 @@ This root brief applies everywhere; area briefs add rules and never relax it. Ke
 | `src/providers/`        | Sandbox allocation, command execution, file transfer and disposal.                           |
 | `src/infrastructure/`   | Processes, binary streams, Git, files, native conversation storage and logging.              |
 | `src/cli/`              | Argument handling, project scaffolding and image commands.                                   |
+| `editor/`               | Recipe editor web app (TanStack Start SPA), built into `dist/editor` for `recipe editor`.    |
 
 `scripts/check-architecture.mjs` enforces these internal dependency directions:
 
@@ -107,11 +108,12 @@ Install root dependencies with `bun install --frozen-lockfile`; install document
 | Public API, exports, packaging or dependencies                        | Also `bun run test:package`.                                                                                   |
 | Container commands, transfers, mounts, lifecycle or image scaffolding | Also real Docker and Podman tests and the PTY fixture using the setup in `.github/workflows/ci.yml`.           |
 | BullMQ queue state, distribution or connection ownership              | Also `bun run test:redis` against standalone Redis using the setup in `.github/workflows/ci.yml`.              |
+| Recipe editor app, its server routes or editor runs                   | Also `bun run build`, then `bun run test:editor` after `bunx playwright-core install chromium`.                |
 | API documentation or changelog sources                                | `bun run docs:sync`, then inspect generated changes.                                                           |
 | Documentation content or site configuration                           | `bun run build`, `bun run docs:check`, `bun run docs:build`, `bun run docs:test`, `bun run docs:test:browser`. |
 | Any changed tracked content                                           | Prettier check on changed files; full `bun run format:check` before release.                                   |
 
-CI runs the full unit/functional suite with coverage on Linux and in three test shards without instrumentation on Windows and macOS. Static checks run once on Linux; package consumption and recipe examples run on all three systems. Real Docker/Podman execution, Redis, documentation and dependency audits remain required. New pushes cancel superseded branch/PR runs; release-tag verification is not cancelled. The `Images` workflow builds and publishes agent images and the egress companion together, testing the same image bytes with Docker and rootless Podman on amd64/arm64. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
+CI runs the full unit/functional suite with coverage on Linux and in three test shards without instrumentation on Windows and macOS. Static checks run once on Linux; package consumption and recipe examples run on all three systems. The built recipe editor runs in headless Chromium on Linux. Real Docker/Podman execution, Redis, documentation and dependency audits remain required. New pushes cancel superseded branch/PR runs; release-tag verification is not cancelled. The `Images` workflow builds and publishes agent images and the egress companion together, testing the same image bytes with Docker and rootless Podman on amd64/arm64. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
 
 ## Generated files and changelogs
 

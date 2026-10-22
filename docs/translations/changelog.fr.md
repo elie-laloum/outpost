@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Ajouter `outpost recipe editor`, un éditeur web local de recettes YAML construit avec React Flow. Il affiche les tâches et leurs dépendances sous forme de graphe, édite les recettes au format 3 et les configurations en version 3 par le canvas, des formulaires et des vues YAML en conservant commentaires et mise en forme, valide les brouillons non enregistrés sur place et enregistre la position des nœuds dans un fichier `recipe.editor.json` à côté de la recette. Il déclare et édite les modules d’extensions, affiche le plan statique, et lance, suit, arrête et reprend des exécutions par la CLI dans un processus enfant, avec réponses et décisions d’approbation non signées pour les exécutions durables. Le serveur écoute en boucle locale derrière un jeton propre à la session, vérifie Host et Origin et reste confiné à un dossier, sans `.git`. Le nouveau guide « Éditer une recette visuellement » le décrit.
+- Ajouter `recipe validate --extensions`, qui importe les modules d’extensions déclarés et vérifie leurs exports selon leur type et leur contrat. L’option exécute le code des modules et exige `--config` ; sans elle, la validation n’importe toujours aucune extension.
+- Ajouter `--events <fichier>` à `recipe run`, `resume`, `answer` et `decide` pour ajouter les événements d’observation masqués sous forme de lignes JSON, et `sinks` à `RecipeRunOptions` et `RecipeResumeOptions` pour les recevoir dans le code.
+- Ajouter à `validateRecipeProject()` un argument facultatif `RecipeProjectSources` qui valide le texte de la recette et de la configuration à la place des fichiers enregistrés, avec des diagnostics toujours situés dans ces fichiers.
+- Signaler les clés de tâches en double, les dépendances inconnues et les cycles de dépendances à la ligne et à la colonne de la tâche qui les déclare.
+- Corriger le masquage des secrets résolus après le début d’une exécution : les hubs d’observation enfants lisent désormais les motifs de leur propriétaire à chaque événement, afin que les variables de sandbox lues depuis l’environnement n’atteignent plus en clair les récepteurs d’observation des recettes configurées en mode fichiers.
+
 ## 14.0.0
 
 - **Rupture :** Sortir la spéculation de l’expérimental. Importez `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` et leurs types depuis `@elie-laloum/outpost/speculation` ; `/experimental/speculation` est supprimé sans alias. La spéculation YAML n’exige plus `experimental: true` dans la configuration d’exécution, que Firecracker exige toujours. Options, résultats, checkpoints, durabilité et autorisation de récupération restent inchangés.

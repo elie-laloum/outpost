@@ -65,13 +65,14 @@ Dans le rapport, `outputs.read.stdout` contient `Hello from Outpost!`. Le worksp
 
 ## Continuer
 
-| Vous voulez…                                                          | Consultez…                                          |
-| --------------------------------------------------------------------- | --------------------------------------------------- |
-| Conserver les fichiers, copier un dossier ou utiliser une branche Git | [Choisir un workspace](../recipe-workspaces/)       |
-| Ajouter un agent ou passer à Docker                                   | [Configurer l’exécution](../recipe-configuration/)  |
-| Transmettre des paramètres et des résultats                           | [Composer les étapes](../recipe-workflows/)         |
-| Voir la progression et les résultats                                  | [Suivre une exécution](../recipe-observation/)      |
-| Attendre une approbation puis reprendre                               | [Enregistrer la progression](../recipe-durability/) |
+| Vous voulez…                                                          | Consultez…                                           |
+| --------------------------------------------------------------------- | ---------------------------------------------------- |
+| Conserver les fichiers, copier un dossier ou utiliser une branche Git | [Choisir un workspace](../recipe-workspaces/)        |
+| Ajouter un agent ou passer à Docker                                   | [Configurer l’exécution](../recipe-configuration/)   |
+| Transmettre des paramètres et des résultats                           | [Composer les étapes](../recipe-workflows/)          |
+| Voir la progression et les résultats                                  | [Suivre une exécution](../recipe-observation/)       |
+| Attendre une approbation puis reprendre                               | [Enregistrer la progression](../recipe-durability/)  |
+| Éditer le graphe des tâches et l’exécuter depuis un navigateur        | [Éditer une recette visuellement](../recipe-editor/) |
 
 La [référence CLI des recettes](../recipe-cli/) décrit les commandes et leurs options.
 

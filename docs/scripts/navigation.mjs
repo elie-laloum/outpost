@@ -136,6 +136,7 @@ export const tiers = [
           "guide/recipe-harness",
           "guide/recipe-extensions",
           "guide/recipe-services",
+          "guide/recipe-editor",
           "guide/sharing-recipes",
         ],
       ],

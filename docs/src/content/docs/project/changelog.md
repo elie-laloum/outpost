@@ -12,6 +12,13 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add `outpost recipe editor`, a local web editor for YAML recipes built with React Flow. It shows tasks and dependencies as a graph, edits format 3 recipes and version 3 configurations through the canvas, forms and YAML views while keeping comments and formatting, validates unsaved drafts in place and saves node positions in a `recipe.editor.json` file beside the recipe. It declares and edits extension modules, shows the static plan, and starts, follows, stops and resumes runs through the CLI in a child process, with answers and unsigned gate decisions for durable runs. The server listens on loopback behind a per-session token, checks Host and Origin and stays confined to one directory without `.git`. The new “Edit recipes visually” guide describes it.
+- Add `recipe validate --extensions`, which imports declared extension modules and checks their exports against their kind and contract. It runs module code and requires `--config`; validation without it still never imports extensions.
+- Add `--events <file>` to `recipe run`, `resume`, `answer` and `decide` to append redacted observation events as JSON lines, and `sinks` to `RecipeRunOptions` and `RecipeResumeOptions` to receive them in code.
+- Add an optional `RecipeProjectSources` argument to `validateRecipeProject()` that validates recipe and configuration text in place of the saved files, with diagnostics still located in those files.
+- Report duplicate task keys, unknown dependencies and dependency cycles at the line and column of the task that declares them.
+- Fix observation redaction of secrets resolved after a run starts: child observation hubs now read their owner's patterns at each event, so sandbox variables read from the environment no longer reach the observation sinks of file-configured recipe runs in clear text.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.
