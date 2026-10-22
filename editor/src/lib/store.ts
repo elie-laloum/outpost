@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ApiError, api, streamEvents } from "./api.ts";
 import { useRuns } from "./runs.ts";
+import type { JsonSchema } from "./schema.ts";
 import type {
   CanvasLayers,
   EditorFailure,
@@ -14,6 +15,7 @@ import type {
 } from "./types.ts";
 
 type Connection = "connecting" | "live" | "offline";
+type SchemaName = "recipe" | "configuration";
 
 interface EditorStore {
   readonly info?: RecipeEditorSessionInfo;
@@ -26,7 +28,10 @@ interface EditorStore {
   /** Scene id of the selected node, such as `task:build` or `zone:sandbox`. */
   readonly selected?: string;
   readonly layers: CanvasLayers;
+  readonly schemas: Partial<Record<SchemaName, JsonSchema>>;
   start(): () => void;
+  /** Fetches a document schema once, for the inspector forms. */
+  loadSchema(name: SchemaName): void;
   /** Accepts a state returned by a request outside the edit queue. */
   receive(state: RecipeEditorState): void;
   select(id: string | undefined): void;
@@ -60,6 +65,7 @@ interface EditorStore {
 }
 
 let queue: Promise<unknown> = Promise.resolve();
+const requested = new Set<SchemaName>();
 
 export const useEditor = create<EditorStore>()((set, get) => {
   /** Every server change bumps the revision, so an equal one is a duplicate of the state held. */
@@ -107,6 +113,7 @@ export const useEditor = create<EditorStore>()((set, get) => {
     connection: "connecting",
     pending: 0,
     layers: { components: true, references: false },
+    schemas: {},
     start() {
       const controller = new AbortController();
       api<RecipeEditorSessionInfo>("/api/session")
@@ -146,6 +153,15 @@ export const useEditor = create<EditorStore>()((set, get) => {
       return () => controller.abort();
     },
     receive: (next) => receive(next),
+    loadSchema(name) {
+      if (requested.has(name)) return;
+      requested.add(name);
+      api<JsonSchema>(`/api/schemas/${name}`).then(
+        (schema) =>
+          set((store) => ({ schemas: { ...store.schemas, [name]: schema } })),
+        () => requested.delete(name),
+      );
+    },
     select: (selected) => set({ selected }),
     toggleLayer: (layer) =>
       set((store) => ({

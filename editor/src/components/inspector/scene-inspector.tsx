@@ -8,8 +8,9 @@ import { useRecipe } from "@/lib/use-recipe";
 import { familyIcon } from "../canvas/entity-node";
 import { zoneLabel } from "../canvas/zone-node";
 import { record } from "./action-forms";
-import { TextField, YamlField, removed } from "./fields";
+import { type FieldValue, TextField, YamlField, removed } from "./fields";
 import { Problems } from "./problems";
+import { DocumentForm } from "./schema-form";
 
 const namePattern = {
   test: /^[A-Za-z0-9_-]+$/,
@@ -21,6 +22,20 @@ function at(value: unknown, path: readonly (string | number)[]): unknown {
     (current, part) => record(current)[String(part)],
     value,
   );
+}
+
+function setter(
+  edit: ReturnType<typeof useRecipe>["edit"],
+  role: "recipe" | "config",
+) {
+  return (path: readonly (string | number)[], value: FieldValue<unknown>) =>
+    void edit(role, [
+      {
+        type: "set",
+        path: [...path],
+        ...(value === removed ? {} : { value }),
+      },
+    ]);
 }
 
 function Header({
@@ -94,19 +109,12 @@ export function ZoneInspector({ zone }: { readonly zone: RecipeEditorZone }) {
           : "Command and agent tasks inside this zone run in its sandbox; drag a task to another sandbox to change its provider."}
       </p>
       <Separator />
-      <YamlField
-        label="Declaration"
-        hint={`Configuration ${zone.path.join(".")}; features dropped on the zone appear here.`}
+      <DocumentForm
+        name="configuration"
         value={at(state?.config?.value, zone.path)}
-        onCommit={(value) =>
-          void edit("config", [
-            {
-              type: "set",
-              path: [...zone.path],
-              ...(value === removed ? {} : { value }),
-            },
-          ])
-        }
+        path={zone.path}
+        set={setter(edit, "config")}
+        hidden={zone.name && zone.kind === "sandbox" ? ["workspace"] : []}
       />
     </fieldset>
   );
@@ -158,18 +166,11 @@ export function EntityInspector({
           : "Nothing references it yet."}
       </p>
       <Separator />
-      <YamlField
-        label="Declaration"
+      <DocumentForm
+        name="configuration"
         value={at(state?.config?.value, [entity.family, entity.name])}
-        onCommit={(value) =>
-          void edit("config", [
-            {
-              type: "set",
-              path: [entity.family, entity.name],
-              ...(value === removed ? {} : { value }),
-            },
-          ])
-        }
+        path={[entity.family, entity.name]}
+        set={setter(edit, "config")}
       />
     </fieldset>
   );
@@ -183,36 +184,24 @@ export function RunInspector() {
     <div className="flex flex-col gap-4">
       <h2 className="text-sm font-medium">Run</h2>
       <Problems problems={problems} />
-      <fieldset disabled={!editable}>
-        <YamlField
-          label="Workflow options"
-          hint="Such as concurrency: 2 or checkpoint: { store: { $ref: stores.state }, runId: main }."
+      <fieldset disabled={!editable} className="flex flex-col gap-3">
+        <h3 className="text-xs font-medium text-muted-foreground">
+          Workflow options
+        </h3>
+        <DocumentForm
+          name="recipe"
           value={record(recipe?.value).workflow}
-          onCommit={(value) =>
-            void edit("recipe", [
-              {
-                type: "set",
-                path: ["workflow"],
-                ...(value === removed ? {} : { value }),
-              },
-            ])
-          }
+          path={["workflow"]}
+          set={setter(edit, "recipe")}
         />
       </fieldset>
+      <Separator />
       <fieldset disabled={!configEditable}>
         <YamlField
           label="Environment"
-          hint="Names the recipe may read, mapped to host variables."
+          hint="Names the recipe may read, mapped to host variables, such as TOKEN: GITHUB_TOKEN."
           value={record(state?.config?.value).environment}
-          onCommit={(value) =>
-            void edit("config", [
-              {
-                type: "set",
-                path: ["environment"],
-                ...(value === removed ? {} : { value }),
-              },
-            ])
-          }
+          onCommit={(value) => setter(edit, "config")(["environment"], value)}
         />
       </fieldset>
     </div>

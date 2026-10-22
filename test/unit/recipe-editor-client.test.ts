@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { validateRecipe } from "../../src/domain/recipe.ts";
 import {
@@ -21,6 +22,16 @@ import {
   zoneFrame,
 } from "../../editor/src/lib/scene-layout.ts";
 import { componentName } from "../../editor/src/lib/scene-templates.ts";
+import {
+  type JsonSchema,
+  constantOf,
+  documentSchema,
+  fieldKind,
+  schemaAt,
+  schemaChoice,
+  schemaProperties,
+  schemaVariant,
+} from "../../editor/src/lib/schema.ts";
 import { recipeEditorGraph } from "../../src/domain/recipes/editor.ts";
 import { recipeEditorScene } from "../../src/domain/recipes/editor-scene.ts";
 import {
@@ -331,4 +342,76 @@ test("run observations become log lines and live task statuses", () => {
     ),
     false,
   );
+});
+
+test("schema forms follow the configuration schema through maps, variants and references", async () => {
+  const root = JSON.parse(
+    await readFile("recipe-configuration.schema.json", "utf8"),
+  ) as JsonSchema;
+  const document = documentSchema(root);
+  assert.ok(document);
+  const box = schemaAt(root, document, ["sandboxes", "box"]);
+  const sandbox = schemaChoice(root, box, { provider: "docker" });
+  assert.equal(sandbox.discriminator, "provider");
+  assert.equal(schemaChoice(root, box).discriminator, "type");
+  assert.ok(sandbox.reference);
+  const docker = schemaVariant(root, sandbox, {
+    provider: "docker",
+    image: "node:24",
+  });
+  assert.equal(constantOf(root, schemaProperties(docker!).provider), "docker");
+  const field = (name: string) =>
+    fieldKind(root, schemaProperties(docker!)[name]);
+  assert.deepEqual(field("image"), { kind: "text" });
+  assert.equal(field("volumes").kind, "yaml");
+  assert.equal(field("egress").kind, "object");
+  assert.equal(
+    schemaVariant(root, sandbox, { $ref: "sandboxProviders.box" }),
+    sandbox.reference,
+  );
+  const workspace = schemaChoice(root, schemaAt(root, document, ["workspace"]));
+  assert.equal(workspace.discriminator, "kind");
+  const retention = schemaAt(root, document, [
+    "workspaces",
+    "notes",
+    "retention",
+  ]);
+  assert.equal(schemaChoice(root, retention).discriminator, "policy");
+  assert.deepEqual(
+    fieldKind(
+      root,
+      schemaAt(root, document, ["workspaces", "notes", "retention", "policy"]),
+    ),
+    { kind: "choice", choices: ["run", "local"] },
+  );
+  const agents = schemaChoice(root, schemaAt(root, document, ["agents", "a"]));
+  const coder = schemaVariant(root, agents, {
+    harness: "codex",
+    authentication: "account",
+  });
+  assert.ok(schemaProperties(coder!).harness);
+  assert.equal(
+    constantOf(
+      root,
+      schemaProperties(
+        schemaVariant(root, agents, { type: "fallback", agents: [], on: [] })!,
+      ).type,
+    ),
+    "fallback",
+  );
+  assert.equal(schemaAt(root, document, ["unknown", "x"]), undefined);
+  assert.deepEqual(
+    fieldKind(root, { type: "array", items: { type: "string" } }),
+    {
+      kind: "list",
+    },
+  );
+  assert.deepEqual(
+    fieldKind(root, { anyOf: [{ const: false }, { const: true }] }),
+    {
+      kind: "boolean",
+    },
+  );
+  assert.deepEqual(fieldKind(root, { type: "integer" }), { kind: "number" });
+  assert.deepEqual(fieldKind(root, {}), { kind: "yaml" });
 });

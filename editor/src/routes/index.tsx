@@ -8,7 +8,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Palette } from "@/components/canvas/palette";
 import { RecipeCanvas } from "@/components/canvas/recipe-canvas";
 import { Inspector } from "@/components/inspector/task-inspector";
-import { ConfigView } from "@/components/config/config-view";
+import { ExtensionsPanel } from "@/components/extensions/extensions-panel";
 import { ConflictDialog, Notices } from "@/components/notices";
 import { OpenDialog } from "@/components/open-dialog";
 import { PlanView } from "@/components/plan-view";
@@ -25,7 +25,7 @@ import { useRecipe } from "@/lib/use-recipe";
 const views: readonly EditorView[] = [
   "canvas",
   "yaml",
-  "config",
+  "extensions",
   "plan",
   "runs",
 ];
@@ -136,8 +136,17 @@ function Workbench() {
         <Notices />
         <main className="flex min-h-0 flex-1">
           {view === "canvas" && opened && <CanvasView />}
-          {view === "yaml" && <YamlView role="recipe" />}
-          {view === "config" && <ConfigView />}
+          {view === "yaml" && (
+            <div className="flex min-w-0 flex-1 divide-x">
+              <YamlView role="recipe" />
+              <YamlView role="config" />
+            </div>
+          )}
+          {view === "extensions" && (
+            <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-6">
+              <ExtensionsPanel />
+            </div>
+          )}
           {view === "plan" && <PlanView />}
           {view === "runs" && <RunsView onRun={() => setRunning(true)} />}
           {view === "canvas" && !opened && (

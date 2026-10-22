@@ -17,6 +17,7 @@ import { useRecipe } from "@/lib/use-recipe";
 import { actionIcon } from "../canvas/action-icons";
 import { ActionForm, type TaskSetter, record } from "./action-forms";
 import { Problems } from "./problems";
+import { DocumentForm } from "./schema-form";
 import {
   EntityInspector,
   RunInspector,
@@ -162,6 +163,21 @@ function TaskInspector({ node }: { readonly node: RecipeEditorNode }) {
       <Separator />
       {node.action && (
         <ActionForm task={task} action={node.action} set={set} names={names} />
+      )}
+      {node.action && (
+        <details>
+          <summary className="cursor-pointer text-xs text-muted-foreground select-none">
+            Every {node.action} option
+          </summary>
+          <div className="mt-3">
+            <DocumentForm
+              name="recipe"
+              value={task[node.action]}
+              path={["tasks", node.index, node.action]}
+              set={(path, value) => set(path.slice(2), value)}
+            />
+          </div>
+        </details>
       )}
       {!node.action && (
         <p className="text-xs text-muted-foreground">

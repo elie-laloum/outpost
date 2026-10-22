@@ -6,8 +6,8 @@ import {
   Network,
   Play,
   Redo2,
+  Puzzle,
   Save,
-  Settings2,
   Undo2,
   History,
 } from "lucide-react";
@@ -117,10 +117,10 @@ export function Toolbar({
             <Network /> Canvas
           </TabsTrigger>
           <TabsTrigger value="yaml">
-            <FileCode2 /> Recipe YAML
+            <FileCode2 /> YAML
           </TabsTrigger>
-          <TabsTrigger value="config" disabled={!state?.config}>
-            <Settings2 /> Configuration
+          <TabsTrigger value="extensions" disabled={!state?.config}>
+            <Puzzle /> Extensions
           </TabsTrigger>
           <TabsTrigger value="plan" disabled={!state?.config}>
             <ListChecks /> Plan

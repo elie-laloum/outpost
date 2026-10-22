@@ -31,7 +31,7 @@ export function StatusBar({
     diagnostics.length === 1 ? "1 problem" : `${diagnostics.length} problems`;
   const show = (diagnostic: RecipeEditorDiagnostic) => {
     if (diagnostic.node) return onShow("canvas", diagnostic.node);
-    onShow(diagnostic.file === "config" ? "config" : "yaml");
+    onShow("yaml");
   };
   return (
     <footer className="shrink-0 border-t text-xs">

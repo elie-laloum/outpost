@@ -84,7 +84,7 @@ export interface ConfigurationNames {
   readonly functions: readonly string[];
 }
 
-export type EditorView = "canvas" | "yaml" | "config" | "plan" | "runs";
+export type EditorView = "canvas" | "yaml" | "extensions" | "plan" | "runs";
 
 /** Something the palette adds, by click or by drop on the canvas. */
 export type PaletteItem =
