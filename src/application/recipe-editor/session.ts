@@ -270,9 +270,9 @@ export function createRecipeEditorSession(
     };
   }
 
-  async function commit(): Promise<RecipeEditorState> {
+  async function commit(revalidate = true): Promise<RecipeEditorState> {
     revision++;
-    diagnostics = await validate();
+    if (revalidate) diagnostics = await validate();
     const current = state();
     for (const listener of listeners) {
       try {
@@ -316,7 +316,7 @@ export function createRecipeEditorSession(
   function change(
     seen: number,
     apply: () => void,
-    record = true,
+    { record = true, revalidate = true } = {},
   ): Promise<RecipeEditorState> {
     return exclusive(async () => {
       expectRevision(seen);
@@ -332,7 +332,7 @@ export function createRecipeEditorSession(
         if (undoStack.length > recipeEditorDefaults.history) undoStack.shift();
         redoStack.length = 0;
       }
-      return commit();
+      return commit(revalidate);
     });
   }
 
@@ -485,7 +485,7 @@ export function createRecipeEditorSession(
             throw new OutpostError("configuration", "No recipe is open");
           layout = recipeEditorLayout(next);
         },
-        false,
+        { record: false, revalidate: false },
       ),
     undo: (seen) =>
       exclusive(async () => {

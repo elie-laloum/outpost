@@ -21,6 +21,7 @@ import type {
   RecipeEditorRevisionRequest,
   RecipeEditorRoutesOptions,
   RecipeEditorSaveRequest,
+  RecipeEditorSessionInfo,
   RecipeEditorTextRequest,
 } from "./routes.types.ts";
 
@@ -131,21 +132,25 @@ export function recipeEditorRoutes(
   }
 
   return {
-    "GET /api/session": recipeEditorRoute(async () => ({
-      directory: session.root.directory,
-      version: options.version,
-      suggested: options.suggested ?? {},
-      files: Object.fromEntries(
-        Object.entries(session.files()).map(([role, file]) => [
-          role,
-          session.root.relative(file),
-        ]),
-      ),
-      starters: Object.entries(recipeEditorStarters).map(([name, starter]) => ({
-        name,
-        description: starter.description,
-      })),
-    })),
+    "GET /api/session": recipeEditorRoute(
+      async (): Promise<RecipeEditorSessionInfo> => ({
+        directory: session.root.directory,
+        version: options.version,
+        suggested: options.suggested ?? {},
+        files: Object.fromEntries(
+          Object.entries(session.files()).map(([role, file]) => [
+            role,
+            session.root.relative(file),
+          ]),
+        ),
+        starters: Object.entries(recipeEditorStarters).map(
+          ([name, starter]) => ({
+            name,
+            description: starter.description,
+          }),
+        ),
+      }),
+    ),
     "GET /api/files": recipeEditorRoute(async ({ query }) =>
       listEditorDirectory(
         session.root,

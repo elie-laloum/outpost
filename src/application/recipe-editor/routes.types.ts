@@ -9,7 +9,7 @@ export interface RecipeEditorRoutesOptions {
     readonly configuration: string;
   };
   /** Files named on the command line, proposed when the editor opens nothing yet. */
-  readonly suggested?: { readonly recipe?: string; readonly config?: string };
+  readonly suggested?: RecipeEditorFiles;
   readonly diskPollMs?: number;
 }
 
@@ -36,4 +36,23 @@ export interface RecipeEditorRevisionRequest {
 
 export interface RecipeEditorSaveRequest {
   readonly overwrite?: boolean;
+}
+
+/** Recipe and configuration paths, relative to the editor directory. */
+export interface RecipeEditorFiles {
+  readonly recipe?: string;
+  readonly config?: string;
+}
+
+/** Response of `GET /api/session`. */
+export interface RecipeEditorSessionInfo {
+  readonly directory: string;
+  readonly version: string;
+  readonly suggested: RecipeEditorFiles;
+  /** Files currently open in the session. */
+  readonly files: RecipeEditorFiles;
+  readonly starters: readonly {
+    readonly name: string;
+    readonly description: string;
+  }[];
 }
