@@ -7,6 +7,10 @@ import {
   diagnosticsByTask,
 } from "../../editor/src/lib/diagnostics.ts";
 import { createEventParser } from "../../editor/src/lib/events.ts";
+import { observationText } from "../../editor/src/lib/observation-text.ts";
+import { applyRecipeTaskStatus } from "../../src/domain/recipes/run-status.ts";
+import type { Observation } from "../../src/domain/observation.types.ts";
+import type { TaskStatus } from "../../src/domain/workflow.types.ts";
 import {
   arrangeGraph,
   nodeSize,
@@ -124,4 +128,69 @@ test("diagnostics are grouped by task and located in the text", () => {
   assert.equal(diagnosticOffset(text, 2, 3), "first\nse".length);
   assert.equal(diagnosticOffset(text, 9, 99), text.length);
   assert.equal(diagnosticOffset(text, undefined, undefined), 0);
+});
+
+test("run observations become log lines and live task statuses", () => {
+  const observation = (event: Observation["event"]): Observation => ({
+    seq: 1,
+    at: "2026-10-22T12:00:00.000Z",
+    source: "workflow",
+    scope: {},
+    event,
+  });
+  const workflow = (event: Record<string, unknown>) =>
+    observation({
+      kind: "workflow",
+      event: {
+        executionId: "e",
+        workflow: "w",
+        timestamp: "2026-10-22T12:00:00.000Z",
+        type: "task",
+        ...event,
+      },
+    } as Observation["event"]);
+  assert.equal(
+    observationText(
+      workflow({ key: "build", status: "failed", error: "boom" }),
+    ),
+    "task build → failed: boom",
+  );
+  assert.equal(observationText(workflow({ type: "checkpoint" })), undefined);
+  assert.equal(
+    observationText(
+      observation({ kind: "command-output", channel: "stdout", text: "ok\n" }),
+    ),
+    "ok",
+  );
+  assert.equal(
+    observationText(observation({ kind: "text-delta", text: "o" })),
+    undefined,
+  );
+  assert.equal(
+    observationText(observation({ kind: "warning", message: "slow" })),
+    "warning: slow",
+  );
+  const tasks: Record<string, TaskStatus> = {};
+  assert.equal(
+    applyRecipeTaskStatus(tasks, workflow({ key: "build", status: "active" })),
+    true,
+  );
+  applyRecipeTaskStatus(
+    tasks,
+    workflow({
+      type: "finish",
+      tasks: [
+        { key: "build", status: "done", attempts: 1 },
+        { key: "ship", status: "skipped", attempts: 0 },
+      ],
+    }),
+  );
+  assert.deepEqual(tasks, { build: "done", ship: "skipped" });
+  assert.equal(
+    applyRecipeTaskStatus(
+      tasks,
+      observation({ kind: "warning", message: "slow" }),
+    ),
+    false,
+  );
 });

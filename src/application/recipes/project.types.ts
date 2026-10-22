@@ -3,6 +3,7 @@ import type {
   RecipeEnqueueOptions,
 } from "./service-components.types.ts";
 import type { QueueJob } from "../../domain/task-queue.types.ts";
+import type { ObservationSink } from "../../domain/observation.types.ts";
 import type { RecipeResumeOptions, RecipeRunStatus } from "./durable.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { RecipeRegistry } from "../../domain/recipes/component.types.ts";
@@ -56,6 +57,8 @@ export interface RecipeRunOptions {
   readonly inputs?: Readonly<Record<string, WorkflowJson>>;
   readonly signal?: AbortSignal;
   readonly report?: "json";
+  /** Observation sinks added for this execution; they receive events after secret redaction. */
+  readonly sinks?: readonly ObservationSink[];
 }
 
 export interface RecipeRuntime {

@@ -1,9 +1,11 @@
 import { Handle, type Node, type NodeProps, Position } from "@xyflow/react";
 import { GitBranch, TriangleAlert } from "lucide-react";
 import { nodeSize } from "@/lib/layout";
+import { useRuns } from "@/lib/runs";
 import { taskTemplates } from "@/lib/templates";
 import type { RecipeEditorDiagnostic, RecipeEditorNode } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { StatusBadge, statusBorders } from "../runs/run-status";
 import { actionIcon } from "./action-icons";
 
 export type TaskNodeData = {
@@ -24,6 +26,9 @@ function kindLabel(task: RecipeEditorNode): string {
 export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
   const { task, problems, connectable } = data;
   const Icon = actionIcon(task.action);
+  const status = useRuns((store) =>
+    task.key ? store.tasks[task.key] : undefined,
+  );
   return (
     <div
       style={{ width: nodeSize.width, minHeight: nodeSize.height }}
@@ -31,6 +36,8 @@ export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
         "flex flex-col gap-1.5 border bg-card px-3 py-2.5 text-left shadow-sm transition-colors",
         selected ? "border-primary" : "border-border hover:border-input",
         problems.length > 0 && !selected && "border-destructive/70",
+        status && !selected && statusBorders[status],
+        status === "active" && "animate-pulse",
       )}
       data-testid={`task-${task.id}`}
     >
@@ -63,8 +70,11 @@ export function TaskNode({ data, selected }: NodeProps<TaskFlowNode>) {
           </span>
         )}
       </div>
-      <div className="text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
-        {kindLabel(task)}
+      <div className="flex items-center gap-2">
+        <span className="flex-1 truncate text-[0.6875rem] tracking-wide text-muted-foreground uppercase">
+          {kindLabel(task)}
+        </span>
+        {status && <StatusBadge status={status} />}
       </div>
       {task.summary && (
         <div className="line-clamp-2 text-xs text-foreground/80">

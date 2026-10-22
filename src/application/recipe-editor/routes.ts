@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { OutpostError } from "../../domain/errors.ts";
 import { recipeEditorExtensionRoutes } from "./extension-routes.ts";
+import { recipeEditorRunRoutes } from "./run-routes.ts";
 import { recipeEditorRoute } from "./route-handler.ts";
 import { recipeEditorLayout } from "../../domain/recipes/editor.ts";
 import { listEditorDirectory } from "../../infrastructure/editor-files.ts";
@@ -93,6 +94,7 @@ export function recipeEditorRoutes(
 
   return {
     ...recipeEditorExtensionRoutes(options),
+    ...recipeEditorRunRoutes(options),
     "GET /api/session": recipeEditorRoute(
       async (): Promise<RecipeEditorSessionInfo> => ({
         directory: session.root.directory,
@@ -160,11 +162,15 @@ export function recipeEditorRoutes(
         const unsubscribe = session.subscribe((state) =>
           stream.send("state", state),
         );
+        const unfollow = options.runs?.subscribe((event) =>
+          stream.send(event.type, event),
+        );
         const release = watch();
         try {
           await aborted(signal);
         } finally {
           unsubscribe();
+          unfollow?.();
           release();
         }
       },

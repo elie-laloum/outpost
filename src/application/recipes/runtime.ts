@@ -1,4 +1,5 @@
 import { withCleanup } from "../../domain/cleanup.ts";
+import { createObservationHub } from "../../domain/observation.ts";
 import { recipeRuntimeError } from "./errors.ts";
 import { recipeProjectIdentity } from "./durable-session.ts";
 import { serveRecipeProject, enqueueRecipeProject } from "./services.ts";
@@ -84,15 +85,22 @@ export function createRecipeProjectRuntime(
               throw new Error("Invalid recipe observation hub");
             observation = value;
           }
-          if (project.files)
+          const sinks = settings.sinks ?? [];
+          const secure = () =>
+            (
+              observation ?? (sinks.length ? createObservationHub() : undefined)
+            )?.child({}, sinks, scope.redactions);
+          if (project.files) {
+            securedObservation = secure();
             return await runFileRecipe(
               project,
               scope,
               settings,
               resume,
               signal,
-              observation,
+              securedObservation,
             );
+          }
           const configuration = await recipeExecutionConfiguration(
             project,
             scope,
@@ -103,7 +111,7 @@ export function createRecipeProjectRuntime(
               identity: recipeProjectIdentity(project, inputs ?? {}),
               sharedSandbox: configuration.sandbox,
             };
-            securedObservation = observation?.child({}, [], scope.redactions);
+            securedObservation = secure();
             signal.throwIfAborted();
             if (components.workflow.checkpoint)
               return await runDurableRecipe(
@@ -142,7 +150,7 @@ export function createRecipeProjectRuntime(
               throw new Error(`Invalid dispatch options: ${step.key}`);
             requests[step.key] = request;
           }
-          securedObservation = observation?.child({}, [], scope.redactions);
+          securedObservation = secure();
           observation = securedObservation;
           signal.throwIfAborted();
           const { sandbox, ownedWorkspace } = await openRecipeSandbox(

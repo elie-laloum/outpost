@@ -1,3 +1,4 @@
+import type { RecipeEditorRuns } from "./runs.types.ts";
 import type { RecipeEditorOperation } from "../../domain/recipes/editor.types.ts";
 import type { RecipeEditorRole, RecipeEditorSession } from "./session.types.ts";
 
@@ -13,6 +14,8 @@ export interface RecipeEditorRoutesOptions {
   readonly diskPollMs?: number;
   /** Command that starts the Outpost CLI for verifications and runs. */
   readonly cli?: readonly string[];
+  /** Recipe runs started from the editor; the caller closes them. */
+  readonly runs?: RecipeEditorRuns;
 }
 
 export interface RecipeEditorEditRequest {
@@ -66,4 +69,8 @@ export interface RecipeEditorModuleRequest {
   readonly text: string;
   /** Hash of the text last read; null to create the file. */
   readonly hash: string | null;
+}
+
+export interface RecipeEditorRunIdRequest {
+  readonly id: string;
 }

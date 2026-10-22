@@ -23,6 +23,28 @@ function operation(
   } as const;
 }
 
+/** Answer or unsigned decision fields addressed to one pending request. */
+function intervention(fields: Readonly<Record<string, unknown>>) {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "executionId",
+      "key",
+      "requestId",
+      "actor",
+      ...Object.keys(fields),
+    ],
+    properties: {
+      executionId: key,
+      key,
+      requestId: key,
+      actor: key,
+      ...fields,
+    },
+  } as const;
+}
+
 export const recipeEditorRequestSchemas = {
   open: {
     type: "object",
@@ -116,6 +138,65 @@ export const recipeEditorRequestSchemas = {
       text: { type: "string" },
       hash: { anyOf: [{ type: "string" }, { type: "null" }] },
     },
+  },
+  run: {
+    oneOf: [
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["action"],
+        properties: {
+          action: { const: "run" },
+          inputs: {
+            type: "object",
+            maxProperties: 100,
+            additionalProperties: { type: "string", maxLength: 65_536 },
+          },
+          runId: key,
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["action", "from"],
+        properties: {
+          action: { const: "resume" },
+          from: key,
+          retryIncomplete: { type: "boolean" },
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["action", "from", "answer"],
+        properties: {
+          action: { const: "answer" },
+          from: key,
+          answer: intervention({
+            value: { type: "string", maxLength: 65_536 },
+          }),
+        },
+      },
+      {
+        type: "object",
+        additionalProperties: false,
+        required: ["action", "from", "decision"],
+        properties: {
+          action: { const: "decide" },
+          from: key,
+          decision: intervention({
+            action: { enum: ["approve", "resume", "reject"] },
+            reason: { type: "string", maxLength: 4096 },
+          }),
+        },
+      },
+    ],
+  },
+  runId: {
+    type: "object",
+    additionalProperties: false,
+    required: ["id"],
+    properties: { id: key },
   },
   save: {
     type: "object",

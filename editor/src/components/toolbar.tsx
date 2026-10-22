@@ -2,11 +2,14 @@ import {
   FileCode2,
   FolderOpen,
   ListChecks,
+  LoaderCircle,
   Network,
+  Play,
   Redo2,
   Save,
   Settings2,
   Undo2,
+  History,
 } from "lucide-react";
 import type { ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRuns } from "@/lib/runs";
 import { useEditor } from "@/lib/store";
 import type { EditorView } from "@/lib/types";
 
@@ -66,11 +70,16 @@ export function Toolbar({
   view,
   onView,
   onOpen,
+  onRun,
 }: {
   readonly view: EditorView;
   readonly onView: (view: EditorView) => void;
   readonly onOpen: () => void;
+  readonly onRun: () => void;
 }) {
+  const active = useRuns((store) =>
+    store.runs.some((run) => run.state === "running"),
+  );
   const state = useEditor((store) => store.state);
   const pending = useEditor((store) => store.pending);
   const undo = useEditor((store) => store.undo);
@@ -116,6 +125,9 @@ export function Toolbar({
           <TabsTrigger value="plan" disabled={!state?.config}>
             <ListChecks /> Plan
           </TabsTrigger>
+          <TabsTrigger value="runs" disabled={!state?.config}>
+            <History /> Runs
+          </TabsTrigger>
         </TabsList>
       </Tabs>
       <Action
@@ -144,6 +156,15 @@ export function Toolbar({
         onClick={() => void save()}
       >
         <Save /> Save
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={!state?.recipe || !state.config || active}
+        onClick={onRun}
+      >
+        {active ? <LoaderCircle className="animate-spin" /> : <Play />}
+        {active ? "Running" : "Run"}
       </Button>
     </header>
   );

@@ -26,6 +26,20 @@ export type {
   RecipeEditorExtensionCreation,
   RecipeEditorVerification,
 } from "../../../src/application/recipe-editor/extensions.types.ts";
+export type {
+  RecipeEditorRun,
+  RecipeEditorRunDetail,
+  RecipeEditorRunEvent,
+  RecipeEditorRunRequest,
+} from "../../../src/application/recipe-editor/runs.types.ts";
+export type { RecipeRunStatus } from "../../../src/application/recipes/durable.types.ts";
+export type { RecipeReport } from "../../../src/application/recipe-report.types.ts";
+export type { Observation } from "../../../src/domain/observation.types.ts";
+export type {
+  TaskRecord,
+  TaskStatus,
+} from "../../../src/domain/workflow.types.ts";
+export type { WorkflowInputRequest } from "../../../src/domain/workflow/input.types.ts";
 import type { inspectRecipeExecution } from "../../../src/application/recipes/plan.ts";
 
 /** Static execution plan of the drafts, as `outpost recipe plan --json` reports it. */
@@ -52,4 +66,4 @@ export interface ConfigurationNames {
   readonly functions: readonly string[];
 }
 
-export type EditorView = "canvas" | "yaml" | "config" | "plan";
+export type EditorView = "canvas" | "yaml" | "config" | "plan" | "runs";

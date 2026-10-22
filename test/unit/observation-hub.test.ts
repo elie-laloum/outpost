@@ -251,3 +251,26 @@ test("closing an ancestor detaches descendant sinks and reentrant loops are boun
   assert.match(String(cyclic.errors[0]), /Reentrant/);
   assert.ok(cyclic.dropped > 0);
 });
+
+test("child redaction reads patterns its owner protects after creation", () => {
+  const received: Observation[] = [];
+  const patterns: RegExp[] = [];
+  const hub = createObservationHub({
+    sinks: [{ observe: (value) => void received.push(value) }],
+  });
+  const child = hub.child({}, [], patterns);
+  assert.equal(child.redacting, false);
+  patterns.push(/late-secret/g);
+  child.emit("sandbox", {
+    kind: "command-output",
+    channel: "stdout",
+    text: "token=late-secret",
+  });
+  assert.equal(child.redacting, true);
+  assert.equal(child.redact("late-secret"), "[REDACTED]");
+  assert.deepEqual(received[0]?.event, {
+    kind: "command-output",
+    channel: "stdout",
+    text: "token=[REDACTED]",
+  });
+});

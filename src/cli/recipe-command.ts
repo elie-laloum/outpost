@@ -231,6 +231,8 @@ export async function recipeCommand({
     throw new Error("Durable recipe commands require YAML configuration");
   if (values.interactive === true || values.actor !== undefined)
     throw new Error("Interactive recipe commands require YAML configuration");
+  if (values.events)
+    throw new Error("Recipe --events requires YAML configuration");
   const module: unknown = await import(pathToFileURL(configuration).href);
   if (!module || typeof module !== "object" || !("default" in module))
     throw new Error(

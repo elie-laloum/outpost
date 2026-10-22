@@ -13,6 +13,7 @@ import {
 import { nativeRecipeSchemas } from "../application/recipes/native-schemas.constants.ts";
 import { createJsonDecoder } from "../infrastructure/json-schema.ts";
 import { readRecipeFile } from "../infrastructure/recipes/read.ts";
+import { openObservationFile } from "../infrastructure/observation-file.ts";
 import { workspaceRecoverySchema } from "../domain/file-workspace.constants.ts";
 import type { RecipeResumeOptions } from "../application/recipes/durable.types.ts";
 import type { WorkflowOptions } from "../domain/workflow.types.ts";
@@ -111,10 +112,14 @@ export async function recipeYamlCommand(
         path,
       );
     }
+    await using events = values.events
+      ? await openObservationFile(values.events)
+      : undefined;
     const settings = {
       ...(inputs ? { inputs } : {}),
       signal: controller.signal,
       ...(values.json ? { report: "json" as const } : {}),
+      ...(events ? { sinks: [events] } : {}),
     };
     const workspaceRecovery = values["workspace-recovery"]
       ? workspaceRecoveries.parse(

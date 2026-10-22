@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { ApiError, api, streamEvents } from "./api.ts";
+import { useRuns } from "./runs.ts";
 import type {
   EditorFailure,
+  RecipeEditorRunEvent,
   Position,
   RecipeEditorOperation,
   RecipeEditorRole,
@@ -106,8 +108,12 @@ export const useEditor = create<EditorStore>()((set, get) => {
         try {
           await streamEvents((event, data) => {
             set({ connection: "live" });
+            if (event === "run" || event === "observation")
+              return useRuns.getState().receive(data as RecipeEditorRunEvent);
             if (event !== "state") return;
             receive(data as RecipeEditorState, fresh);
+            // Run events missed while disconnected are only in the history.
+            if (fresh) void useRuns.getState().load();
             fresh = false;
           }, controller.signal);
         } catch (error) {

@@ -72,6 +72,11 @@ export const cliOptions = {
     type: "string",
     description: "JSON file containing a WorkflowAnswer",
   },
+  events: {
+    type: "string",
+    description:
+      "Append redacted observation events to this file as JSON lines",
+  },
   decision: {
     type: "string",
     description:
@@ -343,6 +348,7 @@ export const commandOptions = {
       "run-id",
       "interactive",
       "actor",
+      "events",
       "json",
     ],
     examples: [
@@ -367,6 +373,7 @@ export const commandOptions = {
       "workspace-recovery",
       "interactive",
       "actor",
+      "events",
       "json",
     ],
     examples: [`outpost recipe resume ${recipeFile} --run-id nightly`],
@@ -380,6 +387,7 @@ export const commandOptions = {
       "answer",
       "interactive",
       "actor",
+      "events",
       "json",
     ],
     examples: [
@@ -395,6 +403,7 @@ export const commandOptions = {
       "decision",
       "interactive",
       "actor",
+      "events",
       "json",
     ],
     examples: [

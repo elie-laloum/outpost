@@ -4,6 +4,7 @@ import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRecipeEditorSession } from "../application/recipe-editor/session.ts";
 import { recipeEditorRoutes } from "../application/recipe-editor/routes.ts";
+import { createRecipeEditorRuns } from "../application/recipe-editor/runs.ts";
 import { openBrowser } from "../infrastructure/browser.ts";
 import { openEditorRoot } from "../infrastructure/editor-files.ts";
 import { serveEditor } from "../infrastructure/editor-server.ts";
@@ -52,13 +53,16 @@ export async function recipeEditorCommand({
   const assets = packageFile("dist/editor");
   const token = randomBytes(32).toString("base64url");
   const listen = port(values.port);
+  const cli = [process.execPath, fileURLToPath(cliEntry)];
+  const runs = createRecipeEditorRuns({ session, cli });
   const server = await serveEditor({
     routes: recipeEditorRoutes({
       session,
       schemas,
       suggested,
       version: packageVersion(),
-      cli: [process.execPath, fileURLToPath(cliEntry)],
+      cli,
+      runs,
     }),
     token,
     ...(existsSync(assets) ? { assets } : {}),
@@ -87,5 +91,6 @@ export async function recipeEditorCommand({
     process.once("SIGINT", interrupt);
     process.once("SIGTERM", terminate);
   });
+  await runs.close();
   await server.close();
 }

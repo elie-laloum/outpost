@@ -12,6 +12,8 @@ import { ConfigView } from "@/components/config/config-view";
 import { ConflictDialog, Notices } from "@/components/notices";
 import { OpenDialog } from "@/components/open-dialog";
 import { PlanView } from "@/components/plan-view";
+import { RunDialog } from "@/components/runs/run-dialog";
+import { RunsView } from "@/components/runs/runs-view";
 import { StatusBar } from "@/components/status-bar";
 import { Toolbar } from "@/components/toolbar";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,7 +22,13 @@ import { useEditor } from "@/lib/store";
 import type { EditorView } from "@/lib/types";
 import { useRecipe } from "@/lib/use-recipe";
 
-const views: readonly EditorView[] = ["canvas", "yaml", "config", "plan"];
+const views: readonly EditorView[] = [
+  "canvas",
+  "yaml",
+  "config",
+  "plan",
+  "runs",
+];
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { view?: EditorView } => {
@@ -87,6 +95,7 @@ function Workbench() {
   const info = useEditor((store) => store.info);
   const opened = useEditor((store) => !!store.state?.recipe);
   const [choosing, setChoosing] = useState(false);
+  const [running, setRunning] = useState(false);
   useEffect(() => start(), [start]);
   useShortcuts(() => setChoosing(true));
   const show = (next: EditorView, task?: string) => {
@@ -100,6 +109,7 @@ function Workbench() {
           view={view}
           onView={(next) => show(next)}
           onOpen={() => setChoosing(true)}
+          onRun={() => setRunning(true)}
         />
         <Notices />
         <main className="flex min-h-0 flex-1">
@@ -107,6 +117,7 @@ function Workbench() {
           {view === "yaml" && <YamlView role="recipe" />}
           {view === "config" && <ConfigView />}
           {view === "plan" && <PlanView />}
+          {view === "runs" && <RunsView onRun={() => setRunning(true)} />}
           {view === "canvas" && !opened && (
             <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
               Open or create a recipe to start.
@@ -120,6 +131,11 @@ function Workbench() {
         onOpenChange={setChoosing}
       />
       <ConflictDialog />
+      <RunDialog
+        open={running}
+        onOpenChange={setRunning}
+        onStarted={() => show("runs")}
+      />
     </TooltipProvider>
   );
 }
