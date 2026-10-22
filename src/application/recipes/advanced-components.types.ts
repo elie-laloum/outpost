@@ -5,6 +5,7 @@ import type {
   IntegrationOptions,
 } from "../conflict-resolution.types.ts";
 import type { RecipeConfiguration } from "../recipe.types.ts";
+import type { SandboxOptions } from "../outpost.types.ts";
 import type {
   ReporterHandlers,
   CustomReporterOptions,
@@ -23,4 +24,6 @@ export type RecipeSpeculationSettings = Omit<
 export type RecipeIntegrationSettings = Omit<IntegrationOptions, "signal">;
 export interface RecipeRuntimeConfiguration extends RecipeConfiguration {
   readonly integration?: RecipeIntegrationSettings;
+  /** Options of each named sandbox, including the workspace it opens. */
+  readonly sandboxes?: Readonly<Record<string, SandboxOptions>>;
 }

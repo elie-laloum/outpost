@@ -14,7 +14,6 @@ import type {
 } from "./durable.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
 import type { RecipeReport } from "../recipe-report.types.ts";
-import type { FileWorkspace } from "../file-workspace.types.ts";
 import type { FileSandbox } from "../file-sandbox.types.ts";
 import { createFileWorkspace } from "../file-workspace.ts";
 import { restoreManagedFileWorkspace } from "../task-file-workspace.ts";
@@ -24,10 +23,7 @@ import {
   validateFileSandbox,
 } from "../file-sandbox.ts";
 import { dispatchCandidates } from "../../domain/fallback-agent.ts";
-import {
-  captureWorkspaceOutputBaseline,
-  workspaceOutputIdentity,
-} from "../workspace-output-baseline.ts";
+import { workspaceOutputIdentity } from "../workspace-output-baseline.ts";
 import { publishWorkspaceOutputs } from "../workspace-publication.ts";
 import { fileWorkspaces } from "../file-workspace-registry.ts";
 import { bindRecipe } from "../recipe.ts";
@@ -37,8 +33,19 @@ import { recipeWorkflowReport } from "./workflow-report.ts";
 import { nativeRecipeGuards } from "./native.ts";
 import { openRecipeCheckpoint } from "./durable-session.ts";
 import { resolveRecipeEnvironment } from "./configuration-model.ts";
-import type { Transport } from "../../domain/transport.types.ts";
-import type { WorkspaceRetention } from "../../domain/file-workspace.types.ts";
+import type {
+  FileWorkspaceRecord,
+  FileWorkspaceSource,
+  WorkspacePublication,
+} from "../../domain/file-workspace.types.ts";
+import { runCleanup } from "../../domain/cleanup.ts";
+import { createRecipeZoneSandboxes } from "./zone-sandboxes.ts";
+import { recipeSandboxZone, recipeZoneOrder } from "./zones.ts";
+import {
+  captureRecipeFileBaselines,
+  prepareRecipeFileZones,
+} from "./file-zones.ts";
+import type { RecipeFileZone } from "./file-zones.types.ts";
 import { refreshFilePublicationReport } from "./file-publication-report.ts";
 import { workspaceRecoverySchema } from "../../domain/file-workspace.constants.ts";
 import { validateJsonSchema } from "../../infrastructure/json-schema.ts";
@@ -48,9 +55,6 @@ function isProvider(value: unknown): value is SandboxProvider {
 }
 function isAgent(value: unknown): value is DispatchAgent {
   return nativeRecipeGuards.agent!(value);
-}
-function isTransport(value: unknown): value is Transport {
-  return nativeRecipeGuards.transport!(value);
 }
 
 export async function runFileRecipe(
@@ -63,28 +67,8 @@ export async function runFileRecipe(
 ): Promise<RecipeReport> {
   const files = project.files;
   invariant(files, "Missing recipe file configuration");
-  let retention: WorkspaceRetention | undefined;
-  if (files.retention?.policy === "portable") {
-    const transporter = await scope.resolve(
-      files.retention.transporter,
-      "transport",
-    );
-    invariant(
-      isTransport(transporter),
-      "Invalid workspace retention Transport",
-    );
-    retention = { policy: "portable", transporter };
-  }
-  if (files.retention?.policy === "run" || files.retention?.policy === "local")
-    retention = files.retention;
-  const workspaceInputs = await Promise.all(
-    (files.inputs ?? []).map(async (input) => {
-      if ("directory" in input) return input;
-      const transporter = await scope.resolve(input.transporter, "transport");
-      invariant(isTransport(transporter), "Invalid workspace input Transport");
-      return { snapshot: input.snapshot, transporter };
-    }),
-  );
+  const fileZones = await prepareRecipeFileZones(project, scope);
+  const main = fileZones.get("workspace")!;
   const agents: Record<string, DispatchAgent> = {};
   for (const role of project.model.agents) {
     const agent = await scope.resolve(`agents.${role}`, "agent");
@@ -132,7 +116,8 @@ export async function runFileRecipe(
       ),
       "Unsupported workspace recovery option",
     );
-    if (key === "shared") continue;
+    if (key === "shared" || (key !== "workspace" && fileZones.has(key)))
+      continue;
     const step = components.steps[key];
     invariant(step, `Unknown recovery workspace: ${key}`);
     const isolated = step.isolated;
@@ -171,54 +156,14 @@ export async function runFileRecipe(
     !resume || session,
     "Recipe resume requires a configured workflow checkpoint",
   );
-  let workspace: FileWorkspace | undefined;
-  let sandbox: FileSandbox | undefined;
-  try {
-    if (resume && session?.previous?.recipe.report?.status === "done")
-      return scope.redact(session.previous.recipe.report);
-    if (
-      resume &&
-      session?.previous?.recipe.report?.errors.some(
-        (error) => error.publicationId,
-      )
-    ) {
-      const report = await refreshFilePublicationReport(
-        session.previous.recipe.report,
-        files.outputs.length,
-        retention?.policy === "portable" ? retention.transporter : undefined,
-      );
-      await session.saveReport(report);
-      return scope.redact(report);
-    }
-    const baselines = session?.resource("shared")
-      ? []
-      : await Promise.all(
-          files.outputs.map((output) => captureWorkspaceOutputBaseline(output)),
-        );
-    let context: TaskContext | undefined;
-    const persist = async (
-      record: import("../../domain/file-workspace.types.ts").FileWorkspaceRecord,
-    ) => {
-      await session?.saveResource("shared", {
-        state: "ready",
-        fileRecord: record,
-      });
-      await context?.workspaceCheckpoint?.write("shared", recipeJson(record));
-    };
-    const acquire = async (taskContext?: TaskContext) => {
-      context = taskContext;
-      if (sandbox) return sandbox;
-      invariant(files.source, "Recipe task requires a workspace source");
-      const provider = await scope.resolve("sandbox", "sandboxProvider");
-      invariant(
-        isProvider(provider) && provider.workspaces,
-        "Recipe sandbox provider does not support file workspaces",
-      );
-      await validateFileSandbox({
-        workspaceSource: files.source,
-        sandboxProvider: provider,
-      });
-      const saved = session?.resource("shared");
+  const zones = createRecipeZoneSandboxes<RecipeFileZone, FileSandbox>({
+    async workspace(target) {
+      const zone = fileZones.get(target.workspace);
+      invariant(zone, `Unknown recipe workspace: ${target.workspace}`);
+      const source = zone.declaration.source;
+      invariant(source, "Recipe task requires a workspace source");
+      const provider = await fileProvider(target.sandbox, source);
+      const saved = session?.resource(zone.resource);
       invariant(
         !saved || saved.state !== "allocating" || saved.fileRecord,
         "Recipe workspace allocation requires explicit recovery",
@@ -231,43 +176,94 @@ export async function runFileRecipe(
         !saved || saved.state !== "closed",
         "Completed workspace cannot be silently reconstructed",
       );
+      const recovery = recoveries?.[zone.resource];
       if (saved?.fileRecord) {
-        workspace = await restoreManagedFileWorkspace(
+        zone.workspace = await restoreManagedFileWorkspace(
           saved.fileRecord,
           {
             runtime: files.runtime,
-            ...(retention ? { retention } : {}),
-            ...(recoveries?.shared ? { recovery: recoveries.shared } : {}),
+            ...(zone.retention ? { retention: zone.retention } : {}),
+            ...(recovery ? { recovery } : {}),
           },
           provider,
         );
-        await persist(await workspace.checkpoint());
+        await persist(zone, await zone.workspace.checkpoint());
       }
-      if (!workspace) {
-        await session?.saveResource("shared", { state: "allocating" });
-        workspace = await createFileWorkspace(
+      if (!zone.workspace) {
+        await session?.saveResource(zone.resource, { state: "allocating" });
+        zone.workspace = await createFileWorkspace(
           {
-            source: files.source,
+            source,
             runtime: files.runtime,
-            inputs: workspaceInputs,
-            ...(retention ? { retention } : {}),
-            ...(files.paths ? { paths: files.paths } : {}),
+            inputs: zone.inputs,
+            ...(zone.retention ? { retention: zone.retention } : {}),
+            ...(zone.declaration.paths
+              ? { paths: zone.declaration.paths }
+              : {}),
           },
-          persist,
+          (record) => persist(zone, record),
         );
-        const state = fileWorkspaces.get(workspace)!;
-        for (const baseline of baselines)
+        const state = fileWorkspaces.get(zone.workspace)!;
+        for (const baseline of zone.baselines)
           state.publications.set(
             workspaceOutputIdentity(baseline.options),
             baseline,
           );
-        await persist(await workspace.checkpoint());
+        await persist(zone, await zone.workspace.checkpoint());
       }
-      sandbox = await createFileSandbox(
-        { workspace, sandboxProvider: provider, variables, signal },
-        persist,
+      return zone;
+    },
+    async sandbox(zone, target) {
+      const workspace = zone.workspace!;
+      return createFileSandbox(
+        {
+          workspace,
+          sandboxProvider: await fileProvider(target.sandbox, workspace.source),
+          variables,
+          signal,
+        },
+        (record) => persist(zone, record),
       );
-      return sandbox;
+    },
+  });
+  const opened = () => recipeZoneOrder(zones.workspaces);
+  const release = (preserve: boolean) =>
+    runCleanup(
+      [
+        () => zones.release(),
+        ...opened().map(([, zone]) => async () => {
+          if (zone.workspace && !fileWorkspaces.get(zone.workspace)?.active)
+            await zone.workspace.close({ preserve });
+        }),
+      ],
+      [],
+      { message: "Recipe workspace cleanup failed" },
+    );
+  try {
+    if (resume && session?.previous?.recipe.report?.status === "done")
+      return scope.redact(session.previous.recipe.report);
+    if (
+      resume &&
+      session?.previous?.recipe.report?.errors.some(
+        (error) => error.publicationId,
+      )
+    ) {
+      const report = await refreshFilePublicationReport(
+        session.previous.recipe.report,
+        files.outputs.length,
+        main.retention?.policy === "portable"
+          ? main.retention.transporter
+          : undefined,
+      );
+      await session.saveReport(report);
+      return scope.redact(report);
+    }
+    await captureRecipeFileBaselines(fileZones, session);
+    const acquire = (taskContext: TaskContext | undefined, name?: string) => {
+      const zone = recipeSandboxZone(name, project.model.sandboxes);
+      const state = fileZones.get(zone.workspace);
+      if (state) state.context = taskContext;
+      return zones.acquire(zone, taskContext);
     };
     const inputs = session?.inputs ?? settings.inputs;
     const workflow =
@@ -277,7 +273,7 @@ export async function runFileRecipe(
             {
               agents,
               ...(inputs ? { inputs } : {}),
-              acquireSandbox: async (ctx) => acquire(ctx),
+              acquireSandbox: acquire,
               async validateDispatch(request) {
                 for (const agent of dispatchCandidates(request.agent))
                   await validateFileAgent(agent, request);
@@ -285,6 +281,7 @@ export async function runFileRecipe(
             },
             {
               ...components,
+              sandboxes: project.model.sandboxes,
               ...(session
                 ? {
                     workflow: {
@@ -296,13 +293,13 @@ export async function runFileRecipe(
             },
           )
         : bindRecipe(project.document, {
-            sandbox: await acquire(),
+            sandbox: await acquire(undefined),
             agents,
             ...(inputs ? { inputs } : {}),
           });
     const errors: unknown[] = [];
     let result: WorkflowResult | undefined;
-    const publications = [];
+    const publications = new Map<string, WorkspacePublication[]>();
     try {
       result = await workflow.start({
         signal,
@@ -314,36 +311,61 @@ export async function runFileRecipe(
           ? { decisions: settings.decisions }
           : {}),
       });
-      context = undefined;
+      for (const zone of fileZones.values()) zone.context = undefined;
       errors.push(...result.errors);
-      await sandbox?.close({ preserve: true });
-      if (result.status === "done" && workspace)
-        for (const output of files.outputs)
-          publications.push(await publishWorkspaceOutputs(workspace, output));
+      await zones.release();
+      if (result.status === "done")
+        for (const [key, zone] of opened()) {
+          const published: WorkspacePublication[] = [];
+          publications.set(key, published);
+          for (const output of zone.declaration.outputs)
+            published.push(
+              await publishWorkspaceOutputs(zone.workspace!, output),
+            );
+        }
     } catch (error) {
-      context = undefined;
+      for (const zone of fileZones.values()) zone.context = undefined;
       errors.push(error);
     }
-    let workspaceInfo = workspace
-      ? fileWorkspaces.get(workspace)?.record
-      : session?.resource("shared")?.fileRecord;
+    const complete = () => result?.status === "done" && !errors.length;
     try {
-      await sandbox?.close({ preserve: true });
-      if (workspace && !fileWorkspaces.get(workspace)?.active)
-        await workspace.close({
-          preserve: result?.status !== "done" || errors.length > 0,
-        });
-      if (workspace) workspaceInfo = fileWorkspaces.get(workspace)?.record;
-      if (workspace && result?.status === "done" && !errors.length)
-        await session?.saveResource("shared", {
-          state: "closed",
-          ...(workspaceInfo ? { fileRecord: workspaceInfo } : {}),
-        });
+      await release(!complete());
+      const records = new Map<string, FileWorkspaceRecord | undefined>();
+      for (const zone of fileZones.values()) {
+        const record = zone.workspace
+          ? fileWorkspaces.get(zone.workspace)?.record
+          : session?.resource(zone.resource)?.fileRecord;
+        records.set(zone.key, record);
+        if (zone.workspace && complete())
+          await session?.saveResource(zone.resource, {
+            state: "closed",
+            ...(record ? { fileRecord: record } : {}),
+          });
+      }
+      const workspaceInfo = records.get("workspace");
+      const named = opened().filter(([key]) => key !== "workspace");
       const report: RecipeReport = {
         ...recipeWorkflowReport(workflow, result, errors, signal),
         ...(session ? { runId: session.options.runId } : {}),
         ...(workspaceInfo ? { workspaceInfo } : {}),
-        fileOutputs: publications,
+        fileOutputs: publications.get("workspace") ?? [],
+        ...(named.length
+          ? {
+              workspaces: Object.fromEntries(
+                named.map(([key]) => {
+                  const record = records.get(key);
+                  return [
+                    key.slice("workspaces.".length),
+                    {
+                      kind: "files" as const,
+                      ...(record ? { workspaceInfo: record } : {}),
+                      fileOutputs: publications.get(key) ?? [],
+                    },
+                  ];
+                }),
+              ),
+            }
+          : {}),
       };
       await session?.saveReport(report);
       return scope.redact(report);
@@ -351,9 +373,34 @@ export async function runFileRecipe(
       await session?.close();
     }
   } finally {
-    await sandbox?.close({ preserve: true });
-    if (workspace && !fileWorkspaces.get(workspace)?.active)
-      await workspace.close({ preserve: true });
+    await release(true);
     await session?.close();
+  }
+
+  async function fileProvider(
+    key: string,
+    source: FileWorkspaceSource,
+  ): Promise<SandboxProvider> {
+    const provider = await scope.resolve(key, "sandboxProvider");
+    invariant(
+      isProvider(provider) && provider.workspaces,
+      "Recipe sandbox provider does not support file workspaces",
+    );
+    await validateFileSandbox({
+      workspaceSource: source,
+      sandboxProvider: provider,
+    });
+    return provider;
+  }
+
+  async function persist(zone: RecipeFileZone, record: FileWorkspaceRecord) {
+    await session?.saveResource(zone.resource, {
+      state: "ready",
+      fileRecord: record,
+    });
+    await zone.context?.workspaceCheckpoint?.write(
+      zone.resource,
+      recipeJson(record),
+    );
   }
 }

@@ -2,6 +2,8 @@ import { configurationInvariant } from "../../domain/configuration-diagnostic.ts
 import { recipeTaskSourcePath } from "../../domain/recipe.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
 import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
+import type { RecipeRuntimeConfiguration } from "./advanced-components.types.ts";
+import type { SandboxOptions } from "../outpost.types.ts";
 import type { RecipeTaskZone } from "./zones.types.ts";
 
 /** Configuration key of a named workspace, or of the configuration workspace. */
@@ -15,11 +17,18 @@ export function recipeTaskZone(
   sandboxes: RecipeConfigurationModel["sandboxes"],
 ): RecipeTaskZone | undefined {
   if (!step.command && !step.agent) return;
-  if (step.sandbox === undefined)
-    return { workspace: "workspace", sandbox: "sandbox" };
+  return recipeSandboxZone(step.sandbox, sandboxes);
+}
+
+/** Zone of a named sandbox, or of the configuration sandbox when `name` is absent. */
+export function recipeSandboxZone(
+  name: string | undefined,
+  sandboxes: RecipeConfigurationModel["sandboxes"],
+): RecipeTaskZone {
+  if (name === undefined) return { workspace: "workspace", sandbox: "sandbox" };
   return {
-    workspace: recipeWorkspaceKey(sandboxes[step.sandbox]?.workspace),
-    sandbox: `sandboxes.${step.sandbox}`,
+    workspace: recipeWorkspaceKey(sandboxes[name]?.workspace),
+    sandbox: `sandboxes.${name}`,
   };
 }
 
@@ -43,4 +52,26 @@ export function validateRecipeZones(
       "unknown-reference",
       `Declare sandboxes.${step.sandbox} in the execution configuration.`,
     );
+}
+
+/** Options of the configuration sandbox a zone names. */
+export function recipeZoneOptions(
+  configuration: RecipeRuntimeConfiguration,
+  zone: RecipeTaskZone,
+): SandboxOptions {
+  if (zone.sandbox === "sandbox") return configuration.sandbox;
+  const options =
+    configuration.sandboxes?.[zone.sandbox.slice("sandboxes.".length)];
+  if (!options) throw new Error(`Unknown recipe sandbox: ${zone.sandbox}`);
+  return options;
+}
+
+/** Opened workspaces with the configuration workspace first, then by name. */
+export function recipeZoneOrder<T>(
+  workspaces: ReadonlyMap<string, T>,
+): [string, T][] {
+  const rank = (key: string) => (key === "workspace" ? "" : key);
+  return [...workspaces].sort(([left], [right]) =>
+    rank(left) < rank(right) ? -1 : 1,
+  );
 }

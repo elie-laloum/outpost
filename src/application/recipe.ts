@@ -24,6 +24,8 @@ export function bindRecipe(
     throw new Error(
       "Recipe workflow and task options require createRecipeRuntime",
     );
+  if (document.tasks.some((step) => step.sandbox !== undefined))
+    throw new Error("Named recipe sandboxes require createRecipeRuntime");
   return bindRecipeWorkflow(document, bindings, {
     workflow: {},
     steps: Object.fromEntries(

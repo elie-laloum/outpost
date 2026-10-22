@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { readRecipeConfigurationModel } from "../../src/application/recipes/configuration-model.ts";
 import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 import { parseRecipe } from "../../src/infrastructure/recipe.ts";
+import { defineRecipe } from "../../src/application/recipe.ts";
 
 const file = resolve("zones/execution.yaml");
 const document = parseRecipe(
@@ -311,5 +312,28 @@ test("named file workspaces read their own inputs and retention", async () => {
       0,
       "snapshot",
     ]),
+  );
+});
+
+test("recipes bound to one TypeScript sandbox refuse named sandboxes", () => {
+  assert.throws(
+    () =>
+      defineRecipe(
+        JSON.stringify({
+          version: 3,
+          name: "zones",
+          tasks: [
+            {
+              key: "draft",
+              command: { executable: "true" },
+              sandbox: "docker",
+            },
+          ],
+        }),
+        {
+          sandbox: {} as never,
+        },
+      ),
+    /Named recipe sandboxes require createRecipeRuntime/,
   );
 });

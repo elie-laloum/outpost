@@ -10,6 +10,7 @@ import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { normalizeRecipe } from "./normalize.ts";
 import { compileRecipeStep } from "./compile-step.ts";
 import { recipeTextRenderer } from "./rendering.ts";
+import { recipeTaskWorkspace } from "./zones.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
 import type {
   Task,
@@ -66,12 +67,17 @@ export function bindRecipeWorkflow(
   const inputs = resolveRecipeInputs(document.inputs, bindings.inputs);
   const program = normalizeRecipe(document, components);
   const tasks = new Map<string, Task>();
-  const sandbox = async (context: TaskContext) => {
-    if (bindings.acquireSandbox) return bindings.acquireSandbox(context);
+  const sandbox = async (context: TaskContext, name?: string) => {
+    if (bindings.acquireSandbox) return bindings.acquireSandbox(context, name);
+    if (name !== undefined)
+      throw new Error(`Recipe task requires sandbox ${name}`);
     if (!bindings.sandbox)
       throw new Error("Recipe task requires a shared sandbox");
     return bindings.sandbox;
   };
+  const named = new Map(
+    document.tasks.map((step) => [step.key, step.sandbox] as const),
+  );
   const keys = program.tasks.map((step) => step.key);
   const contextFor = (context: TaskContext) => ({
     inputs,
@@ -119,7 +125,7 @@ export function bindRecipeWorkflow(
         common,
         bindings,
         components,
-        sandbox,
+        sandbox: (context) => sandbox(context, named.get(step.key)),
         evaluate,
         text,
       }),
@@ -141,7 +147,11 @@ export function bindRecipeWorkflow(
         ...components.workflow,
         ...options,
       };
-      validateRecipeConcurrency(document, settings.concurrency);
+      validateRecipeConcurrency(
+        document,
+        settings.concurrency,
+        recipeTaskWorkspace(components.sandboxes ?? {}),
+      );
       return workflow.start(settings);
     },
   };

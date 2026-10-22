@@ -13,6 +13,7 @@ import { invariant } from "../../domain/errors.ts";
 import { resolveRecipeEnvironment } from "./configuration-model.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
+import { recipeWorkspaceKey } from "./zones.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -60,16 +61,53 @@ export async function recipeExecutionConfiguration(
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
     agents[role] = agent;
   }
-  for (const role of new Set(
-    project.document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
-  )) {
+  const sandboxes: Record<string, SandboxOptions> = {};
+  for (const [name, declaration] of Object.entries(model.sandboxes)) {
+    const target =
+      declaration.workspace === undefined
+        ? model.workspace
+        : model.workspaces[declaration.workspace];
+    invariant(
+      target?.kind === "git",
+      `Sandbox ${name} requires a Git workspace`,
+    );
+    const [named, settings] = await Promise.all([
+      scope.resolve(`sandboxes.${name}`, "sandboxProvider"),
+      scope.resolve(
+        recipeWorkspaceKey(declaration.workspace),
+        "sandboxOptions",
+      ),
+    ]);
+    if (!isProvider(named) || !isSandboxOptions(settings))
+      throw new Error(`Invalid sandbox configuration: ${name}`);
+    sandboxes[name] = {
+      repository: target.repository,
+      branch: target.branch,
+      logging: false,
+      ...settings,
+      sandboxProvider: {
+        ...named,
+        variables: { ...named.variables, ...environment },
+      },
+    };
+  }
+  const preflights = new Map<string, [string, SandboxOptions | undefined]>();
+  for (const task of project.document.tasks)
+    if (task.agent)
+      preflights.set(`${task.agent}\0${task.sandbox ?? ""}`, [
+        task.agent,
+        task.sandbox === undefined ? undefined : sandboxes[task.sandbox],
+      ]);
+  for (const [role, zone] of preflights.values())
     await preflightRecipeAgent(
       agents[role]!,
-      repository,
-      { ...provider.variables, ...environment },
+      zone?.repository ?? repository,
+      zone?.sandboxProvider?.variables ?? {
+        ...provider.variables,
+        ...environment,
+      },
       scope,
     );
-  }
 
   if (options.workspace) {
     if (model.components.branch !== undefined)
@@ -99,5 +137,6 @@ export async function recipeExecutionConfiguration(
     },
     agents,
     integration,
+    ...(Object.keys(sandboxes).length ? { sandboxes } : {}),
   };
 }

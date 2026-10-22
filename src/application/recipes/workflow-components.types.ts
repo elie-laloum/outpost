@@ -22,6 +22,7 @@ import type { Sandbox, SandboxOptions } from "../outpost.types.ts";
 import type { RecipeBindings } from "../recipe.types.ts";
 import type { FileSandbox } from "../file-sandbox.types.ts";
 import type { FileDispatchRequest } from "../file-sandbox.types.ts";
+import type { RecipeConfigurationModel } from "./configuration-model.types.ts";
 
 export type RecipeTaskSettings = Omit<
   TaskOptions<unknown>,
@@ -71,6 +72,8 @@ export interface RecipeWorkflowComponents {
   readonly identity?: string;
   readonly retryIncomplete?: boolean;
   readonly sharedSandbox?: SandboxOptions;
+  /** Named sandboxes and the workspaces they open, to order tasks per workspace. */
+  readonly sandboxes?: RecipeConfigurationModel["sandboxes"];
   readonly workflow: RecipeWorkflowSettings;
   readonly steps: Readonly<Record<string, RecipeWorkflowStepComponents>>;
 }
@@ -81,7 +84,11 @@ export type RecipeExecutionBindings = Omit<RecipeBindings, "sandbox"> & {
     },
   ): Promise<void>;
   readonly sandbox?: Sandbox | FileSandbox | undefined;
-  acquireSandbox?(context: TaskContext): Promise<Sandbox | FileSandbox>;
+  /** `sandbox` names the configuration sandbox the task selects, if any. */
+  acquireSandbox?(
+    context: TaskContext,
+    sandbox?: string,
+  ): Promise<Sandbox | FileSandbox>;
   prepareIsolated?(
     key: string,
     request: RecipeIsolatedSettings,

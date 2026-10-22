@@ -54,8 +54,6 @@ export function createRecipeProjectRuntime(
       throw new Error("Recipe runtime is closed or already running");
     if (resume && project.document.version !== 3)
       throw new Error("Recipe resume requires format 3");
-    if (project.document.tasks.some((task) => task.sandbox !== undefined))
-      throw new Error("Named recipe sandboxes cannot run yet");
     const inputs = resume
       ? undefined
       : resolveRecipeInputs(project.document.inputs, settings.inputs);
@@ -112,6 +110,7 @@ export function createRecipeProjectRuntime(
               ...(await prepareRecipeWorkflow(project.document, scope)),
               identity: recipeProjectIdentity(project, inputs ?? {}),
               sharedSandbox: configuration.sandbox,
+              sandboxes: project.model.sandboxes,
             };
             securedObservation = secure();
             signal.throwIfAborted();

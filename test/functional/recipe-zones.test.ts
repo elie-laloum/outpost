@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -8,6 +8,8 @@ import { execFile } from "node:child_process";
 import { inspectRecipeExecution } from "../../src/application/recipes/plan.ts";
 import { readRecipeProject } from "../../src/application/recipes/project.ts";
 import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
+import { createRecipeRuntime } from "../../src/application/recipes/runtime.ts";
+import { repository } from "../helpers.ts";
 
 async function project(t: { after(callback: () => Promise<void>): void }) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-zones-"));
@@ -256,4 +258,191 @@ test("named file workspaces reference declared Transports", async (t) => {
     ]);
     return true;
   });
+});
+
+function shell(
+  key: string,
+  script: string,
+  extra: Record<string, unknown> = {},
+) {
+  return {
+    key,
+    command: { executable: "sh", arguments: ["-c", script] },
+    ...extra,
+  };
+}
+
+test("tasks switch sandboxes on one Git workspace, keep its files and integrate every workspace", async (t) => {
+  const { file, config, write } = await project(t);
+  const repo = await repository(t);
+  const commit = 'git add -A && git commit -qm "$ZONE"';
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      tasks: [
+        shell("draft", `echo "$ZONE" > zone.txt && ${commit}`, {
+          sandbox: "a",
+        }),
+        shell(
+          "review",
+          `cat zone.txt && echo "$ZONE" >> zone.txt && ${commit}`,
+          {
+            sandbox: "b",
+            after: ["draft"],
+          },
+        ),
+        shell("check", 'cat zone.txt; echo "$ZONE"', { after: ["review"] }),
+        shell("other", `echo "$ZONE" > other.txt && ${commit}`, {
+          sandbox: "c",
+        }),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local", variables: { ZONE: "default" } },
+      workspaces: {
+        side: {
+          kind: "git",
+          repository: repo,
+          branch: { mode: "named", name: "side" },
+        },
+      },
+      sandboxes: {
+        a: { provider: "local", variables: { ZONE: "a" } },
+        b: { provider: "local", variables: { ZONE: "b" } },
+        c: {
+          workspace: { $ref: "workspaces.side" },
+          provider: "local",
+          variables: { ZONE: "c" },
+        },
+      },
+    },
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const report = await runtime.run();
+  assert.equal(report.status, "done", JSON.stringify(report.errors));
+  assert.equal(report.outputs.review?.stdout, "a\n");
+  assert.equal(report.outputs.check?.stdout, "a\nb\ndefault\n");
+  const show = (revision: string) =>
+    promisify(execFile)("git", ["-C", repo, "show", revision], {
+      encoding: "utf8",
+    }).then(({ stdout }) => stdout);
+  assert.equal(await show("main:zone.txt"), "a\nb\n");
+  assert.equal(await show("side:other.txt"), "c\n");
+  assert.equal(report.workspace?.retainedDirectory, undefined);
+  assert.equal(report.workspaces?.side?.kind, "git");
+  assert.equal(
+    report.workspaces?.side?.kind === "git" && report.workspaces.side.branch,
+    "side",
+  );
+});
+
+test("tasks switch sandboxes on one file workspace and each workspace publishes its outputs", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  await mkdir(join(directory, "source"));
+  await writeFile(join(directory, "source", "base.txt"), "base\n");
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      tasks: [
+        shell("draft", 'echo "$ZONE" > zone.txt', { sandbox: "a" }),
+        shell("review", 'cat zone.txt base.txt && echo "$ZONE" >> zone.txt', {
+          sandbox: "b",
+          after: ["draft"],
+        }),
+        shell("other", 'printf \'{"zone":"%s"}\' "$ZONE" > result.json', {
+          sandbox: "c",
+        }),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "directory", directory: "./source" },
+      outputs: [
+        { paths: ["zone.txt"], destination: "./published", policy: "create" },
+      ],
+      workspaces: {
+        scratch: {
+          kind: "ephemeral",
+          outputs: [
+            {
+              paths: ["result.json"],
+              destination: "./scratch",
+              policy: "create",
+            },
+          ],
+        },
+      },
+      sandboxes: {
+        a: { provider: "local", variables: { ZONE: "a" } },
+        b: { provider: "local", variables: { ZONE: "b" } },
+        c: {
+          workspace: { $ref: "workspaces.scratch" },
+          provider: "local",
+          variables: { ZONE: "c" },
+        },
+      },
+    },
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const report = await runtime.run();
+  assert.equal(report.status, "done", JSON.stringify(report.errors));
+  assert.equal(report.outputs.review?.stdout, "a\nbase\n");
+  assert.equal(
+    await readFile(join(directory, "published", "zone.txt"), "utf8"),
+    "a\nb\n",
+  );
+  assert.equal(
+    await readFile(join(directory, "scratch", "result.json"), "utf8"),
+    '{"zone":"c"}',
+  );
+  await assert.rejects(readFile(join(directory, "source", "zone.txt")), {
+    code: "ENOENT",
+  });
+  assert.equal(report.fileOutputs?.length, 1);
+  const scratch = report.workspaces?.scratch;
+  assert.equal(scratch?.kind, "files");
+  assert.equal(scratch?.kind === "files" && scratch.fileOutputs.length, 1);
+});
+
+test("workspaces progress in parallel when the recipe allows concurrency", async (t) => {
+  const { directory, file, config, write } = await project(t);
+  const repo = await repository(t);
+  const barrier = (mine: string, other: string) =>
+    `touch "${directory}/${mine}" && while [ ! -e "${directory}/${other}" ]; do sleep 0.05; done`;
+  await write(
+    {
+      version: 3,
+      name: "zones",
+      workflow: { concurrency: 2 },
+      tasks: [
+        shell("left", barrier("left", "right"), { timeoutMs: 20000 }),
+        shell("right", barrier("right", "left"), {
+          sandbox: "side",
+          timeoutMs: 20000,
+        }),
+      ],
+    },
+    {
+      version: 3,
+      workspace: { kind: "git", repository: repo },
+      sandbox: { provider: "local" },
+      workspaces: {
+        side: {
+          kind: "git",
+          repository: repo,
+          branch: { mode: "named", name: "side" },
+        },
+      },
+      sandboxes: {
+        side: { workspace: { $ref: "workspaces.side" }, provider: "local" },
+      },
+    },
+  );
+  await using runtime = await createRecipeRuntime({ file, config });
+  const report = await runtime.run();
+  assert.equal(report.status, "done", JSON.stringify(report.errors));
 });

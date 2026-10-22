@@ -61,7 +61,11 @@ export async function runDurableRecipe(
       {
         ...(configuration.agents ? { agents: configuration.agents } : {}),
         inputs: session.inputs,
-        acquireSandbox: resources.shared,
+        acquireSandbox(context, name) {
+          if (name !== undefined)
+            throw new Error("Durable recipes cannot run named sandboxes yet");
+          return resources.shared(context);
+        },
         prepareIsolated: (key, request, context) =>
           isFileSandboxOptions(request)
             ? Promise.resolve(request)

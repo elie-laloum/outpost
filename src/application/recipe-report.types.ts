@@ -35,4 +35,22 @@ export interface RecipeReport {
     readonly directory: string;
     readonly retainedDirectory?: string;
   };
+  /** Named workspaces of the configuration that the run opened. */
+  readonly workspaces?: Readonly<Record<string, RecipeWorkspaceReport>>;
+}
+
+export type RecipeWorkspaceReport =
+  RecipeGitWorkspaceReport | RecipeFileWorkspaceReport;
+
+export interface RecipeGitWorkspaceReport extends NonNullable<
+  RecipeReport["workspace"]
+> {
+  readonly kind: "git";
+  readonly integration?: import("./conflict-resolution.types.ts").ConflictResolution;
+}
+
+export interface RecipeFileWorkspaceReport {
+  readonly kind: "files";
+  readonly workspaceInfo?: import("../domain/file-workspace.types.ts").FileWorkspaceRecord;
+  readonly fileOutputs: readonly import("../domain/file-workspace.types.ts").WorkspacePublication[];
 }
