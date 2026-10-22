@@ -97,7 +97,7 @@ outpost.yaml:6:13: Unknown configuration field unexpected
 Hint: Remove unexpected or move it under the section that declares it.
 ```
 
-Avec `--json`, l’objet `error` porte les mêmes champs `code`, `path`, `message`, `hint`, `file`, `line` et `column`.
+Avec `--json`, l’objet `error` porte les mêmes champs `code`, `path`, `message`, `hint`, `file`, `line` et `column`. `code` nomme la nature du problème indépendamment de la formulation, par exemple `unknown-field`, `missing-field`, `invalid-value`, `unknown-reference`, `missing-dependency`, `unsupported-binding` ou `git-workspace-only`. Une erreur portant sur une tâche, comme une fonction réservée à Git dans un workspace de fichiers, désigne le fichier de recette même lorsqu’elle est détectée pendant la lecture de la configuration d’exécution.
 
 ## `outpost recipe list` et `outpost recipe fetch`
 

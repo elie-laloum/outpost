@@ -81,12 +81,19 @@ export async function readRecipeProject(
       configuration.version !== 2 &&
       configuration.version !== 3
     )
-      throw new Error(`${config}: configuration version must be 1, 2 or 3`);
+      throw configurationError(
+        "Configuration version must be 1, 2 or 3",
+        ["version"],
+        "unsupported-version",
+        "Declare version: 3 for new configurations.",
+      );
     if (
       configuration.experimental !== undefined &&
       typeof configuration.experimental !== "boolean"
     )
-      throw new Error("experimental must be a boolean");
+      throw configurationError("experimental must be a boolean", [
+        "experimental",
+      ]);
     const extra = new Set([
       "observation",
       "reports",
@@ -155,16 +162,22 @@ export async function readRecipeProject(
       files?.retention?.policy === "portable" &&
       graph.nodes.get(files.retention.transporter)?.kind !== "transport"
     )
-      throw new Error(
+      throw configurationError(
         "Portable workspace retention references an unknown Transport",
+        ["workspace", "retention", "transporter"],
+        "unknown-reference",
+        `Declare ${files.retention.transporter} as a Transport in the execution configuration.`,
       );
-    for (const input of files?.inputs ?? [])
+    for (const [index, input] of (files?.inputs ?? []).entries())
       if (
         "snapshot" in input &&
         graph.nodes.get(input.transporter)?.kind !== "transport"
       )
-        throw new Error(
+        throw configurationError(
           "Workspace snapshot input references an unknown Transport",
+          ["workspace", "inputs", index, "transporter"],
+          "unknown-reference",
+          `Declare ${input.transporter} as a Transport in the execution configuration.`,
         );
     const reports = configuration.reports ?? [];
     if (!Array.isArray(reports))

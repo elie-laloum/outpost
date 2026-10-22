@@ -1,4 +1,4 @@
-import { invariant } from "../../domain/errors.ts";
+import { configurationInvariant } from "../../domain/configuration-diagnostic.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 
@@ -13,15 +13,21 @@ export function validateFileRecipeCapabilities(
     const node = graph.nodes.get(name);
     if (!node) return;
     const factory = node.definition?.name;
-    invariant(
+    configurationInvariant(
       factory !== "toolset.git" &&
         !(factory === "tool.custom" && node.options.workspace === "git"),
       "Git tools cannot run in file workspaces",
+      name,
+      "git-workspace-only",
+      "Use toolset files or search with selection: filesystem, or run the recipe in a Git workspace.",
     );
     if (factory === "toolset.files" || factory === "toolset.search")
-      invariant(
+      configurationInvariant(
         node.options.selection === "filesystem",
         "File recipes require explicit filesystem tool selection",
+        `${name}.selection`,
+        "missing-field",
+        "Set selection: filesystem on this toolset.",
       );
     for (const dependency of node.dependencies) visit(dependency);
   };

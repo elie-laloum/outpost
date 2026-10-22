@@ -3,9 +3,14 @@ import {
   recipeTemplatePattern,
   recipeResultFields,
 } from "./recipe.constants.ts";
+import {
+  configurationInvariant,
+  locateConfiguration,
+} from "./configuration-diagnostic.ts";
 import type {
   RecipeDocument,
   RecipeReference,
+  RecipeStep,
   RecipeValue,
 } from "./recipe.types.ts";
 import type { Command } from "./command.types.ts";
@@ -23,10 +28,6 @@ export function recipeReferences(text: string): readonly RecipeReference[] {
     if (kind === "steps" && field) return { source, kind, key: key!, field };
     throw new Error(`Invalid recipe reference: ${source}`);
   });
-}
-
-export function recipeCommandStrings(command: Command): readonly string[] {
-  return recipeCommandFields(command).map(([value]) => value);
 }
 
 /** Pairs each templated command string with its path under the task's `command` field. */
@@ -50,45 +51,76 @@ export function recipeCommandFields(
   ];
 }
 
-export function validateRecipeReferences(document: RecipeDocument): void {
+/** Checks format 2 references, locating each error at its task field through `sourcePath`. */
+export function validateRecipeReferences(
+  document: RecipeDocument,
+  sourcePath: (task: RecipeStep) => RecipeSourcePath,
+): void {
   if (document.version !== 2) return;
   const tasks = new Map(document.tasks.map((task) => [task.key, task]));
   for (const task of document.tasks) {
-    const strings = task.command
-      ? recipeCommandStrings(task.command)
-      : task.brief === undefined
-        ? []
-        : [task.brief];
-    for (const reference of strings.flatMap(recipeReferences)) {
-      if (reference.kind === "inputs") {
-        if (!Object.hasOwn(document.inputs, reference.key))
-          throw new Error(
-            `Unknown recipe input in ${task.key}: ${reference.key}`,
-          );
-        if (
-          !["string", "number", "boolean"].includes(
-            document.inputs[reference.key]!.type,
+    const fields: readonly (readonly [string, RecipeSourcePath])[] = [
+      ...(task.command
+        ? recipeCommandFields(task.command).map(
+            ([value, path]) => [value, ["command", ...path]] as const,
           )
-        )
-          throw new Error(
-            `Text interpolation requires a scalar input: ${reference.key}`,
-          );
-        continue;
-      }
-      const dependency = tasks.get(reference.key);
-      if (!dependency || !task.after.includes(reference.key))
-        throw new Error(
-          `Recipe step ${task.key} must declare ${reference.key} in after before referencing its output`,
-        );
-      const fields: readonly string[] = dependency.command
-        ? recipeResultFields.command
-        : recipeResultFields.agent;
-      if (!fields.includes(reference.field!))
-        throw new Error(
-          `Unknown recipe output: ${reference.key}.${reference.field}`,
-        );
+        : []),
+      ...(task.brief === undefined ? [] : [[task.brief, ["brief"]] as const]),
+    ];
+    for (const [text, field] of fields) {
+      const path = [...sourcePath(task), ...field];
+      const references = locateConfiguration(path, () =>
+        recipeReferences(text),
+      );
+      for (const reference of references)
+        validateReference(document, tasks, task, reference, path);
     }
   }
+}
+
+function validateReference(
+  document: RecipeDocument,
+  tasks: ReadonlyMap<string, RecipeStep>,
+  task: RecipeStep,
+  reference: RecipeReference,
+  path: RecipeSourcePath,
+): void {
+  if (reference.kind === "inputs") {
+    configurationInvariant(
+      Object.hasOwn(document.inputs, reference.key),
+      `Unknown recipe input in ${task.key}: ${reference.key}`,
+      path,
+      "unknown-input",
+      `Declare inputs.${reference.key} in the recipe.`,
+    );
+    configurationInvariant(
+      ["string", "number", "boolean"].includes(
+        document.inputs[reference.key]!.type,
+      ),
+      `Text interpolation requires a scalar input: ${reference.key}`,
+      path,
+      "invalid-value",
+    );
+    return;
+  }
+  const dependency = tasks.get(reference.key);
+  configurationInvariant(
+    dependency && task.after.includes(reference.key),
+    `Recipe step ${task.key} must declare ${reference.key} in after before referencing its output`,
+    path,
+    "missing-dependency",
+    `Add ${reference.key} to after.`,
+  );
+  const fields: readonly string[] = dependency.command
+    ? recipeResultFields.command
+    : recipeResultFields.agent;
+  configurationInvariant(
+    fields.includes(reference.field!),
+    `Unknown recipe output: ${reference.key}.${reference.field}`,
+    path,
+    "unknown-output",
+    `Use one of: ${fields.join(", ")}.`,
+  );
 }
 
 export function renderRecipeText(

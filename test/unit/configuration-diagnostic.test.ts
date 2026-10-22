@@ -42,3 +42,54 @@ test("recipe validation carries structured task locations through YAML parsing",
     },
   );
 });
+
+test("located configuration checks keep their cause and never relocate a diagnostic", async () => {
+  const { configurationInvariant, locateConfiguration } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  assert.throws(
+    () =>
+      configurationInvariant(
+        false,
+        "Bad value",
+        "outputs[1].policy",
+        "invalid-value",
+        "Use create.",
+      ),
+    (error) => {
+      assert.ok(error instanceof ConfigurationError);
+      assert.deepEqual(error.diagnostic, {
+        code: "invalid-value",
+        path: ["outputs", 1, "policy"],
+        message: "Bad value",
+        hint: "Use create.",
+      });
+      return true;
+    },
+  );
+  const cause = new Error("Workspace selection must not be empty");
+  assert.throws(
+    () =>
+      locateConfiguration(["outputs", 0, "paths"], () => {
+        throw cause;
+      }),
+    (error) => {
+      assert.ok(error instanceof ConfigurationError);
+      assert.equal(error.cause, cause);
+      assert.equal(error.message, cause.message);
+      assert.deepEqual(error.diagnostic.path, ["outputs", 0, "paths"]);
+      return true;
+    },
+  );
+  const inner = configurationError("Inner", ["workspace", "kind"]);
+  assert.throws(
+    () =>
+      locateConfiguration(["workspace"], () => {
+        throw inner;
+      }),
+    (error) => error === inner,
+  );
+  assert.equal(
+    locateConfiguration(["workspace"], () => 3),
+    3,
+  );
+});

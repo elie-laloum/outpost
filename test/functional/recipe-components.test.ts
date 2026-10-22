@@ -600,3 +600,102 @@ test("configuration component errors locate their use site with a hint", async (
     /execution\.yaml:6:13: Unknown configuration field unexpected\nHint: Remove unexpected/,
   );
 });
+
+test("file workspace configuration errors locate the declaration they reject", async (t) => {
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-file-diagnostic-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const file = join(directory, "recipe.yaml");
+  const config = join(directory, "execution.yaml");
+  const recipe =
+    "version: 3\nname: files\ntasks:\n  - key: read\n    command: { executable: cat }\n";
+  const ephemeral =
+    "version: 3\nworkspace:\n  kind: ephemeral\nsandbox:\n  provider: local\n";
+  for (const [source, configuration, code, path, line, hint] of [
+    [
+      recipe,
+      "version: 3\nworkspace:\n  kind: ephemeral\n  unexpected: true\nsandbox:\n  provider: local\n",
+      "unknown-field",
+      ["workspace", "unexpected"],
+      4,
+      /Remove unexpected; workspace accepts kind/,
+    ],
+    [
+      recipe,
+      "version: 3\nworkspace:\n  kind: directory\n  directory: .\n  access: { mode: mount, target: work, readOnly: true }\nsandbox:\n  provider: vercel\n",
+      "unsupported-binding",
+      ["sandbox"],
+      7,
+      /vercel supports copy, ephemeral/,
+    ],
+    [
+      recipe,
+      "version: 3\nworkspace:\n  kind: ephemeral\nsandbox:\n  provider: docker\n",
+      "missing-field",
+      ["sandbox", "image"],
+      5,
+      /Declare sandbox\.image/,
+    ],
+    [
+      recipe,
+      `${ephemeral}outputs:\n  - paths: ["*.json"]\n    destination: ./results\n    policy: replace\n`,
+      "invalid-value",
+      ["outputs", 0, "policy"],
+      9,
+      /create or update/,
+    ],
+    [
+      recipe,
+      `${ephemeral}outputs:\n  - paths: ["../escape"]\n    destination: ./results\n    policy: create\n`,
+      "invalid-configuration",
+      ["outputs", 0, "paths"],
+      7,
+      /^$/,
+    ],
+    [
+      recipe,
+      `${ephemeral}runtime:\n  namespace: "-bad"\n`,
+      "invalid-value",
+      ["runtime", "namespace"],
+      7,
+      /starting with a letter or digit/,
+    ],
+    [
+      recipe,
+      "version: 3\nruntime:\n  namespace: team\nworkspace:\n  kind: ephemeral\n  retention:\n    policy: portable\n    transporter: { $ref: transports.archive }\nsandbox:\n  provider: local\n",
+      "unknown-reference",
+      ["workspace", "retention", "transporter"],
+      8,
+      /Declare transports\.archive as a Transport/,
+    ],
+    [
+      'version: 1\nname: branch\ntasks:\n  - key: first\n    command: { executable: "true" }\n  - key: review\n    after: [first]\n    agent: reviewer\n    brief: "Review {{ WORK_BRANCH }}"\n',
+      ephemeral,
+      "git-workspace-only",
+      ["tasks", 1, "brief"],
+      9,
+      /file workspaces have no branches/,
+    ],
+    [
+      'version: 2\nname: references\ntasks:\n  - key: review\n    agent: reviewer\n    brief: "Use {{ steps.first.stdout }}"\n  - key: first\n    command: { executable: "true" }\n',
+      ephemeral,
+      "missing-dependency",
+      ["tasks", 0, "brief"],
+      6,
+      /Add first to after/,
+    ],
+  ] as const) {
+    await writeFile(file, source);
+    await writeFile(config, configuration);
+    await assert.rejects(readRecipeProject({ file, config }), (error) => {
+      assert.ok(error instanceof ConfigurationError, String(error));
+      assert.equal(error.diagnostic.code, code);
+      assert.deepEqual(error.diagnostic.path, path);
+      assert.equal(error.diagnostic.file, path[0] === "tasks" ? file : config);
+      assert.equal(error.diagnostic.line, line, error.message);
+      assert.match(error.diagnostic.hint ?? "", hint);
+      return true;
+    });
+  }
+});

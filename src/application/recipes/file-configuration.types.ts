@@ -4,6 +4,7 @@ import type {
   WorkspaceRuntimeOptions,
 } from "../../domain/file-workspace.types.ts";
 import type { TransportReference } from "../../domain/transport.types.ts";
+import type { ConfigurationDiagnostic } from "../../domain/configuration-diagnostic.types.ts";
 import type {
   FileWorkspaceBinding,
   SandboxProvider,
@@ -23,7 +24,7 @@ export interface RecipeFileWorkspacePlan {
     readonly placement?: SandboxProvider["placement"];
     readonly bindings?: readonly FileWorkspaceBinding[];
   };
-  readonly diagnostics: readonly string[];
+  readonly diagnostics: readonly ConfigurationDiagnostic[];
 }
 
 export interface RecipeFileConfiguration {

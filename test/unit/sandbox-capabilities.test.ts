@@ -56,7 +56,14 @@ test("file workspace plans report bindings and refuse undemonstrated ones before
   );
   assert.deepEqual(
     planFileWorkspace(mount, { provider: "vercel" }).diagnostics,
-    ["Sandbox provider cannot mount workspace sources"],
+    [
+      {
+        code: "unsupported-binding",
+        path: ["sandbox"],
+        message: "Sandbox provider cannot mount workspace sources",
+        hint: "vercel supports copy, ephemeral; change workspace.access or the sandbox provider.",
+      },
+    ],
   );
   assert.deepEqual(
     planFileWorkspace(mount, { provider: "docker", image: "fixture" })
@@ -68,12 +75,25 @@ test("file workspace plans report bindings and refuse undemonstrated ones before
       provider: "podman",
       image: "fixture",
       repositoryMode: "isolated",
-    }).diagnostics,
+    }).diagnostics.map((diagnostic) => diagnostic.message),
     ["Sandbox provider cannot mount workspace sources"],
   );
   assert.deepEqual(
-    planFileWorkspace({ kind: "ephemeral" }, { type: "docker" }).diagnostics,
-    ["File workspaces require an explicit container image"],
+    planFileWorkspace(
+      { kind: "ephemeral" },
+      { type: "docker" },
+    ).diagnostics.map((diagnostic) => [
+      diagnostic.code,
+      diagnostic.path,
+      diagnostic.message,
+    ]),
+    [
+      [
+        "missing-field",
+        ["sandbox", "image"],
+        "File workspaces require an explicit container image",
+      ],
+    ],
   );
   const extension = planFileWorkspace(mount, {
     $ref: "extensions.sandbox",

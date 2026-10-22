@@ -327,7 +327,9 @@ export function validateRecipe(value: unknown): RecipeDocument {
       : { recipeVersion: text(record.recipeVersion, "recipe.recipeVersion") }),
   };
   for (const [index, task] of tasks.entries()) taskSources.set(task, index);
-  validateRecipeReferences(document);
+  validateRecipeReferences(document, (task) =>
+    recipeTaskSourcePath(document, task),
+  );
   if (document.version === 3)
     for (const step of document.tasks) {
       const at = (...path: RecipeSourcePath) => ({

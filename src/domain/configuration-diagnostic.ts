@@ -34,3 +34,30 @@ export function configurationError(
     ...(hint === undefined ? {} : { hint }),
   });
 }
+
+export function configurationInvariant(
+  condition: unknown,
+  message: string,
+  path: string | readonly (string | number)[],
+  code = "invalid-configuration",
+  hint?: string,
+): asserts condition {
+  if (!condition) throw configurationError(message, path, code, hint);
+}
+
+/** Locates an error raised by a lower-level validator at the value it checked. */
+export function locateConfiguration<T>(
+  path: string | readonly (string | number)[],
+  read: () => T,
+): T {
+  try {
+    return read();
+  } catch (error) {
+    if (error instanceof ConfigurationError) throw error;
+    const located = configurationError(
+      error instanceof Error ? error.message : String(error),
+      path,
+    );
+    throw new ConfigurationError(located.diagnostic, { cause: error });
+  }
+}
