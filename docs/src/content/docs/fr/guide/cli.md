@@ -1,5 +1,5 @@
 ---
-title: "Commandes en ligne de commande"
+title: "Commandes de la CLI"
 description: "Vérifiez votre environnement, préparez les images d’agent, exécutez des recettes YAML et examinez les données de récupération depuis le terminal."
 ---
 

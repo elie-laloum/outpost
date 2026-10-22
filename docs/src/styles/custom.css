@@ -61,6 +61,18 @@ a[data-api-kind="constant"] {
 .docs-navigation section + section {
   margin-top: 0.4rem;
 }
+.docs-tier {
+  margin: 0;
+  padding: 1rem 0.65rem 0.3rem;
+  color: var(--sl-color-accent-high);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.docs-navigation section:first-child .docs-tier {
+  padding-top: 0;
+}
 .docs-navigation h2 {
   margin: 0 0 0.5rem;
   padding: 0 0.65rem 0.5rem;

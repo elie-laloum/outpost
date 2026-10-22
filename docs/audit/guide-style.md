@@ -4,7 +4,7 @@ The Guide helps developers run a first task from TypeScript or YAML, then find f
 
 ## Recommended first steps
 
-The reading path is Introduction, Installation, Your first task, Your first workflow, then How Outpost runs a task. Installation covers the package, agent image, authentication prerequisite and an explicitly imported configuration file. Use `image eject` and `image build` to prepare an agent image when a task needs one.
+The reading path is Introduction, Installation, Your first task, Your first workflow, then How Outpost runs a task. Your first YAML recipe sits in the same chapter as the declarative alternative, and Troubleshoot your setup closes it for installation problems. Installation covers the package, agent image, authentication prerequisite and an explicitly imported configuration file. Use `image eject` and `image build` to prepare an agent image when a task needs one.
 
 Use `.ts` for every TypeScript example, import and execution command. Installation explains the ESM package setting once; CommonJS projects can keep these scripts in a separate directory with its own package manifest. Keep examples executable with Node.js 24 or later and match the public API.
 

@@ -1,5 +1,5 @@
 ---
-title: "Choisir les fichiers de travail"
+title: "Choisir où l’agent travaille"
 description: "Choisir des branches Git, une copie de dossier ou un espace vide."
 ---
 

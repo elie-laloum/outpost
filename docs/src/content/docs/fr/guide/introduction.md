@@ -26,14 +26,15 @@ Vous préférez un fichier déclaratif ? Après l’installation, suivez [Votre 
 
 ## Continuer dans l’ordre
 
-Suivez ces guides dans l’ordre une fois votre premier workflow exécuté.
+Suivez ces guides dans l’ordre une fois votre premier workflow exécuté. La barre latérale regroupe le Guide en quatre étapes le long de ce parcours : adopter, développer, industrialiser, puis approfondir.
 
 <!-- path -->
 
-1. [Tester les changements de l’agent](../sandbox-sessions/) : Exécuter l’agent et vos tests dans le même environnement.
-2. [Recevoir des données validées](../typed-responses/) : Vérifier une réponse JSON avant de l’utiliser.
-3. [Enregistrer et reprendre un workflow](../durable-runs/) : Reprendre après une pause ou une interruption sans répéter les tâches terminées.
-4. [Automatiser les exécutions](../unattended-runs/) : Lancer du travail depuis la CI, une file, une planification ou un webhook.
+1. [Choisir un agent](../choose-an-agent/) : Comparer les modes de connexion et ce que chaque agent prend en charge.
+2. [Tester les changements de l’agent](../sandbox-sessions/) : Exécuter l’agent et vos tests dans le même environnement.
+3. [Recevoir des données validées](../typed-responses/) : Vérifier une réponse JSON avant de l’utiliser.
+4. [Enregistrer et reprendre un workflow](../durable-runs/) : Reprendre après une pause ou une interruption sans répéter les tâches terminées.
+5. [Automatiser les exécutions](../unattended-runs/) : Lancer du travail depuis la CI, une file, une planification ou un webhook.
 
 ## Choisir la suite
 

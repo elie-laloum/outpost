@@ -1,9 +1,17 @@
 ---
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
 import NavFooter from "./NavFooter.astro";
-import { currentLink } from "./docs-route.ts";
+import { currentLink, isFrench } from "./docs-route.ts";
+import { tiers } from "../../scripts/navigation.mjs";
 
-const guide = Astro.locals.starlightRoute.sidebar[0];
+const route = Astro.locals.starlightRoute;
+const guide = route.sidebar[0];
+const tierLabels = new Map<number, string>();
+let start = 0;
+for (const [english, french, list] of tiers) {
+  tierLabels.set(start, isFrench(route) ? french : english);
+  start += list.length;
+}
 ---
 
 <div class="docs-navigation">
@@ -13,6 +21,9 @@ const guide = Astro.locals.starlightRoute.sidebar[0];
         (group, index) =>
           group.type === "group" && (
             <section>
+              {tierLabels.has(index) && (
+                <p class="docs-tier">{tierLabels.get(index)}</p>
+              )}
               <details open={index === 0 || Boolean(currentLink(group.entries))}>
                 <summary>
                   <h2>{group.label}</h2>

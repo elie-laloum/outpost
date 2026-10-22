@@ -176,9 +176,21 @@ for (const locale of ["", "fr/"]) {
   }
 }
 
-for (const [locale, title, reference] of [
-  ["", "Your first task", "API"],
-  ["fr/", "Votre première tâche", "API"],
+for (const [locale, title, reference, agents, tierLabels] of [
+  [
+    "",
+    "Your first task",
+    "API",
+    "Connect an agent",
+    ["Adopt", "Develop", "Run in production", "Go further"],
+  ],
+  [
+    "fr/",
+    "Votre première tâche",
+    "API",
+    "Connecter un agent",
+    ["Adopter", "Développer", "Industrialiser", "Approfondir"],
+  ],
 ]) {
   test(`guide navigation opens the API space (${locale || "en"})`, async ({
     page,
@@ -189,6 +201,9 @@ for (const [locale, title, reference] of [
       chapters.length,
     );
     await expect(page.locator(".docs-navigation details[open]")).toHaveCount(1);
+    await expect(page.locator(".docs-navigation .docs-tier")).toHaveText(
+      tierLabels,
+    );
     const spacing = await page
       .locator(".docs-navigation")
       .evaluate((navigation) => {
@@ -216,13 +231,13 @@ for (const [locale, title, reference] of [
       });
     expect(spacing.groupGap).toBeLessThanOrEqual(8);
     expect(spacing.linkGap).toBeLessThanOrEqual(2);
-    const agents = page.locator(".docs-navigation details").filter({
-      has: page.getByRole("heading", { name: "Agents", exact: true }),
+    const agentGroup = page.locator(".docs-navigation details").filter({
+      has: page.getByRole("heading", { name: agents, exact: true }),
     });
-    await agents.locator("summary").click();
-    await expect(agents.getByRole("link", { name: /Codex/ })).toBeVisible();
+    await agentGroup.locator("summary").click();
+    await expect(agentGroup.getByRole("link", { name: /Codex/ })).toBeVisible();
     await expect(
-      agents.locator(`a[href$="/${locale}guide/cli-hooks/"]`),
+      agentGroup.locator(`a[href$="/${locale}guide/authentication/"]`),
     ).toBeVisible();
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");
@@ -1319,10 +1334,10 @@ for (const locale of ["", "fr/"]) {
     const features = page.locator("ul.features").first();
     await expect(features.locator("a.feature-cell")).toHaveCount(4);
     await expect(features.locator(".feature-icon svg").first()).toBeVisible();
-    await expect(page.locator("ol.path a.path-cell")).toHaveCount(7);
+    await expect(page.locator("ol.path a.path-cell")).toHaveCount(8);
     await page.locator("ol.path").nth(1).locator("a.path-cell").first().click();
     await expect(page).toHaveURL(
-      new RegExp(`/${locale}guide/sandbox-sessions/$`),
+      new RegExp(`/${locale}guide/choose-an-agent/$`),
     );
     await page.goto(`${locale}guide/introduction/`);
     await features.locator("a.feature-cell").first().click();

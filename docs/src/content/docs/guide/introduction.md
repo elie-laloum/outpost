@@ -26,14 +26,15 @@ Prefer a declarative file? After installation, follow [Your first YAML recipe](.
 
 ## Continue in order
 
-Follow these guides in order once your first workflow runs.
+Follow these guides in order once your first workflow runs. The sidebar groups the Guide into four stages along this path: adopt, develop, run in production, then go further.
 
 <!-- path -->
 
-1. [Run tests on the agent’s changes](../sandbox-sessions/): Keep the agent and your test command in the same environment.
-2. [Receive validated data](../typed-responses/): Check a JSON answer before your application uses it.
-3. [Save and resume a workflow](../durable-runs/): Resume after a pause or interruption without repeating finished tasks.
-4. [Automate your runs](../unattended-runs/): Start work from CI, a queue, a schedule or a webhook.
+1. [Choose an agent](../choose-an-agent/): Compare sign-in modes and what each agent supports.
+2. [Run tests on the agent’s changes](../sandbox-sessions/): Keep the agent and your test command in the same environment.
+3. [Receive validated data](../typed-responses/): Check a JSON answer before your application uses it.
+4. [Save and resume a workflow](../durable-runs/): Resume after a pause or interruption without repeating finished tasks.
+5. [Automate your runs](../unattended-runs/): Start work from CI, a queue, a schedule or a webhook.
 
 ## Choose your next task
 
