@@ -47,7 +47,10 @@ export function defineDecisionTask<const Q extends DecisionQuestions>(
           ...(allowTruncated === undefined ? {} : { allowTruncated }),
         },
         {
-          account: (usage) => context.reportUsage(modelUsage(usage, model)),
+          account: (usage) =>
+            context.reportUsage(
+              context.prices ? modelUsage(usage, model) : usage,
+            ),
         },
       );
     },

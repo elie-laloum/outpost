@@ -289,8 +289,7 @@ test("the built-in loop runs tools in the sandbox and returns the final answer",
   });
   assert.equal(result.completed, true);
   assert.equal(result.text, done);
-  const tokens = { input: 8, cached: 2, output: 4 };
-  assert.deepEqual(result.usage, { ...tokens, models: { tuned: tokens } });
+  assert.deepEqual(result.usage, { input: 8, cached: 2, output: 4 });
   assert.equal(requests.length, 2);
   assert.equal(
     requests[0]?.system,

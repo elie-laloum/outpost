@@ -648,7 +648,7 @@ test("Codex receives steering through app-server turn/steer during a tool call",
   const tokens = { input: 10, cached: 4, cacheCreated: 0, output: 2 };
   assert.deepEqual(result.usage, {
     ...tokens,
-    models: { "codex:default": tokens },
+    models: { codex: tokens },
   });
   assert.ok(!events.some((event) => event.kind === "failure"));
 });

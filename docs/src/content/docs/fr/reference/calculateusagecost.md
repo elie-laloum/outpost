@@ -19,10 +19,10 @@ Estime les frais des tokens dans la devise de la table à partir de Usage.models
 
 ## Paramètres et propriétés
 
-| Nom      | Type              | Présence | Rôle                                                        |
-| -------- | ----------------- | -------- | ----------------------------------------------------------- |
-| `usage`  | `Usage`           | Requis   | Usage agrégé des tokens avec ses compteurs par modèle.      |
-| `prices` | `ModelPriceTable` | Requis   | Tarifs explicites et devise utilisés pour cette estimation. |
+| Nom      | Type              | Présence | Rôle                                                           |
+| -------- | ----------------- | -------- | -------------------------------------------------------------- |
+| `usage`  | `Usage`           | Requis   | Usage agrégé des tokens avec compteurs facultatifs par modèle. |
+| `prices` | `ModelPriceTable` | Requis   | Tarifs explicites et devise utilisés pour cette estimation.    |
 
 ## Retour
 

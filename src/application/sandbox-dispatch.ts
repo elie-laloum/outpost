@@ -133,7 +133,7 @@ export async function dispatchInSandbox<T>(
                 usage:
                   selected.kind === "replay"
                     ? usage
-                    : attributeUsage(selected, usage),
+                    : attributeUsage(selected, usage, Boolean(dispatch.prices)),
               }
             : {}),
         };

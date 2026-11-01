@@ -139,7 +139,7 @@ test("one-shot dispatch writes a journal, returns usage and integrates committed
   const tokens = { input: 2, cached: 1, output: 3 };
   assert.deepEqual(output.usage, {
     ...tokens,
-    models: { "fixture:default": tokens },
+    models: { fixture: tokens },
   });
   assert.equal(output.completed, true);
   assert.ok(output.logReference);

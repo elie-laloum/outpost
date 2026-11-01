@@ -65,7 +65,7 @@ export const result = await dispatch({
 console.log(result.text);
 // Example output: No test calls parseDate() or formatDate().
 console.log(result.usage);
-// Example output: { models: { 'claude-sonnet-5-5': { input: 1200, cached: 0, output: 320 } }, input: 1200, cached: 0, output: 320 }
+// Example output: { input: 1200, cached: 0, output: 320 }
 ```
 
 Set `ANTHROPIC_API_KEY`, then run `node harness-review.ts`. `result.text` holds the model’s final answer. These tools only read files, so the agent cannot edit the repository.

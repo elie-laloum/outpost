@@ -42,7 +42,7 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
   const tokens = { input: 6, cached: 2, output: 4 };
   assert.deepEqual(result.usage.tokens, {
     ...tokens,
-    models: { "fixture:default": tokens },
+    models: { fixture: tokens },
   });
 });
 

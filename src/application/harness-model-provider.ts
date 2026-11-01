@@ -20,18 +20,20 @@ export function harnessModelProvider(scope: HarnessModelScope): ModelProvider {
     };
   };
   const account = (received: ModelResult, model: string): ModelResult => {
-    const result = {
-      ...received,
-      usage: modelUsage(
-        received.usage ?? {
-          input: 0,
-          cached: 0,
-          output: 0,
-          complete: false,
-        },
-        model,
-      ),
-    };
+    const result = scope.trackModels
+      ? {
+          ...received,
+          usage: modelUsage(
+            received.usage ?? {
+              input: 0,
+              cached: 0,
+              output: 0,
+              complete: false,
+            },
+            model,
+          ),
+        }
+      : received;
     signal.throwIfAborted();
     invariant(
       result && typeof result.text === "string",

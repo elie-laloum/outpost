@@ -115,7 +115,7 @@ console.log(`branch: ${sandbox.workspace.branch}`);
 console.log(`rounds: ${result.tasks[0]?.rounds?.length ?? 0}`);
 // Example output: rounds: 2
 console.log(`tokens: ${JSON.stringify(result.usage.tokens)}`);
-// Example output: tokens: {"models":{"codex:default":{"input":1200,"cached":0,"output":320}},"input":1200,"cached":0,"output":320}
+// Example output: tokens: {"models":{"codex":{"input":1200,"cached":0,"output":320}},"input":1200,"cached":0,"output":320}
 if (result.status === "done") console.log(result.value(fix).summary);
 // Example output: Fixed the parser and verified the tests.
 result.unwrap();

@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { dispatch, type Usage } from "../../src/core.ts";
+import {
+  createAgent,
+  createFallbackAgent,
+  dispatch,
+  type Agent,
+  type CliAgent,
+  type Usage,
+} from "../../src/core.ts";
+import { createHarness } from "../../src/harness.ts";
 import {
   calculateUsageCost,
   defineIsolatedTask,
@@ -14,27 +22,56 @@ import { repository, scripted, emit } from "../helpers.ts";
 
 const uncachedTokens = { input: 4, cached: 10, cacheCreated: 2, output: 3 };
 const inclusiveTokens = { input: 12, cached: 8, output: 5 };
+const harnessTokens = { input: 20, cached: 5, output: 7 };
+const shared = "claude-sonnet-4-5";
 const prices: ModelPriceTable = {
   currency: "USD",
   models: {
     opus: { input: 5, output: 25, cached: 0.5, cacheCreated: 6.25 },
     gpt: { input: 2, output: 8, cached: 0.2 },
+    [shared]: { input: 3, output: 15, cached: 0.3 },
   },
 };
+const usageLine = (tokens: Usage) =>
+  `console.log(JSON.stringify({kind:"usage",tokens:${JSON.stringify(tokens)}}));`;
+const quota = `console.log(JSON.stringify({kind:"failure",message:"usage limit reached"})); process.exit(1);`;
 
-function fixture(tokens: Usage, model?: string, uncached = false) {
+function fixture(
+  name: string,
+  tokens: Usage,
+  options: { model?: string; uncached?: boolean; quota?: boolean } = {},
+): CliAgent {
   return {
     ...scripted(
-      `console.log(JSON.stringify({kind:"usage",tokens:${JSON.stringify(tokens)}})); ${emit("<outpost>done</outpost>")}`,
+      `${usageLine(tokens)} ${options.quota ? quota : emit("<outpost>done</outpost>")}`,
     ),
-    ...(model ? { model: { name: model } } : {}),
-    ...(uncached ? { usageInput: "uncached" as const } : {}),
+    name,
+    quota: (text) => /usage limit/.test(text),
+    ...(options.model ? { model: { name: options.model } } : {}),
+    ...(options.uncached ? { usageInput: "uncached" as const } : {}),
   };
 }
 
+const claude = (model = shared, failing = false) =>
+  fixture("claude", uncachedTokens, { model, uncached: true, quota: failing });
+const codex = (model = shared) => fixture("codex", inclusiveTokens, { model });
+const harness = () =>
+  createAgent({
+    model: shared,
+    harness: createHarness({
+      modelProvider: {
+        name: "fixture",
+        request: async () => ({
+          text: "<outpost>done</outpost>",
+          usage: harnessTokens,
+        }),
+      },
+    }),
+  });
+
 async function run(
   root: string,
-  agent: ReturnType<typeof fixture>,
+  agent: Parameters<typeof dispatch>[0]["agent"],
   options: { readonly prices?: ModelPriceTable } = {},
 ) {
   const events: AgentObservation[] = [];
@@ -53,49 +90,41 @@ async function run(
   return { result, usage };
 }
 
-test("usage without prices keeps the cache convention of each model", async (t) => {
+test("unpriced CLI usage is filed under its agent and model with its cache convention", async (t) => {
   const root = await repository(t);
-  const uncached = await run(root, fixture(uncachedTokens, "opus", true));
-  const inclusive = await run(root, fixture(inclusiveTokens, "gpt"));
-  const opus = { ...uncachedTokens, inputIncludesCache: false };
-  assert.deepEqual(uncached.result.usage, {
-    ...uncachedTokens,
-    models: { opus },
-  });
-  assert.deepEqual(uncached.usage, [{ ...uncachedTokens, models: { opus } }]);
+  const uncached = await run(root, claude("opus"));
+  const inclusive = await run(root, codex("gpt"));
+  const models = {
+    "claude:opus": { ...uncachedTokens, inputIncludesCache: false },
+  };
+  assert.deepEqual(uncached.result.usage, { ...uncachedTokens, models });
+  assert.deepEqual(uncached.usage, [{ ...uncachedTokens, models }]);
   assert.deepEqual(inclusive.result.usage, {
     ...inclusiveTokens,
-    models: { gpt: inclusiveTokens },
+    models: { "codex:gpt": inclusiveTokens },
   });
   assert.deepEqual(inclusive.usage, [
-    { ...inclusiveTokens, models: { gpt: inclusiveTokens } },
+    { ...inclusiveTokens, models: { "codex:gpt": inclusiveTokens } },
   ]);
 });
 
-test("usage of an agent without a configured model is filed under its default model", async (t) => {
+test("unpriced usage of an agent without a configured model is filed under the agent name", async (t) => {
   const root = await repository(t);
   const { result, usage } = await run(
     root,
-    fixture(uncachedTokens, undefined, true),
+    fixture("claude", uncachedTokens, { uncached: true }),
   );
   const expected = {
     ...uncachedTokens,
-    models: {
-      "fixture:default": { ...uncachedTokens, inputIncludesCache: false },
-    },
+    models: { claude: { ...uncachedTokens, inputIncludesCache: false } },
   };
   assert.deepEqual(result.usage, expected);
   assert.deepEqual(usage, [expected]);
-  assert.deepEqual(calculateUsageCost(result.usage, prices), {
-    currency: "USD",
-    amount: 0,
-    complete: false,
-  });
 });
 
-test("a workflow mixing cache conventions keeps each model separate", async (t) => {
+test("an unpriced workflow sharing one model name across conventions keeps separate keys", async (t) => {
   const root = await repository(t);
-  const task = (key: string, agent: ReturnType<typeof fixture>) =>
+  const task = (key: string, agent: Agent) =>
     defineIsolatedTask({
       key,
       request: () => ({
@@ -108,21 +137,21 @@ test("a workflow mixing cache conventions keeps each model separate", async (t) 
     });
   const events: WorkflowEvent[] = [];
   const result = await defineWorkflow("mixed", [
-    task("claude", fixture(uncachedTokens, "opus", true)),
-    task("codex", fixture(inclusiveTokens, "gpt")),
-    task("unnamed", fixture(inclusiveTokens)),
+    task("claude", claude()),
+    task("codex", codex()),
+    task("harness", harness()),
   ]).start({ observe: (event) => events.push(event) });
   result.unwrap();
+  const attributed = {
+    [`claude:${shared}`]: { ...uncachedTokens, inputIncludesCache: false },
+    [`codex:${shared}`]: inclusiveTokens,
+  };
   assert.deepEqual(result.usage.tokens, {
-    input: 28,
-    cached: 26,
+    input: 36,
+    cached: 23,
     cacheCreated: 2,
-    output: 13,
-    models: {
-      opus: { ...uncachedTokens, inputIncludesCache: false },
-      gpt: inclusiveTokens,
-      "fixture:default": inclusiveTokens,
-    },
+    output: 15,
+    models: attributed,
   });
   const byTask = Object.fromEntries(
     events.flatMap((event) =>
@@ -130,24 +159,53 @@ test("a workflow mixing cache conventions keeps each model separate", async (t) 
     ),
   );
   assert.deepEqual(byTask, {
-    claude: { opus: { ...uncachedTokens, inputIncludesCache: false } },
-    codex: { gpt: inclusiveTokens },
-    unnamed: { "fixture:default": inclusiveTokens },
+    claude: { [`claude:${shared}`]: attributed[`claude:${shared}`] },
+    codex: { [`codex:${shared}`]: inclusiveTokens },
+    harness: undefined,
   });
 });
 
-test("prices keep their usage and cost when attribution no longer depends on them", async (t) => {
+test("an unpriced fallback across conventions on one model name keeps both usages", async (t) => {
   const root = await repository(t);
-  const agent = fixture(uncachedTokens, "opus", true);
-  const unpriced = await run(root, agent);
-  const priced = await run(root, agent, { prices });
-  assert.deepEqual(priced.result.usage, unpriced.result.usage);
-  assert.deepEqual(priced.usage, unpriced.usage);
-  const cost = calculateUsageCost(unpriced.result.usage, prices);
-  assert.deepEqual(cost, {
+  const agent = createFallbackAgent([claude(shared, true), codex()], {
+    on: ["quota"],
+  });
+  const { result } = await run(root, agent);
+  assert.equal(result.fallback?.selected.name, "codex");
+  assert.deepEqual(result.usage.models, {
+    [`claude:${shared}`]: { ...uncachedTokens, inputIncludesCache: false },
+    [`codex:${shared}`]: inclusiveTokens,
+  });
+});
+
+test("priced usage keeps model-name keys, costs and the convention conflict", async (t) => {
+  const root = await repository(t);
+  const unknown = await run(
+    root,
+    fixture("claude", uncachedTokens, { uncached: true }),
+    { prices },
+  );
+  assert.deepEqual(unknown.result.usage, uncachedTokens);
+  const priced = await run(root, claude("opus"), { prices });
+  const opus = { ...uncachedTokens, inputIncludesCache: false };
+  assert.deepEqual(priced.result.usage, {
+    ...uncachedTokens,
+    models: { opus },
+  });
+  assert.deepEqual(priced.usage, [{ ...uncachedTokens, models: { opus } }]);
+  const cost = {
     currency: "USD",
     amount: (4 * 5 + 10 * 0.5 + 2 * 6.25 + 3 * 25) / 1_000_000,
     complete: true,
-  });
+  };
+  assert.deepEqual(calculateUsageCost(priced.result.usage, prices), cost);
   assert.deepEqual(priced.result.reportData?.cost, cost);
+  await assert.rejects(
+    run(
+      root,
+      createFallbackAgent([claude(shared, true), codex()], { on: ["quota"] }),
+      { prices },
+    ),
+    /Cannot combine different cache conventions for one model/,
+  );
 });

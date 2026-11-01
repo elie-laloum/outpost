@@ -70,9 +70,9 @@ const summary = defineTask({
 
 `reportUsage(usage)` s’ajoute aux totaux. `reportUsageOnce(receipt, usage)` ignore un reçu déjà enregistré par la tâche, même après une reprise de checkpoint : un résultat lu deux fois compte une seule fois. Les deux ne fonctionnent que pendant la tentative en cours.
 
-## Répartir l’usage par modèle
+## Répartir l’usage par agent
 
-Chaque usage qu’Outpost rapporte pour un tour d’agent, une requête de modèle du harness ou une tâche de décision contient aussi `usage.models`, avec ou sans `prices`. Chaque entrée a pour clé le nom du modèle configuré. Un agent sans modèle configuré utilise le modèle par défaut de sa CLI, enregistré sous `<agent>:default`, par exemple `codex:default`. Les totaux du workflow, les événements `usage` des tâches, les checkpoints et les rapports de recette conservent une entrée par clé.
+L’usage d’un tour d’agent CLI contient aussi `usage.models`, avec ou sans `prices`. Sans tarifs, chaque entrée a pour clé `<agent>:<modèle>`, par exemple `claude:claude-sonnet-5-5`, ou le seul nom de l’agent quand aucun modèle n’est configuré, par exemple `codex`. Inclure l’agent sépare deux agents qui utilisent le même nom de modèle ; donnez aux agents personnalisés des noms distincts de ceux des agents intégrés. Avec des tarifs, les entrées ont pour clé le nom du modèle afin de correspondre à la table de prix, et les requêtes de modèle du harness, le routage et les tâches de décision sont aussi attribués. Les totaux du workflow, les événements `usage` des tâches, les checkpoints et les rapports de recette conservent une entrée par clé.
 
 Les agents ne comptent pas les tokens de cache de la même manière. Dans une entrée avec `inputIncludesCache: false` (Claude Code et Kimi Code), `input` exclut les lectures (`cached`) et les écritures (`cacheCreated`) du cache ; sinon `input` les inclut. Les compteurs de premier niveau additionnent les entrées telles qu’elles sont rapportées : normalisez donc à partir de `models` une exécution qui mélange les deux conventions.
 
@@ -80,11 +80,11 @@ Les agents ne comptent pas les tokens de cache de la même manière. Dans une en
 import type { Usage } from "@elie-laloum/outpost/core";
 
 export function cacheBreakdown(usage: Usage) {
-  return Object.entries(usage.models ?? {}).map(([model, tokens]) => {
+  return Object.entries(usage.models ?? {}).map(([key, tokens]) => {
     const cacheWrite = tokens.cacheCreated ?? 0;
     const cacheIncluded = tokens.inputIncludesCache !== false;
     return {
-      model,
+      key,
       uncachedInput: cacheIncluded
         ? tokens.input - tokens.cached - cacheWrite
         : tokens.input,
@@ -103,21 +103,21 @@ const rows = cacheBreakdown({
   cacheCreated: 100,
   output: 450,
   models: {
-    "claude-sonnet-5-5": { ...claude, inputIncludesCache: false },
-    "codex:default": codex,
+    "claude:claude-sonnet-5-5": { ...claude, inputIncludesCache: false },
+    codex,
   },
 });
 for (const row of rows)
   console.log(
-    `${row.model}: ${row.uncachedInput} uncached, ${row.cacheRead} read, ${row.cacheWrite} written, ${row.output} output`,
+    `${row.key}: ${row.uncachedInput} uncached, ${row.cacheRead} read, ${row.cacheWrite} written, ${row.output} output`,
   );
-// Example output: claude-sonnet-5-5: 12 uncached, 600 read, 100 written, 150 output
-// Example output: codex:default: 900 uncached, 300 read, 0 written, 300 output
+// Example output: claude:claude-sonnet-5-5: 12 uncached, 600 read, 100 written, 150 output
+// Example output: codex: 900 uncached, 300 read, 0 written, 300 output
 ```
 
 <!-- check:run -->
 
-La fonction renvoie, pour chaque modèle, l’entrée hors cache, les lectures et les écritures du cache et la sortie. L’usage qu’une tâche personnalisée ou un worker de queue rapporte sans `models` s’ajoute seulement aux compteurs de premier niveau. Un même nom de modèle ne peut pas porter les deux conventions : le rapporter depuis deux agents de ce type échoue, donnez-leur donc des noms de modèle distincts. Les limites de tokens de `budget.usage` s’appliquent aux compteurs de premier niveau, conventions mélangées comprises.
+La fonction renvoie, pour chaque clé, l’entrée hors cache, les lectures et les écritures du cache et la sortie. L’usage rapporté sans `models`, comme une requête du harness sans tarifs ou une tâche personnalisée, s’ajoute seulement aux compteurs de premier niveau ; les providers de modèle intégrés comptent les tokens de cache dans `input`. Les limites de tokens de `budget.usage` s’appliquent aux compteurs de premier niveau, conventions mélangées comprises.
 
 ## Inclure l’usage des décisions
 
@@ -178,7 +178,7 @@ export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
 console.log(result.status, result.usage);
-// Example output: done { attempts: 1, tokens: { models: { 'codex:default': [Object] }, input: 1200, cached: 0, output: 320 } }
+// Example output: done { attempts: 1, tokens: { models: { codex: [Object] }, input: 1200, cached: 0, output: 320 } }
 ```
 
 `timeoutMs` borne chaque tentative de tâche et `deadlineMs` chaque tour d’agent : voir [Limites et annulation](../limits-and-cancellation/). [Choisir un agent](../choose-an-agent/) indique quand chaque agent rapporte sa consommation.

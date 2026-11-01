@@ -81,7 +81,7 @@ test("replay reproduces a fallback handover, its commits and its usage", async (
   const primary = { input: 10, cached: 0, output: 5 };
   assert.deepEqual(replaying.turns[0]!.usage, {
     ...primary,
-    models: { "primary:default": primary },
+    models: { primary },
   });
 
   await git(root, ["reset", "--hard", baseline]);

@@ -65,7 +65,14 @@ export async function turn(
     notify(
       options.observe,
       event.kind === "usage"
-        ? { ...event, tokens: attributeUsage(agent, event.tokens) }
+        ? {
+            ...event,
+            tokens: attributeUsage(
+              agent,
+              event.tokens,
+              Boolean(options.prices),
+            ),
+          }
         : event,
     );
     watchdog.observe(event);
@@ -228,7 +235,7 @@ export async function turn(
   return {
     ...(preparedConversation ? { conversation: preparedConversation } : {}),
     ...outcome,
-    usage: attributeUsage(agent, outcome.usage),
+    usage: attributeUsage(agent, outcome.usage, Boolean(options.prices)),
     status,
     ...(interrupted ? { interrupted: "steering" as const } : {}),
     durationMs: Date.now() - start,

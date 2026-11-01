@@ -76,7 +76,6 @@ test("decision tasks checkpoint typed dependencies and reuse cached JSON without
   first.unwrap();
   assert.equal(first.value(triage).answers.flag.noul, 0.9);
   assert.equal(first.usage.tokens.input, 4);
-  assert.deepEqual(first.usage.tokens.models, { fixture: answer.usage });
   assert.ok(
     events.some(
       (event) =>

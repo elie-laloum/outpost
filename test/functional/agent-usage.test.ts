@@ -72,7 +72,7 @@ test("session accounting counts failed retries and successful passes once", asyn
   const tokens = { input: 14, cached: 6, output: 4, cacheCreated: 2 };
   assert.deepEqual(result.usage.tokens, {
     ...tokens,
-    models: { "kimi:default": { ...tokens, inputIncludesCache: false } },
+    models: { kimi: { ...tokens, inputIncludesCache: false } },
   });
   await using sandbox = await createSandbox({
     repository: repo,

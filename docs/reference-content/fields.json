@@ -7591,8 +7591,8 @@
     "True uniquement si chaque token rapporté est associé à un modèle tarifé et si tous les compteurs sont complets."
   ],
   "Usage.models": [
-    "Model-attributed counters, each with its cache convention. Dispatches fill this automatically, with or without prices, from CLI models (<agent>:default when none is configured), harness requests, built-in subagents and decision tasks. Custom or queued tasks must preserve or provide it. Aggregate counters stay available and add entries as reported.",
-    "Compteurs par modèle, chacun avec sa convention de cache. Les dispatchs les renseignent automatiquement, avec ou sans tarifs, à partir des modèles CLI (<agent>:default quand aucun n’est configuré), des requêtes du harness, des sous-agents intégrés et des tâches de décision. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles et additionnent les entrées telles que rapportées."
+    "Model-attributed counters, each with its cache convention. Priced dispatches fill this from explicit CLI models, harness requests and built-in subagents, keyed by model name. Without prices, CLI agent turns are still attributed under <agent>:<model>, or the agent name when no model is configured. Custom or queued tasks must preserve or provide it. Aggregate counters stay available and add entries as reported.",
+    "Compteurs par modèle, chacun avec sa convention de cache. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés, avec le nom du modèle pour clé. Sans tarifs, les tours d’agent CLI restent attribués sous <agent>:<modèle>, ou le nom de l’agent quand aucun modèle n’est configuré. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles et additionnent les entrées telles que rapportées."
   ],
   "ModelUsage.inputIncludesCache": [
     "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false, so uncached input is input itself; otherwise it is input minus cached and cacheCreated. Built-in model providers use true.",
@@ -7603,8 +7603,8 @@
     "Convention des tokens d’entrée enregistrée sur chaque entrée par modèle de l’usage CLI et utilisée pour la tarification : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
   ],
   "WorkflowBudget.prices": [
-    "Model rates per million tokens. Adds cost to result.usage, even without a monetary limit, from the model counters that usage always carries. Copied when accounting starts.",
-    "Tarifs par million de tokens. Ajoute cost à result.usage, même sans limite monétaire, à partir des compteurs par modèle que l’usage contient toujours. Copiée au début de la comptabilisation."
+    "Model rates per million tokens. Enables model attribution in built-in workflow task helpers and adds cost to result.usage, even without a monetary limit. Copied when accounting starts.",
+    "Tarifs par million de tokens. Active l’attribution par modèle dans les helpers de tâches et ajoute cost à result.usage, même sans limite monétaire. Copiée au début de la comptabilisation."
   ],
   "WorkflowBudget.cost": [
     "Shared monetary limit with currency and finite nonnegative limit. Requires prices in the same currency; reaching it cancels running attempts and blocks admissions. Unknown cost fails even with an attempts limit.",
@@ -7615,12 +7615,12 @@
     "Estimation calculée à partir des compteurs cumulés sauvegardés et de la table configurée ; absente sans prices. La reprise recalcule les estimations historiques avec la table fournie."
   ],
   "TaskContext.prices": [
-    "Workflow price table, forwarded by built-in agent task helpers to estimate each dispatch report’s cost. Model counters are collected without it.",
-    "Table de prix du workflow, transmise par les helpers de tâches d’agent pour estimer le coût du rapport de chaque dispatch. Les compteurs par modèle sont collectés sans elle."
+    "Workflow price table, forwarded by built-in agent task helpers. Custom dispatches must pass this explicitly to collect model counters.",
+    "Table de prix du workflow, transmise par les helpers de tâches d’agent. Les dispatchs personnalisés doivent la passer explicitement pour collecter les compteurs par modèle."
   ],
   "DispatchOptions.prices": [
-    "Optional model rates for the report’s cost estimate; usage carries model counters without them. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
-    "Tarifs facultatifs pour l’estimation de coût du rapport ; usage contient les compteurs par modèle sans eux. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
+    "Optional model rates. With them, usage is attributed by model name, including harness requests, to match the table; without them only CLI turns are attributed, under agent-scoped keys. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
+    "Tarifs facultatifs. Avec eux, usage est attribué par nom de modèle, requêtes du harness comprises, pour correspondre à la table ; sans eux, seuls les tours CLI sont attribués, sous des clés incluant l’agent. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
   ],
   "DispatchOptions.redact": [
     "Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.",
@@ -7647,8 +7647,8 @@
     "Scope d’observation portant la politique de masquage héritée pour les transcripts JSONL, fichiers annexes et bundles de session décodés avant archivage par transport."
   ],
   "calculateUsageCost.usage": [
-    "Aggregate token usage with its model-attributed counters.",
-    "Usage agrégé des tokens avec ses compteurs par modèle."
+    "Aggregate token usage with optional model-attributed counters.",
+    "Usage agrégé des tokens avec compteurs facultatifs par modèle."
   ],
   "calculateUsageCost.prices": [
     "Explicit rates and currency used for this estimate.",

@@ -281,8 +281,12 @@ test("the harness streams text deltas to observers but not to non-verbose journa
       .join(""),
     "<outpost>done</outpost>",
   );
-  const tokens = { input: 4, cached: 0, cacheCreated: 0, output: 3 };
-  assert.deepEqual(result.usage, { ...tokens, models: { m: tokens } });
+  assert.deepEqual(result.usage, {
+    input: 4,
+    cached: 0,
+    cacheCreated: 0,
+    output: 3,
+  });
   const journal = JSON.stringify(
     await readJournal({ transporter, reference: result.logReference! }),
   );

@@ -5,14 +5,17 @@ import type { AgentOutput, DispatchOptions } from "./execution.types.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import { notify } from "./observation.ts";
 
-// Without a configured model the CLI picks one, so usage is filed under `<agent>:default`.
+// Priced keys match price tables; unpriced keys carry the agent so conventions never share a key.
 export function attributeUsage(
   agent: Pick<CliAgent, "name" | "model" | "usageInput">,
   usage: Usage,
+  priced: boolean,
 ): Usage {
+  const model = agent.model?.name;
+  const unpriced = model ? `${agent.name}:${model}` : agent.name;
   return modelUsage(
     usage,
-    agent.model?.name ?? `${agent.name}:default`,
+    priced ? model : unpriced,
     agent.usageInput !== "uncached",
   );
 }

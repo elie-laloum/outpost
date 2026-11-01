@@ -71,7 +71,9 @@ export async function routeHarnessModel(
           account(usage) {
             const receipt = {
               text: "",
-              usage: modelUsage(usage, routing.model),
+              usage: runtime.modelScope.trackModels
+                ? modelUsage(usage, routing.model)
+                : usage,
             };
             runtime.modelScope.account(receipt, runtime.subagentId);
             runtime.budget.account(receipt);

@@ -60,7 +60,7 @@ test("scripted coder and reviewer both account streaming usage once per round", 
   const tokens = { input: 12, cached: 4, output: 8 };
   assert.deepEqual(result.usage.tokens, {
     ...tokens,
-    models: { "fixture:default": tokens },
+    models: { fixture: tokens },
   });
   assert.equal(
     (

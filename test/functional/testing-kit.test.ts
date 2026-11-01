@@ -56,7 +56,7 @@ test("testing kit emits events and usage and integrates real commits without a C
   const tokens = { input: 5, cached: 2, output: 3 };
   assert.deepEqual(result.usage, {
     ...tokens,
-    models: { "scripted:default": tokens },
+    models: { scripted: tokens },
   });
   assert.ok(events.includes("tool"));
   assert.equal(
