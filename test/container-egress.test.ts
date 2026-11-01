@@ -3,10 +3,8 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
 import { containerProvider } from "../src/providers/container.ts";
-import {
-  listContainerSandboxes,
-  removeContainerSandbox,
-} from "../src/providers/container-inventory.ts";
+import { listContainerSandboxes } from "../src/providers/container-inventory.ts";
+import { recoverContainer } from "../src/providers/container-recovery.ts";
 import {
   executeProcess,
   requireSuccess,
@@ -282,7 +280,9 @@ test(
       ),
       [name],
     );
-    await removeContainerSandbox(engine, name, { deadlineMs: 30_000 });
+    await recoverContainer(engine, executeProcess, name, {
+      deadlineMs: 30_000,
+    });
     assert.deepEqual(await listContainerSandboxes(engine, query), []);
     const remaining = await call([
       "container",

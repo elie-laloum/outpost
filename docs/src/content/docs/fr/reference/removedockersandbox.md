@@ -19,12 +19,12 @@ Supprime par son nom une sandbox Docker et son compagnon egress, quel que soit l
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                                     | Présence  | Rôle                                                                                                     |
-| -------------------- | ---------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------- |
-| `name`               | `string`                                 | Requis    | Nom de la sandbox, tel que rapporté par listDockerSandboxes ou reçu par SandboxContext.registerRecovery. |
-| `options`            | `ContainerInventoryOptions \| undefined` | Optionnel | Signal d’annulation et délai appliqués à chaque commande docker de la suppression.                       |
-| `options.signal`     | `AbortSignal \| undefined`               | Optionnel | Annulation coopérative ; l’abandon arrête la commande du moteur en cours et rejette l’opération.         |
-| `options.deadlineMs` | `number \| undefined`                    | Optionnel | Durée maximale en millisecondes de chaque commande du moteur, 10000 par défaut.                          |
+| Nom                  | Type                           | Présence  | Rôle                                                                                                                                                  |
+| -------------------- | ------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`               | `string`                       | Requis    | Nom de la sandbox, tel que rapporté par listDockerSandboxes ou reçu par SandboxContext.registerRecovery.                                              |
+| `options`            | `TransferOptions \| undefined` | Optionnel | Signal d’annulation et délai appliqués à chaque commande docker de la suppression.                                                                    |
+| `options.signal`     | `AbortSignal \| undefined`     | Optionnel | Annulation coopérative de la suppression ; l’abandon arrête la commande docker en cours et rejette.                                                   |
+| `options.deadlineMs` | `number \| undefined`          | Optionnel | Durée maximale en millisecondes de chaque commande docker de la suppression, 10000 par défaut ; au-delà, la suppression rejette avec le code timeout. |
 
 ## Retour
 
@@ -35,10 +35,10 @@ Supprime par son nom une sandbox Docker et son compagnon egress, quel que soit l
 ```ts
 export declare const removeDockerSandbox: (
   name: string,
-  options?: ContainerInventoryOptions,
+  options?: TransferOptions,
 ) => Promise<void>;
 ```
 
 ## Contrats associés
 
-- [ContainerInventoryOptions](../containerinventoryoptions/)
+- [TransferOptions](../transferoptions/)

@@ -1,14 +1,15 @@
-import { invariant, OutpostError } from "../domain/errors.ts";
+import { configurationInvariant } from "../domain/configuration-diagnostic.ts";
+import { createDeadline } from "../domain/deadline.ts";
+import { OutpostError } from "../domain/errors.ts";
 import { executeProcess, requireSuccess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import { containerEgress } from "./container-egress.constants.ts";
 import type {
-  ContainerInventoryOptions,
   ContainerSandbox,
   ContainerSandboxQuery,
 } from "./container-inventory.types.ts";
+import { containerLabels } from "./container-labels.constants.ts";
 import { validateContainerLabels } from "./container-labels.ts";
-import { recoverContainer } from "./container-recovery.ts";
 import { containerDefaults } from "./container.constants.ts";
 import type { ContainerEngine, ContainerLabels } from "./container.types.ts";
 
@@ -54,6 +55,16 @@ function inspected(engine: ContainerEngine, line: string): ContainerSandbox {
   return { name: name.replace(/^\//, ""), labels };
 }
 
+const unreserved = (labels: ContainerLabels): ContainerLabels =>
+  Object.freeze(
+    Object.fromEntries(
+      Object.entries(labels).filter(
+        ([key]) =>
+          !key.toLowerCase().startsWith(containerLabels.reservedPrefix),
+      ),
+    ),
+  );
+
 function sandboxes(
   engine: ContainerEngine,
   output: string,
@@ -67,7 +78,7 @@ function sandboxes(
     if (!owned(name)) continue;
     if (companion && labels[containerEgress.label] !== sandbox) continue;
     if (companion && found.has(sandbox)) continue;
-    found.set(sandbox, labels);
+    found.set(sandbox, unreserved(labels));
   }
   return [...found]
     .sort(([left], [right]) => (left < right ? -1 : 1))
@@ -80,17 +91,29 @@ export async function listContainerSandboxes(
   executor: Executor = executeProcess,
 ): Promise<ContainerSandbox[]> {
   const labels = validateContainerLabels(query.labels);
-  invariant(
+  configurationInvariant(
     Object.keys(labels).length > 0,
     "Listing container sandboxes requires at least one label",
+    ["labels"],
+    "missing-container-label",
   );
+  const durationMs = query.deadlineMs ?? containerDefaults.cleanupMs;
+  const deadline = createDeadline({
+    ...(query.signal ? { parent: query.signal } : {}),
+    durationMs,
+    reason: new OutpostError(
+      "timeout",
+      `Container inventory exceeded ${durationMs} ms`,
+      { engine },
+    ),
+  });
   const call = (args: readonly string[]) =>
     requireSuccess(
       {
         executable: engine,
         arguments: args,
-        deadlineMs: query.deadlineMs ?? containerDefaults.cleanupMs,
-        ...(query.signal ? { signal: query.signal } : {}),
+        deadlineMs: durationMs,
+        signal: deadline.signal,
       },
       executor,
     );
@@ -113,33 +136,31 @@ export async function listContainerSandboxes(
       .split(/\r?\n/)
       .map((name) => name.trim())
       .filter(owned);
-  let names = await list();
-  while (names.length) {
-    try {
-      const result = await call([
-        "container",
-        "inspect",
-        "--format",
-        "{{json .Name}} {{json .Config.Labels}}",
-        ...names,
-      ]);
-      return sandboxes(engine, result.stdout);
-    } catch (cause) {
-      // A container removed between listing and inspection fails the batch.
-      const current = new Set(await list());
-      const remaining = names.filter((name) => current.has(name));
-      if (remaining.length === names.length) throw cause;
-      names = remaining;
+  try {
+    let names = await list();
+    while (names.length) {
+      let output: string;
+      try {
+        output = (
+          await call([
+            "container",
+            "inspect",
+            "--format",
+            "{{json .Name}} {{json .Config.Labels}}",
+            ...names,
+          ])
+        ).stdout;
+      } catch (cause) {
+        // A container removed between listing and inspection fails the batch.
+        const current = await list();
+        if (names.every((name) => current.includes(name))) throw cause;
+        names = current;
+        continue;
+      }
+      return sandboxes(engine, output);
     }
+    return [];
+  } finally {
+    deadline.close();
   }
-  return [];
-}
-
-export function removeContainerSandbox(
-  engine: ContainerEngine,
-  name: string,
-  options: ContainerInventoryOptions = {},
-  executor: Executor = executeProcess,
-): Promise<void> {
-  return recoverContainer(engine, executor, name, options);
 }

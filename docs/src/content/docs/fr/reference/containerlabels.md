@@ -19,7 +19,7 @@ import type { ContainerLabels } from "@elie-laloum/outpost/providers/podman";
 
 ## Rôle et comportement
 
-Labels de conteneur sous forme de chaînes clé-valeur : ContainerOptions.labels à la création, le sélecteur ContainerSandboxQuery.labels et les labels rapportés dans ContainerSandbox. Dans les labels qu’Outpost pose ou sélectionne, les clés commencent par une lettre ou un chiffre et ne contiennent que lettres, chiffres, ., _, / et - (255 caractères au plus) ; le préfixe io.outpost. est réservé à Outpost. Les valeurs sont des chaînes non vides de 1024 caractères au plus, sans caractère de contrôle.
+Labels de conteneur sous forme de chaînes clé-valeur : ContainerOptions.labels à la création, le sélecteur ContainerSandboxQuery.labels et les labels rapportés dans ContainerSandbox. Dans les labels qu’Outpost pose ou sélectionne, les clés commencent par une lettre ou un chiffre et ne contiennent que lettres, chiffres, ., _, / et - (255 caractères au plus) ; le préfixe io.outpost. est réservé à Outpost. Les valeurs sont des chaînes non vides de 1024 caractères au plus, sans caractère de contrôle ni espace en début ou en fin.
 
 [Exemple complet et règles détaillées](../../guide/containers/).
 

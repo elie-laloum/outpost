@@ -1,11 +1,7 @@
+import type { TransferOptions } from "../domain/sandbox.types.ts";
 import type { ContainerLabels } from "./container.types.ts";
 
-export interface ContainerInventoryOptions {
-  readonly signal?: AbortSignal;
-  readonly deadlineMs?: number;
-}
-
-export interface ContainerSandboxQuery extends ContainerInventoryOptions {
+export interface ContainerSandboxQuery extends TransferOptions {
   readonly labels: ContainerLabels;
 }
 

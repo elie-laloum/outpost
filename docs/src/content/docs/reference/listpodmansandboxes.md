@@ -13,7 +13,7 @@ import { listPodmanSandboxes } from "@elie-laloum/outpost/providers/podman";
 
 ## Purpose and behavior
 
-List the Podman sandboxes created by Outpost that carry every label of the query, whatever the repositoryMode of the provider that created them. A sandbox whose egress companion remains after its container is gone is still reported under the sandbox name, so it can be removed. Containers not named outpost-&lt;uuid> are never reported. The result is a snapshot sorted by name; it does not tell whether a sandbox is still in use. Failed podman commands reject with code process.
+List the Podman sandboxes created by Outpost that carry every label of the query, whatever the repositoryMode of the provider that created them. A sandbox whose egress companion remains after its container is gone is still reported under the sandbox name, so it can be removed. Containers not named outpost-&lt;uuid> are never reported. The result is a snapshot sorted by name; it does not tell whether a sandbox is still in use. A sandbox is listed as soon as its containers are created, before acquire returns. Reserved io.outpost. labels are left out of the result. The deadline and signal bound the whole listing; failed podman commands reject with code process.
 
 [Complete example and detailed rules](../../guide/containers/).
 

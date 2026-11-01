@@ -19,10 +19,10 @@ import type { ContainerSandbox } from "@elie-laloum/outpost/providers/podman";
 
 ## Paramètres et propriétés
 
-| Nom      | Type                               | Présence | Rôle                                                                                                                                                                                                                         |
-| -------- | ---------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`   | `string`                           | Requis   | Nom du conteneur de la sandbox, outpost-&lt;uuid>, à passer à removeDockerSandbox ou removePodmanSandbox. Il est aussi rapporté quand seul le compagnon egress subsiste.                                                     |
-| `labels` | `Readonly<Record<string, string>>` | Requis   | Labels que le moteur rapporte pour le conteneur de la sandbox, y compris ceux hérités de son image. Quand seul le compagnon egress subsiste, ce sont les labels du compagnon, qui contiennent aussi io.outpost.egress.owner. |
+| Nom      | Type                               | Présence | Rôle                                                                                                                                                                                                                                         |
+| -------- | ---------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | `string`                           | Requis   | Nom du conteneur de la sandbox, outpost-&lt;uuid>, à passer à removeDockerSandbox ou removePodmanSandbox. Il est aussi rapporté quand seul le compagnon egress subsiste.                                                                     |
+| `labels` | `Readonly<Record<string, string>>` | Requis   | Labels que le moteur rapporte pour le conteneur de la sandbox, y compris ceux hérités de son image, sans les clés réservées io.outpost.. Quand seul le compagnon egress subsiste, ce sont les labels du compagnon, filtrés de la même façon. |
 
 ## Signature
 

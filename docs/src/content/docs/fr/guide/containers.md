@@ -116,8 +116,8 @@ for (const sandbox of sandboxes) {
 
 - **Tout mode de dépôt** : Les deux fonctions s’utilisent sans le fournisseur, quel que soit le `repositoryMode` qui a créé les sandboxes.
 - **Conteneurs Outpost uniquement** : Seuls les conteneurs nommés `outpost-<uuid>` sont listés ou supprimés, jamais d’autres conteneurs portant les mêmes labels.
-- **Votre décision** : La suppression ne vérifie pas si une exécution utilise encore la sandbox. Les commandes suivantes de cette exécution échouent et sa libération réussit toujours.
-- **Préfixe réservé** : Les clés qui commencent par `io.outpost.` appartiennent à Outpost. Des labels invalides échouent à la création du fournisseur.
+- **Votre décision** : La suppression ne vérifie pas si une exécution utilise encore la sandbox. Une sandbox étiquetée est listée dès que ses conteneurs sont créés, avant le retour de `acquire()` : marquez le job actif avant `acquire()` et retirez cette marque seulement après `release()`. Les commandes suivantes d’une sandbox supprimée échouent et sa libération réussit toujours.
+- **Préfixe réservé** : Les clés qui commencent par `io.outpost.` appartiennent à Outpost et sont exclues des labels listés. Des labels invalides, y compris des valeurs entourées d’espaces, échouent à la création du fournisseur.
 
 La liste exige au moins un label. Le moteur rapporte aussi les labels de l’image : choisissez des clés que vos images ne définissent pas.
 

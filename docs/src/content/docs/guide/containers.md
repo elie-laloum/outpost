@@ -116,8 +116,8 @@ for (const sandbox of sandboxes) {
 
 - **Any repository mode**: Both functions work without the provider, whatever `repositoryMode` created the sandboxes.
 - **Outpost containers only**: Only containers named `outpost-<uuid>` are listed or removed, never other containers carrying the same labels.
-- **Your decision**: Removal does not check whether a run still uses the sandbox. That run's next commands fail and its release still succeeds.
-- **Reserved prefix**: Keys starting with `io.outpost.` belong to Outpost. Invalid labels fail when the provider is created.
+- **Your decision**: Removal does not check whether a run still uses the sandbox. A labelled sandbox is listed as soon as its containers are created, before `acquire()` returns, so mark the job active before `acquire()` and clear it only after `release()`. A removed sandbox's next commands fail and its release still succeeds.
+- **Reserved prefix**: Keys starting with `io.outpost.` belong to Outpost and are left out of listed labels. Invalid labels, including values with surrounding whitespace, fail when the provider is created.
 
 Listing requires at least one label. The engine reports image labels too, so choose keys your images do not set.
 

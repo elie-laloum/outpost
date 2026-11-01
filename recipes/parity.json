@@ -8044,9 +8044,7 @@
     }
   },
   "./providers/docker:createDockerSandboxProvider": {
-    "signatures": [
-      "(options?: ContainerOptions): import(\"../integrations.js\").SandboxProvider"
-    ],
+    "signatures": ["(options?: ContainerOptions): SandboxProvider"],
     "options": {},
     "category": "native",
     "lot": 2,
@@ -8089,22 +8087,6 @@
       "domains": "contract",
       "allowCidrs": "contract",
       "denyCidrs": "contract"
-    }
-  },
-  "./providers/docker:ContainerInventoryOptions": {
-    "signatures": [],
-    "options": {
-      "signal": "AbortSignal | undefined",
-      "deadlineMs": "number | undefined"
-    },
-    "category": "contract",
-    "lot": 2,
-    "status": "implemented",
-    "test": null,
-    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
-    "optionCoverage": {
-      "signal": "contract",
-      "deadlineMs": "contract"
     }
   },
   "./providers/docker:ContainerLabels": {
@@ -8164,9 +8146,7 @@
     "optionCoverage": {}
   },
   "./providers/docker:removeDockerSandbox": {
-    "signatures": [
-      "(name: string, options?: ContainerInventoryOptions): Promise<void>"
-    ],
+    "signatures": ["(name: string, options?: TransferOptions): Promise<void>"],
     "options": {},
     "category": "contract",
     "lot": 2,
@@ -8282,9 +8262,7 @@
     }
   },
   "./providers/podman:createPodmanSandboxProvider": {
-    "signatures": [
-      "(options?: ContainerOptions): import(\"../integrations.js\").SandboxProvider"
-    ],
+    "signatures": ["(options?: ContainerOptions): SandboxProvider"],
     "options": {},
     "category": "native",
     "lot": 2,
@@ -8327,22 +8305,6 @@
       "domains": "contract",
       "allowCidrs": "contract",
       "denyCidrs": "contract"
-    }
-  },
-  "./providers/podman:ContainerInventoryOptions": {
-    "signatures": [],
-    "options": {
-      "signal": "AbortSignal | undefined",
-      "deadlineMs": "number | undefined"
-    },
-    "category": "contract",
-    "lot": 2,
-    "status": "implemented",
-    "test": null,
-    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
-    "optionCoverage": {
-      "signal": "contract",
-      "deadlineMs": "contract"
     }
   },
   "./providers/podman:ContainerLabels": {
@@ -8402,9 +8364,7 @@
     "optionCoverage": {}
   },
   "./providers/podman:removePodmanSandbox": {
-    "signatures": [
-      "(name: string, options?: ContainerInventoryOptions): Promise<void>"
-    ],
+    "signatures": ["(name: string, options?: TransferOptions): Promise<void>"],
     "options": {},
     "category": "contract",
     "lot": 2,

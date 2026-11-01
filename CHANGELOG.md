@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add `labels` to Docker and Podman `ContainerOptions`: the `create` commands of the sandbox container and of its egress companion set them, so a container never exists without its labels. Keys and values are validated when the provider is created, and the `io.outpost.` prefix is reserved. Add `listDockerSandboxes()`/`listPodmanSandboxes()` to list the Outpost sandboxes carrying given labels, including a sandbox whose egress companion outlived its container, and `removeDockerSandbox()`/`removePodmanSandbox()` to remove a sandbox with its companion idempotently, whatever the `repositoryMode`. Both act only on containers named `outpost-<uuid>`. Providers without `labels` create the same containers as before, and `recover` is unchanged.
+- Add `labels` to Docker and Podman `ContainerOptions`: the `create` commands of the sandbox container and of its egress companion set them, so a container never exists without its labels. Keys and values are validated when the provider is created, with a `ConfigurationError` located at `labels.<key>`; values cannot have surrounding whitespace, and the `io.outpost.` prefix is reserved and left out of listed labels. Add `listDockerSandboxes()`/`listPodmanSandboxes()` to list the Outpost sandboxes carrying given labels, including a sandbox whose egress companion outlived its container, within one deadline, and `removeDockerSandbox()`/`removePodmanSandbox()` to remove a sandbox with its companion idempotently, whatever the `repositoryMode`. Both act only on containers named `outpost-<uuid>`. Providers without `labels` create the same containers as before, and `recover` is unchanged.
 
 ## 14.0.0
 

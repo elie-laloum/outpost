@@ -1,10 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { containerProvider } from "../../src/providers/container.ts";
-import {
-  listContainerSandboxes,
-  removeContainerSandbox,
-} from "../../src/providers/container-inventory.ts";
+import { listContainerSandboxes } from "../../src/providers/container-inventory.ts";
+import { recoverContainer } from "../../src/providers/container-recovery.ts";
+import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 import {
   listDockerSandboxes,
   removeDockerSandbox,
@@ -109,10 +108,17 @@ test("caller labels reject unsafe keys, reserved keys and invalid values at prov
     { "io.outpost.egress.owner": "outpost-x" },
     { "IO.Outpost.sandbox": "true" },
     { key: "" },
+    { key: "job-42 " },
+    { key: " job-42" },
+    { key: "\tjob" },
     { key: "line\nbreak" },
     { key: "v".repeat(1025) },
     { key: 1 },
     ["key=value"],
+    new Map([["key", "value"]]),
+    new (class Labels {
+      key = "value";
+    })(),
     null,
   ];
   for (const labels of invalid)
@@ -121,13 +127,28 @@ test("caller labels reject unsafe keys, reserved keys and invalid values at prov
         containerProvider("docker", {
           labels: labels as Record<string, string>,
         }),
-      { name: "OutpostError", code: "configuration" },
+      ConfigurationError,
       JSON.stringify(labels),
     );
+  assert.throws(
+    () => containerProvider("docker", { labels: { "com.example/job": "a " } }),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.diagnostic.code === "invalid-container-label" &&
+      error.diagnostic.path.join(".") === "labels.com.example/job",
+  );
+  assert.throws(
+    () => containerProvider("docker", { labels: { "io.outpost.job": "1" } }),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.diagnostic.code === "reserved-container-label" &&
+      error.diagnostic.path.join(".") === "labels.io.outpost.job" &&
+      error.diagnostic.hint?.includes("com.example.job") === true,
+  );
+  const prototypeFree: Record<string, string> = Object.create(null);
+  prototypeFree["com.example/job"] = "-leading dash is a value";
   assert.doesNotThrow(() =>
-    containerProvider("podman", {
-      labels: { "com.example/job": "-leading dash is a value" },
-    }),
+    containerProvider("podman", { labels: prototypeFree }),
   );
 });
 
@@ -158,7 +179,10 @@ test("listing filters by every label and reports sandboxes and orphaned companio
             "com.example/app": "web",
             "io.outpost.egress.owner": other,
           }),
-          line(`/${sandbox}`, { "com.example/app": "web" }),
+          line(`/${sandbox}`, {
+            "com.example/app": "web",
+            "IO.Outpost.image": "inherited",
+          }),
           line(`/${sandbox}-egress`, {
             "io.outpost.egress.owner": sandbox,
           }),
@@ -168,10 +192,7 @@ test("listing filters by every label and reports sandboxes and orphaned companio
   );
   assert.deepEqual(result, [
     { name: sandbox, labels: { "com.example/app": "web" } },
-    {
-      name: other,
-      labels: { "com.example/app": "web", "io.outpost.egress.owner": other },
-    },
+    { name: other, labels: { "com.example/app": "web" } },
   ]);
   const [list, inspect] = calls;
   assert.deepEqual(list!.arguments, [
@@ -193,6 +214,7 @@ test("listing filters by every label and reports sandboxes and orphaned companio
     `${sandbox}-egress`,
   ]);
   assert.ok(calls.every((command) => command.deadlineMs === 5_000));
+  assert.ok(calls.every((command) => command.signal === calls[0]!.signal));
   assert.equal(calls.length, 2);
 });
 
@@ -234,7 +256,8 @@ test("listing skips inspection when nothing matches and requires a label selecto
   );
 });
 
-test("listing retries without containers removed between listing and inspection", async () => {
+test("listing inspects the re-listed sandboxes after a removal between listing and inspection", async () => {
+  const third = "outpost-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
   let lists = 0;
   const inspected: string[][] = [];
   const result = await listContainerSandboxes(
@@ -243,15 +266,60 @@ test("listing retries without containers removed between listing and inspection"
     async (command) => {
       const args = command.arguments ?? [];
       if (args[1] === "ls")
-        return ok(++lists === 1 ? `${sandbox}\n${other}` : other);
+        return ok(
+          ++lists === 1 ? `${sandbox}\n${other}` : `${other}\n${third}`,
+        );
       inspected.push(args.slice(4));
       if (args.includes(sandbox))
         return { status: 1, stdout: "", stderr: "No such object" };
-      return ok(line(`/${other}`, null));
+      return ok(`${line(`/${other}`, null)}\n${line(`/${third}`, {})}`);
     },
   );
-  assert.deepEqual(result, [{ name: other, labels: {} }]);
-  assert.deepEqual(inspected, [[sandbox, other], [other]]);
+  assert.deepEqual(result, [
+    { name: other, labels: {} },
+    { name: third, labels: {} },
+  ]);
+  assert.deepEqual(inspected, [
+    [sandbox, other],
+    [other, third],
+  ]);
+});
+
+test("one deadline bounds the whole listing, retries included", async () => {
+  const started = Date.now();
+  const calls: Command[] = [];
+  await assert.rejects(
+    listContainerSandboxes(
+      "podman",
+      { labels: { app: "web" }, deadlineMs: 50 },
+      (command) => {
+        calls.push(command);
+        if (command.arguments?.[1] === "ls")
+          return Promise.resolve(ok(sandbox));
+        return new Promise((_resolve, reject) => {
+          const signal = command.signal!;
+          if (signal.aborted) reject(signal.reason);
+          signal.addEventListener("abort", () => reject(signal.reason));
+        });
+      },
+    ),
+    { name: "OutpostError", code: "timeout" },
+  );
+  assert.ok(Date.now() - started < 5_000);
+  assert.ok(calls.every((command) => command.signal?.aborted));
+  const controller = new AbortController();
+  controller.abort(new Error("stopped"));
+  await assert.rejects(
+    listContainerSandboxes(
+      "podman",
+      { labels: { app: "web" }, signal: controller.signal },
+      async (command) => {
+        command.signal?.throwIfAborted();
+        return ok();
+      },
+    ),
+    /stopped/,
+  );
 });
 
 test("listing reports inspection failures that are not explained by removal", async () => {
@@ -272,17 +340,22 @@ test("listing reports inspection failures that are not explained by removal", as
     `"${sandbox}" [1]`,
     `"${sandbox}" {"app":1}`,
     `1 {"app":"web"}`,
-  ])
+  ]) {
+    let calls = 0;
     await assert.rejects(
       listContainerSandboxes(
         "docker",
         { labels: { app: "web" } },
-        async (command) =>
-          ok(command.arguments?.[1] === "ls" ? sandbox : output),
+        async (command) => {
+          calls++;
+          return ok(command.arguments?.[1] === "ls" ? sandbox : output);
+        },
       ),
       { name: "OutpostError", code: "provider" },
       output,
     );
+    assert.equal(calls, 2, output);
+  }
 });
 
 test("removal deletes the sandbox and its companion, is idempotent and refuses foreign containers", async () => {
@@ -295,13 +368,11 @@ test("removal deletes the sandbox and its companion, is idempotent and refuses f
     if (args[0] === "rm") existing.delete(args.at(-1)!);
     return ok(args[0] === "container" ? [...existing].join("\n") : "");
   };
-  await removeContainerSandbox(
-    "podman",
-    sandbox,
-    { deadlineMs: 3_000, signal: controller.signal },
-    executor,
-  );
-  await removeContainerSandbox("podman", sandbox, {}, executor);
+  await recoverContainer("podman", executor, sandbox, {
+    deadlineMs: 3_000,
+    signal: controller.signal,
+  });
+  await recoverContainer("podman", executor, sandbox, {});
   assert.deepEqual(existing, new Set());
   assert.deepEqual(
     calls
@@ -316,7 +387,7 @@ test("removal deletes the sandbox and its companion, is idempotent and refuses f
   assert.equal(calls[0]!.signal, controller.signal);
   for (const name of ["outpost-gui-postgres-1", `${sandbox}-egress`, "-f"])
     await assert.rejects(
-      removeContainerSandbox("podman", name, {}, executor),
+      recoverContainer("podman", executor, name, {}),
       /identity/,
     );
 });

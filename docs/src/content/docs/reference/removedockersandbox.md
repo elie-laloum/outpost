@@ -19,12 +19,12 @@ Remove a Docker sandbox and its egress companion by name, whatever the repositor
 
 ## Parameters and properties
 
-| Name                 | Type                                     | Presence | Meaning                                                                                          |
-| -------------------- | ---------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `name`               | `string`                                 | Required | Sandbox name, as reported by listDockerSandboxes or received by SandboxContext.registerRecovery. |
-| `options`            | `ContainerInventoryOptions \| undefined` | Optional | Cancellation signal and deadline applied to each docker command of the removal.                  |
-| `options.signal`     | `AbortSignal \| undefined`               | Optional | Cooperative cancellation; aborting stops the running engine command and rejects the operation.   |
-| `options.deadlineMs` | `number \| undefined`                    | Optional | Maximum duration in milliseconds of each engine command, default 10000.                          |
+| Name                 | Type                           | Presence | Meaning                                                                                                                               |
+| -------------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`               | `string`                       | Required | Sandbox name, as reported by listDockerSandboxes or received by SandboxContext.registerRecovery.                                      |
+| `options`            | `TransferOptions \| undefined` | Optional | Cancellation signal and deadline applied to each docker command of the removal.                                                       |
+| `options.signal`     | `AbortSignal \| undefined`     | Optional | Cooperative cancellation of the removal; aborting stops the running docker command and rejects.                                       |
+| `options.deadlineMs` | `number \| undefined`          | Optional | Maximum duration in milliseconds of each docker command of the removal, default 10000; past it the removal rejects with code timeout. |
 
 ## Returns
 
@@ -35,10 +35,10 @@ Remove a Docker sandbox and its egress companion by name, whatever the repositor
 ```ts
 export declare const removeDockerSandbox: (
   name: string,
-  options?: ContainerInventoryOptions,
+  options?: TransferOptions,
 ) => Promise<void>;
 ```
 
 ## Related contracts
 
-- [ContainerInventoryOptions](../containerinventoryoptions/)
+- [TransferOptions](../transferoptions/)

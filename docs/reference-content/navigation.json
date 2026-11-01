@@ -2843,11 +2843,6 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
-        "slug": "reference/containerinventoryoptions",
-        "label": "ContainerInventoryOptions",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
         "slug": "reference/dependencycache",
         "label": "DependencyCache",
         "attrs": { "data-api-kind": "interface" }

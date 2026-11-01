@@ -1,19 +1,22 @@
 import { containerProvider } from "./container.ts";
-import {
-  listContainerSandboxes,
-  removeContainerSandbox,
-} from "./container-inventory.ts";
+import { listContainerSandboxes } from "./container-inventory.ts";
 import type {
-  ContainerInventoryOptions,
   ContainerSandbox,
   ContainerSandboxQuery,
 } from "./container-inventory.types.ts";
+import { recoverContainer } from "./container-recovery.ts";
+import type {
+  SandboxProvider,
+  TransferOptions,
+} from "../domain/sandbox.types.ts";
+import { executeProcess } from "../infrastructure/process.ts";
 import type { ContainerOptions } from "./container.types.ts";
 
 export type { ContainerOptions } from "./container.ts";
 
-export const createPodmanSandboxProvider = (options: ContainerOptions = {}) =>
-  containerProvider("podman", options);
+export const createPodmanSandboxProvider = (
+  options: ContainerOptions = {},
+): SandboxProvider => containerProvider("podman", options);
 
 export const listPodmanSandboxes = (
   query: ContainerSandboxQuery,
@@ -21,13 +24,12 @@ export const listPodmanSandboxes = (
 
 export const removePodmanSandbox = (
   name: string,
-  options: ContainerInventoryOptions = {},
-): Promise<void> => removeContainerSandbox("podman", name, options);
+  options: TransferOptions = {},
+): Promise<void> => recoverContainer("podman", executeProcess, name, options);
 
 export type { DependencyCache } from "./container-cache.types.ts";
 
 export type {
-  ContainerInventoryOptions,
   ContainerSandbox,
   ContainerSandboxQuery,
 } from "./container-inventory.types.ts";

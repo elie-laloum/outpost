@@ -13,7 +13,7 @@ import { listPodmanSandboxes } from "@elie-laloum/outpost/providers/podman";
 
 ## Rôle et comportement
 
-Liste les sandboxes Podman créées par Outpost qui portent chaque label de la requête, quel que soit le repositoryMode du provider qui les a créées. Une sandbox dont le compagnon egress subsiste après la disparition de son conteneur est toujours rapportée sous le nom de la sandbox, afin de pouvoir la supprimer. Les conteneurs qui ne sont pas nommés outpost-&lt;uuid> ne sont jamais rapportés. Le résultat est un instantané trié par nom ; il n’indique pas si une sandbox est encore utilisée. Une commande podman en échec rejette avec le code process.
+Liste les sandboxes Podman créées par Outpost qui portent chaque label de la requête, quel que soit le repositoryMode du provider qui les a créées. Une sandbox dont le compagnon egress subsiste après la disparition de son conteneur est toujours rapportée sous le nom de la sandbox, afin de pouvoir la supprimer. Les conteneurs qui ne sont pas nommés outpost-&lt;uuid> ne sont jamais rapportés. Le résultat est un instantané trié par nom ; il n’indique pas si une sandbox est encore utilisée. Une sandbox est listée dès que ses conteneurs sont créés, avant le retour de acquire. Les labels réservés io.outpost. sont exclus du résultat. Le délai et le signal bornent toute la liste ; une commande podman en échec rejette avec le code process.
 
 [Exemple complet et règles détaillées](../../guide/containers/).
 
