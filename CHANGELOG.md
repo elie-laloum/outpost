@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Let the Docker/Podman egress companion's proxy reach its DNS resolvers when `denyCidrs` covers them. At startup the companion reads up to three nameservers from its `/etc/resolv.conf` and accepts only UDP and TCP port 53 from the proxy UID to those exact addresses, before the denials. Denying ranges such as `10.0.0.0/8` or `169.254.0.0/16` (which contain the rootless Podman, WSL or private-network resolver) no longer breaks every domain grant. The sandbox gains no DNS access, and an allowed domain resolving into a denied range is still refused. The egress companion image must be rebuilt and republished, and its verified digest recorded, for the default image to include the fix.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.

@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Le proxy du conteneur de filtrage Docker/Podman atteint désormais ses résolveurs DNS lorsque `denyCidrs` les couvre. Au démarrage, le conteneur lit jusqu’à trois serveurs de noms dans son `/etc/resolv.conf` et n’accepte, avant les interdictions, que l’UDP et le TCP vers le port 53 depuis l’UID du proxy et vers ces adresses exactes. Interdire des plages comme `10.0.0.0/8` ou `169.254.0.0/16` (qui contiennent le résolveur de Podman sans privilèges, de WSL ou d’un réseau privé) ne bloque plus toutes les autorisations de domaines. La sandbox n’obtient aucun accès DNS, et un domaine autorisé qui se résout dans une plage interdite reste refusé. L’image du conteneur de filtrage doit être reconstruite et republiée, et son empreinte vérifiée enregistrée, pour que l’image par défaut contienne cette correction.
+
 ## 14.0.0
 
 - **Rupture :** Sortir la spéculation de l’expérimental. Importez `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` et leurs types depuis `@elie-laloum/outpost/speculation` ; `/experimental/speculation` est supprimé sans alias. La spéculation YAML n’exige plus `experimental: true` dans la configuration d’exécution, que Firecracker exige toujours. Options, résultats, checkpoints, durabilité et autorisation de récupération restent inchangés.
