@@ -1,8 +1,21 @@
-import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
+import type { AgentAdapter, CliAgent, Usage } from "../domain/agent.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
+import { modelUsage } from "../domain/usage.ts";
 import type { AgentOutput, DispatchOptions } from "./execution.types.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import { notify } from "./observation.ts";
+
+// Without a configured model the CLI picks one, so usage is filed under `<agent>:default`.
+export function attributeUsage(
+  agent: Pick<CliAgent, "name" | "model" | "usageInput">,
+  usage: Usage,
+): Usage {
+  return modelUsage(
+    usage,
+    agent.model?.name ?? `${agent.name}:default`,
+    agent.usageInput !== "uncached",
+  );
+}
 
 export function warnUsage(
   options: DispatchOptions<unknown>,

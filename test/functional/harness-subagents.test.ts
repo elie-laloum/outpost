@@ -138,7 +138,8 @@ test("subagents borrow one sandbox, isolate history, persist lineage and account
     observe: (event) => events.push(event),
   });
   assert.equal(result.completed, true);
-  assert.deepEqual(result.usage, { input: 16, cached: 4, output: 8 });
+  const total = { input: 16, cached: 4, output: 8 };
+  assert.deepEqual(result.usage, { ...total, models: { fixture: total } });
   assert.equal(events.filter((event) => event.kind === "usage").length, 4);
   const started = events.find(
     (event) => event.kind === "subagent" && event.status === "started",

@@ -136,7 +136,11 @@ test("one-shot dispatch writes a journal, returns usage and integrates committed
   });
   assert.equal(await readFile(join(root, "created.txt"), "utf8"), "hello");
   assert.equal(output.commits[0]?.subject, "Created");
-  assert.deepEqual(output.usage, { input: 2, cached: 1, output: 3 });
+  const tokens = { input: 2, cached: 1, output: 3 };
+  assert.deepEqual(output.usage, {
+    ...tokens,
+    models: { "fixture:default": tokens },
+  });
   assert.equal(output.completed, true);
   assert.ok(output.logReference);
   assert.match(

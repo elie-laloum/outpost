@@ -70,6 +70,55 @@ const summary = defineTask({
 
 `reportUsage(usage)` adds to the totals. `reportUsageOnce(receipt, usage)` ignores a receipt the task already recorded, even after a checkpoint resume, so a result read twice is counted once. Both work only during the running attempt.
 
+## Split usage by model
+
+Every usage Outpost reports for an agent turn, a harness model request or a decision task also carries `usage.models`, with or without `prices`. Each entry is keyed by the configured model name. An agent without a configured model runs its CLI’s default, recorded as `<agent>:default`, for example `codex:default`. Workflow totals, task `usage` events, checkpoints and recipe reports keep one entry per key.
+
+Agents count cache tokens differently. In an entry with `inputIncludesCache: false` (Claude Code and Kimi Code), `input` excludes cache reads (`cached`) and writes (`cacheCreated`); otherwise `input` includes them. The top-level counters add entries as reported, so normalize a run that mixes both conventions from `models`:
+
+```ts title="cache-breakdown.ts"
+import type { Usage } from "@elie-laloum/outpost/core";
+
+export function cacheBreakdown(usage: Usage) {
+  return Object.entries(usage.models ?? {}).map(([model, tokens]) => {
+    const cacheWrite = tokens.cacheCreated ?? 0;
+    const cacheIncluded = tokens.inputIncludesCache !== false;
+    return {
+      model,
+      uncachedInput: cacheIncluded
+        ? tokens.input - tokens.cached - cacheWrite
+        : tokens.input,
+      cacheRead: tokens.cached,
+      cacheWrite,
+      output: tokens.output,
+    };
+  });
+}
+
+const claude = { input: 12, cached: 600, cacheCreated: 100, output: 150 };
+const codex = { input: 1_200, cached: 300, output: 300 };
+const rows = cacheBreakdown({
+  input: 1_212,
+  cached: 900,
+  cacheCreated: 100,
+  output: 450,
+  models: {
+    "claude-sonnet-5-5": { ...claude, inputIncludesCache: false },
+    "codex:default": codex,
+  },
+});
+for (const row of rows)
+  console.log(
+    `${row.model}: ${row.uncachedInput} uncached, ${row.cacheRead} read, ${row.cacheWrite} written, ${row.output} output`,
+  );
+// Example output: claude-sonnet-5-5: 12 uncached, 600 read, 100 written, 150 output
+// Example output: codex:default: 900 uncached, 300 read, 0 written, 300 output
+```
+
+<!-- check:run -->
+
+The function returns uncached input, cache reads, cache writes and output for each model. Usage that a custom task or queue worker reports without `models` only adds to the top-level counters. One model name cannot carry both conventions: reporting it from two such agents fails, so give them distinct model names. Token limits in `budget.usage` apply to the top-level counters, mixed conventions included.
+
 ## Include decision usage
 
 [Decision tasks](../decisions/) contribute their normalized usage to workflow budgets. [Model routing](../model-routing/) also counts against harness, ancestor and workflow budgets, exactly once per router request. Valid usage still counts when truncation rejects the result. A missing receipt is incomplete usage, and strict token budgets reject continuation with unknown consumption.
@@ -129,7 +178,7 @@ export const result = await defineWorkflow("fix-tests", [fix]).start({
   budget: { attempts: 3, usage: { input: 2_000_000 } },
 });
 console.log(result.status, result.usage);
-// Example output: done { attempts: 1, tokens: { input: 1200, cached: 0, output: 320 } }
+// Example output: done { attempts: 1, tokens: { models: { 'codex:default': [Object] }, input: 1200, cached: 0, output: 320 } }
 ```
 
 `timeoutMs` bounds each task attempt and `deadlineMs` each agent turn: see [Limits and cancellation](../limits-and-cancellation/). [Choose an agent](../choose-an-agent/) shows when each agent reports usage.

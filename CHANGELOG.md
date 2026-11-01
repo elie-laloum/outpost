@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Attribute every reported usage to its model with its cache convention, with or without `prices`. Agent turns, session and transcript counters, harness model requests, routing and decision tasks now always fill `usage.models`; an entry with `inputIncludesCache: false` (Claude Code, Kimi Code) counts cache reads and writes outside `input`. An agent without a configured model is recorded as `<agent>:default`, for example `codex:default`. Top-level counters keep their meaning, so dispatch results, workflow totals, task `usage` events, checkpoints, journals and recipe reports gain the table without other changes; prices and costs are unchanged. One model name reported with both conventions, previously rejected only when priced, is now always rejected. The budgets guide shows how to split usage into uncached input, cache reads, cache writes and output per model.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.

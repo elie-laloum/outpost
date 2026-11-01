@@ -87,7 +87,7 @@ export async function customTurn(
     });
     watchdog.refresh(false);
   };
-  const modelScope = { track, account, trackModels: Boolean(options.prices) };
+  const modelScope = { track, account };
   const modelProvider = harnessModelProvider({
     agent,
     signal,

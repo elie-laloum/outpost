@@ -1,4 +1,5 @@
 import {
+  attributeUsage,
   collectAgentUsage,
   prepareAgentUsage,
   warnUsage,
@@ -21,7 +22,6 @@ import {
 } from "./execution.constants.ts";
 import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
 import { steeringInterruption } from "./execution.constants.ts";
-import { modelUsage } from "../domain/usage.ts";
 import { notify } from "./observation.ts";
 import { openCliHooks } from "./cli-hooks.ts";
 import type { AgentHookInstallation } from "../domain/agent-hook.types.ts";
@@ -64,15 +64,8 @@ export async function turn(
     steering.observe(event);
     notify(
       options.observe,
-      event.kind === "usage" && options.prices
-        ? {
-            ...event,
-            tokens: modelUsage(
-              event.tokens,
-              agent.model?.name,
-              agent.usageInput !== "uncached",
-            ),
-          }
+      event.kind === "usage"
+        ? { ...event, tokens: attributeUsage(agent, event.tokens) }
         : event,
     );
     watchdog.observe(event);
@@ -235,15 +228,7 @@ export async function turn(
   return {
     ...(preparedConversation ? { conversation: preparedConversation } : {}),
     ...outcome,
-    ...(options.prices
-      ? {
-          usage: modelUsage(
-            outcome.usage,
-            agent.model?.name,
-            agent.usageInput !== "uncached",
-          ),
-        }
-      : {}),
+    usage: attributeUsage(agent, outcome.usage),
     status,
     ...(interrupted ? { interrupted: "steering" as const } : {}),
     durationMs: Date.now() - start,

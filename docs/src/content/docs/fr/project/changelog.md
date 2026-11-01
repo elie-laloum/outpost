@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Attribuer chaque usage rapporté à son modèle avec sa convention de cache, avec ou sans `prices`. Les tours d’agent, les compteurs de session et de transcript, les requêtes de modèle du harness, le routage et les tâches de décision renseignent désormais toujours `usage.models` ; une entrée avec `inputIncludesCache: false` (Claude Code, Kimi Code) compte les lectures et écritures du cache en dehors de `input`. Un agent sans modèle configuré est enregistré sous `<agent>:default`, par exemple `codex:default`. Les compteurs de premier niveau gardent leur sens : résultats de dispatch, totaux de workflow, événements `usage` des tâches, checkpoints, journaux et rapports de recette gagnent la table sans autre changement ; tarifs et coûts restent inchangés. Un même nom de modèle rapporté avec les deux conventions, auparavant refusé seulement avec des tarifs, est désormais toujours refusé. Le guide des budgets montre comment répartir l’usage par modèle en entrée hors cache, lectures du cache, écritures du cache et sortie.
+
 ## 14.0.0
 
 - **Rupture :** Sortir la spéculation de l’expérimental. Importez `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` et leurs types depuis `@elie-laloum/outpost/speculation` ; `/experimental/speculation` est supprimé sans alias. La spéculation YAML n’exige plus `experimental: true` dans la configuration d’exécution, que Firecracker exige toujours. Options, résultats, checkpoints, durabilité et autorisation de récupération restent inchangés.

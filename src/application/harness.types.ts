@@ -28,10 +28,7 @@ export interface HarnessRuntime {
   readonly permissions: readonly HarnessPermissions[];
   readonly depth: number;
   readonly maxDepth: number;
-  readonly modelScope: Pick<
-    HarnessModelScope,
-    "track" | "account" | "trackModels"
-  >;
+  readonly modelScope: Pick<HarnessModelScope, "track" | "account">;
   readonly agent: CustomAgent;
   readonly tools: readonly HarnessTool[];
   readonly modelProvider: ModelProvider;

@@ -98,7 +98,12 @@ test("interactive workflow survives separate processes and asks adaptive questio
   assert.equal(last.value.turns, 3);
   assert.deepEqual(last.usage, {
     attempts: 3,
-    tokens: { input: 12, cached: 0, output: 6 },
+    tokens: {
+      input: 12,
+      cached: 0,
+      output: 6,
+      models: { fixture: { input: 12, cached: 0, output: 6 } },
+    },
   });
   assert.ok((await stat(last.value.directory)).isDirectory());
   assert.deepEqual(await run(), last);

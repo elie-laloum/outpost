@@ -53,7 +53,11 @@ test("testing kit emits events and usage and integrates real commits without a C
   assert.equal(result.text, "Done");
   assert.equal(result.commits.length, 1);
   assert.equal(result.commits[0]?.subject, "fix: parser");
-  assert.deepEqual(result.usage, { input: 5, cached: 2, output: 3 });
+  const tokens = { input: 5, cached: 2, output: 3 };
+  assert.deepEqual(result.usage, {
+    ...tokens,
+    models: { "scripted:default": tokens },
+  });
   assert.ok(events.includes("tool"));
   assert.equal(
     await readFile(join(root, "src/p.ts"), "utf8"),

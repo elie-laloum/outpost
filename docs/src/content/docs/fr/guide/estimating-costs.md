@@ -7,7 +7,7 @@ Estimez une dépense en tokens sans appeler de modèle. Enregistrez ces fichiers
 
 ## Fixer les tarifs et la limite
 
-Les tarifs sont exprimés par million de tokens dans une seule devise. Les noms de modèles doivent correspondre exactement à la configuration de vos agents.
+Les tarifs sont exprimés par million de tokens dans une seule devise. Les noms de modèles doivent correspondre exactement à la configuration de vos agents. L’usage d’un agent sans modèle configuré est enregistré sous `<agent>:default` (voir [Répartir l’usage par modèle](../budgets/#répartir-lusage-par-modèle)) : configurez le modèle pour le tarifer de façon fiable.
 
 ```ts title="prices.ts"
 import type { ModelPriceTable } from "@elie-laloum/outpost/workflows";
@@ -19,7 +19,7 @@ export const prices: ModelPriceTable = {
 };
 ```
 
-Cette tâche déclare sa consommation explicitement. Les fonctions de tâches d’agent le font déjà ; un dispatch personnalisé doit recevoir `prices: context.prices`, et un worker doit retourner la consommation par modèle.
+Cette tâche déclare sa consommation explicitement. Les fonctions de tâches d’agent le font déjà. Chaque dispatch attribue sa consommation à un modèle, avec ou sans `prices` ; un worker doit retourner cette consommation attribuée.
 
 ```ts title="monetary-budget.ts"
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";

@@ -19,10 +19,10 @@ Estimate token charges in the table’s currency from Usage.models. Rates are pe
 
 ## Parameters and properties
 
-| Name     | Type              | Presence | Meaning                                                        |
-| -------- | ----------------- | -------- | -------------------------------------------------------------- |
-| `usage`  | `Usage`           | Required | Aggregate token usage with optional model-attributed counters. |
-| `prices` | `ModelPriceTable` | Required | Explicit rates and currency used for this estimate.            |
+| Name     | Type              | Presence | Meaning                                                   |
+| -------- | ----------------- | -------- | --------------------------------------------------------- |
+| `usage`  | `Usage`           | Required | Aggregate token usage with its model-attributed counters. |
+| `prices` | `ModelPriceTable` | Required | Explicit rates and currency used for this estimate.       |
 
 ## Returns
 

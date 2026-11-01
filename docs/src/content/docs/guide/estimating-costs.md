@@ -7,7 +7,7 @@ Estimate token spending without making a model request. Save these files togethe
 
 ## Set prices and a limit
 
-Rates are per million tokens in one currency. Model names must match your agent configuration exactly.
+Rates are per million tokens in one currency. Model names must match your agent configuration exactly. Usage of an agent without a configured model is recorded as `<agent>:default` (see [Split usage by model](../budgets/#split-usage-by-model)): configure the model to price it reliably.
 
 ```ts title="prices.ts"
 import type { ModelPriceTable } from "@elie-laloum/outpost/workflows";
@@ -19,7 +19,7 @@ export const prices: ModelPriceTable = {
 };
 ```
 
-This task reports usage explicitly. Agent task helpers already do so; a custom dispatch needs `prices: context.prices`, and a queue worker must return usage attributed to each model.
+This task reports usage explicitly. Agent task helpers already do so. Every dispatch attributes its usage to a model, with or without `prices`; a queue worker must return that attributed usage.
 
 ```ts title="monetary-budget.ts"
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost/workflows";
