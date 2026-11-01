@@ -1,8 +1,24 @@
-import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
+import type { AgentAdapter, CliAgent, Usage } from "../domain/agent.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
+import { modelUsage } from "../domain/usage.ts";
 import type { AgentOutput, DispatchOptions } from "./execution.types.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import { notify } from "./observation.ts";
+
+// Priced keys match price tables; unpriced keys carry the agent so conventions never share a key.
+export function attributeUsage(
+  agent: Pick<CliAgent, "name" | "model" | "usageInput">,
+  usage: Usage,
+  priced: boolean,
+): Usage {
+  const model = agent.model?.name;
+  const unpriced = model ? `${agent.name}:${model}` : agent.name;
+  return modelUsage(
+    usage,
+    priced ? model : unpriced,
+    agent.usageInput !== "uncached",
+  );
+}
 
 export function warnUsage(
   options: DispatchOptions<unknown>,

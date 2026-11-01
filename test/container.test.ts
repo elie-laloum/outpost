@@ -1311,11 +1311,15 @@ test(
         agent: selected,
         brief: { text: "fixture" },
       });
+      const tokens = { input: 7, output: 2, cached: 3, cacheCreated: 1 };
       assert.deepEqual(result.usage, {
-        input: 7,
-        output: 2,
-        cached: 3,
-        cacheCreated: 1,
+        ...tokens,
+        models: {
+          [kind]: {
+            ...tokens,
+            ...(kind === "kimi" ? { inputIncludesCache: false } : {}),
+          },
+        },
       });
       assert.equal((await box.command({ executable: "true" })).status, 0);
     }

@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Attribute CLI agent usage to its agent and model with its cache convention even without `prices`. Unpriced agent turns, their `usage` events and session or transcript counters now fill `usage.models` under `<agent>:<model>`, for example `claude:claude-sonnet-5-5`, or under the agent name when no model is configured; an entry with `inputIncludesCache: false` (Claude Code, Kimi Code) counts cache reads and writes outside `input`. The agent name keeps built-in agents that report one model name with different conventions apart, so their unpriced runs gain no new failure. Top-level counters keep their meaning, so dispatch results, workflow totals, task `usage` events, checkpoints, journals and recipe reports gain the table without other changes. Priced runs are unchanged: entries keep model-name keys, harness requests, routing and decisions are attributed only with prices, and costs are identical. The budgets guide shows how to split usage into uncached input, cache reads, cache writes and output per key.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.
