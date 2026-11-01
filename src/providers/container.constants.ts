@@ -8,4 +8,6 @@ export const containerDefaults = Object.freeze({
   isolatedRoot: "/tmp/outpost/workspace",
   home: "/home/agent",
   minimumMemoryMb: 64,
+  namePattern: /^outpost-[a-f0-9-]{36}$/,
+  companionSuffix: "-egress",
 });

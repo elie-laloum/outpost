@@ -12,7 +12,7 @@ export async function recoverContainer(
   options: TransferOptions = {},
 ): Promise<void> {
   invariant(
-    /^outpost-[a-f0-9-]{36}$/.test(resourceId),
+    containerDefaults.namePattern.test(resourceId),
     "Invalid recoverable container identity",
   );
   const limits = {

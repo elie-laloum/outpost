@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ajouter `labels` aux `ContainerOptions` de Docker et Podman : les commandes `create` du conteneur de la sandbox et de son compagnon egress les posent, si bien qu’un conteneur n’existe jamais sans ses labels. Les clés et valeurs sont validées à la création du fournisseur, et le préfixe `io.outpost.` est réservé. Ajouter `listDockerSandboxes()`/`listPodmanSandboxes()` pour lister les sandboxes Outpost qui portent des labels donnés, y compris une sandbox dont le compagnon egress a survécu à son conteneur, et `removeDockerSandbox()`/`removePodmanSandbox()` pour supprimer de façon idempotente une sandbox avec son compagnon, quel que soit le `repositoryMode`. Les deux n’agissent que sur les conteneurs nommés `outpost-<uuid>`. Les fournisseurs sans `labels` créent les mêmes conteneurs qu’avant, et `recover` est inchangé.
+
 ## 14.0.0
 
 - **Rupture :** Sortir la spéculation de l’expérimental. Importez `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` et leurs types depuis `@elie-laloum/outpost/speculation` ; `/experimental/speculation` est supprimé sans alias. La spéculation YAML n’exige plus `experimental: true` dans la configuration d’exécution, que Firecracker exige toujours. Options, résultats, checkpoints, durabilité et autorisation de récupération restent inchangés.

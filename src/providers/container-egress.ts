@@ -5,6 +5,7 @@ import {
   defaultEgressImage,
 } from "./container-egress.constants.ts";
 import { egressRuntime } from "./egress/egress.constants.ts";
+import { labelArguments } from "./container-labels.ts";
 import type {
   ContainerCall,
   ContainerEngine,
@@ -63,6 +64,7 @@ export function createContainerEgress(
           companion,
           "--network",
           "bridge",
+          ...labelArguments(config.labels),
           "--label",
           `${containerEgress.label}=${name}`,
           "--user",

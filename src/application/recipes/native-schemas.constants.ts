@@ -17064,6 +17064,13 @@ export const nativeRecipeSchemas: Readonly<
           },
         ],
       },
+      labels: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          type: "string",
+        },
+      },
       retain: {
         type: "number",
       },
@@ -17285,6 +17292,13 @@ export const nativeRecipeSchemas: Readonly<
             const: "Z",
           },
         ],
+      },
+      labels: {
+        type: "object",
+        properties: {},
+        additionalProperties: {
+          type: "string",
+        },
       },
       retain: {
         type: "number",

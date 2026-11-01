@@ -26,6 +26,7 @@ import { containerCommand } from "./container-command.ts";
 import { containerFiles } from "./container-files.ts";
 import { containerMounts } from "./container-mounts.ts";
 import { containerPlan } from "./container-plan.ts";
+import { validateContainerLabels } from "./container-labels.ts";
 import { containerPreflight } from "./container-preflight.ts";
 import { containerDefaults } from "./container.constants.ts";
 import type { ContainerEngine, ContainerOptions } from "./container.types.ts";
@@ -55,6 +56,9 @@ export function containerProvider(
     ...(policy ? { egress: policy } : {}),
     networks: containerNetworks(options),
     caches: (options.caches ?? []).map((cache) => ({ ...cache })),
+    ...(options.labels === undefined
+      ? {}
+      : { labels: validateContainerLabels(options.labels) }),
   };
   if (config.egressImage !== undefined) {
     invariant(

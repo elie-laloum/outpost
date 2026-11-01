@@ -1,5 +1,6 @@
 import type { ContainerPlanOptions } from "./container.types.ts";
 import { containerUserNamespace } from "./container-egress.ts";
+import { labelArguments } from "./container-labels.ts";
 
 export function containerPlan({
   config,
@@ -19,6 +20,7 @@ export function containerPlan({
     "create",
     "--name",
     name,
+    ...labelArguments(config.labels),
     "--init",
     "--user",
     `${user.uid}:${user.gid}`,

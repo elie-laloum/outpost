@@ -2774,6 +2774,54 @@
     "SELinux relabeling of bind mounts on Linux: z shared (default), Z private, false plain bind mounts.",
     "Réétiquetage SELinux des montages sous Linux : z partagé (par défaut), Z privé, false montages simples."
   ],
+  "ContainerOptions.labels": [
+    "Caller labels set by the create command of the sandbox container and of its egress companion, so they exist as soon as the container does, with the ContainerLabels rules. Invalid or reserved labels fail at provider creation with code configuration. listDockerSandboxes and listPodmanSandboxes find sandboxes by these labels. Unrelated to label, which controls SELinux relabeling.",
+    "Labels de l’appelant posés par la commande create du conteneur de la sandbox et de son compagnon egress, si bien qu’ils existent dès que le conteneur existe, selon les règles de ContainerLabels. Des labels invalides ou réservés échouent à la création du provider avec le code configuration. listDockerSandboxes et listPodmanSandboxes retrouvent les sandboxes par ces labels. Sans rapport avec label, qui règle le réétiquetage SELinux."
+  ],
+  "listDockerSandboxes.query": [
+    "Labels every reported sandbox must carry, with the cancellation signal and deadline applied to each docker command.",
+    "Labels que chaque sandbox rapportée doit porter, avec le signal d’annulation et le délai appliqués à chaque commande docker."
+  ],
+  "removeDockerSandbox.name": [
+    "Sandbox name, as reported by listDockerSandboxes or received by SandboxContext.registerRecovery.",
+    "Nom de la sandbox, tel que rapporté par listDockerSandboxes ou reçu par SandboxContext.registerRecovery."
+  ],
+  "removeDockerSandbox.options": [
+    "Cancellation signal and deadline applied to each docker command of the removal.",
+    "Signal d’annulation et délai appliqués à chaque commande docker de la suppression."
+  ],
+  "listPodmanSandboxes.query": [
+    "Labels every reported sandbox must carry, with the cancellation signal and deadline applied to each podman command.",
+    "Labels que chaque sandbox rapportée doit porter, avec le signal d’annulation et le délai appliqués à chaque commande podman."
+  ],
+  "removePodmanSandbox.name": [
+    "Sandbox name, as reported by listPodmanSandboxes or received by SandboxContext.registerRecovery.",
+    "Nom de la sandbox, tel que rapporté par listPodmanSandboxes ou reçu par SandboxContext.registerRecovery."
+  ],
+  "removePodmanSandbox.options": [
+    "Cancellation signal and deadline applied to each podman command of the removal.",
+    "Signal d’annulation et délai appliqués à chaque commande podman de la suppression."
+  ],
+  "ContainerInventoryOptions.signal": [
+    "Cooperative cancellation; aborting stops the running engine command and rejects the operation.",
+    "Annulation coopérative ; l’abandon arrête la commande du moteur en cours et rejette l’opération."
+  ],
+  "ContainerInventoryOptions.deadlineMs": [
+    "Maximum duration in milliseconds of each engine command, default 10000.",
+    "Durée maximale en millisecondes de chaque commande du moteur, 10000 par défaut."
+  ],
+  "ContainerSandboxQuery.labels": [
+    "Labels every reported sandbox must carry, with the ContainerLabels rules. At least one label is required, so a query cannot select every Outpost sandbox on the host.",
+    "Labels que chaque sandbox rapportée doit porter, selon les règles de ContainerLabels. Au moins un label est requis, afin qu’une requête ne puisse pas sélectionner toutes les sandboxes Outpost de l’hôte."
+  ],
+  "ContainerSandbox.name": [
+    "Sandbox container name, outpost-<uuid>, to pass to removeDockerSandbox or removePodmanSandbox. It is also reported when only the egress companion remains.",
+    "Nom du conteneur de la sandbox, outpost-<uuid>, à passer à removeDockerSandbox ou removePodmanSandbox. Il est aussi rapporté quand seul le compagnon egress subsiste."
+  ],
+  "ContainerSandbox.labels": [
+    "Labels the engine reports for the sandbox container, including labels inherited from its image. When only the egress companion remains, the companion's labels, which also include io.outpost.egress.owner.",
+    "Labels que le moteur rapporte pour le conteneur de la sandbox, y compris ceux hérités de son image. Quand seul le compagnon egress subsiste, ce sont les labels du compagnon, qui contiennent aussi io.outpost.egress.owner."
+  ],
   "ContainerOptions.retain": [
     "Bytes of output tail kept per stream, default 65536.",
     "Octets de fin de sortie conservés par flux, 65536 par défaut."

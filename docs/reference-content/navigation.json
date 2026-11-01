@@ -2758,6 +2758,26 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/listdockersandboxes",
+        "label": "listDockerSandboxes",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/listpodmansandboxes",
+        "label": "listPodmanSandboxes",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/removedockersandbox",
+        "label": "removeDockerSandbox",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/removepodmansandbox",
+        "label": "removePodmanSandbox",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createlocalsandboxprovider",
         "label": "createLocalSandboxProvider",
         "attrs": { "data-api-kind": "function" }
@@ -2788,6 +2808,11 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/containerlabels",
+        "label": "ContainerLabels",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/egresspolicy",
         "label": "EgressPolicy",
         "attrs": { "data-api-kind": "type" }
@@ -2805,6 +2830,21 @@
       {
         "slug": "reference/containeroptions",
         "label": "ContainerOptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/containersandbox",
+        "label": "ContainerSandbox",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/containersandboxquery",
+        "label": "ContainerSandboxQuery",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/containerinventoryoptions",
+        "label": "ContainerInventoryOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {

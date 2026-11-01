@@ -3,6 +3,7 @@ import "./container-file-workspaces.test.ts";
 import "./container-hooks.test.ts";
 import { createAgent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { PassThrough } from "node:stream";
 import { diagnoseImage } from "../src/application/doctor-image.ts";
@@ -35,8 +36,16 @@ import {
   defineMcpPrompt,
 } from "../src/harness.ts";
 import type { ModelRequest, HarnessToolContext } from "../src/harness.ts";
-import { createDockerSandboxProvider } from "../src/providers/docker.ts";
-import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
+import {
+  createDockerSandboxProvider,
+  listDockerSandboxes,
+  removeDockerSandbox,
+} from "../src/providers/docker.ts";
+import {
+  createPodmanSandboxProvider,
+  listPodmanSandboxes,
+  removePodmanSandbox,
+} from "../src/providers/podman.ts";
 import { conversationStore, repository, scripted } from "./helpers.ts";
 import { defineLeaseContractSuite } from "./fixtures/lease-contract-suite.ts";
 import {
@@ -1357,6 +1366,90 @@ test(
     );
     const removed = await lease.invoke({ executable: "true" });
     assert.notEqual(removed.status, 0);
+  },
+);
+
+test(
+  "real labelled isolated sandboxes and orphaned companions are listed and removed by label",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const [create, list, remove] =
+      engine === "podman"
+        ? [
+            createPodmanSandboxProvider,
+            listPodmanSandboxes,
+            removePodmanSandbox,
+          ]
+        : [
+            createDockerSandboxProvider,
+            listDockerSandboxes,
+            removeDockerSandbox,
+          ];
+    const root = await repository(t);
+    const labels = { "com.example.outpost-test/run": randomUUID() };
+    let name = "";
+    const lease = await create({
+      image: containerImage,
+      networks: "none",
+      repositoryMode: "isolated",
+      labels,
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [join(root, ".git")],
+      variables: {},
+      registerRecovery: async (id) => {
+        name = id;
+      },
+    });
+    t.after(() => lease.release().catch(() => {}));
+    const orphan = `outpost-${randomUUID()}`;
+    const created = await executeProcess({
+      executable: engine,
+      arguments: [
+        "create",
+        "--name",
+        `${orphan}-egress`,
+        "--label",
+        `com.example.outpost-test/run=${labels["com.example.outpost-test/run"]}`,
+        "--label",
+        `io.outpost.egress.owner=${orphan}`,
+        "--entrypoint",
+        "sleep",
+        containerImage,
+        "infinity",
+      ],
+      deadlineMs: 30_000,
+    });
+    assert.equal(created.status, 0, created.stderr);
+    t.after(() =>
+      executeProcess({
+        executable: engine,
+        arguments: ["rm", "--force", `${orphan}-egress`],
+        deadlineMs: 30_000,
+      }),
+    );
+    const found = await list({ labels, deadlineMs: 30_000 });
+    assert.deepEqual(
+      found.map((sandbox) => sandbox.name),
+      [name, orphan].sort(),
+    );
+    assert.ok(
+      found.every(
+        (sandbox) =>
+          sandbox.labels["com.example.outpost-test/run"] ===
+          labels["com.example.outpost-test/run"],
+      ),
+    );
+    for (const sandbox of found) {
+      await remove(sandbox.name, { deadlineMs: 30_000 });
+      await remove(sandbox.name, { deadlineMs: 30_000 });
+    }
+    assert.deepEqual(await list({ labels, deadlineMs: 30_000 }), []);
+    assert.notEqual((await lease.invoke({ executable: "true" })).status, 0);
+    await lease.release();
   },
 );
 
