@@ -7591,16 +7591,16 @@
     "True uniquement si chaque token rapporté est associé à un modèle tarifé et si tous les compteurs sont complets."
   ],
   "Usage.models": [
-    "Optional model-attributed counters for cost accounting. Priced dispatches fill this automatically from explicit CLI models, harness requests and built-in subagents. Custom or queued tasks must preserve or provide it. Aggregate counters stay available.",
-    "Compteurs facultatifs par modèle pour calculer le coût. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles."
+    "Model-attributed counters, each with its cache convention. Priced dispatches fill this from explicit CLI models, harness requests and built-in subagents, keyed by model name. Without prices, CLI agent turns are still attributed under <agent>:<model>, or the agent name when no model is configured. Custom or queued tasks must preserve or provide it. Aggregate counters stay available and add entries as reported.",
+    "Compteurs par modèle, chacun avec sa convention de cache. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés, avec le nom du modèle pour clé. Sans tarifs, les tours d’agent CLI restent attribués sous <agent>:<modèle>, ou le nom de l’agent quand aucun modèle n’est configuré. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles et additionnent les entrées telles que rapportées."
   ],
   "ModelUsage.inputIncludesCache": [
-    "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false; built-in model providers use true.",
-    "Indique si input inclut cached et cacheCreated, true par défaut. L’attribution des CLI Claude Code et Kimi utilise false ; les providers de modèle intégrés utilisent true."
+    "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false, so uncached input is input itself; otherwise it is input minus cached and cacheCreated. Built-in model providers use true.",
+    "Indique si input inclut cached et cacheCreated, true par défaut. L’attribution des CLI Claude Code et Kimi utilise false : l’entrée hors cache est alors input ; sinon, c’est input moins cached et cacheCreated. Les providers de modèle intégrés utilisent true."
   ],
   "AgentFeatures.usageInput": [
-    "Input-token convention for pricing CLI usage: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.",
-    "Convention des tokens d’entrée pour tarifer l’usage CLI : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
+    "Input-token convention recorded on each model entry of CLI usage and used for pricing: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.",
+    "Convention des tokens d’entrée enregistrée sur chaque entrée par modèle de l’usage CLI et utilisée pour la tarification : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
   ],
   "WorkflowBudget.prices": [
     "Model rates per million tokens. Enables model attribution in built-in workflow task helpers and adds cost to result.usage, even without a monetary limit. Copied when accounting starts.",
@@ -7619,8 +7619,8 @@
     "Table de prix du workflow, transmise par les helpers de tâches d’agent. Les dispatchs personnalisés doivent la passer explicitement pour collecter les compteurs par modèle."
   ],
   "DispatchOptions.prices": [
-    "Optional model rates that enable model attribution in usage. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
-    "Tarifs facultatifs activant l’attribution par modèle dans usage. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
+    "Optional model rates. With them, usage is attributed by model name, including harness requests, to match the table; without them only CLI turns are attributed, under agent-scoped keys. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
+    "Tarifs facultatifs. Avec eux, usage est attribué par nom de modèle, requêtes du harness comprises, pour correspondre à la table ; sans eux, seuls les tours CLI sont attribués, sous des clés incluant l’agent. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
   ],
   "DispatchOptions.redact": [
     "Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.",
