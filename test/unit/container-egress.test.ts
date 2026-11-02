@@ -10,6 +10,8 @@ import { egressAccess } from "../../src/providers/egress/policy.ts";
 import { createEgressProxy } from "../../src/providers/egress/proxy.ts";
 import { tlsServerName } from "../../src/providers/egress/tls-hello.ts";
 import { egressCidr } from "../../src/providers/egress/address.ts";
+import { egressFirewall } from "../../src/providers/egress/firewall.ts";
+import { egressNameservers } from "../../src/providers/egress/nameservers.ts";
 import { linuxHostMounts, repository } from "../helpers.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 
@@ -280,6 +282,93 @@ test("domain and CIDR authorization pins resolved addresses and gives denials pr
     );
   await assert.rejects(
     access.resolve("host.example.com", async () => []),
+    /denied/,
+  );
+});
+
+test("companion resolvers are read from resolv.conf without accepting nft syntax", () => {
+  assert.deepEqual(egressNameservers(""), []);
+  assert.deepEqual(
+    egressNameservers(
+      [
+        "# nameserver 192.0.2.1",
+        "; nameserver 192.0.2.2",
+        "search example.test",
+        "nameserver 169.254.1.1 trailing",
+        "\tnameserver\tfe80::1%eth0\r",
+        "nameserver ::ffff:10.0.0.2",
+        "nameserver 169.254.1.1",
+        "nameserver 10.0.0.3",
+      ].join("\n"),
+    ),
+    [
+      { address: "169.254.1.1", family: 4 },
+      { address: "fe80::1", family: 6 },
+      { address: "10.0.0.2", family: 4 },
+    ],
+  );
+  assert.deepEqual(
+    egressNameservers(
+      [
+        "nameserver 10.0.0.1;",
+        "nameserver 10.0.0.1}",
+        "nameserver 10.0.0.1%eth0",
+        "nameserver 10.1",
+        "nameserver 010.0.0.1",
+        "nameserver example.test",
+        "nameserver",
+        "nameservers 10.0.0.4",
+        "options ndots:1",
+      ].join("\n"),
+    ),
+    [],
+  );
+  assert.deepEqual(egressNameservers("nameserver fe80::1%eth0;} flush"), [
+    { address: "fe80::1", family: 6 },
+  ]);
+});
+
+test("the proxy may reach its resolvers on port 53 inside denied ranges, before every denial", async () => {
+  const policy = {
+    mode: "allowlist" as const,
+    domains: ["allowed.example.test"],
+    allowCidrs: ["192.0.2.0/24"],
+    denyCidrs: ["169.254.0.0/16", "10.0.0.0/8", "fe80::/10"],
+  };
+  const permitted = (nameservers: Parameters<typeof egressFirewall>[1]) => {
+    const rules = egressFirewall(policy, nameservers);
+    return rules
+      .slice(rules.indexOf("chain permitted {"), rules.indexOf("chain output"))
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line && !line.endsWith("{") && line !== "}");
+  };
+  const exempted = permitted(
+    egressNameservers("nameserver 169.254.1.1\nnameserver fe80::1%eth0"),
+  );
+  assert.deepEqual(exempted.slice(0, 4), [
+    "meta skuid 65532 ip daddr 169.254.1.1 udp dport 53 accept",
+    "meta skuid 65532 ip daddr 169.254.1.1 tcp dport 53 accept",
+    "meta skuid 65532 ip6 daddr fe80::1 udp dport 53 accept",
+    "meta skuid 65532 ip6 daddr fe80::1 tcp dport 53 accept",
+  ]);
+  assert.deepEqual(exempted.slice(4, 7), [
+    "ip daddr 169.254.0.0/16 drop",
+    "ip daddr 10.0.0.0/8 drop",
+    "ip6 daddr fe80::/10 drop",
+  ]);
+  assert.deepEqual(exempted.slice(7), permitted([]).slice(3));
+  assert.equal(permitted([])[0], "ip daddr 169.254.0.0/16 drop");
+  for (const nameserver of [
+    { address: "10.0.0.1; flush ruleset", family: 4 },
+    { address: "fe80::1%eth0", family: 6 },
+    { address: "10.0.0.1", family: 6 },
+  ])
+    assert.throws(() => egressFirewall(policy, [nameserver]), /nameserver/);
+  await assert.rejects(
+    egressAccess(policy).resolve("allowed.example.test", async () => [
+      { address: "169.254.1.1", family: 4 },
+    ]),
     /denied/,
   );
 });

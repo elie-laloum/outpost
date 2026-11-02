@@ -12,8 +12,8 @@ import { egressTestTls } from "./fixtures/egress-tls.constants.ts";
 import type { EgressPolicy } from "../src/domain/egress.types.ts";
 
 test(
-  "real container egress filters web, raw TCP/UDP, denials, proxy bypass and companion failure",
-  { skip: !process.env.OUTPOST_CONTAINER_ENGINE, timeout: 120_000 },
+  "real container egress filters web, raw TCP/UDP, denials, resolvers in denied ranges, proxy bypass and companion failure",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE, timeout: 180_000 },
   async (t) => {
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
@@ -62,6 +62,42 @@ test(
       ])
     ).stdout.trim();
     assert.match(ip, /^\d+\.\d+\.\d+\.\d+$/);
+    const resolver = `${backend}-dns`;
+    await call([
+      "run",
+      "-d",
+      "--name",
+      resolver,
+      "--network",
+      "bridge",
+      "--entrypoint",
+      "node",
+      nodeImage,
+      "-e",
+      `
+    const self=()=>Object.values(require('os').networkInterfaces()).flat().find(i=>i.family==='IPv4'&&!i.internal).address;
+    const names={'resolved.example.test':()=>${JSON.stringify(ip)},'private.example.test':self};
+    const udp=require('dgram').createSocket('udp4');
+    udp.on('message',(query,remote)=>{let offset=12;const labels=[];while(query[offset]){labels.push(query.toString('latin1',offset+1,offset+1+query[offset]));offset+=query[offset]+1}
+      const answer=query.readUInt16BE(offset+1)===1&&names[labels.join('.').toLowerCase()]?.();const header=Buffer.from(query.subarray(0,12));header.writeUInt16BE(0x8180,2);header.writeUInt16BE(1,4);header.writeUInt16BE(answer?1:0,6);header.writeUInt32BE(0,8);
+      udp.send(Buffer.concat([header,query.subarray(12,offset+5),answer?Buffer.from([0xc0,12,0,1,0,1,0,0,0,0,0,4,...answer.split('.').map(Number)]):Buffer.alloc(0)]),remote.port,remote.address)});
+    udp.bind(53,'0.0.0.0',()=>console.log('ready'));
+  `,
+    ]);
+    t.after(() => call(["rm", "--force", resolver]));
+    for (let attempt = 0; attempt < 30; attempt++) {
+      if ((await call(["logs", resolver])).stdout.includes("ready")) break;
+      await setTimeout(100);
+    }
+    const resolverIp = (
+      await call([
+        "inspect",
+        "--format",
+        "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
+        resolver,
+      ])
+    ).stdout.trim();
+    assert.match(resolverIp, /^\d+\.\d+\.\d+\.\d+$/);
     const policies: EgressPolicy[] = [
       { mode: "allowlist", domains: ["allowed.example.test"] },
       { mode: "allowlist", allowCidrs: [`${ip}/32`] },
@@ -70,6 +106,15 @@ test(
         domains: ["allowed.example.test"],
         allowCidrs: [`${ip}/32`],
         denyCidrs: [`${ip}/32`],
+      },
+      {
+        mode: "allowlist",
+        domains: [
+          "allowed.example.test",
+          "resolved.example.test",
+          "private.example.test",
+        ],
+        denyCidrs: [`${resolverIp}/32`],
       },
     ];
     for (const [index, egress] of policies.entries()) {
@@ -91,6 +136,7 @@ test(
                 `allowed.example.test:${ip}`,
                 "--add-host",
                 `denied.example.test:${ip}`,
+                ...(index === 3 ? ["--dns", resolverIp] : []),
                 ...args.slice(1),
               ],
             });
@@ -133,6 +179,28 @@ test(
         `),
             "allowed",
           );
+        }
+        if (index === 3) {
+          for (const [host, status] of [
+            ["resolved.example.test", "200"],
+            ["private.example.test", "403"],
+          ])
+            assert.equal(
+              await probe(
+                `require('http').get({host:'127.0.0.1',port:18080,path:'http://${host}/'},r=>{console.log(r.statusCode);r.resume()})`,
+              ),
+              status,
+              host,
+            );
+          for (const elevated of [false, true])
+            assert.equal(
+              await probe(
+                `const socket=require('dgram').createSocket('udp4');const timer=setTimeout(()=>{console.log('blocked');socket.close()},500);socket.on('message',()=>{clearTimeout(timer);console.log('allowed');socket.close()});socket.send(Buffer.from('000001000001000000000000087265736f6c766564076578616d706c6504746573740000010001','hex'),53,${JSON.stringify(resolverIp)});`,
+                elevated,
+              ),
+              "blocked",
+              `sandbox DNS, elevated ${elevated}`,
+            );
         }
         for (const elevated of [false, true]) {
           assert.equal(

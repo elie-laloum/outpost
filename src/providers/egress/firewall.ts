@@ -1,19 +1,34 @@
 import { isIP } from "node:net";
 import { egressRuntime } from "./egress.constants.ts";
-import type { Allowlist } from "./egress.types.ts";
+import type { Allowlist, EgressAddress } from "./egress.types.ts";
 import { egressCidr } from "./address.ts";
 
-export function egressFirewall(policy: Allowlist): string {
-  const destination = (value: string) => {
-    const cidr = egressCidr(value);
-    return `${isIP(cidr.split("/")[0]!) === 4 ? "ip" : "ip6"} daddr ${cidr}`;
-  };
+function destination(value: string): string {
+  return `${isIP(value.split("/")[0]!) === 4 ? "ip" : "ip6"} daddr ${value}`;
+}
+
+function resolverRules(nameservers: readonly EgressAddress[]): string[] {
+  return nameservers.flatMap(({ address, family }) => {
+    if (isIP(address) !== family || address.includes("%"))
+      throw new Error("Invalid egress nameserver");
+    return ["udp", "tcp"].map(
+      (protocol) =>
+        `meta skuid ${egressRuntime.uid} ${destination(address)} ${protocol} dport 53 accept`,
+    );
+  });
+}
+
+export function egressFirewall(
+  policy: Allowlist,
+  nameservers: readonly EgressAddress[] = [],
+): string {
   return `table inet outpost_egress {
  set live { type nf_proto; flags timeout; timeout 3s; }
  chain permitted {
-  ${(policy.denyCidrs ?? []).map((cidr) => `${destination(cidr)} drop`).join("\n  ")}
+  ${resolverRules(nameservers).join("\n  ")}
+  ${(policy.denyCidrs ?? []).map((cidr) => `${destination(egressCidr(cidr))} drop`).join("\n  ")}
   meta skuid ${egressRuntime.uid} meta l4proto { tcp, udp } accept
-  ${(policy.allowCidrs ?? []).map((cidr) => `${destination(cidr)} meta l4proto { tcp, udp } accept`).join("\n  ")}
+  ${(policy.allowCidrs ?? []).map((cidr) => `${destination(egressCidr(cidr))} meta l4proto { tcp, udp } accept`).join("\n  ")}
  }
  chain output {
   type filter hook output priority -150; policy drop;
