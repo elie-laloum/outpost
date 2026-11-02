@@ -3,6 +3,9 @@ export const egressRuntime = Object.freeze({
   uid: 65532,
   port: 18080,
   ready: "/run/outpost/ready",
+  resolvConf: "/etc/resolv.conf",
+  // glibc MAXNS: getaddrinfo queries at most the first three resolvers.
+  maxNameservers: 3,
   maxHelloBytes: 65_536,
   maxHelloRecords: 32,
   maxHeaderBytes: 16_384,

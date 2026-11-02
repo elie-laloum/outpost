@@ -39,7 +39,11 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
   result.unwrap();
   assert.equal(result.value(run).turns.length, 2);
   assert.equal(events.filter((kind) => kind === "summary").length, 2);
-  assert.deepEqual(result.usage.tokens, { input: 6, cached: 2, output: 4 });
+  const tokens = { input: 6, cached: 2, output: 4 };
+  assert.deepEqual(result.usage.tokens, {
+    ...tokens,
+    models: { fixture: tokens },
+  });
 });
 
 test("isolated task streaming usage cancels the running process, blocks retries and dependents", async (t) => {
