@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
 import { containerProvider } from "../src/providers/container.ts";
+import { listContainerSandboxes } from "../src/providers/container-inventory.ts";
+import { recoverContainer } from "../src/providers/container-recovery.ts";
 import {
   executeProcess,
   requireSuccess,
@@ -290,5 +292,76 @@ test(
       }),
       /egress|provisioning/i,
     );
+  },
+);
+
+test(
+  "real labelled egress companions are listed with their sandbox and removed with it",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE, timeout: 120_000 },
+  async (t) => {
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const image = process.env.OUTPOST_EGRESS_IMAGE;
+    assert.ok(image, "Build images/egress and set OUTPOST_EGRESS_IMAGE");
+    const call = (args: readonly string[]) =>
+      requireSuccess({
+        executable: engine,
+        arguments: args,
+        deadlineMs: 30_000,
+      });
+    const root = await repository(t);
+    const labels = { "com.example.outpost-test/run": randomUUID() };
+    let name = "";
+    const lease = await containerProvider(engine, {
+      image:
+        process.env.OUTPOST_FILE_CONTAINER_IMAGE ??
+        "docker.io/library/node:24-slim",
+      egressImage: image,
+      egress: { mode: "allowlist", domains: ["example.com"] },
+      repositoryMode: "isolated",
+      labels,
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+      registerRecovery: async (id) => {
+        name = id;
+      },
+    });
+    t.after(() => lease.release().catch(() => {}));
+    const companion = await call([
+      "container",
+      "inspect",
+      "--format",
+      "{{json .Config.Labels}}",
+      `${name}-egress`,
+    ]);
+    assert.equal(
+      JSON.parse(companion.stdout)["com.example.outpost-test/run"],
+      labels["com.example.outpost-test/run"],
+    );
+    const query = { labels, deadlineMs: 30_000 };
+    assert.deepEqual(
+      (await listContainerSandboxes(engine, query)).map(
+        (sandbox) => sandbox.name,
+      ),
+      [name],
+    );
+    await recoverContainer(engine, executeProcess, name, {
+      deadlineMs: 30_000,
+    });
+    assert.deepEqual(await listContainerSandboxes(engine, query), []);
+    const remaining = await call([
+      "container",
+      "ls",
+      "--all",
+      "--filter",
+      `name=^${name}(-egress)?$`,
+      "--format",
+      "{{.Names}}",
+    ]);
+    assert.equal(remaining.stdout.trim(), "");
+    await lease.release();
   },
 );

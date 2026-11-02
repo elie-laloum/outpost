@@ -2271,6 +2271,7 @@
       "cpus": "native",
       "memoryMb": "native",
       "label": "native",
+      "labels": "native",
       "retain": "native",
       "userns": "native"
     },
@@ -2367,6 +2368,7 @@
       "cpus": "native",
       "memoryMb": "native",
       "label": "native",
+      "labels": "native",
       "retain": "native",
       "userns": "native"
     },
