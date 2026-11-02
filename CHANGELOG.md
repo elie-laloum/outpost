@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Update the repository's development dependencies to patched releases: `undici` 7.30.1 and 8.12.3, `zod` 4.6.7, `follow-redirects` 1.16.2 and `@azure/msal-node` 7.1.2 through `@azure/identity` 4.14.1. The dependency audit ignores GHSA-mrhx-c7xc-m3w5 for the zod 3 copy of the optional Infisical SDK, which has no patched 3.x release. The published package's runtime dependencies are unchanged.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.

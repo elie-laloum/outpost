@@ -12,6 +12,8 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Mettre à jour les dépendances de développement du dépôt vers des versions corrigées : `undici` 7.30.1 et 8.12.3, `zod` 4.6.7, `follow-redirects` 1.16.2 et `@azure/msal-node` 7.1.2 via `@azure/identity` 4.14.1. L’audit des dépendances ignore GHSA-mrhx-c7xc-m3w5 pour la copie zod 3 du SDK Infisical optionnel, qui n’a aucune version 3.x corrigée. Les dépendances d’exécution du paquet publié ne changent pas.
+
 ## 14.0.0
 
 - **Rupture :** Sortir la spéculation de l’expérimental. Importez `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` et leurs types depuis `@elie-laloum/outpost/speculation` ; `/experimental/speculation` est supprimé sans alias. La spéculation YAML n’exige plus `experimental: true` dans la configuration d’exécution, que Firecracker exige toujours. Options, résultats, checkpoints, durabilité et autorisation de récupération restent inchangés.

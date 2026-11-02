@@ -224,7 +224,7 @@
     "@1password/sdk": "^0.5.0",
     "@aws-sdk/client-s3": "^3.1140.0",
     "@aws-sdk/client-secrets-manager": "^3.1147.0",
-    "@azure/identity": "^4.13.3",
+    "@azure/identity": "^4.14.1",
     "@azure/keyvault-secrets": "^4.11.2",
     "@daytona/sdk": "^0.216.0",
     "@google-cloud/secret-manager": "^7.1.1",
@@ -248,7 +248,7 @@
     "yaml": "^2.9.1"
   },
   "overrides": {
-    "follow-redirects": "1.16.1",
+    "follow-redirects": "1.16.2",
     "shell-quote": "1.11.0"
   }
 }
