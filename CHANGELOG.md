@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Declare a format-3 `loop` with recipe steps instead of extension callbacks: an agent `attempt` with a brief, and a `check` that is either a command (accepted on exit status 0, its output becoming the feedback) or an agent answering `{ done, feedback }`. Both run in the shared recipe workspace. Briefs interpolate `{{ loop.round }}`, `{{ loop.feedback }}` and, in an agent check, `{{ loop.text }}`; `conversation: continue` sends later rounds in the attempt's conversation. The task output is the last attempt's projection, with the commits of every round and `rounds`. `validateRecipeProject` and `recipe validate` locate unknown loop agents and refuse loop references outside their fields, a new-conversation brief without `{{ loop.feedback }}`, and a dispatch `continuation`. Callback loops are unchanged; mixing callbacks and steps is refused. The bundled catalogue adds `fix-until-green`.
+- Pass the rejected round's result to `defineLoopTask` attempts as a third argument, typed `unknown` so that declaring it keeps the result type inferred; it is restored from the round records after a durable resume. Recipe callback loops receive the previous round's unwrapped value.
+- End the `LoopTaskExhausted` message with the last check feedback, and carry that feedback on the `complete` event of each rejected round (`WorkflowEvent.feedback`), both limited to 2,000 characters; events are masked by the workflow `redact` patterns. The `feedback` property and round records keep the full text.
+
 ## 14.0.0
 
 - **Breaking:** Move speculation out of experimental. Import `speculate`, `recoverSpeculation`, `checkSpeculationIntegration` and their types from `@elie-laloum/outpost/speculation`; `/experimental/speculation` is removed without an alias. YAML speculation no longer requires `experimental: true` in the execution configuration, which Firecracker still requires. Options, results, checkpoints, durability and recovery authorization are unchanged.

@@ -102,6 +102,46 @@ agents:
 
 Exécutez avec la même commande `recipe run`, sans `--input`. Utilisez des chemins de dépôt différents pour travailler sur plusieurs repositories. L’intégration, lorsqu’elle est demandée, reste indépendante pour chaque dépôt ; il n’existe aucune transaction Git commune.
 
+## Recommencer jusqu’à ce qu’une vérification passe
+
+Une tâche `loop` répète une tentative d’agent jusqu’à ce que sa vérification accepte le travail, en au plus `maxRounds` tours. La tentative et la vérification s’exécutent dans le workspace configuré, comme les tâches `agent` et `command`. Cette recette utilise le rôle `coder` de la configuration ci-dessus, avec `workspace` pointant vers votre projet.
+
+```yaml title="recipe.yaml — loop"
+version: 3
+name: fix-until-green
+inputs:
+  goal: { type: string, description: The change to implement. }
+tasks:
+  - key: fix
+    loop:
+      maxRounds: 3
+      attempt:
+        agent: coder
+        brief: "Implement this change and commit it: {{ inputs.goal }}"
+        conversation: continue
+      check:
+        command: { executable: npm, arguments: [test] }
+  - key: summary
+    after: [fix]
+    value: "{{ steps.fix.text }} after {{ steps.fix.rounds }} rounds"
+```
+
+La vérification accepte la tentative quand `npm test` se termine avec le statut 0. Sinon, son statut de sortie et les 4 000 derniers caractères de stdout et stderr deviennent le retour du tour. La sortie de la commande est observée comme celle d’une tâche `command`.
+
+`conversation: continue` envoie les tours suivants dans la conversation de la tentative : `followUp` si vous le déclarez, sinon un message intégré qui contient le retour. Avec la valeur par défaut `conversation: new`, chaque tour démarre une nouvelle conversation ; le brief doit donc contenir `{{ loop.feedback }}`, sinon la validation le refuse.
+
+Pour confier la décision à un autre agent, remplacez la commande par `check: { agent: reviewer, brief: "Review the last commit: {{ loop.text }}" }`. Outpost demande au relecteur une réponse `{ done, feedback }`, dans une nouvelle conversation à chaque tour.
+
+| Valeur                | Disponible dans                       | Contenu                                      |
+| --------------------- | ------------------------------------- | -------------------------------------------- |
+| `{{ loop.round }}`    | Tentative, vérification et commande   | Numéro du tour, à partir de 1                |
+| `{{ loop.feedback }}` | `brief` et `followUp` de la tentative | Retour du tour refusé ; vide au premier tour |
+| `{{ loop.text }}`     | `brief` d’une vérification par agent  | Réponse finale de la tentative du tour       |
+
+`outputs.fix` contient le `text`, la `conversation` et la `value` de la dernière tentative, les `commits` de tous les tours et `rounds`. Quand le dernier tour est refusé, la tâche échoue avec un message qui se termine par son retour, limité à 2 000 caractères. L’événement `loop` de chaque tour refusé porte son retour, masqué par `workflow.redact`.
+
+`attempt.dispatch` accepte les [options de dispatch d’une tâche agent](../../reference/dispatchoptions/) sauf `continuation` ; une conversation poursuivie exige aussi une seule passe. `quotaResume` s’applique à la tentative et à une vérification par agent. Une boucle n’a pas de `retry` ; `timeoutMs` borne chaque tour. Avec un [checkpoint](../recipe-durability/), une exécution reprise vérifie une tentative sauvegardée sans la refaire. Poursuivre une conversation dans une nouvelle sandbox après une reprise exige un agent qui capture ses conversations.
+
 ## Régler l’exécution
 
 Ajoutez ce bloc à la racine d’une recette dont les tâches peuvent s’exécuter en parallèle. Les `options` d’une tâche peuvent aussi fixer retries et délais ; voir [TaskOptions](../../reference/taskoptions/) et [WorkflowOptions](../../reference/workflowoptions/).
@@ -115,7 +155,7 @@ workflow:
 
 Les commandes et agents ordinaires partagent le workspace configuré. Ordonnez-les avec `after` ; la validation refuse leur utilisation concurrente de ce workspace. Utilisez des tâches isolées pour les travaux indépendants.
 
-Continuez avec les [callbacks et boucles](../recipe-extensions/#déclarer-des-actions-locales), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
+Continuez avec les [callbacks et boucles par callbacks](../recipe-extensions/#déclarer-des-actions-locales), les [réponses structurées des agents](../recipe-harness/) ou les [checkpoints](../recipe-durability/).
 
 <!-- Retained section anchors for existing bookmarks. -->
 

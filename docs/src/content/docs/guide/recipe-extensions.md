@@ -48,7 +48,7 @@ export function summary(value: unknown) {
 
 Save both YAML files and `steps.ts` together. Run `npx outpost recipe validate --file recipe.yaml --config outpost.yaml`, then the same command with `run --json`. The `summarize.value` output contains `count: 2` and both paths.
 
-`loop` accepts `maxRounds`, `attempt` and `check`, through [defineLoopTask](../../reference/definelooptask/). Bind callbacks using `loop.options.attempt` and `loop.options.check`; attempt results become the step's JSON `value`, while the check receives the unwrapped result. Round history and usage are maintained by the existing scheduler. Loops do not accept ordinary retry, gate or interaction options.
+`loop` accepts `maxRounds`, `attempt` and `check`, through [defineLoopTask](../../reference/definelooptask/). Bind callbacks using `loop.options.attempt` and `loop.options.check`; attempt results become the step's JSON `value`, while the check receives the unwrapped result. The attempt also receives the previous round's unwrapped result as its third argument. Round history and usage are maintained by the existing scheduler. Loops do not accept ordinary retry, gate or interaction options. Both phases are callbacks, or both are recipe steps: for an agent attempt checked by a command or another agent, [declare the loop in the recipe](../recipe-workflows/#repeat-until-a-check-passes).
 
 `decision` accepts the provider, model, decision contract and truncation policy of [defineDecisionTask](../../reference/definedecisiontask/). A separate `state` expression supplies its structured context, and the result is available under `value`. No sandbox is allocated for a decision request.
 
