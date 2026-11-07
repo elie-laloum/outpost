@@ -408,8 +408,8 @@
     "Déclare une tâche qui exécute attempt puis check pendant au plus maxRounds tours, en transmettant le feedback de chaque check refusé à la tentative suivante. Chaque tour consomme une tentative du workflow et, avec un checkpoint, enregistre sa phase. La sortie est la valeur acceptée ; l’épuisement fait échouer la tâche avec LoopTaskExhausted et une exception d’un callback la fait échouer immédiatement."
   ],
   "LoopTaskExhausted": [
-    "Error recorded when the last permitted round fails verification. Inspect key, maxRounds and feedback through WorkflowResult.errors; resuming the same checkpoint does not reset the limit.",
-    "Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite."
+    "Error recorded when the last permitted round fails verification. Inspect key, maxRounds and feedback through WorkflowResult.errors; resuming the same checkpoint does not reset the limit. The message quotes the first and last 1,000 characters of the last feedback, which a workflow masks with its redact patterns before cutting it; the feedback property keeps the full text.",
+    "Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite. Le message cite les 1 000 premiers et 1 000 derniers caractères du dernier feedback, qu’un workflow masque avec ses motifs redact avant de le couper ; la propriété feedback garde le texte complet."
   ],
   "quotaFault": [
     "Return the message, resetAt and conversation of the first OutpostError with code quota in the error and up to seven wrapped causes, or undefined. Fallback agents and onQuota pauses use the same test. It does not wait or retry.",

@@ -6,6 +6,7 @@ import {
 } from "../../domain/configuration-diagnostic.ts";
 import { recipeTaskSourcePath } from "../../domain/recipe.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
+import { recipeStepUsesSharedWorkspace } from "../../domain/recipes/step-resources.ts";
 import type {
   FileWorkspaceSource,
   WorkspaceOutputOptions,
@@ -374,9 +375,7 @@ export function normalizeRecipeWorkspaceConfiguration(
       "Use kind git, directory or ephemeral; directory access is copy or mount.",
     );
   }
-  const needsSandbox = document.tasks.some(
-    (step) => step.command || step.agent,
-  );
+  const needsSandbox = document.tasks.some(recipeStepUsesSharedWorkspace);
   configurationInvariant(
     !needsSandbox || (source && configuration.sandbox),
     "Sandbox tasks require an explicit workspace source and sandbox",

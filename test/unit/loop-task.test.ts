@@ -12,15 +12,17 @@ import type { LoopTaskContext, WorkflowEvent } from "../../src/workflows.ts";
 test("loop feedback, dependency values, typed result and phase identities", async () => {
   const source = defineTask({ key: "source", perform: () => 10 });
   const seen: (string | undefined)[] = [];
+  const previous: unknown[] = [];
   const contexts: LoopTaskContext[] = [];
   const events: WorkflowEvent[] = [];
   const fix = defineLoopTask({
     key: "fix",
     after: [source],
     maxRounds: 3,
-    attempt(context, feedback) {
+    attempt(context, feedback, last) {
       contexts.push(context);
       seen.push(feedback);
+      previous.push(last);
       context.reportUsage({ input: 1, cached: 0, output: 2 });
       return context.value(source) + context.round;
     },
@@ -38,20 +40,23 @@ test("loop feedback, dependency values, typed result and phase identities", asyn
   result.unwrap();
   assert.equal(result.value(fix), 12);
   assert.deepEqual(seen, [undefined, "Try again"]);
+  assert.deepEqual(previous, [undefined, 11]);
   assert.equal(new Set(contexts.map((ctx) => ctx.idempotencyKey)).size, 4);
   assert.deepEqual(result.usage, {
     attempts: 3,
     tokens: { input: 6, cached: 0, output: 6 },
   });
   assert.deepEqual(
-    events.filter((e) => e.type === "loop").map((e) => [e.round, e.phase]),
+    events
+      .filter((e) => e.type === "loop")
+      .map((e) => [e.round, e.phase, e.feedback]),
     [
-      [1, "attempt"],
-      [1, "check"],
-      [1, "complete"],
-      [2, "attempt"],
-      [2, "check"],
-      [2, "complete"],
+      [1, "attempt", undefined],
+      [1, "check", undefined],
+      [1, "complete", "Try again"],
+      [2, "attempt", undefined],
+      [2, "check", undefined],
+      [2, "complete", undefined],
     ],
   );
   assert.equal(result.tasks[1]?.rounds?.length, 2);
@@ -78,7 +83,56 @@ test("exhaustion preserves feedback and blocks dependents", async () => {
   assert.equal(error.key, "fix");
   assert.equal(error.maxRounds, 2);
   assert.equal(error.feedback, "broken");
+  assert.equal(error.message, "Loop task fix exhausted its 2 rounds: broken");
   assert.equal(result.tasks[1]?.status, "skipped");
+});
+
+test("long feedback keeps its start and end in messages and events, redacted before it is cut", async () => {
+  const feedback = `${"x".repeat(990)}secret-token${"y".repeat(3_000)}\nfinal summary`;
+  const events: WorkflowEvent[] = [];
+  const fix = defineLoopTask({
+    key: "fix",
+    maxRounds: 1,
+    attempt: () => 1,
+    check: () => ({ done: false, feedback }),
+  });
+  const result = await defineWorkflow("bounded", [fix]).start({
+    redact: [/secret-token/g],
+    observe: (event) => events.push(event),
+  });
+  const error = result.errors[0];
+  assert.ok(error instanceof LoopTaskExhausted);
+  assert.equal(error.feedback, feedback);
+  const complete = events.find(
+    (event) => event.type === "loop" && event.phase === "complete",
+  );
+  assert.ok(complete?.feedback);
+  for (const excerpt of [error.message, complete.feedback]) {
+    assert.match(
+      excerpt,
+      /x+\[REDACTED\]\n… \[\d+ characters omitted\] …\ny+\nfinal summary$/,
+    );
+    assert.doesNotMatch(excerpt, /secret-t/);
+  }
+  assert.ok(complete.feedback.length < 2_100);
+  assert.equal(
+    result.tasks[0]?.rounds?.[0]?.check?.done === false &&
+      result.tasks[0].rounds[0].check.feedback,
+    feedback,
+  );
+});
+
+test("an empty final feedback keeps the short exhaustion message", async () => {
+  const fix = defineLoopTask({
+    key: "fix",
+    maxRounds: 1,
+    attempt: () => 1,
+    check: () => ({ done: false, feedback: "" }),
+  });
+  const result = await defineWorkflow("empty", [fix]).start();
+  const error = result.errors[0];
+  assert.ok(error instanceof LoopTaskExhausted);
+  assert.equal(error.message, "Loop task fix exhausted its 1 rounds");
 });
 
 test("definition validation and workflow-only execution", () => {

@@ -7,6 +7,13 @@ import { join } from "node:path";
 import { recipeCatalogCommand } from "../../src/cli/recipe-catalog.ts";
 import { downloadRecipeResource } from "../../src/infrastructure/recipe-download.ts";
 import { validateRecipeCatalog } from "../../src/domain/recipe-catalog.ts";
+import { defineRecipe } from "../../src/application/recipe.ts";
+import { createSandbox } from "../../src/application/sandbox.ts";
+import {
+  createScriptedAgent,
+  createMemorySandboxProvider,
+} from "../../src/testing.ts";
+import { repository } from "../helpers.ts";
 
 const source =
   "version: 2\nname: review\nrecipeVersion: '1.0.0'\ntasks: [{key: review, agent: reviewer, brief: Review}]\n";
@@ -148,4 +155,23 @@ test("catalogue integrity and source restrictions fail before writing a recipe",
     ),
     /404/,
   );
+});
+
+test("fix-and-check runs the project's test script with every supported runner", async (t) => {
+  const source = await readFile("recipes/fix-and-check.yaml", "utf8");
+  for (const runner of ["npm", "bun", "pnpm", "yarn"]) {
+    await using sandbox = await createSandbox({
+      repository: await repository(t),
+      sandboxProvider: createMemorySandboxProvider({
+        commands: [{ executable: runner, arguments: ["run", "test"] }],
+      }),
+      logging: false,
+    });
+    const result = await defineRecipe(source, {
+      sandbox,
+      inputs: { goal: "add a parser", runner },
+      agents: { coder: createScriptedAgent({ turns: [{ text: "Done" }] }) },
+    }).start();
+    result.unwrap();
+  }
 });

@@ -11,6 +11,10 @@ import { parseRecipe, parseRecipeYaml } from "../../infrastructure/recipe.ts";
 import { readRecipeFile } from "../../infrastructure/recipes/read.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { recipeRecord } from "../../domain/recipes/values.ts";
+import {
+  recipeAgentRoles,
+  recipeStepAgents,
+} from "../../domain/recipes/step-resources.ts";
 import { recipeTaskSourcePath } from "../../domain/recipe.ts";
 import { createRecipeRegistry } from "../../domain/recipes/component.ts";
 import { recipeJsonValidator } from "../../infrastructure/recipes/schema.ts";
@@ -129,15 +133,15 @@ export async function readRecipeProject(
     );
     const files =
       model.workspace.kind === "files" ? model.workspace.files : undefined;
-    for (const step of document.tasks) {
-      if (step.agent && !model.agents.includes(step.agent))
-        throw configurationError(
-          `Unknown recipe agent: ${step.agent}`,
-          [...recipeTaskSourcePath(document, step), "agent"],
-          "unknown-agent",
-          `Declare agents.${step.agent} in the execution configuration.`,
-        );
-    }
+    for (const step of document.tasks)
+      for (const { agent, path } of recipeStepAgents(step))
+        if (!model.agents.includes(agent))
+          throw configurationError(
+            `Unknown recipe agent: ${agent}`,
+            [...recipeTaskSourcePath(document, step), ...path],
+            "unknown-agent",
+            `Declare agents.${agent} in the execution configuration.`,
+          );
     const registry = createRecipeRegistry({
       components: [
         ...observationComponents,
@@ -214,13 +218,7 @@ export async function validateRecipeProject(
     version: project.document.version,
     configurationVersion: Number(project.configuration.version),
     tasks: project.document.tasks.map((task) => task.key),
-    agents: [
-      ...new Set(
-        project.document.tasks.flatMap((task) =>
-          task.agent ? [task.agent] : [],
-        ),
-      ),
-    ],
+    agents: recipeAgentRoles(project.document),
     extensions: [...project.graph.nodes.values()]
       .filter((node) => node.extension)
       .map((node) => node.name),

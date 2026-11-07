@@ -63,6 +63,8 @@ export interface RecipeWorkflowStepComponents {
   readonly options?: RecipeTaskSettings;
   readonly dispatch?: RecipeDispatchSettings;
   readonly loop?: RecipeLoopSettings;
+  /** Dispatch options of a declarative loop's agent attempt. */
+  readonly loopAttemptDispatch?: RecipeDispatchSettings;
   readonly decision?: RecipeDecisionSettings;
   readonly isolated?: RecipeIsolatedSettings;
   readonly call?: RecipeCallSettings;

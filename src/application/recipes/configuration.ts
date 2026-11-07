@@ -13,6 +13,7 @@ import { invariant } from "../../domain/errors.ts";
 import { resolveRecipeEnvironment } from "./configuration-model.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
+import { recipeAgentRoles } from "../../domain/recipes/step-resources.ts";
 
 function isProvider(value: unknown): value is SandboxProvider {
   return nativeRecipeGuards.sandboxProvider!(value);
@@ -60,9 +61,7 @@ export async function recipeExecutionConfiguration(
     if (!isAgent(agent)) throw new Error(`Invalid agent: ${role}`);
     agents[role] = agent;
   }
-  for (const role of new Set(
-    project.document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
-  )) {
+  for (const role of recipeAgentRoles(project.document)) {
     await preflightRecipeAgent(
       agents[role]!,
       repository,

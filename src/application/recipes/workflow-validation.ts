@@ -6,6 +6,7 @@ import { positive } from "../../domain/workflow/validation.ts";
 import { maxTimerMs } from "../../domain/workflow/retry.constants.ts";
 import { workflowAccounting } from "../../domain/workflow/budget.ts";
 import { validateQuotaPolicy } from "../../domain/workflow/quota-pause.ts";
+import { recipeStepUsesSharedWorkspace } from "../../domain/recipes/step-resources.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeWorkflowComponents } from "./workflow-components.types.ts";
 
@@ -58,7 +59,7 @@ export function validateRecipeWorkflowSettings(
         step.after.flatMap((key) => [key, ...(ancestors.get(key) ?? [])]),
       ),
     );
-  const shared = document.tasks.some((task) => task.command || task.agent);
+  const shared = document.tasks.some(recipeStepUsesSharedWorkspace);
   for (const step of document.tasks) {
     const isolated = components.steps[step.key]?.isolated;
     if (

@@ -9,6 +9,9 @@ import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { normalizeRecipe } from "./normalize.ts";
 import { compileRecipeStep } from "./compile-step.ts";
 import { recipeTextRenderer } from "./rendering.ts";
+import { recipeStepUsesSharedWorkspace } from "../../domain/recipes/step-resources.ts";
+import { recipeLoopValues } from "../../domain/recipes/loop.constants.ts";
+import type { RecipeExpressionContext } from "../../domain/recipes/expressions.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type {
   Task,
@@ -22,7 +25,7 @@ import type {
 } from "./workflow-components.types.ts";
 
 export function recipeHasSharedSandbox(document: RecipeDocument): boolean {
-  return document.tasks.some((step) => step.command || step.agent);
+  return document.tasks.some(recipeStepUsesSharedWorkspace);
 }
 
 export function validateRecipeConcurrency(
@@ -38,7 +41,7 @@ export function validateRecipeConcurrency(
         step.after.flatMap((key) => [key, ...(ancestors.get(key) ?? [])]),
       ),
     );
-  const shared = document.tasks.filter((step) => step.command || step.agent);
+  const shared = document.tasks.filter(recipeStepUsesSharedWorkspace);
   for (const [index, left] of shared.entries())
     for (const right of shared.slice(index + 1))
       if (!ancestors.get(right.key)?.has(left.key))
@@ -64,7 +67,10 @@ export function bindRecipeWorkflow(
     return bindings.sandbox;
   };
   const keys = program.tasks.map((step) => step.key);
-  const contextFor = (context: TaskContext) => ({
+  const contextFor = (
+    context: TaskContext,
+    loop?: RecipeExpressionContext["loop"],
+  ): RecipeExpressionContext => ({
     inputs,
     steps: keys,
     output(key: string) {
@@ -72,10 +78,18 @@ export function bindRecipeWorkflow(
       if (!task) throw new Error(`Unknown recipe dependency: ${key}`);
       return context.value(task);
     },
+    ...(loop ? { loop } : {}),
   });
-  const expression = createRecipeExpressionEvaluator(Object.keys(inputs), keys);
-  const evaluate = (value: unknown, context: TaskContext) =>
-    expression(value, contextFor(context));
+  const expression = createRecipeExpressionEvaluator(
+    Object.keys(inputs),
+    keys,
+    [...new Set(Object.values(recipeLoopValues).flat())],
+  );
+  const evaluate = (
+    value: unknown,
+    context: TaskContext,
+    loop?: RecipeExpressionContext["loop"],
+  ) => expression(value, contextFor(context, loop));
   const text = recipeTextRenderer(program.version, contextFor, evaluate);
   for (const step of program.tasks) {
     const after = step.after.map((key) => {

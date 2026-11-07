@@ -14,55 +14,19 @@ import {
   recipeCommandFields,
 } from "./recipe-templates.ts";
 import type { RecipeSourcePath } from "./recipes/expressions.types.ts";
-import { SECRET_VARIABLE_NAME } from "./secrets.constants.ts";
-
-function object(value: unknown, path: string): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw configurationError(`${path} must be a mapping`, path);
-  return Object.fromEntries(Object.entries(value));
-}
-
-function fields(
-  value: unknown,
-  path: string,
-  keys: readonly string[],
-): Record<string, unknown> {
-  const record = object(value, path);
-  for (const key of Object.keys(record))
-    if (!keys.includes(key))
-      throw configurationError(
-        `Unknown recipe field: ${path}.${key}`,
-        `${path}.${key}`,
-        "unknown-field",
-      );
-  return record;
-}
-
-function text(value: unknown, path: string): string {
-  if (typeof value !== "string" || !value.trim())
-    throw configurationError(`${path} must be a nonempty string`, path);
-  return value;
-}
-
-function strings(value: unknown, path: string): string[] {
-  if (!Array.isArray(value))
-    throw configurationError(`${path} must be a list of strings`, path);
-  return value.map((item, index) => {
-    if (typeof item !== "string")
-      throw configurationError(`${path}[${index}] must be a string`, path);
-    return item;
-  });
-}
-
-function integer(value: unknown, path: string, minimum = 1): number {
-  if (
-    typeof value !== "number" ||
-    !Number.isSafeInteger(value) ||
-    value < minimum
-  )
-    throw configurationError(`${path} must be an integer >= ${minimum}`, path);
-  return value;
-}
+import {
+  recipeCommand,
+  recipeFields as fields,
+  recipeInteger as integer,
+  recipeMapping as object,
+  recipeStrings as strings,
+  recipeText as text,
+} from "./recipes/document-fields.ts";
+import {
+  declarativeRecipeLoop,
+  parseRecipeLoop,
+  validateRecipeLoopExpressions,
+} from "./recipes/loop.ts";
 
 function step(value: unknown, index: number, version: unknown): RecipeStep {
   const path = `tasks[${index}]`;
@@ -113,9 +77,13 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
       `${path}.quotaResume must be continue or restart`,
       path,
     );
-  if (item.quotaResume !== undefined && !item.agent && !item.isolated)
+  const loop =
+    version === 3 && item.loop !== undefined
+      ? parseRecipeLoop(item.loop, `${path}.loop`)
+      : undefined;
+  if (item.quotaResume !== undefined && !item.agent && !item.isolated && !loop)
     throw configurationError(
-      `${path}.quotaResume requires an agent or isolated task`,
+      `${path}.quotaResume requires an agent, isolated or declarative loop task`,
       path,
     );
   if (item.data !== undefined && !item.artifact)
@@ -196,54 +164,9 @@ function step(value: unknown, index: number, version: unknown): RecipeStep {
         `${path} must select either command or agent with brief`,
         path,
       );
-    const command = fields(item.command, `${path}.command`, recipeKeys.command);
-    const variables =
-      command.variables === undefined
-        ? undefined
-        : object(command.variables, `${path}.command.variables`);
-    const environment =
-      variables === undefined
-        ? undefined
-        : Object.fromEntries(
-            Object.entries(variables).map(([name, value]) => {
-              if (!SECRET_VARIABLE_NAME.test(name) || typeof value !== "string")
-                throw configurationError(
-                  `${path}.command.variables requires variable names and string values`,
-                  path,
-                );
-              return [name, value];
-            }),
-          );
-    if (command.stdin !== undefined && typeof command.stdin !== "string")
-      throw configurationError(`${path}.command.stdin must be a string`, path);
     return {
       ...common,
-      command: {
-        executable: text(command.executable, `${path}.command.executable`),
-        ...(command.arguments === undefined
-          ? {}
-          : {
-              arguments: strings(
-                command.arguments,
-                `${path}.command.arguments`,
-              ),
-            }),
-        ...(command.stdin === undefined ? {} : { stdin: command.stdin }),
-        ...(command.directory === undefined
-          ? {}
-          : {
-              directory: text(command.directory, `${path}.command.directory`),
-            }),
-        ...(environment === undefined ? {} : { variables: environment }),
-        ...(command.deadlineMs === undefined
-          ? {}
-          : {
-              deadlineMs: integer(
-                command.deadlineMs,
-                `${path}.command.deadlineMs`,
-              ),
-            }),
-      },
+      command: recipeCommand(item.command, `${path}.command`),
     };
   }
   return {
@@ -383,6 +306,14 @@ export function validateRecipe(value: unknown): RecipeDocument {
               ),
             );
         }
+      const loop = declarativeRecipeLoop(step);
+      if (loop)
+        validateRecipeLoopExpressions(
+          document,
+          step,
+          loop,
+          at("loop").sourcePath,
+        );
       if (step.when !== undefined)
         validateRecipeCondition(step.when, at("when"));
       for (const field of ["value", "arguments", "state", "data"] as const)

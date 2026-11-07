@@ -35,9 +35,13 @@ for (const interrupted of ["attempt", "check"]) {
       const fix = defineLoopTask({
         key: "fix",
         maxRounds: 3,
-        attempt(ctx, feedback) {
+        attempt(ctx, feedback, previous) {
           attempts.push(ctx.round);
           assert.equal(feedback, ctx.round === 1 ? undefined : "feedback");
+          assert.deepEqual(
+            previous,
+            ctx.round === 1 ? undefined : { round: ctx.round - 1 },
+          );
           if (ctx.phase === interrupted) keys.push(ctx.idempotencyKey);
           ctx.reportUsage({ input: 1, cached: 0, output: 1 });
           if (interrupt && ctx.round === 2 && interrupted === "attempt")

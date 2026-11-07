@@ -3,6 +3,11 @@ import {
   ConfigurationError,
 } from "../../domain/configuration-diagnostic.ts";
 import { planRecipeAgents, recipeAgentDiagnostics } from "./agent-plan.ts";
+import { recipeStepAgents } from "../../domain/recipes/step-resources.ts";
+import {
+  declarativeRecipeLoop,
+  recipeLoopDispatchComponent,
+} from "../../domain/recipes/loop.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 
@@ -36,8 +41,10 @@ export function validateFileRecipeCapabilities(
     for (const dependency of node.dependencies) visit(dependency);
   };
   for (const step of document.tasks) {
-    if (step.agent) visit(`agents.${step.agent}`);
+    for (const { agent } of recipeStepAgents(step)) visit(`agents.${agent}`);
     if (step.dispatch) visit(`tasks.${step.key}.dispatch`);
+    if (declarativeRecipeLoop(step)?.attempt.dispatch)
+      visit(recipeLoopDispatchComponent(step.key));
     if (step.isolated) visit(`tasks.${step.key}.isolated`);
     if (step.interactive) visit(`tasks.${step.key}.interactive`);
   }

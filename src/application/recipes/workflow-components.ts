@@ -6,6 +6,11 @@ import { dispatchCandidates } from "../../domain/fallback-agent.ts";
 import { recipeObject } from "../../domain/recipes/values.ts";
 import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
 import { resolveRecipeOptions } from "./native.ts";
+import {
+  declarativeRecipeLoop,
+  recipeLoopDispatchComponent,
+  validateRecipeLoopDispatch,
+} from "../../domain/recipes/loop.ts";
 import type { RecipeComponentDefinition } from "../../domain/recipes/component.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentScope } from "./components.types.ts";
@@ -59,6 +64,7 @@ export async function prepareRecipeWorkflow(
       "Recipe checkpoint replay must be authorized with resume({ retryIncomplete: true }) or --retry-incomplete",
     );
   for (const step of document.tasks) {
+    const loop = declarativeRecipeLoop(step);
     const values: Record<string, unknown> = {};
     for (const [field, kind] of Object.entries({
       speculation: "speculation",
@@ -74,14 +80,26 @@ export async function prepareRecipeWorkflow(
       call: "call",
     })) {
       if (!Object.hasOwn(step, field)) continue;
+      if (field === "loop" && loop) continue;
       values[field] = await scope.resolve(
         `tasks.${step.key}.${field}`,
         `${kind}Options`,
       );
     }
+    if (loop?.attempt.dispatch)
+      values.loopAttemptDispatch = await scope.resolve(
+        recipeLoopDispatchComponent(step.key),
+        "dispatchOptions",
+      );
     if (!stepOptions(values))
       throw new Error(`Invalid recipe task: ${step.key}`);
     const prepared: RecipeWorkflowStepComponents = values;
+    if (loop && prepared.loopAttemptDispatch)
+      validateRecipeLoopDispatch(
+        loop.attempt.conversation,
+        prepared.loopAttemptDispatch,
+        recipeLoopDispatchComponent(step.key),
+      );
     if (
       prepared.isolated &&
       "brief" in prepared.isolated &&

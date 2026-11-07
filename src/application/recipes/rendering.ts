@@ -33,8 +33,8 @@ export function recipeTextRenderer(
           return field;
         });
     case 3:
-      return (text, context) => {
-        const result = evaluate(text, context);
+      return (text, context, loop) => {
+        const result = evaluate(text, context, loop);
         if (typeof result !== "string")
           throw new Error("Recipe text requires a string");
         return result;

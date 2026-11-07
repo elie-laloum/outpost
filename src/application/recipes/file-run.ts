@@ -1,4 +1,5 @@
 import { recipeJson } from "../../domain/recipes/expressions.ts";
+import { recipeAgentRoles } from "../../domain/recipes/step-resources.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
 import type { SandboxProvider } from "../../domain/sandbox.types.ts";
@@ -91,9 +92,7 @@ export async function runFileRecipe(
     invariant(isAgent(agent), `Invalid recipe agent: ${role}`);
     agents[role] = agent;
   }
-  for (const role of new Set(
-    project.document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
-  )) {
+  for (const role of recipeAgentRoles(project.document)) {
     const agent = agents[role];
     invariant(agent, `Missing recipe agent: ${role}`);
     for (const candidate of dispatchCandidates(agent))

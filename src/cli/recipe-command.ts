@@ -16,6 +16,7 @@ import type {
   MixedRecipeBindings,
 } from "../application/recipe.types.ts";
 import type { RecipeDocument } from "../domain/recipe.types.ts";
+import { recipeAgentRoles } from "../domain/recipes/step-resources.ts";
 import { createSandboxForOptions } from "../application/sandbox.ts";
 import { readRecipeInputs } from "./recipe-inputs.ts";
 import { initializeRecipe } from "./recipe-init.ts";
@@ -87,9 +88,9 @@ function requireAgents(
   document: RecipeDocument,
   agents: RecipeBindings["agents"],
 ): void {
-  for (const step of document.tasks)
-    if (step.agent && !Object.hasOwn(agents ?? {}, step.agent))
-      throw new Error(`Unknown recipe agent: ${step.agent}`);
+  for (const agent of recipeAgentRoles(document))
+    if (!Object.hasOwn(agents ?? {}, agent))
+      throw new Error(`Unknown recipe agent: ${agent}`);
 }
 
 async function readRecipe(file: string): Promise<string> {
@@ -172,11 +173,7 @@ export async function recipeCommand({
       description: document.description,
       recipeVersion: document.recipeVersion,
       inputs: document.inputs,
-      agents: [
-        ...new Set(
-          document.tasks.flatMap((task) => (task.agent ? [task.agent] : [])),
-        ),
-      ],
+      agents: recipeAgentRoles(document),
       tasks: document.tasks.map((task) => task.key),
     };
     process.stdout.write(

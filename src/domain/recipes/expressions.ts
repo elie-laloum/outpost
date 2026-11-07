@@ -20,6 +20,8 @@ import type {
   RecipeExpressionValidation,
   RecipeReferencePath,
   RecipeSourcePath,
+  RecipeTextInterpolation,
+  RecipeTextReference,
   RecipeValueReference,
 } from "./expressions.types.ts";
 
@@ -113,6 +115,30 @@ function valueReference(
     : { kind: "step-value", step: key, path, sourcePath };
 }
 
+function textReference(
+  reference: RecipeTextReference,
+  sourcePath: RecipeSourcePath,
+): RecipeTextInterpolation["reference"] {
+  switch (reference.kind) {
+    case "inputs":
+      return {
+        kind: "input-value",
+        input: reference.key,
+        path: reference.path,
+        sourcePath,
+      };
+    case "steps":
+      return {
+        kind: "step-value",
+        step: reference.key,
+        path: reference.path,
+        sourcePath,
+      };
+    case "loop":
+      return { kind: "loop-value", name: reference.key, sourcePath };
+  }
+}
+
 /** Parses an expression once into located nodes; validation and evaluation share the result. */
 export function compileRecipeExpression(
   value: unknown,
@@ -121,23 +147,10 @@ export function compileRecipeExpression(
 ): RecipeExpressionNode {
   if (typeof value === "string") {
     const interpolations = located(sourcePath, () =>
-      recipeTextReferences(value, scope.inputs, scope.steps),
+      recipeTextReferences(value, scope.inputs, scope.steps, scope.loop),
     ).map((reference) => ({
       source: reference.source,
-      reference:
-        reference.kind === "inputs"
-          ? ({
-              kind: "input-value",
-              input: reference.key,
-              path: reference.path,
-              sourcePath,
-            } as const)
-          : ({
-              kind: "step-value",
-              step: reference.key,
-              path: reference.path,
-              sourcePath,
-            } as const),
+      reference: textReference(reference, sourcePath),
     }));
     return interpolations.length
       ? { kind: "text", text: value, interpolations, sourcePath }
@@ -219,6 +232,12 @@ export function evaluateRecipeExpression(
       return select(context.inputs[node.input], node.path);
     case "step-value":
       return select(context.output(node.step), node.path);
+    case "loop-value": {
+      const value = context.loop?.[node.name];
+      if (value === undefined)
+        throw new Error(`Loop value ${node.name} is unavailable here`);
+      return value;
+    }
     case "select":
       return select(evaluateRecipeExpression(node.from, context), node.path);
     case "text": {
@@ -244,7 +263,11 @@ export function evaluateRecipeExpression(
 }
 
 function scopeOf(context: RecipeExpressionContext): RecipeExpressionScope {
-  return { inputs: Object.keys(context.inputs), steps: context.steps };
+  return {
+    inputs: Object.keys(context.inputs),
+    steps: context.steps,
+    ...(context.loop ? { loop: Object.keys(context.loop) } : {}),
+  };
 }
 
 export function recipeExpression(
@@ -260,12 +283,13 @@ export function recipeExpression(
 export function createRecipeExpressionEvaluator(
   inputs: readonly string[],
   steps: readonly string[],
+  loop: readonly string[] = [],
 ) {
   const compiled = new Map<unknown, RecipeExpressionNode>();
   return (value: unknown, context: RecipeExpressionContext): WorkflowJson => {
     let expression = compiled.get(value);
     if (!expression) {
-      expression = compileRecipeExpression(value, { inputs, steps });
+      expression = compileRecipeExpression(value, { inputs, steps, loop });
       compiled.set(value, expression);
     }
     return evaluateRecipeExpression(expression, context);
@@ -282,7 +306,10 @@ function* expressionReferences(
       return;
     case "text":
       for (const { reference } of node.interpolations)
-        yield { reference, interpolated: true };
+        if (reference.kind !== "loop-value")
+          yield { reference, interpolated: true };
+      return;
+    case "loop-value":
       return;
     case "select":
       yield* expressionReferences(node.from);
@@ -324,11 +351,13 @@ function* conditionExpressions(
 function documentScope({
   document,
   step,
+  loop,
 }: RecipeExpressionValidation): RecipeExpressionScope {
   return {
     inputs: Object.keys(document.inputs),
     steps: document.tasks.map((task) => task.key),
     label: step.key,
+    ...(loop ? { loop } : {}),
   };
 }
 

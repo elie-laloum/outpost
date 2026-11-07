@@ -1,8 +1,11 @@
 import { recipeAction } from "../../domain/recipes/actions.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
+import { declarativeRecipeLoop } from "../../domain/recipes/loop.ts";
+import type { RecipeDeclarativeLoop } from "../../domain/recipes/loop.types.ts";
 import type {
   NormalizedRecipe,
   NormalizedRecipeStep,
+  NormalizedRecipeStepBase,
 } from "./normalized.types.ts";
 import type {
   RecipeWorkflowComponents,
@@ -81,7 +84,10 @@ function normalizeStep(
           "Recipe call components require createRecipeRuntime",
         ),
       };
-    case "loop":
+    case "loop": {
+      const loop = declarativeRecipeLoop(step);
+      if (loop)
+        return normalizeDeclarativeLoop(common, quota, loop, configuration);
       return {
         ...common,
         kind,
@@ -90,6 +96,7 @@ function normalizeStep(
           "Recipe loop components require createRecipeRuntime",
         ),
       };
+    }
     case "decision":
       return {
         ...common,
@@ -160,6 +167,25 @@ function normalizeStep(
     default:
       return unreachableRecipeStep(kind);
   }
+}
+
+function normalizeDeclarativeLoop(
+  common: NormalizedRecipeStepBase,
+  quota: Pick<RecipeStep, "quotaResume">,
+  loop: RecipeDeclarativeLoop,
+  configuration: RecipeWorkflowStepComponents,
+): NormalizedRecipeStep {
+  if (loop.attempt.dispatch && !configuration.loopAttemptDispatch)
+    throw new Error("Recipe dispatch components require createRecipeRuntime");
+  return {
+    ...common,
+    kind: "declarative-loop",
+    ...quota,
+    loop,
+    ...(configuration.loopAttemptDispatch
+      ? { dispatch: configuration.loopAttemptDispatch }
+      : {}),
+  };
 }
 
 export function unreachableRecipeStep(value: never): never {

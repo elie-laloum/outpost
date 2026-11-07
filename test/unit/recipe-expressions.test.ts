@@ -6,6 +6,7 @@ import {
   validateRecipeExpression,
 } from "../../src/domain/recipes/expressions.ts";
 import { parseRecipe } from "../../src/infrastructure/recipe.ts";
+import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 
 test("recipe comparisons preserve JSON types, existence and single-pass text", () => {
   const context = {
@@ -187,4 +188,59 @@ test("expression validation errors point at the task in source order", async () 
         return true;
       },
     );
+});
+
+test("loop values interpolate only where a loop field provides them", () => {
+  const document = parseRecipe(
+    "version: 3\nname: check\ninputs:\n  goal: { type: string, description: A goal }\ntasks:\n  - key: first\n    value: 1\n",
+  );
+  const step = document.tasks[0]!;
+  validateRecipeExpression("{{ inputs.goal }} {{ loop.feedback }}", {
+    document,
+    step,
+    loop: ["round", "feedback"],
+  });
+  assert.throws(
+    () =>
+      validateRecipeExpression("{{ loop.feedback }}", {
+        document,
+        step,
+        sourcePath: ["tasks", 0, "value"],
+      }),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      /only available inside a loop attempt or check/.test(error.message) &&
+      error.diagnostic.path.join(".") === "tasks.0.value",
+  );
+  assert.throws(
+    () =>
+      validateRecipeExpression("{{ loop.text }}", {
+        document,
+        step,
+        loop: ["round", "feedback"],
+      }),
+    /not available here; use \{\{ loop.round \}\} or \{\{ loop.feedback \}\}/,
+  );
+  const context = {
+    steps: [],
+    inputs: { goal: "ship" },
+    output: () => undefined,
+    loop: { round: 2, feedback: "tests fail" },
+  };
+  assert.equal(
+    recipeExpression(
+      "{{ inputs.goal }} #{{ loop.round }}: {{ loop.feedback }}",
+      context,
+    ),
+    "ship #2: tests fail",
+  );
+  assert.throws(
+    () =>
+      recipeExpression("{{ loop.feedback }}", {
+        steps: [],
+        inputs: {},
+        output: () => undefined,
+      }),
+    /only available inside a loop/,
+  );
 });

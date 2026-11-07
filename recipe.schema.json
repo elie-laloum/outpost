@@ -37623,6 +37623,409 @@
               },
               "required": ["maxRounds", "attempt", "check"],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["maxRounds", "attempt", "check"],
+              "properties": {
+                "maxRounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "attempt": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["agent", "brief"],
+                  "properties": {
+                    "agent": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    },
+                    "brief": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    },
+                    "conversation": {
+                      "enum": ["new", "continue"]
+                    },
+                    "followUp": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    },
+                    "dispatch": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": ["$ref"],
+                          "properties": {
+                            "$ref": {
+                              "type": "string",
+                              "pattern": "\\S"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "continuation": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "fork": {
+                                  "anyOf": [
+                                    {
+                                      "const": false
+                                    },
+                                    {
+                                      "const": true
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": ["id"],
+                              "additionalProperties": false
+                            },
+                            "runId": {
+                              "type": "string"
+                            },
+                            "watchdog": {
+                              "type": "object",
+                              "properties": {
+                                "repetition": {
+                                  "type": "object",
+                                  "properties": {
+                                    "window": {
+                                      "type": "number"
+                                    },
+                                    "maxRepeats": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": ["window", "maxRepeats"],
+                                  "additionalProperties": false
+                                },
+                                "onStuck": {
+                                  "anyOf": [
+                                    {
+                                      "const": "warn"
+                                    },
+                                    {
+                                      "const": "stop"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "instruction": {
+                                          "type": "string"
+                                        },
+                                        "maxInterventions": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "required": ["instruction"],
+                                      "additionalProperties": false
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": ["repetition", "onStuck"],
+                              "additionalProperties": false
+                            },
+                            "prices": {
+                              "type": "object",
+                              "properties": {
+                                "currency": {
+                                  "anyOf": [
+                                    {
+                                      "const": "EUR"
+                                    },
+                                    {
+                                      "const": "USD"
+                                    }
+                                  ]
+                                },
+                                "models": {
+                                  "type": "object",
+                                  "properties": {},
+                                  "additionalProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                      "input": {
+                                        "type": "number"
+                                      },
+                                      "output": {
+                                        "type": "number"
+                                      },
+                                      "cached": {
+                                        "type": "number"
+                                      },
+                                      "cacheCreated": {
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": ["input", "output"],
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "required": ["currency", "models"],
+                              "additionalProperties": false
+                            },
+                            "redact": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "pattern": {
+                                    "type": "string"
+                                  },
+                                  "flags": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": ["pattern"],
+                                "additionalProperties": false
+                              }
+                            },
+                            "logging": {
+                              "anyOf": [
+                                {
+                                  "const": false
+                                },
+                                {
+                                  "const": "stdout"
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "transporter": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "required": ["$ref"],
+                                          "properties": {
+                                            "$ref": {
+                                              "type": "string",
+                                              "pattern": "\\S"
+                                            }
+                                          },
+                                          "additionalProperties": false
+                                        },
+                                        {
+                                          "$ref": "#/$defs/transport"
+                                        }
+                                      ]
+                                    },
+                                    "verbose": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
+                                    },
+                                    "replayable": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              ]
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "passes": {
+                              "type": "number"
+                            },
+                            "until": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              ]
+                            },
+                            "idleMs": {
+                              "type": "number"
+                            },
+                            "idleWarningMs": {
+                              "type": "number"
+                            },
+                            "settleMs": {
+                              "type": "number"
+                            },
+                            "deadlineMs": {
+                              "type": "number"
+                            },
+                            "expansionMs": {
+                              "type": "number"
+                            },
+                            "steering": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "$ref": "#/$defs/steering"
+                                }
+                              ]
+                            },
+                            "response": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "$ref": "#/$defs/response"
+                                }
+                              ]
+                            },
+                            "telemetry": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              ]
+                            },
+                            "observe": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              ]
+                            },
+                            "warn": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              ]
+                            },
+                            "diagnostic": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "required": ["$ref"],
+                                  "properties": {
+                                    "$ref": {
+                                      "type": "string",
+                                      "pattern": "\\S"
+                                    }
+                                  },
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "if": {
+                    "required": ["conversation"],
+                    "properties": {
+                      "conversation": {
+                        "const": "continue"
+                      }
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["followUp"]
+                    }
+                  }
+                },
+                "check": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["command"],
+                      "properties": {
+                        "command": {
+                          "$ref": "#/$defs/command"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["agent", "brief"],
+                      "properties": {
+                        "agent": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        },
+                        "brief": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
             }
           ]
         },
@@ -40242,6 +40645,19 @@
                 },
                 {
                   "required": ["isolated"]
+                },
+                {
+                  "required": ["loop"],
+                  "properties": {
+                    "loop": {
+                      "required": ["attempt"],
+                      "properties": {
+                        "attempt": {
+                          "required": ["agent"]
+                        }
+                      }
+                    }
+                  }
                 }
               ]
             }

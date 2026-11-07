@@ -7,7 +7,7 @@ Après une [première exécution](../yaml-recipes/), réutilisez une recette d�
 
 ## Trouver et télécharger des recettes
 
-Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `queued-review`, `review`, `review-change`, `review-and-approve` et `update-docs`. Configurez un [workspace Git](../recipe-workspaces/) pour ces recettes, puis listez-les et copiez-en une dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
+Le paquet inclut le catalogue officiel versionné dans Git : `fix-and-check`, `fix-until-green`, `queued-review`, `review`, `review-change`, `review-and-approve` et `update-docs`. Configurez un [workspace Git](../recipe-workspaces/) pour ces recettes, puis listez-les et copiez-en une dans votre projet. Le téléchargement n’exécute aucun code et n’écrase aucun fichier existant. Gardez la configuration locale séparée et associez les rôles d’agents requis avant l’exécution.
 
 ```sh
 npx outpost recipe list

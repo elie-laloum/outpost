@@ -138,10 +138,8 @@ for (const locale of ["", "fr/"]) {
 
   test(`${locale}workflow examples validate typed inputs and separate branches`, async (t) => {
     const [, configuration] = await blocks("yaml-recipes", locale);
-    const [recipe, isolated, isolatedConfiguration] = await blocks(
-      "recipe-workflows",
-      locale,
-    );
+    const workflowBlocks = await blocks("recipe-workflows", locale);
+    const [recipe, isolated, isolatedConfiguration] = workflowBlocks;
     const files = await project(t, recipe.source, configuration.source);
     const { stdout } = await command(
       files,
@@ -160,6 +158,14 @@ for (const locale of ["", "fr/"]) {
       command(files, "run", "--input", 'changes={"files":[42]}', "--json"),
     );
     await project(t, isolated.source, isolatedConfiguration.source);
+    const loop = workflowBlocks.find(
+      (block) => block.title === "recipe.yaml — loop",
+    );
+    assert.ok(loop, "the loop example is present");
+    const validation = await validateRecipeProject(
+      await project(t, loop.source, isolatedConfiguration.source),
+    );
+    assert.deepEqual(validation.agents, ["coder"]);
   });
 
   test(`${locale}durability and services examples preserve a pending approval`, async (t) => {

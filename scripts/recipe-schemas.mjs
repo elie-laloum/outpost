@@ -422,6 +422,55 @@ for (const [field, kind] of Object.entries({
       shapeOf(nativeRecipeSchemas[`${kind}.options`], `${kind}.options`),
     ],
   };
+// A declarative loop runs an agent attempt and a command or agent check in the shared workspace.
+taskV3.properties.loop.anyOf.push({
+  type: "object",
+  additionalProperties: false,
+  required: ["maxRounds", "attempt", "check"],
+  properties: {
+    maxRounds: {
+      type: "integer",
+      minimum: 1,
+      maximum: Number.MAX_SAFE_INTEGER,
+    },
+    attempt: {
+      type: "object",
+      additionalProperties: false,
+      required: ["agent", "brief"],
+      properties: {
+        agent: { type: "string", pattern: "\\S" },
+        brief: { type: "string", pattern: "\\S" },
+        conversation: { enum: ["new", "continue"] },
+        followUp: { type: "string", pattern: "\\S" },
+        dispatch: taskV3.properties.dispatch,
+      },
+      if: {
+        required: ["conversation"],
+        properties: { conversation: { const: "continue" } },
+      },
+      else: { not: { required: ["followUp"] } },
+    },
+    check: {
+      oneOf: [
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["command"],
+          properties: { command: { $ref: "#/$defs/command" } },
+        },
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["agent", "brief"],
+          properties: {
+            agent: { type: "string", pattern: "\\S" },
+            brief: { type: "string", pattern: "\\S" },
+          },
+        },
+      ],
+    },
+  },
+});
 taskV3.properties.call = clean(
   nativeRecipeSchemas["call.options"].properties.perform,
 );
@@ -458,7 +507,21 @@ taskV3.allOf = [
   },
   {
     if: {
-      not: { anyOf: [{ required: ["agent"] }, { required: ["isolated"] }] },
+      not: {
+        anyOf: [
+          { required: ["agent"] },
+          { required: ["isolated"] },
+          {
+            required: ["loop"],
+            properties: {
+              loop: {
+                required: ["attempt"],
+                properties: { attempt: { required: ["agent"] } },
+              },
+            },
+          },
+        ],
+      },
     },
     then: { not: { required: ["quotaResume"] } },
   },

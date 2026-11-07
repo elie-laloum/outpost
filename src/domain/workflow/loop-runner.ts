@@ -2,7 +2,7 @@ import { createDeadline } from "../deadline.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { startTaskAttempt } from "./task-state.ts";
 import { OutpostError } from "../errors.ts";
-import { LoopTaskExhausted } from "./loop-task.ts";
+import { LoopTaskExhausted, loopFeedbackExcerpt } from "./loop-task.ts";
 import { validateLoopCheck } from "./loop-validation.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 import type {
@@ -18,6 +18,13 @@ export async function runLoopTask(
 ): Promise<unknown> {
   const state = runtime.record(item);
   let rounds = state.rounds ?? Object.freeze([]);
+  let latestRound = 0;
+  let latestResult: unknown;
+  const previousResult = (round: number): unknown => {
+    if (latestRound > 0 && latestRound === round - 1) return latestResult;
+    const output = rounds.find((value) => value.round === round - 1)?.output;
+    return output?.kind === "json" ? structuredClone(output.value) : undefined;
+  };
   async function save(entry: LoopRoundRecord): Promise<void> {
     rounds = Object.freeze([
       ...rounds.filter((value) => value.round !== entry.round),
@@ -30,6 +37,13 @@ export async function runLoopTask(
       attempt: state.attempts,
       round: entry.round,
       phase: entry.phase,
+      ...(entry.check?.done === false
+        ? {
+            feedback: loopFeedbackExcerpt(
+              runtime.observation.redact(entry.check.feedback),
+            ),
+          }
+        : {}),
     });
     await runtime.persist();
   }
@@ -38,12 +52,15 @@ export async function runLoopTask(
     const last = rounds.at(-1);
     if (last?.check?.done)
       return last.output?.kind === "json" ? last.output.value : undefined;
-    if (last?.phase === "complete" && last.round === definition.maxRounds)
+    if (last?.phase === "complete" && last.round === definition.maxRounds) {
+      const feedback = last.check?.done === false ? last.check.feedback : "";
       throw new LoopTaskExhausted(
         item.key,
         definition.maxRounds,
-        last.check?.done === false ? last.check.feedback : "",
+        feedback,
+        runtime.observation.redact(feedback),
       );
+    }
     const entry: LoopRoundRecord =
       last && last.phase !== "complete"
         ? last
@@ -62,8 +79,10 @@ export async function runLoopTask(
     });
     const { signal } = deadline;
     const base = runtime.context(item, state.attempts, signal);
+    // A quota pause belongs to the phase it interrupted, which the round resumes first.
+    const { quota: _paused, ...unpaused } = base;
     const context = (phase: LoopTaskContext["phase"]): LoopTaskContext => ({
-      ...base,
+      ...(phase === entry.phase ? base : unpaused),
       round: entry.round,
       phase,
       idempotencyKey: `${base.idempotencyKey}:round:${entry.round}:${phase}`,
@@ -79,6 +98,7 @@ export async function runLoopTask(
         result = await definition.attempt(
           context("attempt"),
           previous?.done === false ? previous.feedback : undefined,
+          previousResult(entry.round),
         );
         signal.throwIfAborted();
         const output = runtime.options.checkpoint
@@ -90,6 +110,8 @@ export async function runLoopTask(
           ...(output ? { output } : {}),
         });
       }
+      latestRound = entry.round;
+      latestResult = result;
       signal.throwIfAborted();
       const checked = await definition.check(context("check"), result);
       signal.throwIfAborted();

@@ -2,6 +2,7 @@ import { defineTask } from "../../domain/workflow.ts";
 import { defineLoopTask } from "../../domain/workflow/loop-task.ts";
 import { defineDecisionTask } from "../decision-task.ts";
 import { recipeJson } from "../../domain/recipes/expressions.ts";
+import { recipeObject } from "../../domain/recipes/values.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { DecisionState } from "../../domain/decision.types.ts";
 import type { RecipeCompilationContext } from "./compilation.types.ts";
@@ -46,8 +47,14 @@ export function compileLoop(
   return defineLoopTask({
     ...common,
     ...loop,
-    attempt: async (context, feedback) => ({
-      value: recipeJson(await loop.attempt(context, feedback)),
+    attempt: async (context, feedback, previous) => ({
+      value: recipeJson(
+        await loop.attempt(
+          context,
+          feedback,
+          recipeObject(previous) ? previous.value : undefined,
+        ),
+      ),
     }),
     check: (context, output) => loop.check(context, output.value),
   });

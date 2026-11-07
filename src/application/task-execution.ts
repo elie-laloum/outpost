@@ -34,12 +34,13 @@ export async function executeAgentTask<T>(
   }
 }
 
-export async function executeCommandTask(
+/** Runs a task command with observed output and returns its result, whatever its exit status. */
+export async function runTaskCommand(
   { sandbox, command }: CommandTaskOptions,
   context: TaskContext,
 ) {
   const invocation = typeof command === "function" ? command(context) : command;
-  const result = await sandbox.command({
+  return sandbox.command({
     ...invocation,
     observe(channel, text) {
       for (
@@ -59,6 +60,13 @@ export async function executeCommandTask(
     },
     signal: context.signal,
   });
+}
+
+export async function executeCommandTask(
+  options: CommandTaskOptions,
+  context: TaskContext,
+) {
+  const result = await runTaskCommand(options, context);
   if (result.status !== 0)
     throw new OutpostError("process", "Workflow command failed", {
       ...result,
