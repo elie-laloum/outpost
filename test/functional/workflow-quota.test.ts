@@ -263,6 +263,46 @@ test("a loop task paused by quota resumes the interrupted phase", async () => {
   assert.equal(checks, 2);
 });
 
+test("a quota pause reaches only the loop phase it interrupted", async () => {
+  for (const interrupted of ["attempt", "check"] as const) {
+    const memory = memoryCheckpoint();
+    const seen: string[] = [];
+    let paused = false;
+    const pause = (phase: string) => {
+      if (phase !== interrupted || paused) return;
+      paused = true;
+      throw limit();
+    };
+    const fix = defineLoopTask({
+      key: "fix",
+      maxRounds: 2,
+      attempt: (context) => {
+        seen.push(`attempt:${context.quota !== undefined}`);
+        pause("attempt");
+        return "patch";
+      },
+      check: (context) => {
+        seen.push(`check:${context.quota !== undefined}`);
+        pause("check");
+        return { done: true };
+      },
+    });
+    const graph = defineWorkflow("nightly", [fix]);
+    const first = await graph.start({
+      checkpoint: memory.checkpoint,
+      onQuota: { action: "pause" },
+    });
+    assert.equal(first.status, "paused");
+    (await graph.start({ checkpoint: memory.checkpoint })).unwrap();
+    assert.deepEqual(
+      seen,
+      interrupted === "attempt"
+        ? ["attempt:false", "attempt:true", "check:false"]
+        : ["attempt:false", "check:false", "check:true"],
+    );
+  }
+});
+
 test("onQuota requires a checkpoint and a valid policy", async () => {
   const graph = defineWorkflow("nightly", [
     defineTask({ key: "a", perform: () => 1 }),

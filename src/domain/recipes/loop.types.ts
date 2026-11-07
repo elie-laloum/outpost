@@ -12,9 +12,18 @@ export interface RecipeLoopAttempt {
   readonly dispatch?: Readonly<Record<string, unknown>>;
 }
 
-export type RecipeLoopCheck =
-  | { readonly kind: "command"; readonly command: Command }
-  | { readonly kind: "agent"; readonly agent: string; readonly brief: string };
+export interface RecipeLoopCommandCheck {
+  readonly kind: "command";
+  readonly command: Command;
+}
+
+export interface RecipeLoopAgentCheck {
+  readonly kind: "agent";
+  readonly agent: string;
+  readonly brief: string;
+}
+
+export type RecipeLoopCheck = RecipeLoopCommandCheck | RecipeLoopAgentCheck;
 
 /** A loop whose attempt and check are recipe steps run in the shared workspace. */
 export interface RecipeDeclarativeLoop {

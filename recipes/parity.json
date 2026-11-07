@@ -12286,7 +12286,7 @@
     "signatures": [],
     "options": {
       "maxRounds": "number",
-      "attempt": "(context: LoopTaskContext, feedback: string | undefined, previous: unknown) => T | Promise<T>",
+      "attempt": "(context: LoopTaskContext, feedback: string | undefined, previous?: unknown) => T | Promise<T>",
       "check": "(context: LoopTaskContext, result: T) => LoopCheckResult | Promise<LoopCheckResult>",
       "after": "readonly Task<unknown>[] | undefined",
       "key": "string",

@@ -87,8 +87,8 @@ test("exhaustion preserves feedback and blocks dependents", async () => {
   assert.equal(result.tasks[1]?.status, "skipped");
 });
 
-test("long feedback is bounded in exhaustion messages and loop events but kept whole in rounds", async () => {
-  const feedback = `secret-token ${"x".repeat(3_000)}`;
+test("long feedback keeps its start and end in messages and events, redacted before it is cut", async () => {
+  const feedback = `${"x".repeat(990)}secret-token${"y".repeat(3_000)}\nfinal summary`;
   const events: WorkflowEvent[] = [];
   const fix = defineLoopTask({
     key: "fix",
@@ -103,17 +103,18 @@ test("long feedback is bounded in exhaustion messages and loop events but kept w
   const error = result.errors[0];
   assert.ok(error instanceof LoopTaskExhausted);
   assert.equal(error.feedback, feedback);
-  assert.match(
-    error.message,
-    /: secret-token x+… \[1013 characters omitted\]$/,
-  );
   const complete = events.find(
     (event) => event.type === "loop" && event.phase === "complete",
   );
   assert.ok(complete?.feedback);
+  for (const excerpt of [error.message, complete.feedback]) {
+    assert.match(
+      excerpt,
+      /x+\[REDACTED\]\n… \[\d+ characters omitted\] …\ny+\nfinal summary$/,
+    );
+    assert.doesNotMatch(excerpt, /secret-t/);
+  }
   assert.ok(complete.feedback.length < 2_100);
-  assert.doesNotMatch(complete.feedback, /secret-token/);
-  assert.equal(result.tasks[0]?.rounds?.[0]?.check?.done, false);
   assert.equal(
     result.tasks[0]?.rounds?.[0]?.check?.done === false &&
       result.tasks[0].rounds[0].check.feedback,

@@ -13,7 +13,7 @@ import { LoopTaskExhausted } from "@elie-laloum/outpost/workflows";
 
 ## Rôle et comportement
 
-Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite.
+Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite. Le message cite les 1 000 premiers et 1 000 derniers caractères du dernier feedback, qu’un workflow masque avec ses motifs redact avant de le couper ; la propriété feedback garde le texte complet.
 
 [Exemple complet et règles détaillées](../../guide/verification-loops/).
 
@@ -36,6 +36,7 @@ export declare class LoopTaskExhausted extends Error {
   readonly key: string;
   readonly maxRounds: number;
   readonly feedback: string;
-  constructor(key: string, maxRounds: number, feedback: string);
+  /** `shown` is the feedback quoted in the message, such as a redacted copy; it defaults to `feedback`. */
+  constructor(key: string, maxRounds: number, feedback: string, shown?: string);
 }
 ```

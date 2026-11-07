@@ -38,7 +38,11 @@ export async function runLoopTask(
       round: entry.round,
       phase: entry.phase,
       ...(entry.check?.done === false
-        ? { feedback: loopFeedbackExcerpt(entry.check.feedback) }
+        ? {
+            feedback: loopFeedbackExcerpt(
+              runtime.observation.redact(entry.check.feedback),
+            ),
+          }
         : {}),
     });
     await runtime.persist();
@@ -48,12 +52,15 @@ export async function runLoopTask(
     const last = rounds.at(-1);
     if (last?.check?.done)
       return last.output?.kind === "json" ? last.output.value : undefined;
-    if (last?.phase === "complete" && last.round === definition.maxRounds)
+    if (last?.phase === "complete" && last.round === definition.maxRounds) {
+      const feedback = last.check?.done === false ? last.check.feedback : "";
       throw new LoopTaskExhausted(
         item.key,
         definition.maxRounds,
-        last.check?.done === false ? last.check.feedback : "",
+        feedback,
+        runtime.observation.redact(feedback),
       );
+    }
     const entry: LoopRoundRecord =
       last && last.phase !== "complete"
         ? last
@@ -72,8 +79,10 @@ export async function runLoopTask(
     });
     const { signal } = deadline;
     const base = runtime.context(item, state.attempts, signal);
+    // A quota pause belongs to the phase it interrupted, which the round resumes first.
+    const { quota: _paused, ...unpaused } = base;
     const context = (phase: LoopTaskContext["phase"]): LoopTaskContext => ({
-      ...base,
+      ...(phase === entry.phase ? base : unpaused),
       round: entry.round,
       phase,
       idempotencyKey: `${base.idempotencyKey}:round:${entry.round}:${phase}`,

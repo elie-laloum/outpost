@@ -19,7 +19,7 @@ export interface LoopTaskOptions<T> extends Pick<
   readonly attempt: (
     context: LoopTaskContext,
     feedback: string | undefined,
-    previous: unknown,
+    previous?: unknown,
   ) => T | Promise<T>;
   readonly check: (
     context: LoopTaskContext,

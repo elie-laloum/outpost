@@ -15,10 +15,16 @@ export class LoopTaskExhausted extends Error {
   readonly maxRounds: number;
   readonly feedback: string;
 
-  constructor(key: string, maxRounds: number, feedback: string) {
+  /** `shown` is the feedback quoted in the message, such as a redacted copy; it defaults to `feedback`. */
+  constructor(
+    key: string,
+    maxRounds: number,
+    feedback: string,
+    shown: string = feedback,
+  ) {
     super(
-      feedback
-        ? `Loop task ${key} exhausted its ${maxRounds} rounds: ${loopFeedbackExcerpt(feedback)}`
+      shown
+        ? `Loop task ${key} exhausted its ${maxRounds} rounds: ${loopFeedbackExcerpt(shown)}`
         : `Loop task ${key} exhausted its ${maxRounds} rounds`,
     );
     this.name = "LoopTaskExhausted";
@@ -28,10 +34,11 @@ export class LoopTaskExhausted extends Error {
   }
 }
 
-/** Bounds check feedback for messages and events; the full text stays in round records. */
+/** Keeps the start and end of long feedback, where commands print their status and summary. */
 export function loopFeedbackExcerpt(feedback: string): string {
   if (feedback.length <= loopFeedbackCharacters) return feedback;
-  return `${feedback.slice(0, loopFeedbackCharacters)}… [${feedback.length - loopFeedbackCharacters} characters omitted]`;
+  const half = loopFeedbackCharacters / 2;
+  return `${feedback.slice(0, half)}\n… [${feedback.length - loopFeedbackCharacters} characters omitted] …\n${feedback.slice(-half)}`;
 }
 
 export function defineLoopTask<T>(options: LoopTaskOptions<T>): Task<T> {

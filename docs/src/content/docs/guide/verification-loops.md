@@ -230,7 +230,7 @@ With a [checkpoint](../durable-runs/), each candidate is saved before `check`. O
 
 An interrupted round replays only with `resume: "retry-incomplete"`, since it may already have changed files. Changing `maxRounds` makes the checkpoint incompatible.
 
-Each task record lists its `rounds`, and each phase emits a `loop` workflow event. The `complete` event of a rejected round carries its `feedback`, limited to 2,000 characters and masked by the workflow's `redact` patterns. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
+Each task record lists its `rounds`, and each phase emits a `loop` workflow event. The `complete` event of a rejected round carries its `feedback`, masked by the workflow's `redact` patterns, then limited to its first and last 1,000 characters. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
 
 API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
 
@@ -273,12 +273,12 @@ With top-level `dispatch()`, each pass allocates a fresh sandbox and runs its pr
 
 ## Limits
 
-| Limit or event         | What happens                                                                                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `maxRounds`            | Caps the rounds, resumes included.                                                                                                                                                   |
-| Workflow attempts      | Each round, and each replay of an interrupted round, counts against `budget.attempts`.                                                                                               |
-| `timeoutMs`            | Bounds each round. It stops callbacks that honor `context.signal`.                                                                                                                   |
-| An exception           | Fails the task at once. A loop task has no `retry` option.                                                                                                                           |
-| The last check rejects | The task fails with `LoopTaskExhausted`. Its message ends with the last `feedback`, limited to 2,000 characters; its `feedback` property keeps the full text. Dependents do not run. |
+| Limit or event         | What happens                                                                                                                                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `maxRounds`            | Caps the rounds, resumes included.                                                                                                                                                                                 |
+| Workflow attempts      | Each round, and each replay of an interrupted round, counts against `budget.attempts`.                                                                                                                             |
+| `timeoutMs`            | Bounds each round. It stops callbacks that honor `context.signal`.                                                                                                                                                 |
+| An exception           | Fails the task at once. A loop task has no `retry` option.                                                                                                                                                         |
+| The last check rejects | The task fails with `LoopTaskExhausted`. Its message ends with the first and last 1,000 characters of the last `feedback`, masked by `redact`; its `feedback` property keeps the full text. Dependents do not run. |
 
 [Fix a failing CI build](../fix-failing-ci/) handles each outcome in a complete script.

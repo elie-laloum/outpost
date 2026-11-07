@@ -11,28 +11,22 @@ import {
   recipeLoopCheckResponse,
   recipeLoopOutputCharacters,
 } from "./compile-loop.constants.ts";
-import type { CommandResult } from "../../domain/command.types.ts";
+import { configurationError } from "../../domain/configuration-diagnostic.ts";
 import type { DispatchAgent } from "../../domain/fallback-agent.types.ts";
-import type { RecipeLoopCheck } from "../../domain/recipes/loop.types.ts";
 import type {
-  LoopCheckResult,
-  LoopTaskContext,
-} from "../../domain/workflow/loop-task.types.ts";
+  RecipeLoopAgentCheck,
+  RecipeLoopCommandCheck,
+} from "../../domain/recipes/loop.types.ts";
+import type { LoopCheckResult } from "../../domain/workflow/loop-task.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
 import type { Task } from "../../domain/workflow.types.ts";
 import type { RecipeCompilationContext } from "./compilation.types.ts";
 import type { RecipeStepOf } from "./normalized.types.ts";
-import type { RecipeLoopOutput } from "./compile-loop.types.ts";
-
-const checkResponse = defineJsonResponse<LoopCheckResult>({
-  ...recipeLoopCheckResponse,
-  schema(input) {
-    validateLoopCheck(input);
-    return input.done
-      ? { done: true }
-      : { done: false, feedback: input.feedback };
-  },
-});
+import type {
+  RecipeLoopOutput,
+  RecipeLoopPhase,
+  RecipeLoopStream,
+} from "./compile-loop.types.ts";
 
 function loopAgent(
   { bindings }: RecipeCompilationContext,
@@ -78,72 +72,137 @@ function attemptOutput(
   return { ...output, rounds: round };
 }
 
-function tail(text: string): string {
-  if (text.length <= recipeLoopOutputCharacters) return text;
-  return `[${text.length - recipeLoopOutputCharacters} characters omitted]\n${text.slice(-recipeLoopOutputCharacters)}`;
+/** The tail of one output stream; `length` also counts what a bounded collector dropped. */
+function tail({ channel, text, length }: RecipeLoopStream): string {
+  const output = text.trimEnd();
+  if (!output.trim()) return "";
+  const kept = output.slice(-recipeLoopOutputCharacters);
+  const omitted = length - text.length + output.length - kept.length;
+  return omitted > 0
+    ? `${channel}:\n[${omitted} characters omitted]\n${kept}`
+    : `${channel}:\n${kept}`;
 }
 
-function commandFeedback(executable: string, result: CommandResult): string {
-  const sections = [`${executable} exited with status ${result.status}.`];
-  for (const [channel, output] of [
-    ["stdout", result.stdout.trimEnd()],
-    ["stderr", result.stderr.trimEnd()],
-  ] as const)
-    if (output.trim()) sections.push(`${channel}:\n${tail(output)}`);
-  return sections.join("\n\n");
+function commandFeedback(
+  summary: string,
+  streams: readonly RecipeLoopStream[],
+): string {
+  return [summary, ...streams.map(tail).filter(Boolean)].join("\n\n");
+}
+
+/** A command check fails on a nonzero exit or on its own deadline, keeping the output seen so far. */
+function commandCheck(
+  check: RecipeLoopCommandCheck,
+  { sandbox, text }: RecipeCompilationContext,
+): RecipeLoopPhase {
+  return async (task) => {
+    const command = renderRecipeCommand(check.command, (value) =>
+      text(value, task, { round: task.round }),
+    );
+    const seen = new Map<RecipeLoopStream["channel"], RecipeLoopStream>();
+    const observe = (channel: RecipeLoopStream["channel"], chunk: string) => {
+      const stream = seen.get(channel);
+      seen.set(channel, {
+        channel,
+        length: (stream?.length ?? 0) + chunk.length,
+        text: ((stream?.text ?? "") + chunk).slice(-recipeLoopOutputCharacters),
+      });
+    };
+    try {
+      const result = await runTaskCommand(
+        { sandbox: await sandbox(task), command: { ...command, observe } },
+        task,
+      );
+      if (result.status === 0) return { done: true };
+      return {
+        done: false,
+        feedback: commandFeedback(
+          `${command.executable} exited with status ${result.status}.`,
+          [
+            {
+              channel: "stdout",
+              text: result.stdout,
+              length: result.stdout.length,
+            },
+            {
+              channel: "stderr",
+              text: result.stderr,
+              length: result.stderr.length,
+            },
+          ],
+        ),
+      };
+    } catch (error) {
+      if (
+        task.signal.aborted ||
+        !(error instanceof OutpostError) ||
+        error.code !== "timeout"
+      )
+        throw error;
+      return {
+        done: false,
+        feedback: commandFeedback(
+          `${command.executable} did not finish: ${error.message}.`,
+          [...seen.values()],
+        ),
+      };
+    }
+  };
+}
+
+/** An agent check answers { done, feedback } in a new conversation, with one repair when it can resume. */
+function agentCheck(
+  check: RecipeLoopAgentCheck,
+  step: RecipeStepOf<"declarative-loop">,
+  context: RecipeCompilationContext,
+): RecipeLoopPhase {
+  const { bindings, sandbox, text } = context;
+  const agent = loopAgent(context, check.agent);
+  const response = defineJsonResponse<LoopCheckResult>({
+    ...recipeLoopCheckResponse,
+    repairs:
+      agent.kind !== "fallback" && (agent.resumable ?? !!agent.storage) ? 1 : 0,
+    schema(input) {
+      validateLoopCheck(input);
+      return input.done
+        ? { done: true }
+        : { done: false, feedback: input.feedback };
+    },
+  });
+  return async (task, output) => {
+    const request = {
+      agent,
+      brief: {
+        text: text(check.brief, task, {
+          round: task.round,
+          text: typeof output.text === "string" ? output.text : "",
+        }),
+      },
+      response,
+    };
+    await bindings.validateDispatch?.(request);
+    const result = await executeAgentTask(
+      {
+        ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
+        sandbox: await sandbox(task),
+        request: () => request,
+      },
+      task,
+    );
+    return result.value;
+  };
 }
 
 function compileCheck(
-  check: RecipeLoopCheck,
   step: RecipeStepOf<"declarative-loop">,
   context: RecipeCompilationContext,
-): (
-  task: LoopTaskContext,
-  output: RecipeLoopOutput,
-) => Promise<LoopCheckResult> {
-  const { bindings, sandbox, text } = context;
+): RecipeLoopPhase {
+  const { check } = step.loop;
   switch (check.kind) {
     case "command":
-      return async (task) => {
-        const command = renderRecipeCommand(check.command, (value) =>
-          text(value, task, { round: task.round }),
-        );
-        const result = await runTaskCommand(
-          { sandbox: await sandbox(task), command },
-          task,
-        );
-        return result.status === 0
-          ? { done: true }
-          : {
-              done: false,
-              feedback: commandFeedback(command.executable, result),
-            };
-      };
-    case "agent": {
-      const agent = loopAgent(context, check.agent);
-      return async (task, output) => {
-        const request = {
-          agent,
-          brief: {
-            text: text(check.brief, task, {
-              round: task.round,
-              text: typeof output.text === "string" ? output.text : "",
-            }),
-          },
-          response: checkResponse,
-        };
-        await bindings.validateDispatch?.(request);
-        const result = await executeAgentTask(
-          {
-            ...(step.quotaResume ? { quotaResume: step.quotaResume } : {}),
-            sandbox: await sandbox(task),
-            request: () => request,
-          },
-          task,
-        );
-        return result.value;
-      };
-    }
+      return commandCheck(check, context);
+    case "agent":
+      return agentCheck(check, step, context);
   }
 }
 
@@ -155,7 +214,17 @@ export function compileDeclarativeLoop(
   const { common, bindings, sandbox, text } = context;
   const { maxRounds, attempt } = step.loop;
   const agent = loopAgent(context, attempt.agent);
-  const check = compileCheck(step.loop.check, step, context);
+  if (
+    attempt.conversation === "continue" &&
+    (agent.kind === "fallback" || agent.resumable === false)
+  )
+    throw configurationError(
+      `${step.key}: agent ${attempt.agent} cannot continue its conversation between rounds`,
+      `tasks.${step.key}.loop.attempt.conversation`,
+      "unsupported-capability",
+      "Set conversation: new, or choose an agent that resumes conversations.",
+    );
+  const check = compileCheck(step, context);
   return defineLoopTask<RecipeLoopOutput>({
     ...common,
     maxRounds,

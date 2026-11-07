@@ -23,4 +23,4 @@ tasks:
       check:
         command:
           executable: "{{ inputs.runner }}"
-          arguments: [test]
+          arguments: [run, test]

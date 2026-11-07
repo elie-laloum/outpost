@@ -13,3 +13,5 @@ export const fileAgentCapabilityRefusals: Readonly<
 
 export const interactiveCaptureRefusal =
   "Interactive tasks require portable conversation capture and resume";
+export const continuationCaptureRefusal =
+  "Interactive tasks and continued loop conversations require portable conversation capture and resume";

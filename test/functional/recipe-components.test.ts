@@ -761,7 +761,7 @@ test("file recipe plans read agent capabilities from the catalog and refuse unde
   );
   await assert.rejects(
     inspectRecipeExecution({ file, config }),
-    /Interactive tasks require portable conversation capture and resume/,
+    /Interactive tasks and continued loop conversations require portable conversation capture and resume/,
   );
   await writeFile(config, configuration("agy"));
   await assert.rejects(readRecipeProject({ file, config }), (error) => {

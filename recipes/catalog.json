@@ -20,7 +20,7 @@
       "version": "1.0.0",
       "description": "Implement a change, run the project tests and feed failures back to the agent until they pass.",
       "source": "./fix-until-green.yaml",
-      "sha256": "b56bda3c5b4484cba4c3777e735f776b528df8a379bd0083676d64630a8ffa83"
+      "sha256": "456843fb45f47c7b983a13b058c096261cd0b96923d55bfff19a4562fecc7110"
     },
     {
       "name": "queued-review",

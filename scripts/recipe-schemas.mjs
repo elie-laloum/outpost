@@ -511,7 +511,15 @@ taskV3.allOf = [
         anyOf: [
           { required: ["agent"] },
           { required: ["isolated"] },
-          { required: ["loop"] },
+          {
+            required: ["loop"],
+            properties: {
+              loop: {
+                required: ["attempt"],
+                properties: { attempt: { required: ["agent"] } },
+              },
+            },
+          },
         ],
       },
     },

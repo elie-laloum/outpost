@@ -5613,8 +5613,8 @@
     "Phase sauvegardée sur les événements de boucle : attempt, check ou complete."
   ],
   "WorkflowEvent.feedback": [
-    "Feedback of a rejected round on its complete loop event, limited to 2,000 characters and masked by the workflow redact patterns.",
-    "Feedback d’un tour refusé sur son événement de boucle complete, limité à 2 000 caractères et masqué par les motifs redact du workflow."
+    "Feedback of a rejected round on its complete loop event, masked by the workflow redact patterns, then limited to its first and last 1,000 characters.",
+    "Feedback d’un tour refusé sur son événement de boucle complete, masqué par les motifs redact du workflow, puis limité à ses 1 000 premiers et 1 000 derniers caractères."
   ],
   "LoopTaskExhausted.key": [
     "Key of the loop task whose verification never succeeded.",

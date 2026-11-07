@@ -17,7 +17,11 @@ import {
   LoopTaskExhausted,
   createWorkflowCheckpointStore,
 } from "../../src/workflows.ts";
-import { createLocalTransport } from "../../src/core.ts";
+import {
+  createLocalTransport,
+  createFallbackAgent,
+  OutpostError,
+} from "../../src/core.ts";
 import {
   createScriptedAgent,
   createMemorySandboxProvider,
@@ -736,14 +740,27 @@ test("the published recipe schema accepts declarative loops and refuses invalid 
       attempt,
       check: { command: npmTest, agent: "reviewer", brief: "Review." },
     }),
+    loopRecipe(
+      {
+        maxRounds: 2,
+        attempt: { $ref: "functions.attempt" },
+        check: { $ref: "functions.check" },
+      },
+      { quotaResume: "continue" },
+    ),
   ])
     assert.equal(validate(recipe), false, JSON.stringify(recipe));
 });
 
 test("the bundled fix-until-green recipe feeds failing tests back into the coder's conversation", async (t) => {
   await using sandbox = await loopSandbox(t, [
-    { executable: "bun", arguments: ["test"], status: 1, stdout: "1 fail" },
-    { executable: "bun", arguments: ["test"], stdout: "1 pass" },
+    {
+      executable: "bun",
+      arguments: ["run", "test"],
+      status: 1,
+      stdout: "1 fail",
+    },
+    { executable: "bun", arguments: ["run", "test"], stdout: "1 pass" },
   ]);
   const requests: DispatchOptions<unknown>[] = [];
   const workflow = defineRecipe(
@@ -766,4 +783,146 @@ test("the bundled fix-until-green recipe feeds failing tests back into the coder
   );
   assert.match(requests[1]?.brief.text ?? "", /bun exited with status 1/);
   assert.ok(requests[1]?.continuation?.id);
+});
+
+function commandLoop(check: Record<string, unknown> = { command: npmTest }) {
+  return JSON.stringify(
+    loopRecipe({
+      maxRounds: 2,
+      attempt: { agent: "coder", brief: "Fix. {{ loop.feedback }}" },
+      check,
+    }),
+  );
+}
+
+test("a check command that exceeds its deadline becomes feedback with the output seen so far", async (t) => {
+  await using sandbox = await loopSandbox(t, [npmTest]);
+  const requests: DispatchOptions<unknown>[] = [];
+  let timedOut = false;
+  const workflow = defineRecipe(commandLoop(), {
+    sandbox: {
+      ...recorded(sandbox, requests),
+      async command(command) {
+        if (timedOut) return sandbox.command(command);
+        timedOut = true;
+        command.observe?.("stdout", "running test 1\n");
+        throw new OutpostError("timeout", "Command exceeded 50 ms", {
+          deadlineMs: 50,
+        });
+      },
+    },
+    agents: {
+      coder: createScriptedAgent({ turns: [{ text: "A" }, { text: "B" }] }),
+    },
+  });
+  (await workflow.start()).unwrap();
+  assert.equal(
+    requests[1]?.brief.text,
+    "Fix. npm did not finish: Command exceeded 50 ms.\n\nstdout:\nrunning test 1",
+  );
+});
+
+test("long check output keeps its tail and counts what was omitted", async (t) => {
+  await using sandbox = await loopSandbox(t, [
+    { ...npmTest, status: 1, stdout: `${"x".repeat(5_000)}END\n` },
+    npmTest,
+  ]);
+  const requests: DispatchOptions<unknown>[] = [];
+  const workflow = defineRecipe(commandLoop(), {
+    sandbox: recorded(sandbox, requests),
+    agents: {
+      coder: createScriptedAgent({ turns: [{ text: "A" }, { text: "B" }] }),
+    },
+  });
+  (await workflow.start()).unwrap();
+  const brief = requests[1]?.brief.text ?? "";
+  assert.match(brief, /stdout:\n\[1003 characters omitted\]\nx{3997}END$/);
+});
+
+test("a continued loop fails clearly when the previous attempt reported no conversation", async (t) => {
+  await using sandbox = await loopSandbox(t, [
+    { ...npmTest, status: 1, stdout: "not ok" },
+  ]);
+  const workflow = defineRecipe(
+    JSON.stringify(
+      loopRecipe({
+        maxRounds: 2,
+        attempt: { agent: "coder", brief: "Fix.", conversation: "continue" },
+        check: { command: npmTest },
+      }),
+    ),
+    {
+      sandbox: {
+        ...sandbox,
+        async dispatch<T>(options: DispatchOptions<T>) {
+          const { conversation: _conversation, ...result } =
+            await sandbox.dispatch(options);
+          return result;
+        },
+      },
+      agents: { coder: createScriptedAgent({ turns: [{ text: "A" }] }) },
+    },
+  );
+  const result = await workflow.start();
+  assert.equal(result.status, "failed");
+  const [error] = result.errors;
+  assert.ok(error instanceof OutpostError);
+  assert.equal(error.code, "session");
+  assert.match(error.message, /cannot continue round 2/);
+});
+
+test("a continued loop refuses a fallback agent before any round runs", async (t) => {
+  await using sandbox = await loopSandbox(t, []);
+  const coder = createFallbackAgent(
+    [
+      createScriptedAgent({ turns: [{ text: "A" }] }),
+      createScriptedAgent({ name: "spare", turns: [{ text: "B" }] }),
+    ],
+    { on: ["quota"] },
+  );
+  assert.throws(
+    () =>
+      defineRecipe(
+        JSON.stringify(
+          loopRecipe({
+            maxRounds: 2,
+            attempt: {
+              agent: "coder",
+              brief: "Fix.",
+              conversation: "continue",
+            },
+            check: { command: npmTest },
+          }),
+        ),
+        { sandbox, agents: { coder } },
+      ),
+    (error) =>
+      error instanceof ConfigurationError &&
+      error.diagnostic.code === "unsupported-capability" &&
+      error.diagnostic.path.join(".") ===
+        "tasks.implement.loop.attempt.conversation",
+  );
+});
+
+test("an agent check gets one repair for a malformed answer", async (t) => {
+  await using sandbox = await loopSandbox(t, []);
+  const requests: DispatchOptions<unknown>[] = [];
+  const workflow = defineRecipe(
+    commandLoop({ agent: "reviewer", brief: "Review {{ loop.text }}" }),
+    {
+      sandbox: recorded(sandbox, requests),
+      agents: {
+        coder: createScriptedAgent({ turns: [{ text: "Done" }] }),
+        reviewer: createScriptedAgent({
+          name: "reviewer",
+          turns: [
+            { text: "Looks good to me." },
+            { text: '<loop-check>{"done": true, "feedback": ""}</loop-check>' },
+          ],
+        }),
+      },
+    },
+  );
+  (await workflow.start()).unwrap();
+  assert.equal(requests[1]?.response?.repairs, 1);
 });

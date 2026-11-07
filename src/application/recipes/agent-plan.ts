@@ -2,7 +2,7 @@ import { builtInAgents } from "../../adapters/agents/catalog.ts";
 import { configurationPath } from "../../domain/configuration-diagnostic.ts";
 import type { ConfigurationDiagnostic } from "../../domain/configuration-diagnostic.types.ts";
 import { fileCapabilityDiagnostics } from "../../domain/file-agent-capabilities.ts";
-import { interactiveCaptureRefusal } from "../../domain/file-agent-capabilities.constants.ts";
+import { continuationCaptureRefusal } from "../../domain/file-agent-capabilities.constants.ts";
 import { recipeStepAgents } from "../../domain/recipes/step-resources.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type {
@@ -102,7 +102,7 @@ export function recipeAgentDiagnostics(
       if (plan.requires.includes("continuation") && !candidate.continuation)
         refusals.push({
           code: "unsupported-capability",
-          message: interactiveCaptureRefusal,
+          message: continuationCaptureRefusal,
           path: configurationPath(candidate.component),
           hint: `Use a harness that captures and resumes conversations in file workspaces, and keep saveConversations enabled, for ${plan.tasks.join(", ")}.`,
         });
