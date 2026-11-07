@@ -5,12 +5,15 @@ export function recipeTextReferences(
   text: string,
   inputs: readonly string[],
   steps: readonly string[],
+  loop: readonly string[] = [],
 ): readonly RecipeTextReference[] {
   if (text.replace(recipeTemplatePattern, "").includes("{{"))
     throw new Error("Unclosed recipe reference");
   return [...text.matchAll(recipeTemplatePattern)].map((match) => {
     const source = match[0],
       expression = match[1]!.trim();
+    if (expression.startsWith("loop."))
+      return loopReference(source, expression.slice(5), loop);
     const kind = expression.startsWith("inputs.") ? "inputs" : "steps";
     if (!expression.startsWith(`${kind}.`))
       throw new Error(`Invalid recipe reference: ${source}`);
@@ -24,4 +27,20 @@ export function recipeTextReferences(
       throw new Error(`Invalid recipe reference path: ${source}`);
     return { source, kind, key, path };
   });
+}
+
+function loopReference(
+  source: string,
+  name: string,
+  available: readonly string[],
+): RecipeTextReference {
+  if (available.includes(name))
+    return { source, kind: "loop", key: name, path: [] };
+  if (!available.length)
+    throw new Error(
+      `${source} is only available inside a loop attempt or check`,
+    );
+  throw new Error(
+    `${source} is not available here; use ${available.map((value) => `{{ loop.${value} }}`).join(" or ")}`,
+  );
 }

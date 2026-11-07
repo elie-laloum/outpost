@@ -5,12 +5,14 @@ import type { RecipeDocument, RecipeStep } from "../recipe.types.ts";
 export interface RecipeExpressionContext {
   readonly inputs: Readonly<Record<string, WorkflowJson>>;
   readonly steps: readonly string[];
+  /** Values of the current loop round, such as `round` and `feedback`. */
+  readonly loop?: Readonly<Record<string, WorkflowJson>>;
   output(key: string): unknown;
 }
 
 export interface RecipeTextReference {
   readonly source: string;
-  readonly kind: "inputs" | "steps";
+  readonly kind: "inputs" | "steps" | "loop";
   readonly key: string;
   readonly path: readonly string[];
 }
@@ -25,6 +27,8 @@ export interface RecipeExpressionValidation {
   readonly step: RecipeStep;
   /** Locates validation errors in the recipe document when provided. */
   readonly sourcePath?: RecipeSourcePath;
+  /** Loop values this field may interpolate; other fields refuse `{{ loop.* }}`. */
+  readonly loop?: readonly string[];
 }
 
 export interface RecipeInputValue {
@@ -43,6 +47,12 @@ export interface RecipeStepValue {
 
 export type RecipeValueReference = RecipeInputValue | RecipeStepValue;
 
+export interface RecipeLoopValue {
+  readonly kind: "loop-value";
+  readonly name: string;
+  readonly sourcePath: RecipeSourcePath;
+}
+
 export interface RecipeExpressionReference {
   readonly reference: RecipeValueReference;
   /** Whether the reference is interpolated into text, which requires a scalar. */
@@ -51,13 +61,14 @@ export interface RecipeExpressionReference {
 
 export interface RecipeTextInterpolation {
   readonly source: string;
-  readonly reference: RecipeValueReference;
+  readonly reference: RecipeValueReference | RecipeLoopValue;
 }
 
 /** A recipe expression compiled once: references are parsed and located, never reinterpreted. */
 export type RecipeExpressionNode =
   | { readonly kind: "literal"; readonly value: WorkflowJson }
   | RecipeValueReference
+  | RecipeLoopValue
   | {
       readonly kind: "select";
       readonly from: RecipeExpressionNode;
@@ -96,6 +107,7 @@ export type RecipeConditionNode =
 export interface RecipeExpressionScope {
   readonly inputs: readonly string[];
   readonly steps: readonly string[];
+  readonly loop?: readonly string[];
   /** Prefix of compilation errors, normally the task key. */
   readonly label?: string;
 }
