@@ -16,6 +16,13 @@
       "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
     },
     {
+      "name": "fix-until-green",
+      "version": "1.0.0",
+      "description": "Implement a change, run the project tests and feed failures back to the agent until they pass.",
+      "source": "./fix-until-green.yaml",
+      "sha256": "b56bda3c5b4484cba4c3777e735f776b528df8a379bd0083676d64630a8ffa83"
+    },
+    {
       "name": "queued-review",
       "version": "1.0.0",
       "description": "Delegate a review to an explicitly configured queue worker and retain its workflow summary.",

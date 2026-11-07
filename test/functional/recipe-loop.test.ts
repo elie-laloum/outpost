@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { Ajv2020 } from "ajv/dist/2020.js";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -692,4 +693,77 @@ test("createRecipeRuntime resolves the attempt's dispatch components and reports
     report.tasks.find((task) => task.key === "implement")?.rounds?.length,
     2,
   );
+});
+
+test("the published recipe schema accepts declarative loops and refuses invalid ones", async () => {
+  const schema = JSON.parse(await readFile("recipe.schema.json", "utf8"));
+  const validate = new Ajv2020({ strict: false }).compile(schema);
+  const attempt = { agent: "coder", brief: "Fix. {{ loop.feedback }}" };
+  const valid = [
+    loopRecipe({ maxRounds: 3, attempt, check: { command: npmTest } }),
+    loopRecipe(
+      {
+        maxRounds: 3,
+        attempt: {
+          agent: "coder",
+          brief: "Fix.",
+          conversation: "continue",
+          followUp: "{{ loop.feedback }}",
+          dispatch: { deadlineMs: 600000 },
+        },
+        check: { agent: "reviewer", brief: "Review {{ loop.text }}" },
+      },
+      { quotaResume: "continue" },
+    ),
+    loopRecipe({
+      maxRounds: 2,
+      attempt: { $ref: "functions.attempt" },
+      check: { $ref: "functions.check" },
+    }),
+  ];
+  for (const recipe of valid)
+    assert.equal(validate(recipe), true, JSON.stringify(validate.errors));
+  for (const recipe of [
+    loopRecipe({ maxRounds: 0, attempt, check: { command: npmTest } }),
+    loopRecipe({
+      maxRounds: 2,
+      attempt: { ...attempt, followUp: "{{ loop.feedback }}" },
+      check: { command: npmTest },
+    }),
+    loopRecipe({ maxRounds: 2, attempt, check: { agent: "reviewer" } }),
+    loopRecipe({
+      maxRounds: 2,
+      attempt,
+      check: { command: npmTest, agent: "reviewer", brief: "Review." },
+    }),
+  ])
+    assert.equal(validate(recipe), false, JSON.stringify(recipe));
+});
+
+test("the bundled fix-until-green recipe feeds failing tests back into the coder's conversation", async (t) => {
+  await using sandbox = await loopSandbox(t, [
+    { executable: "bun", arguments: ["test"], status: 1, stdout: "1 fail" },
+    { executable: "bun", arguments: ["test"], stdout: "1 pass" },
+  ]);
+  const requests: DispatchOptions<unknown>[] = [];
+  const workflow = defineRecipe(
+    await readFile("recipes/fix-until-green.yaml", "utf8"),
+    {
+      sandbox: recorded(sandbox, requests),
+      inputs: { goal: "add a parser", runner: "bun" },
+      agents: {
+        coder: createScriptedAgent({
+          turns: [{ text: "Added" }, { text: "Fixed" }],
+        }),
+      },
+    },
+  );
+  const result = await workflow.start();
+  result.unwrap();
+  assert.equal(
+    requests[0]?.brief.text,
+    "Implement this change and commit it: add a parser",
+  );
+  assert.match(requests[1]?.brief.text ?? "", /bun exited with status 1/);
+  assert.ok(requests[1]?.continuation?.id);
 });
