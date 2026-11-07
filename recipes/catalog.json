@@ -10,10 +10,10 @@
     },
     {
       "name": "fix-and-check",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Implement a requested change, commit it and run the project tests.",
       "source": "./fix-and-check.yaml",
-      "sha256": "941c648f53a9c25c29521abbadd9e09e49b9d3e69fd43f3f9a6c390b2e8ce807"
+      "sha256": "687837f6a523713c80503490c03db5d242daa60afe50691e3c2512adb7c0d009"
     },
     {
       "name": "fix-until-green",
