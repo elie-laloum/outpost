@@ -1,6 +1,10 @@
 import { configurationError } from "../../domain/configuration-diagnostic.ts";
 import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
+import {
+  declarativeRecipeLoop,
+  recipeLoopDispatchComponent,
+} from "../../domain/recipes/loop.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import {
   recipeObject,
@@ -64,6 +68,7 @@ export function recipeComponentGraph(
       call: "call",
     })) {
       if (!Object.hasOwn(step, field)) continue;
+      if (field === "loop" && declarativeRecipeLoop(step)) continue;
       const key = `tasks.${step.key}.${field}`;
       const source = new Map(Object.entries(step)).get(field);
       declarations.set(
@@ -78,6 +83,15 @@ export function recipeComponentGraph(
             },
       );
       expected.set(key, `${kind}Options`);
+    }
+    const dispatch = declarativeRecipeLoop(step)?.attempt.dispatch;
+    if (dispatch) {
+      const key = recipeLoopDispatchComponent(step.key);
+      declarations.set(
+        key,
+        recipeReference(dispatch) ? dispatch : { ...dispatch, type: "options" },
+      );
+      expected.set(key, "dispatchOptions");
     }
   }
   if (configuration.version !== 1) {

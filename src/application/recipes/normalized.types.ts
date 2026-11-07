@@ -1,6 +1,7 @@
 import type { Command } from "../../domain/command.types.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
 import type { WorkflowJson } from "../../domain/workflow/checkpoint.types.ts";
+import type { RecipeDeclarativeLoop } from "../../domain/recipes/loop.types.ts";
 import type { RecipeDispatchSettings } from "./agent-components.types.ts";
 import type { RecipeSpeculationSettings } from "./advanced-components.types.ts";
 import type { RecipeQueuedSettings } from "./service-components.types.ts";
@@ -41,6 +42,12 @@ export type NormalizedRecipeStep = NormalizedRecipeStepBase &
         readonly arguments?: WorkflowJson;
       }
     | { readonly kind: "loop"; readonly loop: RecipeLoopSettings }
+    | {
+        readonly kind: "declarative-loop";
+        readonly loop: RecipeDeclarativeLoop;
+        readonly dispatch?: RecipeDispatchSettings;
+        readonly quotaResume?: "continue" | "restart";
+      }
     | {
         readonly kind: "decision";
         readonly decision: RecipeDecisionSettings;

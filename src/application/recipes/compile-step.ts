@@ -16,6 +16,7 @@ import {
   compileQueued,
   compileSpeculation,
 } from "./compile-durable.ts";
+import { compileDeclarativeLoop } from "./compile-loop.ts";
 import { unreachableRecipeStep } from "./normalize.ts";
 import type { NormalizedRecipeStep } from "./normalized.types.ts";
 import type { RecipeCompilationContext } from "./compilation.types.ts";
@@ -38,6 +39,8 @@ export function compileRecipeStep(
       return compileCall(step, context);
     case "loop":
       return compileLoop(step, context);
+    case "declarative-loop":
+      return compileDeclarativeLoop(step, context);
     case "decision":
       return compileDecision(step, context);
     case "gate":

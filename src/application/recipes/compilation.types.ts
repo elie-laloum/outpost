@@ -1,4 +1,5 @@
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
+import type { RecipeExpressionContext } from "../../domain/recipes/expressions.types.ts";
 import type {
   Task,
   TaskContext,
@@ -20,6 +21,15 @@ export interface RecipeCompilationContext {
   readonly bindings: RecipeExecutionBindings;
   readonly components: RecipeWorkflowComponents;
   sandbox(context: TaskContext): Promise<Sandbox | FileSandbox>;
-  evaluate(value: unknown, context: TaskContext): WorkflowJson;
-  text(value: string, context: TaskContext): string;
+  evaluate(
+    value: unknown,
+    context: TaskContext,
+    loop?: RecipeExpressionContext["loop"],
+  ): WorkflowJson;
+  /** Renders recipe text; `loop` supplies the round values of a loop field. */
+  text(
+    value: string,
+    context: TaskContext,
+    loop?: RecipeExpressionContext["loop"],
+  ): string;
 }

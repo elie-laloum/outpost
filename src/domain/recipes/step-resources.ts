@@ -1,10 +1,30 @@
+import { declarativeRecipeLoop } from "./loop.ts";
 import type { RecipeDocument, RecipeStep } from "../recipe.types.ts";
 import type { RecipeStepAgent } from "./step-resources.types.ts";
 
 /** Agent roles a task dispatches in the shared recipe workspace. */
 export function recipeStepAgents(step: RecipeStep): readonly RecipeStepAgent[] {
-  if (step.agent === undefined) return [];
-  return [{ agent: step.agent, path: ["agent"], continuation: false }];
+  if (step.agent !== undefined)
+    return [{ agent: step.agent, path: ["agent"], continuation: false }];
+  const loop = declarativeRecipeLoop(step);
+  if (!loop) return [];
+  const { attempt, check } = loop;
+  return [
+    {
+      agent: attempt.agent,
+      path: ["loop", "attempt", "agent"],
+      continuation: attempt.conversation === "continue",
+    },
+    ...(check.kind === "agent"
+      ? [
+          {
+            agent: check.agent,
+            path: ["loop", "check", "agent"],
+            continuation: false,
+          },
+        ]
+      : []),
+  ];
 }
 
 /** Whether a task runs commands or agents in the shared recipe workspace. */
