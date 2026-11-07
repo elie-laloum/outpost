@@ -55,7 +55,8 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       # braces <=3.0.3 (via @daytona/sdk) has no patched release yet; drop the ignore once one ships.
-      - run: bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm
+      # zod 3 (via @infisical/sdk) has no patch below 4.6.6; drop the ignore once the SDK moves to zod 4.
+      - run: bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm --ignore=GHSA-mrhx-c7xc-m3w5
       - run: node scripts/recipe-catalog.mjs
       - run: node scripts/recipe-schemas.mjs
       - run: node scripts/recipe-native-schemas.mjs
