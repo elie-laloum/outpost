@@ -57,7 +57,11 @@ test("scripted coder and reviewer both account streaming usage once per round", 
   result.unwrap();
   assert.equal(result.value(fix), "fixed");
   assert.equal(result.usage.attempts, 2);
-  assert.deepEqual(result.usage.tokens, { input: 12, cached: 4, output: 8 });
+  const tokens = { input: 12, cached: 4, output: 8 };
+  assert.deepEqual(result.usage.tokens, {
+    ...tokens,
+    models: { fixture: tokens },
+  });
   assert.equal(
     (
       await coder.command({

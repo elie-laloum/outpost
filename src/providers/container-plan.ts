@@ -1,5 +1,7 @@
 import type { ContainerPlanOptions } from "./container.types.ts";
 import { containerUserNamespace } from "./container-egress.ts";
+import { labelArguments } from "./container-labels.ts";
+import { containerDefaults } from "./container.constants.ts";
 
 export function containerPlan({
   config,
@@ -19,11 +21,12 @@ export function containerPlan({
     "create",
     "--name",
     name,
+    ...labelArguments(config.labels),
     "--init",
     "--user",
     `${user.uid}:${user.gid}`,
     ...(engine === "podman" && config.egress?.mode === "allowlist"
-      ? ["--userns", `container:${name}-egress`]
+      ? ["--userns", `container:${name}${containerDefaults.companionSuffix}`]
       : containerUserNamespace(engine, config, user)),
     "--workdir",
     config.repositoryMode === "isolated" ? "/" : root,

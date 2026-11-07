@@ -78,6 +78,51 @@ Référence API : [ContainerOptions](../../reference/containeroptions/).
 
 `outpost image eject --engine podman` écrit un `Containerfile` au lieu d’un `Dockerfile`.
 
+## Retrouver les sandboxes par label
+
+Définissez `labels` pour étiqueter chaque sandbox créée par un fournisseur. La commande `create` qui crée le conteneur les pose, de même que celle qui crée son [compagnon egress](../network-restrictions/) : un conteneur n’existe donc jamais sans ses labels.
+
+```ts
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+export const sandboxProvider = createDockerSandboxProvider({
+  image: "outpost-codex:dev",
+  repositoryMode: "isolated",
+  labels: { "com.example.app": "reviews", "com.example.job": "job-42" },
+});
+```
+
+Un processus de nettoyage peut ensuite retrouver les sandboxes de votre application, y compris celles dont il n’a jamais enregistré le nom. `listDockerSandboxes()` renvoie chaque sandbox Outpost qui porte tous les labels donnés, avec son nom et ses labels. `removeDockerSandbox()` supprime une sandbox avec son compagnon egress et réussit quand ils ont déjà disparu. Podman dispose de `listPodmanSandboxes()` et `removePodmanSandbox()`.
+
+```ts title="reap.ts"
+import {
+  listDockerSandboxes,
+  removeDockerSandbox,
+} from "@elie-laloum/outpost/providers/docker";
+
+declare function isJobActive(job: string): Promise<boolean>;
+
+const sandboxes = await listDockerSandboxes({
+  labels: { "com.example.app": "reviews" },
+});
+for (const sandbox of sandboxes) {
+  const job = sandbox.labels["com.example.job"];
+  if (job && (await isJobActive(job))) continue;
+  await removeDockerSandbox(sandbox.name, { deadlineMs: 30_000 });
+}
+```
+
+<!-- features -->
+
+- **Tout mode de dépôt** : Les deux fonctions s’utilisent sans le fournisseur, quel que soit le `repositoryMode` qui a créé les sandboxes.
+- **Conteneurs Outpost uniquement** : Seuls les conteneurs nommés `outpost-<uuid>` sont listés ou supprimés, jamais d’autres conteneurs portant les mêmes labels.
+- **Votre décision** : La suppression ne vérifie pas si une exécution utilise encore la sandbox. Une sandbox étiquetée est listée dès que ses conteneurs sont créés, avant le retour de `acquire()` : marquez le job actif avant `acquire()` et retirez cette marque seulement après `release()`. Les commandes suivantes d’une sandbox supprimée échouent et sa libération réussit toujours.
+- **Préfixe réservé** : Les clés qui commencent par `io.outpost.` appartiennent à Outpost et sont exclues des labels listés. Des labels invalides, y compris des valeurs entourées d’espaces, échouent à la création du fournisseur.
+
+La liste exige au moins un label. Le moteur rapporte aussi les labels de l’image : choisissez des clés que vos images ne définissent pas.
+
+Référence API : [ContainerOptions](../../reference/containeroptions/), [listDockerSandboxes](../../reference/listdockersandboxes/), [removeDockerSandbox](../../reference/removedockersandbox/) et [ContainerSandbox](../../reference/containersandbox/).
+
 ## Limites
 
 - Le fournisseur ne bascule jamais vers une exécution sur l’hôte. Si le moteur ou l’image manque, l’allocation échoue ; lancez les [Diagnostics](../diagnostics/).
@@ -87,4 +132,4 @@ Référence API : [ContainerOptions](../../reference/containeroptions/).
 - Un fichier isolé ne peut être monté que dans le répertoire personnel de l’agent ; montez son dossier pour les autres destinations.
 - Le checkout et les métadonnées Git montés sont accessibles en écriture : ce n’est pas une frontière contre un agent hostile ([Sécurité](../security/)).
 
-API : [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/) · [Volume](../../reference/volume/) · [DependencyCache](../../reference/dependencycache/).
+API : [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [listDockerSandboxes](../../reference/listdockersandboxes/) · [listPodmanSandboxes](../../reference/listpodmansandboxes/) · [removeDockerSandbox](../../reference/removedockersandbox/) · [removePodmanSandbox](../../reference/removepodmansandbox/) · [ContainerOptions](../../reference/containeroptions/) · [Volume](../../reference/volume/) · [DependencyCache](../../reference/dependencycache/).

@@ -12,7 +12,7 @@ export async function recoverContainer(
   options: TransferOptions = {},
 ): Promise<void> {
   invariant(
-    /^outpost-[a-f0-9-]{36}$/.test(resourceId),
+    containerDefaults.namePattern.test(resourceId),
     "Invalid recoverable container identity",
   );
   const limits = {
@@ -27,7 +27,7 @@ export async function recoverContainer(
         "ls",
         "--all",
         "--filter",
-        `name=^${resourceId}(-egress)?$`,
+        `name=^${resourceId}(${containerDefaults.companionSuffix})?$`,
         "--format",
         "{{.Names}}",
       ],
@@ -37,13 +37,12 @@ export async function recoverContainer(
   );
   if (!result.stdout.trim()) return;
   const names = result.stdout.trim().split(/\r?\n/);
+  const companion = `${resourceId}${containerDefaults.companionSuffix}`;
   invariant(
-    names.every(
-      (name) => name === resourceId || name === `${resourceId}-egress`,
-    ),
+    names.every((name) => name === resourceId || name === companion),
     "Recoverable container identity mismatch",
   );
-  for (const name of [resourceId, `${resourceId}-egress`]) {
+  for (const name of [resourceId, companion]) {
     if (!names.includes(name)) continue;
     await requireSuccess(
       { executable: engine, arguments: ["rm", "--force", name], ...limits },
