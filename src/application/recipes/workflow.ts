@@ -9,6 +9,7 @@ import { validateRecipeWorkflowSettings } from "./workflow-validation.ts";
 import { normalizeRecipe } from "./normalize.ts";
 import { compileRecipeStep } from "./compile-step.ts";
 import { recipeTextRenderer } from "./rendering.ts";
+import { recipeStepUsesSharedWorkspace } from "../../domain/recipes/step-resources.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type {
   Task,
@@ -22,7 +23,7 @@ import type {
 } from "./workflow-components.types.ts";
 
 export function recipeHasSharedSandbox(document: RecipeDocument): boolean {
-  return document.tasks.some((step) => step.command || step.agent);
+  return document.tasks.some(recipeStepUsesSharedWorkspace);
 }
 
 export function validateRecipeConcurrency(
@@ -38,7 +39,7 @@ export function validateRecipeConcurrency(
         step.after.flatMap((key) => [key, ...(ancestors.get(key) ?? [])]),
       ),
     );
-  const shared = document.tasks.filter((step) => step.command || step.agent);
+  const shared = document.tasks.filter(recipeStepUsesSharedWorkspace);
   for (const [index, left] of shared.entries())
     for (const right of shared.slice(index + 1))
       if (!ancestors.get(right.key)?.has(left.key))
