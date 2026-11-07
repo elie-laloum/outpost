@@ -2,7 +2,7 @@ import { createDeadline } from "../deadline.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { startTaskAttempt } from "./task-state.ts";
 import { OutpostError } from "../errors.ts";
-import { LoopTaskExhausted } from "./loop-task.ts";
+import { LoopTaskExhausted, loopFeedbackExcerpt } from "./loop-task.ts";
 import { validateLoopCheck } from "./loop-validation.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 import type {
@@ -18,6 +18,13 @@ export async function runLoopTask(
 ): Promise<unknown> {
   const state = runtime.record(item);
   let rounds = state.rounds ?? Object.freeze([]);
+  let latestRound = 0;
+  let latestResult: unknown;
+  const previousResult = (round: number): unknown => {
+    if (latestRound > 0 && latestRound === round - 1) return latestResult;
+    const output = rounds.find((value) => value.round === round - 1)?.output;
+    return output?.kind === "json" ? structuredClone(output.value) : undefined;
+  };
   async function save(entry: LoopRoundRecord): Promise<void> {
     rounds = Object.freeze([
       ...rounds.filter((value) => value.round !== entry.round),
@@ -30,6 +37,9 @@ export async function runLoopTask(
       attempt: state.attempts,
       round: entry.round,
       phase: entry.phase,
+      ...(entry.check?.done === false
+        ? { feedback: loopFeedbackExcerpt(entry.check.feedback) }
+        : {}),
     });
     await runtime.persist();
   }
@@ -79,6 +89,7 @@ export async function runLoopTask(
         result = await definition.attempt(
           context("attempt"),
           previous?.done === false ? previous.feedback : undefined,
+          previousResult(entry.round),
         );
         signal.throwIfAborted();
         const output = runtime.options.checkpoint
@@ -90,6 +101,8 @@ export async function runLoopTask(
           ...(output ? { output } : {}),
         });
       }
+      latestRound = entry.round;
+      latestResult = result;
       signal.throwIfAborted();
       const checked = await definition.check(context("check"), result);
       signal.throwIfAborted();

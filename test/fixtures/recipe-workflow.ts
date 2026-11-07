@@ -23,8 +23,11 @@ export function transform(
 export function attempt(
   context: LoopTaskContext,
   feedback: string | undefined,
+  previous: unknown,
 ) {
-  visits.push(`attempt:${context.round}:${feedback ?? ""}`);
+  visits.push(
+    `attempt:${context.round}:${feedback ?? ""}:${JSON.stringify(previous) ?? ""}`,
+  );
   context.reportUsage({ input: 1, output: 1, cached: 0 });
   return { round: context.round };
 }

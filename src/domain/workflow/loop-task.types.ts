@@ -15,9 +15,11 @@ export interface LoopTaskOptions<T> extends Pick<
   "key" | "after" | "condition" | "timeoutMs" | "cache"
 > {
   readonly maxRounds: number;
+  /** `previous` holds the rejected round's result; `unknown` keeps T inferred from the returned value. */
   readonly attempt: (
     context: LoopTaskContext,
     feedback: string | undefined,
+    previous: unknown,
   ) => T | Promise<T>;
   readonly check: (
     context: LoopTaskContext,
@@ -37,6 +39,7 @@ export interface LoopDefinition {
   readonly attempt: (
     context: LoopTaskContext,
     feedback: string | undefined,
+    previous: unknown,
   ) => unknown | Promise<unknown>;
   readonly check: (
     context: LoopTaskContext,

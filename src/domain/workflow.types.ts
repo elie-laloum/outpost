@@ -131,6 +131,8 @@ export interface WorkflowEvent {
   readonly resetAt?: string;
   readonly round?: number;
   readonly phase?: "attempt" | "check" | "complete";
+  /** Bounded feedback of a rejected loop round, on its `complete` event. */
+  readonly feedback?: string;
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;

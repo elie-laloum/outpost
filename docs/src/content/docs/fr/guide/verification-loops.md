@@ -158,7 +158,7 @@ console.log(result.value(fix).summary);
 
 `coding.perform(context)` rattache les tokens et l’annulation de l’agent à la boucle et à son [budget](../budgets/). `coder` sert à exécuter l’appel : seul `fix` entre dans le workflow. `attempt` renvoie du JSON, car un [checkpoint](../durable-runs/) sauvegarde chaque candidat, même refusé.
 
-Un `npm test` en échec renvoie un `status` non nul, et sa sortie devient le retour de la vérification. À vous de choisir où l’envoyer : dans le brief suivant, comme ici, ou dans une [conversation poursuivie](../conversations/).
+Un `npm test` en échec renvoie un `status` non nul, et sa sortie devient le retour de la vérification. À vous de choisir où l’envoyer : dans le brief suivant, comme ici, ou dans une [conversation poursuivie](../conversations/). `attempt` reçoit le résultat du tour refusé en troisième argument, par exemple pour poursuivre sa `conversation`.
 
 :::caution
 Un `sandbox.dispatch()` direct échappe au budget et à l’annulation de la boucle. Passez-lui `context.signal` et déclarez ses tokens avec `context.reportUsage()`.
@@ -230,7 +230,7 @@ Avec un [checkpoint](../durable-runs/), chaque candidat est sauvegardé avant `c
 
 Un tour interrompu n’est rejoué qu’avec `resume: "retry-incomplete"`, car il a peut-être déjà modifié des fichiers. Modifier `maxRounds` rend le checkpoint incompatible.
 
-Chaque enregistrement de tâche liste ses `rounds`, et chaque phase émet un événement de workflow `loop`. `context.idempotencyKey` change à chaque tour et à chaque phase, pour dédupliquer les effets comme dans [Files de jobs et workers](../job-queues/).
+Chaque enregistrement de tâche liste ses `rounds`, et chaque phase émet un événement de workflow `loop`. L’événement `complete` d’un tour refusé porte son `feedback`, limité à 2 000 caractères et masqué par les motifs `redact` du workflow. `context.idempotencyKey` change à chaque tour et à chaque phase, pour dédupliquer les effets comme dans [Files de jobs et workers](../job-queues/).
 
 API : [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).
 
@@ -273,12 +273,12 @@ Avec `dispatch()` au niveau supérieur, chaque passe alloue une nouvelle sandbox
 
 ## Limites
 
-| Limite ou événement             | Ce qui se passe                                                                                               |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `maxRounds`                     | Plafonne les tours, reprises comprises.                                                                       |
-| Tentatives du workflow          | Chaque tour, et chaque rejeu d’un tour interrompu, compte dans `budget.attempts`.                             |
-| `timeoutMs`                     | Borne chaque tour. Il arrête les fonctions de rappel qui respectent `context.signal`.                         |
-| Une exception                   | Fait échouer la tâche aussitôt. Une tâche en boucle n’a pas d’option `retry`.                                 |
-| La dernière vérification refuse | La tâche échoue avec `LoopTaskExhausted`, qui porte le dernier `feedback`. Les dépendants ne s’exécutent pas. |
+| Limite ou événement             | Ce qui se passe                                                                                                                                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxRounds`                     | Plafonne les tours, reprises comprises.                                                                                                                                                                    |
+| Tentatives du workflow          | Chaque tour, et chaque rejeu d’un tour interrompu, compte dans `budget.attempts`.                                                                                                                          |
+| `timeoutMs`                     | Borne chaque tour. Il arrête les fonctions de rappel qui respectent `context.signal`.                                                                                                                      |
+| Une exception                   | Fait échouer la tâche aussitôt. Une tâche en boucle n’a pas d’option `retry`.                                                                                                                              |
+| La dernière vérification refuse | La tâche échoue avec `LoopTaskExhausted`. Son message se termine par le dernier `feedback`, limité à 2 000 caractères ; sa propriété `feedback` garde le texte complet. Les dépendants ne s’exécutent pas. |
 
 [Réparer une CI en échec](../fix-failing-ci/) traite chaque issue dans un script complet.

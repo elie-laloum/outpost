@@ -5545,8 +5545,8 @@
     "Entier sûr strictement positif limitant les tours logiques, reprises comprises. Rejouer une phase interrompue conserve son tour mais consomme une tentative supplémentaire du workflow."
   ],
   "LoopTaskOptions.attempt": [
-    "Produce the candidate output from the phase context and previous rejected check feedback; feedback is undefined in round one. Persisted outputs must be lossless JSON or undefined.",
-    "Produit le résultat candidat depuis le contexte de phase et le feedback du refus précédent ; feedback vaut undefined au premier tour. Les résultats persistés doivent être du JSON sans perte ou undefined."
+    "Produce the candidate output from the phase context, the previous rejected check feedback and the previous round's result; both are undefined in round one, and the result is restored from its checkpoint after a resume. The result is typed unknown so that declaring it keeps T inferred from the returned value. Persisted outputs must be lossless JSON or undefined.",
+    "Produit le résultat candidat depuis le contexte de phase, le feedback du refus précédent et le résultat du tour précédent ; tous deux valent undefined au premier tour, et le résultat est relu depuis son checkpoint après une reprise. Ce résultat est typé unknown pour que sa déclaration laisse T inféré depuis la valeur renvoyée. Les résultats persistés doivent être du JSON sans perte ou undefined."
   ],
   "LoopTaskOptions.check": [
     "Accept the candidate with done: true or request another round with done: false and text feedback. May invoke a reviewer agent; report its usage through the context. Exceptions fail the task.",
@@ -5611,6 +5611,10 @@
   "WorkflowEvent.phase": [
     "Saved phase on loop events: attempt, check or complete.",
     "Phase sauvegardée sur les événements de boucle : attempt, check ou complete."
+  ],
+  "WorkflowEvent.feedback": [
+    "Feedback of a rejected round on its complete loop event, limited to 2,000 characters and masked by the workflow redact patterns.",
+    "Feedback d’un tour refusé sur son événement de boucle complete, limité à 2 000 caractères et masqué par les motifs redact du workflow."
   ],
   "LoopTaskExhausted.key": [
     "Key of the loop task whose verification never succeeded.",

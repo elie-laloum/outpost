@@ -1,4 +1,7 @@
-import { loopTaskDefinition } from "./loop-task.constants.ts";
+import {
+  loopFeedbackCharacters,
+  loopTaskDefinition,
+} from "./loop-task.constants.ts";
 import { defineTask } from "./task.ts";
 import type { Task, TaskOptions } from "../workflow.types.ts";
 import type {
@@ -13,12 +16,22 @@ export class LoopTaskExhausted extends Error {
   readonly feedback: string;
 
   constructor(key: string, maxRounds: number, feedback: string) {
-    super(`Loop task ${key} exhausted its ${maxRounds} rounds`);
+    super(
+      feedback
+        ? `Loop task ${key} exhausted its ${maxRounds} rounds: ${loopFeedbackExcerpt(feedback)}`
+        : `Loop task ${key} exhausted its ${maxRounds} rounds`,
+    );
     this.name = "LoopTaskExhausted";
     this.key = key;
     this.maxRounds = maxRounds;
     this.feedback = feedback;
   }
+}
+
+/** Bounds check feedback for messages and events; the full text stays in round records. */
+export function loopFeedbackExcerpt(feedback: string): string {
+  if (feedback.length <= loopFeedbackCharacters) return feedback;
+  return `${feedback.slice(0, loopFeedbackCharacters)}… [${feedback.length - loopFeedbackCharacters} characters omitted]`;
 }
 
 export function defineLoopTask<T>(options: LoopTaskOptions<T>): Task<T> {

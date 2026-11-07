@@ -150,6 +150,7 @@ test("recipe data, callbacks, loop rounds and decisions match TypeScript without
     2,
   );
   const events = [...visits];
+  assert.ok(events.includes('attempt:2:Try again:{"round":1}'));
   visits.length = 0;
   const selected = defineTask({
     key: "select",
