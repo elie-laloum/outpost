@@ -23,10 +23,12 @@ export interface ContainerOptions {
   readonly cpus?: number;
   readonly memoryMb?: number;
   readonly label?: "z" | "Z" | false;
+  readonly labels?: ContainerLabels;
   readonly retain?: number;
   readonly userns?: "keep-id" | false;
 }
 
+export type ContainerLabels = Readonly<Record<string, string>>;
 export type ContainerEngine = "docker" | "podman";
 export type ContainerCall = (
   args: readonly string[],

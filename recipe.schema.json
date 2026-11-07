@@ -9281,6 +9281,13 @@
                 }
               ]
             },
+            "labels": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
             "retain": {
               "type": "number"
             },
@@ -9510,6 +9517,13 @@
                   "const": "Z"
                 }
               ]
+            },
+            "labels": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {
+                "type": "string"
+              }
             },
             "retain": {
               "type": "number"

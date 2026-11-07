@@ -5,6 +5,8 @@ import {
   defaultEgressImage,
 } from "./container-egress.constants.ts";
 import { egressRuntime } from "./egress/egress.constants.ts";
+import { labelArguments } from "./container-labels.ts";
+import { containerDefaults } from "./container.constants.ts";
 import type {
   ContainerCall,
   ContainerEngine,
@@ -36,7 +38,7 @@ export function createContainerEgress(
   engine: ContainerEngine,
   user: ContainerUser,
 ) {
-  const companion = `${name}-egress`;
+  const companion = `${name}${containerDefaults.companionSuffix}`;
   let attempted = false;
   return {
     name: companion,
@@ -63,6 +65,7 @@ export function createContainerEgress(
           companion,
           "--network",
           "bridge",
+          ...labelArguments(config.labels),
           "--label",
           `${containerEgress.label}=${name}`,
           "--user",

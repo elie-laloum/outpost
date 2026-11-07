@@ -4,7 +4,17 @@ import { fileURLToPath } from "node:url";
 import { validateEgress } from "../../domain/egress.ts";
 import { egressRuntime } from "./egress.constants.ts";
 import { egressFirewall, egressHeartbeat } from "./firewall.ts";
+import { egressNameservers } from "./nameservers.ts";
 import { createEgressProxy } from "./proxy.ts";
+
+// Without a file, glibc queries loopback, which needs no exemption.
+function resolvConf(): string {
+  try {
+    return readFileSync(egressRuntime.resolvConf, "utf8");
+  } catch {
+    return "";
+  }
+}
 
 function run(): void {
   if (process.argv[2] === "health") {
@@ -36,7 +46,7 @@ function run(): void {
       timeout: 2_000,
       stdio: ["pipe", "ignore", "pipe"],
     });
-  nft(egressFirewall(policy));
+  nft(egressFirewall(policy, egressNameservers(resolvConf())));
   const child = spawn(
     process.execPath,
     [fileURLToPath(import.meta.url), "proxy"],

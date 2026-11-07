@@ -8014,6 +8014,7 @@
       "cpus": "number | undefined",
       "memoryMb": "number | undefined",
       "label": "false | \"z\" | \"Z\" | undefined",
+      "labels": "Readonly<Record<string, string>> | undefined",
       "retain": "number | undefined",
       "userns": "false | \"keep-id\" | undefined"
     },
@@ -8037,14 +8038,13 @@
       "cpus": "native",
       "memoryMb": "native",
       "label": "native",
+      "labels": "native",
       "retain": "native",
       "userns": "native"
     }
   },
   "./providers/docker:createDockerSandboxProvider": {
-    "signatures": [
-      "(options?: ContainerOptions): import(\"../integrations.js\").SandboxProvider"
-    ],
+    "signatures": ["(options?: ContainerOptions): SandboxProvider"],
     "options": {},
     "category": "native",
     "lot": 2,
@@ -8088,6 +8088,72 @@
       "allowCidrs": "contract",
       "denyCidrs": "contract"
     }
+  },
+  "./providers/docker:ContainerLabels": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {}
+  },
+  "./providers/docker:ContainerSandbox": {
+    "signatures": [],
+    "options": {
+      "name": "string",
+      "labels": "Readonly<Record<string, string>>"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "name": "contract",
+      "labels": "contract"
+    }
+  },
+  "./providers/docker:ContainerSandboxQuery": {
+    "signatures": [],
+    "options": {
+      "labels": "Readonly<Record<string, string>>",
+      "signal": "AbortSignal | undefined",
+      "deadlineMs": "number | undefined"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "labels": "contract",
+      "signal": "contract",
+      "deadlineMs": "contract"
+    }
+  },
+  "./providers/docker:listDockerSandboxes": {
+    "signatures": [
+      "(query: ContainerSandboxQuery): Promise<ContainerSandbox[]>"
+    ],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/unit/container-inventory.test.ts",
+    "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  "./providers/docker:removeDockerSandbox": {
+    "signatures": ["(name: string, options?: TransferOptions): Promise<void>"],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/unit/container-inventory.test.ts",
+    "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
   },
   "./providers/firecracker:createFirecrackerSandboxProvider": {
     "signatures": ["(options: FirecrackerOptions): SandboxProvider"],
@@ -8166,6 +8232,7 @@
       "cpus": "number | undefined",
       "memoryMb": "number | undefined",
       "label": "false | \"z\" | \"Z\" | undefined",
+      "labels": "Readonly<Record<string, string>> | undefined",
       "retain": "number | undefined",
       "userns": "false | \"keep-id\" | undefined"
     },
@@ -8189,14 +8256,13 @@
       "cpus": "native",
       "memoryMb": "native",
       "label": "native",
+      "labels": "native",
       "retain": "native",
       "userns": "native"
     }
   },
   "./providers/podman:createPodmanSandboxProvider": {
-    "signatures": [
-      "(options?: ContainerOptions): import(\"../integrations.js\").SandboxProvider"
-    ],
+    "signatures": ["(options?: ContainerOptions): SandboxProvider"],
     "options": {},
     "category": "native",
     "lot": 2,
@@ -8240,6 +8306,72 @@
       "allowCidrs": "contract",
       "denyCidrs": "contract"
     }
+  },
+  "./providers/podman:ContainerLabels": {
+    "signatures": [],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {}
+  },
+  "./providers/podman:ContainerSandbox": {
+    "signatures": [],
+    "options": {
+      "name": "string",
+      "labels": "Readonly<Record<string, string>>"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "name": "contract",
+      "labels": "contract"
+    }
+  },
+  "./providers/podman:ContainerSandboxQuery": {
+    "signatures": [],
+    "options": {
+      "labels": "Readonly<Record<string, string>>",
+      "signal": "AbortSignal | undefined",
+      "deadlineMs": "number | undefined"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "labels": "contract",
+      "signal": "contract",
+      "deadlineMs": "contract"
+    }
+  },
+  "./providers/podman:listPodmanSandboxes": {
+    "signatures": [
+      "(query: ContainerSandboxQuery): Promise<ContainerSandbox[]>"
+    ],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/unit/container-inventory.test.ts",
+    "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
+  },
+  "./providers/podman:removePodmanSandbox": {
+    "signatures": ["(name: string, options?: TransferOptions): Promise<void>"],
+    "options": {},
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": "test/unit/container-inventory.test.ts",
+    "reason": "Immediate operation or inspection utility; call from a trusted local extension when needed.",
+    "optionCoverage": {}
   },
   "./providers/vercel:CloudDependencyCache": {
     "signatures": [],

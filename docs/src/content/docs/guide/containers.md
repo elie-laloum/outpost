@@ -78,6 +78,51 @@ API reference: [ContainerOptions](../../reference/containeroptions/).
 
 `outpost image eject --engine podman` writes a `Containerfile` instead of a `Dockerfile`.
 
+## Find sandboxes by label
+
+Set `labels` to tag every sandbox a provider creates. The `create` command that creates the container sets them, and so does the one that creates its [egress companion](../network-restrictions/), so a container never exists without its labels.
+
+```ts
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+
+export const sandboxProvider = createDockerSandboxProvider({
+  image: "outpost-codex:dev",
+  repositoryMode: "isolated",
+  labels: { "com.example.app": "reviews", "com.example.job": "job-42" },
+});
+```
+
+A cleanup process can then find the sandboxes your application owns, including those whose name it never recorded. `listDockerSandboxes()` returns each Outpost sandbox that carries every given label, with its name and labels. `removeDockerSandbox()` removes a sandbox with its egress companion and succeeds when they are already gone. Podman has `listPodmanSandboxes()` and `removePodmanSandbox()`.
+
+```ts title="reap.ts"
+import {
+  listDockerSandboxes,
+  removeDockerSandbox,
+} from "@elie-laloum/outpost/providers/docker";
+
+declare function isJobActive(job: string): Promise<boolean>;
+
+const sandboxes = await listDockerSandboxes({
+  labels: { "com.example.app": "reviews" },
+});
+for (const sandbox of sandboxes) {
+  const job = sandbox.labels["com.example.job"];
+  if (job && (await isJobActive(job))) continue;
+  await removeDockerSandbox(sandbox.name, { deadlineMs: 30_000 });
+}
+```
+
+<!-- features -->
+
+- **Any repository mode**: Both functions work without the provider, whatever `repositoryMode` created the sandboxes.
+- **Outpost containers only**: Only containers named `outpost-<uuid>` are listed or removed, never other containers carrying the same labels.
+- **Your decision**: Removal does not check whether a run still uses the sandbox. A labelled sandbox is listed as soon as its containers are created, before `acquire()` returns, so mark the job active before `acquire()` and clear it only after `release()`. A removed sandbox's next commands fail and its release still succeeds.
+- **Reserved prefix**: Keys starting with `io.outpost.` belong to Outpost and are left out of listed labels. Invalid labels, including values with surrounding whitespace, fail when the provider is created.
+
+Listing requires at least one label. The engine reports image labels too, so choose keys your images do not set.
+
+API reference: [ContainerOptions](../../reference/containeroptions/), [listDockerSandboxes](../../reference/listdockersandboxes/), [removeDockerSandbox](../../reference/removedockersandbox/) and [ContainerSandbox](../../reference/containersandbox/).
+
 ## Limits
 
 - The provider never falls back to host execution. If the engine or image is missing, allocation fails; run [Diagnostics](../diagnostics/).
@@ -87,4 +132,4 @@ API reference: [ContainerOptions](../../reference/containeroptions/).
 - A single file can be mounted only inside the agent home; mount its directory for other destinations.
 - Mounted checkout and Git metadata are writable: this is not a boundary against a hostile agent ([Security](../security/)).
 
-API: [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/) · [Volume](../../reference/volume/) · [DependencyCache](../../reference/dependencycache/).
+API: [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [listDockerSandboxes](../../reference/listdockersandboxes/) · [listPodmanSandboxes](../../reference/listpodmansandboxes/) · [removeDockerSandbox](../../reference/removedockersandbox/) · [removePodmanSandbox](../../reference/removepodmansandbox/) · [ContainerOptions](../../reference/containeroptions/) · [Volume](../../reference/volume/) · [DependencyCache](../../reference/dependencycache/).

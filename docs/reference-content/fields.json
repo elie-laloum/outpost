@@ -2774,6 +2774,46 @@
     "SELinux relabeling of bind mounts on Linux: z shared (default), Z private, false plain bind mounts.",
     "Réétiquetage SELinux des montages sous Linux : z partagé (par défaut), Z privé, false montages simples."
   ],
+  "ContainerOptions.labels": [
+    "Caller labels set by the create command of the sandbox container and of its egress companion, so they exist as soon as the container does, with the ContainerLabels rules. Invalid or reserved labels fail at provider creation with a ConfigurationError located at labels.<key>; a reserved key also carries a hint. listDockerSandboxes and listPodmanSandboxes find sandboxes by these labels. Unrelated to label, which controls SELinux relabeling.",
+    "Labels de l’appelant posés par la commande create du conteneur de la sandbox et de son compagnon egress, si bien qu’ils existent dès que le conteneur existe, selon les règles de ContainerLabels. Des labels invalides ou réservés échouent à la création du provider avec une ConfigurationError située sur labels.<clé> ; une clé réservée porte aussi une indication. listDockerSandboxes et listPodmanSandboxes retrouvent les sandboxes par ces labels. Sans rapport avec label, qui règle le réétiquetage SELinux."
+  ],
+  "listDockerSandboxes.query": [
+    "Labels every reported sandbox must carry, with the cancellation signal and deadline applied to each docker command.",
+    "Labels que chaque sandbox rapportée doit porter, avec le signal d’annulation et le délai appliqués à chaque commande docker."
+  ],
+  "removeDockerSandbox.name": [
+    "Sandbox name, as reported by listDockerSandboxes or received by SandboxContext.registerRecovery.",
+    "Nom de la sandbox, tel que rapporté par listDockerSandboxes ou reçu par SandboxContext.registerRecovery."
+  ],
+  "removeDockerSandbox.options": [
+    "Cancellation signal and deadline applied to each docker command of the removal.",
+    "Signal d’annulation et délai appliqués à chaque commande docker de la suppression."
+  ],
+  "listPodmanSandboxes.query": [
+    "Labels every reported sandbox must carry, with the cancellation signal and deadline applied to each podman command.",
+    "Labels que chaque sandbox rapportée doit porter, avec le signal d’annulation et le délai appliqués à chaque commande podman."
+  ],
+  "removePodmanSandbox.name": [
+    "Sandbox name, as reported by listPodmanSandboxes or received by SandboxContext.registerRecovery.",
+    "Nom de la sandbox, tel que rapporté par listPodmanSandboxes ou reçu par SandboxContext.registerRecovery."
+  ],
+  "removePodmanSandbox.options": [
+    "Cancellation signal and deadline applied to each podman command of the removal.",
+    "Signal d’annulation et délai appliqués à chaque commande podman de la suppression."
+  ],
+  "ContainerSandboxQuery.labels": [
+    "Labels every reported sandbox must carry, with the ContainerLabels rules; an invalid selector fails with a ConfigurationError before any engine command. At least one label is required, so a query cannot select every Outpost sandbox on the host.",
+    "Labels que chaque sandbox rapportée doit porter, selon les règles de ContainerLabels ; un sélecteur invalide échoue avec une ConfigurationError avant toute commande du moteur. Au moins un label est requis, afin qu’une requête ne puisse pas sélectionner toutes les sandboxes Outpost de l’hôte."
+  ],
+  "ContainerSandbox.name": [
+    "Sandbox container name, outpost-<uuid>, to pass to removeDockerSandbox or removePodmanSandbox. It is also reported when only the egress companion remains.",
+    "Nom du conteneur de la sandbox, outpost-<uuid>, à passer à removeDockerSandbox ou removePodmanSandbox. Il est aussi rapporté quand seul le compagnon egress subsiste."
+  ],
+  "ContainerSandbox.labels": [
+    "Labels the engine reports for the sandbox container, including labels inherited from its image, without the reserved io.outpost. keys. When only the egress companion remains, the companion's labels, filtered the same way.",
+    "Labels que le moteur rapporte pour le conteneur de la sandbox, y compris ceux hérités de son image, sans les clés réservées io.outpost.. Quand seul le compagnon egress subsiste, ce sont les labels du compagnon, filtrés de la même façon."
+  ],
   "ContainerOptions.retain": [
     "Bytes of output tail kept per stream, default 65536.",
     "Octets de fin de sortie conservés par flux, 65536 par défaut."
@@ -7591,16 +7631,16 @@
     "True uniquement si chaque token rapporté est associé à un modèle tarifé et si tous les compteurs sont complets."
   ],
   "Usage.models": [
-    "Optional model-attributed counters for cost accounting. Priced dispatches fill this automatically from explicit CLI models, harness requests and built-in subagents. Custom or queued tasks must preserve or provide it. Aggregate counters stay available.",
-    "Compteurs facultatifs par modèle pour calculer le coût. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles."
+    "Model-attributed counters, each with its cache convention. Priced dispatches fill this from explicit CLI models, harness requests and built-in subagents, keyed by model name. Without prices, CLI agent turns are still attributed under <agent>:<model>, or the agent name when no model is configured. Custom or queued tasks must preserve or provide it. Aggregate counters stay available and add entries as reported.",
+    "Compteurs par modèle, chacun avec sa convention de cache. Les dispatchs tarifés les renseignent à partir des modèles CLI explicites, des requêtes du harness et des sous-agents intégrés, avec le nom du modèle pour clé. Sans tarifs, les tours d’agent CLI restent attribués sous <agent>:<modèle>, ou le nom de l’agent quand aucun modèle n’est configuré. Les tâches personnalisées ou en queue doivent les conserver ou les fournir. Les compteurs agrégés restent disponibles et additionnent les entrées telles que rapportées."
   ],
   "ModelUsage.inputIncludesCache": [
-    "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false; built-in model providers use true.",
-    "Indique si input inclut cached et cacheCreated, true par défaut. L’attribution des CLI Claude Code et Kimi utilise false ; les providers de modèle intégrés utilisent true."
+    "Whether input includes cached and cacheCreated, default true. Claude Code and Kimi CLI attribution uses false, so uncached input is input itself; otherwise it is input minus cached and cacheCreated. Built-in model providers use true.",
+    "Indique si input inclut cached et cacheCreated, true par défaut. L’attribution des CLI Claude Code et Kimi utilise false : l’entrée hors cache est alors input ; sinon, c’est input moins cached et cacheCreated. Les providers de modèle intégrés utilisent true."
   ],
   "AgentFeatures.usageInput": [
-    "Input-token convention for pricing CLI usage: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.",
-    "Convention des tokens d’entrée pour tarifer l’usage CLI : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
+    "Input-token convention recorded on each model entry of CLI usage and used for pricing: inclusive by default, uncached when cache reads and writes are additional. Does not alter reported aggregate counters.",
+    "Convention des tokens d’entrée enregistrée sur chaque entrée par modèle de l’usage CLI et utilisée pour la tarification : inclusive par défaut, uncached lorsque les lectures et écritures du cache sont supplémentaires. Ne modifie pas les compteurs agrégés rapportés."
   ],
   "WorkflowBudget.prices": [
     "Model rates per million tokens. Enables model attribution in built-in workflow task helpers and adds cost to result.usage, even without a monetary limit. Copied when accounting starts.",
@@ -7619,8 +7659,8 @@
     "Table de prix du workflow, transmise par les helpers de tâches d’agent. Les dispatchs personnalisés doivent la passer explicitement pour collecter les compteurs par modèle."
   ],
   "DispatchOptions.prices": [
-    "Optional model rates that enable model attribution in usage. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
-    "Tarifs facultatifs activant l’attribution par modèle dans usage. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
+    "Optional model rates. With them, usage is attributed by model name, including harness requests, to match the table; without them only CLI turns are attributed, under agent-scoped keys. Use calculateUsageCost on the result to display its estimate; no dispatch-level monetary limit is enforced.",
+    "Tarifs facultatifs. Avec eux, usage est attribué par nom de modèle, requêtes du harness comprises, pour correspondre à la table ; sans eux, seuls les tours CLI sont attribués, sous des clés incluant l’agent. Utilisez calculateUsageCost sur le résultat pour afficher son estimation ; aucune limite monétaire propre au dispatch n’est appliquée."
   ],
   "DispatchOptions.redact": [
     "Regular expressions replacing matching persisted and observed strings with [REDACTED]. Added to inherited hub rules; prompts sent to the agent and returned results stay intact.",
@@ -11609,5 +11649,29 @@
   "ExecutionDiagnostic.message": [
     "The message createSandbox() or dispatch() raises for this incompatibility.",
     "Le message que createSandbox() ou dispatch() lève pour cette incompatibilité."
+  ],
+  "ContainerSandboxQuery.signal": [
+    "Cooperative cancellation of the whole listing; aborting stops the running engine command and rejects with the signal's reason.",
+    "Annulation coopérative de toute la liste ; l’abandon arrête la commande du moteur en cours et rejette avec la raison du signal."
+  ],
+  "ContainerSandboxQuery.deadlineMs": [
+    "Maximum duration in milliseconds of the whole listing, retries included, default 10000; past it the listing rejects with code timeout.",
+    "Durée maximale en millisecondes de toute la liste, nouvelles tentatives comprises, 10000 par défaut ; au-delà, la liste rejette avec le code timeout."
+  ],
+  "removeDockerSandbox.options.signal": [
+    "Cooperative cancellation of the removal; aborting stops the running docker command and rejects.",
+    "Annulation coopérative de la suppression ; l’abandon arrête la commande docker en cours et rejette."
+  ],
+  "removeDockerSandbox.options.deadlineMs": [
+    "Maximum duration in milliseconds of each docker command of the removal, default 10000; past it the removal rejects with code timeout.",
+    "Durée maximale en millisecondes de chaque commande docker de la suppression, 10000 par défaut ; au-delà, la suppression rejette avec le code timeout."
+  ],
+  "removePodmanSandbox.options.signal": [
+    "Cooperative cancellation of the removal; aborting stops the running podman command and rejects.",
+    "Annulation coopérative de la suppression ; l’abandon arrête la commande podman en cours et rejette."
+  ],
+  "removePodmanSandbox.options.deadlineMs": [
+    "Maximum duration in milliseconds of each podman command of the removal, default 10000; past it the removal rejects with code timeout.",
+    "Durée maximale en millisecondes de chaque commande podman de la suppression, 10000 par défaut ; au-delà, la suppression rejette avec le code timeout."
   ]
 }
