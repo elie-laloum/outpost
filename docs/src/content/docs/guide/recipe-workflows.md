@@ -140,7 +140,7 @@ To let another agent decide, replace the command with `check: { agent: reviewer,
 
 `outputs.fix` holds the last attempt's `text`, `conversation` and `value`, the `commits` of every round and `rounds`. When the last round is rejected, the task fails with a message ending with its feedback. That message and the `loop` event of each rejected round mask the feedback with `workflow.redact`, then keep its first and last 1,000 characters.
 
-`attempt.dispatch` accepts the [agent task dispatch options](../../reference/dispatchoptions/) except `continuation`; a continued conversation also requires a single pass. `quotaResume` applies to the attempt and to an agent check. A loop has no `retry`; `timeoutMs` bounds each round. With a [checkpoint](../recipe-durability/), a resumed run checks a saved attempt without repeating it. Continuing a conversation in a new sandbox after a resume requires an agent that captures its conversations.
+`attempt.dispatch` accepts the [agent task dispatch options](../../reference/dispatchoptions/) except `continuation`; a continued conversation also requires a single pass. `quotaResume` applies to the attempt and to an agent check. A loop has no `retry`; `timeoutMs` bounds each round. With a [checkpoint](../recipe-durability/), a resumed run checks a saved attempt without repeating it. Continuing a conversation in a new sandbox after a resume requires an agent that captures its conversations; this path is tested with scripted agents and not yet validated live with Claude Code or Codex.
 
 ## Control execution
 
