@@ -194,3 +194,29 @@ test("SELinux mount labels preserve readonly and writable combinations", async (
       await lease.release();
     }
 });
+
+test("file workspace bind volumes cannot replace the owned root or the filesystem root", async (t) => {
+  const control = await repository(t),
+    workspace = await repository(t),
+    source = await repository(t);
+  const acquire = (target: string) =>
+    containerProvider(
+      "docker",
+      { label: false, volumes: [{ source, target, readOnly: true }] },
+      async () => ({ status: 0, stdout: "", stderr: "" }),
+    ).acquire({
+      repository: control,
+      directory: workspace,
+      gitDirectories: [],
+      variables: {},
+      workspaceIdentity: "fixture-workspace",
+    });
+  for (const target of ["/", "/workspace", "."])
+    await assert.rejects(
+      acquire(target),
+      /cannot replace the owned workspace root/,
+      target,
+    );
+  const lease = await acquire("/inputs");
+  await lease.release();
+});

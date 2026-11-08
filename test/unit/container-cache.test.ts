@@ -230,3 +230,32 @@ test("Podman reuses an existing cache volume without recreating or deleting it",
   }
   assert.equal(volumes.size, 1);
 });
+
+test("cache overlap checks resolve volume targets like the mounts they create", () => {
+  const caches = [{ name: "npm", key: "v1" }];
+  assert.throws(
+    () =>
+      containerProvider("docker", {
+        caches,
+        volumes: [{ source: ".", target: "~/../../outpost/cache" }],
+      }),
+    /must not overlap dependency caches/,
+  );
+  // The isolated root is /tmp/outpost/workspace, so this volume lands in /tmp/outpost/cache.
+  assert.doesNotThrow(() =>
+    containerProvider("docker", {
+      repositoryMode: "isolated",
+      caches,
+      volumes: [{ source: ".", target: "../../outpost/cache/npm" }],
+    }),
+  );
+  assert.throws(
+    () =>
+      containerProvider("docker", {
+        repositoryMode: "isolated",
+        caches,
+        volumes: [{ source: ".", target: "../../../outpost/cache/npm" }],
+      }),
+    /must not overlap dependency caches/,
+  );
+});

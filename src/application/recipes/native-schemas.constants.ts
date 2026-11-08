@@ -16975,6 +16975,25 @@ export const nativeRecipeSchemas: Readonly<
           additionalProperties: false,
         },
       },
+      imageMounts: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            image: {
+              type: "string",
+            },
+            path: {
+              type: "string",
+            },
+            target: {
+              type: "string",
+            },
+          },
+          required: ["image", "target"],
+          additionalProperties: false,
+        },
+      },
       variables: {
         anyOf: [
           {
@@ -17201,6 +17220,25 @@ export const nativeRecipeSchemas: Readonly<
             },
           },
           required: ["source", "target"],
+          additionalProperties: false,
+        },
+      },
+      imageMounts: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            image: {
+              type: "string",
+            },
+            path: {
+              type: "string",
+            },
+            target: {
+              type: "string",
+            },
+          },
+          required: ["image", "target"],
           additionalProperties: false,
         },
       },

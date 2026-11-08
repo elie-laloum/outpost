@@ -16,6 +16,7 @@ export interface ContainerOptions {
   readonly image?: string;
   readonly user?: { readonly uid: number; readonly gid: number };
   readonly volumes?: readonly Volume[];
+  readonly imageMounts?: readonly ContainerImageMount[];
   readonly variables?: Variables;
   readonly networks?: string | readonly string[];
   readonly groups?: readonly (string | number)[];
@@ -26,6 +27,12 @@ export interface ContainerOptions {
   readonly labels?: ContainerLabels;
   readonly retain?: number;
   readonly userns?: "keep-id" | false;
+}
+
+export interface ContainerImageMount {
+  readonly image: string;
+  readonly path?: string;
+  readonly target: string;
 }
 
 export type ContainerLabels = Readonly<Record<string, string>>;

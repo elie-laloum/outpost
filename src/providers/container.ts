@@ -24,7 +24,11 @@ import {
 } from "./container-cache.constants.ts";
 import { containerCommand } from "./container-command.ts";
 import { containerFiles } from "./container-files.ts";
-import { containerMounts } from "./container-mounts.ts";
+import {
+  imageMountArguments,
+  validateContainerImageMounts,
+} from "./container-image-mounts.ts";
+import { containerMounts, containerRoot } from "./container-mounts.ts";
 import { containerPlan } from "./container-plan.ts";
 import { validateContainerLabels } from "./container-labels.ts";
 import { containerPreflight } from "./container-preflight.ts";
@@ -59,6 +63,14 @@ export function containerProvider(
     ...(options.labels === undefined
       ? {}
       : { labels: validateContainerLabels(options.labels) }),
+    ...(options.imageMounts === undefined
+      ? {}
+      : {
+          imageMounts: validateContainerImageMounts(
+            options.imageMounts,
+            options,
+          ),
+        }),
   };
   if (config.egressImage !== undefined) {
     invariant(
@@ -128,10 +140,7 @@ export function containerProvider(
           executor,
         );
       await containerPreflight(engine, platform, call, config, image, user);
-      const root =
-          config.repositoryMode === "isolated"
-            ? containerDefaults.isolatedRoot
-            : containerDefaults.root,
+      const root = containerRoot(config),
         home = containerDefaults.home;
       const { env, volumes, fileParents } = await containerMounts(
         context,
@@ -139,6 +148,14 @@ export function containerProvider(
         platform,
         root,
         home,
+      );
+      volumes.push(
+        ...imageMountArguments({
+          engine,
+          mounts: config.imageMounts ?? [],
+          root,
+          home,
+        }),
       );
       const egress =
         config.egress?.mode === "allowlist"

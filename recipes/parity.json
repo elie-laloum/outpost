@@ -8007,6 +8007,7 @@
       "image": "string | undefined",
       "user": "{ readonly uid: number; readonly gid: number; } | undefined",
       "volumes": "readonly Volume[] | undefined",
+      "imageMounts": "readonly ContainerImageMount[] | undefined",
       "variables": "Readonly<Record<string, string>> | undefined",
       "networks": "string | readonly string[] | undefined",
       "groups": "readonly (string | number)[] | undefined",
@@ -8031,6 +8032,7 @@
       "image": "native",
       "user": "native",
       "volumes": "native",
+      "imageMounts": "native",
       "variables": "native",
       "networks": "native",
       "groups": "native",
@@ -8087,6 +8089,24 @@
       "domains": "contract",
       "allowCidrs": "contract",
       "denyCidrs": "contract"
+    }
+  },
+  "./providers/docker:ContainerImageMount": {
+    "signatures": [],
+    "options": {
+      "image": "string",
+      "path": "string | undefined",
+      "target": "string"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "image": "contract",
+      "path": "contract",
+      "target": "contract"
     }
   },
   "./providers/docker:ContainerLabels": {
@@ -8225,6 +8245,7 @@
       "image": "string | undefined",
       "user": "{ readonly uid: number; readonly gid: number; } | undefined",
       "volumes": "readonly Volume[] | undefined",
+      "imageMounts": "readonly ContainerImageMount[] | undefined",
       "variables": "Readonly<Record<string, string>> | undefined",
       "networks": "string | readonly string[] | undefined",
       "groups": "readonly (string | number)[] | undefined",
@@ -8249,6 +8270,7 @@
       "image": "native",
       "user": "native",
       "volumes": "native",
+      "imageMounts": "native",
       "variables": "native",
       "networks": "native",
       "groups": "native",
@@ -8305,6 +8327,24 @@
       "domains": "contract",
       "allowCidrs": "contract",
       "denyCidrs": "contract"
+    }
+  },
+  "./providers/podman:ContainerImageMount": {
+    "signatures": [],
+    "options": {
+      "image": "string",
+      "path": "string | undefined",
+      "target": "string"
+    },
+    "category": "contract",
+    "lot": 2,
+    "status": "implemented",
+    "test": null,
+    "reason": "Type contract or execution result, consumed through its owning API rather than a standalone YAML declaration.",
+    "optionCoverage": {
+      "image": "contract",
+      "path": "contract",
+      "target": "contract"
     }
   },
   "./providers/podman:ContainerLabels": {

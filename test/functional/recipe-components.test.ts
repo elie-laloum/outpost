@@ -18,7 +18,12 @@ import {
 } from "../../src/core.ts";
 import { nativeRecipeGuards } from "../../src/application/recipes/native.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
+import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
 import { repository } from "../helpers.ts";
+
+function isSandboxProvider(value: unknown): value is SandboxProvider {
+  return nativeRecipeGuards.sandboxProvider!(value);
+}
 
 function isCliAgent(value: unknown): value is CliAgent {
   return (
@@ -777,4 +782,72 @@ test("file recipe plans read agent capabilities from the catalog and refuse unde
     assert.match(error.diagnostic.hint ?? "", /keep saveConversations enabled/);
     return true;
   });
+});
+
+test("YAML container providers validate image mounts and pass them to the provider", async (t) => {
+  const { ConfigurationError } =
+    await import("../../src/domain/configuration-diagnostic.ts");
+  const directory = await repository(t);
+  const file = join(directory, "recipe.yaml"),
+    config = join(directory, "outpost.yaml");
+  await writeFile(
+    file,
+    JSON.stringify({
+      version: 3,
+      name: "image-mounts",
+      tasks: [{ key: "read", command: { executable: "must-not-run" } }],
+    }),
+  );
+  const declare = (provider: string, imageMounts: unknown) =>
+    writeFile(
+      config,
+      JSON.stringify({
+        version: 2,
+        repository: ".",
+        sandbox: { provider, image: "sandbox:1", imageMounts },
+      }),
+    );
+  const resolveProvider = async () => {
+    const project = await readRecipeProject({ file, config });
+    const scope = createRecipeComponentScope(
+      project.graph,
+      project.registry,
+      directory,
+      new AbortController().signal,
+    );
+    t.after(() => scope.close());
+    return scope.resolve("sandbox", "sandboxProvider");
+  };
+  for (const provider of ["docker", "podman"]) {
+    await declare(provider, [
+      { image: "tools:1", path: "/usr/local/bin", target: "/opt/tools" },
+      { image: "tools:1", target: "~/platform" },
+    ]);
+    await validateRecipeProject({ file, config });
+    const sandboxProvider = await resolveProvider();
+    assert.ok(isSandboxProvider(sandboxProvider));
+    assert.equal(sandboxProvider.name, provider);
+  }
+  await declare("docker", [
+    { image: "tools:1", target: "/opt/tools", readOnly: false },
+  ]);
+  await assert.rejects(
+    validateRecipeProject({ file, config }),
+    /additional properties/,
+  );
+  // The schema accepts these values; the provider refuses them where they are declared.
+  for (const [mount, field] of [
+    [{ image: "tools:1", path: "usr/local/bin", target: "/opt/tools" }, "path"],
+    [{ image: "tools:1", target: "/outpost/tools" }, "target"],
+    [{ image: "tools:1", target: "tools" }, "target"],
+  ] as const) {
+    await declare("podman", [mount]);
+    await validateRecipeProject({ file, config });
+    await assert.rejects(resolveProvider(), (error) => {
+      assert.ok(error instanceof ConfigurationError);
+      assert.equal(error.diagnostic.code, "invalid-container-image-mount");
+      assert.deepEqual(error.diagnostic.path, ["imageMounts", 0, field]);
+      return true;
+    });
+  }
 });
