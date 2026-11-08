@@ -1503,10 +1503,17 @@ test(
         image: containerImage,
         networks: "none",
         repositoryMode,
+        // Docker 28.0 refuses the same image twice in one container (lease collision).
         imageMounts: [
           { image: mountImage, target: "/opt/outpost-image" },
           ...(subpaths
-            ? [{ image: mountImage, path: "/usr/local/bin", target: "~/tools" }]
+            ? [
+                {
+                  image: containerImage,
+                  path: "/usr/local/bin",
+                  target: "~/tools",
+                },
+              ]
             : []),
         ],
       }).acquire({

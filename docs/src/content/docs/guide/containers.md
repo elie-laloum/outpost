@@ -94,7 +94,8 @@ Writes to the mount fail with `Read-only file system`. A target is an absolute p
 
 - **Image already on the engine host**: Outpost never pulls a mount image and does not check it beforehand. When it is missing, the engine fails to start the sandbox: Podman reports `image not known`, Docker `No such image`.
 - **Engine versions**: Docker Engine 28.0 with the containerd image store, which Docker requires for image mounts and enables by default on fresh Docker 29 installations, or Podman 2.2. A `path` needs Podman 5.1; Docker supports it from 28.0.
-- **Validation status**: Podman behavior has been verified with rootless Podman 5.4 on Linux, including the remote client through `CONTAINER_HOST`. The Docker syntax follows the Docker documentation and the Moby source but has not been validated by a real Docker run yet.
+- **Docker 28 and repeated images**: Docker 28.0 refuses to mount the same image twice in one sandbox (`AlreadyExists: lease … already exists` at `create`); Docker 29.9 accepts it. On Docker 28, mount each image once, or use separate images.
+- **Validation status**: Podman behavior has been verified with rootless Podman 5.4 on Linux, including the remote client through `CONTAINER_HOST`. Docker behavior has been verified by hand with Docker 29.9 and the containerd image store, and the Docker container tests in CI run it on Docker 28.0 with that store.
 
 Check these points before relying on a mount:
 

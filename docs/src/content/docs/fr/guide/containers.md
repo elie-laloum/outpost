@@ -94,7 +94,8 @@ Les écritures dans le montage échouent avec `Read-only file system`. Une cible
 
 - **Image déjà sur l’hôte du moteur** : Outpost ne télécharge jamais une image montée et ne la vérifie pas au préalable. Quand elle manque, le moteur ne parvient pas à démarrer la sandbox : Podman signale `image not known`, Docker `No such image`.
 - **Versions des moteurs** : Docker Engine 28.0 avec le stockage d’images containerd, que Docker exige pour les montages d’image et active par défaut sur les nouvelles installations de Docker 29, ou Podman 2.2. Un `path` demande Podman 5.1 ; Docker le prend en charge dès 28.0.
-- **État de la validation** : Le comportement de Podman a été vérifié avec Podman 5.4 rootless sous Linux, y compris le client distant via `CONTAINER_HOST`. La syntaxe Docker suit la documentation Docker et le code source de Moby, mais n’a pas encore été validée par une exécution réelle de Docker.
+- **Docker 28 et images répétées** : Docker 28.0 refuse de monter deux fois la même image dans une sandbox (`AlreadyExists: lease … already exists` au `create`) ; Docker 29.9 l’accepte. Sous Docker 28, montez chaque image une seule fois ou utilisez des images distinctes.
+- **État de la validation** : Le comportement de Podman a été vérifié avec Podman 5.4 rootless sous Linux, y compris le client distant via `CONTAINER_HOST`. Le comportement de Docker a été vérifié à la main avec Docker 29.9 et le stockage d’images containerd, et les tests de conteneurs Docker de la CI l’exécutent sous Docker 28.0 avec ce stockage.
 
 Vérifiez ces points avant de vous appuyer sur un montage :
 
