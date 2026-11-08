@@ -43,7 +43,7 @@ async function acquire(
   const recorded = recorder();
   const lease = await containerProvider(
     engine,
-    { image: "sandbox:1", user, ...options },
+    { image: "sandbox:1", user, label: false, ...options },
     recorded.executor,
     "linux",
   ).acquire({
@@ -242,7 +242,7 @@ test("image mounts are copied when the provider is created", async (t) => {
   const imageMounts = [{ image: "tools:1", path: "/opt", target: "/opt/a" }];
   const provider = containerProvider(
     "docker",
-    { image: "sandbox:1", user, imageMounts },
+    { image: "sandbox:1", user, label: false, imageMounts },
     recorded.executor,
     "linux",
   );
@@ -359,6 +359,7 @@ test("file workspaces pass image mounts to the sandbox they allocate", async (t)
     {
       image: "sandbox:1",
       user,
+      label: false,
       imageMounts: [
         { image: "tools:1", path: "/usr/local/bin", target: "/opt/tools" },
       ],
