@@ -34,6 +34,9 @@ export type {
   ContainerSandboxQuery,
 } from "./container-inventory.types.ts";
 
-export type { ContainerLabels } from "./container.types.ts";
+export type {
+  ContainerImageMount,
+  ContainerLabels,
+} from "./container.types.ts";
 
 export type { EgressPolicy } from "../domain/egress.types.ts";

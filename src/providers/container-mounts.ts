@@ -6,6 +6,7 @@ import { expandPath } from "../infrastructure/files.ts";
 import { inside } from "../infrastructure/files.ts";
 import { canonicalWorkspacePath } from "../infrastructure/workspace-lock.ts";
 import { validateIsolatedMount } from "./container-isolation.ts";
+import { containerDefaults } from "./container.constants.ts";
 import type { ContainerMounts, ContainerOptions } from "./container.types.ts";
 
 export async function containerMounts(
@@ -63,13 +64,7 @@ export async function containerMounts(
         "provider",
         `Mount source is unavailable: ${source}`,
       );
-    const destination = volume.target.replaceAll("\\", "/");
-    const target =
-      destination === "~"
-        ? home
-        : destination.startsWith("~/")
-          ? posix.resolve(home, destination.slice(2))
-          : posix.resolve(root, destination);
+    const target = mountTarget(volume.target, root, home);
     if (context.workspaceIdentity !== undefined && !internal.includes(volume)) {
       const canonicalSource = await canonicalWorkspacePath(source);
       const control = await canonicalWorkspacePath(context.repository);
@@ -77,10 +72,7 @@ export async function containerMounts(
         !inside(canonicalSource, control) && !inside(control, canonicalSource),
         "File workspace mounts cannot expose runtime control storage",
       );
-      invariant(
-        target !== root && !root.startsWith(`${target}/`),
-        "Custom mounts cannot replace the owned workspace root",
-      );
+      validateOwnedRootTarget(root, target);
     }
     if (config.repositoryMode === "isolated")
       await validateIsolatedMount(context, source, target);
@@ -116,4 +108,29 @@ export async function containerMounts(
   }
 
   return { env, volumes, fileParents };
+}
+
+export function containerRoot(config: ContainerOptions): string {
+  return config.repositoryMode === "isolated"
+    ? containerDefaults.isolatedRoot
+    : containerDefaults.root;
+}
+
+/** Resolves a mount target: `~` is the agent home, other relative paths start at the root. */
+export function mountTarget(
+  destination: string,
+  root: string,
+  home: string,
+): string {
+  const target = destination.replaceAll("\\", "/");
+  if (target === "~") return home;
+  if (target.startsWith("~/")) return posix.resolve(home, target.slice(2));
+  return posix.resolve(root, target);
+}
+
+function validateOwnedRootTarget(root: string, target: string): void {
+  invariant(
+    target !== root && target !== "/" && !root.startsWith(`${target}/`),
+    "Custom mounts cannot replace the owned workspace root",
+  );
 }

@@ -31,13 +31,23 @@ export async function validateIsolatedMount(
       "Isolated repository mounts must not expose the host repository, workspace or Git metadata",
     );
   }
-  for (const protectedPath of ["/outpost", "/tmp"]) {
+  validateIsolatedTarget(target);
+}
+
+export function overlapsIsolatedControl(target: string): boolean {
+  return ["/outpost", "/tmp"].some((protectedPath) => {
     const offset = posix.relative(protectedPath, target);
     const reverse = posix.relative(target, protectedPath);
-    invariant(
+    return !(
       (offset === ".." || offset.startsWith("../")) &&
-        (reverse === ".." || reverse.startsWith("../")),
-      "Isolated repository mounts must not overlap workspace or control directories",
+      (reverse === ".." || reverse.startsWith("../"))
     );
-  }
+  });
+}
+
+function validateIsolatedTarget(target: string): void {
+  invariant(
+    !overlapsIsolatedControl(target),
+    "Isolated repository mounts must not overlap workspace or control directories",
+  );
 }

@@ -68,6 +68,46 @@ export const sandboxProvider = createDockerSandboxProvider({
 
 Every mount, device and network you add widens what the agent can reach. To keep the host Git metadata out of the container, use [Private Git](../private-git/).
 
+## Mount tooling from another image
+
+Set `imageMounts` to mount files from another image into the sandbox, read-only. Users can then bring their own sandbox image while your platform adds its launcher, Outpost or a CLI from a tooling image it controls. Each entry names an `image`, an optional absolute `path` inside it and a `target` in the sandbox.
+
+```ts
+import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
+
+export const sandboxProvider = createPodmanSandboxProvider({
+  image: "registry.example.com/team/sandbox:3",
+  repositoryMode: "isolated",
+  imageMounts: [
+    {
+      image: "registry.example.com/platform/run:1.4",
+      path: "/opt/platform",
+      target: "/opt/platform",
+    },
+  ],
+});
+```
+
+Writes to the mount fail with `Read-only file system`. A target is an absolute path, or a `~/` path in the agent home, outside the workspace, `/tmp` and `/outpost`; invalid entries fail when the provider is created. [ContainerImageMount](../../reference/containerimagemount/) lists every rule.
+
+<!-- features -->
+
+- **Image already on the engine host**: Outpost never pulls a mount image and does not check it beforehand. When it is missing, the engine fails to start the sandbox: Podman reports `image not known`, Docker `No such image`.
+- **Engine versions**: Docker Engine 28.0 with the containerd image store, which Docker requires for image mounts and enables by default on fresh Docker 29 installations, or Podman 2.2. A `path` needs Podman 5.1; Docker supports it from 28.0.
+- **Docker 28 and repeated images**: Docker 28.0 refuses to mount the same image twice in one sandbox (`AlreadyExists: lease … already exists` at `create`); Docker 29.9 accepts it. On Docker 28, mount each image once, or use separate images.
+- **Validation status**: Podman behavior has been verified with rootless Podman 5.4 on Linux, including the remote client through `CONTAINER_HOST`. Docker behavior has been verified by hand with Docker 29.9 and the containerd image store, and the Docker container tests in CI run it on Docker 28.0 with that store.
+
+Check these points before relying on a mount:
+
+<!-- features -->
+
+- **Self-contained tooling**: Mounted files run against the sandbox image's libraries. Ship statically linked binaries or a runtime bundled next to the program: a binary linked against glibc does not run in a musl image such as Alpine, and a CLI that needs Node.js fails in a sandbox image without Node.js.
+- **Targets in the home**: Use a direct child of the home, such as `~/tools`, or a path outside it, such as `/opt/tools`. For a deeper target such as `~/.local/bin`, the engine creates the missing folders owned by root, so the agent cannot write beside the mount, for example in `~/.local/share`. A single-file volume cannot sit under an image mount in the home, because Outpost prepares its parent folders inside the read-only image.
+- **Nested mounts**: A bind or image mount under an image mount target needs its mountpoint to exist already in the read-only image; otherwise the container fails to start with `Read-only file system`.
+- **Remote engines**: Image mounts read no path on the machine running Outpost, so they suit an engine reached through `CONTAINER_HOST` or `podman --remote`. `volumes`, the default `repositoryMode: "mounted"` and file workspaces bound as `mount-readonly` or `mount-write` still read the caller's disk; with a remote engine, use `repositoryMode: "isolated"` ([Private Git](../private-git/)) and no `volumes`.
+
+API reference: [ContainerOptions](../../reference/containeroptions/) and [ContainerImageMount](../../reference/containerimagemount/).
+
 ## Podman
 
 Rootless Podman maps your host user into the container with `--userns keep-id`, so files the agent writes stay owned by you. Set `userns: false` to leave the mapping to your Podman configuration. When Podman runs as root, set `userns: "keep-id"` to request it.

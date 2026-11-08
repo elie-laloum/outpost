@@ -1458,6 +1458,108 @@ test(
 );
 
 test(
+  "real image mounts expose read-only image content without caller paths",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const factory =
+      engine === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
+    const mountImage =
+      process.env.OUTPOST_FILE_CONTAINER_IMAGE ??
+      "docker.io/library/node:24-slim";
+    const probe = (args: string[]) =>
+      executeProcess({
+        executable: engine,
+        arguments: args,
+        deadlineMs: 30_000,
+      });
+    // Podman info reports the engine version, also through a remote client.
+    const version = await probe(
+      engine === "podman"
+        ? ["info", "--format", "{{.Version.Version}}"]
+        : ["version", "--format", "{{.Server.Version}}"],
+    );
+    const [major = 0, minor = 0] = version.stdout
+      .trim()
+      .split(/[.-]/)
+      .map(Number);
+    if (engine === "docker") {
+      const store = await probe(["info", "--format", "{{json .DriverStatus}}"]);
+      if (major < 28 || !store.stdout.includes("io.containerd.snapshotter")) {
+        t.skip(
+          `Docker ${major}.${minor} image mounts need Engine 28.0 and the containerd image store (DriverStatus: ${store.stdout.trim() || store.stderr.trim()})`,
+        );
+        return;
+      }
+    }
+    // Podman added image mount subpaths in 5.1; Docker has them since 28.0.
+    const subpaths = engine === "docker" || major * 100 + minor >= 501;
+    const root = await repository(t);
+    const sandbox = (repositoryMode: "mounted" | "isolated") =>
+      factory({
+        image: containerImage,
+        networks: "none",
+        repositoryMode,
+        // Docker 28.0 refuses the same image twice in one container (lease collision).
+        imageMounts: [
+          { image: mountImage, target: "/opt/outpost-image" },
+          ...(subpaths
+            ? [
+                {
+                  image: containerImage,
+                  path: "/usr/local/bin",
+                  target: "~/tools",
+                },
+              ]
+            : []),
+        ],
+      }).acquire({
+        repository: root,
+        directory: root,
+        gitDirectories: [join(root, ".git")],
+        variables: {},
+      });
+    const shell = (
+      lease: Awaited<ReturnType<typeof sandbox>>,
+      script: string,
+    ) => lease.invoke({ executable: "sh", arguments: ["-c", script] });
+    for (const repositoryMode of ["mounted", "isolated"] as const)
+      await t.test(repositoryMode, async () => {
+        const lease = await sandbox(repositoryMode);
+        try {
+          const read = await shell(
+            lease,
+            "grep -q '^ID=' /opt/outpost-image/etc/os-release && test -x /opt/outpost-image/usr/local/bin/node",
+          );
+          assert.equal(read.status, 0, read.stderr);
+          const write = await shell(lease, "touch /opt/outpost-image/probe");
+          assert.notEqual(write.status, 0);
+          assert.match(write.stderr, /Read-only file system/);
+          if (!subpaths) return;
+          const tool = await shell(
+            lease,
+            'test ! -e "$HOME/tools/usr" && "$HOME/tools/node" -e "process.stdout.write(process.version)"',
+          );
+          assert.equal(tool.status, 0, tool.stderr);
+          assert.match(tool.stdout, /^v\d+\./);
+          const folderWrite = await shell(lease, 'touch "$HOME/tools/probe"');
+          assert.notEqual(folderWrite.status, 0);
+          assert.match(folderWrite.stderr, /Read-only file system/);
+        } finally {
+          await lease.release();
+        }
+      });
+    if (!subpaths)
+      t.diagnostic(
+        `${engine} ${major}.${minor} cannot mount an image path; only whole-image mounts were checked`,
+      );
+  },
+);
+
+test(
   "durable interactive tasks release containers between questions and restore files and history",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async (t) => {

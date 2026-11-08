@@ -68,6 +68,46 @@ export const sandboxProvider = createDockerSandboxProvider({
 
 Chaque montage, périphérique ou réseau ajouté élargit ce que l’agent peut atteindre. Pour garder les métadonnées Git de l’hôte hors du conteneur, utilisez le [Git privé](../private-git/).
 
+## Monter des outils depuis une autre image
+
+Définissez `imageMounts` pour monter dans la sandbox des fichiers d’une autre image, en lecture seule. Vos utilisateurs peuvent alors fournir leur propre image de sandbox tandis que votre plateforme y ajoute son lanceur, Outpost ou une CLI depuis une image d’outillage qu’elle contrôle. Chaque entrée désigne une `image`, un `path` absolu facultatif dans cette image et une `target` dans la sandbox.
+
+```ts
+import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
+
+export const sandboxProvider = createPodmanSandboxProvider({
+  image: "registry.example.com/team/sandbox:3",
+  repositoryMode: "isolated",
+  imageMounts: [
+    {
+      image: "registry.example.com/platform/run:1.4",
+      path: "/opt/platform",
+      target: "/opt/platform",
+    },
+  ],
+});
+```
+
+Les écritures dans le montage échouent avec `Read-only file system`. Une cible est un chemin absolu, ou un chemin `~/` dans le répertoire personnel de l’agent, hors du workspace, de `/tmp` et de `/outpost` ; une entrée invalide échoue à la création du fournisseur. [ContainerImageMount](../../reference/containerimagemount/) liste toutes les règles.
+
+<!-- features -->
+
+- **Image déjà sur l’hôte du moteur** : Outpost ne télécharge jamais une image montée et ne la vérifie pas au préalable. Quand elle manque, le moteur ne parvient pas à démarrer la sandbox : Podman signale `image not known`, Docker `No such image`.
+- **Versions des moteurs** : Docker Engine 28.0 avec le stockage d’images containerd, que Docker exige pour les montages d’image et active par défaut sur les nouvelles installations de Docker 29, ou Podman 2.2. Un `path` demande Podman 5.1 ; Docker le prend en charge dès 28.0.
+- **Docker 28 et images répétées** : Docker 28.0 refuse de monter deux fois la même image dans une sandbox (`AlreadyExists: lease … already exists` au `create`) ; Docker 29.9 l’accepte. Sous Docker 28, montez chaque image une seule fois ou utilisez des images distinctes.
+- **État de la validation** : Le comportement de Podman a été vérifié avec Podman 5.4 rootless sous Linux, y compris le client distant via `CONTAINER_HOST`. Le comportement de Docker a été vérifié à la main avec Docker 29.9 et le stockage d’images containerd, et les tests de conteneurs Docker de la CI l’exécutent sous Docker 28.0 avec ce stockage.
+
+Vérifiez ces points avant de vous appuyer sur un montage :
+
+<!-- features -->
+
+- **Outillage autonome** : Les fichiers montés s’exécutent avec les bibliothèques de l’image de la sandbox. Fournissez des binaires liés statiquement ou un runtime embarqué à côté du programme : un binaire lié à la glibc ne s’exécute pas dans une image musl comme Alpine, et une CLI qui demande Node.js échoue dans une image de sandbox sans Node.js.
+- **Cibles dans le répertoire personnel** : Choisissez un enfant direct du répertoire personnel, comme `~/tools`, ou un chemin en dehors, comme `/opt/tools`. Pour une cible plus profonde comme `~/.local/bin`, le moteur crée les dossiers manquants avec root pour propriétaire, si bien que l’agent ne peut pas écrire à côté du montage, par exemple dans `~/.local/share`. Un volume d’un seul fichier ne peut pas se trouver sous un montage d’image dans le répertoire personnel, car Outpost prépare ses dossiers parents dans l’image en lecture seule.
+- **Montages imbriqués** : Un montage bind ou d’image sous la cible d’un montage d’image exige que son point de montage existe déjà dans l’image en lecture seule ; sinon le conteneur ne démarre pas, avec `Read-only file system`.
+- **Moteurs distants** : Les montages d’image ne lisent aucun chemin sur la machine qui exécute Outpost : ils conviennent à un moteur joint via `CONTAINER_HOST` ou `podman --remote`. `volumes`, le `repositoryMode: "mounted"` par défaut et les workspaces de fichiers liés en `mount-readonly` ou `mount-write` lisent toujours le disque de l’appelant ; avec un moteur distant, utilisez `repositoryMode: "isolated"` ([Git privé](../private-git/)) et aucun `volumes`.
+
+Référence API : [ContainerOptions](../../reference/containeroptions/) et [ContainerImageMount](../../reference/containerimagemount/).
+
 ## Podman
 
 Podman rootless associe votre utilisateur hôte au conteneur avec `--userns keep-id` : les fichiers écrits par l’agent restent à vous. Définissez `userns: false` pour laisser la correspondance à votre configuration Podman. Quand Podman tourne en root, définissez `userns: "keep-id"` pour la demander.

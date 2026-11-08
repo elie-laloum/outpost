@@ -188,3 +188,26 @@ jobs:
           bun run docs:test:container
         env:
           OUTPOST_DOCS_ENGINE: ${{ matrix.engine }}
+  docker-image-mounts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Switch Docker to the containerd image store
+        run: |
+          echo '{"features":{"containerd-snapshotter":true}}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}' | tee /dev/stderr | grep -q io.containerd.snapshotter
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: node test/fixtures/ci-image.ts docker outpost-ci:latest
+      - run: docker pull docker.io/library/node:24-slim
+      - run: node --import ./test/setup.ts --test --test-name-pattern='real image mounts' test/container.test.ts
+        env:
+          OUTPOST_CONTAINER_ENGINE: docker

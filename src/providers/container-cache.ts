@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import { realpath } from "node:fs/promises";
-import { posix } from "node:path";
 import { invariant } from "../domain/errors.ts";
 import { cacheDefaults } from "./container-cache.constants.ts";
+import { containerRoot, mountTarget } from "./container-mounts.ts";
+import { containerDefaults } from "./container.constants.ts";
 import type {
   DependencyCache,
   ContainerCacheMount,
@@ -33,11 +34,9 @@ export function validateCacheDeclarations(
 export function validateCaches(config: ContainerOptions): void {
   validateCacheDeclarations(config.caches ?? []);
   if (!config.caches?.length) return;
+  const root = containerRoot(config);
   for (const volume of config.volumes ?? []) {
-    const target = posix.resolve(
-      "/workspace",
-      volume.target.replaceAll("\\", "/"),
-    );
+    const target = mountTarget(volume.target, root, containerDefaults.home);
     invariant(
       !(
         target === cacheDefaults.root ||
