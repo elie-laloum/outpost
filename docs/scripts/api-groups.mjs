@@ -130,7 +130,7 @@ export const groups = [
     title: ["Providers", "Providers"],
     guide: "guide/choose-a-sandbox",
     names:
-      "createDockerSandboxProvider createPodmanSandboxProvider listDockerSandboxes listPodmanSandboxes removeDockerSandbox removePodmanSandbox createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions ContainerLabels ContainerSandbox ContainerSandboxQuery DependencyCache CloudDependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
+      "createDockerSandboxProvider createPodmanSandboxProvider listDockerSandboxes listPodmanSandboxes removeDockerSandbox removePodmanSandbox createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions ContainerImageMount ContainerLabels ContainerSandbox ContainerSandboxQuery DependencyCache CloudDependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
   },
   {
     id: "model-providers",
@@ -291,7 +291,7 @@ const guidePages = {
   "quota-pauses":
     "WorkflowQuotaPolicy WorkflowQuotaPause QuotaResumePolicy quotaFault QuotaFault",
   containers:
-    "createDockerSandboxProvider createPodmanSandboxProvider listDockerSandboxes listPodmanSandboxes removeDockerSandbox removePodmanSandbox ContainerOptions ContainerLabels ContainerSandbox ContainerSandboxQuery Volume",
+    "createDockerSandboxProvider createPodmanSandboxProvider listDockerSandboxes listPodmanSandboxes removeDockerSandbox removePodmanSandbox ContainerOptions ContainerImageMount ContainerLabels ContainerSandbox ContainerSandboxQuery Volume",
   "host-process": "createLocalSandboxProvider",
   "cloud-sandboxes":
     "createVercelSandboxProvider createDaytonaSandboxProvider VercelOptions DaytonaOptions",

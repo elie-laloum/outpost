@@ -2833,6 +2833,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/containerimagemount",
+        "label": "ContainerImageMount",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/containersandbox",
         "label": "ContainerSandbox",
         "attrs": { "data-api-kind": "interface" }

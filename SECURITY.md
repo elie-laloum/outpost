@@ -10,7 +10,7 @@ Protected publication uses destination manifests, host-user overlap locks, same-
 
 ## Sandbox access
 
-By default, Docker/Podman expose the selected checkout, Git metadata and explicit volumes. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
+By default, Docker/Podman expose the selected checkout, Git metadata and explicit volumes. Image mounts expose the content of other images already on the engine host, always read-only; trust those images like the sandbox image, because their programs run with the agent's authority. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
 
 Shared Git metadata is writable by the agent. A mounted sandbox is not an adversarial boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but a malicious repository can contain other executable configuration or project tooling. Do not run untrusted repositories with valuable host credentials. Host `createLocalSandboxProvider()` provides no isolation.
 
