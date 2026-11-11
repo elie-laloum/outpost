@@ -1,5 +1,8 @@
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
-import type { RecipeExpressionContext } from "../../domain/recipes/expressions.types.ts";
+import type {
+  RecipeConditionNode,
+  RecipeExpressionContext,
+} from "../../domain/recipes/expressions.types.ts";
 import type {
   Task,
   TaskContext,
@@ -32,4 +35,10 @@ export interface RecipeCompilationContext {
     context: TaskContext,
     loop?: RecipeExpressionContext["loop"],
   ): string;
+  /** Evaluates a compiled condition; `response` is a loop check agent's typed response. */
+  condition(
+    node: RecipeConditionNode,
+    context: TaskContext,
+    response?: WorkflowJson,
+  ): boolean;
 }

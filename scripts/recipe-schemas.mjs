@@ -356,9 +356,9 @@ const expressions = {
         type: "object",
         additionalProperties: { $ref: "#/$defs/expression" },
         not: {
-          anyOf: ["$input", "$step", "$literal", "$select"].map((key) => ({
-            required: [key],
-          })),
+          anyOf: ["$input", "$step", "$literal", "$select", "$response"].map(
+            (key) => ({ required: [key] }),
+          ),
         },
       },
     ],
@@ -422,7 +422,66 @@ for (const [field, kind] of Object.entries({
       shapeOf(nativeRecipeSchemas[`${kind}.options`], `${kind}.options`),
     ],
   };
-// A declarative loop runs an agent attempt and a command or agent check in the shared workspace.
+// A loop check agent's done condition alone may read its typed response through $response.
+const doneExpressions = JSON.parse(
+  JSON.stringify(expressions)
+    .replaceAll('"#/$defs/expression"', '"#/$defs/doneExpression"')
+    .replaceAll('"#/$defs/condition"', '"#/$defs/doneCondition"'),
+);
+doneExpressions.expression.anyOf.splice(-1, 0, {
+  type: "object",
+  additionalProperties: false,
+  required: ["$response"],
+  properties: { $response: { $ref: "#/$defs/propertyPath" } },
+});
+const loopText = { type: "string", pattern: "\\S" };
+const loopSteps = {
+  doneExpression: doneExpressions.expression,
+  doneCondition: doneExpressions.condition,
+  loopCommandStep: {
+    type: "object",
+    additionalProperties: false,
+    required: ["command"],
+    properties: { command: { $ref: "#/$defs/command" } },
+  },
+  loopAttemptAgent: {
+    type: "object",
+    additionalProperties: false,
+    required: ["agent", "brief"],
+    properties: {
+      agent: loopText,
+      brief: loopText,
+      conversation: { enum: ["new", "continue"] },
+      followUp: loopText,
+      dispatch: taskV3.properties.dispatch,
+    },
+  },
+  loopCheckAgent: {
+    type: "object",
+    additionalProperties: false,
+    required: ["agent", "brief"],
+    dependentRequired: { done: ["dispatch"] },
+    properties: {
+      agent: loopText,
+      brief: loopText,
+      dispatch: taskV3.properties.dispatch,
+      done: { $ref: "#/$defs/doneCondition" },
+    },
+  },
+};
+const attemptStep = {
+  oneOf: [
+    { $ref: "#/$defs/loopCommandStep" },
+    { $ref: "#/$defs/loopAttemptAgent" },
+  ],
+};
+const checkStep = {
+  oneOf: [
+    { $ref: "#/$defs/loopCommandStep" },
+    { $ref: "#/$defs/loopCheckAgent" },
+  ],
+};
+// A declarative loop runs ordered agent and command steps in the shared workspace; a mapping is a one-step list.
 taskV3.properties.loop.anyOf.push({
   type: "object",
   additionalProperties: false,
@@ -434,40 +493,18 @@ taskV3.properties.loop.anyOf.push({
       maximum: Number.MAX_SAFE_INTEGER,
     },
     attempt: {
-      type: "object",
-      additionalProperties: false,
-      required: ["agent", "brief"],
-      properties: {
-        agent: { type: "string", pattern: "\\S" },
-        brief: { type: "string", pattern: "\\S" },
-        conversation: { enum: ["new", "continue"] },
-        followUp: { type: "string", pattern: "\\S" },
-        dispatch: taskV3.properties.dispatch,
-      },
-      if: {
-        required: ["conversation"],
-        properties: { conversation: { const: "continue" } },
-      },
-      else: { not: { required: ["followUp"] } },
-    },
-    check: {
-      oneOf: [
+      anyOf: [
+        { $ref: "#/$defs/loopAttemptAgent" },
         {
-          type: "object",
-          additionalProperties: false,
-          required: ["command"],
-          properties: { command: { $ref: "#/$defs/command" } },
-        },
-        {
-          type: "object",
-          additionalProperties: false,
-          required: ["agent", "brief"],
-          properties: {
-            agent: { type: "string", pattern: "\\S" },
-            brief: { type: "string", pattern: "\\S" },
-          },
+          type: "array",
+          minItems: 1,
+          items: attemptStep,
+          contains: { $ref: "#/$defs/loopAttemptAgent" },
         },
       ],
+    },
+    check: {
+      anyOf: [checkStep, { type: "array", minItems: 1, items: checkStep }],
     },
   },
 });
@@ -516,7 +553,11 @@ taskV3.allOf = [
             properties: {
               loop: {
                 required: ["attempt"],
-                properties: { attempt: { required: ["agent"] } },
+                properties: {
+                  attempt: {
+                    anyOf: [{ type: "array" }, { required: ["agent"] }],
+                  },
+                },
               },
             },
           },
@@ -555,6 +596,7 @@ recipe.$defs = {
   ...recipe.$defs,
   ...definitions,
   ...expressions,
+  ...loopSteps,
   taskV3,
   inputV3,
 };

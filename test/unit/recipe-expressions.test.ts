@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  compileRecipeCondition,
+  evaluateRecipeCondition,
   recipeCondition,
   recipeExpression,
+  validateRecipeCondition,
   validateRecipeExpression,
 } from "../../src/domain/recipes/expressions.ts";
+import { validateRecipe } from "../../src/domain/recipe.ts";
 import { parseRecipe } from "../../src/infrastructure/recipe.ts";
 import { ConfigurationError } from "../../src/domain/configuration-diagnostic.ts";
 
@@ -242,5 +246,148 @@ test("loop values interpolate only where a loop field provides them", () => {
         output: () => undefined,
       }),
     /only available inside a loop/,
+  );
+});
+
+test("each loop step position interpolates only its own loop values", () => {
+  const recipe = (
+    attempt: readonly object[],
+    check: readonly object[] = [{ command: { executable: "true" } }],
+  ) => ({
+    version: 3,
+    name: "positions",
+    tasks: [{ key: "loop", loop: { maxRounds: 2, attempt, check } }],
+  });
+  const located = (path: string, pattern: RegExp) => (error: unknown) =>
+    error instanceof ConfigurationError &&
+    error.diagnostic.path.join(".") === path &&
+    pattern.test(error.message);
+  validateRecipe(
+    recipe(
+      [
+        {
+          agent: "coder",
+          brief: "#{{ loop.round }} {{ loop.feedback }}",
+          followUp: "#{{ loop.round }} {{ loop.feedback }}",
+        },
+        { command: { executable: "echo", arguments: ["{{ loop.round }}"] } },
+      ],
+      [
+        { command: { executable: "echo", arguments: ["{{ loop.round }}"] } },
+        { agent: "reviewer", brief: "#{{ loop.round }} {{ loop.text }}" },
+      ],
+    ),
+  );
+  for (const [attempt, check, path, pattern] of [
+    [
+      [{ agent: "coder", brief: "{{ loop.text }}" }],
+      undefined,
+      "tasks.0.loop.attempt.0.brief",
+      /use \{\{ loop.round \}\} or \{\{ loop.feedback \}\}/,
+    ],
+    [
+      [
+        { agent: "coder", brief: "Fix." },
+        { command: { executable: "echo", arguments: ["{{ loop.feedback }}"] } },
+      ],
+      undefined,
+      "tasks.0.loop.attempt.1.command.arguments.0",
+      /use \{\{ loop.round \}\}$/,
+    ],
+    [
+      [{ agent: "coder", brief: "Fix." }],
+      [{ agent: "reviewer", brief: "{{ loop.feedback }}" }],
+      "tasks.0.loop.check.0.brief",
+      /use \{\{ loop.round \}\} or \{\{ loop.text \}\}/,
+    ],
+    [
+      [{ agent: "coder", brief: "Fix." }],
+      [
+        {
+          agent: "reviewer",
+          brief: "Review.",
+          done: { eq: ["{{ loop.round }}", "2"] },
+        },
+      ],
+      "tasks.0.loop.check.0.done.eq.0",
+      /\{\{ loop.round \}\}/,
+    ],
+  ] as const)
+    assert.throws(
+      () => validateRecipe(recipe(attempt, check)),
+      located(path, pattern),
+    );
+});
+
+test("$response reads a check agent's typed response only inside done", () => {
+  const scope = { inputs: [], steps: [], response: true };
+  const response = { score: 9, issues: [], nested: { ok: true } };
+  const context = { inputs: {}, steps: [], output: () => undefined, response };
+  const evaluate = (condition: unknown) =>
+    evaluateRecipeCondition(compileRecipeCondition(condition, scope), context);
+  assert.equal(evaluate({ gte: [{ $response: ["score"] }, 8] }), true);
+  assert.equal(evaluate({ eq: [{ $response: ["issues"] }, []] }), true);
+  assert.equal(evaluate({ eq: [{ $response: [] }, response] }), true);
+  assert.equal(evaluate({ exists: { $response: ["nested", "ok"] } }), true);
+  assert.equal(evaluate({ exists: { $response: ["missing"] } }), false);
+  assert.throws(
+    () => evaluate({ gte: [{ $response: ["missing"] }, 1] }),
+    /Missing recipe field: missing/,
+  );
+  assert.throws(
+    () => evaluate({ gte: [{ $response: ["issues"] }, 1] }),
+    /ordering requires two numbers or two strings/,
+  );
+  assert.throws(
+    () =>
+      evaluateRecipeCondition(
+        compileRecipeCondition({ exists: { $response: [] } }, scope),
+        { inputs: {}, steps: [], output: () => undefined },
+      ),
+    /\$response is unavailable here/,
+  );
+  for (const malformed of [
+    { $response: "score" },
+    { $response: ["score"], path: [] },
+    { $response: [-1] },
+  ])
+    assert.throws(
+      () => compileRecipeCondition({ exists: malformed }, scope, ["done"]),
+      (error: unknown) =>
+        error instanceof ConfigurationError &&
+        error.diagnostic.path.join(".") === "done.exists",
+    );
+  const document = parseRecipe(
+    "version: 3\nname: check\ntasks:\n  - key: first\n    value: 1\n",
+  );
+  const step = document.tasks[0]!;
+  assert.throws(
+    () =>
+      validateRecipeCondition(
+        { eq: [{ $response: ["score"] }, 1] },
+        { document, step, sourcePath: ["tasks", 0, "when"] },
+      ),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      /only available in the done condition/.test(error.message) &&
+      error.diagnostic.path.join(".") === "tasks.0.when.eq.0",
+  );
+  assert.throws(
+    () =>
+      validateRecipe({
+        version: 3,
+        name: "reserved",
+        tasks: [{ key: "first", value: { $response: ["score"] } }],
+      }),
+    (error: unknown) =>
+      error instanceof ConfigurationError &&
+      error.diagnostic.path.join(".") === "tasks.0.value",
+  );
+  assert.deepEqual(
+    recipeExpression(
+      { $literal: { $response: ["score"] } },
+      { inputs: {}, steps: [], output: () => undefined },
+    ),
+    { $response: ["score"] },
   );
 });

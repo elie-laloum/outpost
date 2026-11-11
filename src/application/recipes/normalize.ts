@@ -1,11 +1,19 @@
 import { recipeAction } from "../../domain/recipes/actions.ts";
 import type { RecipeDocument, RecipeStep } from "../../domain/recipe.types.ts";
-import { declarativeRecipeLoop } from "../../domain/recipes/loop.ts";
-import type { RecipeDeclarativeLoop } from "../../domain/recipes/loop.types.ts";
+import {
+  declarativeRecipeLoop,
+  recipeLoopDispatchComponent,
+  recipeLoopDone,
+} from "../../domain/recipes/loop.ts";
+import type {
+  RecipeDeclarativeLoop,
+  RecipeLoopAgentStep,
+} from "../../domain/recipes/loop.types.ts";
 import type {
   NormalizedRecipe,
+  NormalizedRecipeLoop,
+  NormalizedRecipeLoopAttemptAgent,
   NormalizedRecipeStep,
-  NormalizedRecipeStepBase,
 } from "./normalized.types.ts";
 import type {
   RecipeWorkflowComponents,
@@ -26,12 +34,13 @@ export function normalizeRecipe(
     name: document.name,
     inputs: document.inputs,
     tasks: document.tasks.map((step, index) =>
-      normalizeStep(step, components.steps[step.key] ?? {}, index),
+      normalizeStep(document, step, components.steps[step.key] ?? {}, index),
     ),
   };
 }
 
 function normalizeStep(
+  document: RecipeDocument,
   step: RecipeStep,
   configuration: RecipeWorkflowStepComponents,
   index: number,
@@ -87,7 +96,18 @@ function normalizeStep(
     case "loop": {
       const loop = declarativeRecipeLoop(step);
       if (loop)
-        return normalizeDeclarativeLoop(common, quota, loop, configuration);
+        return {
+          ...common,
+          kind: "declarative-loop",
+          ...quota,
+          loop: normalizeDeclarativeLoop(
+            document,
+            step,
+            index,
+            loop,
+            configuration,
+          ),
+        };
       return {
         ...common,
         kind,
@@ -170,21 +190,39 @@ function normalizeStep(
 }
 
 function normalizeDeclarativeLoop(
-  common: NormalizedRecipeStepBase,
-  quota: Pick<RecipeStep, "quotaResume">,
+  document: RecipeDocument,
+  step: RecipeStep,
+  index: number,
   loop: RecipeDeclarativeLoop,
   configuration: RecipeWorkflowStepComponents,
-): NormalizedRecipeStep {
-  if (loop.attempt.dispatch && !configuration.loopAttemptDispatch)
-    throw new Error("Recipe dispatch components require createRecipeRuntime");
+): NormalizedRecipeLoop {
+  const dispatch = (
+    agent: RecipeLoopAgentStep,
+  ): Pick<NormalizedRecipeLoopAttemptAgent, "dispatch"> => {
+    if (!agent.dispatch) return {};
+    const settings =
+      configuration.loopDispatch?.[
+        recipeLoopDispatchComponent(step.key, agent)
+      ];
+    if (!settings)
+      throw new Error("Recipe dispatch components require createRecipeRuntime");
+    return { dispatch: settings };
+  };
   return {
-    ...common,
-    kind: "declarative-loop",
-    ...quota,
-    loop,
-    ...(configuration.loopAttemptDispatch
-      ? { dispatch: configuration.loopAttemptDispatch }
-      : {}),
+    maxRounds: loop.maxRounds,
+    attempt: loop.attempt.map((item) =>
+      item.kind === "agent" ? { ...item, ...dispatch(item) } : item,
+    ),
+    check: loop.check.map((item) => {
+      if (item.kind === "command") return item;
+      const { done: _source, ...agent } = item;
+      const done = recipeLoopDone(document, step, item, [
+        "tasks",
+        index,
+        "loop",
+      ]);
+      return { ...agent, ...dispatch(item), ...(done ? { done } : {}) };
+    }),
   };
 }
 

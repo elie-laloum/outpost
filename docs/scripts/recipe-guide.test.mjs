@@ -168,6 +168,14 @@ for (const locale of ["", "fr/"]) {
     assert.deepEqual(validation.agents, ["coder"]);
   });
 
+  test(`${locale}loop step examples validate agents, responses and done conditions`, async (t) => {
+    const [recipe, configuration] = await blocks("recipe-loops", locale);
+    const validation = await validateRecipeProject(
+      await project(t, recipe.source, configuration.source),
+    );
+    assert.deepEqual(validation.agents, ["coder", "documenter", "reviewer"]);
+  });
+
   test(`${locale}durability and services examples preserve a pending approval`, async (t) => {
     const [configuration, recipe] = await blocks("recipe-durability", locale);
     const files = await project(t, recipe.source, configuration.source);

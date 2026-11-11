@@ -129,6 +129,7 @@ export const tiers = [
           "guide/recipe-workspaces",
           "guide/recipe-configuration",
           "guide/recipe-workflows",
+          "guide/recipe-loops",
           "guide/recipe-dialogue",
           "guide/recipe-durability",
           "guide/recipe-observation",

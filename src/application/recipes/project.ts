@@ -3,6 +3,7 @@ import {
   ConfigurationError,
 } from "../../domain/configuration-diagnostic.ts";
 import { validateRecipeProjectExpressions } from "./project-expressions.ts";
+import { validateRecipeProjectLoops } from "./project-loops.ts";
 import { validateRecipeConcurrency } from "./workflow.ts";
 import { workflowOptionComponents } from "./workflow-components.ts";
 import { recipeFileError } from "../../infrastructure/recipes/diagnostic.ts";
@@ -161,6 +162,7 @@ export async function readRecipeProject(
       document,
     );
     validateRecipeProjectExpressions(document, graph);
+    validateRecipeProjectLoops(document, graph);
     if (files) validateFileRecipeCapabilities(document, graph);
     if (
       files?.retention?.policy === "portable" &&

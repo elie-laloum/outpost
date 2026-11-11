@@ -41,7 +41,7 @@ Chaque tentative est admise sur `budget.attempts` avant de démarrer.
 <!-- features -->
 
 - [Tentative de tâche](../concurrency-and-retries/): Chaque exécution d’une tâche, relances comprises.
-- [Tour de boucle](../verification-loops/): Chaque tour d’une tâche en boucle.
+- [Tour de boucle](../verification-loops/): Chaque tour d’une tâche en boucle, quel que soit le nombre d’agents qu’il lance ; `timeoutMs` borne aussi le tour entier.
 - [Candidat spéculatif](../speculation/): Chaque candidat lancé par `speculate()`.
 
 Un échange avec l’agent compte comme une tentative, même s’il comporte de nombreuses requêtes au modèle. Une tâche ignorée ou un résultat restauré depuis le [cache](../task-cache/) ne consomme aucune tentative.

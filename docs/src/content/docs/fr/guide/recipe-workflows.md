@@ -128,19 +128,9 @@ tasks:
 
 La vérification accepte la tentative quand `npm test` se termine avec le statut 0. Sinon, son statut de sortie et les 4 000 derniers caractères de stdout et stderr deviennent le retour du tour ; une commande qui dépasse son `deadlineMs` fait aussi échouer la vérification, avec la sortie déjà produite. La sortie de la commande est observée comme celle d’une tâche `command`.
 
-`conversation: continue` envoie les tours suivants dans la conversation de la tentative : `followUp` si vous le déclarez, sinon un message intégré qui contient le retour. Il exige un agent qui reprend ses conversations ; un agent de repli est refusé avant le premier tour. Avec la valeur par défaut `conversation: new`, chaque tour démarre une nouvelle conversation ; le brief doit donc contenir `{{ loop.feedback }}`, sinon la validation le refuse.
+Les tours suivants envoient `followUp` si vous le déclarez. Sinon, `conversation: continue` envoie dans la conversation de la tentative un message intégré qui contient le retour, et la valeur par défaut `conversation: new` renvoie le brief dans une nouvelle conversation. Pour confier la décision à un autre agent, remplacez la commande par `check: { agent: reviewer, brief: "Review the last commit: {{ loop.text }}" }` : Outpost lui demande une réponse `{ done, feedback }`, dans une nouvelle conversation à chaque tour.
 
-Pour confier la décision à un autre agent, remplacez la commande par `check: { agent: reviewer, brief: "Review the last commit: {{ loop.text }}" }`. Outpost demande au relecteur une réponse `{ done, feedback }`, dans une nouvelle conversation à chaque tour, et la redemande une fois après une réponse mal formée quand le relecteur peut reprendre sa conversation.
-
-| Valeur                | Disponible dans                       | Contenu                                      |
-| --------------------- | ------------------------------------- | -------------------------------------------- |
-| `{{ loop.round }}`    | Tentative, vérification et commande   | Numéro du tour, à partir de 1                |
-| `{{ loop.feedback }}` | `brief` et `followUp` de la tentative | Retour du tour refusé ; vide au premier tour |
-| `{{ loop.text }}`     | `brief` d’une vérification par agent  | Réponse finale de la tentative du tour       |
-
-`outputs.fix` contient le `text`, la `conversation` et la `value` de la dernière tentative, les `commits` de tous les tours et `rounds`. Quand le dernier tour est refusé, la tâche échoue avec un message qui se termine par son retour. Ce message et l’événement `loop` de chaque tour refusé masquent le retour avec `workflow.redact`, puis en gardent les 1 000 premiers et 1 000 derniers caractères.
-
-`attempt.dispatch` accepte les [options de dispatch d’une tâche agent](../../reference/dispatchoptions/) sauf `continuation` ; une conversation poursuivie exige aussi une seule passe. `quotaResume` s’applique à la tentative et à une vérification par agent. Une boucle n’a pas de `retry` ; `timeoutMs` borne chaque tour. Avec un [checkpoint](../recipe-durability/), une exécution reprise vérifie une tentative sauvegardée sans la refaire. Poursuivre une conversation dans une nouvelle sandbox après une reprise exige un agent qui capture ses conversations ; ce chemin est testé avec des agents scriptés, pas encore validé en conditions réelles avec Claude Code ou Codex.
+`outputs.fix` contient le `text`, la `conversation` et la `value` de la dernière tentative, les `commits` de tous les tours et `rounds`. Pour enchaîner plusieurs agents et commandes dans chaque phase, décider à partir d’une relecture typée ou configurer la dispatch de chaque agent, voir les [étapes de boucle](../recipe-loops/).
 
 ## Régler l’exécution
 

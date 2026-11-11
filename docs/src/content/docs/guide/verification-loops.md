@@ -281,4 +281,4 @@ With top-level `dispatch()`, each pass allocates a fresh sandbox and runs its pr
 | An exception           | Fails the task at once. A loop task has no `retry` option.                                                                                                                                                         |
 | The last check rejects | The task fails with `LoopTaskExhausted`. Its message ends with the first and last 1,000 characters of the last `feedback`, masked by `redact`; its `feedback` property keeps the full text. Dependents do not run. |
 
-[Fix a failing CI build](../fix-failing-ci/) handles each outcome in a complete script.
+[Fix a failing CI build](../fix-failing-ci/) handles each outcome in a complete script. YAML recipes declare the same loops with agent and command steps; see the [correspondence with TypeScript](../recipe-loops/#map-to-typescript).

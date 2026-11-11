@@ -1,4 +1,5 @@
 import { validateRecipeExpression } from "../../domain/recipes/expressions.ts";
+import { configurationInvariant } from "../../domain/configuration-diagnostic.ts";
 import { validateSpeculationOptions } from "../speculation-validation.ts";
 import { preflightRecipeAgent } from "./agent-preflight.ts";
 import { validateFileAgent, isFileSandboxOptions } from "../file-sandbox.ts";
@@ -8,8 +9,11 @@ import { nativeRecipeSchemas } from "./native-schemas.constants.ts";
 import { resolveRecipeOptions } from "./native.ts";
 import {
   declarativeRecipeLoop,
+  recipeLoopAgents,
   recipeLoopDispatchComponent,
+  recipeLoopDispatchRules,
   validateRecipeLoopDispatch,
+  validateRecipeLoopResponse,
 } from "../../domain/recipes/loop.ts";
 import type { RecipeComponentDefinition } from "../../domain/recipes/component.types.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
@@ -86,20 +90,34 @@ export async function prepareRecipeWorkflow(
         `${kind}Options`,
       );
     }
-    if (loop?.attempt.dispatch)
-      values.loopAttemptDispatch = await scope.resolve(
-        recipeLoopDispatchComponent(step.key),
-        "dispatchOptions",
-      );
+    if (loop) {
+      const dispatch: Record<string, unknown> = {};
+      for (const use of recipeLoopAgents(loop)) {
+        if (!use.step.dispatch) continue;
+        const name = recipeLoopDispatchComponent(step.key, use.step);
+        const options = await scope.resolve(name, "dispatchOptions");
+        configurationInvariant(
+          recipeObject(options),
+          `${name} must resolve to dispatch options`,
+          name,
+          "invalid-configuration",
+          "Return a dispatch options object from the referenced component.",
+        );
+        // Extensions supply options and responses the document could not check.
+        validateRecipeLoopDispatch(recipeLoopDispatchRules(use), options, name);
+        if (use.phase === "check")
+          validateRecipeLoopResponse(
+            use.step,
+            recipeObject(options.response) ? options.response : undefined,
+            ["tasks", step.key, "loop"],
+          );
+        dispatch[name] = options;
+      }
+      values.loopDispatch = dispatch;
+    }
     if (!stepOptions(values))
       throw new Error(`Invalid recipe task: ${step.key}`);
     const prepared: RecipeWorkflowStepComponents = values;
-    if (loop && prepared.loopAttemptDispatch)
-      validateRecipeLoopDispatch(
-        loop.attempt.conversation,
-        prepared.loopAttemptDispatch,
-        recipeLoopDispatchComponent(step.key),
-      );
     if (
       prepared.isolated &&
       "brief" in prepared.isolated &&

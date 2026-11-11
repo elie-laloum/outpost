@@ -78,6 +78,8 @@ A normal pause needs only `resume`. After a crash, stop the previous coordinator
 
 Ownership recovery does not authorize task replay. Heartbeat expiry authorizes neither. [CLI reference](../recipe-cli/) documents the flags.
 
+An interrupted [declarative loop](../recipe-loops/#resume-and-quota-pauses) replays its whole phase: every attempt step runs again, commands included, while an interrupted check reruns its steps without repeating the attempt.
+
 ## Add caches, artifacts or quota pauses
 
 | Need                       | YAML integration                                        |

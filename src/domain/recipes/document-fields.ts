@@ -12,10 +12,12 @@ export function recipeMapping(
   return Object.fromEntries(Object.entries(value));
 }
 
+/** Reads a mapping limited to `keys`; `hints` explains where a refused field belongs. */
 export function recipeFields(
   value: unknown,
   path: string,
   keys: readonly string[],
+  hints: Readonly<Record<string, string>> = {},
 ): Record<string, unknown> {
   const record = recipeMapping(value, path);
   for (const key of Object.keys(record))
@@ -24,6 +26,7 @@ export function recipeFields(
         `Unknown recipe field: ${path}.${key}`,
         `${path}.${key}`,
         "unknown-field",
+        Object.hasOwn(hints, key) ? hints[key] : undefined,
       );
   return record;
 }
