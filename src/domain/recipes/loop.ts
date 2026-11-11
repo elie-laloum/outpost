@@ -1,6 +1,5 @@
 import { configurationError } from "../configuration-diagnostic.ts";
 import { recipeCommandFields } from "../recipe-templates.ts";
-import { recipeTemplatePattern } from "../recipe.constants.ts";
 import {
   recipeCommand,
   recipeFields,
@@ -8,19 +7,58 @@ import {
   recipeMapping,
   recipeText,
 } from "./document-fields.ts";
-import { validateRecipeExpression } from "./expressions.ts";
-import { recipeLoopKeys, recipeLoopValues } from "./loop.constants.ts";
+import {
+  recipeJson,
+  validateRecipeCondition,
+  validateRecipeExpression,
+} from "./expressions.ts";
+import {
+  recipeLoopFieldHints,
+  recipeLoopKeys,
+  recipeLoopValues,
+} from "./loop.constants.ts";
 import { recipeObject, recipeReference } from "./values.ts";
 import type { RecipeDocument, RecipeStep } from "../recipe.types.ts";
-import type { RecipeSourcePath } from "./expressions.types.ts";
+import type {
+  RecipeConditionNode,
+  RecipeSourcePath,
+} from "./expressions.types.ts";
 import type {
   RecipeDeclarativeLoop,
-  RecipeLoopAttempt,
-  RecipeLoopCheck,
-  RecipeLoopConversation,
+  RecipeLoopAgentStep,
+  RecipeLoopAgentUse,
+  RecipeLoopAttemptStep,
+  RecipeLoopCheckAgent,
+  RecipeLoopCheckStep,
+  RecipeLoopCommandStep,
+  RecipeLoopDispatchRules,
+  RecipeLoopPassRule,
+  RecipeLoopPhaseName,
+  RecipeLoopResponseCheck,
+  RecipeLoopResponseShape,
 } from "./loop.types.ts";
 
+/** Dispatch API rule: a continued conversation or a typed response needs one pass. */
+const singlePassRules: readonly RecipeLoopPassRule[] = [
+  {
+    applies: (rules) => rules.conversation === "continue",
+    reason: "the loop continues its conversation",
+    hint: "Remove passes, or set conversation: new.",
+  },
+  {
+    applies: (rules) => rules.phase === "check",
+    reason: "a check agent answers with a typed response",
+    hint: "Remove passes; a check agent answers in one pass.",
+  },
+  {
+    applies: (_rules, dispatch) => dispatch.response !== undefined,
+    reason: "the step expects a typed response",
+    hint: "Remove passes, or remove response.",
+  },
+];
+
 const parsed = new WeakMap<object, RecipeDeclarativeLoop | null>();
+const conditions = new WeakMap<RecipeLoopCheckAgent, RecipeConditionNode>();
 
 function reference(value: unknown): boolean {
   return recipeObject(value) && Object.hasOwn(value, "$ref");
@@ -35,45 +73,13 @@ function callbackLoop(loop: Record<string, unknown>, path: string): boolean {
     `${path} must declare both phases as callbacks or both as recipe steps`,
     path,
     "mixed-loop",
-    "Reference callbacks with $ref in attempt and check, or declare an agent attempt with a command or agent check.",
+    "Reference callbacks with $ref in attempt and check, or declare agent and command steps in both.",
   );
 }
 
-function attemptOf(value: unknown, path: string): RecipeLoopAttempt {
-  const attempt = recipeFields(value, path, recipeLoopKeys.attempt);
-  const conversation = attempt.conversation ?? "new";
-  if (conversation !== "new" && conversation !== "continue")
-    throw configurationError(
-      `${path}.conversation must be new or continue`,
-      `${path}.conversation`,
-    );
-  if (attempt.followUp !== undefined && conversation !== "continue")
-    throw configurationError(
-      `${path}.followUp requires conversation: continue`,
-      `${path}.followUp`,
-      "invalid-configuration",
-      "Remove followUp, or set conversation: continue to send it in the same conversation.",
-    );
-  const dispatch =
-    attempt.dispatch === undefined
-      ? undefined
-      : recipeMapping(attempt.dispatch, `${path}.dispatch`);
-  if (dispatch && !recipeReference(dispatch))
-    validateRecipeLoopDispatch(conversation, dispatch, `${path}.dispatch`);
-  return {
-    agent: recipeText(attempt.agent, `${path}.agent`),
-    brief: recipeText(attempt.brief, `${path}.brief`),
-    conversation,
-    ...(attempt.followUp === undefined
-      ? {}
-      : { followUp: recipeText(attempt.followUp, `${path}.followUp`) }),
-    ...(dispatch === undefined ? {} : { dispatch }),
-  };
-}
-
-/** Outpost owns the conversation between rounds; a single pass keeps it continuable. */
+/** Outpost owns each agent's conversation between rounds; one pass keeps it continuable. */
 export function validateRecipeLoopDispatch(
-  conversation: RecipeLoopConversation,
+  rules: RecipeLoopDispatchRules,
   dispatch: Readonly<Record<string, unknown>>,
   path: string,
 ): void {
@@ -82,42 +88,121 @@ export function validateRecipeLoopDispatch(
       `${path}.continuation is managed by the loop`,
       `${path}.continuation`,
       "invalid-configuration",
-      "Remove continuation; set conversation: continue on the attempt to resume the previous round.",
+      "Remove continuation; set conversation: continue on an attempt agent to resume its previous round.",
     );
-  if (
-    conversation === "continue" &&
-    dispatch.passes !== undefined &&
-    dispatch.passes !== 1
-  )
-    throw configurationError(
-      `${path}.passes must be 1 when the loop continues its conversation`,
-      `${path}.passes`,
-      "invalid-configuration",
-      "Remove passes, or set conversation: new.",
-    );
+  if (dispatch.passes === undefined || dispatch.passes === 1) return;
+  const rule = singlePassRules.find(({ applies }) => applies(rules, dispatch));
+  if (!rule) return;
+  throw configurationError(
+    `${path}.passes must be 1 when ${rule.reason}`,
+    `${path}.passes`,
+    "invalid-configuration",
+    rule.hint,
+  );
 }
 
-function checkOf(value: unknown, path: string): RecipeLoopCheck {
-  const check = recipeMapping(value, path);
-  if (Object.hasOwn(check, "command")) {
-    recipeFields(check, path, recipeLoopKeys.commandCheck);
-    return {
-      kind: "command",
-      command: recipeCommand(check.command, `${path}.command`),
-    };
-  }
-  if (!Object.hasOwn(check, "agent"))
+function inlineDispatch(
+  step: Readonly<Record<string, unknown>>,
+  path: string,
+  rules: RecipeLoopDispatchRules,
+): Pick<RecipeLoopAgentStep, "dispatch"> {
+  if (step.dispatch === undefined) return {};
+  const dispatch = recipeMapping(step.dispatch, `${path}.dispatch`);
+  if (!recipeReference(dispatch))
+    validateRecipeLoopDispatch(rules, dispatch, `${path}.dispatch`);
+  return { dispatch };
+}
+
+function commandStep(
+  step: Readonly<Record<string, unknown>>,
+  path: string,
+  at: RecipeSourcePath,
+): RecipeLoopCommandStep {
+  recipeFields(step, path, recipeLoopKeys.command, recipeLoopFieldHints);
+  return {
+    kind: "command",
+    path: at,
+    command: recipeCommand(step.command, `${path}.command`),
+  };
+}
+
+function attemptStep(
+  value: unknown,
+  path: string,
+  at: RecipeSourcePath,
+): RecipeLoopAttemptStep {
+  const step = recipeMapping(value, path);
+  if (Object.hasOwn(step, "command")) return commandStep(step, path, at);
+  recipeFields(step, path, recipeLoopKeys.attemptAgent, recipeLoopFieldHints);
+  const conversation = step.conversation ?? "new";
+  if (conversation !== "new" && conversation !== "continue")
+    throw configurationError(
+      `${path}.conversation must be new or continue`,
+      `${path}.conversation`,
+    );
+  const dispatch = inlineDispatch(step, path, {
+    phase: "attempt",
+    conversation,
+  });
+  return {
+    kind: "agent",
+    path: at,
+    agent: recipeText(step.agent, `${path}.agent`),
+    brief: recipeText(step.brief, `${path}.brief`),
+    conversation,
+    ...(step.followUp === undefined
+      ? {}
+      : { followUp: recipeText(step.followUp, `${path}.followUp`) }),
+    ...dispatch,
+  };
+}
+
+function checkStep(
+  value: unknown,
+  path: string,
+  at: RecipeSourcePath,
+): RecipeLoopCheckStep {
+  const step = recipeMapping(value, path);
+  if (Object.hasOwn(step, "command")) return commandStep(step, path, at);
+  if (!Object.hasOwn(step, "agent"))
     throw configurationError(
       `${path} requires a command or an agent with a brief`,
       path,
       "missing-field",
     );
-  recipeFields(check, path, recipeLoopKeys.agentCheck);
+  recipeFields(step, path, recipeLoopKeys.checkAgent, recipeLoopFieldHints);
+  const dispatch = inlineDispatch(step, path, {
+    phase: "check",
+    conversation: "new",
+  });
   return {
     kind: "agent",
-    agent: recipeText(check.agent, `${path}.agent`),
-    brief: recipeText(check.brief, `${path}.brief`),
+    path: at,
+    agent: recipeText(step.agent, `${path}.agent`),
+    brief: recipeText(step.brief, `${path}.brief`),
+    ...dispatch,
+    ...(step.done === undefined ? {} : { done: recipeJson(step.done) }),
   };
+}
+
+/** Reads a phase as a list of steps; a single mapping is the shorthand for a one-step list. */
+function phaseSteps<T>(
+  value: unknown,
+  path: string,
+  phase: RecipeLoopPhaseName,
+  read: (value: unknown, path: string, at: RecipeSourcePath) => T,
+): T[] {
+  if (!Array.isArray(value)) return [read(value, path, [phase])];
+  if (!value.length)
+    throw configurationError(
+      `${path} must list at least one step`,
+      path,
+      "invalid-configuration",
+      "Declare one or more agent or command steps.",
+    );
+  return value.map((item, index) =>
+    read(item, `${path}[${index}]`, [phase, index]),
+  );
 }
 
 /** Reads a declarative loop; callback loops return undefined and stay component options. */
@@ -128,16 +213,120 @@ export function parseRecipeLoop(
   const loop = recipeMapping(value, path);
   if (callbackLoop(loop, path)) return undefined;
   recipeFields(loop, path, recipeLoopKeys.loop);
+  const maxRounds = recipeInteger(loop.maxRounds, `${path}.maxRounds`);
+  const attempt = phaseSteps(
+    loop.attempt,
+    `${path}.attempt`,
+    "attempt",
+    attemptStep,
+  );
+  if (!attempt.some((step) => step.kind === "agent"))
+    throw configurationError(
+      `${path}.attempt requires an agent step`,
+      `${path}.attempt`,
+      "missing-loop-agent",
+      "Add an agent step; run commands that only prepare the work as a task before the loop, linked with after.",
+    );
   return {
-    maxRounds: recipeInteger(loop.maxRounds, `${path}.maxRounds`),
-    attempt: attemptOf(loop.attempt, `${path}.attempt`),
-    check: checkOf(loop.check, `${path}.check`),
+    maxRounds,
+    attempt,
+    check: phaseSteps(loop.check, `${path}.check`, "check", checkStep),
   };
 }
 
-/** Component name of a loop attempt's dispatch options in the recipe graph. */
-export function recipeLoopDispatchComponent(key: string): string {
-  return `tasks.${key}.loop.attempt.dispatch`;
+/** Component name of a loop agent's dispatch options in the recipe graph. */
+export function recipeLoopDispatchComponent(
+  key: string,
+  step: Pick<RecipeLoopAgentStep, "path">,
+): string {
+  return `tasks.${key}.loop.${step.path.join(".")}.dispatch`;
+}
+
+function declaresField(
+  schema: Readonly<Record<string, unknown>>,
+  field: string,
+  type: string,
+): boolean {
+  const property = recipeObject(schema.properties)
+    ? schema.properties[field]
+    : undefined;
+  const declared = recipeObject(property) ? property.type : undefined;
+  return (
+    recipeObject(property) &&
+    Array.isArray(schema.required) &&
+    schema.required.includes(field) &&
+    (declared === undefined ||
+      declared === type ||
+      (Array.isArray(declared) && declared.includes(type)))
+  );
+}
+
+/** Checks a check agent's response; schemas without top-level `properties` are checked at runtime. */
+export function validateRecipeLoopResponse(
+  check: RecipeLoopResponseCheck,
+  response: RecipeLoopResponseShape | undefined,
+  loopPath: RecipeSourcePath,
+): void {
+  const at = [...loopPath, ...check.path];
+  if (!response) {
+    if (check.done === undefined) return;
+    throw configurationError(
+      "done requires a custom JSON response on the check agent",
+      [...at, "done"],
+      "invalid-configuration",
+      "Declare dispatch.response with a JSON schema that requires feedback, or remove done to use the built-in { done, feedback } answer.",
+    );
+  }
+  const path = [...at, "dispatch", "response"];
+  if (response.format === "text")
+    throw configurationError(
+      "A loop check agent requires a JSON response",
+      path,
+      "invalid-configuration",
+      "Declare a JSON response, or remove response to use the built-in { done, feedback } answer.",
+    );
+  const schema = response.jsonSchema;
+  if (!recipeObject(schema) || !recipeObject(schema.properties)) return;
+  const fields: readonly (readonly [string, string])[] =
+    check.done === undefined
+      ? [
+          ["done", "boolean"],
+          ["feedback", "string"],
+        ]
+      : [["feedback", "string"]];
+  for (const [field, type] of fields)
+    if (!declaresField(schema, field, type))
+      throw configurationError(
+        `The check agent response must declare ${field} as a required ${type}`,
+        path,
+        "invalid-configuration",
+        check.done === undefined
+          ? "Without a done condition, the response carries the verdict: require done (boolean) and feedback (string)."
+          : "The done condition decides; require feedback (string) to explain a refusal.",
+      );
+}
+
+/** The agent steps of both phases, attempt first, each in declaration order. */
+export function recipeLoopAgents(
+  loop: RecipeDeclarativeLoop,
+): readonly RecipeLoopAgentUse[] {
+  return [
+    ...loop.attempt.flatMap((step) =>
+      step.kind === "agent" ? [{ phase: "attempt" as const, step }] : [],
+    ),
+    ...loop.check.flatMap((step) =>
+      step.kind === "agent" ? [{ phase: "check" as const, step }] : [],
+    ),
+  ];
+}
+
+/** Dispatch rules of a loop agent; check agents always start a new conversation. */
+export function recipeLoopDispatchRules(
+  use: RecipeLoopAgentUse,
+): RecipeLoopDispatchRules {
+  return use.phase === "attempt"
+    ? { phase: "attempt", conversation: use.step.conversation }
+    : { phase: "check", conversation: "new" };
 }
 
 /** The declarative loop of a validated task, read once per document. */
@@ -153,56 +342,65 @@ export function declarativeRecipeLoop(
   return loop ?? undefined;
 }
 
-function usesLoopValue(text: string, name: string): boolean {
-  return [...text.matchAll(recipeTemplatePattern)].some(
-    (match) => match[1]!.trim() === `loop.${name}`,
-  );
+/** Compiles a check agent's done condition once, with `$response` and the task's references. */
+export function recipeLoopDone(
+  document: RecipeDocument,
+  step: RecipeStep,
+  check: RecipeLoopCheckAgent,
+  loopPath: RecipeSourcePath,
+): RecipeConditionNode | undefined {
+  if (check.done === undefined) return undefined;
+  let condition = conditions.get(check);
+  if (!condition) {
+    condition = validateRecipeCondition(check.done, {
+      document,
+      step,
+      loop: [],
+      response: true,
+      sourcePath: [...loopPath, ...check.path, "done"],
+    });
+    conditions.set(check, condition);
+  }
+  return condition;
 }
 
-/** Validates loop expressions and requires the attempt to see the check feedback. */
+function validateStep(
+  document: RecipeDocument,
+  task: RecipeStep,
+  step: RecipeLoopAttemptStep | RecipeLoopCheckStep,
+  phase: RecipeLoopPhaseName,
+  sourcePath: RecipeSourcePath,
+): void {
+  const at = (values: readonly string[], ...path: RecipeSourcePath) => ({
+    document,
+    step: task,
+    loop: values,
+    sourcePath: [...sourcePath, ...step.path, ...path],
+  });
+  if (step.kind === "command") {
+    for (const [value, path] of recipeCommandFields(step.command))
+      validateRecipeExpression(
+        value,
+        at(recipeLoopValues.command, "command", ...path),
+      );
+    return;
+  }
+  const values = recipeLoopValues[phase];
+  validateRecipeExpression(step.brief, at(values, "brief"));
+  if ("followUp" in step && step.followUp !== undefined)
+    validateRecipeExpression(step.followUp, at(values, "followUp"));
+  if ("done" in step) recipeLoopDone(document, task, step, sourcePath);
+}
+
+/** Validates the text, commands and done conditions of every loop step. */
 export function validateRecipeLoopExpressions(
   document: RecipeDocument,
   step: RecipeStep,
   loop: RecipeDeclarativeLoop,
   sourcePath: RecipeSourcePath,
 ): void {
-  const at = (values: readonly string[], ...path: RecipeSourcePath) => ({
-    document,
-    step,
-    loop: values,
-    sourcePath: [...sourcePath, ...path],
-  });
-  const { attempt, check } = loop;
-  validateRecipeExpression(
-    attempt.brief,
-    at(recipeLoopValues.attempt, "attempt", "brief"),
-  );
-  if (attempt.followUp !== undefined)
-    validateRecipeExpression(
-      attempt.followUp,
-      at(recipeLoopValues.attempt, "attempt", "followUp"),
-    );
-  if (check.kind === "agent")
-    validateRecipeExpression(
-      check.brief,
-      at(recipeLoopValues.check, "check", "brief"),
-    );
-  if (check.kind === "command")
-    for (const [value, path] of recipeCommandFields(check.command))
-      validateRecipeExpression(
-        value,
-        at(recipeLoopValues.command, "check", "command", ...path),
-      );
-  const field =
-    attempt.conversation === "new" ? "brief" : ("followUp" as const);
-  const text = attempt[field];
-  if (text === undefined || usesLoopValue(text, "feedback")) return;
-  throw configurationError(
-    `${step.key}: the loop attempt ${field} must include {{ loop.feedback }}`,
-    [...sourcePath, "attempt", field],
-    "missing-loop-feedback",
-    attempt.conversation === "new"
-      ? "A new conversation starts without the check feedback: place {{ loop.feedback }} in the brief, or set conversation: continue."
-      : "Place {{ loop.feedback }} in followUp, or remove followUp to send the default feedback message.",
-  );
+  for (const item of loop.attempt)
+    validateStep(document, step, item, "attempt", sourcePath);
+  for (const item of loop.check)
+    validateStep(document, step, item, "check", sourcePath);
 }

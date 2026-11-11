@@ -3,6 +3,7 @@ import { recipeFamilies } from "../../domain/recipes/schema.constants.ts";
 import { mapRecipeSchema } from "../../domain/recipes/schema-walk.ts";
 import {
   declarativeRecipeLoop,
+  recipeLoopAgents,
   recipeLoopDispatchComponent,
 } from "../../domain/recipes/loop.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
@@ -31,6 +32,17 @@ const extensionDeclaration = createJsonDecoder<RecipeExtensionDeclaration>(
   extensionSchema,
   "extensions",
 );
+
+/** The definition or extension behind a chain of `$ref` aliases, if every link exists. */
+export function resolveRecipeComponent(
+  nodes: ReadonlyMap<string, RecipeComponentNode>,
+  name: string,
+): RecipeComponentNode | undefined {
+  let node = nodes.get(name);
+  while (node && !node.definition && !node.extension)
+    node = nodes.get(recipeReference(node.options) ?? "");
+  return node;
+}
 
 export function recipeComponentGraph(
   configuration: Readonly<Record<string, unknown>>,
@@ -84,9 +96,11 @@ export function recipeComponentGraph(
       );
       expected.set(key, `${kind}Options`);
     }
-    const dispatch = declarativeRecipeLoop(step)?.attempt.dispatch;
-    if (dispatch) {
-      const key = recipeLoopDispatchComponent(step.key);
+    const loop = declarativeRecipeLoop(step);
+    for (const { step: agent } of loop ? recipeLoopAgents(loop) : []) {
+      const { dispatch } = agent;
+      if (!dispatch) continue;
+      const key = recipeLoopDispatchComponent(step.key, agent);
       declarations.set(
         key,
         recipeReference(dispatch) ? dispatch : { ...dispatch, type: "options" },
@@ -189,9 +203,7 @@ export function recipeComponentGraph(
           if (typeof shape.component !== "string") return value;
           const target = component(value, shape.component, path);
           if (typeof shape.contract === "string") {
-            let node = nodes.get(target);
-            while (node && !node.extension && !node.definition)
-              node = nodes.get(recipeReference(node.options)!);
+            const node = resolveRecipeComponent(nodes, target);
             if (node?.extension && node.extension.contract !== shape.contract)
               throw configurationError(
                 `${path} requires callback contract ${shape.contract}`,

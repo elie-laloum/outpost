@@ -1,5 +1,6 @@
 import { validateRecipeExpression } from "../../domain/recipes/expressions.ts";
-import { recipeObject, recipeReference } from "../../domain/recipes/values.ts";
+import { recipeObject } from "../../domain/recipes/values.ts";
+import { resolveRecipeComponent } from "./graph.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
 import type { RecipeComponentGraph } from "./components.types.ts";
 
@@ -9,9 +10,10 @@ export function validateRecipeProjectExpressions(
 ): void {
   for (const step of document.tasks) {
     for (const field of ["isolated", "speculation"]) {
-      let node = graph.nodes.get(`tasks.${step.key}.${field}`);
-      while (node && !node.definition && !node.extension)
-        node = graph.nodes.get(recipeReference(node.options)!);
+      const node = resolveRecipeComponent(
+        graph.nodes,
+        `tasks.${step.key}.${field}`,
+      );
       if (!node) continue;
       const requests: unknown[] = [];
       if (field === "isolated") requests.push(node.options);

@@ -19,6 +19,7 @@ import type {
   RecipeExpressionScope,
   RecipeExpressionValidation,
   RecipeReferencePath,
+  RecipeResponseValue,
   RecipeSourcePath,
   RecipeTextInterpolation,
   RecipeTextReference,
@@ -115,6 +116,28 @@ function valueReference(
     : { kind: "step-value", step: key, path, sourcePath };
 }
 
+function responseReference(
+  value: Readonly<Record<string, unknown>>,
+  scope: RecipeExpressionScope,
+  sourcePath: RecipeSourcePath,
+): RecipeResponseValue {
+  if (!scope.response)
+    throw expressionError(
+      `${prefix(scope)}$response is only available in the done condition of a loop check agent`,
+      sourcePath,
+    );
+  if (Object.keys(value).length !== 1 || !Array.isArray(value.$response))
+    throw expressionError(
+      `${prefix(scope)}$response requires a property path, such as [] or [score]`,
+      sourcePath,
+    );
+  return {
+    kind: "response-value",
+    path: referencePath(value.$response, scope, sourcePath),
+    sourcePath,
+  };
+}
+
 function textReference(
   reference: RecipeTextReference,
   sourcePath: RecipeSourcePath,
@@ -182,6 +205,8 @@ export function compileRecipeExpression(
   for (const kind of ["$input", "$step"] as const)
     if (Object.hasOwn(value, kind))
       return valueReference(kind, value, scope, sourcePath);
+  if (Object.hasOwn(value, "$response"))
+    return responseReference(value, scope, sourcePath);
   if (Object.hasOwn(value, "$select")) {
     const selection = value.$select;
     if (
@@ -238,6 +263,10 @@ export function evaluateRecipeExpression(
         throw new Error(`Loop value ${node.name} is unavailable here`);
       return value;
     }
+    case "response-value":
+      if (context.response === undefined)
+        throw new Error("$response is unavailable here");
+      return select(context.response, node.path);
     case "select":
       return select(evaluateRecipeExpression(node.from, context), node.path);
     case "text": {
@@ -310,6 +339,7 @@ function* expressionReferences(
           yield { reference, interpolated: true };
       return;
     case "loop-value":
+    case "response-value":
       return;
     case "select":
       yield* expressionReferences(node.from);
@@ -352,12 +382,14 @@ function documentScope({
   document,
   step,
   loop,
+  response,
 }: RecipeExpressionValidation): RecipeExpressionScope {
   return {
     inputs: Object.keys(document.inputs),
     steps: document.tasks.map((task) => task.key),
     label: step.key,
     ...(loop ? { loop } : {}),
+    ...(response ? { response } : {}),
   };
 }
 
@@ -459,10 +491,11 @@ export function compileRecipeCondition(
   };
 }
 
+/** Compiles a condition against its task, validates its references and returns it. */
 export function validateRecipeCondition(
   value: unknown,
   context: RecipeExpressionValidation,
-): void {
+): RecipeConditionNode {
   const condition = compileRecipeCondition(
     value,
     documentScope(context),
@@ -470,6 +503,7 @@ export function validateRecipeCondition(
   );
   for (const expression of conditionExpressions(condition))
     validateReferences(expression, context);
+  return condition;
 }
 
 function compare(

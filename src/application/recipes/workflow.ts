@@ -127,6 +127,11 @@ export function bindRecipeWorkflow(
         sandbox,
         evaluate,
         text,
+        condition: (node, context, response) =>
+          evaluateRecipeCondition(node, {
+            ...contextFor(context),
+            ...(response === undefined ? {} : { response }),
+          }),
       }),
     );
   }

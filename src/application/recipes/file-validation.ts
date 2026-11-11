@@ -6,6 +6,7 @@ import { planRecipeAgents, recipeAgentDiagnostics } from "./agent-plan.ts";
 import { recipeStepAgents } from "../../domain/recipes/step-resources.ts";
 import {
   declarativeRecipeLoop,
+  recipeLoopAgents,
   recipeLoopDispatchComponent,
 } from "../../domain/recipes/loop.ts";
 import type { RecipeDocument } from "../../domain/recipe.types.ts";
@@ -43,8 +44,9 @@ export function validateFileRecipeCapabilities(
   for (const step of document.tasks) {
     for (const { agent } of recipeStepAgents(step)) visit(`agents.${agent}`);
     if (step.dispatch) visit(`tasks.${step.key}.dispatch`);
-    if (declarativeRecipeLoop(step)?.attempt.dispatch)
-      visit(recipeLoopDispatchComponent(step.key));
+    const loop = declarativeRecipeLoop(step);
+    for (const { step: agent } of loop ? recipeLoopAgents(loop) : [])
+      if (agent.dispatch) visit(recipeLoopDispatchComponent(step.key, agent));
     if (step.isolated) visit(`tasks.${step.key}.isolated`);
     if (step.interactive) visit(`tasks.${step.key}.interactive`);
   }

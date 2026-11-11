@@ -7,6 +7,8 @@ export interface RecipeExpressionContext {
   readonly steps: readonly string[];
   /** Values of the current loop round, such as `round` and `feedback`. */
   readonly loop?: Readonly<Record<string, WorkflowJson>>;
+  /** Typed response of the loop check agent whose `done` condition is evaluated. */
+  readonly response?: WorkflowJson;
   output(key: string): unknown;
 }
 
@@ -29,6 +31,8 @@ export interface RecipeExpressionValidation {
   readonly sourcePath?: RecipeSourcePath;
   /** Loop values this field may interpolate; other fields refuse `{{ loop.* }}`. */
   readonly loop?: readonly string[];
+  /** Whether `$response` may read a loop check agent's typed response. */
+  readonly response?: boolean;
 }
 
 export interface RecipeInputValue {
@@ -53,6 +57,13 @@ export interface RecipeLoopValue {
   readonly sourcePath: RecipeSourcePath;
 }
 
+/** `{ $response: [path] }`: a field of a loop check agent's typed response. */
+export interface RecipeResponseValue {
+  readonly kind: "response-value";
+  readonly path: RecipeReferencePath;
+  readonly sourcePath: RecipeSourcePath;
+}
+
 export interface RecipeExpressionReference {
   readonly reference: RecipeValueReference;
   /** Whether the reference is interpolated into text, which requires a scalar. */
@@ -69,6 +80,7 @@ export type RecipeExpressionNode =
   | { readonly kind: "literal"; readonly value: WorkflowJson }
   | RecipeValueReference
   | RecipeLoopValue
+  | RecipeResponseValue
   | {
       readonly kind: "select";
       readonly from: RecipeExpressionNode;
@@ -108,6 +120,8 @@ export interface RecipeExpressionScope {
   readonly inputs: readonly string[];
   readonly steps: readonly string[];
   readonly loop?: readonly string[];
+  /** Whether `$response` may read a loop check agent's typed response. */
+  readonly response?: boolean;
   /** Prefix of compilation errors, normally the task key. */
   readonly label?: string;
 }

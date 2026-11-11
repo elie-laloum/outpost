@@ -1,0 +1,18 @@
+{
+  "version": 3,
+  "name": "durable-loop",
+  "tasks": [
+    {
+      "key": "implement",
+      "loop": {
+        "maxRounds": 3,
+        "attempt": {
+          "agent": "coder",
+          "brief": "Implement. {{ loop.feedback }}",
+          "conversation": "continue"
+        },
+        "check": { "command": { "executable": "npm", "arguments": ["test"] } }
+      }
+    }
+  ]
+}
