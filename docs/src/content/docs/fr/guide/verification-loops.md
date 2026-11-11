@@ -281,4 +281,4 @@ Avec `dispatch()` au niveau supérieur, chaque passe alloue une nouvelle sandbox
 | Une exception                   | Fait échouer la tâche aussitôt. Une tâche en boucle n’a pas d’option `retry`.                                                                                                                                                                        |
 | La dernière vérification refuse | La tâche échoue avec `LoopTaskExhausted`. Son message se termine par les 1 000 premiers et 1 000 derniers caractères du dernier `feedback`, masqué par `redact` ; sa propriété `feedback` garde le texte complet. Les dépendants ne s’exécutent pas. |
 
-[Réparer une CI en échec](../fix-failing-ci/) traite chaque issue dans un script complet.
+[Réparer une CI en échec](../fix-failing-ci/) traite chaque issue dans un script complet. Les recettes YAML déclarent les mêmes boucles avec des étapes agent et commande ; voir la [correspondance avec TypeScript](../recipe-loops/#correspondance-avec-typescript).

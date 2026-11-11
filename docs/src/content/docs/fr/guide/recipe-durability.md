@@ -78,6 +78,8 @@ Une pause normale demande seulement `resume`. Après un crash, arrêtez l’anci
 
 Récupérer la propriété n’autorise pas le rejeu d’une tâche. L’expiration du heartbeat n’autorise aucune de ces opérations. La [référence CLI](../recipe-cli/) décrit les options.
 
+Une [boucle déclarative](../recipe-loops/#reprise-et-pauses-de-quota) interrompue rejoue sa phase entière : toutes les étapes de la tentative s’exécutent de nouveau, commandes comprises, alors qu’une vérification interrompue relance ses étapes sans refaire la tentative.
+
 ## Ajouter caches, artefacts et pauses sur quota
 
 | Besoin                                  | Intégration YAML                                       |

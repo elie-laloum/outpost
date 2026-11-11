@@ -100,7 +100,7 @@ Waiting in the process requires a known reset within `maxWaitMs`; otherwise the 
 - **Resume**: Continue captured conversation or run the task again as supported.
   - Workflow
 
-The paused record in `result.tasks` holds `quota.resetAt`: schedule the next `start()` from it. `onQuota` authorizes the rerun, without `resume: "retry-incomplete"`. A [loop task](../verification-loops/) resumes the phase of the round that hit the limit.
+The paused record in `result.tasks` holds `quota.resetAt`: schedule the next `start()` from it. `onQuota` authorizes the rerun, without `resume: "retry-incomplete"`. A [loop task](../verification-loops/) resumes the phase of the round that hit the limit. In a YAML loop whose phase runs several agents, the pause does not name the agent that stopped: the phase starts again with each agent's brief ([loop steps](../recipe-loops/#resume-and-quota-pauses)).
 
 ## Continue the interrupted conversation
 

@@ -100,7 +100,7 @@ L’attente dans le processus exige une date de réinitialisation connue dans `m
 - **Reprise**: Continuer la conversation capturée ou relancer la tâche selon ses capacités.
   - Workflow
 
-L’enregistrement en pause dans `result.tasks` contient `quota.resetAt` : planifiez le `start()` suivant à partir de cette heure. `onQuota` autorise la relance, sans `resume: "retry-incomplete"`. Une [tâche en boucle](../verification-loops/) reprend la phase du tour qui a atteint la limite.
+L’enregistrement en pause dans `result.tasks` contient `quota.resetAt` : planifiez le `start()` suivant à partir de cette heure. `onQuota` autorise la relance, sans `resume: "retry-incomplete"`. Une [tâche en boucle](../verification-loops/) reprend la phase du tour qui a atteint la limite. Dans une boucle YAML dont la phase exécute plusieurs agents, la pause n’indique pas quel agent s’est arrêté : la phase repart de zéro avec le brief de chaque agent ([étapes de boucle](../recipe-loops/#reprise-et-pauses-de-quota)).
 
 ## Poursuivre la conversation interrompue
 

@@ -41,7 +41,7 @@ Each attempt is admitted against `budget.attempts` before it starts.
 <!-- features -->
 
 - [Task attempt](../concurrency-and-retries/): Each run of a task, including every retry.
-- [Loop round](../verification-loops/): Each round of a loop task.
+- [Loop round](../verification-loops/): Each round of a loop task, whatever the number of agents it dispatches; `timeoutMs` also bounds the whole round.
 - [Speculative candidate](../speculation/): Each candidate that `speculate()` starts.
 
 One agent turn counts as one attempt, even if it makes many model requests. A skipped task or a result restored from the [cache](../task-cache/) uses no attempt.

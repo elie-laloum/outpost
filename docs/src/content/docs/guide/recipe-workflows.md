@@ -128,19 +128,9 @@ tasks:
 
 The check accepts the attempt when `npm test` exits with status 0. Otherwise its exit status and the last 4,000 characters of stdout and stderr become the feedback of the round; a command that exceeds its `deadlineMs` also fails the check, with the output seen so far. The command output is observed like a `command` task.
 
-`conversation: continue` sends later rounds in the attempt's conversation: `followUp` when you declare it, otherwise a built-in message containing the feedback. It requires an agent that resumes conversations; a fallback agent is refused before the first round. With the default `conversation: new`, each round starts a new conversation, so the brief must include `{{ loop.feedback }}`; validation refuses it otherwise.
+Later rounds send `followUp` when you declare it. Otherwise, `conversation: continue` sends a built-in message containing the feedback in the attempt's conversation, and the default `conversation: new` sends the brief again in a new conversation. To let another agent decide, replace the command with `check: { agent: reviewer, brief: "Review the last commit: {{ loop.text }}" }`: Outpost asks it for a `{ done, feedback }` answer in a new conversation each round.
 
-To let another agent decide, replace the command with `check: { agent: reviewer, brief: "Review the last commit: {{ loop.text }}" }`. Outpost asks the reviewer for a `{ done, feedback }` answer, in a new conversation each round, and asks once more after a malformed answer when the reviewer can resume its conversation.
-
-| Value                 | Available in                | Contents                                         |
-| --------------------- | --------------------------- | ------------------------------------------------ |
-| `{{ loop.round }}`    | Attempt, check and command  | Round number, starting at 1                      |
-| `{{ loop.feedback }}` | Attempt `brief`, `followUp` | Feedback of the rejected round; empty in round 1 |
-| `{{ loop.text }}`     | Agent check `brief`         | Final answer of the round's attempt              |
-
-`outputs.fix` holds the last attempt's `text`, `conversation` and `value`, the `commits` of every round and `rounds`. When the last round is rejected, the task fails with a message ending with its feedback. That message and the `loop` event of each rejected round mask the feedback with `workflow.redact`, then keep its first and last 1,000 characters.
-
-`attempt.dispatch` accepts the [agent task dispatch options](../../reference/dispatchoptions/) except `continuation`; a continued conversation also requires a single pass. `quotaResume` applies to the attempt and to an agent check. A loop has no `retry`; `timeoutMs` bounds each round. With a [checkpoint](../recipe-durability/), a resumed run checks a saved attempt without repeating it. Continuing a conversation in a new sandbox after a resume requires an agent that captures its conversations; this path is tested with scripted agents and not yet validated live with Claude Code or Codex.
+`outputs.fix` holds the last attempt's `text`, `conversation` and `value`, the `commits` of every round and `rounds`. To chain several agents and commands in each phase, decide from a typed review or configure each agent's dispatch, see [loop steps](../recipe-loops/).
 
 ## Control execution
 
