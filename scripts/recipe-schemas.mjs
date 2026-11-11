@@ -34,6 +34,14 @@ const components = [
   secretSelectionComponent,
 ];
 const kinds = new Set(components.map((component) => component.kind));
+const metadataKeys = [
+  "component",
+  "hostPath",
+  "secret",
+  "regexp",
+  "contract",
+  "$defs",
+];
 function clean(value, prefix = "") {
   if (Array.isArray(value)) return value.map((item) => clean(item, prefix));
   if (!value || typeof value !== "object") return value;
@@ -48,25 +56,26 @@ function clean(value, prefix = "") {
     };
   return Object.fromEntries(
     Object.entries(value)
-      .filter(
-        ([key]) =>
-          ![
-            "component",
-            "hostPath",
-            "secret",
-            "regexp",
-            "contract",
-            "$defs",
-          ].includes(key),
-      )
+      .filter(([key]) => !metadataKeys.includes(key))
       .map(([key, item]) => [
         key,
         key === "$ref" &&
         typeof item === "string" &&
         item.startsWith("#/$defs/")
           ? `#/$defs/${prefix}${item.slice(8)}`
-          : clean(item, prefix),
+          : key === "properties"
+            ? cleanProperties(item, prefix)
+            : clean(item, prefix),
       ]),
+  );
+}
+// Property names are recipe fields such as `contract`, never descriptor metadata.
+function cleanProperties(properties, prefix) {
+  return Object.fromEntries(
+    Object.entries(properties).map(([name, schema]) => [
+      name,
+      clean(schema, prefix),
+    ]),
   );
 }
 const definitions = {};
@@ -435,7 +444,28 @@ doneExpressions.expression.anyOf.splice(-1, 0, {
   properties: { $response: { $ref: "#/$defs/propertyPath" } },
 });
 const loopText = { type: "string", pattern: "\\S" };
+// Mirrors validateRecipeLoopDispatch: the loop owns continuations, and a typed response needs one pass.
+const loopDispatch = structuredClone(taskV3.properties.dispatch);
+const inlineDispatch = loopDispatch.anyOf.find(
+  (shape) => shape.properties?.continuation,
+);
+assert.ok(
+  inlineDispatch,
+  "Loop dispatch schema no longer declares continuation",
+);
+delete inlineDispatch.properties.continuation;
+Object.assign(inlineDispatch, {
+  if: { required: ["response"] },
+  then: { properties: { passes: { const: 1 } } },
+});
+const singlePass = {
+  allOf: [
+    { $ref: "#/$defs/loopDispatch" },
+    { properties: { passes: { const: 1 } } },
+  ],
+};
 const loopSteps = {
+  loopDispatch,
   doneExpression: doneExpressions.expression,
   doneCondition: doneExpressions.condition,
   loopCommandStep: {
@@ -453,8 +483,13 @@ const loopSteps = {
       brief: loopText,
       conversation: { enum: ["new", "continue"] },
       followUp: loopText,
-      dispatch: taskV3.properties.dispatch,
+      dispatch: { $ref: "#/$defs/loopDispatch" },
     },
+    if: {
+      required: ["conversation"],
+      properties: { conversation: { const: "continue" } },
+    },
+    then: { properties: { dispatch: singlePass } },
   },
   loopCheckAgent: {
     type: "object",
@@ -464,7 +499,7 @@ const loopSteps = {
     properties: {
       agent: loopText,
       brief: loopText,
-      dispatch: taskV3.properties.dispatch,
+      dispatch: singlePass,
       done: { $ref: "#/$defs/doneCondition" },
     },
   },
@@ -609,10 +644,34 @@ const generated = generatedFiles({
     "recipes/schemas/*.json",
   ],
 });
+function undeclaredRequirements(schema, path = "#") {
+  if (!schema || typeof schema !== "object") return [];
+  const required = [
+    ...(Array.isArray(schema.required) ? schema.required : []),
+    ...Object.values(schema.dependentRequired ?? {}).flat(),
+  ];
+  const own =
+    schema.additionalProperties === false
+      ? required
+          .filter((name) => !Object.hasOwn(schema.properties ?? {}, name))
+          .map((name) => `${path} requires undeclared ${name}`)
+      : [];
+  return [
+    ...own,
+    ...Object.entries(schema).flatMap(([key, item]) =>
+      undeclaredRequirements(item, `${path}/${key}`),
+    ),
+  ];
+}
 for (const [file, value] of [
   ["recipe-configuration.schema.json", configSchema],
   ["recipe.schema.json", recipe],
 ]) {
+  assert.deepEqual(
+    undeclaredRequirements(value),
+    [],
+    `${file} requires properties that it refuses`,
+  );
   const path = new URL(`../${file}`, import.meta.url);
   if (process.argv.includes("--write"))
     await writeFile(path, JSON.stringify(value, null, 2) + "\n");
