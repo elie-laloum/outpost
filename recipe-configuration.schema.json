@@ -3235,6 +3235,24 @@
                 }
               ]
             },
+            "contract": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/artifact"
+                }
+              ]
+            },
             "parents": {
               "anyOf": [
                 {
@@ -18494,6 +18512,36 @@
         {
           "type": "object",
           "properties": {
+            "secret": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "env": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                    }
+                  },
+                  "required": ["env"],
+                  "additionalProperties": false
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
             "type": {
               "const": "github"
             }
@@ -18634,6 +18682,36 @@
         {
           "type": "object",
           "properties": {
+            "secret": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "env": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                    }
+                  },
+                  "required": ["env"],
+                  "additionalProperties": false
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
             "toleranceMs": {
               "type": "number"
             },

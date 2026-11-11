@@ -3435,6 +3435,24 @@
                 }
               ]
             },
+            "contract": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/artifact"
+                }
+              ]
+            },
             "parents": {
               "anyOf": [
                 {
@@ -18694,6 +18712,36 @@
         {
           "type": "object",
           "properties": {
+            "secret": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "env": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                    }
+                  },
+                  "required": ["env"],
+                  "additionalProperties": false
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
             "type": {
               "const": "github"
             }
@@ -18834,6 +18882,36 @@
         {
           "type": "object",
           "properties": {
+            "secret": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "env": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                    }
+                  },
+                  "required": ["env"],
+                  "additionalProperties": false
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              ]
+            },
             "toleranceMs": {
               "type": "number"
             },
@@ -34904,6 +34982,323 @@
         }
       ]
     },
+    "loopDispatch": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["$ref"],
+          "properties": {
+            "$ref": {
+              "type": "string",
+              "pattern": "\\S"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "runId": {
+              "type": "string"
+            },
+            "watchdog": {
+              "type": "object",
+              "properties": {
+                "repetition": {
+                  "type": "object",
+                  "properties": {
+                    "window": {
+                      "type": "number"
+                    },
+                    "maxRepeats": {
+                      "type": "number"
+                    }
+                  },
+                  "required": ["window", "maxRepeats"],
+                  "additionalProperties": false
+                },
+                "onStuck": {
+                  "anyOf": [
+                    {
+                      "const": "warn"
+                    },
+                    {
+                      "const": "stop"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "instruction": {
+                          "type": "string"
+                        },
+                        "maxInterventions": {
+                          "type": "number"
+                        }
+                      },
+                      "required": ["instruction"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": ["repetition", "onStuck"],
+              "additionalProperties": false
+            },
+            "prices": {
+              "type": "object",
+              "properties": {
+                "currency": {
+                  "anyOf": [
+                    {
+                      "const": "EUR"
+                    },
+                    {
+                      "const": "USD"
+                    }
+                  ]
+                },
+                "models": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "input": {
+                        "type": "number"
+                      },
+                      "output": {
+                        "type": "number"
+                      },
+                      "cached": {
+                        "type": "number"
+                      },
+                      "cacheCreated": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["input", "output"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["currency", "models"],
+              "additionalProperties": false
+            },
+            "redact": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pattern": {
+                    "type": "string"
+                  },
+                  "flags": {
+                    "type": "string"
+                  }
+                },
+                "required": ["pattern"],
+                "additionalProperties": false
+              }
+            },
+            "logging": {
+              "anyOf": [
+                {
+                  "const": false
+                },
+                {
+                  "const": "stdout"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "transporter": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": ["$ref"],
+                          "properties": {
+                            "$ref": {
+                              "type": "string",
+                              "pattern": "\\S"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "$ref": "#/$defs/transport"
+                        }
+                      ]
+                    },
+                    "verbose": {
+                      "anyOf": [
+                        {
+                          "const": false
+                        },
+                        {
+                          "const": true
+                        }
+                      ]
+                    },
+                    "replayable": {
+                      "anyOf": [
+                        {
+                          "const": false
+                        },
+                        {
+                          "const": true
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "label": {
+              "type": "string"
+            },
+            "passes": {
+              "type": "number"
+            },
+            "until": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "idleMs": {
+              "type": "number"
+            },
+            "idleWarningMs": {
+              "type": "number"
+            },
+            "settleMs": {
+              "type": "number"
+            },
+            "deadlineMs": {
+              "type": "number"
+            },
+            "expansionMs": {
+              "type": "number"
+            },
+            "steering": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/steering"
+                }
+              ]
+            },
+            "response": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/response"
+                }
+              ]
+            },
+            "telemetry": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "observe": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "warn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "diagnostic": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": ["$ref"],
+                  "properties": {
+                    "$ref": {
+                      "type": "string",
+                      "pattern": "\\S"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "if": {
+            "required": ["response"]
+          },
+          "then": {
+            "properties": {
+              "passes": {
+                "const": 1
+              }
+            }
+          }
+        }
+      ]
+    },
     "doneExpression": {
       "anyOf": [
         {
@@ -35197,331 +35592,33 @@
           "pattern": "\\S"
         },
         "dispatch": {
-          "anyOf": [
-            {
-              "type": "object",
-              "required": ["$ref"],
-              "properties": {
-                "$ref": {
-                  "type": "string",
-                  "pattern": "\\S"
-                }
+          "$ref": "#/$defs/loopDispatch"
+        }
+      },
+      "if": {
+        "required": ["conversation"],
+        "properties": {
+          "conversation": {
+            "const": "continue"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "dispatch": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/loopDispatch"
               },
-              "additionalProperties": false
-            },
-            {
-              "type": "object",
-              "properties": {
-                "continuation": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "fork": {
-                      "anyOf": [
-                        {
-                          "const": false
-                        },
-                        {
-                          "const": true
-                        }
-                      ]
-                    }
-                  },
-                  "required": ["id"],
-                  "additionalProperties": false
-                },
-                "runId": {
-                  "type": "string"
-                },
-                "watchdog": {
-                  "type": "object",
-                  "properties": {
-                    "repetition": {
-                      "type": "object",
-                      "properties": {
-                        "window": {
-                          "type": "number"
-                        },
-                        "maxRepeats": {
-                          "type": "number"
-                        }
-                      },
-                      "required": ["window", "maxRepeats"],
-                      "additionalProperties": false
-                    },
-                    "onStuck": {
-                      "anyOf": [
-                        {
-                          "const": "warn"
-                        },
-                        {
-                          "const": "stop"
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "instruction": {
-                              "type": "string"
-                            },
-                            "maxInterventions": {
-                              "type": "number"
-                            }
-                          },
-                          "required": ["instruction"],
-                          "additionalProperties": false
-                        }
-                      ]
-                    }
-                  },
-                  "required": ["repetition", "onStuck"],
-                  "additionalProperties": false
-                },
-                "prices": {
-                  "type": "object",
-                  "properties": {
-                    "currency": {
-                      "anyOf": [
-                        {
-                          "const": "EUR"
-                        },
-                        {
-                          "const": "USD"
-                        }
-                      ]
-                    },
-                    "models": {
-                      "type": "object",
-                      "properties": {},
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "input": {
-                            "type": "number"
-                          },
-                          "output": {
-                            "type": "number"
-                          },
-                          "cached": {
-                            "type": "number"
-                          },
-                          "cacheCreated": {
-                            "type": "number"
-                          }
-                        },
-                        "required": ["input", "output"],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": ["currency", "models"],
-                  "additionalProperties": false
-                },
-                "redact": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "pattern": {
-                        "type": "string"
-                      },
-                      "flags": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["pattern"],
-                    "additionalProperties": false
+              {
+                "properties": {
+                  "passes": {
+                    "const": 1
                   }
-                },
-                "logging": {
-                  "anyOf": [
-                    {
-                      "const": false
-                    },
-                    {
-                      "const": "stdout"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "transporter": {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "required": ["$ref"],
-                              "properties": {
-                                "$ref": {
-                                  "type": "string",
-                                  "pattern": "\\S"
-                                }
-                              },
-                              "additionalProperties": false
-                            },
-                            {
-                              "$ref": "#/$defs/transport"
-                            }
-                          ]
-                        },
-                        "verbose": {
-                          "anyOf": [
-                            {
-                              "const": false
-                            },
-                            {
-                              "const": true
-                            }
-                          ]
-                        },
-                        "replayable": {
-                          "anyOf": [
-                            {
-                              "const": false
-                            },
-                            {
-                              "const": true
-                            }
-                          ]
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "label": {
-                  "type": "string"
-                },
-                "passes": {
-                  "type": "number"
-                },
-                "until": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  ]
-                },
-                "idleMs": {
-                  "type": "number"
-                },
-                "idleWarningMs": {
-                  "type": "number"
-                },
-                "settleMs": {
-                  "type": "number"
-                },
-                "deadlineMs": {
-                  "type": "number"
-                },
-                "expansionMs": {
-                  "type": "number"
-                },
-                "steering": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    {
-                      "$ref": "#/$defs/steering"
-                    }
-                  ]
-                },
-                "response": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    {
-                      "$ref": "#/$defs/response"
-                    }
-                  ]
-                },
-                "telemetry": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "observe": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "warn": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "diagnostic": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
                 }
-              },
-              "additionalProperties": false
-            }
-          ]
+              }
+            ]
+          }
         }
       }
     },
@@ -35542,329 +35639,16 @@
           "pattern": "\\S"
         },
         "dispatch": {
-          "anyOf": [
+          "allOf": [
             {
-              "type": "object",
-              "required": ["$ref"],
-              "properties": {
-                "$ref": {
-                  "type": "string",
-                  "pattern": "\\S"
-                }
-              },
-              "additionalProperties": false
+              "$ref": "#/$defs/loopDispatch"
             },
             {
-              "type": "object",
               "properties": {
-                "continuation": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "fork": {
-                      "anyOf": [
-                        {
-                          "const": false
-                        },
-                        {
-                          "const": true
-                        }
-                      ]
-                    }
-                  },
-                  "required": ["id"],
-                  "additionalProperties": false
-                },
-                "runId": {
-                  "type": "string"
-                },
-                "watchdog": {
-                  "type": "object",
-                  "properties": {
-                    "repetition": {
-                      "type": "object",
-                      "properties": {
-                        "window": {
-                          "type": "number"
-                        },
-                        "maxRepeats": {
-                          "type": "number"
-                        }
-                      },
-                      "required": ["window", "maxRepeats"],
-                      "additionalProperties": false
-                    },
-                    "onStuck": {
-                      "anyOf": [
-                        {
-                          "const": "warn"
-                        },
-                        {
-                          "const": "stop"
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "instruction": {
-                              "type": "string"
-                            },
-                            "maxInterventions": {
-                              "type": "number"
-                            }
-                          },
-                          "required": ["instruction"],
-                          "additionalProperties": false
-                        }
-                      ]
-                    }
-                  },
-                  "required": ["repetition", "onStuck"],
-                  "additionalProperties": false
-                },
-                "prices": {
-                  "type": "object",
-                  "properties": {
-                    "currency": {
-                      "anyOf": [
-                        {
-                          "const": "EUR"
-                        },
-                        {
-                          "const": "USD"
-                        }
-                      ]
-                    },
-                    "models": {
-                      "type": "object",
-                      "properties": {},
-                      "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                          "input": {
-                            "type": "number"
-                          },
-                          "output": {
-                            "type": "number"
-                          },
-                          "cached": {
-                            "type": "number"
-                          },
-                          "cacheCreated": {
-                            "type": "number"
-                          }
-                        },
-                        "required": ["input", "output"],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": ["currency", "models"],
-                  "additionalProperties": false
-                },
-                "redact": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "pattern": {
-                        "type": "string"
-                      },
-                      "flags": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["pattern"],
-                    "additionalProperties": false
-                  }
-                },
-                "logging": {
-                  "anyOf": [
-                    {
-                      "const": false
-                    },
-                    {
-                      "const": "stdout"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "transporter": {
-                          "anyOf": [
-                            {
-                              "type": "object",
-                              "required": ["$ref"],
-                              "properties": {
-                                "$ref": {
-                                  "type": "string",
-                                  "pattern": "\\S"
-                                }
-                              },
-                              "additionalProperties": false
-                            },
-                            {
-                              "$ref": "#/$defs/transport"
-                            }
-                          ]
-                        },
-                        "verbose": {
-                          "anyOf": [
-                            {
-                              "const": false
-                            },
-                            {
-                              "const": true
-                            }
-                          ]
-                        },
-                        "replayable": {
-                          "anyOf": [
-                            {
-                              "const": false
-                            },
-                            {
-                              "const": true
-                            }
-                          ]
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "label": {
-                  "type": "string"
-                },
                 "passes": {
-                  "type": "number"
-                },
-                "until": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  ]
-                },
-                "idleMs": {
-                  "type": "number"
-                },
-                "idleWarningMs": {
-                  "type": "number"
-                },
-                "settleMs": {
-                  "type": "number"
-                },
-                "deadlineMs": {
-                  "type": "number"
-                },
-                "expansionMs": {
-                  "type": "number"
-                },
-                "steering": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    {
-                      "$ref": "#/$defs/steering"
-                    }
-                  ]
-                },
-                "response": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    {
-                      "$ref": "#/$defs/response"
-                    }
-                  ]
-                },
-                "telemetry": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "observe": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "warn": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
-                },
-                "diagnostic": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "required": ["$ref"],
-                      "properties": {
-                        "$ref": {
-                          "type": "string",
-                          "pattern": "\\S"
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  ]
+                  "const": 1
                 }
-              },
-              "additionalProperties": false
+              }
             }
           ]
         },
@@ -38021,6 +37805,24 @@
                     },
                     {
                       "$ref": "#/$defs/artifactStore"
+                    }
+                  ]
+                },
+                "contract": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": ["$ref"],
+                      "properties": {
+                        "$ref": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "$ref": "#/$defs/artifact"
                     }
                   ]
                 },
