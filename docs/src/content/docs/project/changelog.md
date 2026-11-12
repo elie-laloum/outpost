@@ -12,7 +12,10 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+## 14.3.1
+
 - Restore a `defineLoopTask` served by the task cache when its checkpoint is resumed. A cache hit is recorded done with no attempts and no rounds, the shape checkpoint validation requires of it, but the loop record validation refused a done loop task without rounds, so every resume of a run in which a loop task had hit the cache failed with `Invalid or incompatible workflow loop checkpoint`.
+- Keep the default egress companion image of 14.1.0: it still predates the DNS resolver exemption, so build `images/egress/Dockerfile` and select it with `egressImage` to apply it, as the network restrictions guide explains.
 
 ## 14.3.0
 

@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## 14.3.1
+
 - Restaurer une `defineLoopTask` servie par le cache de tâches à la reprise de son checkpoint. Un succès de cache est enregistré terminé, sans tentative ni tour, la forme que la validation du checkpoint exige de lui ; mais la validation des enregistrements de boucle refusait une tâche de boucle terminée sans tour, si bien que toute reprise d’une exécution dont une tâche de boucle avait été servie par le cache échouait avec `Invalid or incompatible workflow loop checkpoint`.
+- Conserver l’image par défaut du compagnon egress de 14.1.0 : elle précède toujours l’exemption des résolveurs DNS ; construisez `images/egress/Dockerfile` et sélectionnez-la avec `egressImage` pour l’appliquer, comme l’explique le guide des restrictions réseau.
 
 ## 14.3.0
 
