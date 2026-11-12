@@ -45,7 +45,12 @@ for (const file of files) {
     const home = `${origin}${base}/${locale === "fr" ? "fr/" : ""}`;
     const description = $('meta[name="description"]').attr("content");
     assert.equal($("h1").length, 1, `Home needs one H1: ${file}`);
-    assert.match($("title").text(), /Outpost.*TypeScript/);
+    assert.equal(
+      $("title").text(),
+      locale === "fr"
+        ? "Outpost — Industrialiser vos agents"
+        : "Outpost — Industrialize your agents",
+    );
     assert.equal($('link[rel="canonical"]').attr("href"), home);
     assert.equal($('meta[property="og:type"]').attr("content"), "website");
     assert.equal($('meta[property="og:url"]').attr("content"), home);

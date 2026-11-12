@@ -1,10 +1,10 @@
 ---
-title: Outpost — Workflows d’agents en TypeScript et YAML
-description: Reliez agents, outils et décisions humaines dans des workflows pour les mails, la veille, les documents, le logiciel et le travail que vous souhaitez automatiser.
+title: Outpost — Industrialiser vos agents
+description: Passez de la tâche ponctuelle au processus que vous pouvez relancer, vérifier et suivre. Orchestrez vos agents avec Outpost, en TypeScript ou en YAML.
 tableOfContents: false
 head:
   - tag: title
-    content: Outpost — Workflows d’agents en TypeScript et YAML
+    content: Outpost — Industrialiser vos agents
   - tag: meta
     attrs:
       property: og:type
@@ -12,19 +12,19 @@ head:
 landing:
   category: Orchestration d’agents · Bibliothèque TypeScript et CLI
   headline:
-    - Vos agents.
-    - Vos outils. Vos workflows.
-  lead: Reliez des agents, des actions et des décisions pour automatiser votre travail. Définissez ce qui doit se passer, ce qui mérite une vérification et quand vous voulez intervenir.
+    - Industrialiser
+    - vos agents
+  lead: Transformez une tâche réussie en un processus que votre équipe peut relancer, vérifier et suivre. Outpost orchestre vos agents, vos outils et vos validations dans des workflows en TypeScript ou en YAML.
   primary:
-    label: Voir les possibilités
+    label: Explorer les cas d’usage
     href: "#possibilities"
   secondary:
     label: Commencer avec le Guide
     href: guide/introduction/
   scenarios:
-    label: Imaginez votre prochain workflow
-    title: Quel travail aimeriez-vous déléguer ?
-    text: Un nouveau mail. Un dossier de documents. Une demande client. Partez d’une tâche que vous connaissez, puis composez les étapes selon vos besoins.
+    label: Du travail ponctuel au processus
+    title: Quel processus allez-vous industrialiser ?
+    text: Trier les mails, produire une veille, traiter des documents ou préparer un changement logiciel. Pour chaque tâche récurrente, définissez les étapes, le résultat attendu et les points de contrôle.
     requestLabel: La demande
     resultLabel: Ce que vous obtenez
     note: Ces workflows sont des exemples à composer. Vous connectez vos services avec votre code, des API ou des outils MCP ; Outpost orchestre les étapes, les agents et les pauses.
@@ -214,40 +214,40 @@ landing:
         result: Une branche avec les changements proposés et les résultats de vos vérifications.
         boundary: Vous choisissez les tests, le nombre de tentatives et la politique d’intégration.
   overview:
-    - icon: plug
-      title: Gardez vos outils habituels
-      text: Connectez vos fonctions, vos API et vos serveurs MCP. Donnez aux agents le contexte et les actions nécessaires à leur tâche.
     - icon: nodes
-      title: Donnez une suite à chaque étape
-      text: Transmettez les résultats, lancez les tâches indépendantes en parallèle et choisissez la prochaine action selon le résultat.
+      title: Formalisez le travail
+      text: Définissez les étapes, les dépendances et les résultats attendus. Votre équipe partage un workflow versionné, relançable avec de nouvelles entrées.
     - icon: approve
-      title: Gardez les décisions importantes
-      text: Exigez une vérification ou une réponse humaine avant de continuer. Choisissez où l’automatisation laisse place à votre jugement.
+      title: Encadrez l’autonomie
+      text: Choisissez les outils, l’environnement et les vérifications. Placez une approbation humaine avant les actions qui l’exigent.
+    - icon: replay
+      title: Préparez la suite
+      text: Configurez le suivi des exécutions et la persistance des étapes. Inspectez les échecs et décidez comment reprendre le travail interrompu.
   capabilities:
-    title: De quoi construire vos propres idées
-    text: Assemblez ces comportements autour de votre travail. Commencez par une tâche et ajoutez ce qui rend la suite utile.
+    title: Les contrôles qui rendent le travail exploitable
+    text: Un processus récurrent a besoin de résultats vérifiés, de limites et d’un chemin de reprise. Ajoutez ces contrôles là où votre travail les exige.
     items:
       - icon: split
-        title: Faire avancer plusieurs tâches
-        text: Lire différentes sources ou traiter des demandes indépendantes en parallèle, puis réunir leurs résultats.
+        title: Organiser le travail en parallèle
+        text: Exécutez les tâches indépendantes avec une concurrence bornée, puis transmettez leurs résultats aux étapes suivantes.
       - icon: braces
-        title: Obtenir des données exploitables
-        text: Valider une réponse structurée avant que votre code l’utilise pour décider ou agir.
+        title: Vérifier avant d’agir
+        text: Validez les réponses structurées et exécutez vos propres contrôles avant de transmettre le résultat à vos outils.
       - icon: repeat
-        title: Vérifier, corriger, réessayer
-        text: Transmettre les vérifications en échec à un agent, avec une limite au nombre de tentatives.
+        title: Borner les tentatives
+        text: Fixez des budgets et des limites de tentatives. Renvoyez les vérifications en échec à une boucle de correction bornée.
       - icon: pause
-        title: Faire une place à l’humain
-        text: Attendre une approbation ou une précision, puis continuer avec la réponse acceptée.
+        title: Garder la décision humaine
+        text: Suspendez le workflow pour une approbation ou une précision. Continuez avec la réponse acceptée.
       - icon: replay
-        title: Reprendre le travail plus tard
-        text: Enregistrer les étapes terminées et reprendre un workflow durable. Récupérer explicitement les tentatives interrompues.
+        title: Organiser la reprise
+        text: Avec des checkpoints persistés, reprenez un workflow durable. Inspectez et récupérez explicitement les tentatives interrompues.
       - icon: clock
-        title: Agir quand le travail arrive
-        text: Publier des tâches depuis un calendrier ou un webhook vérifié, puis les faire exécuter avec les budgets que vous fixez.
+        title: Suivre chaque exécution
+        text: Configurez les rapports, les événements et le stockage de l’état pour retrouver la progression et examiner les résultats.
   closing:
-    title: Que fera votre premier workflow ?
-    text: Choisissez une tâche que vous aimeriez déléguer. Le Guide présente les éléments et vous aide à les relier à votre propre travail.
+    title: Industrialisez une première tâche.
+    text: Choisissez un travail récurrent, définissez ce qui rend son résultat acceptable et construisez votre premier workflow. Le Guide vous accompagne de l’installation à l’exécution.
     link:
       label: Commencer avec le Guide
       href: guide/introduction/
@@ -291,9 +291,12 @@ landing:
 <span id="commencez-par-ce-qui-vous-attend-déjà"></span>
 <span id="vos-outils-habituels-votre-façon-de-les-assembler"></span>
 
-## Votre processus peut suivre plusieurs chemins
+<span id="votre-processus-peut-suivre-plusieurs-chemins"></span>
+<span id="choisissez-comment-vos-agents-travaillent"></span>
 
-Un agent peut interpréter une demande. Vos outils récupèrent le contexte et exécutent les actions. Votre code vérifie le résultat, choisit la suite ou demande à une personne de décider. Outpost relie ces étapes et suit leur exécution.
+## Un cadre explicite, de la demande au résultat
+
+Industrialiser, c’est définir ce qui se passe à chaque exécution. L’agent propose un résultat, votre code le vérifie et le workflow décide de la suite. Les actions sensibles peuvent attendre une approbation humaine.
 
 Voici un chemin possible. Vous choisissez les vérifications et les pauses utiles à votre travail.
 
@@ -315,7 +318,7 @@ Voici un chemin possible. Vous choisissez les vérifications et les pauses utile
 - **Agir**: Votre fonction enregistre le résultat, met à jour un service ou lance la tâche suivante.
   - Vos outils
 
-## Choisissez comment vos agents travaillent
+## Vos agents. Votre infrastructure. Vos règles.
 
 Utilisez un agent CLI comme Claude Code, Codex, Copilot, Kimi ou Antigravity, ou construisez une boucle d’agent avec un fournisseur de modèles et vos propres outils. Choisissez séparément l’environnement d’exécution : un conteneur, une sandbox cloud ou une exécution locale explicite.
 

@@ -1,10 +1,10 @@
 ---
-title: Outpost — Agent workflows in TypeScript and YAML
-description: Connect agents, tools and human decisions into workflows for email, research, documents, software and the work you want to automate.
+title: Outpost — Industrialize your agents
+description: Turn one-off agent tasks into processes you can repeat, verify and observe. Orchestrate your agents with Outpost, in TypeScript or YAML.
 tableOfContents: false
 head:
   - tag: title
-    content: Outpost — Agent workflows in TypeScript and YAML
+    content: Outpost — Industrialize your agents
   - tag: meta
     attrs:
       property: og:type
@@ -12,19 +12,19 @@ head:
 landing:
   category: Agent orchestration · TypeScript library & CLI
   headline:
-    - Your agents.
-    - Your tools. Your workflows.
-  lead: Connect agents, actions and decisions to automate your work. Define what happens next, what needs a check and when you want to step in.
+    - Industrialize
+    - your agents
+  lead: Turn a successful task into a process your team can repeat, verify and observe. Outpost orchestrates your agents, tools and approvals in TypeScript or YAML workflows.
   primary:
-    label: Explore the possibilities
+    label: Explore use cases
     href: "#possibilities"
   secondary:
     label: Start with the Guide
     href: guide/introduction/
   scenarios:
-    label: Imagine your next workflow
-    title: What would you like to put to work?
-    text: A new message. A folder of documents. A request from a customer. Start with work you recognize, then shape the steps around your needs.
+    label: From one-off tasks to repeatable work
+    title: Which process will you industrialize?
+    text: Triage email, deliver research, process documents or prepare a software change. For each recurring task, define the steps, expected result and checkpoints.
     requestLabel: The request
     resultLabel: What you get
     note: These are workflows you can compose. You connect your services through your own code, APIs or MCP tools; Outpost orchestrates the steps, agents and pauses.
@@ -214,40 +214,40 @@ landing:
         result: A branch with the proposed changes and the results of your checks.
         boundary: You choose the tests, retry limits and integration policy.
   overview:
-    - icon: plug
-      title: Bring the tools you already use
-      text: Connect your functions, APIs and MCP servers. Let agents work with the context and actions your task needs.
     - icon: nodes
-      title: Give every step a clear next move
-      text: Pass results between tasks, run independent work in parallel and choose the next action from the outcome.
+      title: Define the work
+      text: Declare steps, dependencies and expected results. Give your team a versioned workflow they can run again with new inputs.
     - icon: approve
-      title: Keep the decisions that matter
-      text: Require a check or a human answer before continuing. Choose where automation ends and your judgment begins.
+      title: Set the boundaries
+      text: Choose tools, execution environments and checks. Require human approval before the actions that need it.
+    - icon: replay
+      title: Plan what happens next
+      text: Configure execution tracking and persist completed steps. Inspect failures and decide how to resume interrupted work.
   capabilities:
-    title: The building blocks for your own ideas
-    text: Combine these behaviors around your work. Start with a single task and add the pieces that make the next step useful.
+    title: The controls that make the work usable
+    text: Recurring work needs checked results, limits and a recovery path. Add these controls where your process needs them.
     items:
       - icon: split
-        title: Let several tasks make progress
-        text: Read different sources or process independent requests in parallel, then bring their results together.
+        title: Coordinate parallel work
+        text: Run independent tasks with bounded concurrency, then pass their results to the next steps.
       - icon: braces
-        title: Turn answers into usable data
-        text: Validate a structured answer before your code uses it to decide or act.
+        title: Verify before acting
+        text: Validate structured responses and run your own checks before passing results to your tools.
       - icon: repeat
-        title: Check, correct, try again
-        text: Give failed checks back to an agent, with a limit on how many attempts it can make.
+        title: Bound the attempts
+        text: Set budgets and attempt limits. Feed failed checks into a bounded correction loop.
       - icon: pause
-        title: Make room for a person
-        text: Pause for an approval or a missing detail, then continue with the accepted answer.
+        title: Keep human decisions
+        text: Pause the workflow for an approval or a missing detail. Continue with the accepted answer.
       - icon: replay
-        title: Pick up work later
-        text: Save completed steps and resume a durable workflow. Recover interrupted attempts explicitly.
+        title: Plan for recovery
+        text: Resume a durable workflow from persisted checkpoints. Inspect and explicitly recover interrupted attempts.
       - icon: clock
-        title: Run when the work arrives
-        text: Publish jobs from a schedule or verified webhook, and let workers execute them with the budgets you set.
+        title: Track every run
+        text: Configure reports, events and state storage to find progress and inspect results.
   closing:
-    title: What will your first workflow do?
-    text: Choose one task you would like to hand off. The Guide introduces the pieces and helps you connect them to your own work.
+    title: Industrialize your first task.
+    text: Choose recurring work, define what makes its result acceptable and build your first workflow. The Guide takes you from installation to execution.
     link:
       label: Start with the Guide
       href: guide/introduction/
@@ -291,9 +291,12 @@ landing:
 <span id="start-with-work-already-on-your-plate"></span>
 <span id="keep-your-tools-choose-how-they-work-together"></span>
 
-## Your process can take more than one path
+<span id="your-process-can-take-more-than-one-path"></span>
+<span id="choose-how-your-agents-work"></span>
 
-An agent can interpret a request. Your tools fetch context and perform actions. Your code checks the result, chooses what follows or asks a person to decide. Outpost connects those steps and keeps track of their execution.
+## An explicit process, from request to result
+
+Industrializing means defining what happens on every run. The agent proposes a result, your code checks it and the workflow determines what follows. Sensitive actions can wait for human approval.
 
 This is one possible path. You decide which checks and pauses your work needs.
 
@@ -315,7 +318,7 @@ This is one possible path. You decide which checks and pauses your work needs.
 - **Act**: Your function saves the result, updates a service or starts the next task.
   - Your tools
 
-## Choose how your agents work
+## Your agents. Your infrastructure. Your rules.
 
 Use a CLI agent such as Claude Code, Codex, Copilot, Kimi or Antigravity, or build an agent loop with a model provider and your own tools. Choose the execution environment separately: a container, a cloud sandbox or explicit local execution.
 

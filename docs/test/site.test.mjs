@@ -272,15 +272,15 @@ for (const [locale, title, reference, agents, tierLabels] of [
 for (const [locale, heading, explore, start, copied] of [
   [
     "",
-    "Your agents.",
-    "Explore the possibilities",
+    "Industrialize",
+    "Explore use cases",
     "Start with the Guide",
     "Copy the install command",
   ],
   [
     "fr/",
-    "Vos agents.",
-    "Voir les possibilités",
+    "Industrialiser",
+    "Explorer les cas d’usage",
     "Commencer avec le Guide",
     "Copier la commande d’installation",
   ],
@@ -549,7 +549,7 @@ test("documentation section styles leave the landing untouched", async ({
 }) => {
   await page.goto("");
   const primary = page.locator(".landing .hero .button.primary");
-  await expect(primary).toHaveText(/Explore the possibilities/);
+  await expect(primary).toHaveText(/Explore use cases/);
   const colors = await primary.evaluate((element) => {
     const style = getComputedStyle(element);
     return [style.color, style.backgroundColor];
