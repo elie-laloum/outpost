@@ -28,7 +28,11 @@ export function validateLoopRecord(
   const invalid = () =>
     new Error("Invalid or incompatible workflow loop checkpoint");
   if (record.rounds === undefined) {
-    if (definition && (record.attempts !== 0 || record.status === "done"))
+    if (
+      definition &&
+      record.cacheHit !== true &&
+      (record.attempts !== 0 || record.status === "done")
+    )
       throw invalid();
     return;
   }
