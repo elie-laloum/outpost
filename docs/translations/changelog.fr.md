@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restaurer une `defineLoopTask` servie par le cache de tâches à la reprise de son checkpoint. Un succès de cache est enregistré terminé, sans tentative ni tour, la forme que la validation du checkpoint exige de lui ; mais la validation des enregistrements de boucle refusait une tâche de boucle terminée sans tour, si bien que toute reprise d’une exécution dont une tâche de boucle avait été servie par le cache échouait avec `Invalid or incompatible workflow loop checkpoint`.
+
 ## 14.3.0
 
 - Composer une `loop` déclarative à partir d’étapes ordonnées : `attempt` et `check` acceptent une liste d’étapes agent et commande, et l’objet de la 14.1.0 reste un raccourci permanent d’une liste d’une étape, avec la même exécution, la même sortie, les mêmes diagnostics et la même identité de checkpoint. La tentative exige un agent (sinon `missing-loop-agent`) et fait échouer la tâche quand l’une de ses commandes se termine avec un statut non nul ; la vérification s’arrête au premier refus, dont le retour part au tour suivant. Chaque agent de la tentative garde sa propre conversation, et une tentative à plusieurs agents ajoute à la sortie de la tâche `conversations`, la conversation de chaque agent dans l’ordre ou `null`. Les commits faits par des étapes commande ne figurent pas dans `commits`.

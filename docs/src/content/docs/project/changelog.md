@@ -12,6 +12,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Restore a `defineLoopTask` served by the task cache when its checkpoint is resumed. A cache hit is recorded done with no attempts and no rounds, the shape checkpoint validation requires of it, but the loop record validation refused a done loop task without rounds, so every resume of a run in which a loop task had hit the cache failed with `Invalid or incompatible workflow loop checkpoint`.
+
 ## 14.3.0
 
 - Compose a declarative `loop` from ordered steps: `attempt` and `check` accept a list of agent and command steps, and the 14.1.0 mapping remains a permanent shorthand for a one-step list, with the same execution, output, diagnostics and checkpoint identity. The attempt requires an agent (`missing-loop-agent` otherwise) and fails the task when one of its commands exits with a nonzero status; the check stops at the first refusal, whose feedback goes to the next round. Each attempt agent keeps its own conversation, and an attempt with several agents adds `conversations`, each agent's conversation in order or `null`, to the task output. Commits made by command steps are not listed in `commits`.

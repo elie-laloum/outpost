@@ -298,6 +298,46 @@ test("checkpoints persist cache hits and reject inconsistent hit records", async
   );
 });
 
+test("a resumed checkpoint restores a loop task served by the cache", async (t) => {
+  const transporter = await storage(t);
+  const cache = createTaskCacheStore({ transporter });
+  let attempts = 0,
+    broken = true;
+  const definitions = () => {
+    const fix = defineLoopTask({
+      key: "fix",
+      maxRounds: 2,
+      cache: { store: cache, version: "1", key: () => "shared" },
+      attempt: () => ++attempts,
+      check: () => ({ done: true }),
+    });
+    const publish = defineTask({
+      key: "publish",
+      perform() {
+        if (broken) throw new Error("Unavailable");
+        return "published";
+      },
+    });
+    return { fix, graph: defineWorkflow("cached-loop", [fix, publish]) };
+  };
+  broken = false;
+  (await definitions().graph.start()).unwrap();
+  broken = true;
+  const saved = memory();
+  const checkpoint = { store: saved.store, runId: "cached-loop", version: "1" };
+  await definitions().graph.start({ checkpoint });
+  assert.equal(saved.read().records[0]?.cacheHit, true);
+
+  broken = false;
+  const restored = definitions();
+  const resumed = await restored.graph.start({
+    checkpoint: { ...checkpoint, resume: "retry-incomplete" },
+  });
+  resumed.unwrap();
+  assert.equal(resumed.value(restored.fix), 1);
+  assert.equal(attempts, 1);
+});
+
 test("retention inventories task cache entries and prunes them only when selected", async (t) => {
   const transporter = await storage(t);
   const store = createTaskCacheStore({ transporter });
